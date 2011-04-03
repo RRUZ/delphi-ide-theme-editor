@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899/12/30 00:00:00.000.483,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Main.dfm=C:\Users\Dexter\Documents\RAD Studio\Projects\Unit4.dfm</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.151,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uDelphiVersions.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.522,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uSettings.dfm=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.dfm</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.293,=C:\Users\Dexter\Documents\RAD Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.522,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uSettings.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.746,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uDelphiIDEHighlight.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.072,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uStackTrace.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.483,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Main.pas=C:\Users\Dexter\Documents\RAD Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.329,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uStackTrace.pas=</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.519,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\DelphiIDEThemeEditor.dproj=C:\Users\Dexter\Documents\RAD Studio\Projects\Project10.dproj</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.117,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.dfm=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uHueSat.dfm</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.262,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.934,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.443,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.277,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.414,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.449,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uHSLUtils.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.826,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uRegistry.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.944,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.036,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.117,C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Unit1.pas=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\uHueSat.pas</Transaction>
+    <Transaction>2011/04/03 18:55:33.576,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Units\uDelphiIDEHighlight.pas</Transaction>
+    <Transaction>2011/04/03 18:55:33.603,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Units\uDelphiVersions.pas</Transaction>
+    <Transaction>2011/04/03 18:55:33.616,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Units\uHSLUtils.pas</Transaction>
+    <Transaction>2011/04/03 18:55:33.658,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Units\uHueSat.pas</Transaction>
+    <Transaction>2011/04/03 18:55:33.680,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Units\uRegistry.pas</Transaction>
+    <Transaction>2011/04/03 18:55:33.704,=C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Theme Editor\Units\uSettings.pas</Transaction>
+  </Transactions>
+</BorlandProject>
