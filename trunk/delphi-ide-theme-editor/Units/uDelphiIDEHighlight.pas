@@ -670,7 +670,7 @@ var
         xPathElement:=Format(xPathElement,[i]);
         ElementVariant:=XmlDocVSTheme.selectSingleNode(Format('%s%s',[xPathElement,'@Name']));
 
-        if not VarIsNull(ElementVariant) and not VarIsNull(ElementVariant.text) then
+        if not VarIsNull(ElementVariant) and not VarIsClear(ElementVariant) then
         if CompareText(ElementVariant.text,ElementName)=0 then
         begin
             //OutputDebugString(PChar(VarToStr(ElementVariant.text)));
