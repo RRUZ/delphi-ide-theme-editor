@@ -173,11 +173,11 @@ end;
 
 function GetIndexClosestColor(AColor:TColor) : Integer;
 var
-  SqrDist,SmallSqrDist  : Integer;
+  SqrDist,SmallSqrDist  : Double;
   i,R1,G1,B1,R2,G2,B2   : Integer;
 begin
   Result:=0;
-  SmallSqrDist := 256 * 256 * 256;
+  SmallSqrDist := Sqrt(SQR(255)*3);
   R1 := GetRValue(AColor);
   G1 := GetGValue(AColor);
   B1 := GetBValue(AColor);
@@ -187,7 +187,7 @@ begin
       R2 := GetRValue(DelphiOldColorsList[i]);
       G2 := GetGValue(DelphiOldColorsList[i]);
       B2 := GetBValue(DelphiOldColorsList[i]);
-      SqrDist := SQR(R1 - R2) + SQR(G1 - G2) + SQR(B1 - B2);
+      SqrDist := Sqrt(SQR(R1 - R2) + SQR(G1 - G2) + SQR(B1 - B2));
       if SqrDist < SmallSqrDist then
       begin
        Result := i;
