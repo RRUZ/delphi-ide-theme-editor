@@ -1,6 +1,6 @@
 object FrmMain: TFrmMain
-  Left = 534
-  Top = 228
+  Left = 511
+  Top = 214
   Caption = 'Delphi IDE Theme Editor'
   ClientHeight = 582
   ClientWidth = 784
@@ -791,6 +791,7 @@ object FrmMain: TFrmMain
     Font.Style = []
     TabOrder = 11
     OnClick = SynEditCodeClick
+    Gutter.DigitCount = 3
     Gutter.Font.Charset = DEFAULT_CHARSET
     Gutter.Font.Color = clWindowText
     Gutter.Font.Height = -11
@@ -822,8 +823,8 @@ object FrmMain: TFrmMain
     TabOrder = 15
   end
   object ImageListDelphiVersion: TImageList
-    Left = 71
-    Top = 72
+    Left = 175
+    Top = 136
   end
   object SynPasSyn1: TSynPasSyn
     Left = 199
@@ -832,8 +833,8 @@ object FrmMain: TFrmMain
   object OpenDialogImport: TOpenDialog
     Filter = 'Visual Studio Configuration File|*.vssettings'
     Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
-    Left = 264
-    Top = 72
+    Left = 192
+    Top = 184
   end
   object ImageListlGutterGlyphs: TImageList
     Height = 14
@@ -841,7 +842,7 @@ object FrmMain: TFrmMain
     Left = 256
     Top = 100
     Bitmap = {
-      494C01010600090028000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010600090038000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
