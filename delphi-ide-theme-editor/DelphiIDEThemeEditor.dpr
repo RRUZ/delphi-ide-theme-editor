@@ -4,6 +4,7 @@
 program DelphiIDEThemeEditor;
 
 uses
+  uStackTrace in 'Units\uStackTrace.pas',
   Forms,
   Main in 'Main.pas' {FrmMain},
   uDelphiIDEHighlight in 'Units\uDelphiIDEHighlight.pas',

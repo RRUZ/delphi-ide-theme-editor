@@ -124,7 +124,7 @@ type
     procedure LoadValuesElements;
     procedure RefreshPasSynEdit;
     procedure SetSynAttr(Element: TIDEHighlightElements;
-      SynAttr: TSynHighlighterAttributes);
+      SynAttr: TSynHighlighterAttributes;DelphiVersion : TDelphiVersions);
     procedure CreateThemeFile;
     procedure ApplyCurentTheme;
     function GetThemeIndex(const AThemeName: string): integer;
@@ -149,6 +149,8 @@ const
   EnabledBreakLine   = 12;
   DisabledBreakLine  = 13;
   ErrorLineLine      = 14;
+
+  
 
 {$R *.dfm}
 {$R ManAdmin.RES}
@@ -425,6 +427,10 @@ procedure TFrmMain.CbIDEFontsChange(Sender: TObject);
 begin
   SynEditCode.Font.Name := CbIDEFonts.Text;
   SynEditCode.Font.Size := StrToInt(EditFontSize.Text);
+      {
+  SynEditCode.Gutter.Font.Name := CbIDEFonts.Text;
+  SynEditCode.Gutter.Font.Size := StrToInt(EditFontSize.Text);
+      }
   BtnApplyFont.Enabled  := True;
   RefreshPasSynEdit;
 end;
@@ -653,6 +659,10 @@ begin
     DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
     FillListAvailableElements(DelphiVersion, CbElement.Items);
 
+    SynEditCode.Gutter.Visible :=
+      DelphiVersionNumbers[DelphiVersion] >= IDEHighlightElementsMinVersion[
+      TIDEHighlightElements.LineNumber];
+
     SynEditCode.Gutter.ShowLineNumbers :=
       DelphiVersionNumbers[DelphiVersion] >= IDEHighlightElementsMinVersion[
       TIDEHighlightElements.LineNumber];
@@ -663,6 +673,8 @@ begin
 
     CbIDEFontsChange(nil);
     BtnApplyFont.Enabled := False;
+
+    BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion);
 
     if (LvThemes.Selected <> nil) and (CbElement.Items.Count > 0) then
     begin
@@ -738,56 +750,60 @@ begin
     end;
   end;
 end;
-
+               
 procedure TFrmMain.RefreshPasSynEdit;
 var
-  Element: TIDEHighlightElements;
+  Element   : TIDEHighlightElements;
+  DelphiVer : TDelphiVersions;
 begin
   if (LvDelphiVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
   begin
+    //Patch colors for Old
+    DelphiVer := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
+
     Element := TIDEHighlightElements.RightMargin;
     SynEditCode.RightEdgeColor :=
-      StringToColor(FCurrentTheme[Element].ForegroundColorNew);
+      GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].ForegroundColorNew),DelphiVer);
 
     Element := TIDEHighlightElements.MarkedBlock;
     SynEditCode.SelectedColor.Foreground :=
-      StringToColor(FCurrentTheme[Element].ForegroundColorNew);
+      GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].ForegroundColorNew),DelphiVer);
     SynEditCode.SelectedColor.Background :=
-      StringToColor(FCurrentTheme[Element].BackgroundColorNew);
+      GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew),DelphiVer);
 
     Element := TIDEHighlightElements.LineNumber;
     SynEditCode.Gutter.Color := StringToColor(FCurrentTheme[Element].BackgroundColorNew);
     SynEditCode.Gutter.Font.Color :=
-      StringToColor(FCurrentTheme[Element].ForegroundColorNew);
+      GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].ForegroundColorNew),DelphiVer);
 
     Element := TIDEHighlightElements.LineHighlight;
     SynEditCode.ActiveLineColor :=
-      StringToColor(FCurrentTheme[Element].BackgroundColorNew);
+      GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew),DelphiVer);
 
 
     with SynPasSyn1 do
     begin
-      SetSynAttr(TIDEHighlightElements.Assembler, AsmAttri);
-      SetSynAttr(TIDEHighlightElements.Character, CharAttri);
-      SetSynAttr(TIDEHighlightElements.Comment, CommentAttri);
-      SetSynAttr(TIDEHighlightElements.Preprocessor, DirectiveAttri);
-      SetSynAttr(TIDEHighlightElements.Float, FloatAttri);
-      SetSynAttr(TIDEHighlightElements.Hex, HexAttri);
-      SetSynAttr(TIDEHighlightElements.Identifier, IdentifierAttri);
-      SetSynAttr(TIDEHighlightElements.ReservedWord, KeyAttri);
-      SetSynAttr(TIDEHighlightElements.Number, NumberAttri);
-      SetSynAttr(TIDEHighlightElements.Whitespace, SpaceAttri);
-      SetSynAttr(TIDEHighlightElements.string, StringAttri);
-      SetSynAttr(TIDEHighlightElements.Symbol, SymbolAttri);
+      SetSynAttr(TIDEHighlightElements.Assembler, AsmAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Character, CharAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Comment, CommentAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Preprocessor, DirectiveAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Float, FloatAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Hex, HexAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Identifier, IdentifierAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.ReservedWord, KeyAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Number, NumberAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Whitespace, SpaceAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.string, StringAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.Symbol, SymbolAttri,DelphiVer);
     end;
   end;
 end;
 
 procedure TFrmMain.SetSynAttr(Element: TIDEHighlightElements;
-  SynAttr: TSynHighlighterAttributes);
+  SynAttr: TSynHighlighterAttributes;DelphiVersion : TDelphiVersions);
 begin
-  SynAttr.Background := StringToColor(FCurrentTheme[Element].BackgroundColorNew);
-  SynAttr.Foreground := StringToColor(FCurrentTheme[Element].ForegroundColorNew);
+  SynAttr.Background := GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew),DelphiVersion);
+  SynAttr.Foreground := GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].ForegroundColorNew),DelphiVersion);
   SynAttr.Style      := [];
   if FCurrentTheme[Element].Bold then
     SynAttr.Style := SynAttr.Style + [fsBold];

@@ -7,37 +7,35 @@ uses
 
 implementation
 
-function GetExceptionStackInfoProc(P: PExceptionRecord): Pointer;
-var
-  LLines:  TStringList;
-  LText:   string;
-  LResult: PChar;
+function GetExceptionStackInfoProc(P: PExceptionRecord):Pointer;
 begin
-  LLines := TStringList.Create;
-  try
-    JclLastExceptStackListToStrings(LLines, True, True, True, True);
-    LText   := LLines.Text;
-    LResult := StrAlloc(Length(LText));
-    StrCopy(LResult, PChar(LText));
-    Result := LResult;
-  finally
-    LLines.Free;
-  end;
+  Result := TJclStackInfoList.Create(False, 0, nil);
 end;
 
 function GetStackInfoStringProc(Info: Pointer): string;
+var
+  Stack : TJclStackInfoList;
+  List  : TStringList;
 begin
-  Result := string(PChar(Info));
+  if Info = nil then Exit;
+  List   := nil;
+  Stack  := nil;
+ try
+  List  := TStringList.Create;
+  Stack := TJclStackInfoList(Info);
+  Stack.AddToStrings(List);
+  Result :=  List.Text;
+ finally
+    FreeAndNil(List);
+ end;
 end;
 
 procedure CleanUpStackInfoProc(Info: Pointer);
 begin
-  StrDispose(PChar(Info));
+  FreeAndNil(TJclStackInfoList(Info));
 end;
 
 initialization
-  // Start the Jcl exception tracking and register our Exception
-  // stack trace provider.
   if JclStartExceptionTracking then
   begin
     Exception.GetExceptionStackInfoProc := GetExceptionStackInfoProc;
@@ -46,7 +44,6 @@ initialization
   end;
 
 finalization
-  // Stop Jcl exception tracking and unregister our provider.
   if JclExceptionTrackingActive then
   begin
     Exception.GetExceptionStackInfoProc := nil;

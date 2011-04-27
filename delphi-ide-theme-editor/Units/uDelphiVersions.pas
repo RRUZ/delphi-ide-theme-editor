@@ -3,11 +3,12 @@ unit uDelphiVersions;
 interface
 
 uses
+  Graphics,
   SysUtils,
   Classes,
   ComCtrls;
 
-{.$DEFINE OLDEVERSIONS_SUPPORT}
+{$DEFINE OLDEVERSIONS_SUPPORT}
 
 type
   TDelphiVersions =
@@ -28,6 +29,49 @@ type
 
 
 const
+  {$IFDEF OLDEVERSIONS_SUPPORT}
+  DelphiOldVersions = 2;
+  DelphiOldVersionNumbers: array[0..DelphiOldVersions-1] of TDelphiVersions =(Delphi5,Delphi6);
+
+  DelphiOldColorsCount =16;
+
+
+{ BGR
+Color0=$000000
+Color1=$000080
+Color2=$008000
+Color3=$008080
+Color4=$800000
+Color5=$800080
+Color6=$808000
+Color7=$C0C0C0
+Color8=$808080
+Color9=$0000FF
+Color10=$00FF00
+Color11=$00FFFF
+Color12=$FF0000
+Color13=$FF00FF
+Color14=$FFFF00
+Color15=$FFFFFF
+}
+  DelphiOldColorsList: array[0..DelphiOldColorsCount-1] of TColor =
+  (
+    $000000,$000080,$008000,$008080,
+    $800000,$800080,$808000,$C0C0C0,
+    $808080,$0000FF,$00FF00,$00FFFF,
+    $FF0000,$FF00FF,$FFFF00,$FFFFFF
+  )
+     {
+  (
+    $000000,$800000,$008000,$808000,
+    $000080,$800080,$008080,$C0C0C0,
+    $808080,$FF0000,$00FF00,$FFFF00,
+    $0000FF,$FF00FF,$00FFFF,$FFFFFF
+  )
+   }
+  ;
+  {$ENDIF}
+
   DelphiVersionsNames: array[TDelphiVersions] of string = (
   {$IFDEF OLDEVERSIONS_SUPPORT}
     'Delphi 5',
@@ -79,6 +123,12 @@ const
 procedure FillListViewDelphiVersions(ListView: TListView);
 function IsDelphiIDERunning(const DelphiIDEPath: TFileName): boolean;
 function GetFileVersion(const exeName: string): string;
+{$IFDEF OLDEVERSIONS_SUPPORT}
+function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
+function GetIndexClosestColor(AColor:TColor) : Integer;
+{$ENDIF}
+
+function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions) : TColor;
 
 {
 
@@ -106,6 +156,57 @@ uses
   Windows,
   uRegistry,
   Registry;
+
+{$IFDEF OLDEVERSIONS_SUPPORT}
+function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
+var
+ i  : integer;
+begin
+ Result:=False;
+  for i:=0  to DelphiOldVersions-1 do
+    if DelphiVersion=DelphiOldVersionNumbers[i] then
+    begin
+       Result:=True;
+       exit;
+    end;
+end;
+
+function GetIndexClosestColor(AColor:TColor) : Integer;
+var
+  SqrDist,SmallSqrDist  : Integer;
+  i,R1,G1,B1,R2,G2,B2   : Integer;
+begin
+  Result:=0;
+  SmallSqrDist := 256 * 256 * 256;
+  R1 := GetRValue(AColor);
+  G1 := GetGValue(AColor);
+  B1 := GetBValue(AColor);
+
+    for i := 0 to DelphiOldColorsCount-1 do
+    begin
+      R2 := GetRValue(DelphiOldColorsList[i]);
+      G2 := GetGValue(DelphiOldColorsList[i]);
+      B2 := GetBValue(DelphiOldColorsList[i]);
+      SqrDist := SQR(R1 - R2) + SQR(G1 - G2) + SQR(B1 - B2);
+      if SqrDist < SmallSqrDist then
+      begin
+       Result := i;
+       SmallSqrDist := SqrDist;
+      end
+    end
+end;
+
+{$ENDIF}
+
+
+function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions) : TColor;
+begin
+ Result:=AColor;
+{$IFDEF OLDEVERSIONS_SUPPORT}
+  if DelphiIsOldVersion(DelphiVersion) then
+  Result:= DelphiOldColorsList[GetIndexClosestColor(AColor)];
+{$ENDIF}
+end;
 
 function GetFileVersion(const exeName: string): string;
 const
