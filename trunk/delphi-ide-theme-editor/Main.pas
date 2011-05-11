@@ -816,7 +816,7 @@ end;
 procedure TFrmMain.SynEditCodeClick(Sender: TObject);
 var
   ptCaret: TBufferCoord;
-  Token: WideString;
+  Token: String;
   Attri: TSynHighlighterAttributes;
   i:    integer;
   ElementStr: string;

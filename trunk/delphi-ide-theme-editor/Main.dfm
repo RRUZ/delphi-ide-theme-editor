@@ -799,16 +799,31 @@ object FrmMain: TFrmMain
     Gutter.Font.Style = []
     Gutter.ShowLineNumbers = True
     Highlighter = SynPasSyn1
-    Lines.WideStrings = 
-      '{ Syntax highlighting }'#13#10'procedure TForm1.Button1Click(Sender: T' +
-      'Object);'#13#10'var'#13#10'  Number, I, X: Integer;'#13#10'begin'#13#10'  Number := 123 ' +
-      '+ $FF + Trunc(12.3);'#13#10'  Caption := '#39'The Number is'#39' + #32 + IntTo' +
-      'Str(Number);'#13#10'  {Search Match, Text Block}'#13#10'  { Invalid breakpoi' +
-      'nt }'#13#10'  for I := 0 to Number do {execution point}'#13#10'  begin'#13#10'    ' +
-      'Inc(X); { Enabled breakpoint }'#13#10'    Dec(X); { Disabled breakpoin' +
-      't }'#13#10'    X := X + 1.0; {Error Line}'#13#10'    Listbox1.Items.Add(IntT' +
-      'oStr(X));'#13#10'  end;'#13#10'  {$R+}'#13#10'  asm'#13#10'    mov AX, 1234H'#13#10'    mov Nu' +
-      'mber, AX'#13#10'  end;'#13#10'  {$R-}'#13#10'  {$WARNINGS OFF}'#13#10'end;'
+    Lines.Strings = (
+      '{ Syntax highlighting }'
+      'procedure TForm1.Button1Click(Sender: TObject);'
+      'var'
+      '  Number, I, X: Integer;'
+      'begin'
+      '  Number := 123 + $FF + Trunc(12.3);'
+      '  Caption := '#39'The Number is'#39' + #32 + IntToStr(Number);'
+      '  {Search Match, Text Block}'
+      '  { Invalid breakpoint }'
+      '  for I := 0 to Number do {execution point}'
+      '  begin'
+      '    Inc(X); { Enabled breakpoint }'
+      '    Dec(X); { Disabled breakpoint }'
+      '    X := X + 1.0; {Error Line}'
+      '    Listbox1.Items.Add(IntToStr(X));'
+      '  end;'
+      '  {$R+}'
+      '  asm'
+      '    mov AX, 1234H'
+      '    mov Number, AX'
+      '  end;'
+      '  {$R-}'
+      '  {$WARNINGS OFF}'
+      'end;')
     ReadOnly = True
     OnGutterClick = SynEditCodeGutterClick
     OnSpecialLineColors = SynEditCodeSpecialLineColors
@@ -842,7 +857,7 @@ object FrmMain: TFrmMain
     Left = 256
     Top = 100
     Bitmap = {
-      494C01010600090038000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010600090040000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
