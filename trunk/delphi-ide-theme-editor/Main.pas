@@ -183,7 +183,7 @@ begin
   begin
     DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
     if ApplyIDETheme(DelphiVersion, FCurrentTheme) then
-      MsgBox('The theme was sucefully applied')
+      MsgBox('The theme was successfully applied')
     else
       MsgBox('Error setting theme');
   end;
@@ -228,7 +228,7 @@ begin
         DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
 
         if SetIDEFont(DelphiVersion, CbIDEFonts.Text, UpDownFontSize.Position) then
-          MsgBox('The font was sucefully applied')
+          MsgBox('The font was successfully applied')
         else
           MsgBox('Error setting font');
 
