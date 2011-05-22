@@ -12,7 +12,8 @@ uses
   uHSLUtils in 'Units\uHSLUtils.pas',
   uHueSat in 'Units\uHueSat.pas' {FrmHueSat},
   uRegistry in 'Units\uRegistry.pas',
-  uSettings in 'Units\uSettings.pas' {FrmSettings};
+  uSettings in 'Units\uSettings.pas' {FrmSettings},
+  uColorSelector in 'Units\uColorSelector.pas' {DialogColorSelector};
 
 {$R *.res}
 
