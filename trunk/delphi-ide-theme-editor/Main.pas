@@ -29,7 +29,7 @@ interface
  //grow list themes - done
  //change xml format, add all versions internal support, theme GUID. theme version, theme name, author -> working  on it
  //notepad++ themes
- //exception handler extended
+ //exception handler extended - done
  //eclipse themes   done
  //hue/saturation - done
  //vs studio and eclipse importer mapper XML
@@ -41,11 +41,13 @@ interface
  //import from http://studiostyl.es/schemes
  //import fom notepad++
  //http://www.eclipsecolorthemes.org/   done
+
+ //http://www.colorotate.org/
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight,
-  pngimage, uSettings;
+  pngimage, uSettings, ExtDlgs;
 
 type
   //THackSynPasSyn= class(TSynPasSyn);
@@ -91,6 +93,10 @@ type
     ImageHue:    TImage;
     CbIDEThemeImport: TComboBox;
     ImageListlGutterGlyphs: TImageList;
+    BtnSelForColor: TButton;
+    ImageList1: TImageList;
+    BtnSelBackColor: TButton;
+    ImageBug: TImage;
     procedure FormCreate(Sender: TObject);
     procedure LvDelphiVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -114,6 +120,9 @@ type
       var Special: boolean; var FG, BG: TColor);
     procedure SynEditCodeGutterClick(Sender: TObject; Button: TMouseButton;
       X, Y, Line: integer; Mark: TSynEditMark);
+    procedure BtnSelForColorClick(Sender: TObject);
+    procedure ImageBugClick(Sender: TObject);
+    procedure BtnSelBackColorClick(Sender: TObject);
   private
     FThemeChangued: boolean;
     FSettings:      TSettings;
@@ -129,6 +138,8 @@ type
     procedure ApplyCurentTheme;
     function GetThemeIndex(const AThemeName: string): integer;
     function GetElementIndex(Element: TIDEHighlightElements): integer;
+    procedure OnSelForegroundColorChange(Sender: TObject);
+    procedure OnSelBackGroundColorChange(Sender: TObject);
   public
     { Public declarations }
   end;
@@ -139,9 +150,10 @@ var
 implementation
 
 uses
+  ShellApi,
   IOUtils,
   StrUtils,
-  uHueSat;
+  uHueSat, uColorSelector;
 
 const
   InvalidBreakLine   = 9;
@@ -282,6 +294,76 @@ begin
         [E.Message, E.StackTrace]));
   end;
 end;
+
+
+procedure TFrmMain.BtnSelForColorClick(Sender: TObject);
+var
+   Frm      : TDialogColorSelector;
+   OldColor : TColor;
+begin
+   Frm := TDialogColorSelector.Create(Self);
+   try
+     OldColor:=CblForeground.Selected;
+     Frm.OnChange:=OnSelForegroundColorChange;
+     Frm.SelectedColor:=CblForeground.Selected;
+     if Frm.Execute then
+     begin
+      CblForeground.Selected:=Frm.SelectedColor;
+      CblForegroundChange(CblForeground);
+     end
+     else
+     if CblForeground.Selected<>OldColor then
+     begin
+      CblForeground.Selected:=OldColor;
+      CblForegroundChange(CblForeground);
+     end;
+   finally
+     Frm.Free;
+   end;
+end;
+
+
+procedure TFrmMain.BtnSelBackColorClick(Sender: TObject);
+var
+   Frm      : TDialogColorSelector;
+   OldColor : TColor;
+begin
+   Frm := TDialogColorSelector.Create(Self);
+   try
+     OldColor:=CblBackground.Selected;
+     Frm.SelectedColor:=CblBackground.Selected;
+     Frm.OnChange:=OnSelBackGroundColorChange;
+     if Frm.Execute then
+     begin
+      CblBackground.Selected:=Frm.SelectedColor;
+      CblForegroundChange(CblBackground);
+     end
+     else
+     if CblBackground.Selected<>OldColor then
+     begin
+      CblBackground.Selected:=OldColor;
+      CblForegroundChange(CblBackground);
+     end;
+   finally
+     Frm.Free;
+   end;
+end;
+
+
+procedure TFrmMain.OnSelForegroundColorChange(Sender: TObject);
+begin
+  CblForeground.Selected:=TDialogColorSelector(Sender).SelectedColor;
+  CblForegroundChange(CblForeground);
+end;
+
+procedure TFrmMain.OnSelBackGroundColorChange(Sender: TObject);
+begin
+  CblBackground.Selected:=TDialogColorSelector(Sender).SelectedColor;
+  CblForegroundChange(CblBackground);
+end;
+
+
+
 
 procedure TFrmMain.BtnImportRegThemeClick(Sender: TObject);
 var
@@ -534,6 +616,11 @@ begin
 
 end;
 
+procedure TFrmMain.ImageBugClick(Sender: TObject);
+begin
+    ShellExecute(Handle, 'open', 'http://code.google.com/p/delphi-ide-theme-editor/issues/list',nil,nil, SW_SHOWNORMAL) ;
+end;
+
 procedure TFrmMain.ImageConfClick(Sender: TObject);
 var
   Frm: TFrmSettings;
@@ -708,6 +795,7 @@ begin
         [E.Message, E.StackTrace]));
   end;
 end;
+
 
 procedure TFrmMain.CblForegroundChange(Sender: TObject);
 var
@@ -920,7 +1008,7 @@ begin
   APoint.Y := Msg.YPos;
   APoint   := ScreenToClient(APoint);
   if (Msg.Result = htClient) and ((APoint.Y <= GlassFrame.Top) or (APoint.Y >= ClientHeight - GlassFrame.Bottom)) and
-    (not PtInRect(ImageHue.BoundsRect, APoint)) and  (not PtInRect(ImageConf.BoundsRect, APoint)) then
+    (not PtInRect(ImageHue.BoundsRect, APoint)) and  (not PtInRect(ImageConf.BoundsRect, APoint)) and  (not PtInRect(ImageBug.BoundsRect, APoint)) then
     Msg.Result := htCaption;
 end;
 
