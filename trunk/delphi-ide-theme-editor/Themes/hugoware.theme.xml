@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-05-12 23:26:28" author="Delphi IDE Theme Editor" versionapp="1.0.0.139">
+<DelphiIDETheme modified="2011-05-22 20:06:41" author="Delphi IDE Theme Editor" versionapp="1.0.0.143">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
@@ -213,7 +213,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -573,7 +573,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -933,7 +933,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -1293,7 +1293,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -1653,7 +1653,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -2013,7 +2013,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -2373,7 +2373,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -2733,7 +2733,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -3093,7 +3093,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
@@ -3453,7 +3453,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003C424E</ForegroundColorNew>
+    <ForegroundColorNew>$00838DA0</ForegroundColorNew>
     <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>

@@ -1,3 +1,27 @@
+﻿{**************************************************************************************************}
+{                                                                                                  }
+{ Unit uColorSelector                                                                              }
+{ Color Dialog for the Delphi IDE Theme Editor                                                     }
+{                                                                                                  }
+{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
+{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
+{ License at http://www.mozilla.org/MPL/                                                           }
+{                                                                                                  }
+{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
+{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
+{ and limitations under the License.                                                               }
+{                                                                                                  }
+{ The Original Code is uColorSelector.pas.                                                         }
+{                                                                                                  }
+{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ All Rights Reserved.                                                                             }
+{                                                                                                  }
+{  Based in the components of                                                                      }
+{  Marko Binić Color Lib  v2.0.2  http://mxs.bergsoft.net/index.php?p=3                            }
+{                                                                                                  }
+{**************************************************************************************************}
+
 unit uColorSelector;
 
 interface
@@ -53,12 +77,12 @@ type
     procedure HSLColorPicker1Change(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure RedExit(Sender: TObject);
+    procedure HueExit(Sender: TObject);
   private
     FInitializating: Boolean;
     FSelectedColor: TColor;
     FStatus       : Boolean;
     FRefreshHSVColorPicker : Boolean;
-    FRefreshVColorPicker   : Boolean;
     FOnChange: TNotifyEvent;
     { Private declarations }
     procedure RefreshColors(Acolor: TColor);
@@ -80,8 +104,6 @@ uses
 {$R *.dfm}
 
 
-//
-//http://delphihaven.wordpress.com/2010/04/19/setting-up-a-custom-titlebar/
 procedure TDialogColorSelector.BtnApplyClick(Sender: TObject);
 begin
   FStatus:=True;
@@ -101,18 +123,9 @@ begin
 end;
 
 procedure TDialogColorSelector.FormCreate(Sender: TObject);
-var
-  i : Integer;
 begin
    FInitializating:=True;
    FStatus:=False;
-   {
-   mbColorPalette1.Colors.Clear;
-   for i:=0 to WebNamedColorsCount-1 do
-   begin
-    mbColorPalette1.Colors.Add(IntToStr(WebNamedColors[i].Value));
-    mbColorPalette1.ColorNames.Add(WebNamedColors[i].Name);
-   end;     }
 end;
 
 procedure TDialogColorSelector.FormShow(Sender: TObject);
@@ -142,6 +155,8 @@ begin
   end;
 end;
 
+
+
 procedure TDialogColorSelector.VColorPicker1Change(Sender: TObject);
 begin
   if not FInitializating then
@@ -170,20 +185,50 @@ begin
 end;
 
 procedure TDialogColorSelector.RedExit(Sender: TObject);
+const
+  RGBMAX = 255;            // R,G, and B vary over 0-RGBMAX
 var
  Value : Integer;
+ r,g,b : Byte;
+ color : TColor;
 begin
    if TEdit(Sender).Text='' then
     TEdit(Sender).Text:='0';
 
-  if TryStrToInt(TEdit(Sender).Text,Value) and (Value>255) then
-   TEdit(Sender).Text:='255';
+   if TryStrToInt(TEdit(Sender).Text,Value) and (Value>RGBMAX) then
+     TEdit(Sender).Text:=IntToStr(RGBMAX);
+
+    r := StrToInt(Red.Text);
+    g := StrToInt(Green.Text);
+    b := StrToInt(Blue.Text);
+    color := RGB(r, g, b);
+
+    RefreshColors(color);
+end;
+
+procedure TDialogColorSelector.HueExit(Sender: TObject);
+const
+  HLSMAX = 240;            // H,L, and S vary over 0-HLSMAX
+var
+  Value : Integer;
+  Hue, Luminance, Saturation: Word;
+begin
+ if TEdit(Sender).Text='' then
+  TEdit(Sender).Text:='0';
+
+ if TryStrToInt(TEdit(Sender).Text,Value) and (Value>HLSMAX) then
+   TEdit(Sender).Text:=IntToStr(HLSMAX);
+
+  Hue        := StrToInt(Self.Hue.Text);
+  Luminance  := StrToInt(Lum.Text);
+  Saturation := StrToInt(Sat.Text);
+
+  RefreshColors(ColorHLSToRGB(Hue, Luminance, Saturation));
 end;
 
 procedure TDialogColorSelector.RefreshColors(Acolor: TColor);
 var
   Hue, Luminance, Saturation: Word;
-  s : string;
 begin
   mbColorPreview1.Color:=Acolor;
   mbColorPreview2.Color:=Acolor;
@@ -194,14 +239,13 @@ begin
   Self.Hue.Text   :=IntToStr(Hue);
   Self.Lum.Text   :=IntToStr(Luminance);
   Self.Sat.Text   :=IntToStr(Saturation);
-  FmtStr(s, '%s%0.8x', [HexDisplayPrefix, Integer(Acolor)]);
-  Hex.Text:=s;
+
+  Hex.Text:=Format('#%.2x%.2x%.2x',[GetRValue(Acolor),GetGValue(Acolor),GetBValue(Acolor)]);
 
   FSelectedColor:=Acolor;
 
   if Assigned(CheckBoxLive) and CheckBoxLive.Checked and  (@FOnChange<>nil) then
    OnChange(Self);
-
 end;
 
 procedure TDialogColorSelector.SetSelectedColor(const Value: TColor);
