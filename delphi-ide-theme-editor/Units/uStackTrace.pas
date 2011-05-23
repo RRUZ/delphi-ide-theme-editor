@@ -14,20 +14,18 @@ end;
 
 function GetStackInfoStringProc(Info: Pointer): string;
 var
-  Stack : TJclStackInfoList;
+  StackInfoList : TJclStackInfoList;
   List  : TStringList;
 begin
   if Info = nil then Exit;
-  List   := nil;
-  Stack  := nil;
- try
   List  := TStringList.Create;
-  Stack := TJclStackInfoList(Info);
-  Stack.AddToStrings(List);
-  Result :=  List.Text;
- finally
-    FreeAndNil(List);
- end;
+  try
+   StackInfoList := TJclStackInfoList(Info);
+   StackInfoList.AddToStrings(List);
+   Result :=  List.Text;
+  finally
+    List.Free;
+  end;
 end;
 
 procedure CleanUpStackInfoProc(Info: Pointer);

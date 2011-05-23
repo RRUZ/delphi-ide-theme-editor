@@ -124,6 +124,7 @@ type
     procedure ImageBugClick(Sender: TObject);
     procedure BtnSelBackColorClick(Sender: TObject);
   private
+    FChanging     : boolean;
     FThemeChangued: boolean;
     FSettings:      TSettings;
     FCurrentTheme:  TIDETheme;
@@ -262,7 +263,10 @@ begin
     LoadThemes;
     index := GetThemeIndex(EditThemeName.Text);
     if index >= 0 then
+    begin
       LvThemes.Selected := LvThemes.Items.Item[index];
+      LvThemes.Selected.MakeVisible(True);
+    end;
   except
     on E: Exception do
       MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
@@ -520,6 +524,7 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 begin
+  FChanging := False;
   FSettings := TSettings.Create;
   ReadSettings(FSettings);
 
@@ -728,11 +733,17 @@ begin
     Element := TIDEHighlightElements(CbElement.Items.Objects[CbElement.ItemIndex]);
     CblForeground.Selected := StringToColor(FCurrentTheme[Element].ForegroundColorNew);
     CblBackground.Selected := StringToColor(FCurrentTheme[Element].BackgroundColorNew);
-    CheckBold.Checked := FCurrentTheme[Element].Bold;
-    CheckItalic.Checked := FCurrentTheme[Element].Italic;
-    CheckUnderline.Checked := FCurrentTheme[Element].Underline;
-    CheckForeground.Checked := FCurrentTheme[Element].DefaultForeground;
-    CheckBackground.Checked := FCurrentTheme[Element].DefaultBackground;
+    FChanging:=True;
+    try
+      CheckBold.Checked      := FCurrentTheme[Element].Bold;
+      CheckItalic.Checked    := FCurrentTheme[Element].Italic;
+      CheckUnderline.Checked := FCurrentTheme[Element].Underline;
+
+      CheckForeground.Checked := FCurrentTheme[Element].DefaultForeground;
+      CheckBackground.Checked := FCurrentTheme[Element].DefaultBackground;
+    finally
+      FChanging:=False;
+    end;
   end;
 end;
 
@@ -801,7 +812,7 @@ procedure TFrmMain.CblForegroundChange(Sender: TObject);
 var
   Element: TIDEHighlightElements;
 begin
-  if LvDelphiVersions.Selected <> nil then
+  if (LvDelphiVersions.Selected <> nil) and (not FChanging) then
   begin
     Element := TIDEHighlightElements(CbElement.Items.Objects[CbElement.ItemIndex]);
     FCurrentTheme[Element].ForegroundColorNew := ColorToString(CblForeground.Selected);
@@ -881,7 +892,7 @@ begin
       SetSynAttr(TIDEHighlightElements.ReservedWord, KeyAttri,DelphiVer);
       SetSynAttr(TIDEHighlightElements.Number, NumberAttri,DelphiVer);
       SetSynAttr(TIDEHighlightElements.Whitespace, SpaceAttri,DelphiVer);
-      SetSynAttr(TIDEHighlightElements.string, StringAttri,DelphiVer);
+      SetSynAttr(TIDEHighlightElements.String, StringAttri,DelphiVer);
       SetSynAttr(TIDEHighlightElements.Symbol, SymbolAttri,DelphiVer);
     end;
   end;
@@ -991,11 +1002,11 @@ procedure TFrmMain.SynEditCodeSpecialLineColors(Sender: TObject;
 
 begin
   case Line of
-    InvalidBreakLine: SetColorSpecialLine(InvalidBreak);
+    InvalidBreakLine  : SetColorSpecialLine(InvalidBreak);
     ExecutionPointLine: SetColorSpecialLine(ExecutionPoint);
-    EnabledBreakLine: SetColorSpecialLine(EnabledBreak);
-    DisabledBreakLine: SetColorSpecialLine(DisabledBreak);
-    ErrorLineLine: SetColorSpecialLine(ErrorLine);
+    EnabledBreakLine  : SetColorSpecialLine(EnabledBreak);
+    DisabledBreakLine : SetColorSpecialLine(DisabledBreak);
+    ErrorLineLine     : SetColorSpecialLine(ErrorLine);
   end;
 end;
 
