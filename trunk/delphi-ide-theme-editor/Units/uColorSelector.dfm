@@ -1,7 +1,7 @@
 object DialogColorSelector: TDialogColorSelector
   Left = 698
   Top = 364
-  BorderStyle = bsToolWindow
+  BorderStyle = bsDialog
   Caption = 'Color Selector'
   ClientHeight = 292
   ClientWidth = 354
@@ -3486,7 +3486,6 @@ object DialogColorSelector: TDialogColorSelector
     TabOrder = 6
     object TabSheet1: TTabSheet
       Caption = 'Hexa'
-      ExplicitHeight = 157
       object HexaColorPicker1: THexaColorPicker
         Left = 0
         Top = 0
@@ -3499,17 +3498,19 @@ object DialogColorSelector: TDialogColorSelector
         Constraints.MinHeight = 85
         Constraints.MinWidth = 93
         OnChange = HexaColorPicker1Change
-        ExplicitHeight = 157
       end
     end
     object TabSheet2: TTabSheet
       Caption = 'Web Palette'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 157
       object mbColorPalette1: TmbColorPalette
         Left = 0
         Top = 0
-        Width = 210
+        Width = 196
         Height = 184
         Align = alClient
         Colors.Strings = (
@@ -3780,6 +3781,9 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet4: TTabSheet
       Caption = 'HSL'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 157
       object HSLColorPicker1: THSLColorPicker
         Left = 0
@@ -3802,6 +3806,9 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet3: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 157
       object HSVColorPicker1: THSVColorPicker
         Left = 3
@@ -3921,7 +3928,7 @@ object DialogColorSelector: TDialogColorSelector
     Left = 192
     Top = 255
     Bitmap = {
-      494C0101010020003C0018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101002000400018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000
