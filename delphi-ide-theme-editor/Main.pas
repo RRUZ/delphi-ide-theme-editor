@@ -24,7 +24,9 @@ unit Main;
 interface
 //T0DO
 
- //save theme as...
+ //save theme as... done
+ //delete theme   done
+ //clone theme     done
  //hide line number ( delphi 7) - done
  //grow list themes - done
  //change xml format, add all versions internal support, theme GUID. theme version, theme name, author -> working  on it
@@ -32,7 +34,9 @@ interface
  //exception handler extended - done
  //eclipse themes   done
  //hue/saturation - done
- //vs studio and eclipse importer mapper XML
+ //*****************************************************
+ //Importer mapper XML . create xml with relations between delphi themes and external IDE themes
+ //*****************************************************
  //download themes online
  //config file - done
  //translate
@@ -43,11 +47,28 @@ interface
  //http://www.eclipsecolorthemes.org/   done
 
  //http://www.colorotate.org/
+
+ //import themes from IntelliJ IDE
+ //   http://confluence.jetbrains.net/display/RUBYDEV/Third-party+add-ons
+ //   http://devnet.jetbrains.net/docs/DOC-1154
+ //   http://tedwise.com/2009/02/26/dark-pastels-theme-for-intellij-idea/
+ //   http://yiwenandsoftware.wordpress.com/2008/05/15/textmate-golbalt-color-theme-for-intellij/
+ //   http://blog.gokhanozcan.com/2008/10/06/intellij-idea-dark-color-scheme/
+ //   http://stackoverflow.com/questions/4414593/where-can-i-download-intellij-idea-10-color-schemes
+
+ //import themes from    NetBeans IDE
+ //   http://www.niccolofavari.com/dark-low-contrast-color-scheme-for-netbeans-ide
+ //   http://blog.mixu.net/2010/05/03/syntax-highlighting-color-schemes-for-netbeans/
+
+ //import themes from Komodo
+ //   http://www.kolormodo.com
+
+
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight,
-  pngimage, uSettings, ExtDlgs;
+  pngimage, uSettings, ExtDlgs, Menus;
 
 type
   //THackSynPasSyn= class(TSynPasSyn);
@@ -97,6 +118,13 @@ type
     ImageList1: TImageList;
     BtnSelBackColor: TButton;
     ImageBug: TImage;
+    PopupMenuThemes: TPopupMenu;
+    CloneTheme1: TMenuItem;
+    DeleteTheme1: TMenuItem;
+    ApplyTheme1: TMenuItem;
+    SaveChanges1: TMenuItem;
+    SaveAs1: TMenuItem;
+    LabelMsg: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure LvDelphiVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -123,6 +151,9 @@ type
     procedure BtnSelForColorClick(Sender: TObject);
     procedure ImageBugClick(Sender: TObject);
     procedure BtnSelBackColorClick(Sender: TObject);
+    procedure DeleteTheme1Click(Sender: TObject);
+    procedure CloneTheme1Click(Sender: TObject);
+    procedure SaveAs1Click(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -151,10 +182,14 @@ var
 implementation
 
 uses
+  Diagnostics,
   ShellApi,
   IOUtils,
   StrUtils,
-  uHueSat, uColorSelector;
+  uHueSat,
+  uColorSelector,
+  EclipseThemes,
+  VSThemes;
 
 const
   InvalidBreakLine   = 9;
@@ -426,6 +461,7 @@ var
   DelphiVersion: TDelphiVersions;
   ImportType: TIDEImportThemes;
   GoNext: boolean;
+  s : TStopwatch;
 begin
   ImportType := TIDEImportThemes(
     CbIDEThemeImport.Items.Objects[CbIDEThemeImport.ItemIndex]);
@@ -434,7 +470,7 @@ begin
   try
     if (LvDelphiVersions.Selected <> nil) and OpenDialogImport.Execute(Handle) then
     begin
-      DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
+      DelphiVersion := DelphiXE;//TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
 
       if OpenDialogImport.Files.Count = 1 then
         GoNext := Application.MessageBox(
@@ -448,14 +484,18 @@ begin
 
       if GoNext and (OpenDialogImport.Files.Count > 1) then
       begin
+
+        s:=TStopwatch.Create;
+        s.Start;
+
         ProgressBar1.Visible := True;
         try
           ProgressBar1.Position := 0;
           ProgressBar1.Max      := OpenDialogImport.Files.Count;
-
+          LabelMsg.Visible:=True;
           for i := 0 to OpenDialogImport.Files.Count - 1 do
           begin
-
+            LabelMsg.Caption:=Format('Importing %s theme',[ExtractFileName(OpenDialogImport.Files[i])]);
             case ImportType of
               VisualStudioThemes: ImportVisualStudioTheme(
                   DelphiVersion, OpenDialogImport.Files[i], FSettings.ThemePath, ThemeName);
@@ -467,9 +507,11 @@ begin
           end;
         finally
           ProgressBar1.Visible := False;
+          LabelMsg.Visible:=False;
         end;
 
-        MsgBox(Format('%d Themes imported', [OpenDialogImport.Files.Count]));
+        s.Stop;
+        MsgBox(Format('%d Themes imported in %n seconds', [OpenDialogImport.Files.Count,s.Elapsed.TotalSeconds]));
         LoadThemes;
         LvThemes.Selected := LvThemes.Items.Item[0];
       end
@@ -713,8 +755,7 @@ begin
     for FileName in TDirectory.GetFiles(FSettings.ThemePath, '*.theme.xml') do
     begin
       Item := LvThemes.Items.Add;
-      Item.Caption := Copy(ExtractFileName(FileName), 1, Pos(
-        '.theme', ExtractFileName(FileName)) - 1);
+      Item.Caption := Copy(ExtractFileName(FileName), 1, Pos('.theme', ExtractFileName(FileName)) - 1);
       Item.SubItems.Add(FileName);
     end;
     FThemeChangued := False;
@@ -830,6 +871,36 @@ begin
 end;
 
 
+procedure TFrmMain.CloneTheme1Click(Sender: TObject);
+var
+  index    : integer;
+  FileName : string;
+  NFileName: string;
+begin
+  try
+    if LvThemes.Selected <> nil then
+    begin
+      index    := LvThemes.Selected.Index;
+      FileName :=LvThemes.Selected.SubItems[0];
+      NFileName:=ChangeFileExt(ExtractFileName(FileName),'');//remove .xml
+      NFileName:=ChangeFileExt(ExtractFileName(NFileName),'');//remove .theme
+      NFileName:=ExtractFilePath(FileName)+NFileName+'-Clone.theme.xml';
+      DeleteFile(NFileName);
+      TFile.Copy(FileName,NFileName);
+      LoadThemes;
+      if index >= 0 then
+      begin
+        LvThemes.Selected := LvThemes.Items.Item[index];
+        LvThemes.Selected.MakeVisible(True);
+      end;
+    end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error deleting theme message : %s : trace %s',[E.Message, E.StackTrace]));
+  end;
+end;
+
+
 procedure TFrmMain.CreateThemeFile;
 var
   DelphiVersion: TDelphiVersions;
@@ -850,11 +921,40 @@ begin
   end;
 end;
                
+procedure TFrmMain.DeleteTheme1Click(Sender: TObject);
+var
+  index: integer;
+begin
+  try
+    if LvThemes.Selected <> nil then
+      if Application.MessageBox(
+        PChar(Format('Do you want delete the theme "%s"?',[LvThemes.Selected.Caption])), 'Confirmation',
+        MB_YESNO + MB_ICONQUESTION) = idYes then
+    begin
+      index := LvThemes.Selected.Index;
+      DeleteFile(LvThemes.Selected.SubItems[0]);
+      LoadThemes;
+      if index >= 0 then
+      begin
+        LvThemes.Selected := LvThemes.Items.Item[index];
+        LvThemes.Selected.MakeVisible(True);
+      end;
+    end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error deleting theme message : %s : trace %s',[E.Message, E.StackTrace]));
+  end;
+end;
+
+
 procedure TFrmMain.RefreshPasSynEdit;
 var
   Element   : TIDEHighlightElements;
   DelphiVer : TDelphiVersions;
+  Special   : boolean;
+  FG, BG    : TColor;
 begin
+
   if (LvDelphiVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
   begin
     //Patch colors for Old
@@ -895,6 +995,46 @@ begin
       SetSynAttr(TIDEHighlightElements.String, StringAttri,DelphiVer);
       SetSynAttr(TIDEHighlightElements.Symbol, SymbolAttri,DelphiVer);
     end;
+
+
+    {
+    SynEditCodeSpecialLineColors(nil,InvalidBreakLine, Special, FG, BG);
+    SynEditCodeSpecialLineColors(nil,ExecutionPointLine, Special, FG, BG);
+    SynEditCodeSpecialLineColors(nil,EnabledBreakLine, Special, FG, BG);
+    SynEditCodeSpecialLineColors(nil,DisabledBreakLine, Special, FG, BG);
+    SynEditCodeSpecialLineColors(nil,ErrorLineLine, Special, FG, BG);
+    SynEditCode.InvalidateLine(InvalidBreakLine);
+    }
+
+    SynEditCode.Repaint;
+  end;
+end;
+
+procedure TFrmMain.SaveAs1Click(Sender: TObject);
+var
+  index: integer;
+  Value: string;
+begin
+  //detect name in list show msg overwrite
+  Value:=EditThemeName.Text;
+  try
+
+   if InputQuery('Save As..','Enter the new name of the theme',Value) then
+   begin
+    EditThemeName.Text:=Value;
+    CreateThemeFile;
+    LoadThemes;
+    index := GetThemeIndex(EditThemeName.Text);
+    if index >= 0 then
+    begin
+      LvThemes.Selected := LvThemes.Items.Item[index];
+      LvThemes.Selected.MakeVisible(True);
+    end;
+   end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
+        [E.Message, E.StackTrace]));
   end;
 end;
 
