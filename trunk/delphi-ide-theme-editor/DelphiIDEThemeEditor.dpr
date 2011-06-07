@@ -13,7 +13,9 @@ uses
   uHueSat in 'Units\uHueSat.pas' {FrmHueSat},
   uRegistry in 'Units\uRegistry.pas',
   uSettings in 'Units\uSettings.pas' {FrmSettings},
-  uColorSelector in 'Units\uColorSelector.pas' {DialogColorSelector};
+  uColorSelector in 'Units\uColorSelector.pas' {DialogColorSelector},
+  VSThemes in 'Units\VSThemes.pas',
+  EclipseThemes in 'Units\EclipseThemes.pas';
 
 {$R *.res}
 
