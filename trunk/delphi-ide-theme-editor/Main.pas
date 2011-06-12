@@ -125,6 +125,7 @@ type
     SaveChanges1: TMenuItem;
     SaveAs1: TMenuItem;
     LabelMsg: TLabel;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure LvDelphiVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -154,6 +155,7 @@ type
     procedure DeleteTheme1Click(Sender: TObject);
     procedure CloneTheme1Click(Sender: TObject);
     procedure SaveAs1Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -189,6 +191,7 @@ uses
   uHueSat,
   uColorSelector,
   EclipseThemes,
+  GraphUtil,
   VSThemes;
 
 const
@@ -334,6 +337,11 @@ begin
   end;
 end;
 
+
+procedure TFrmMain.Button1Click(Sender: TObject);
+begin
+ ShellExecute(Handle, 'open', PChar('http://theroadtodelphi.wordpress.com/contributions/'), nil, nil, SW_SHOW);
+end;
 
 procedure TFrmMain.BtnSelForColorClick(Sender: TObject);
 var
@@ -978,6 +986,10 @@ begin
     Element := TIDEHighlightElements.LineHighlight;
     SynEditCode.ActiveLineColor :=
       GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew),DelphiVer);
+
+
+    Element := TIDEHighlightElements.PlainText;
+    SynEditCode.Gutter.BorderColor := GetHighLightColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew));
 
 
     with SynPasSyn1 do
