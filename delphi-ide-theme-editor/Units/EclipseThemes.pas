@@ -48,7 +48,11 @@ var
   function WebColorToTColor(const S: string): string;
   var I: Integer;
   begin
-    I := StrToInt(S);
+    try
+      I :=StrToInt(S);
+    except
+      I :=0;
+    end;
     Result :=ColorToString((I AND $0000FF00) OR ((I AND $00FF0000) SHR 16) OR ((I AND $000000FF) SHL 16));
   end;
 
