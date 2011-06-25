@@ -94,7 +94,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">160</VersionInfo>
+						<VersionInfo Name="Build">163</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -106,7 +106,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.0.160</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.0.163</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>

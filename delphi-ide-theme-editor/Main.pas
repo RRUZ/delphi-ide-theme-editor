@@ -68,7 +68,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight,
-  pngimage, uSettings, ExtDlgs, Menus;
+  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML;
 
 type
   //THackSynPasSyn= class(TSynPasSyn);
@@ -126,6 +126,7 @@ type
     SaveAs1: TMenuItem;
     LabelMsg: TLabel;
     Button1: TButton;
+    SynExporterHTML1: TSynExporterHTML;
     procedure FormCreate(Sender: TObject);
     procedure LvDelphiVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -174,6 +175,7 @@ type
     function GetElementIndex(Element: TIDEHighlightElements): integer;
     procedure OnSelForegroundColorChange(Sender: TObject);
     procedure OnSelBackGroundColorChange(Sender: TObject);
+    procedure ExportThemeHtml;
   public
     { Public declarations }
   end;
@@ -954,6 +956,16 @@ begin
   end;
 end;
 
+
+procedure TFrmMain.ExportThemeHtml;
+begin
+  SynExporterHTML1.Color    :=StringToColor(FCurrentTheme[PlainText].BackgroundColorNew);
+  SynExporterHTML1.Font.Name:=CbIDEFonts.Text;
+  SynExporterHTML1.Font.Size:=UpDownFontSize.Position;
+  SynExporterHTML1.ExportAsText:=True;
+  SynExporterHTML1.ExportAll(SynEditCode.Lines);
+  SynExporterHTML1.SaveToFile('C:\Users\Dexter\Desktop\demo.html');
+end;
 
 procedure TFrmMain.RefreshPasSynEdit;
 var
