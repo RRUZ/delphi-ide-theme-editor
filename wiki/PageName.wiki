@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Untitled</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #1B4346; }
+.pas1-assembler { background-color: #1B4346; color: #42FFEF; font-weight: bold; }
+.pas1-character { background-color: #1B4346; color: #70C116; font-weight: bold; }
+.pas1-comment { background-color: #1B4346; color: #39B5BC; font-weight: bold; }
+.pas1-float { background-color: #1B4346; color: #D1FFFB; font-weight: bold; }
+.pas1-hexadecimal { background-color: #1B4346; color: #D1FFFB; font-weight: bold; }
+.pas1-identifier { background-color: #1B4346; color: #D1FFFB; font-weight: bold; }
+.pas1-number { background-color: #1B4346; color: #D1FFFB; font-weight: bold; }
+.pas1-preprocessor { background-color: #1B4346; color: #00FFA2; font-weight: bold; }
+.pas1-reservedword { background-color: #1B4346; color: #42FFEF; font-weight: bold; }
+.pas1-space { background-color: #1B4346; color: #D1FFFB; font-weight: bold; }
+.pas1-string { background-color: #1B4346; color: #70C116; font-weight: bold; }
+.pas1-symbol { background-color: #1B4346; color: #D1FFFB; font-weight: bold; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Consolas;"><span class="pas1-comment">{ Syntax highlighting }
+</span><span class="pas1-reservedword">procedure</span><span class="pas1-space"> TForm1.Button1Click(Sender: TObject);
+
+</span><span class="pas1-reservedword">var
+</span><span class="pas1-space">  Number, I, X: Integer;
+</span><span class="pas1-reservedword">begin
+</span><span class="pas1-space">  Number := 123 + $FF + Trunc(12.3);
+  Caption := </span><span class="pas1-string">'The Number is'</span><span class="pas1-space"> + </span><span class="pas1-character">#32</span><span class="pas1-space"> + IntToStr(Number);
+  </span><span class="pas1-comment">{Search Match, Text Block}
+</span><span class="pas1-space">  </span><span class="pas1-comment">{ Invalid breakpoint }
+</span><span class="pas1-space">  </span><span class="pas1-reservedword">for</span><span class="pas1-space"> I := 0 </span><span class="pas1-reservedword">to</span><span class="pas1-space"> Number </span><span class="pas1-reservedword">do</span><span class="pas1-space"> </span><span class="pas1-comment">{execution point}
+
+</span><span class="pas1-space">  </span><span class="pas1-reservedword">begin
+</span><span class="pas1-space">    Inc(X); </span><span class="pas1-comment">{ Enabled breakpoint }
+</span><span class="pas1-space">    Dec(X); </span><span class="pas1-comment">{ Disabled breakpoint }
+</span><span class="pas1-space">    X := X + 1.0; </span><span class="pas1-comment">{Error Line}
+</span><span class="pas1-space">    Listbox1.Items.Add(IntToStr(X));
+  </span><span class="pas1-reservedword">end</span><span class="pas1-symbol">;
+  </span><span class="pas1-preprocessor">{$R+}
+</span><span class="pas1-space">  </span><span class="pas1-reservedword">asm
+
+</span><span class="pas1-space">    </span><span class="pas1-assembler">mov</span><span class="pas1-space"> </span><span class="pas1-assembler">AX,</span><span class="pas1-space"> </span><span class="pas1-assembler">1234H
+</span><span class="pas1-space">    </span><span class="pas1-assembler">mov</span><span class="pas1-space"> </span><span class="pas1-assembler">Number,</span><span class="pas1-space"> </span><span class="pas1-assembler">AX
+</span><span class="pas1-space">  </span><span class="pas1-reservedword">end</span><span class="pas1-symbol">;
+  </span><span class="pas1-preprocessor">{$R-}
+</span><span class="pas1-space">  </span><span class="pas1-preprocessor">{$WARNINGS OFF}
+
+</span><span class="pas1-reservedword">end</span><span class="pas1-symbol">;
+</span></span>
+</code></pre>
+</body>
+</html>
