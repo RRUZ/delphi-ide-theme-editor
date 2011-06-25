@@ -892,6 +892,7 @@ object FrmMain: TFrmMain
     Width = 472
     Height = 354
     Anchors = [akLeft, akTop, akRight, akBottom]
+    Color = clSilver
     ActiveLineColor = clYellow
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -982,8 +983,8 @@ object FrmMain: TFrmMain
     Top = 136
   end
   object SynPasSyn1: TSynPasSyn
-    Left = 199
-    Top = 72
+    Left = 399
+    Top = 224
   end
   object OpenDialogImport: TOpenDialog
     Filter = 'Visual Studio Configuration File|*.vssettings'
@@ -997,7 +998,7 @@ object FrmMain: TFrmMain
     Left = 256
     Top = 100
     Bitmap = {
-      494C01010600090084000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101060009008C000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1170,7 +1171,7 @@ object FrmMain: TFrmMain
     Left = 408
     Top = 112
     Bitmap = {
-      494C010107000800580010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800600010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1469,5 +1470,19 @@ object FrmMain: TFrmMain
       Caption = 'Sa&ve As...'
       OnClick = SaveAs1Click
     end
+  end
+  object SynExporterHTML1: TSynExporterHTML
+    Color = clNone
+    DefaultFilter = 'HTML Documents (*.htm;*.html)|*.htm;*.html'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Style = []
+    Highlighter = SynPasSyn1
+    Title = 'Untitled'
+    UseBackground = True
+    Left = 472
+    Top = 224
   end
 end
