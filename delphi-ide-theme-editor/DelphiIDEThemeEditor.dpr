@@ -2,6 +2,7 @@
  // JCL_DEBUG_EXPERT_INSERTJDBG OFF
  // JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
 program DelphiIDEThemeEditor;
+{$WARN SYMBOL_PLATFORM OFF}
 
 uses
   uStackTrace in 'Units\uStackTrace.pas',

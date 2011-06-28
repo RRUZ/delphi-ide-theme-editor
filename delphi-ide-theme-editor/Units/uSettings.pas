@@ -31,7 +31,7 @@ type
   TSettings = class
   private
     FThemePath: string;
-  published
+  public
     property ThemePath: string Read FThemePath Write FThemePath;
   end;
 
