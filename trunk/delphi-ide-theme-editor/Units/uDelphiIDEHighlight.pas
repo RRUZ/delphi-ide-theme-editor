@@ -609,8 +609,11 @@ end;
 
 procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);
 var
- Element : TIDEHighlightElements;
+ Element      : TIDEHighlightElements;
+ DefaultTheme : TIDETheme;
 begin
+    LoadThemeFromXMLFile(DefaultTheme,ExtractFilePath(ParamStr(0))+'default\Default.theme.xml');
+
     for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
     begin
       if DelphiVersionNumbers[DelphiVersion]>=IDEHighlightElementsMinVersion[Element] then
@@ -624,7 +627,17 @@ begin
         ATheme[Element].BackgroundColorNew:=GetBackgroundColor(DelphiVersion,Element);
       end
       else
+       //if the values are not present in the current theme  then
+      //load the default values from default theme template (based on XE)
       begin
+        ATheme[Element].Bold              :=DefaultTheme[Element].Bold;
+        ATheme[Element].Italic            :=DefaultTheme[Element].Italic;
+        ATheme[Element].Underline         :=DefaultTheme[Element].Underline;
+        ATheme[Element].DefaultForeground :=DefaultTheme[Element].DefaultForeground;
+        ATheme[Element].DefaultBackground :=DefaultTheme[Element].DefaultBackground;
+        ATheme[Element].ForegroundColorNew:=DefaultTheme[Element].ForegroundColorNew;
+        ATheme[Element].BackgroundColorNew:=DefaultTheme[Element].BackgroundColorNew;
+        {
         ATheme[Element].Bold     :=false;
         ATheme[Element].Italic   :=false;
         ATheme[Element].Underline:=false;
@@ -632,6 +645,7 @@ begin
         ATheme[Element].DefaultBackground:=false;
         ATheme[Element].ForegroundColorNew:='clDefault';
         ATheme[Element].BackgroundColorNew:='clDefault';
+        }
       end;
     end;
 end;

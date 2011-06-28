@@ -70,6 +70,8 @@ uses
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML;
 
+{.$DEFINE ENABLE_THEME_EXPORT}
+
 type
   //THackSynPasSyn= class(TSynPasSyn);
   TFrmMain = class(TForm)
@@ -175,7 +177,9 @@ type
     function GetElementIndex(Element: TIDEHighlightElements): integer;
     procedure OnSelForegroundColorChange(Sender: TObject);
     procedure OnSelBackGroundColorChange(Sender: TObject);
+    {$IFDEF ENABLE_THEME_EXPORT}
     procedure ExportThemeHtml;
+    {$ENDIF}
   public
     { Public declarations }
   end;
@@ -956,7 +960,7 @@ begin
   end;
 end;
 
-
+{$IFDEF ENABLE_THEME_EXPORT}
 procedure TFrmMain.ExportThemeHtml;
 begin
   SynExporterHTML1.Color    :=StringToColor(FCurrentTheme[PlainText].BackgroundColorNew);
@@ -966,13 +970,14 @@ begin
   SynExporterHTML1.ExportAll(SynEditCode.Lines);
   SynExporterHTML1.SaveToFile('C:\Users\Dexter\Desktop\demo.html');
 end;
+{$ENDIF}
 
 procedure TFrmMain.RefreshPasSynEdit;
 var
   Element   : TIDEHighlightElements;
   DelphiVer : TDelphiVersions;
-  Special   : boolean;
-  FG, BG    : TColor;
+  //Special   : boolean;
+  //FG, BG    : TColor;
 begin
 
   if (LvDelphiVersions.Selected <> nil) and (LvThemes.Selected <> nil) then

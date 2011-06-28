@@ -5,6 +5,7 @@ Source: Extras\ISSkin.dll; DestDir: {app}; Flags: dontcopy
 Source: Extras\Office2007.cjstyles; DestDir: {tmp}; Flags: dontcopy
 Source: DelphiIDEThemeEditor.exe; DestDir: {app}
 Source: Settings.ini; DestDir: {app}
+Source: default\default.theme.xml; DestDir: {app}\default\
 Source: Themes\Aqua.theme.xml; DestDir: {app}\Themes\
 Source: Themes\artofnet-darkonblue.theme.xml; DestDir: {app}\Themes\
 Source: Themes\artofnet-lime-chocolate.theme.xml; DestDir: {app}\Themes\
@@ -61,15 +62,18 @@ Source: Themes\zenburn-2010.theme.xml; DestDir: {app}\Themes\
 Source: Themes\Zenburn.theme.xml; DestDir: {app}\Themes\
 Source: Themes Eclipse\EclipseThemes.zip; DestDir: {app}\Themes Eclipse\
 Source: Themes VS\VsThemes.rar; DestDir: {app}\Themes VS\
+#define MyAppName 'Delphi IDE Theme Editor'
+#define MyAppVersion GetFileVersion('DelphiIDEThemeEditor.exe')
 [Setup]
 UsePreviousLanguage=no
-AppName=Delphi IDE Theme Editor
+AppName={#MyAppName}
 AppPublisher=The Road To Delphi
-AppVerName=Delphi IDE Theme Editor - The Road To Delphi
+AppVerName={#MyAppName} {#MyAppVersion}
+VersionInfoVersion={#MyAppVersion}
 AppPublisherURL=http://theroadtodelphi.wordpress.com/
 AppSupportURL=http://theroadtodelphi.wordpress.com/
 AppUpdatesURL=http://theroadtodelphi.wordpress.com/
-DefaultDirName={pf}\TheRoadToDelphi\DelphiIDEThemeEditor
+DefaultDirName={pf}\TheRoadToDelphi\Delphi IDE Theme Editor
 OutputBaseFileName=Setup
 DisableDirPage=true
 Compression=lzma
@@ -85,10 +89,53 @@ DisableProgramGroupPage=false
 AppID=DelphiIDEThemeEditor
 SetupIconFile=Images\Delphi_Ide_Theme_Editor.ico
 DefaultGroupName=Delphi IDE Theme Editor
+[Dirs]
+Name: {app}\default
+Name: {app}\Themes
+Name: {app}\Themes Eclipse
+Name: {app}\Themes VS
+[Icons]
+Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
+Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
 [Code]
 procedure LoadSkin(lpszPath: String; lpszIniFileName: String); external 'LoadSkin@files:isskin.dll stdcall';
 procedure UnloadSkin(); external 'UnloadSkin@files:isskin.dll stdcall';
 function  ShowWindow(hWnd: Integer; uType: Integer): Integer; external 'ShowWindow@user32.dll stdcall';
+
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+begin
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+function IsUpgrade(): Boolean;
+begin
+  Result := (GetUninstallString() <> '');
+end;
+
+function UnInstallOldVersion(): Integer;
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+begin
+  Result := 0;
+  sUnInstallString := GetUninstallString();
+  if sUnInstallString <> '' then begin
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    if Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES','', SW_HIDE, ewWaitUntilTerminated, iResultCode) then
+      Result := 3
+    else
+      Result := 2;
+  end else
+    Result := 1;
+end;
+
 
 function InitializeSetup(): Boolean;
 begin
@@ -103,10 +150,13 @@ begin
 	UnloadSkin();
 end;
 
-[Dirs]
-Name: {app}\Themes
-Name: {app}\Themes Eclipse
-Name: {app}\Themes VS
-[Icons]
-Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
-Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep=ssInstall) then
+  begin
+    if (IsUpgrade()) then
+    begin
+      UnInstallOldVersion();
+    end;
+  end;
+end;
