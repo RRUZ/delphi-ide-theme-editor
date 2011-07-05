@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="frontenddev_theme"/>
+			</Names>
+			<Globals Version="6">
+				<Schemefrontenddev_theme>
+					<ahaDefault Background="clBlack" Foreground="clWhite"/>
+					<ahaTextBlock Background="$00333333" Foreground="$00FFD4D4"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="clBlack" Foreground="$00FCFDCD"/>
+					<ahaHighlightAll Background="$00333333" Foreground="$00FFD4D4"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$00666666" Background="clBlack"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="clBlack"/>
+					<ahaCodeFoldingTree Background="clBlack" Foreground="clWhite"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clBlack" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="clBlack" Foreground="clWhite"/>
+					<ahaGutter Background="clBlack" Foreground="$00999999"/>
+					<ahaRightMargin Foreground="clWhite" Background="clBlack"/>
+					<ahaLineNumber Foreground="$00999999" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<Schemefrontenddev_theme>
+					<Assembler Foreground="clWhite" Background="clBlack"/>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Directive Foreground="clPurple" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Key Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<Schemefrontenddev_theme>
+					<Attribute_Name Foreground="clRed" Background="clBlack"/>
+					<Attribute_Value Foreground="$00999999" Style="fsBold" Background="clBlack"/>
+					<CDATA_Section Foreground="clWhite" Style="fsItalic" Background="clBlack"/>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<DOCTYPE_Section Foreground="clPurple" Style="fsItalic" Background="clBlack"/>
+					<Element_Name Foreground="$000FA400" Style="fsBold" Background="clBlack"/>
+					<Entity_Reference Foreground="clWhite" Style="fsBold" Background="clBlack"/>
+					<Namespace_Attribute_Name Foreground="clRed" Background="clBlack"/>
+					<Namespace_Attribute_Value Foreground="$00999999" Style="fsBold" Background="clBlack"/>
+					<Processing_Instruction Foreground="$00999999" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+					<Text Foreground="$000FA400" Style="fsBold" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<Schemefrontenddev_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</Schemefrontenddev_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<Schemefrontenddev_theme>
+					<Assembler Foreground="clWhite" Background="clBlack"/>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Preprocessor Foreground="clPurple" Style="fsBold" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Space Foreground="clWhite" Background="clBlack"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Pragma Style="fsBold" Background="clBlack" Foreground="clPurple"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Space Foreground="clWhite" Background="clBlack"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+					<Variable Style="fsBold" Background="clBlack" Foreground="clPurple"/>
+				</Schemefrontenddev_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Documentation Foreground="$0027C5F7" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Space Foreground="clWhite" Background="clBlack"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+					<Variable Foreground="clPurple" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Documentation Foreground="$0027C5F7" Style="fsBold" Background="clBlack"/>
+					<Float Foreground="clRed" Background="clBlack"/>
+					<Hexadecimal Foreground="clRed" Background="clBlack"/>
+					<Non_reserved_keyword Foreground="clWhite" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Octal Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+					<SyntaxError Foreground="clWhite" Background="clBlack"/>
+					<System_functions_and_variables Style="fsBold" Background="clBlack" Foreground="$0027C5F7"/>
+				</Schemefrontenddev_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Data_type Style="fsBold" Background="clBlack" Foreground="$0027C5F7"/>
+					<Default_packages Style="fsBold" Background="clBlack" Foreground="$000FA400"/>
+					<Exception Style="fsItalic" Background="clBlack" Foreground="clWhite"/>
+					<Function Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<SQL_Plus_command Style="fsBold" Background="clBlack" Foreground="clPurple"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsBold" Background="clBlack"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Reserved_word Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<String Foreground="$000FA400" Background="clBlack"/>
+					<Symbol Foreground="clWhite" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<Schemefrontenddev_theme>
+					<Diff_Added_line Foreground="clBlack" Background="clBlack"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="clBlack"/>
+					<Diff_Chunk_Line_Counts Foreground="clRed" Style="fsBold" Background="clBlack"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="clBlack" Foreground="clWhite"/>
+					<Diff_Chunk_New_Line_Count Foreground="clPurple" Style="fsBold" Background="clBlack"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$000FA400" Style="fsBold" Background="clBlack"/>
+					<Diff_New_File Background="clBlack" Style="fsBold" Foreground="clWhite"/>
+					<Diff_Original_File Background="clBlack" Style="fsBold" Foreground="clRed"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="clBlack"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</Schemefrontenddev_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<Schemefrontenddev_theme>
+					<Key Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+					<Number Foreground="clRed" Background="clBlack"/>
+					<Comment Foreground="$00666666" Style="fsItalic" Background="clBlack"/>
+					<Variable Foreground="$0027C5F7" Background="clBlack"/>
+				</Schemefrontenddev_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<Schemefrontenddev_theme>
+					<Comment Foreground="$00666666" Style="fsItalic" Background="clBlack"/>
+					<Section Style="fsBold" Background="clBlack" Foreground="$00999999"/>
+				</Schemefrontenddev_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

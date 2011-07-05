@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="son_of_obsidian_theme"/>
+			</Names>
+			<Globals Version="6">
+				<Schemeson_of_obsidian_theme>
+					<ahaDefault Background="$002A2822" Foreground="$00F3F2F1"/>
+					<ahaTextBlock Background="$0064614F" Foreground="$00FFFFFF"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$0064614F" Foreground="$00FFFFFF"/>
+					<ahaHighlightAll Background="$0064614F" Foreground="$00FFFFFF"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$00F9DA99" Background="$002A2822"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="clYellow"/>
+					<ahaCodeFoldingTree Background="$002A2822" Foreground="$00808080"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clWhite" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$002A2822" Foreground="$00808080"/>
+					<ahaGutter Background="$002A2822" Foreground="$0063C793"/>
+					<ahaRightMargin Foreground="$02000000" Background="$00F0F0F0"/>
+					<ahaLineNumber Foreground="$0063C793" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Assembler Foreground="$0063C793" Background="$002A2822"/>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Directive Foreground="$00BD82A0" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Key Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Attribute_Name Foreground="$00B18C67" Background="$002A2822"/>
+					<Attribute_Value Foreground="$000076EC" Style="fsBold" Background="$002A2822"/>
+					<CDATA_Section Foreground="$00F3F2F1" Style="fsItalic" Background="$002A2822"/>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<DOCTYPE_Section Foreground="$00BD82A0" Style="fsItalic" Background="$002A2822"/>
+					<Element_Name Foreground="$000076EC" Style="fsBold" Background="$002A2822"/>
+					<Entity_Reference Foreground="$00F3F2F1" Style="fsBold" Background="$002A2822"/>
+					<Namespace_Attribute_Name Foreground="$00B18C67" Background="$002A2822"/>
+					<Namespace_Attribute_Value Foreground="$000076EC" Style="fsBold" Background="$002A2822"/>
+					<Processing_Instruction Foreground="$0063C793" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+					<Text Foreground="$000076EC" Style="fsBold" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</Schemeson_of_obsidian_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Assembler Foreground="$0063C793" Background="$002A2822"/>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Preprocessor Foreground="$00BD82A0" Style="fsBold" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Space Foreground="$00F3F2F1" Background="$002A2822"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Pragma Style="fsBold" Background="$002A2822" Foreground="$00BD82A0"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Space Foreground="$00F3F2F1" Background="$002A2822"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+					<Variable Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+				</Schemeson_of_obsidian_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Documentation Foreground="$00F3F2F1" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Space Foreground="$00F3F2F1" Background="$002A2822"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+					<Variable Foreground="clPurple" Background="clWhite"/>
+				</Schemeson_of_obsidian_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Documentation Foreground="$00F3F2F1" Style="fsBold" Background="$002A2822"/>
+					<Float Foreground="$0022CDFF" Background="$002A2822"/>
+					<Hexadecimal Foreground="$0022CDFF" Background="$002A2822"/>
+					<Non_reserved_keyword Foreground="$00F3F2F1" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Octal Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+					<SyntaxError Foreground="$000076EC" Background="$002A2822"/>
+					<System_functions_and_variables Style="fsBold" Background="$002A2822" Foreground="$00F3F2F1"/>
+				</Schemeson_of_obsidian_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Data_type Style="fsBold" Background="$002A2822" Foreground="$00F3F2F1"/>
+					<Default_packages Style="fsBold" Background="$002A2822" Foreground="$000076EC"/>
+					<Exception Style="fsItalic" Background="$002A2822" Foreground="$000076EC"/>
+					<Function Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<SQL_Plus_command Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsBold" Background="$002A2822"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Reserved_word Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<String Foreground="$000076EC" Background="$002A2822"/>
+					<Symbol Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Diff_Added_line Foreground="clBlack" Background="$00CCFFCC"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$00AAFFFF"/>
+					<Diff_Chunk_Line_Counts Foreground="$0022CDFF" Style="fsBold" Background="$002A2822"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$002A2822" Foreground="$00F3F2F1"/>
+					<Diff_Chunk_New_Line_Count Foreground="$00BD82A0" Style="fsBold" Background="$002A2822"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$000076EC" Style="fsBold" Background="$002A2822"/>
+					<Diff_New_File Background="$002A2822" Style="fsBold" Foreground="$00F3F2F1"/>
+					<Diff_Original_File Background="$002A2822" Style="fsBold" Foreground="$00B18C67"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$00FFC7C7"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</Schemeson_of_obsidian_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Key Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+					<Number Foreground="$0022CDFF" Background="$002A2822"/>
+					<Comment Foreground="$007B7466" Style="fsItalic" Background="$002A2822"/>
+					<Variable Foreground="$00F3F2F1" Background="$002A2822"/>
+				</Schemeson_of_obsidian_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<Schemeson_of_obsidian_theme>
+					<Comment Foreground="$007B7466" Style="fsItalic" Background="$002A2822"/>
+					<Section Style="fsBold" Background="$002A2822" Foreground="$0063C793"/>
+				</Schemeson_of_obsidian_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

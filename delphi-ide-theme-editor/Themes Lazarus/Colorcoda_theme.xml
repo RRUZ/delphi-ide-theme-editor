@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="coda_theme"/>
+			</Names>
+			<Globals Version="6">
+				<Schemecoda_theme>
+					<ahaDefault Background="$00FFFFFF" Foreground="$02000000"/>
+					<ahaTextBlock Background="$00FF9933" Foreground="$02000000"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$00FF9933" Foreground="$02000000"/>
+					<ahaHighlightAll Background="$00FF9933" Foreground="$02000000"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$000073EB" Background="$00FFFFFF"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="clYellow"/>
+					<ahaCodeFoldingTree Background="$00FFFFFF" Foreground="$00808080"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clWhite" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$00FFFFFF" Foreground="$00808080"/>
+					<ahaGutter Background="$00FFFFFF" Foreground="$00AF912B"/>
+					<ahaRightMargin Foreground="$02000000" Background="$00F0F0F0"/>
+					<ahaLineNumber Foreground="$00AF912B" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<Schemecoda_theme>
+					<Assembler Foreground="$00501388" Background="$00FFFFFF"/>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Directive Foreground="$00213868" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Key Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<Schemecoda_theme>
+					<Attribute_Name Foreground="$00004599" Background="$00FFFFFF"/>
+					<Attribute_Value Foreground="$00A61A1A" Style="fsBold" Background="$00FFFFFF"/>
+					<CDATA_Section Foreground="$02000000" Style="fsItalic" Background="$00FFFFFF"/>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<DOCTYPE_Section Foreground="$00213868" Style="fsItalic" Background="$00FFFFFF"/>
+					<Element_Name Foreground="$000073EB" Style="fsBold" Background="$00FFFFFF"/>
+					<Entity_Reference Foreground="$02000000" Style="fsBold" Background="$00FFFFFF"/>
+					<Namespace_Attribute_Name Foreground="$00004599" Background="$00FFFFFF"/>
+					<Namespace_Attribute_Value Foreground="$00A61A1A" Style="fsBold" Background="$00FFFFFF"/>
+					<Processing_Instruction Foreground="$00993300" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+					<Text Foreground="$000073EB" Style="fsBold" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<Schemecoda_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</Schemecoda_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<Schemecoda_theme>
+					<Assembler Foreground="$00501388" Background="$00FFFFFF"/>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Preprocessor Foreground="$00213868" Style="fsBold" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Space Foreground="$02000000" Background="$00FFFFFF"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Pragma Style="fsBold" Background="$00FFFFFF" Foreground="$00213868"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Space Foreground="$02000000" Background="$00FFFFFF"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+					<Variable Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+				</Schemecoda_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Documentation Foreground="$02000000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Space Foreground="$02000000" Background="$00FFFFFF"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+					<Variable Foreground="clPurple" Background="clWhite"/>
+				</Schemecoda_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Documentation Foreground="$02000000" Style="fsBold" Background="$00FFFFFF"/>
+					<Float Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Hexadecimal Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Non_reserved_keyword Foreground="$02000000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Octal Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+					<SyntaxError Foreground="$000000FF" Background="$00FFFFFF"/>
+					<System_functions_and_variables Style="fsBold" Background="$00FFFFFF" Foreground="$02000000"/>
+				</Schemecoda_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Data_type Style="fsBold" Background="$00FFFFFF" Foreground="$02000000"/>
+					<Default_packages Style="fsBold" Background="$00FFFFFF" Foreground="$000073EB"/>
+					<Exception Style="fsItalic" Background="$00FFFFFF" Foreground="$000000FF"/>
+					<Function Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<SQL_Plus_command Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00FFFFFF"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Reserved_word Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<String Foreground="$000073EB" Background="$00FFFFFF"/>
+					<Symbol Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<Schemecoda_theme>
+					<Diff_Added_line Foreground="clBlack" Background="$00CCFFCC"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$00AAFFFF"/>
+					<Diff_Chunk_Line_Counts Foreground="$00FF0000" Style="fsBold" Background="$00FFFFFF"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$00FFFFFF" Foreground="$02000000"/>
+					<Diff_Chunk_New_Line_Count Foreground="$00213868" Style="fsBold" Background="$00FFFFFF"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$000073EB" Style="fsBold" Background="$00FFFFFF"/>
+					<Diff_New_File Background="$00FFFFFF" Style="fsBold" Foreground="$02000000"/>
+					<Diff_Original_File Background="$00FFFFFF" Style="fsBold" Foreground="$00004599"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$00FFC7C7"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</Schemecoda_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<Schemecoda_theme>
+					<Key Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+					<Number Foreground="$00FF0000" Background="$00FFFFFF"/>
+					<Comment Foreground="$00008000" Style="fsItalic" Background="$00FFFFFF"/>
+					<Variable Foreground="$02000000" Background="$00FFFFFF"/>
+				</Schemecoda_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<Schemecoda_theme>
+					<Comment Foreground="$00008000" Style="fsItalic" Background="$00FFFFFF"/>
+					<Section Style="fsBold" Background="$00FFFFFF" Foreground="$00993300"/>
+				</Schemecoda_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

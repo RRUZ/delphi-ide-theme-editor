@@ -152,12 +152,10 @@ var
 
 begin
   Result:=False;
-  NewTheme:=GetIDEDefaultTheme(DelphiVersion);
+  NewTheme:=GetDelphiIDEDefaultTheme(DelphiVersion);
   XmlDocVSTheme       := CreateOleObject(Msxml2_DOMDocument);
   XmlDocVSTheme.Async := False;
   try
-
-    //XmlDocVSTheme.LoadXML(TFile.ReadAllText(FileName));
     XmlDocVSTheme.Load(FileName);
     XmlDocVSTheme.SetProperty('SelectionLanguage','XPath');
     if (XmlDocVSTheme.parseError.errorCode <> 0) then
@@ -226,7 +224,7 @@ begin
     SetIDEHighlightElement(TIDEHighlightElements.Whitespace,'Plain Text');
     //Doc.SaveToFile(Result);
     ThemeName:=Copy(ExtractFileName(FileName),1,Pos('.vssettings',ExtractFileName(FileName))-1);
-    SaveIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
+    SaveDelphiIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
     Result:=True;
   finally
    XmlDocVSTheme    :=Unassigned;

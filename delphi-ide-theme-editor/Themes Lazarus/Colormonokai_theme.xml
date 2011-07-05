@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="monokai_theme"/>
+			</Names>
+			<Globals Version="6">
+				<Schememonokai_theme>
+					<ahaDefault Background="$00222827" Foreground="$00F2F8F8"/>
+					<ahaTextBlock Background="$005E7175" Foreground="$02000000"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$005E7175" Foreground="$02000000"/>
+					<ahaHighlightAll Background="$005E7175" Foreground="$02000000"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$007226F9" Background="$00222827"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="clYellow"/>
+					<ahaCodeFoldingTree Background="$00222827" Foreground="$005E7175"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clWhite" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$00222827" Foreground="$005E7175"/>
+					<ahaGutter Background="$00222827" Foreground="$003E4849"/>
+					<ahaRightMargin Foreground="$02000000" Background="$00222827"/>
+					<ahaLineNumber Foreground="$003E4849" Background="$00222827"/>
+				</Schememonokai_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<Schememonokai_theme>
+					<Assembler Foreground="$00EFD966" Background="$00222827"/>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Directive Foreground="$0074DBE6" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Key Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<Schememonokai_theme>
+					<Attribute_Name Foreground="$002EE2A6" Background="$00222827"/>
+					<Attribute_Value Foreground="$0074DBE6" Style="fsBold" Background="$00222827"/>
+					<CDATA_Section Foreground="$00F2F8F8" Style="fsItalic" Background="$00222827"/>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<DOCTYPE_Section Foreground="$0074DBE6" Style="fsItalic" Background="$00222827"/>
+					<Element_Name Foreground="$0074DBE6" Style="fsBold" Background="$003E4849"/>
+					<Entity_Reference Foreground="$00F2F8F8" Style="fsBold" Background="$00222827"/>
+					<Namespace_Attribute_Name Foreground="$002EE2A6" Background="$00222827"/>
+					<Namespace_Attribute_Value Foreground="$0074DBE6" Style="fsBold" Background="$00222827"/>
+					<Processing_Instruction Foreground="$00EFD966" Background="$00222827"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+					<Text Foreground="$0074DBE6" Style="fsBold" Background="$003E4849"/>
+				</Schememonokai_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<Schememonokai_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</Schememonokai_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<Schememonokai_theme>
+					<Assembler Foreground="$00EFD966" Background="$00222827"/>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Preprocessor Foreground="$0074DBE6" Style="fsBold" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Space Foreground="$00F2F8F8" Background="$00222827"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Pragma Style="fsBold" Background="$00222827" Foreground="$0074DBE6"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Space Foreground="$00F2F8F8" Background="$00222827"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+					<Variable Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+				</Schememonokai_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Documentation Foreground="$00F2F8F8" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Space Foreground="$00F2F8F8" Background="$00222827"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+					<Variable Foreground="clPurple" Background="clWhite"/>
+				</Schememonokai_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Documentation Foreground="$00F2F8F8" Style="fsBold" Background="$00222827"/>
+					<Float Foreground="$00FF81AE" Background="$00222827"/>
+					<Hexadecimal Foreground="$00FF81AE" Background="$00222827"/>
+					<Non_reserved_keyword Foreground="$00F2F8F8" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Octal Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+					<SyntaxError Foreground="$007226F9" Background="$00222827"/>
+					<System_functions_and_variables Style="fsBold" Background="$00222827" Foreground="$00F2F8F8"/>
+				</Schememonokai_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Data_type Style="fsBold" Background="$00222827" Foreground="$00F2F8F8"/>
+					<Default_packages Style="fsBold" Background="$003E4849" Foreground="$0074DBE6"/>
+					<Exception Style="fsItalic" Background="$00222827" Foreground="$007226F9"/>
+					<Function Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<SQL_Plus_command Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsBold" Background="$00222827"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Reserved_word Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<String Foreground="$0074DBE6" Background="$003E4849"/>
+					<Symbol Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<Schememonokai_theme>
+					<Diff_Added_line Foreground="clBlack" Background="$00CCFFCC"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$00AAFFFF"/>
+					<Diff_Chunk_Line_Counts Foreground="$00FF81AE" Style="fsBold" Background="$00222827"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$00222827" Foreground="$00F2F8F8"/>
+					<Diff_Chunk_New_Line_Count Foreground="$0074DBE6" Style="fsBold" Background="$00222827"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$0074DBE6" Style="fsBold" Background="$003E4849"/>
+					<Diff_New_File Background="$00222827" Style="fsBold" Foreground="$00F2F8F8"/>
+					<Diff_Original_File Background="$00222827" Style="fsBold" Foreground="$002EE2A6"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$00FFC7C7"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</Schememonokai_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<Schememonokai_theme>
+					<Key Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+					<Number Foreground="$00FF81AE" Background="$00222827"/>
+					<Comment Foreground="$005E7175" Style="fsItalic" Background="$00222827"/>
+					<Variable Foreground="$00F2F8F8" Background="$00222827"/>
+				</Schememonokai_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<Schememonokai_theme>
+					<Comment Foreground="$005E7175" Style="fsItalic" Background="$00222827"/>
+					<Section Style="fsBold" Background="$00222827" Foreground="$00EFD966"/>
+				</Schememonokai_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

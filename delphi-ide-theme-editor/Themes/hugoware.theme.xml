@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-05-22 20:06:41" author="Delphi IDE Theme Editor" versionapp="1.0.0.143">
+<DelphiIDETheme modified="2011-07-04 20:58:02" author="Delphi IDE Theme Editor" versionapp="65536">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
@@ -61,7 +61,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -421,7 +421,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -781,7 +781,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -1141,7 +1141,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -1501,7 +1501,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -1861,7 +1861,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -2221,7 +2221,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -2581,7 +2581,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -2941,7 +2941,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>
@@ -3301,7 +3301,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00CC9999</ForegroundColorNew>
-    <BackgroundColorNew>$00F4F4F4</BackgroundColorNew>
+    <BackgroundColorNew>$00272A30</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
     <Bold>False</Bold>

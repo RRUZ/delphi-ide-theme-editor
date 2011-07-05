@@ -29,7 +29,9 @@ uses
  Classes,
  ComCtrls,
  uDelphiVersions;
-{$DEFINE OLDEVERSIONS_SUPPORT}
+
+{$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
+
 type
   TIDEHighlightElements =
   (
@@ -234,27 +236,23 @@ function  GetUnderLineValue(DelphiVersion:TDelphiVersions;Element:TIDEHighlightE
 function  GetDefaultForegroundValue(DelphiVersion:TDelphiVersions;Element:TIDEHighlightElements):Boolean;
 function  GetDefaultBackgroundValue(DelphiVersion:TDelphiVersions;Element:TIDEHighlightElements):Boolean;
 
-
 procedure FillListAvailableElements(DelphiVersion:TDelphiVersions;List: TStrings);
 procedure FillListIDEThemesImport(List: TStrings);
 
-
 procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);
 procedure ImportDelphiIDEThemeFromRegExt(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);//internal use only
-function  GetIDEFontName(DelphiVersion:TDelphiVersions):string;
-function  GetIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
-function  SetIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
-function  SaveIDEThemeToRegFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;Path,Name:string):TFileName;
-function  SaveIDEThemeToXmlFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;const Path,Name:string):TFileName;
-
+function  GetDelphiIDEFontName(DelphiVersion:TDelphiVersions):string;
+function  GetDelphiIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
+function  SetDelphiIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
+function  SaveDelphiIDEThemeToRegFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;Path,Name:string):TFileName;
+function  SaveDelphiIDEThemeToXmlFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;const Path,Name:string):TFileName;
 
 function  LoadThemeFromXMLFile(var ATheme : TIDETheme;const FileName:TFileName):Boolean;
-function  SetIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
-function  ApplyIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
-function  GetIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
+function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
+function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
+function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
 
-
-function  ExistIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
+function  ExistDelphiIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
 
 
 implementation
@@ -275,7 +273,7 @@ uses
 
 {$R DefaultThemes.RES}
 
-function  ExistIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
+function  ExistDelphiIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
 begin
   Result:=RegKeyExists(DelphiRegPaths[DelphiVersion]+'\Editor\Highlight\Assembler',HKEY_CURRENT_USER);
 end;
@@ -323,11 +321,11 @@ begin
   end;
 end;
 
-function  ApplyIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
+function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
  var
   FileName: TFileName;
 begin
-  FileName:=SaveIDEThemeToRegFile(DelphiVersion,ATheme,ExtractFilePath(ParamStr(0)),'Dummy');
+  FileName:=SaveDelphiIDEThemeToRegFile(DelphiVersion,ATheme,ExtractFilePath(ParamStr(0)),'Dummy');
   try
     Result:= FileExists(FileName) and RunAndWait(0,'regedit.exe','/S "'+FileName+'"');
   finally
@@ -335,7 +333,7 @@ begin
   end;
 end;
 
-function  SetIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
+function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
  var
   AStream : TResourceStream;
   FStream : TFileStream;
@@ -372,7 +370,7 @@ function  SetIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
   end;
 end;
 
-function  GetIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
+function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
  var
   AStream : TResourceStream;
   FStream : TFileStream;
@@ -445,7 +443,7 @@ begin
   end;
 end;
 
-function  SaveIDEThemeToXmlFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;const Path,Name:string):TFileName;
+function  SaveDelphiIDEThemeToXmlFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;const Path,Name:string):TFileName;
 var
   DelphiComp: TDelphiVersions;
   Element   : TIDEHighlightElements;
@@ -679,7 +677,7 @@ begin
     end;
 end;
 
-function SaveIDEThemeToRegFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;Path,Name:string):TFileName;
+function SaveDelphiIDEThemeToRegFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;Path,Name:string):TFileName;
 var
  Element : TIDEHighlightElements;
  RegFile : TStringList;
@@ -716,7 +714,7 @@ begin
        RegFile.Add(Format('"Default Foreground"="%s"',[BoolToStr(ATheme[Element].DefaultForeground,True)]));
        RegFile.Add(Format('"Default Background"="%s"',[BoolToStr(ATheme[Element].DefaultBackground,True)]));
 
-      {$IFDEF OLDEVERSIONS_SUPPORT}
+      {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
        if DelphiIsOldVersion(DelphiVersion) then
        begin
        {
@@ -741,7 +739,7 @@ begin
          RegFile.Add(Format('"Underline"="%s"',[BoolToStr(ATheme[Element].Underline,True)]));
          RegFile.Add(Format('"Foreground Color New"="%s"',[ATheme[Element].ForegroundColorNew]));
          RegFile.Add(Format('"Background Color New"="%s"',[ATheme[Element].BackgroundColorNew]));
-       {$IFDEF OLDEVERSIONS_SUPPORT}
+       {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
        end;
        {$ENDIF}
 
@@ -756,19 +754,19 @@ begin
   end;
 end;
 
-function  GetIDEFontName(DelphiVersion:TDelphiVersions):string;
+function  GetDelphiIDEFontName(DelphiVersion:TDelphiVersions):string;
 begin
  if not RegReadStr(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Editor Font',Result,HKEY_CURRENT_USER) then
   Result:='';
 end;
 
-function  GetIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
+function  GetDelphiIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
 begin
  if not RegReadInt(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Font Size',Result,HKEY_CURRENT_USER) then
   Result:=0;
 end;
 
-function  SetIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
+function  SetDelphiIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
 begin
   Result:=
   RegWriteStr(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Editor Font',FontName,HKEY_CURRENT_USER)

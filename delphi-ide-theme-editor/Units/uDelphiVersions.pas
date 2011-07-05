@@ -29,12 +29,12 @@ uses
   Classes,
   ComCtrls;
 
-{$DEFINE OLDEVERSIONS_SUPPORT}
+{$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
 
 type
   TDelphiVersions =
     (
-  {$IFDEF OLDEVERSIONS_SUPPORT}
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
     Delphi5,
     Delphi6,
   {$ENDIF}
@@ -50,7 +50,7 @@ type
 
 
 const
-  {$IFDEF OLDEVERSIONS_SUPPORT}
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
   DelphiOldVersions = 2;
   DelphiOldVersionNumbers: array[0..DelphiOldVersions-1] of TDelphiVersions =(Delphi5,Delphi6);
 
@@ -94,7 +94,7 @@ Color15=$FFFFFF
   {$ENDIF}
 
   DelphiVersionsNames: array[TDelphiVersions] of string = (
-  {$IFDEF OLDEVERSIONS_SUPPORT}
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
     'Delphi 5',
     'Delphi 6',
   {$ENDIF}
@@ -110,7 +110,7 @@ Color15=$FFFFFF
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
     (
-  {$IFDEF OLDEVERSIONS_SUPPORT}
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
     13,      // 'Delphi 5',
     14,      // 'Delphi 6',
   {$ENDIF}
@@ -127,7 +127,7 @@ Color15=$FFFFFF
 
 
   DelphiRegPaths: array[TDelphiVersions] of string = (
-  {$IFDEF OLDEVERSIONS_SUPPORT}
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
     '\Software\Borland\Delphi\5.0',
     '\Software\Borland\Delphi\6.0',
   {$ENDIF}
@@ -142,9 +142,7 @@ Color15=$FFFFFF
 
 
 procedure FillListViewDelphiVersions(ListView: TListView);
-function IsDelphiIDERunning(const DelphiIDEPath: TFileName): boolean;
-function GetFileVersion(const exeName: string): string;
-{$IFDEF OLDEVERSIONS_SUPPORT}
+{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
 function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
 function GetIndexClosestColor(AColor:TColor) : Integer;
 {$ENDIF}
@@ -168,17 +166,18 @@ function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions
 implementation
 
 uses
+  uMisc,
   PsAPI,
-  tlhelp32,
   Controls,
   ImgList,
   CommCtrl,
   ShellAPI,
   Windows,
   uRegistry,
+  uSupportedIDEs,
   Registry;
 
-{$IFDEF OLDEVERSIONS_SUPPORT}
+{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
 function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
 var
  i  : integer;
@@ -223,95 +222,17 @@ end;
 function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions) : TColor;
 begin
  Result:=AColor;
-{$IFDEF OLDEVERSIONS_SUPPORT}
+{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
   if DelphiIsOldVersion(DelphiVersion) then
   Result:= DelphiOldColorsList[GetIndexClosestColor(AColor)];
 {$ENDIF}
 end;
 
-function GetFileVersion(const exeName: string): string;
-const
-  c_StringInfo = 'StringFileInfo\040904E4\FileVersion';
-var
-  n, Len:     cardinal;
-  Buf, Value: PChar;
-begin
-  Result := '';
-  n      := GetFileVersionInfoSize(PChar(exeName), n);
-  if n > 0 then
-  begin
-    Buf := AllocMem(n);
-    try
-      GetFileVersionInfo(PChar(exeName), 0, n, Buf);
-      if VerQueryValue(Buf, PChar(c_StringInfo), Pointer(Value), Len) then
-      begin
-        Result := Trim(Value);
-      end;
-    finally
-      FreeMem(Buf, n);
-    end;
-  end;
-end;
 
-function ProcessFileName(PID: DWORD): string;
-var
-  Handle: THandle;
-begin
-  Result := '';
-  Handle := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, PID);
-  if Handle <> 0 then
-    try
-      SetLength(Result, MAX_PATH);
-      if GetModuleFileNameEx(Handle, 0, PChar(Result), MAX_PATH) > 0 then
-        SetLength(Result, StrLen(PChar(Result)))
-      else
-        Result := '';
-    finally
-      CloseHandle(Handle);
-    end;
-end;
 
-function IsDelphiIDERunning(const DelphiIDEPath: TFileName): boolean;
-var
-  HandleSnapShot : Cardinal;
-  EntryParentProc: TProcessEntry32;
-begin
-  Result := False;
-  HandleSnapShot := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if HandleSnapShot = INVALID_HANDLE_VALUE then
-    exit;
-  try
-    EntryParentProc.dwSize := SizeOf(EntryParentProc);
-    if Process32First(HandleSnapShot, EntryParentProc) then
-      repeat
-        if CompareText(ExtractFileName(DelphiIDEPath), EntryParentProc.szExeFile) = 0 then
-          if CompareText(ProcessFileName(EntryParentProc.th32ProcessID),  DelphiIDEPath) = 0 then
-          begin
-            Result := True;
-            break;
-          end;
-      until not Process32Next(HandleSnapShot, EntryParentProc);
-  finally
-    CloseHandle(HandleSnapShot);
-  end;
-end;
 
-procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
-var
-  FileInfo: TShFileInfo;
-begin
-  if FileExists(Filename) then
-  begin
-    FillChar(FileInfo, SizeOf(FileInfo), 0);
-    SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
-      SHGFI_ICON or SHGFI_SMALLICON);
-    if FileInfo.hIcon <> 0 then
-    begin
-      ImageList_AddIcon(ImageList.Handle, FileInfo.hIcon);
-      DestroyIcon(FileInfo.hIcon);
-    end;
-  end;
-end;
+
+
 
 procedure FillListViewDelphiVersions(ListView: TListView);
 var
@@ -343,6 +264,7 @@ begin
       Item.ImageIndex := ListView.SmallImages.Count - 1;
       Item.Caption := DelphiVersionsNames[DelphiComp];
       item.SubItems.Add(FileName);
+      item.SubItems.Add(IntToStr(Ord(TSupportedIDEs.DelphiIDE)));
       Item.Data := Pointer(Ord(DelphiComp));
     end;
   end;

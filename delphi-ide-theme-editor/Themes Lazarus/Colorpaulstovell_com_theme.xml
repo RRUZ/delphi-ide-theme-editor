@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="paulstovell_com_theme"/>
+			</Names>
+			<Globals Version="6">
+				<Schemepaulstovell_com_theme>
+					<ahaDefault Background="$00F1EAE0" Foreground="$02000000"/>
+					<ahaTextBlock Background="$00FF9933" Foreground="$02000000"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$00FF9933" Foreground="$02000000"/>
+					<ahaHighlightAll Background="$00FF9933" Foreground="$02000000"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$00FF0000" Background="$00F1EAE0"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="clYellow"/>
+					<ahaCodeFoldingTree Background="$00F1EAE0" Foreground="$00CC9999"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clWhite" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$00F1EAE0" Foreground="$00CC9999"/>
+					<ahaGutter Background="$00F1EAE0" Foreground="$008B0032"/>
+					<ahaRightMargin Foreground="$02000000" Background="$00F0F0F0"/>
+					<ahaLineNumber Foreground="$008B0032" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<Schemepaulstovell_com_theme>
+					<Assembler Foreground="$00FF0000" Background="$00F1EAE0"/>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Directive Foreground="$00FF0000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Key Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<Schemepaulstovell_com_theme>
+					<Attribute_Name Foreground="$00965608" Background="$00F1EAE0"/>
+					<Attribute_Value Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<CDATA_Section Foreground="$02000000" Style="fsItalic" Background="$00F1EAE0"/>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<DOCTYPE_Section Foreground="$00FF0000" Style="fsItalic" Background="$00F1EAE0"/>
+					<Element_Name Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Entity_Reference Foreground="$02000000" Style="fsBold" Background="$00F1EAE0"/>
+					<Namespace_Attribute_Name Foreground="$00965608" Background="$00F1EAE0"/>
+					<Namespace_Attribute_Value Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Processing_Instruction Foreground="$008B0000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+					<Text Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<Schemepaulstovell_com_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</Schemepaulstovell_com_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<Schemepaulstovell_com_theme>
+					<Assembler Foreground="$00FF0000" Background="$00F1EAE0"/>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Preprocessor Foreground="$00FF0000" Style="fsBold" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Space Foreground="$02000000" Background="$00F1EAE0"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Pragma Style="fsBold" Background="$00F1EAE0" Foreground="$00FF0000"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Space Foreground="$02000000" Background="$00F1EAE0"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+					<Variable Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+				</Schemepaulstovell_com_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Documentation Foreground="$02000000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Space Foreground="$02000000" Background="$00F1EAE0"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+					<Variable Foreground="clPurple" Background="clWhite"/>
+				</Schemepaulstovell_com_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Documentation Foreground="$02000000" Style="fsBold" Background="$00F1EAE0"/>
+					<Float Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Hexadecimal Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Non_reserved_keyword Foreground="$02000000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Octal Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+					<SyntaxError Foreground="clBlack" Background="clWhite"/>
+					<System_functions_and_variables Style="fsBold" Background="$00F1EAE0" Foreground="$02000000"/>
+				</Schemepaulstovell_com_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Data_type Style="fsBold" Background="$00F1EAE0" Foreground="$02000000"/>
+					<Default_packages Style="fsBold" Background="$00F1EAE0" Foreground="$00008000"/>
+					<Exception Style="fsItalic" Background="clWhite" Foreground="clBlack"/>
+					<Function Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<SQL_Plus_command Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Reserved_word Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<String Foreground="$00008000" Background="$00F1EAE0"/>
+					<Symbol Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<Schemepaulstovell_com_theme>
+					<Diff_Added_line Foreground="clBlack" Background="$00CCFFCC"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$00AAFFFF"/>
+					<Diff_Chunk_Line_Counts Foreground="$005D6100" Style="fsBold" Background="$00F1EAE0"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$00F1EAE0" Foreground="$02000000"/>
+					<Diff_Chunk_New_Line_Count Foreground="$00FF0000" Style="fsBold" Background="$00F1EAE0"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$00008000" Style="fsBold" Background="$00F1EAE0"/>
+					<Diff_New_File Background="$00F1EAE0" Style="fsBold" Foreground="$02000000"/>
+					<Diff_Original_File Background="$00F1EAE0" Style="fsBold" Foreground="$00965608"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$00FFC7C7"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</Schemepaulstovell_com_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<Schemepaulstovell_com_theme>
+					<Key Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+					<Number Foreground="$005D6100" Background="$00F1EAE0"/>
+					<Comment Foreground="$00008000" Style="fsItalic" Background="$00F1EAE0"/>
+					<Variable Foreground="$02000000" Background="$00F1EAE0"/>
+				</Schemepaulstovell_com_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<Schemepaulstovell_com_theme>
+					<Comment Foreground="$00008000" Style="fsItalic" Background="$00F1EAE0"/>
+					<Section Style="fsBold" Background="$00F1EAE0" Foreground="$008B0000"/>
+				</Schemepaulstovell_com_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

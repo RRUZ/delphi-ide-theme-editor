@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="Purple_theme"/>
+			</Names>
+			<Globals Version="6">
+				<SchemePurple_theme>
+					<ahaDefault Background="$00461B3E" Foreground="$00FFD1EE" Style="fsBold"/>
+					<ahaTextBlock Background="$00C00070" Foreground="clBlack"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$00C00070" Foreground="clBlack"/>
+					<ahaHighlightAll Background="$00C00070" Foreground="clBlack"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<ahaModifiedLine Foreground="$00FFBF00" FrameColor="59900" Background="$0040FF00"/>
+					<ahaCodeFoldingTree Background="$00461B3E" Foreground="clGray"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clWhite" Foreground="$00BF99CC" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$00461B3E" Foreground="clGray"/>
+					<ahaGutter Background="$00461B3E" Foreground="$00FFD1EE" Style="fsBold"/>
+					<ahaRightMargin Foreground="clBlack" Background="$00F0F0F0"/>
+					<ahaLineNumber Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<SchemePurple_theme>
+					<Assembler Foreground="$00FF42BC" Background="$00461B3E" Style="fsBold"/>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Directive Foreground="$00FF005E" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Key Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<SchemePurple_theme>
+					<Attribute_Name Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Attribute_Value Foreground="$00C19D16" Style="fsBold" Background="$00461B3E"/>
+					<CDATA_Section Foreground="$00FFD1EE" Style="fsBold" Background="$00461B3E"/>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<DOCTYPE_Section Foreground="$00FF005E" Style="fsBold" Background="$00461B3E"/>
+					<Element_Name Foreground="$00C19D16" Style="fsBold" Background="$00461B3E"/>
+					<Entity_Reference Foreground="$00FFD1EE" Style="fsBold" Background="$00461B3E"/>
+					<Namespace_Attribute_Name Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Namespace_Attribute_Value Foreground="$00C19D16" Style="fsBold" Background="$00461B3E"/>
+					<Processing_Instruction Foreground="$00FF42BC" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Text Foreground="$00C19D16" Style="fsBold" Background="$00461B3E"/>
+				</SchemePurple_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<SchemePurple_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</SchemePurple_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<SchemePurple_theme>
+					<Assembler Foreground="$00FF42BC" Background="$00461B3E" Style="fsBold"/>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Preprocessor Foreground="$00FF005E" Style="fsBold" Background="$00461B3E"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Space Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Pragma Style="fsBold" Background="$00461B3E" Foreground="$00FF005E"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Space Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Variable Style="fsBold" Background="clWhite" Foreground="$00002080"/>
+				</SchemePurple_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Documentation Foreground="$00FFD1EE" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Space Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Variable Foreground="$00002080" Background="clWhite"/>
+				</SchemePurple_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Documentation Foreground="$00FFD1EE" Style="fsBold" Background="$00461B3E"/>
+					<Float Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Hexadecimal Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Non_reserved_keyword Foreground="$00FFD1EE" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Octal Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<SyntaxError Foreground="$0000FFBF" Background="$00461B3E" Style="fsBold"/>
+					<System_functions_and_variables Style="fsBold" Background="$00461B3E" Foreground="$00FFD1EE"/>
+				</SchemePurple_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Data_type Style="fsBold" Background="$00461B3E" Foreground="$00FFD1EE"/>
+					<Default_packages Style="fsBold" Background="$00461B3E" Foreground="$00C19D16"/>
+					<Exception Style="fsBold" Background="$00461B3E" Foreground="$0000FFBF"/>
+					<Function Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<SQL_Plus_command Style="fsBold" Background="clWhite" Foreground="$00002080"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Reserved_word Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<String Foreground="$00C19D16" Background="$00461B3E" Style="fsBold"/>
+					<Symbol Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<SchemePurple_theme>
+					<Diff_Added_line Foreground="clBlack" Background="$00FFF2CC"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$00BFFFAA"/>
+					<Diff_Chunk_Line_Counts Foreground="$00FFD1EE" Style="fsBold" Background="$00461B3E"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$00461B3E" Foreground="$00FFD1EE"/>
+					<Diff_Chunk_New_Line_Count Foreground="$00FF005E" Style="fsBold" Background="$00461B3E"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$00C19D16" Style="fsBold" Background="$00461B3E"/>
+					<Diff_New_File Background="$00461B3E" Style="fsBold" Foreground="$00FFD1EE"/>
+					<Diff_Original_File Background="$00461B3E" Style="fsBold" Foreground="$00FFD1EE"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$00F1C7FF"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</SchemePurple_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<SchemePurple_theme>
+					<Key Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+					<Number Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Variable Foreground="$00FFD1EE" Background="$00461B3E" Style="fsBold"/>
+				</SchemePurple_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<SchemePurple_theme>
+					<Comment Foreground="$00BC39A0" Style="fsBold" Background="$00461B3E"/>
+					<Section Style="fsBold" Background="$00461B3E" Foreground="$00FF42BC"/>
+				</SchemePurple_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>
