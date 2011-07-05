@@ -64,11 +64,13 @@ interface
  //   http://www.kolormodo.com
 
 
+
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,
-  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight,
-  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML;
+  Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
+  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions,
+  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, JvBaseDlg,
+  JvBrowseFolder;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -77,7 +79,7 @@ type
   TFrmMain = class(TForm)
     ImageListDelphiVersion: TImageList;
     Label1:      TLabel;
-    LvDelphiVersions: TListView;
+    LvIDEVersions: TListView;
     CbElement:   TComboBox;
     Label2:      TLabel;
     GroupBox1:   TGroupBox;
@@ -129,8 +131,11 @@ type
     LabelMsg: TLabel;
     Button1: TButton;
     SynExporterHTML1: TSynExporterHTML;
+    BtnExportToLazarusTheme: TButton;
+    JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
+    OpenDialogExport: TOpenDialog;
     procedure FormCreate(Sender: TObject);
-    procedure LvDelphiVersionsChange(Sender: TObject; Item: TListItem;
+    procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
     procedure CbElementChange(Sender: TObject);
     procedure CbIDEFontsChange(Sender: TObject);
@@ -159,6 +164,7 @@ type
     procedure CloneTheme1Click(Sender: TObject);
     procedure SaveAs1Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure BtnExportToLazarusThemeClick(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -180,6 +186,8 @@ type
     {$IFDEF ENABLE_THEME_EXPORT}
     procedure ExportThemeHtml;
     {$ENDIF}
+    function GetIDEType(Item:TListItem):TSupportedIDEs;
+
   public
     { Public declarations }
   end;
@@ -198,7 +206,7 @@ uses
   uColorSelector,
   EclipseThemes,
   GraphUtil,
-  VSThemes;
+  VSThemes, uMisc, uLazarusIDEHighlight;
 
 const
   InvalidBreakLine   = 9;
@@ -207,11 +215,8 @@ const
   DisabledBreakLine  = 13;
   ErrorLineLine      = 14;
 
-  
-
 {$R *.dfm}
 {$R ManAdmin.RES}
-
 
 procedure MsgBox(const Msg: string);
 begin
@@ -230,33 +235,46 @@ begin
   Result := 1;
 end;
 
-
-
 procedure TFrmMain.ApplyCurentTheme;
 var
   DelphiVersion: TDelphiVersions;
+  IDEType      : TSupportedIDEs;
 begin
-  if LvDelphiVersions.Selected <> nil then
+  if LvIDEVersions.Selected <> nil then
   begin
-    DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
-    if ApplyIDETheme(DelphiVersion, FCurrentTheme) then
-      MsgBox('The theme was successfully applied')
+    IDEType:=GetIDEType(LvIDEVersions.Selected);
+    if IDEType=TSupportedIDEs.DelphiIDE then
+     DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data))
     else
-      MsgBox('Error setting theme');
+    //if IDEType=TSupportedIDEs.LazarusIDE then
+     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elements
+
+
+    if IDEType=TSupportedIDEs.DelphiIDE then
+      if ApplyDelphiIDETheme(DelphiVersion, FCurrentTheme) then
+        MsgBox('The theme was successfully applied')
+      else
+        MsgBox('Error setting theme')
+    else
+    if IDEType=TSupportedIDEs.LazarusIDE then
+      if ApplyLazarusIDETheme(FCurrentTheme,EditThemeName.Text) then
+        MsgBox('The theme was successfully applied')
+      else
+        MsgBox('Error setting theme');
   end;
 end;
 
 procedure TFrmMain.BtnApplyClick(Sender: TObject);
 begin
   try
-    if (LvDelphiVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
-      if IsDelphiIDERunning(LvDelphiVersions.Selected.SubItems[0]) then
+    if (LvIDEVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
+      if IsAppRunning(LvIDEVersions.Selected.SubItems[0]) then
         MsgBox(Format('Before to continue you must close all running instances of the %s IDE',
-          [LvDelphiVersions.Selected.Caption]))
+          [LvIDEVersions.Selected.Caption]))
       else
       if Application.MessageBox(
         PChar(Format('Do you want apply the theme "%s" to the %s IDE?',
-        [LvThemes.Selected.Caption, LvDelphiVersions.Selected.Caption])), 'Confirmation',
+        [LvThemes.Selected.Caption, LvIDEVersions.Selected.Caption])), 'Confirmation',
         MB_YESNO + MB_ICONQUESTION) = idYes then
         ApplyCurentTheme;
   except
@@ -266,33 +284,124 @@ begin
   end;
 end;
 
-
 procedure TFrmMain.BtnApplyFontClick(Sender: TObject);
 var
   DelphiVersion: TDelphiVersions;
+  IDEType      : TSupportedIDEs;
 begin
   try
-    if (LvDelphiVersions.Selected <> nil) then
-      if IsDelphiIDERunning(LvDelphiVersions.Selected.SubItems[0]) then
+    if (LvIDEVersions.Selected <> nil) then
+      if IsAppRunning(LvIDEVersions.Selected.SubItems[0]) then
         MsgBox(Format('Before to continue you must close all running instances of the %s IDE',
-          [LvDelphiVersions.Selected.Caption]))
+          [LvIDEVersions.Selected.Caption]))
       else
       if Application.MessageBox(
         PChar(Format('Do you want apply the "%s" font to the %s IDE?',
-        [CbIDEFonts.Text, LvDelphiVersions.Selected.Caption])), 'Confirmation',
+        [CbIDEFonts.Text, LvIDEVersions.Selected.Caption])), 'Confirmation',
         MB_YESNO + MB_ICONQUESTION) = idYes then
       begin
-        DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
-
-        if SetIDEFont(DelphiVersion, CbIDEFonts.Text, UpDownFontSize.Position) then
-          MsgBox('The font was successfully applied')
+        IDEType:=GetIDEType(LvIDEVersions.Selected);
+        if IDEType=TSupportedIDEs.DelphiIDE then
+         DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data))
         else
-          MsgBox('Error setting font');
+        //if IDEType=TSupportedIDEs.LazarusIDE then
+         DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elements
+
+
+        if IDEType=TSupportedIDEs.DelphiIDE then
+        begin
+          if SetDelphiIDEFont(DelphiVersion, CbIDEFonts.Text, UpDownFontSize.Position) then
+            MsgBox('The font was successfully applied')
+          else
+            MsgBox('Error setting font');
+        end
+        else
+        if IDEType=TSupportedIDEs.LazarusIDE then
+        begin
+          if SetLazarusIDEFont(CbIDEFonts.Text, UpDownFontSize.Position) then
+            MsgBox('The font was successfully applied')
+          else
+            MsgBox('Error setting font');
+        end;
+
 
       end;
   except
     on E: Exception do
       MsgBox(Format('Error setting font - Message : %s : Trace %s',
+        [E.Message, E.StackTrace]));
+  end;
+end;
+
+procedure TFrmMain.BtnExportToLazarusThemeClick(Sender: TObject);
+var
+  i: integer;
+  OutPutFolder : String;
+  GoNext : Boolean;
+  s  : TStopwatch;
+begin
+  try
+
+    OutPutFolder:=IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Themes Lazarus';
+    if DirectoryExists(OutPutFolder) then
+      JvBrowseForFolderDialog1.Directory := OutPutFolder;
+
+    if JvBrowseForFolderDialog1.Execute then
+      OutPutFolder := JvBrowseForFolderDialog1.Directory
+    else
+      Exit;
+
+
+    OpenDialogExport.InitialDir := ExtractFilePath(ParamStr(0));
+    if OpenDialogExport.Execute(Handle) then
+    begin
+
+      if OpenDialogExport.Files.Count = 1 then
+        GoNext := Application.MessageBox(
+          PChar(Format('Do you want import the "%s" file?', [ExtractFileName(
+          OpenDialogExport.FileName)])), 'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes
+      else
+        GoNext := Application.MessageBox(
+          PChar(Format('Do you want import the %d files selected?',
+          [OpenDialogExport.Files.Count])),
+          'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes;
+
+      if GoNext and (OpenDialogExport.Files.Count > 1) then
+      begin
+
+        s:=TStopwatch.Create;
+        s.Start;
+
+        ProgressBar1.Visible := True;
+        try
+          ProgressBar1.Position := 0;
+          ProgressBar1.Max      := OpenDialogExport.Files.Count;
+          LabelMsg.Visible:=True;
+          for i := 0 to OpenDialogExport.Files.Count - 1 do
+          begin
+            LabelMsg.Caption:=Format('Exporting %s theme',[ExtractFileName(OpenDialogExport.Files[i])]);
+            DelphiIDEThemeToLazarusTheme(OpenDialogExport.Files[i],OutPutFolder);
+            ProgressBar1.Position := i;
+          end;
+        finally
+          ProgressBar1.Visible := False;
+          LabelMsg.Visible:=False;
+        end;
+
+        s.Stop;
+        MsgBox(Format('%d Themes exported in %n seconds', [OpenDialogExport.Files.Count,s.Elapsed.TotalSeconds]));
+      end
+      else
+      if GoNext and (OpenDialogExport.Files.Count = 1) then
+      begin
+        if  DelphiIDEThemeToLazarusTheme(OpenDialogExport.FileName,OutPutFolder) then
+         MsgBox(Format('"%s" Theme exported', [ExtractFileName(OpenDialogExport.FileName)]));
+      end;
+    end;
+
+  except
+    on E: Exception do
+      MsgBox(Format('Error importing theme from registry - Message : %s : Trace %s',
         [E.Message, E.StackTrace]));
   end;
 end;
@@ -323,15 +432,15 @@ var
   DelphiVersion: TDelphiVersions;
 begin
   try
-    if LvDelphiVersions.Selected <> nil then
-      if not IsDelphiIDERunning(LvDelphiVersions.Selected.SubItems[0]) then
+    if LvIDEVersions.Selected <> nil then
+      if not IsAppRunning(LvIDEVersions.Selected.SubItems[0]) then
         if Application.MessageBox(
           PChar(Format('Do you want apply the default theme to the "%s" IDE?',
-          [LvDelphiVersions.Selected.Caption])), 'Confirmation', MB_YESNO +
+          [LvIDEVersions.Selected.Caption])), 'Confirmation', MB_YESNO +
           MB_ICONQUESTION) = idYes then
         begin
-          DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
-          if SetIDEDefaultTheme(DelphiVersion) then
+          DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
+          if SetDelphiIDEDefaultTheme(DelphiVersion) then
             MsgBox('Default theme wae applied')
           else
             MsgBox('Error setting theme');
@@ -402,7 +511,6 @@ begin
    end;
 end;
 
-
 procedure TFrmMain.OnSelForegroundColorChange(Sender: TObject);
 begin
   CblForeground.Selected:=TDialogColorSelector(Sender).SelectedColor;
@@ -415,9 +523,6 @@ begin
   CblForegroundChange(CblBackground);
 end;
 
-
-
-
 procedure TFrmMain.BtnImportRegThemeClick(Sender: TObject);
 var
   ThemeName: string;
@@ -425,18 +530,18 @@ var
   i: integer;
 begin
   try
-    if LvDelphiVersions.Selected <> nil then
+    if LvIDEVersions.Selected <> nil then
       if Application.MessageBox(
         PChar(Format('Do you want import the current theme from  the "%s" IDE?',
-        [LvDelphiVersions.Selected.Caption])), 'Confirmation', MB_YESNO +
+        [LvIDEVersions.Selected.Caption])), 'Confirmation', MB_YESNO +
         MB_ICONQUESTION) = idYes then
       begin
-        DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
-        if not ExistIDEThemeToImport(DelphiVersion) then
+        DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
+        if not ExistDelphiIDEThemeToImport(DelphiVersion) then
         begin
           Application.MessageBox(
             PChar(Format('The "%s" IDE has not themes stored in the windows registry?',
-            [LvDelphiVersions.Selected.Caption])), 'Information', MB_OK + MB_ICONINFORMATION);
+            [LvIDEVersions.Selected.Caption])), 'Information', MB_OK + MB_ICONINFORMATION);
           exit;
         end;
 
@@ -447,7 +552,7 @@ begin
         begin
 
           ImportDelphiIDEThemeFromReg(FCurrentTheme, DelphiVersion);
-          SaveIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, ThemeName);
+          SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, ThemeName);
           EditThemeName.Text := ThemeName;
           MsgBox('Theme imported');
           LoadThemes;
@@ -482,7 +587,7 @@ begin
   OpenDialogImport.Filter := IDEImportThemesDialogFilter[ImportType];
   OpenDialogImport.InitialDir := ExtractFilePath(ParamStr(0));
   try
-    if (LvDelphiVersions.Selected <> nil) and OpenDialogImport.Execute(Handle) then
+    if (LvIDEVersions.Selected <> nil) and OpenDialogImport.Execute(Handle) then
     begin
       DelphiVersion := DelphiXE;//TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
 
@@ -620,17 +725,21 @@ begin
   CbIDEThemeImport.ItemIndex := 0;
 
 
-  LabelVersion.Caption := Format('Version %s', [GetFileVersion(ParamStr(0))]);
-  FillListViewDelphiVersions(LvDelphiVersions);
+  LabelVersion.Caption := Format('Version %s', [uMisc.GetFileVersion(ParamStr(0))]);
+  FillListViewDelphiVersions(LvIDEVersions);
+  if IsLazarusInstalled then
+   FillListViewLazarusVersions(LvIDEVersions);
+
+
   LoadFixedWidthFonts;
   LoadThemes;
 
 
-  if LvDelphiVersions.Items.Count > 0 then
-    LvDelphiVersions.Selected := LvDelphiVersions.Items.Item[0]
+  if LvIDEVersions.Items.Count > 0 then
+    LvIDEVersions.Selected := LvIDEVersions.Items.Item[0]
   else
   begin
-    MsgBox('You don''t have a Delphi IDE installed');
+    MsgBox('You don''t have a Object Pascal IDE installed');
     Halt(0);
   end;
 
@@ -661,6 +770,12 @@ begin
       Result := i;
       Break;
     end;
+end;
+
+function TFrmMain.GetIDEType(Item: TListItem): TSupportedIDEs;
+begin
+  // item.SubItems.Add(IntToStr(Ord(TSupportedIDEs.LazarusIDE)));
+  Result:= TSupportedIDEs(StrtoInt(item.SubItems[1]));
 end;
 
 function TFrmMain.GetThemeIndex(const AThemeName: string): integer;
@@ -704,13 +819,13 @@ var
   index: integer;
   FBackUpTheme: TIDETheme;
 begin
-  if (LvDelphiVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
+  if (LvIDEVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
   begin
 
     Frm := TFrmHueSat.Create(nil);
     try
       FBackUpTheme  := FCurrentTheme;
-      DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
+      DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
       Frm.SynEditor := SynEditCode;
       Frm.Theme     := FCurrentTheme;
       Frm.DelphiVersion := DelphiVersion;
@@ -783,7 +898,7 @@ procedure TFrmMain.LoadValuesElements;
 var
   Element: TIDEHighlightElements;
 begin
-  if LvDelphiVersions.Selected <> nil then
+  if LvIDEVersions.Selected <> nil then
   begin
     Element := TIDEHighlightElements(CbElement.Items.Objects[CbElement.ItemIndex]);
     CblForeground.Selected := StringToColor(FCurrentTheme[Element].ForegroundColorNew);
@@ -802,14 +917,22 @@ begin
   end;
 end;
 
-procedure TFrmMain.LvDelphiVersionsChange(Sender: TObject; Item: TListItem;
+procedure TFrmMain.LvIDEVersionsChange(Sender: TObject; Item: TListItem;
   Change: TItemChange);
 var
   DelphiVersion: TDelphiVersions;
+  IDEType      : TSupportedIDEs;
 begin
-  if LvDelphiVersions.Selected <> nil then
+  if LvIDEVersions.Selected <> nil then
   begin
-    DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
+    IDEType:=GetIDEType(LvIDEVersions.Selected);
+    if IDEType=TSupportedIDEs.DelphiIDE then
+     DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data))
+    else
+    //if IDEType=TSupportedIDEs.LazarusIDE then
+     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elemnents
+
+
     FillListAvailableElements(DelphiVersion, CbElement.Items);
 
     SynEditCode.Gutter.Visible :=
@@ -819,22 +942,32 @@ begin
     SynEditCode.Gutter.ShowLineNumbers :=
       DelphiVersionNumbers[DelphiVersion] >= IDEHighlightElementsMinVersion[
       TIDEHighlightElements.LineNumber];
-    UpDownFontSize.Position := GetIDEFontSize(DelphiVersion);
+
+    if IDEType=TSupportedIDEs.DelphiIDE then
+      UpDownFontSize.Position := GetDelphiIDEFontSize(DelphiVersion)
+    else
+    if IDEType=TSupportedIDEs.LazarusIDE then
+      UpDownFontSize.Position := GetLazarusIDEFontSize;
+
 
     if CbIDEFonts.Items.Count > 0 then
-      CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetIDEFontName(DelphiVersion));
+      if IDEType=TSupportedIDEs.DelphiIDE then
+        CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetDelphiIDEFontName(DelphiVersion))
+      else
+      if IDEType=TSupportedIDEs.LazarusIDE then
+        CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetLazarusIDEFontName);
 
     CbIDEFontsChange(nil);
     BtnApplyFont.Enabled := False;
 
-    BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion);
+    BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEType=TSupportedIDEs.DelphiIDE);
+    BtnExportToLazarusTheme.Visible:=IDEType=TSupportedIDEs.LazarusIDE;
 
     if (LvThemes.Selected <> nil) and (CbElement.Items.Count > 0) then
     begin
       CbElement.ItemIndex := 0;
       LoadValuesElements;
     end;
-
   end;
 end;
 
@@ -842,7 +975,7 @@ end;
 procedure TFrmMain.LvThemesChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
   try
-    if (LvThemes.Selected <> nil) and (LvDelphiVersions.Selected <> nil) then
+    if (LvThemes.Selected <> nil) and (LvIDEVersions.Selected <> nil) then
     begin
       EditThemeName.Text := LvThemes.Selected.Caption;
       LoadThemeFromXMLFile(FCurrentTheme, LvThemes.Selected.SubItems[0]);
@@ -867,7 +1000,7 @@ procedure TFrmMain.CblForegroundChange(Sender: TObject);
 var
   Element: TIDEHighlightElements;
 begin
-  if (LvDelphiVersions.Selected <> nil) and (not FChanging) then
+  if (LvIDEVersions.Selected <> nil) and (not FChanging) then
   begin
     Element := TIDEHighlightElements(CbElement.Items.Objects[CbElement.ItemIndex]);
     FCurrentTheme[Element].ForegroundColorNew := ColorToString(CblForeground.Selected);
@@ -920,15 +1053,15 @@ var
   DelphiVersion: TDelphiVersions;
   FileName:      string;
 begin
-  if LvDelphiVersions.Selected <> nil then
+  if LvIDEVersions.Selected <> nil then
   begin
-    DelphiVersion := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
+    DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
     if EditThemeName.Text = '' then
       MsgBox('You must enter a name for the current theme')
     else
     begin
       //FileName:=SaveCurrentThemeToRegFile(DelphiVersion,ExtractFilePath(ParamStr(0)),EditThemeName.Text);
-      FileName := SaveIDEThemeToXmlFile(DelphiVersion, FCurrentTheme,
+      FileName := SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme,
         FSettings.ThemePath, EditThemeName.Text);
       MsgBox(Format('The theme was saved to the file %s', [FileName]));
     end;
@@ -976,14 +1109,20 @@ procedure TFrmMain.RefreshPasSynEdit;
 var
   Element   : TIDEHighlightElements;
   DelphiVer : TDelphiVersions;
-  //Special   : boolean;
+  IDEType   : TSupportedIDEs;
   //FG, BG    : TColor;
 begin
 
-  if (LvDelphiVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
+  if (LvIDEVersions.Selected <> nil) and (LvThemes.Selected <> nil) then
   begin
     //Patch colors for Old
-    DelphiVer := TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
+    IDEType:=GetIDEType(LvIDEVersions.Selected);
+    if IDEType=TSupportedIDEs.DelphiIDE then
+      DelphiVer := TDelphiVersions(integer(LvIDEVersions.Selected.Data))
+    else
+    //if IDEType=TSupportedIDEs.LazarusIDE then
+      DelphiVer := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elemnents
+
 
     Element := TIDEHighlightElements.RightMargin;
     SynEditCode.RightEdgeColor :=
@@ -1004,10 +1143,8 @@ begin
     SynEditCode.ActiveLineColor :=
       GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew),DelphiVer);
 
-
     Element := TIDEHighlightElements.PlainText;
     SynEditCode.Gutter.BorderColor := GetHighLightColor(StringToColor(FCurrentTheme[Element].BackgroundColorNew));
-
 
     with SynPasSyn1 do
     begin

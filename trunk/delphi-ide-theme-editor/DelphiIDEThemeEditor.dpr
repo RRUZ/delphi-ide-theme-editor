@@ -1,6 +1,7 @@
  // JCL_DEBUG_EXPERT_GENERATEJDBG OFF
  // JCL_DEBUG_EXPERT_INSERTJDBG OFF
  // JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
+// JCL_DEBUG_EXPERT_INSERTJDBG ON
 program DelphiIDEThemeEditor;
 {$WARN SYMBOL_PLATFORM OFF}
 
@@ -16,7 +17,11 @@ uses
   uSettings in 'Units\uSettings.pas' {FrmSettings},
   uColorSelector in 'Units\uColorSelector.pas' {DialogColorSelector},
   VSThemes in 'Units\VSThemes.pas',
-  EclipseThemes in 'Units\EclipseThemes.pas';
+  EclipseThemes in 'Units\EclipseThemes.pas',
+  uLazarusVersions in 'Units\uLazarusVersions.pas',
+  uSupportedIDEs in 'Units\uSupportedIDEs.pas',
+  uMisc in 'Units\uMisc.pas',
+  uLazarusIDEHighlight in 'Units\uLazarusIDEHighlight.pas';
 
 {$R *.res}
 

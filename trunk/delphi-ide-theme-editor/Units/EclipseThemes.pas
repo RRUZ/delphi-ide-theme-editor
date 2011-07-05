@@ -87,11 +87,10 @@ var
 
 begin
   Result:=False;
-  NewTheme:=GetIDEDefaultTheme(DelphiVersion);
+  NewTheme:=GetDelphiIDEDefaultTheme(DelphiVersion);
   XmlDocEclipseTheme       := CreateOleObject(Msxml2_DOMDocument);
   XmlDocEclipseTheme.Async := False;
   try
-    //XmlDocEclipseTheme.LoadXML(TFile.ReadAllText(FileName));
     XmlDocEclipseTheme.Load(FileName);
     XmlDocEclipseTheme.SetProperty('SelectionLanguage','XPath');
     if (XmlDocEclipseTheme.parseError.errorCode <> 0) then
@@ -165,7 +164,7 @@ begin
     SetIDEHighlightElement(TIDEHighlightElements.Whitespace,'foreground');
 
     ThemeName:=Copy(ExtractFileName(FileName),1,Pos('.xml',ExtractFileName(FileName))-1);
-    SaveIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
+    SaveDelphiIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
     Result:=True;
   finally
    XmlDocEclipseTheme    :=Unassigned;

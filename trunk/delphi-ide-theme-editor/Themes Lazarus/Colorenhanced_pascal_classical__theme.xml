@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="enhanced_pascal_classical__theme"/>
+			</Names>
+			<Globals Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<ahaDefault Background="$00400000" Foreground="$00FFFFFF"/>
+					<ahaTextBlock Background="$00FF9933" Foreground="$02000000"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$00FF9933" Foreground="$02000000"/>
+					<ahaHighlightAll Background="$00FF9933" Foreground="$02000000"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$00FFFF80" Background="$00400000"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="clYellow"/>
+					<ahaCodeFoldingTree Background="$00400000" Foreground="$00CC9999"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="clWhite" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$00400000" Foreground="$00CC9999"/>
+					<ahaGutter Background="$00400000" Foreground="clWhite"/>
+					<ahaRightMargin Foreground="$02000000" Background="$00F0F0F0"/>
+					<ahaLineNumber Foreground="clWhite" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Assembler Foreground="$0040C0FF" Background="$00400000"/>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Directive Foreground="$000080FF" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Key Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Attribute_Name Foreground="$0080E0FF" Background="$00400000"/>
+					<Attribute_Value Foreground="$00FFFF80" Style="fsBold" Background="$00400000"/>
+					<CDATA_Section Foreground="$00FFFFFF" Style="fsItalic" Background="$00400000"/>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<DOCTYPE_Section Foreground="$000080FF" Style="fsItalic" Background="$00400000"/>
+					<Element_Name Foreground="$00FFFF80" Style="fsBold" Background="$00400000"/>
+					<Entity_Reference Foreground="$00FFFFFF" Style="fsBold" Background="$00400000"/>
+					<Namespace_Attribute_Name Foreground="$0080E0FF" Background="$00400000"/>
+					<Namespace_Attribute_Value Foreground="$00FFFF80" Style="fsBold" Background="$00400000"/>
+					<Processing_Instruction Foreground="$0040C0FF" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+					<Text Foreground="$00FFFF80" Style="fsBold" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Assembler Foreground="$0040C0FF" Background="$00400000"/>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Preprocessor Foreground="$000080FF" Style="fsBold" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Space Foreground="$00FFFFFF" Background="$00400000"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Pragma Style="fsBold" Background="$00400000" Foreground="$000080FF"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Space Foreground="$00FFFFFF" Background="$00400000"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+					<Variable Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Documentation Foreground="$00FFFFFF" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Space Foreground="$00FFFFFF" Background="$00400000"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+					<Variable Foreground="clPurple" Background="clWhite"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Documentation Foreground="$00FFFFFF" Style="fsBold" Background="$00400000"/>
+					<Float Foreground="$00FFFF00" Background="$00400000"/>
+					<Hexadecimal Foreground="$00FFFF00" Background="$00400000"/>
+					<Non_reserved_keyword Foreground="$00FFFFFF" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Octal Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+					<SyntaxError Foreground="clBlack" Background="clWhite"/>
+					<System_functions_and_variables Style="fsBold" Background="$00400000" Foreground="$00FFFFFF"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Data_type Style="fsBold" Background="$00400000" Foreground="$00FFFFFF"/>
+					<Default_packages Style="fsBold" Background="$00400000" Foreground="$00FFFF80"/>
+					<Exception Style="fsItalic" Background="clWhite" Foreground="clBlack"/>
+					<Function Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<SQL_Plus_command Style="fsBold" Background="clWhite" Foreground="clPurple"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsBold" Background="$00400000"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Reserved_word Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<String Foreground="$00FFFF80" Background="$00400000"/>
+					<Symbol Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Diff_Added_line Foreground="clBlack" Background="$00CCFFCC"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$00AAFFFF"/>
+					<Diff_Chunk_Line_Counts Foreground="$00FFFF00" Style="fsBold" Background="$00400000"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$00400000" Foreground="$00FFFFFF"/>
+					<Diff_Chunk_New_Line_Count Foreground="$000080FF" Style="fsBold" Background="$00400000"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$00FFFF80" Style="fsBold" Background="$00400000"/>
+					<Diff_New_File Background="$00400000" Style="fsBold" Foreground="$00FFFFFF"/>
+					<Diff_Original_File Background="$00400000" Style="fsBold" Foreground="$0080E0FF"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$00FFC7C7"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Key Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+					<Number Foreground="$00FFFF00" Background="$00400000"/>
+					<Comment Foreground="$0000FF00" Style="fsItalic" Background="$00400000"/>
+					<Variable Foreground="$00FFFFFF" Background="$00400000"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<Schemeenhanced_pascal_classical__theme>
+					<Comment Foreground="$0000FF00" Style="fsItalic" Background="$00400000"/>
+					<Section Style="fsBold" Background="$00400000" Foreground="$0040C0FF"/>
+				</Schemeenhanced_pascal_classical__theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

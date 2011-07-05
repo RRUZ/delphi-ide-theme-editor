@@ -29,9 +29,9 @@ object FrmMain: TFrmMain
   object Label1: TLabel
     Left = 8
     Top = 13
-    Width = 49
+    Width = 69
     Height = 13
-    Caption = 'Delphi IDE'
+    Caption = 'Detected IDEs'
   end
   object Label2: TLabel
     Left = 295
@@ -639,7 +639,7 @@ object FrmMain: TFrmMain
     Caption = 'LabelMsg'
     Visible = False
   end
-  object LvDelphiVersions: TListView
+  object LvIDEVersions: TListView
     Left = 8
     Top = 32
     Width = 281
@@ -652,6 +652,10 @@ object FrmMain: TFrmMain
       item
         Caption = 'Path'
         Width = 200
+      end
+      item
+        Caption = 'Type'
+        Width = 0
       end>
     DoubleBuffered = True
     ReadOnly = True
@@ -660,7 +664,7 @@ object FrmMain: TFrmMain
     SmallImages = ImageListDelphiVersion
     TabOrder = 1
     ViewStyle = vsReport
-    OnChange = LvDelphiVersionsChange
+    OnChange = LvIDEVersionsChange
   end
   object CbElement: TComboBox
     Left = 295
@@ -801,7 +805,6 @@ object FrmMain: TFrmMain
     DoubleBuffered = True
     ParentDoubleBuffered = False
     TabOrder = 12
-    Text = 'MyDelphiTheme'
   end
   object BtnSave: TButton
     Left = 8
@@ -905,7 +908,7 @@ object FrmMain: TFrmMain
     Gutter.BorderColor = clYellow
     Gutter.DigitCount = 3
     Gutter.Font.Charset = DEFAULT_CHARSET
-    Gutter.Font.Color = clWindowText
+    Gutter.Font.Color = clRed
     Gutter.Font.Height = -11
     Gutter.Font.Name = 'Courier New'
     Gutter.Font.Style = []
@@ -979,6 +982,17 @@ object FrmMain: TFrmMain
     TabOrder = 22
     OnClick = Button1Click
   end
+  object BtnExportToLazarusTheme: TButton
+    Left = 8
+    Top = 395
+    Width = 281
+    Height = 25
+    Anchors = [akLeft, akBottom]
+    Caption = 'Export Theme to Lazarus Color Scheme'
+    TabOrder = 23
+    Visible = False
+    OnClick = BtnExportToLazarusThemeClick
+  end
   object ImageListDelphiVersion: TImageList
     Left = 175
     Top = 136
@@ -990,7 +1004,7 @@ object FrmMain: TFrmMain
   object OpenDialogImport: TOpenDialog
     Filter = 'Visual Studio Configuration File|*.vssettings'
     Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
-    Left = 192
+    Left = 240
     Top = 184
   end
   object ImageListlGutterGlyphs: TImageList
@@ -999,7 +1013,7 @@ object FrmMain: TFrmMain
     Left = 256
     Top = 100
     Bitmap = {
-      494C01010600090094000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000900A8000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1172,7 +1186,7 @@ object FrmMain: TFrmMain
     Left = 408
     Top = 112
     Bitmap = {
-      494C010107000800680010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101070008007C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1485,5 +1499,16 @@ object FrmMain: TFrmMain
     UseBackground = True
     Left = 472
     Top = 224
+  end
+  object JvBrowseForFolderDialog1: TJvBrowseForFolderDialog
+    StatusText = 'Select Output folder for exported themes'
+    Left = 472
+    Top = 56
+  end
+  object OpenDialogExport: TOpenDialog
+    Filter = 'Delphi IDE Themes|*.theme.xml'
+    Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
+    Left = 264
+    Top = 248
   end
 end

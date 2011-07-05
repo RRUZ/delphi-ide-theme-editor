@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<CONFIG>
+	<Lazarus>
+		<ColorSchemes Version="6">
+			<Names Count="1">
+				<Item1 Value="NightLion_Aptan_theme"/>
+			</Names>
+			<Globals Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<ahaDefault Background="$001E1E1E" Foreground="$00E2E2E2"/>
+					<ahaTextBlock Background="$00564636" Foreground="clWhite"/>
+					<ahaExecutionPoint Background="$009999CC" Foreground="clBlack"/>
+					<ahaEnabledBreakpoint Background="$00FFC7C7" Foreground="clBlack"/>
+					<ahaDisabledBreakpoint Background="$00FFC7C7" Foreground="clGray"/>
+					<ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaUnknownBreakpoint Background="clGreen" Foreground="clWhite"/>
+					<ahaErrorLine Background="clRed" Foreground="clWhite"/>
+					<ahaIncrementalSearch Background="$001E1E1E" Foreground="$00674446"/>
+					<ahaHighlightAll Background="$00564636" Foreground="clWhite"/>
+					<ahaBracketMatch Style="fsBold"/>
+					<ahaMouseLink Foreground="$00CC93A8" Background="$001E1E1E"/>
+					<ahaModifiedLine Foreground="clLime" FrameColor="59900" Background="$001E1E1E"/>
+					<ahaCodeFoldingTree Background="$001E1E1E" Foreground="clWhite"/>
+					<ahaHighlightWord Background="15132390" FrameColor="clSilver"/>
+					<ahaFoldedCode Background="$001E1E1E" Foreground="$00CC9999" FrameColor="clSilver"/>
+					<ahaWordGroup FrameColor="clRed"/>
+					<ahaTemplateEditCur FrameColor="clAqua"/>
+					<ahaTemplateEditSync FrameColor="clFuchsia"/>
+					<ahaTemplateEditOther FrameColor="clMaroon"/>
+					<ahaSyncroEditCur FrameColor="clFuchsia"/>
+					<ahaSyncroEditSync FrameColor="clRed"/>
+					<ahaSyncroEditOther FrameColor="9744532"/>
+					<ahaSyncroEditArea Background="clMoneyGreen"/>
+					<ahaGutterSeparator Background="$001E1E1E" Foreground="clWhite"/>
+					<ahaGutter Background="$001E1E1E" Foreground="clSilver"/>
+					<ahaRightMargin Foreground="$00E2E2E2" Background="$001E1E1E"/>
+					<ahaLineNumber Foreground="clSilver" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</Globals>
+			<LangObjectPascal Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Assembler Foreground="clWhite" Background="$001E1E1E"/>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Directive Foreground="$00CC9393" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangObjectPascal>
+			<LangLazarus_Form_definition Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Key Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangLazarus_Form_definition>
+			<LangXML_document Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Attribute_Name Foreground="clRed" Background="$001E1E1E"/>
+					<Attribute_Value Foreground="clGray" Style="fsBold" Background="$001E1E1E"/>
+					<CDATA_Section Foreground="$00E2E2E2" Style="fsItalic" Background="$001E1E1E"/>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<DOCTYPE_Section Foreground="$00CC9393" Style="fsItalic" Background="$001E1E1E"/>
+					<Element_Name Foreground="$009393CC" Style="fsBold" Background="$001E1E1E"/>
+					<Entity_Reference Foreground="$00D0EFF0" Style="fsBold" Background="$001E1E1E"/>
+					<Namespace_Attribute_Name Foreground="clRed" Background="$001E1E1E"/>
+					<Namespace_Attribute_Value Foreground="clGray" Style="fsBold" Background="$001E1E1E"/>
+					<Processing_Instruction Foreground="$00E2CB8D" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+					<Text Foreground="$009393CC" Style="fsBold" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangXML_document>
+			<LangHTML_document Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Asp Background="clYellow" Foreground="clBlack"/>
+					<Comment Foreground="clBlue" Style="fsBold"/>
+					<Escape_ampersand Foreground="clLime" Style="fsBold"/>
+					<Identifier Style="fsBold"/>
+					<Reserved_word Style="fsBold"/>
+					<Symbol Foreground="clRed"/>
+					<Unknown_word Foreground="clRed" Style="fsBold"/>
+					<Value Foreground="16744448"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangHTML_document>
+			<LangC__ Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Assembler Foreground="clWhite" Background="$001E1E1E"/>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Preprocessor Foreground="$00CC9393" Style="fsBold" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Space Foreground="$00E2E2E2" Background="$001E1E1E"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangC__>
+			<LangPerl Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Pragma Style="fsBold" Background="$001E1E1E" Foreground="$00CC9393"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Space Foreground="$00E2E2E2" Background="$001E1E1E"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+					<Variable Style="fsBold" Background="$001E1E1E" Foreground="clPurple"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangPerl>
+			<LangJava Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Documentation Foreground="$00A9C4D4" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Space Foreground="$00E2E2E2" Background="$001E1E1E"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangJava>
+			<LangUNIX_Shell_Script Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+					<Variable Foreground="clPurple" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangUNIX_Shell_Script>
+			<LangPython Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Documentation Foreground="$00A9C4D4" Style="fsBold" Background="$001E1E1E"/>
+					<Float Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Hexadecimal Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Non_reserved_keyword Foreground="$00E2E2E2" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Octal Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+					<SyntaxError Foreground="clWhite" Background="$001E1E1E"/>
+					<System_functions_and_variables Style="fsBold" Background="$001E1E1E" Foreground="$00A9C4D4"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangPython>
+			<LangPHP Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangPHP>
+			<LangSQL Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Data_type Style="fsBold" Background="$001E1E1E" Foreground="$00A9C4D4"/>
+					<Default_packages Style="fsBold" Background="$001E1E1E" Foreground="$009393CC"/>
+					<Exception Style="fsItalic" Background="$001E1E1E" Foreground="clWhite"/>
+					<Function Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Reserved_word__PL_SQL_ Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<SQL_Plus_command Style="fsBold" Background="$001E1E1E" Foreground="clPurple"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangSQL>
+			<LangJavascript Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsBold" Background="$001E1E1E"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Reserved_word Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<String Foreground="$009393CC" Background="$001E1E1E"/>
+					<Symbol Foreground="$00D0EFF0" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangJavascript>
+			<LangDiff_File Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Diff_Added_line Foreground="clBlack" Background="$001E1E1E"/>
+					<Diff_Changed_Line Foreground="clBlack" Background="$001E1E1E"/>
+					<Diff_Chunk_Line_Counts Foreground="$0082B8EA" Style="fsBold" Background="$001E1E1E"/>
+					<Diff_Chunk_Marker Style="fsBold" Background="$001E1E1E" Foreground="$00D0EFF0"/>
+					<Diff_Chunk_New_Line_Count Foreground="$00CC9393" Style="fsBold" Background="$001E1E1E"/>
+					<Diff_Chunk_Original_Line_Count Foreground="$009393CC" Style="fsBold" Background="$001E1E1E"/>
+					<Diff_New_File Background="$001E1E1E" Style="fsBold" Foreground="$00D0EFF0"/>
+					<Diff_Original_File Background="$001E1E1E" Style="fsBold" Foreground="clRed"/>
+					<Diff_Removed_Line Foreground="clBlack" Background="$001E1E1E"/>
+					<Unknown_word Style="fsItalic" Background="clGreen" Foreground="clWhite"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangDiff_File>
+			<LangMS_DOS_batch_language Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Key Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+					<Number Foreground="$0082B8EA" Background="$001E1E1E"/>
+					<Comment Foreground="$009B8773" Style="fsItalic" Background="$001E1E1E"/>
+					<Variable Foreground="$00A9C4D4" Background="$001E1E1E"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangMS_DOS_batch_language>
+			<LangINI_file Version="6">
+				<SchemeNightLion_Aptan_theme>
+					<Comment Foreground="$009B8773" Style="fsItalic" Background="$001E1E1E"/>
+					<Section Style="fsBold" Background="$001E1E1E" Foreground="$00E2CB8D"/>
+				</SchemeNightLion_Aptan_theme>
+			</LangINI_file>
+		</ColorSchemes>
+	</Lazarus>
+</CONFIG>

@@ -5,6 +5,7 @@ Source: Extras\ISSkin.dll; DestDir: {app}; Flags: dontcopy
 Source: Extras\Office2007.cjstyles; DestDir: {tmp}; Flags: dontcopy
 Source: DelphiIDEThemeEditor.exe; DestDir: {app}
 Source: Settings.ini; DestDir: {app}
+Source: default\ColorDummy.xml; DestDir: {app}\default\
 Source: default\default.theme.xml; DestDir: {app}\default\
 Source: Themes\Aqua.theme.xml; DestDir: {app}\Themes\
 Source: Themes\artofnet-darkonblue.theme.xml; DestDir: {app}\Themes\
@@ -64,6 +65,60 @@ Source: Themes Eclipse\EclipseThemes.zip; DestDir: {app}\Themes Eclipse\
 Source: Themes VS\VsThemes.rar; DestDir: {app}\Themes VS\
 #define MyAppName 'Delphi IDE Theme Editor'
 #define MyAppVersion GetFileVersion('DelphiIDEThemeEditor.exe')
+Source: Themes Lazarus\ColorAqua_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorartofnet_darkonblue_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorartofnet_lime_chocolate_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorbespin_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorBlackboard_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorBlack_and_White_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorBrown_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorChocoCaramel_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorcobalt_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorcoda_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorcode_anxiety_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorcoding_horror_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorcoffee__theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colordark_code_mute_font_beige_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colordeep_blue_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colordesertex_revised_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colordistant_stormy_shore_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorenhanced_pascal_classical__theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorfrontenddev_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorGedit_Original_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorgreendream_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorGreen_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorhugoware_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorhumane_studio_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorIgor_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorInkpot_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorjon_erickson_s_ragnarok_grey_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorlike_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colormonokai_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorMr_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colormustang_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colornightfall_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorNightLion_Aptan_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorOblivion_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorObsidian_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorocean_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorpaulstovell_com_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorpretty_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorPurple_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorragnarok_blue_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorRecognEyes_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorRed_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorrussian_noth_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorselenitic_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorslimcode_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorson_of_obsidian_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorthe_dark_side_of_visual_studio_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorthe_default_at_boxbinary_ltd_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colortial_entry_enhanced_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorturbo_pascal_revisited_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorVibrant_Ink_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorwekeroad_ink_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\Colorzenburn_2010_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Themes Lazarus\ColorZenburn_theme.xml; DestDir: {app}\Themes Lazarus\
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -94,6 +149,7 @@ Name: {app}\default
 Name: {app}\Themes
 Name: {app}\Themes Eclipse
 Name: {app}\Themes VS
+Name: {app}\Themes Lazarus
 [Icons]
 Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
 Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}

@@ -241,7 +241,7 @@ begin
     begin
       ApplyHueSaturationToIDETheme(FTheme, Trunc(JvSpinEditHue.Value),
         Trunc(JvSpinEditSat.Value), Trunc(JvSpinEditLight.Value));
-      SaveIDEThemeToXmlFile(DelphiVersion, FTheme, FSettings.ThemePath, FThemeName);
+      SaveDelphiIDEThemeToXmlFile(DelphiVersion, FTheme, FSettings.ThemePath, FThemeName);
       ShowMessage(Format('Changes saved to the theme "%s"', [FThemeName]));
     end;
   except
@@ -264,7 +264,7 @@ begin
       NewTheme := FTheme;
       ApplyHueSaturationToIDETheme(NewTheme, Trunc(JvSpinEditHue.Value),
         Trunc(JvSpinEditSat.Value), Trunc(JvSpinEditLight.Value));
-      SaveIDEThemeToXmlFile(DelphiVersion, NewTheme, FSettings.ThemePath, NewThemeName);
+      SaveDelphiIDEThemeToXmlFile(DelphiVersion, NewTheme, FSettings.ThemePath, NewThemeName);
       ShowMessage(Format('The theme "%s" was created', [NewThemeName]));
       FReloadThemes := True;
     end;
