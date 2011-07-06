@@ -464,8 +464,8 @@ begin
     RootNode.Attributes['author']   := 'Delphi IDE Theme Editor';
     RootNode.Attributes['versionapp']  := GetFileVersion(ParamStr(0));
 
-    for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
-    begin
+    //for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
+    //begin
       //DelphiNode :=RootNode.AddChild(GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiComp)));
 
         for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
@@ -494,7 +494,7 @@ begin
             ChildNode.Attributes['DefaultBackground'] := BoolToStr(ATheme[Element].DefaultBackground,True);
             }
         end;
-    end;
+    //end;
     ForceDirectories(Path);
     //Result:=Format('%s%s_%s.theme.xml',[IncludeTrailingPathDelimiter(Path),Name,DelphiVersionsNames[DelphiVersion]]);
     Result:=Format('%s%s.theme.xml',[IncludeTrailingPathDelimiter(Path),Name]);

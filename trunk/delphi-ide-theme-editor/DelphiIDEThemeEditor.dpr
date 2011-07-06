@@ -21,7 +21,8 @@ uses
   uLazarusVersions in 'Units\uLazarusVersions.pas',
   uSupportedIDEs in 'Units\uSupportedIDEs.pas',
   uMisc in 'Units\uMisc.pas',
-  uLazarusIDEHighlight in 'Units\uLazarusIDEHighlight.pas';
+  uLazarusIDEHighlight in 'Units\uLazarusIDEHighlight.pas',
+  uCheckUpdate in 'Units\uCheckUpdate.pas' {FrmCheckUpdate};
 
 {$R *.res}
 

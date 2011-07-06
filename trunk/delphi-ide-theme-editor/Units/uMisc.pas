@@ -27,14 +27,16 @@ uses
 
 
 procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
-function GetFileVersion(const FileName: string): string;
-function IsAppRunning(const FileName: string): boolean;
-function GetLocalAppDataFolder: string;
-
+function  GetFileVersion(const FileName: string): string;
+function  IsAppRunning(const FileName: string): boolean;
+function  GetLocalAppDataFolder: string;
+function  GetTempDirectory: string;
+procedure MsgBox(const Msg: string);
 
 implementation
 
 uses
+  Forms,
   ActiveX,
   ShlObj,
   PsAPI,
@@ -44,6 +46,19 @@ uses
   CommCtrl,
   ShellAPI,
   SysUtils;
+
+procedure MsgBox(const Msg: string);
+begin
+  Application.MessageBox(PChar(Msg), 'Information', MB_OK + MB_ICONINFORMATION);
+end;
+
+function GetTempDirectory: string;
+var
+  lpBuffer: array[0..MAX_PATH] of Char;
+begin
+  GetTempPath(MAX_PATH, @lpBuffer);
+  Result := StrPas(lpBuffer);
+end;
 
 function GetLocalAppDataFolder: string;
 const
@@ -69,36 +84,36 @@ begin
 end;
 
 
-function ProcessFileName(PID: DWORD): string;
+function ProcessFileName(dwProcessId: DWORD): string;
 var
-  Handle: THandle;
+  hModule: Cardinal;
 begin
   Result := '';
-  Handle := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, PID);
-  if Handle <> 0 then
+  hModule := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, dwProcessId);
+  if hModule <> 0 then
     try
       SetLength(Result, MAX_PATH);
-      if GetModuleFileNameEx(Handle, 0, PChar(Result), MAX_PATH) > 0 then
+      if GetModuleFileNameEx(hModule, 0, PChar(Result), MAX_PATH) > 0 then
         SetLength(Result, StrLen(PChar(Result)))
       else
         Result := '';
     finally
-      CloseHandle(Handle);
+      CloseHandle(hModule);
     end;
 end;
 
 function IsAppRunning(const FileName: string): boolean;
 var
-  HandleSnapShot : Cardinal;
+  hSnapshot      : Cardinal;
   EntryParentProc: TProcessEntry32;
 begin
   Result := False;
-  HandleSnapShot := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if HandleSnapShot = INVALID_HANDLE_VALUE then
+  hSnapshot := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if hSnapshot = INVALID_HANDLE_VALUE then
     exit;
   try
     EntryParentProc.dwSize := SizeOf(EntryParentProc);
-    if Process32First(HandleSnapShot, EntryParentProc) then
+    if Process32First(hSnapshot, EntryParentProc) then
       repeat
         if CompareText(ExtractFileName(FileName), EntryParentProc.szExeFile) = 0 then
           if CompareText(ProcessFileName(EntryParentProc.th32ProcessID),  FileName) = 0 then
@@ -106,9 +121,9 @@ begin
             Result := True;
             break;
           end;
-      until not Process32Next(HandleSnapShot, EntryParentProc);
+      until not Process32Next(hSnapshot, EntryParentProc);
   finally
-    CloseHandle(HandleSnapShot);
+    CloseHandle(hSnapshot);
   end;
 end;
 
