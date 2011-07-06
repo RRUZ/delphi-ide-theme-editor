@@ -245,7 +245,7 @@ function  GetDelphiIDEFontName(DelphiVersion:TDelphiVersions):string;
 function  GetDelphiIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
 function  SetDelphiIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
 function  SaveDelphiIDEThemeToRegFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;Path,Name:string):TFileName;
-function  SaveDelphiIDEThemeToXmlFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;const Path,Name:string):TFileName;
+function  SaveDelphiIDEThemeToXmlFile(const ATheme : TIDETheme;const Path,Name:string):TFileName;
 
 function  LoadThemeFromXMLFile(var ATheme : TIDETheme;const FileName:TFileName):Boolean;
 function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
@@ -443,9 +443,8 @@ begin
   end;
 end;
 
-function  SaveDelphiIDEThemeToXmlFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;const Path,Name:string):TFileName;
+function  SaveDelphiIDEThemeToXmlFile(const ATheme : TIDETheme;const Path,Name:string):TFileName;
 var
-  DelphiComp: TDelphiVersions;
   Element   : TIDEHighlightElements;
   Doc       : TXMLDocument;
   RootNode, ChildNode, oNode : IXMLNode;
@@ -464,9 +463,6 @@ begin
     RootNode.Attributes['author']   := 'Delphi IDE Theme Editor';
     RootNode.Attributes['versionapp']  := GetFileVersion(ParamStr(0));
 
-    //for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
-    //begin
-      //DelphiNode :=RootNode.AddChild(GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiComp)));
 
         for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
         begin
@@ -494,9 +490,7 @@ begin
             ChildNode.Attributes['DefaultBackground'] := BoolToStr(ATheme[Element].DefaultBackground,True);
             }
         end;
-    //end;
     ForceDirectories(Path);
-    //Result:=Format('%s%s_%s.theme.xml',[IncludeTrailingPathDelimiter(Path),Name,DelphiVersionsNames[DelphiVersion]]);
     Result:=Format('%s%s.theme.xml',[IncludeTrailingPathDelimiter(Path),Name]);
     Doc.SaveToFile(Result);
   finally

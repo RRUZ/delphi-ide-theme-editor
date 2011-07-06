@@ -224,7 +224,8 @@ begin
     SetIDEHighlightElement(TIDEHighlightElements.Whitespace,'Plain Text');
     //Doc.SaveToFile(Result);
     ThemeName:=Copy(ExtractFileName(FileName),1,Pos('.vssettings',ExtractFileName(FileName))-1);
-    SaveDelphiIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
+    //SaveDelphiIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
+    SaveDelphiIDEThemeToXmlFile(NewTheme,Path,ThemeName);
     Result:=True;
   finally
    XmlDocVSTheme    :=Unassigned;
