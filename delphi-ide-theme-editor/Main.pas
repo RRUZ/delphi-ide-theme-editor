@@ -40,7 +40,7 @@ interface
  //download themes online
  //config file - done
  //translate
- //update online   (check new version)
+ //update online   (check new version) - done
 
  //import from http://studiostyl.es/schemes
  //import fom notepad++
@@ -134,6 +134,7 @@ type
     BtnExportToLazarusTheme: TButton;
     JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
     OpenDialogExport: TOpenDialog;
+    ImageUpdate: TImage;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -165,6 +166,7 @@ type
     procedure SaveAs1Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure BtnExportToLazarusThemeClick(Sender: TObject);
+    procedure ImageUpdateClick(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -206,7 +208,7 @@ uses
   uColorSelector,
   EclipseThemes,
   GraphUtil,
-  VSThemes, uMisc, uLazarusIDEHighlight;
+  VSThemes, uMisc, uLazarusIDEHighlight, uStackTrace, uCheckUpdate;
 
 const
   InvalidBreakLine   = 9;
@@ -218,10 +220,6 @@ const
 {$R *.dfm}
 {$R ManAdmin.RES}
 
-procedure MsgBox(const Msg: string);
-begin
-  Application.MessageBox(PChar(Msg), 'Information', MB_OK + MB_ICONINFORMATION);
-end;
 
 function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
   FontType: integer; Data: Pointer): integer; stdcall;
@@ -853,6 +851,18 @@ begin
   end;
 end;
 
+procedure TFrmMain.ImageUpdateClick(Sender: TObject);
+var
+  Frm : TFrmCheckUpdate;
+begin
+  Frm:=TFrmCheckUpdate.Create(nil);
+  try
+    Frm.ShowModal();
+  finally
+    Frm.Free;
+  end;
+end;
+
 //\HKCU\Software\CodeGear\ETM\12.0\Color
 procedure TFrmMain.LoadFixedWidthFonts;
 var
@@ -1325,7 +1335,9 @@ begin
   APoint.Y := Msg.YPos;
   APoint   := ScreenToClient(APoint);
   if (Msg.Result = htClient) and ((APoint.Y <= GlassFrame.Top) or (APoint.Y >= ClientHeight - GlassFrame.Bottom)) and
-    (not PtInRect(ImageHue.BoundsRect, APoint)) and  (not PtInRect(ImageConf.BoundsRect, APoint)) and  (not PtInRect(ImageBug.BoundsRect, APoint)) then
+    (not PtInRect(ImageHue.BoundsRect, APoint)) and  (not PtInRect(ImageConf.BoundsRect, APoint)) and  (not PtInRect(ImageBug.BoundsRect, APoint))
+    and  (not PtInRect(ImageUpdate.BoundsRect, APoint))
+    then
     Msg.Result := htCaption;
 end;
 
