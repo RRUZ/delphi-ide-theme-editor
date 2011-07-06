@@ -21,11 +21,13 @@
 
 unit uCheckUpdate;
 
+{$WARN SYMBOL_PLATFORM OFF}
+
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, StdCtrls, pngimage, ExtCtrls;
+  Dialogs, ComCtrls, StdCtrls, pngimage, ExtCtrls, Diagnostics;
 
 type
   TFrmCheckUpdate = class(TForm)
@@ -45,6 +47,7 @@ type
     FUrlInstaller: string;
     FInstallerFileName: string;
     FTempInstallerFileName: string;
+    FStopwatch : TStopwatch;
     procedure ReadRemoteInfo;
     procedure ReadLocalInfo;
     property XmlVersionInfo : string read FXmlVersionInfo write FXmlVersionInfo;
@@ -63,6 +66,7 @@ type
 
 implementation
 
+
 uses
   ShellAPI,
   uMisc,
@@ -73,24 +77,25 @@ Type
    TProcCallBack= procedure(BytesRead:Integer) of object;
 
 const
-  sRemoteVersionFile  = 'http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Version.xml';
-  sXPathVersionNumber = '/versioninfo/@versionapp';
-  sXPathUrlInstaller  = '/versioninfo/@url';
-  sXPathInstallerFileName  = '/versioninfo/@installerfilename';
+  sRemoteVersionFile       = 'http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Version.xml';
   sApplicationName         = 'Delphi IDE Theme Editor';
+  sXPathVersionNumber      = '/versioninfo/@versionapp';
+  sXPathUrlInstaller       = '/versioninfo/@url';
+  sXPathInstallerFileName  = '/versioninfo/@installerfilename';
+  sUserAgent               = 'Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101';
 
 {$R *.dfm}
 
 
 procedure ParseURL(const lpszUrl: string; var Host, Resource: string);
 var
-  UrlComponents: TURLComponents;
-  lpszScheme: array[0..INTERNET_MAX_SCHEME_LENGTH - 1] of Char;
-  lpszHostName: array[0..INTERNET_MAX_HOST_NAME_LENGTH - 1] of Char;
-  lpszUserName: array[0..INTERNET_MAX_USER_NAME_LENGTH - 1] of Char;
-  lpszPassword: array[0..INTERNET_MAX_PASSWORD_LENGTH - 1] of Char;
-  lpszUrlPath: array[0..INTERNET_MAX_PATH_LENGTH - 1] of Char;
-  lpszExtraInfo: array[0..1024 - 1] of Char;
+  lpszScheme      : array[0..INTERNET_MAX_SCHEME_LENGTH - 1] of Char;
+  lpszHostName    : array[0..INTERNET_MAX_HOST_NAME_LENGTH - 1] of Char;
+  lpszUserName    : array[0..INTERNET_MAX_USER_NAME_LENGTH - 1] of Char;
+  lpszPassword    : array[0..INTERNET_MAX_PASSWORD_LENGTH - 1] of Char;
+  lpszUrlPath     : array[0..INTERNET_MAX_PATH_LENGTH - 1] of Char;
+  lpszExtraInfo   : array[0..1024 - 1] of Char;
+  lpUrlComponents : TURLComponents;
 begin
   ZeroMemory(@lpszScheme, SizeOf(lpszScheme));
   ZeroMemory(@lpszHostName, SizeOf(lpszHostName));
@@ -98,23 +103,23 @@ begin
   ZeroMemory(@lpszPassword, SizeOf(lpszPassword));
   ZeroMemory(@lpszUrlPath, SizeOf(lpszUrlPath));
   ZeroMemory(@lpszExtraInfo, SizeOf(lpszExtraInfo));
-  ZeroMemory(@UrlComponents, SizeOf(TURLComponents));
+  ZeroMemory(@lpUrlComponents, SizeOf(TURLComponents));
 
-  UrlComponents.dwStructSize := SizeOf(TURLComponents);
-  UrlComponents.lpszScheme := lpszScheme;
-  UrlComponents.dwSchemeLength := High(lpszScheme) + 1;
-  UrlComponents.lpszHostName := lpszHostName;
-  UrlComponents.dwHostNameLength := High(lpszHostName) + 1;
-  UrlComponents.lpszUserName := lpszUserName;
-  UrlComponents.dwUserNameLength := High(lpszUserName) + 1;
-  UrlComponents.lpszPassword := lpszPassword;
-  UrlComponents.dwPasswordLength := High(lpszPassword) + 1;
-  UrlComponents.lpszUrlPath := lpszUrlPath;
-  UrlComponents.dwUrlPathLength := High(lpszUrlPath) + 1;
-  UrlComponents.lpszExtraInfo := lpszExtraInfo;
-  UrlComponents.dwExtraInfoLength := High(lpszExtraInfo) + 1;
+  lpUrlComponents.dwStructSize      := SizeOf(TURLComponents);
+  lpUrlComponents.lpszScheme        := lpszScheme;
+  lpUrlComponents.dwSchemeLength    := SizeOf(lpszScheme);
+  lpUrlComponents.lpszHostName      := lpszHostName;
+  lpUrlComponents.dwHostNameLength  := SizeOf(lpszHostName);
+  lpUrlComponents.lpszUserName      := lpszUserName;
+  lpUrlComponents.dwUserNameLength  := SizeOf(lpszUserName);
+  lpUrlComponents.lpszPassword      := lpszPassword;
+  lpUrlComponents.dwPasswordLength  := SizeOf(lpszPassword);
+  lpUrlComponents.lpszUrlPath       := lpszUrlPath;
+  lpUrlComponents.dwUrlPathLength   := SizeOf(lpszUrlPath);
+  lpUrlComponents.lpszExtraInfo     := lpszExtraInfo;
+  lpUrlComponents.dwExtraInfoLength := SizeOf(lpszExtraInfo);
 
-  InternetCrackUrl(PChar(lpszUrl), Length(lpszUrl), ICU_DECODE or ICU_ESCAPE, UrlComponents);
+  InternetCrackUrl(PChar(lpszUrl), Length(lpszUrl), ICU_DECODE or ICU_ESCAPE, lpUrlComponents);
 
   Host := lpszHostName;
   Resource := lpszUrlPath;
@@ -122,46 +127,50 @@ end;
 
 function GetFileSize(const Url : string): Integer;
 var
-  hInet: HINTERNET;
-  hHTTP: HINTERNET;
-  hReq: HINTERNET;
-  //lpvBuffer: PChar;
+  hInet    : HINTERNET;
+  hConnect : HINTERNET;
+  hRequest : HINTERNET;
   lpdwBufferLength: DWORD;
   lpdwReserved    : DWORD;
-  Server: string;
+  ServerName: string;
   Resource: string;
+  ErrorCode : Cardinal;
 begin
-  ParseURL(Url,Server,Resource);
-
-  hInet := InternetOpen(PChar('Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101'), INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
+  ParseURL(Url,ServerName,Resource);
+  Result:=0;
+  hInet := InternetOpen(PChar(sUserAgent), INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
   try
-    hHTTP := InternetConnect(hInet, PChar(Server), INTERNET_DEFAULT_HTTP_PORT, nil, nil, INTERNET_SERVICE_HTTP, 0, 0);
+    hConnect := InternetConnect(hInet, PChar(ServerName), INTERNET_DEFAULT_HTTP_PORT, nil, nil, INTERNET_SERVICE_HTTP, 0, 0);
     try
-      hReq := HttpOpenRequest(hHTTP, PChar('HEAD'), PChar(Resource), nil, nil, nil, 0, 0);
-      try
-        //lpdwBufferLength:=64*1020;
-        lpdwBufferLength:=SizeOf(Result);
-        lpdwReserved    :=0;
-        if not HttpSendRequest(hReq, nil, 0, nil, 0) then
-          raise Exception.Create('HttpOpenRequest failed. ' + SysErrorMessage(GetLastError));
-        //GetMem(lpvBuffer,lpdwBufferLength);
-        try
-         if not HttpQueryInfo(hReq, HTTP_QUERY_CONTENT_LENGTH or HTTP_QUERY_FLAG_NUMBER, @Result, lpdwBufferLength, lpdwReserved) then
-          Result:=0;
-         {
-         if HttpQueryInfo(hReq, HTTP_QUERY_RAW_HEADERS_CRLF, lpvBuffer, lpdwBufferLength, lpdwReserved) then
-         begin
-           ShowMessage(lpvBuffer);
-         end;
-         }
-        finally
-         //FreeMem(lpvBuffer);
+      hRequest := HttpOpenRequest(hConnect, PChar('HEAD'), PChar(Resource), nil, nil, nil, 0, 0);
+        if hRequest<>nil then
+        begin
+          try
+            lpdwBufferLength:=SizeOf(Result);
+            lpdwReserved    :=0;
+            if not HttpSendRequest(hRequest, nil, 0, nil, 0) then
+            begin
+              ErrorCode:=GetLastError;
+              raise Exception.Create(Format('HttpOpenRequest Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+            end;
+
+             if not HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH or HTTP_QUERY_FLAG_NUMBER, @Result, lpdwBufferLength, lpdwReserved) then
+             begin
+              Result:=0;
+              ErrorCode:=GetLastError;
+              raise Exception.Create(Format('HttpQueryInfo Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+             end;
+          finally
+            InternetCloseHandle(hRequest);
+          end;
+        end
+        else
+        begin
+          ErrorCode:=GetLastError;
+          raise Exception.Create(Format('HttpOpenRequest Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
         end;
-      finally
-        InternetCloseHandle(hReq);
-      end;
     finally
-      InternetCloseHandle(hHTTP);
+      InternetCloseHandle(hConnect);
     end;
   finally
     InternetCloseHandle(hInet);
@@ -268,6 +277,8 @@ begin
    DeleteFile(TempInstallerFileName);
    FileStream:=TFileStream.Create(TempInstallerFileName,fmCreate);
    try
+     FStopwatch.Reset;
+     FStopwatch.Start;
      WinInet_HttpGet(UrlInstaller,FileStream,DownloadCallBack);
      SetMsg('Application downloaded');
    finally
@@ -282,11 +293,22 @@ begin
 end;
 
 procedure TFrmCheckUpdate.DownloadCallBack(BytesRead: Integer);
+var
+  Pos  :  Integer;
+  Max  :  Integer;
+  Rate :  Integer;
+  sRate:  string;
 begin
    if ProgressBar1.Style=pbstNormal then
    begin
-     ProgressBar1.Position:=ProgressBar1.Position+BytesRead;
-     SetMsg(Format('Downloaded %s of %s bytes ',[FormatFloat('#,',ProgressBar1.Position),FormatFloat('#,',ProgressBar1.Max)]));
+     Pos:=ProgressBar1.Position+BytesRead;
+     Max:=ProgressBar1.Max;
+     Rate:=0;
+     ProgressBar1.Position:=Pos;
+     if FStopwatch.Elapsed.Seconds>0 then
+     Rate:= Round(Max/1024/FStopwatch.Elapsed.Seconds);
+     sRate:= Format('%d Kbytes x second',[Rate]);
+     SetMsg(Format('Downloaded %s of %s bytes %n%% %sTransfer Rate %s',[FormatFloat('#,',Pos),FormatFloat('#,',Max),Pos*100/Max,#13#10,sRate]));
    end;
 end;
 
@@ -303,6 +325,7 @@ end;
 
 procedure TFrmCheckUpdate.FormCreate(Sender: TObject);
 begin
+   FStopwatch:=TStopwatch.Create;
    ReadLocalInfo;
    LabelVersion.Caption:=Format('Current Version %s',[LocalVersion]);
    SetMsg('');
@@ -349,7 +372,10 @@ end;
 
 function TFrmCheckUpdate.UpdateAvailable: Boolean;
 begin
-   Result:=FRemoteVersion>FLocalVersion;
+   if DebugHook<>0 then
+     Result:=True
+   else
+     Result:=FRemoteVersion>FLocalVersion;
 end;
 
 end.

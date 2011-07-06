@@ -550,7 +550,8 @@ begin
         begin
 
           ImportDelphiIDEThemeFromReg(FCurrentTheme, DelphiVersion);
-          SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, ThemeName);
+          //SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, ThemeName);
+          SaveDelphiIDEThemeToXmlFile(FCurrentTheme, FSettings.ThemePath, ThemeName);
           EditThemeName.Text := ThemeName;
           MsgBox('Theme imported');
           LoadThemes;
@@ -1060,19 +1061,18 @@ end;
 
 procedure TFrmMain.CreateThemeFile;
 var
-  DelphiVersion: TDelphiVersions;
+  //DelphiVersion: TDelphiVersions;
   FileName:      string;
 begin
   if LvIDEVersions.Selected <> nil then
   begin
-    DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
+    //DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
     if EditThemeName.Text = '' then
       MsgBox('You must enter a name for the current theme')
     else
     begin
-      //FileName:=SaveCurrentThemeToRegFile(DelphiVersion,ExtractFilePath(ParamStr(0)),EditThemeName.Text);
-      FileName := SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme,
-        FSettings.ThemePath, EditThemeName.Text);
+      //FileName := SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, EditThemeName.Text);
+      FileName := SaveDelphiIDEThemeToXmlFile(FCurrentTheme, FSettings.ThemePath, EditThemeName.Text);
       MsgBox(Format('The theme was saved to the file %s', [FileName]));
     end;
   end;

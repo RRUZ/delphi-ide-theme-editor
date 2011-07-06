@@ -164,7 +164,8 @@ begin
     SetIDEHighlightElement(TIDEHighlightElements.Whitespace,'foreground');
 
     ThemeName:=Copy(ExtractFileName(FileName),1,Pos('.xml',ExtractFileName(FileName))-1);
-    SaveDelphiIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
+    //SaveDelphiIDEThemeToXmlFile(TDelphiVersions.DelphiXE,NewTheme,Path,ThemeName);
+    SaveDelphiIDEThemeToXmlFile(NewTheme,Path,ThemeName);
     Result:=True;
   finally
    XmlDocEclipseTheme    :=Unassigned;
