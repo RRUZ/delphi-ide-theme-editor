@@ -22,7 +22,8 @@ uses
   uSupportedIDEs in 'Units\uSupportedIDEs.pas',
   uMisc in 'Units\uMisc.pas',
   uLazarusIDEHighlight in 'Units\uLazarusIDEHighlight.pas',
-  uCheckUpdate in 'Units\uCheckUpdate.pas' {FrmCheckUpdate};
+  uCheckUpdate in 'Units\uCheckUpdate.pas' {FrmCheckUpdate},
+  uWinInet in 'Units\uWinInet.pas';
 
 {$R *.res}
 
