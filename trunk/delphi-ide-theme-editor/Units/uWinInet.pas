@@ -32,6 +32,7 @@ type
 function  GetRemoteFileSize(const Url : string): Integer;
 procedure WinInet_HttpGet(const Url: string;Stream:TStream;CallBack:TuWinInetProcCallBack);overload;
 function  WinInet_HttpGet(const Url: string;CallBack:TuWinInetProcCallBack): string;overload;
+function  GetWinInetError(ErrorCode:Cardinal): string;
 
 
 implementation
@@ -43,6 +44,25 @@ uses
 
 const
   sUserAgent = 'Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101';
+
+function GetWinInetError(ErrorCode:Cardinal): string;
+const
+   winetdll = 'wininet.dll';
+var
+  Len: Integer;
+  Buffer: PChar;
+begin
+  Len := FormatMessage(
+  FORMAT_MESSAGE_FROM_HMODULE or FORMAT_MESSAGE_FROM_SYSTEM or
+  FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_IGNORE_INSERTS or  FORMAT_MESSAGE_ARGUMENT_ARRAY,
+  Pointer(GetModuleHandle(winetdll)), ErrorCode, 0, @Buffer, SizeOf(Buffer), nil);
+  try
+    while (Len > 0) and {$IFDEF UNICODE}(CharInSet(Buffer[Len - 1], [#0..#32, '.'])) {$ELSE}(Buffer[Len - 1] in [#0..#32, '.']) {$ENDIF} do Dec(Len);
+    SetString(Result, Buffer, Len);
+  finally
+    LocalFree(HLOCAL(Buffer));
+  end;
+end;
 
 
 procedure ParseURL(const lpszUrl: string; var Host, Resource: string);
@@ -101,7 +121,7 @@ begin
   if hInet=nil then
   begin
     ErrorCode:=GetLastError;
-    raise Exception.Create(Format('InternetOpen Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+    raise Exception.Create(Format('InternetOpen Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
   end;
 
   try
@@ -109,7 +129,7 @@ begin
     if hConnect=nil then
     begin
       ErrorCode:=GetLastError;
-      raise Exception.Create(Format('InternetConnect Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+      raise Exception.Create(Format('InternetConnect Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
     end;
 
     try
@@ -122,14 +142,14 @@ begin
             if not HttpSendRequest(hRequest, nil, 0, nil, 0) then
             begin
               ErrorCode:=GetLastError;
-              raise Exception.Create(Format('HttpOpenRequest Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+              raise Exception.Create(Format('HttpOpenRequest Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
             end;
 
              if not HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH or HTTP_QUERY_FLAG_NUMBER, @Result, lpdwBufferLength, lpdwReserved) then
              begin
               Result:=0;
               ErrorCode:=GetLastError;
-              raise Exception.Create(Format('HttpQueryInfo Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+              raise Exception.Create(Format('HttpQueryInfo Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
              end;
           finally
             InternetCloseHandle(hRequest);
@@ -138,7 +158,7 @@ begin
         else
         begin
           ErrorCode:=GetLastError;
-          raise Exception.Create(Format('HttpOpenRequest Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+          raise Exception.Create(Format('HttpOpenRequest Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
         end;
     finally
       InternetCloseHandle(hConnect);
@@ -163,7 +183,7 @@ begin
   if hInter=nil then
   begin
     ErrorCode:=GetLastError;
-    raise Exception.Create(Format('InternetOpen Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+    raise Exception.Create(Format('InternetOpen Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
   end;
 
     try
@@ -174,7 +194,7 @@ begin
           if hFile=nil then
           begin
             ErrorCode:=GetLastError;
-            raise Exception.Create(Format('InternetOpenUrl Error %d Description %s',[ErrorCode,SysErrorMessage(ErrorCode)]));
+            raise Exception.Create(Format('InternetOpenUrl Error %d Description %s',[ErrorCode,GetWinInetError(ErrorCode)]));
           end;
 
             try
