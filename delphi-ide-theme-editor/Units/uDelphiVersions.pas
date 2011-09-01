@@ -45,7 +45,8 @@ type
     Delphi2007,
     Delphi2009,
     Delphi2010,
-    DelphiXE
+    DelphiXE,
+    DelphiXE2
     );
 
 
@@ -105,7 +106,8 @@ Color15=$FFFFFF
     'RAD Studio 2007',
     'RAD Studio 2009',
     'RAD Studio 2010',
-    'RAD Studio XE'
+    'RAD Studio XE',
+    'RAD Studio XE2'
     );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
@@ -121,7 +123,8 @@ Color15=$FFFFFF
     18.5,    // 'RAD Studio 2007',
     20,      // 'RAD Studio 2009',
     21,      // 'RAD Studio 2010',
-    22       // 'RAD Studio XE'
+    22,      // 'RAD Studio XE'
+    23       // 'RAD Studio XE2'
     );
 
 
@@ -138,7 +141,9 @@ Color15=$FFFFFF
     '\Software\Borland\BDS\5.0',
     '\Software\CodeGear\BDS\6.0',
     '\Software\CodeGear\BDS\7.0',
-    '\Software\Embarcadero\BDS\8.0');
+    '\Software\Embarcadero\BDS\8.0',
+    '\Software\Embarcadero\BDS\9.0'
+    );
 
 
 procedure FillListViewDelphiVersions(ListView: TListView);
