@@ -3428,7 +3428,7 @@ object DialogColorSelector: TDialogColorSelector
     ImageIndex = 0
     Images = ImageList1
     ParentDoubleBuffered = False
-    TabOrder = 0
+    TabOrder = 9
     OnSelColorChange = mbDeskPickerButton1SelColorChange
     ScreenHintFormat = 'RGB(%r, %g, %b)'#13'Hex: %h'
     ShowScreenHint = True
@@ -3449,7 +3449,7 @@ object DialogColorSelector: TDialogColorSelector
     MaxLength = 3
     NumbersOnly = True
     ParentCtl3D = False
-    TabOrder = 2
+    TabOrder = 1
     Text = '255'
     OnExit = RedExit
   end
@@ -3462,7 +3462,7 @@ object DialogColorSelector: TDialogColorSelector
     MaxLength = 3
     NumbersOnly = True
     ParentCtl3D = False
-    TabOrder = 3
+    TabOrder = 2
     OnExit = RedExit
   end
   object Blue: TEdit
@@ -3474,7 +3474,7 @@ object DialogColorSelector: TDialogColorSelector
     MaxLength = 3
     NumbersOnly = True
     ParentCtl3D = False
-    TabOrder = 4
+    TabOrder = 3
     OnExit = RedExit
   end
   object PageControl1: TPageControl
@@ -3483,7 +3483,7 @@ object DialogColorSelector: TDialogColorSelector
     Width = 225
     Height = 212
     ActivePage = TabSheet1
-    TabOrder = 6
+    TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Hexa'
       object HexaColorPicker1: THexaColorPicker
@@ -3503,14 +3503,10 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet2: TTabSheet
       Caption = 'Web Palette'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 157
       object mbColorPalette1: TmbColorPalette
         Left = 0
         Top = 0
-        Width = 196
+        Width = 210
         Height = 184
         Align = alClient
         Colors.Strings = (
@@ -3781,10 +3777,6 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet4: TTabSheet
       Caption = 'HSL'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 157
       object HSLColorPicker1: THSLColorPicker
         Left = 0
         Top = 0
@@ -3797,7 +3789,6 @@ object DialogColorSelector: TDialogColorSelector
         Align = alClient
         TabOrder = 0
         OnChange = HSLColorPicker1Change
-        ExplicitHeight = 157
         DesignSize = (
           217
           184)
@@ -3806,10 +3797,6 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet3: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 157
       object HSVColorPicker1: THSVColorPicker
         Left = 3
         Top = 17
@@ -3848,7 +3835,7 @@ object DialogColorSelector: TDialogColorSelector
     Width = 75
     Height = 25
     Caption = 'Apply'
-    TabOrder = 7
+    TabOrder = 10
     OnClick = BtnApplyClick
   end
   object Button2: TButton
@@ -3857,7 +3844,7 @@ object DialogColorSelector: TDialogColorSelector
     Width = 75
     Height = 25
     Caption = 'Cancel'
-    TabOrder = 8
+    TabOrder = 11
     OnClick = Button2Click
   end
   object Hue: TEdit
@@ -3869,7 +3856,7 @@ object DialogColorSelector: TDialogColorSelector
     MaxLength = 3
     NumbersOnly = True
     ParentCtl3D = False
-    TabOrder = 9
+    TabOrder = 4
     Text = '255'
     OnExit = HueExit
   end
@@ -3882,7 +3869,7 @@ object DialogColorSelector: TDialogColorSelector
     MaxLength = 3
     NumbersOnly = True
     ParentCtl3D = False
-    TabOrder = 10
+    TabOrder = 5
     OnExit = HueExit
   end
   object Sat: TEdit
@@ -3894,7 +3881,7 @@ object DialogColorSelector: TDialogColorSelector
     MaxLength = 3
     NumbersOnly = True
     ParentCtl3D = False
-    TabOrder = 11
+    TabOrder = 6
     OnExit = HueExit
   end
   object Hex: TEdit
@@ -3902,13 +3889,14 @@ object DialogColorSelector: TDialogColorSelector
     Top = 116
     Width = 100
     Height = 19
+    CharCase = ecUpperCase
     Ctl3D = False
-    Enabled = False
-    MaxLength = 3
-    NumbersOnly = True
+    MaxLength = 6
     ParentCtl3D = False
-    TabOrder = 12
+    TabOrder = 7
     Text = '255'
+    OnExit = HexExit
+    OnKeyPress = HexKeyPress
   end
   object CheckBoxLive: TCheckBox
     Left = 8
@@ -3918,7 +3906,7 @@ object DialogColorSelector: TDialogColorSelector
     Caption = 'Live Preview'
     Checked = True
     State = cbChecked
-    TabOrder = 13
+    TabOrder = 8
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
@@ -3928,7 +3916,7 @@ object DialogColorSelector: TDialogColorSelector
     Left = 192
     Top = 255
     Bitmap = {
-      494C010101002000400018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101002000440018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000
