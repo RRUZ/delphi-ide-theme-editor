@@ -129,7 +129,7 @@ type
     SaveChanges1: TMenuItem;
     SaveAs1: TMenuItem;
     LabelMsg: TLabel;
-    Button1: TButton;
+    BtnContribute: TButton;
     SynExporterHTML1: TSynExporterHTML;
     BtnExportToLazarusTheme: TButton;
     JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
@@ -164,7 +164,7 @@ type
     procedure DeleteTheme1Click(Sender: TObject);
     procedure CloneTheme1Click(Sender: TObject);
     procedure SaveAs1Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure BtnContributeClick(Sender: TObject);
     procedure BtnExportToLazarusThemeClick(Sender: TObject);
     procedure ImageUpdateClick(Sender: TObject);
   private
@@ -451,7 +451,7 @@ begin
 end;
 
 
-procedure TFrmMain.Button1Click(Sender: TObject);
+procedure TFrmMain.BtnContributeClick(Sender: TObject);
 begin
  ShellExecute(Handle, 'open', PChar('http://theroadtodelphi.wordpress.com/contributions/'), nil, nil, SW_SHOW);
 end;
@@ -525,6 +525,7 @@ procedure TFrmMain.BtnImportRegThemeClick(Sender: TObject);
 var
   ThemeName: string;
   DelphiVersion: TDelphiVersions;
+  ImpTheme     : TIDETheme;
   i: integer;
 begin
   try
@@ -543,25 +544,29 @@ begin
           exit;
         end;
 
-
         ThemeName := InputBox('Import Delphi IDE Theme',
           'Enter the name for the theme to import', '');
         if ThemeName <> '' then
         begin
+          ImportDelphiIDEThemeFromReg(ImpTheme, DelphiVersion);
+          if IsValidDelphiIDETheme(ImpTheme) then
+          begin
+            FCurrentTheme:=ImpTheme;
+            //SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, ThemeName);
+            SaveDelphiIDEThemeToXmlFile(FCurrentTheme, FSettings.ThemePath, ThemeName);
+            EditThemeName.Text := ThemeName;
+            MsgBox('Theme imported');
+            LoadThemes;
+            for i := 0 to LvThemes.Items.Count - 1 do
+              if CompareText(LvThemes.Items.Item[i].Caption, EditThemeName.Text) = 0 then
+              begin
+                LvThemes.Selected := LvThemes.Items.Item[i];
+                Break;
+              end;
+          end
+          else
+          MsgBox('The imported theme has invalid values, the theme will be discarded');
 
-          ImportDelphiIDEThemeFromReg(FCurrentTheme, DelphiVersion);
-          //SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, ThemeName);
-          SaveDelphiIDEThemeToXmlFile(FCurrentTheme, FSettings.ThemePath, ThemeName);
-          EditThemeName.Text := ThemeName;
-          MsgBox('Theme imported');
-          LoadThemes;
-
-          for i := 0 to LvThemes.Items.Count - 1 do
-            if CompareText(LvThemes.Items.Item[i].Caption, EditThemeName.Text) = 0 then
-            begin
-              LvThemes.Selected := LvThemes.Items.Item[i];
-              Break;
-            end;
         end;
       end;
   except
@@ -984,20 +989,32 @@ end;
 
 
 procedure TFrmMain.LvThemesChange(Sender: TObject; Item: TListItem; Change: TItemChange);
+Var
+  ImpTheme : TIDETheme;
 begin
   try
     if (LvThemes.Selected <> nil) and (LvIDEVersions.Selected <> nil) then
     begin
       EditThemeName.Text := LvThemes.Selected.Caption;
-      LoadThemeFromXMLFile(FCurrentTheme, LvThemes.Selected.SubItems[0]);
-      RefreshPasSynEdit;
-      if CbElement.Items.Count > 0 then
+      LoadThemeFromXMLFile(ImpTheme, LvThemes.Selected.SubItems[0]);
+
+      if IsValidDelphiIDETheme(ImpTheme) then
       begin
-        CbElement.ItemIndex := 0;
-        LoadValuesElements;
-        //PaintGutterGlyphs;
-        //SynEditCode.InvalidateGutter;
-      end;
+        FCurrentTheme:=ImpTheme;
+        RefreshPasSynEdit;
+        if CbElement.Items.Count > 0 then
+        begin
+          CbElement.ItemIndex := 0;
+          LoadValuesElements;
+          //PaintGutterGlyphs;
+          //SynEditCode.InvalidateGutter;
+        end;
+      end
+      else
+      MsgBox(Format('The Theme %s has invalid values',[LvThemes.Selected.Caption]));
+
+
+
     end;
   except
     on E: Exception do
@@ -1132,7 +1149,6 @@ begin
     else
     //if IDEType=TSupportedIDEs.LazarusIDE then
       DelphiVer := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elemnents
-
 
     Element := TIDEHighlightElements.RightMargin;
     SynEditCode.RightEdgeColor :=

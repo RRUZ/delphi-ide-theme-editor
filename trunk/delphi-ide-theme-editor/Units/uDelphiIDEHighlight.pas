@@ -253,6 +253,7 @@ function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDE
 function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
 
 function  ExistDelphiIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
+function  IsValidDelphiIDETheme(ATheme : TIDETheme) : Boolean;
 
 
 implementation
@@ -400,6 +401,19 @@ begin
    TFile.Delete(FileName);
    AStream.Free;
    RegFile.Free;
+  end;
+end;
+
+function  IsValidDelphiIDETheme(ATheme : TIDETheme) : Boolean;
+var
+  Element        : TIDEHighlightElements;
+begin
+ Result:=True;
+  for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
+  begin
+    Result:= (Trim(ATheme[Element].ForegroundColorNew)<>'') and  (Trim(ATheme[Element].BackgroundColorNew)<>'');
+    if not Result then
+     Break;
   end;
 end;
 

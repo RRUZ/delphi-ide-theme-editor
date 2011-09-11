@@ -78,6 +78,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure RedExit(Sender: TObject);
     procedure HueExit(Sender: TObject);
+    procedure HexKeyPress(Sender: TObject; var Key: Char);
+    procedure HexExit(Sender: TObject);
   private
     FInitializating: Boolean;
     FSelectedColor: TColor;
@@ -137,6 +139,38 @@ procedure TDialogColorSelector.HexaColorPicker1Change(Sender: TObject);
 begin
   if not FInitializating then
     RefreshColors(HexaColorPicker1.SelectedColor);
+end;
+
+
+function HexToTColor(const sColor : string) : TColor;
+begin
+   Result :=
+     RGB(
+       StrToInt('$'+Copy(sColor, 1, 2)),
+       StrToInt('$'+Copy(sColor, 3, 2)),
+       StrToInt('$'+Copy(sColor, 5, 2))
+     ) ;
+end;
+
+procedure TDialogColorSelector.HexExit(Sender: TObject);
+Var
+ s : string;
+ Value : Integer;
+begin
+  if Length(TEdit(Sender).Text)<6 then
+   TEdit(Sender).Text:=TEdit(Sender).Text+StringOfChar('0',6-Length(TEdit(Sender).Text));
+
+  s:='$'+TEdit(Sender).Text;
+  if not TryStrToInt(s,Value) then
+   TEdit(Sender).Text:='FFFFFF';
+
+  RefreshColors(HexToTColor(TEdit(Sender).Text));
+end;
+
+procedure TDialogColorSelector.HexKeyPress(Sender: TObject; var Key: Char);
+begin
+  if not ( CharInSet(Key,['0'..'9','a'..'f','A'..'F', #8, #3, #22])) then
+    Key := #0;
 end;
 
 procedure TDialogColorSelector.HSLColorPicker1Change(Sender: TObject);
@@ -235,12 +269,13 @@ begin
   Red.Text  :=IntToStr(GetRValue(Acolor));
   Green.Text:=IntToStr(GetGValue(Acolor));
   Blue.Text :=IntToStr(GetBValue(Acolor));
+
   ColorRGBToHLS(ColorToRGB(Acolor),Hue,Luminance,Saturation);
   Self.Hue.Text   :=IntToStr(Hue);
   Self.Lum.Text   :=IntToStr(Luminance);
   Self.Sat.Text   :=IntToStr(Saturation);
 
-  Hex.Text:=Format('#%.2x%.2x%.2x',[GetRValue(Acolor),GetGValue(Acolor),GetBValue(Acolor)]);
+  Hex.Text:=Format('%.2x%.2x%.2x',[GetRValue(Acolor),GetGValue(Acolor),GetBValue(Acolor)]);
 
   FSelectedColor:=Acolor;
 

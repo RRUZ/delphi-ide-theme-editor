@@ -540,7 +540,7 @@ object FrmMain: TFrmMain
     Top = 542
     Width = 32
     Height = 32
-    Hint = 'Report a bug o make a suggestion'
+    Hint = 'Report a bug or make a suggestion'
     Anchors = [akRight, akBottom]
     AutoSize = True
     ParentShowHint = False
@@ -1064,7 +1064,7 @@ object FrmMain: TFrmMain
     TabOrder = 21
     OnClick = BtnSelBackColorClick
   end
-  object Button1: TButton
+  object BtnContribute: TButton
     Left = 214
     Top = 495
     Width = 75
@@ -1072,7 +1072,7 @@ object FrmMain: TFrmMain
     Anchors = [akLeft, akBottom]
     Caption = 'Contribute'
     TabOrder = 22
-    OnClick = Button1Click
+    OnClick = BtnContributeClick
   end
   object BtnExportToLazarusTheme: TButton
     Left = 8
@@ -1105,7 +1105,7 @@ object FrmMain: TFrmMain
     Left = 256
     Top = 100
     Bitmap = {
-      494C010106000900C4000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000900D4000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1278,7 +1278,7 @@ object FrmMain: TFrmMain
     Left = 408
     Top = 112
     Bitmap = {
-      494C010107000800980010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800A80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
