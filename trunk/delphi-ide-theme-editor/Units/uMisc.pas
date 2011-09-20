@@ -23,29 +23,49 @@ unit uMisc;
 interface
 
 uses
+ Windows,
+ Graphics,
  ImgList;
 
 
 procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
+procedure ExtractIconFile(Icon: TIcon; const Filename: string);
 function  GetFileVersion(const FileName: string): string;
 function  IsAppRunning(const FileName: string): boolean;
 function  GetLocalAppDataFolder: string;
 function  GetTempDirectory: string;
 procedure MsgBox(const Msg: string);
+function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
+procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+
 
 implementation
 
 uses
+  Main,
   Forms,
   ActiveX,
   ShlObj,
   PsAPI,
   tlhelp32,
-  Windows,
   ComObj,
   CommCtrl,
+  StrUtils,
   ShellAPI,
+  Classes,
   SysUtils;
+
+function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
+  FontType: integer; Data: Pointer): integer; stdcall;
+begin
+  //  if ((FontType and TrueType_FontType) <> 0) and  ((LogFont.lfPitchAndFamily and VARIABLE_PITCH) = 0) then
+  if ((LogFont.lfPitchAndFamily and FIXED_PITCH) <> 0) then
+    if not StartsText('@', LogFont.lfFaceName) and
+      (FrmMain.CbIDEFonts.Items.IndexOf(LogFont.lfFaceName) < 0) then
+      FrmMain.CbIDEFonts.Items.Add(LogFont.lfFaceName);
+
+  Result := 1;
+end;
 
 procedure MsgBox(const Msg: string);
 begin
@@ -137,7 +157,19 @@ begin
   Result := FSO.GetFileVersion(FileName);
 end;
 
-
+procedure ExtractIconFile(Icon: TIcon; const Filename: string);
+var
+  FileInfo: TShFileInfo;
+begin
+  if FileExists(Filename) then
+  begin
+    FillChar(FileInfo, SizeOf(FileInfo), 0);
+    SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
+      SHGFI_ICON or SHGFI_SMALLICON);
+    if FileInfo.hIcon <> 0 then
+      Icon.Handle:=FileInfo.hIcon;
+  end;
+end;
 
 procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
 var
@@ -155,5 +187,28 @@ begin
     end;
   end;
 end;
+
+
+procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+Var
+ i : integer;
+ w : integer;
+begin
+  bmp.PixelFormat:=pf24bit;
+  bmp.Width:=Width;
+  bmp.Height:=Height;
+  bmp.Canvas.Brush.Color := clBlack;
+  bmp.Canvas.FillRect(Rect(0,0, Width, Height));
+
+
+  w :=(Width-2) div (High(Colors)+1);
+  for i:=0 to High(Colors) do
+  begin
+   bmp.Canvas.Brush.Color := Colors[i];
+   //bmp.Canvas.FillRect(Rect((w*i),0, w*(i+1), Height));
+   bmp.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
+  end;
+end;
+
 
 end.

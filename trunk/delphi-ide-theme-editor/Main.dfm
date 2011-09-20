@@ -2,7 +2,7 @@ object FrmMain: TFrmMain
   Left = 373
   Top = 215
   Caption = 'Delphi IDE Theme Editor'
-  ClientHeight = 582
+  ClientHeight = 642
   ClientWidth = 784
   Color = clBtnFace
   Constraints.MinHeight = 620
@@ -23,47 +23,47 @@ object FrmMain: TFrmMain
   OnShow = FormShow
   DesignSize = (
     784
-    582)
+    642)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 8
-    Top = 13
-    Width = 69
+    Left = 304
+    Top = 16
+    Width = 66
     Height = 13
-    Caption = 'Detected IDEs'
+    Caption = 'Installed IDEs'
   end
   object Label2: TLabel
-    Left = 295
-    Top = 13
+    Left = 304
+    Top = 63
     Width = 38
     Height = 13
     Caption = 'Element'
   end
   object Label3: TLabel
-    Left = 295
-    Top = 117
-    Width = 84
+    Left = 304
+    Top = 167
+    Width = 56
     Height = 13
-    Caption = 'Foreground Color'
+    Caption = 'Foreground'
   end
   object Label4: TLabel
-    Left = 534
-    Top = 117
-    Width = 84
+    Left = 543
+    Top = 167
+    Width = 56
     Height = 13
-    Caption = 'Background Color'
+    Caption = 'Background'
   end
   object Label5: TLabel
-    Left = 534
-    Top = 13
+    Left = 543
+    Top = 63
     Width = 85
     Height = 13
     Caption = 'Global Editor Font'
   end
   object Label6: TLabel
     Left = 8
-    Top = 287
+    Top = 347
     Width = 62
     Height = 13
     Anchors = [akLeft, akBottom]
@@ -72,7 +72,7 @@ object FrmMain: TFrmMain
   end
   object ImageLogo: TImage
     Left = 8
-    Top = 532
+    Top = 592
     Width = 199
     Height = 50
     Anchors = [akLeft, akBottom]
@@ -311,30 +311,32 @@ object FrmMain: TFrmMain
   end
   object Label7: TLabel
     Left = 8
-    Top = 136
+    Top = 16
     Width = 37
     Height = 13
     Caption = 'Themes'
   end
   object Label8: TLabel
     Left = 8
-    Top = 495
+    Top = 555
     Width = 152
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = 'Author : Rodrigo Ruz V. (RRUZ)'
+    ExplicitTop = 495
   end
   object LabelVersion: TLabel
     Left = 8
-    Top = 513
+    Top = 568
     Width = 35
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = 'Version'
+    ExplicitTop = 508
   end
   object ImageConf: TImage
     Left = 734
-    Top = 542
+    Top = 602
     Width = 32
     Height = 32
     Hint = 'Application settings'
@@ -437,10 +439,11 @@ object FrmMain: TFrmMain
     ShowHint = True
     Transparent = True
     OnClick = ImageConfClick
+    ExplicitTop = 542
   end
   object ImageHue: TImage
     Left = 696
-    Top = 542
+    Top = 602
     Width = 32
     Height = 32
     Hint = 'Change the hue and saturation of the current theme'
@@ -534,10 +537,11 @@ object FrmMain: TFrmMain
     ShowHint = True
     Transparent = True
     OnClick = ImageHueClick
+    ExplicitTop = 542
   end
   object ImageBug: TImage
     Left = 658
-    Top = 542
+    Top = 602
     Width = 32
     Height = 32
     Hint = 'Report a bug or make a suggestion'
@@ -630,18 +634,21 @@ object FrmMain: TFrmMain
     ShowHint = True
     Transparent = True
     OnClick = ImageBugClick
+    ExplicitTop = 542
   end
   object LabelMsg: TLabel
     Left = 8
-    Top = 449
+    Top = 506
     Width = 44
     Height = 13
+    Anchors = [akLeft, akBottom]
     Caption = 'LabelMsg'
     Visible = False
+    ExplicitTop = 449
   end
   object ImageUpdate: TImage
     Left = 620
-    Top = 542
+    Top = 602
     Width = 32
     Height = 32
     Hint = 'Check for updates'
@@ -730,50 +737,24 @@ object FrmMain: TFrmMain
     ShowHint = True
     Transparent = True
     OnClick = ImageUpdateClick
-  end
-  object LvIDEVersions: TListView
-    Left = 8
-    Top = 32
-    Width = 281
-    Height = 98
-    Columns = <
-      item
-        Caption = 'IDE'
-        Width = 150
-      end
-      item
-        Caption = 'Path'
-        Width = 200
-      end
-      item
-        Caption = 'Type'
-        Width = 0
-      end>
-    DoubleBuffered = True
-    ReadOnly = True
-    RowSelect = True
-    ParentDoubleBuffered = False
-    SmallImages = ImageListDelphiVersion
-    TabOrder = 1
-    ViewStyle = vsReport
-    OnChange = LvIDEVersionsChange
+    ExplicitTop = 542
   end
   object CbElement: TComboBox
-    Left = 295
-    Top = 32
+    Left = 304
+    Top = 82
     Width = 233
     Height = 21
     Style = csDropDownList
-    TabOrder = 2
+    TabOrder = 3
     OnChange = CbElementChange
   end
   object GroupBox1: TGroupBox
-    Left = 295
-    Top = 59
+    Left = 304
+    Top = 110
     Width = 233
     Height = 46
     Caption = 'Text Attributes'
-    TabOrder = 6
+    TabOrder = 7
     object CheckBold: TCheckBox
       Left = 16
       Top = 19
@@ -803,12 +784,12 @@ object FrmMain: TFrmMain
     end
   end
   object GroupBox2: TGroupBox
-    Left = 534
-    Top = 59
+    Left = 543
+    Top = 110
     Width = 233
     Height = 46
     Caption = 'Use defaults for'
-    TabOrder = 7
+    TabOrder = 8
     object CheckForeground: TCheckBox
       Left = 16
       Top = 19
@@ -829,163 +810,165 @@ object FrmMain: TFrmMain
     end
   end
   object CblForeground: TColorBox
-    Left = 295
-    Top = 136
-    Width = 207
+    Left = 366
+    Top = 164
+    Width = 145
     Height = 22
     NoneColorColor = 16729138
-    Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-    TabOrder = 8
-    OnChange = CblForegroundChange
-  end
-  object CblBackground: TColorBox
-    Left = 534
-    Top = 136
-    Width = 208
-    Height = 22
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
     TabOrder = 9
     OnChange = CblForegroundChange
   end
+  object CblBackground: TColorBox
+    Left = 605
+    Top = 164
+    Width = 143
+    Height = 22
+    Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
+    TabOrder = 11
+    OnChange = CblForegroundChange
+  end
   object CbIDEFonts: TComboBox
-    Left = 534
-    Top = 32
+    Left = 543
+    Top = 82
     Width = 107
     Height = 21
     Style = csDropDownList
     Sorted = True
-    TabOrder = 3
+    TabOrder = 4
     OnChange = CbIDEFontsChange
   end
   object EditFontSize: TEdit
-    Left = 647
-    Top = 32
+    Left = 656
+    Top = 82
     Width = 23
     Height = 21
     ReadOnly = True
-    TabOrder = 4
+    TabOrder = 5
     Text = '5'
     OnChange = CbIDEFontsChange
   end
   object UpDownFontSize: TUpDown
-    Left = 670
-    Top = 32
+    Left = 679
+    Top = 82
     Width = 16
     Height = 21
     Associate = EditFontSize
     Min = 1
     Max = 30
     Position = 5
-    TabOrder = 5
+    TabOrder = 6
   end
   object BtnApply: TButton
     Left = 151
-    Top = 333
+    Top = 393
     Width = 138
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Apply current theme'
-    TabOrder = 14
+    TabOrder = 16
     OnClick = BtnApplyClick
   end
   object EditThemeName: TEdit
     Left = 8
-    Top = 306
+    Top = 366
     Width = 281
     Height = 21
     Anchors = [akLeft, akBottom]
     DoubleBuffered = True
     ParentDoubleBuffered = False
-    TabOrder = 12
+    TabOrder = 14
   end
   object BtnSave: TButton
     Left = 8
-    Top = 333
+    Top = 393
     Width = 137
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Save Changes'
-    TabOrder = 13
+    TabOrder = 15
     OnClick = BtnSaveClick
   end
   object BtnApplyFont: TButton
-    Left = 692
-    Top = 28
+    Left = 701
+    Top = 78
     Width = 75
     Height = 25
     Caption = 'Apply Font'
     Enabled = False
-    TabOrder = 0
+    TabOrder = 2
     OnClick = BtnApplyFontClick
   end
   object LvThemes: TListView
     Left = 8
-    Top = 155
+    Top = 35
     Width = 281
-    Height = 128
+    Height = 308
     Anchors = [akLeft, akTop, akBottom]
     Columns = <
       item
         Caption = 'Theme'
-        Width = 150
+        Width = 200
       end
       item
         Caption = 'Path'
-        Width = 200
+        Width = 0
       end>
     DoubleBuffered = True
     ReadOnly = True
     RowSelect = True
     ParentDoubleBuffered = False
     PopupMenu = PopupMenuThemes
-    TabOrder = 10
+    ShowColumnHeaders = False
+    SmallImages = ImageListThemes
+    TabOrder = 0
     ViewStyle = vsReport
     OnChange = LvThemesChange
   end
   object BtnImport: TButton
     Left = 264
-    Top = 364
+    Top = 424
     Width = 25
     Height = 21
     Anchors = [akLeft, akBottom]
     Caption = '>'
-    TabOrder = 16
+    TabOrder = 18
     OnClick = BtnImportClick
   end
   object BtnImportRegTheme: TButton
     Left = 8
-    Top = 395
+    Top = 455
     Width = 281
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Import current IDE theme from registry'
-    TabOrder = 17
+    TabOrder = 19
     OnClick = BtnImportRegThemeClick
   end
   object BtnSetDefault: TButton
     Left = 8
-    Top = 464
+    Top = 524
     Width = 281
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Set default theme values for selected IDE'
-    TabOrder = 19
+    TabOrder = 22
     OnClick = BtnSetDefaultClick
   end
   object ProgressBar1: TProgressBar
     Left = 8
-    Top = 426
+    Top = 486
     Width = 281
     Height = 17
     Anchors = [akLeft, akBottom]
-    TabOrder = 18
+    TabOrder = 21
     Visible = False
   end
   object SynEditCode: TSynEdit
-    Left = 295
-    Top = 164
+    Left = 304
+    Top = 200
     Width = 472
-    Height = 354
+    Height = 381
     Anchors = [akLeft, akTop, akRight, akBottom]
     Color = clSilver
     ActiveLineColor = clYellow
@@ -995,7 +978,7 @@ object FrmMain: TFrmMain
     Font.Name = 'Consolas'
     Font.Pitch = fpFixed
     Font.Style = []
-    TabOrder = 11
+    TabOrder = 13
     OnClick = SynEditCodeClick
     Gutter.BorderColor = clYellow
     Gutter.DigitCount = 3
@@ -1037,61 +1020,72 @@ object FrmMain: TFrmMain
   end
   object CbIDEThemeImport: TComboBox
     Left = 8
-    Top = 364
+    Top = 424
     Width = 250
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    TabOrder = 15
+    TabOrder = 17
   end
   object BtnSelForColor: TButton
-    Left = 506
-    Top = 136
+    Left = 515
+    Top = 164
     Width = 22
     Height = 22
     ImageIndex = 2
     Images = ImageList1
-    TabOrder = 20
+    TabOrder = 10
     OnClick = BtnSelForColorClick
   end
   object BtnSelBackColor: TButton
-    Left = 745
-    Top = 136
+    Left = 754
+    Top = 164
     Width = 22
     Height = 22
     ImageIndex = 2
     Images = ImageList1
-    TabOrder = 21
+    TabOrder = 12
     OnClick = BtnSelBackColorClick
   end
   object BtnContribute: TButton
     Left = 214
-    Top = 495
+    Top = 556
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Contribute'
-    TabOrder = 22
+    TabOrder = 23
     OnClick = BtnContributeClick
   end
   object BtnExportToLazarusTheme: TButton
     Left = 8
-    Top = 395
+    Top = 455
     Width = 281
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Export Theme to Lazarus Color Scheme'
-    TabOrder = 23
+    TabOrder = 20
     Visible = False
     OnClick = BtnExportToLazarusThemeClick
   end
+  object ComboBoxExIDEs: TComboBoxEx
+    Left = 304
+    Top = 35
+    Width = 233
+    Height = 22
+    ItemsEx = <>
+    Style = csExDropDownList
+    TabOrder = 1
+    OnChange = ComboBoxExIDEsChange
+    Images = ImageListDelphiVersion
+  end
   object ImageListDelphiVersion: TImageList
-    Left = 175
-    Top = 136
+    Left = 383
+    Top = 291
   end
   object SynPasSyn1: TSynPasSyn
-    Left = 399
-    Top = 224
+    Left = 408
+    Top = 227
   end
   object OpenDialogImport: TOpenDialog
     Filter = 'Visual Studio Configuration File|*.vssettings'
@@ -1102,10 +1096,10 @@ object FrmMain: TFrmMain
   object ImageListlGutterGlyphs: TImageList
     Height = 14
     Width = 11
-    Left = 256
-    Top = 100
+    Left = 568
+    Top = 311
     Bitmap = {
-      494C010106000900D4000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000900E0000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1275,10 +1269,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 408
-    Top = 112
+    Left = 456
+    Top = 307
     Bitmap = {
-      494C010107000800A80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800B40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1589,18 +1583,22 @@ object FrmMain: TFrmMain
     Highlighter = SynPasSyn1
     Title = 'Untitled'
     UseBackground = True
-    Left = 472
-    Top = 224
+    Left = 481
+    Top = 227
   end
   object JvBrowseForFolderDialog1: TJvBrowseForFolderDialog
     StatusText = 'Select Output folder for exported themes'
-    Left = 472
-    Top = 56
+    Left = 561
+    Top = 219
   end
   object OpenDialogExport: TOpenDialog
     Filter = 'Delphi IDE Themes|*.theme.xml'
     Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
     Left = 264
     Top = 248
+  end
+  object ImageListThemes: TImageList
+    Left = 56
+    Top = 96
   end
 end
