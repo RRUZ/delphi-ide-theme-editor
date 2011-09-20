@@ -30,6 +30,8 @@ uses
   Classes,
   Windows,
   Variants,
+  uDelphiVersions,
+  Generics.Collections,
   SysUtils;
 
 function GetLazarusLocalFolder: string;
@@ -39,12 +41,17 @@ function GetLazarusIDEFileName: string;
 function GetLazarusCompilerFileName: string;
 function IsLazarusInstalled: Boolean;
 procedure FillListViewLazarusVersions(ListView: TListView);
+procedure FillListLazarusVersions(AList:TList<TDelphiVersionData>);
+
+
 
 implementation
 
 uses
   uMisc,
-  ShellAPI, uSupportedIDEs;
+  Graphics,
+  ShellAPI,
+  uSupportedIDEs;
 
 const
   sLazarusConfigFile = 'environmentoptions.xml';
@@ -76,7 +83,36 @@ begin
   end;
 end;
 
+procedure FillListLazarusVersions(AList:TList<TDelphiVersionData>);
+var
+  VersionData : TDelphiVersionData;
+  Found : Boolean;
+  FileName: string;
+begin
+  Found:=IsLazarusInstalled;
+  if Found then
+  begin
+    FileName:=GetLazarusIDEFileName;
+    {
+    ExtractIconFileToImageList(ListView.SmallImages, Filename);
+    Item := ListView.Items.Add;
+    Item.ImageIndex := ListView.SmallImages.Count - 1;
+    Item.Caption := Format('Lazarus %s',[uMisc.GetFileVersion(FileName)]);
+    item.SubItems.Add(FileName);
+    item.SubItems.Add(IntToStr(Ord(TSupportedIDEs.LazarusIDE)));
+    Item.Data := nil;
+     }
+      VersionData:=TDelphiVersionData.Create;
+      VersionData.Path:=Filename;
+      //VersionData.Version:=;
+      VersionData.Name   :=Format('Lazarus %s',[uMisc.GetFileVersion(FileName)]);
+      VersionData.IDEType:=TSupportedIDEs.LazarusIDE;
+      VersionData.Icon    :=TIcon.Create;
+      ExtractIconFile(VersionData.Icon, Filename);
+      AList.Add(VersionData);
+  end;
 
+end;
 
 
 function GetLazarusLocalFolder: string;

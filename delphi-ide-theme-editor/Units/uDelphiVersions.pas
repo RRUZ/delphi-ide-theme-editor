@@ -24,6 +24,9 @@ unit uDelphiVersions;
 interface
 
 uses
+  Generics.Defaults,
+  Generics.Collections,
+  uSupportedIDEs,
   Graphics,
   SysUtils,
   Classes,
@@ -48,6 +51,21 @@ type
     DelphiXE,
     DelphiXE2
     );
+
+  TDelphiVersionData=Class
+  private
+    FVersion: TDelphiVersions;
+    FName: string;
+    FPath: string;
+    FIcon: TIcon;
+    FIDEType: TSupportedIDEs;
+  public
+    property Version : TDelphiVersions read FVersion;
+    property Path    : string read FPath write FPath;
+    property Name    : string read FName write FName;
+    property Icon    : TIcon read FIcon write FIcon;
+    property IDEType : TSupportedIDEs read FIDEType write FIDEType;
+  end;
 
 
 const
@@ -146,7 +164,12 @@ Color15=$FFFFFF
     );
 
 
+
+
+
 procedure FillListViewDelphiVersions(ListView: TListView);
+procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
+
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
 function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
 function GetIndexClosestColor(AColor:TColor) : Integer;
@@ -179,7 +202,6 @@ uses
   ShellAPI,
   Windows,
   uRegistry,
-  uSupportedIDEs,
   Registry;
 
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -233,10 +255,40 @@ begin
 {$ENDIF}
 end;
 
+procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
+Var
+  VersionData : TDelphiVersionData;
+  DelphiComp  : TDelphiVersions;
+  FileName    : string;
+  Found       : boolean;
+begin
+  for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
+  begin
+    Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_CURRENT_USER);
+    if Found then
+      Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName, HKEY_CURRENT_USER) and FileExists(FileName);
 
+    if not Found then
+    begin
+      Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_LOCAL_MACHINE);
+      if Found then
+        Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName, HKEY_LOCAL_MACHINE) and FileExists(FileName);
+    end;
 
+    if Found then
+    begin
+      VersionData:=TDelphiVersionData.Create;
+      VersionData.FPath:=Filename;
+      VersionData.FVersion:=DelphiComp;
+      VersionData.FName   :=DelphiVersionsNames[DelphiComp];
+      VersionData.FIDEType:=TSupportedIDEs.DelphiIDE;
+      VersionData.Icon    :=TIcon.Create;
+      ExtractIconFile(VersionData.FIcon, Filename);
+      AList.Add(VersionData);
+    end;
+  end;
 
-
+end;
 
 
 procedure FillListViewDelphiVersions(ListView: TListView);
