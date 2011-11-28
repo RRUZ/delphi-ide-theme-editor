@@ -234,10 +234,10 @@ end;
 procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
 begin
   try
-    if Application.MessageBox(
-      PChar(Format(
+    if MessageDlg(
+      Format(
       'Do you want overwrite the current theme "%s" with the changes made to hue/saturation?',
-      [FThemeName])), 'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes then
+      [FThemeName]), mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
     begin
       ApplyHueSaturationToIDETheme(FTheme, Trunc(JvSpinEditHue.Value),
         Trunc(JvSpinEditSat.Value), Trunc(JvSpinEditLight.Value));

@@ -119,6 +119,20 @@ Source: Themes Lazarus\ColorVibrant_Ink_theme.xml; DestDir: {app}\Themes Lazarus
 Source: Themes Lazarus\Colorwekeroad_ink_theme.xml; DestDir: {app}\Themes Lazarus\
 Source: Themes Lazarus\Colorzenburn_2010_theme.xml; DestDir: {app}\Themes Lazarus\
 Source: Themes Lazarus\ColorZenburn_theme.xml; DestDir: {app}\Themes Lazarus\
+Source: Styles\AmethystKamri.vsf; DestDir: {app}\Styles\
+Source: Styles\AquaGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\AquaLightSlate.vsf; DestDir: {app}\Styles\
+Source: Styles\Carbon.vsf; DestDir: {app}\Styles\
+Source: Styles\CobaltXEMedia.vsf; DestDir: {app}\Styles\
+Source: Styles\EmeraldLightSlate.vsf; DestDir: {app}\Styles\
+Source: Styles\GoldenGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\IcebergClassico.vsf; DestDir: {app}\Styles\
+Source: Styles\LavenderClassico.vsf; DestDir: {app}\Styles\
+Source: Styles\RubyGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\SapphireKamri.vsf; DestDir: {app}\Styles\
+Source: Styles\Sky.vsf; DestDir: {app}\Styles\
+Source: Styles\SlateClassico.vsf; DestDir: {app}\Styles\
+Source: Styles\SmokeyQuartzKamri.vsf; DestDir: {app}\Styles\
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -150,6 +164,7 @@ Name: {app}\Themes
 Name: {app}\Themes Eclipse
 Name: {app}\Themes VS
 Name: {app}\Themes Lazarus
+Name: {app}\Styles
 [Icons]
 Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
 Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}

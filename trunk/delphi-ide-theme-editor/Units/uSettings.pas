@@ -31,8 +31,10 @@ type
   TSettings = class
   private
     FThemePath: string;
+    FVCLStyle: string;
   public
     property ThemePath: string Read FThemePath Write FThemePath;
+    property VCLStyle: string Read FVCLStyle Write FVCLStyle;
   end;
 
 
@@ -44,11 +46,16 @@ type
     BtnCancel: TButton;
     JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
     Bevel1:    TBevel;
+    Label9: TLabel;
+    ComboBoxVCLStyle: TComboBox;
     procedure BtnSelFolderThemesClick(Sender: TObject);
     procedure BtnSaveClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure ComboBoxVCLStyleChange(Sender: TObject);
   private
     FSettings: TSettings;
+    procedure  LoadStyles;
   public
     property Settings: TSettings Read FSettings Write FSettings;
     procedure LoadSettings;
@@ -56,15 +63,41 @@ type
 
 procedure ReadSettings(var Settings: TSettings);
 procedure WriteSettings(const Settings: TSettings);
+procedure LoadVCLStyle(Const StyleName:String);
 
 implementation
 
 uses
+  Vcl.Styles,
+  Vcl.Themes,
   IOUtils,
   IniFiles;
 
 
 {$R *.dfm}
+
+procedure RegisterVCLStyle(const StyleFileName: string);
+begin
+   if TStyleManager.IsValidStyle(StyleFileName) then
+     TStyleManager.LoadFromFile(StyleFileName)
+   else
+     ShowMessage('the Style is not valid');
+end;
+
+procedure LoadVCLStyle(Const StyleName:String);
+begin
+  if StyleName<>'' then
+   TStyleManager.SetStyle(StyleName)
+  else
+   TStyleManager.SetStyle(TStyleManager.SystemStyle.Name);
+       {
+  if CompareText(StyleName,'Windows')=0 then
+   TStyleManager.SetStyle(TStyleManager.SystemStyle.Name)
+  else
+   RegisterAndSetVCLStyle( IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Styles\'+StyleName+'.vsf');
+       }
+end;
+
 
 procedure ReadSettings(var Settings: TSettings);
 var
@@ -72,8 +105,8 @@ var
 begin
   iniFile := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Settings.ini');
   try
-    Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',
-      ExtractFilePath(ParamStr(0)) + 'Themes');
+    Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Windows');
+    Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  ExtractFilePath(ParamStr(0)) + 'Themes');
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
       Settings.ThemePath := ExtractFilePath(ParamStr(0)) + 'Themes';
@@ -91,6 +124,7 @@ begin
   iniFile := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Settings.ini');
   try
     iniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
+    iniFile.WriteString('Global', 'VCLStyle', Settings.VCLStyle);
   finally
     iniFile.Free;
   end;
@@ -104,9 +138,10 @@ end;
 
 procedure TFrmSettings.BtnSaveClick(Sender: TObject);
 begin
-  if Application.MessageBox(PChar(Format('Do you want save the changes ?%s', [''])), 'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes then
+  if MessageDlg('Do you want save the changes ?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     FSettings.ThemePath := EditThemesFolder.Text;
+    FSettings.VCLStyle  := ComboBoxVCLStyle.Text;
     WriteSettings(FSettings);
     Close();
   end;
@@ -121,10 +156,48 @@ begin
     EditThemesFolder.Text := JvBrowseForFolderDialog1.Directory;
 end;
 
+procedure TFrmSettings.ComboBoxVCLStyleChange(Sender: TObject);
+begin
+ LoadVCLStyle(ComboBoxVCLStyle.Text);
+end;
+
+procedure TFrmSettings.FormCreate(Sender: TObject);
+begin
+  LoadStyles;
+end;
+
 procedure TFrmSettings.LoadSettings;
 begin
   ReadSettings(FSettings);
   EditThemesFolder.Text := FSettings.ThemePath;
+  ComboBoxVCLStyle.ItemIndex:=ComboBoxVCLStyle.Items.IndexOf(FSettings.VCLStyle);
 end;
+
+procedure TFrmSettings.LoadStyles;
+var
+  Style   : string;
+begin
+  try
+    ComboBoxVCLStyle.Items.BeginUpdate;
+    ComboBoxVCLStyle.Items.Clear;
+    for Style in TStyleManager.StyleNames do
+      ComboBoxVCLStyle.Items.Add(Style);
+  finally
+    ComboBoxVCLStyle.Items.EndUpdate;
+  end;
+end;
+
+procedure RegisterVCLStyles;
+var
+  Style   : string;
+begin
+  for Style in TDirectory.GetFiles(ExtractFilePath(ParamStr(0))+'\Styles', '*.vsf') do
+    RegisterVCLStyle(Style);
+end;
+
+
+initialization
+ RegisterVCLStyles;
+
 
 end.
