@@ -136,6 +136,7 @@ type
     ImageUpdate: TImage;
     ComboBoxExIDEs: TComboBoxEx;
     ImageListThemes: TImageList;
+    PopupMenu1: TPopupMenu;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -206,6 +207,8 @@ var
 implementation
 
 uses
+  VCl.Styles,
+  VCl.Themes,
   Diagnostics,
   ShellApi,
   IOUtils,
@@ -268,10 +271,9 @@ begin
         MsgBox(Format('Before to continue you must close all running instances of the %s IDE',
           [IDEData.Name]))
       else
-      if Application.MessageBox(
-        PChar(Format('Do you want apply the theme "%s" to the %s IDE?',
-        [LvThemes.Selected.Caption, IDEData.Name])), 'Confirmation',
-        MB_YESNO + MB_ICONQUESTION) = idYes then
+      if MessageDlg(
+        Format('Do you want apply the theme "%s" to the %s IDE?',
+        [LvThemes.Selected.Caption, IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
         ApplyCurentTheme;
   except
     on E: Exception do
@@ -289,10 +291,9 @@ begin
       if IsAppRunning(IDEData.Path) then
         MsgBox(Format('Before to continue you must close all running instances of the %s IDE', [IDEData.Name]))
       else
-      if Application.MessageBox(
-        PChar(Format('Do you want apply the "%s" font to the %s IDE?',
-        [CbIDEFonts.Text, IDEData.Name])), 'Confirmation',
-        MB_YESNO + MB_ICONQUESTION) = idYes then
+      if MessageDlg(
+        Format('Do you want apply the "%s" font to the %s IDE?',
+        [CbIDEFonts.Text, IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
       begin
 
         if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
@@ -351,14 +352,13 @@ begin
     begin
 
       if OpenDialogExport.Files.Count = 1 then
-        GoNext := Application.MessageBox(
-          PChar(Format('Do you want import the "%s" file?', [ExtractFileName(
-          OpenDialogExport.FileName)])), 'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes
+        GoNext := MessageDlg(
+          Format('Do you want import the "%s" file?', [ExtractFileName(
+          OpenDialogExport.FileName)]), mtConfirmation, [mbYes, mbNo], 0) = mrYes
       else
-        GoNext := Application.MessageBox(
-          PChar(Format('Do you want import the %d files selected?',
-          [OpenDialogExport.Files.Count])),
-          'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes;
+        GoNext := MessageDlg(
+          Format('Do you want import the %d files selected?',
+          [OpenDialogExport.Files.Count]), mtConfirmation, [mbYes, mbNo], 0) = mrYes;
 
       if GoNext and (OpenDialogExport.Files.Count > 1) then
       begin
@@ -426,10 +426,9 @@ begin
   try
     if ComboBoxExIDEs.ItemIndex>=0 then
       if not IsAppRunning(IDEData.Path) then
-        if Application.MessageBox(
-          PChar(Format('Do you want apply the default theme to the "%s" IDE?',
-          [IDEData.Name])), 'Confirmation', MB_YESNO +
-          MB_ICONQUESTION) = idYes then
+        if MessageDlg(
+          Format('Do you want apply the default theme to the "%s" IDE?',
+          [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
         begin
           if SetDelphiIDEDefaultTheme(IDEData.Version) then
             MsgBox('Default theme was applied')
@@ -523,17 +522,16 @@ var
 begin
   try
     if ComboBoxExIDEs.ItemIndex >= 0 then
-      if Application.MessageBox(
-        PChar(Format('Do you want import the current theme from  the "%s" IDE?',
-        [IDEData.Name])), 'Confirmation', MB_YESNO +
-        MB_ICONQUESTION) = idYes then
+      if MessageDlg(
+        Format('Do you want import the current theme from  the "%s" IDE?',
+        [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
       begin
         DelphiVersion := IDEData.Version;
         if not ExistDelphiIDEThemeToImport(DelphiVersion) then
         begin
-          Application.MessageBox(
-            PChar(Format('The "%s" IDE has not themes stored in the windows registry?',
-            [IDEData.Name])), 'Information', MB_OK + MB_ICONINFORMATION);
+         MsgBox(
+            Format('The "%s" IDE has not themes stored in the windows registry?',
+            [IDEData.Name]));
           exit;
         end;
 
@@ -589,14 +587,13 @@ begin
       DelphiVersion := DelphiXE;//TDelphiVersions(integer(LvDelphiVersions.Selected.Data));
 
       if OpenDialogImport.Files.Count = 1 then
-        GoNext := Application.MessageBox(
-          PChar(Format('Do you want import the "%s" file?', [ExtractFileName(
-          OpenDialogImport.FileName)])), 'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes
+        GoNext := MessageDlg(
+          Format('Do you want import the "%s" file?', [ExtractFileName(
+          OpenDialogImport.FileName)]), mtConfirmation, [mbYes, mbNo], 0) = mrYes
       else
-        GoNext := Application.MessageBox(
-          PChar(Format('Do you want import the %d files selected?',
-          [OpenDialogImport.Files.Count])),
-          'Confirmation', MB_YESNO + MB_ICONQUESTION) = idYes;
+        GoNext := MessageDlg(
+          Format('Do you want import the %d files selected?',
+          [OpenDialogImport.Files.Count]), mtConfirmation, [mbYes, mbNo], 0) = mrYes;
 
       if GoNext and (OpenDialogImport.Files.Count > 1) then
       begin
@@ -689,6 +686,7 @@ begin
   FChanging := False;
   FSettings := TSettings.Create;
   ReadSettings(FSettings);
+  LoadVCLStyle(FSettings.VCLStyle);
 
   FMapHighlightElementsTSynAttr := TStringList.Create;
   with SynPasSyn1 do
@@ -1189,9 +1187,8 @@ var
 begin
   try
     if LvThemes.Selected <> nil then
-      if Application.MessageBox(
-        PChar(Format('Do you want delete the theme "%s"?',[LvThemes.Selected.Caption])), 'Confirmation',
-        MB_YESNO + MB_ICONQUESTION) = idYes then
+      if MessageDlg(
+        Format('Do you want delete the theme "%s"?',[LvThemes.Selected.Caption]), mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
     begin
       index := LvThemes.Selected.Index;
       DeleteFile(LvThemes.Selected.SubItems[0]);
@@ -1441,5 +1438,8 @@ begin
     then
     Msg.Result := htCaption;
 end;
+
+initialization
+   TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
 
 end.

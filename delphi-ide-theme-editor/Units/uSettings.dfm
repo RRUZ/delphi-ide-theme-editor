@@ -18,6 +18,7 @@ object FrmSettings: TFrmSettings
   GlassFrame.Bottom = 10
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -33,6 +34,13 @@ object FrmSettings: TFrmSettings
     Width = 497
     Height = 9
     Shape = bsTopLine
+  end
+  object Label9: TLabel
+    Left = 8
+    Top = 57
+    Width = 45
+    Height = 13
+    Caption = 'VCL Style'
   end
   object BtnSave: TButton
     Left = 8
@@ -67,6 +75,15 @@ object FrmSettings: TFrmSettings
     Caption = 'Cancel'
     TabOrder = 3
     OnClick = BtnCancelClick
+  end
+  object ComboBoxVCLStyle: TComboBox
+    Left = 8
+    Top = 76
+    Width = 202
+    Height = 21
+    Style = csDropDownList
+    TabOrder = 4
+    OnChange = ComboBoxVCLStyleChange
   end
   object JvBrowseForFolderDialog1: TJvBrowseForFolderDialog
     Left = 472

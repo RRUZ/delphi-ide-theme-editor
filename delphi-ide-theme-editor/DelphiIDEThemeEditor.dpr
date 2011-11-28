@@ -23,7 +23,9 @@ uses
   uMisc in 'Units\uMisc.pas',
   uLazarusIDEHighlight in 'Units\uLazarusIDEHighlight.pas',
   uCheckUpdate in 'Units\uCheckUpdate.pas' {FrmCheckUpdate},
-  uWinInet in 'Units\uWinInet.pas';
+  uWinInet in 'Units\uWinInet.pas',
+  Vcl.Themes,
+  Vcl.Styles;
 
 {$R *.res}
 

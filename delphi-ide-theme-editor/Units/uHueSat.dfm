@@ -96,7 +96,7 @@ object FrmHueSat: TFrmHueSat
     Left = 263
     Top = 147
     Width = 50
-    Height = 25
+    Height = 21
     MaxValue = 255.000000000000000000
     MinValue = -255.000000000000000000
     TabOrder = 7
@@ -106,7 +106,7 @@ object FrmHueSat: TFrmHueSat
     Left = 263
     Top = 92
     Width = 50
-    Height = 25
+    Height = 21
     MaxValue = 100.000000000000000000
     TabOrder = 4
     OnChange = JvSpinEditSatChange
@@ -115,7 +115,7 @@ object FrmHueSat: TFrmHueSat
     Left = 263
     Top = 35
     Width = 50
-    Height = 25
+    Height = 21
     MaxValue = 180.000000000000000000
     MinValue = -180.000000000000000000
     TabOrder = 1

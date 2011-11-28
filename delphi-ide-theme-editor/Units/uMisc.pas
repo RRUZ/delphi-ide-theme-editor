@@ -53,6 +53,7 @@ uses
   StrUtils,
   ShellAPI,
   Classes,
+  Dialogs,
   SysUtils;
 
 function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
@@ -69,7 +70,7 @@ end;
 
 procedure MsgBox(const Msg: string);
 begin
-  Application.MessageBox(PChar(Msg), 'Information', MB_OK + MB_ICONINFORMATION);
+  MessageDlg(Msg, mtInformation, [mbOK], 0);
 end;
 
 function GetTempDirectory: string;
