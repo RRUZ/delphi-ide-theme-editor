@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-07-04 20:53:36" author="Delphi IDE Theme Editor" versionapp="65536">
+<DelphiIDETheme modified="2011-11-28 23:52:17" author="Delphi IDE Theme Editor" versionapp="65536">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
@@ -214,7 +214,7 @@
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$00AF912B</ForegroundColorNew>
-    <BackgroundColorNew>$00FFFFFF</BackgroundColorNew>
+    <BackgroundColorNew>$00413D1F</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
     <Bold>False</Bold>
