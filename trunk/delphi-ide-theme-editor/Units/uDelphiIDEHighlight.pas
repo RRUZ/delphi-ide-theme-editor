@@ -241,6 +241,8 @@ procedure FillListIDEThemesImport(List: TStrings);
 
 procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);
 procedure ImportDelphiIDEThemeFromRegExt(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);//internal use only
+function  ImportDelphiIDEThemeToRegistry(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme):Boolean;
+
 function  GetDelphiIDEFontName(DelphiVersion:TDelphiVersions):string;
 function  GetDelphiIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
 function  SetDelphiIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
@@ -269,6 +271,8 @@ uses
   XMLDoc,
   XMLIntf,
   Windows,
+  Registry,
+  uMisc,
   uRegistry;
 
 
@@ -323,15 +327,8 @@ begin
 end;
 
 function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
- var
-  FileName: TFileName;
 begin
-  FileName:=SaveDelphiIDEThemeToRegFile(DelphiVersion,ATheme,ExtractFilePath(ParamStr(0)),'Dummy');
-  try
-    Result:= FileExists(FileName) and RunAndWait(0,'regedit.exe','/S "'+FileName+'"');
-  finally
-    //TFile.Delete(FileName);
-  end;
+  Result:=ImportDelphiIDEThemeToRegistry(DelphiVersion, ATheme);
 end;
 
 function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
@@ -340,7 +337,7 @@ function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
   FStream : TFileStream;
   FileName: TFileName;
   ResName : String;
- begin
+begin
  {
   Delphi5 RCDATA 5.reg
   Delphi6 RCDATA 6.reg
@@ -350,11 +347,14 @@ function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
   Delphi2007 RCDATA 2007.reg
   Delphi2009 RCDATA 2009.reg
   Delphi2010 RCDATA 2010.reg
-  DelphiXE RCDATA XE.reg
+  DelphiXE  RCDATA XE.reg
+  DelphiXE2 RCDATA XE2.reg
  }
-  Result:=False;
+
+
+  //Result:=False;
   ResName  := GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiVersion));
-  FileName := ExtractFilePath(Paramstr(0))+'Dummy.reg';
+  FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
   TFile.Delete(FileName);
   AStream  := TResourceStream.Create(hInstance, ResName, RT_RCDATA) ;
   try
@@ -380,7 +380,7 @@ function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
   RegFile : TStrings;
 begin
   ResName  := GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiVersion));
-  FileName := ExtractFilePath(Paramstr(0))+'Dummy.reg';
+  FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
   TFile.Delete(FileName);
   AStream  := TResourceStream.Create(hInstance, ResName, RT_RCDATA) ;
   RegFile  := TStringList.Create;
@@ -759,6 +759,102 @@ begin
     RegFile.SaveToFile(Result,TEncoding.Unicode);
   finally
    RegFile.Free;
+  end;
+end;
+
+
+function ImportDelphiIDEThemeToRegistry(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme):Boolean;
+var
+ Element : TIDEHighlightElements;
+ Indexb  : Integer;
+ Indexf  : Integer;
+ Reg     : TRegistry;
+begin
+  Result:=False;
+  Reg:=TRegistry.Create;
+  try
+    Reg.RootKey:=HKEY_CURRENT_USER;
+{
+      Windows Registry Editor Version 5.00
+      [HKEY_CURRENT_USER\Software\Borland\Delphi\7.0\Editor\Highlight]
+
+      [HKEY_CURRENT_USER\Software\Borland\Delphi\7.0\Editor\Highlight\Assembler]
+      "Bold"="False"
+      "Italic"="False"
+      "Underline"="False"
+      "Default Foreground"="False"
+      "Default Background"="False"
+      "Foreground Color New"="$001E1EE8"
+      "Background Color New"="$00272727"
+}
+      {
+    RegFile.Add('Windows Registry Editor Version 5.00');
+    RegFile.Add('');
+    RegFile.Add(Format('[HKEY_CURRENT_USER%s\Editor\Highlight]',[DelphiRegPaths[DelphiVersion]]));
+    RegFile.Add('');
+        }
+    for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
+    if DelphiVersionNumbers[DelphiVersion]>=IDEHighlightElementsMinVersion[Element] then
+    begin
+       if Reg.OpenKey(Format('%s\Editor\Highlight\%s',[DelphiRegPaths[DelphiVersion],IDEHighlightElementsNames[Element]]),True) then
+       begin
+         Reg.WriteString('Default Foreground',BoolToStr(ATheme[Element].DefaultForeground,True));
+         Reg.WriteString('Default Background',BoolToStr(ATheme[Element].DefaultBackground,True));
+
+
+       //RegFile.Add(Format('[HKEY_CURRENT_USER%s\Editor\Highlight\%s]',[DelphiRegPaths[DelphiVersion],IDEHighlightElementsNames[Element]]));
+       //RegFile.Add(Format('"Default Foreground"="%s"',[BoolToStr(ATheme[Element].DefaultForeground,True)]));
+       //RegFile.Add(Format('"Default Background"="%s"',[BoolToStr(ATheme[Element].DefaultBackground,True)]));
+
+        {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+         if DelphiIsOldVersion(DelphiVersion) then
+         begin
+         {
+            [HKEY_CURRENT_USER\Software\Borland\Delphi\5.0\Editor\Highlight\Search match]
+            "Foreground Color"=dword:0000000c
+            "Background Color"=dword:00000007
+            "Default Foreground"="False"
+            "Default Background"="False"
+         }
+
+
+           Indexf:=GetIndexClosestColor(StringToColor(ATheme[Element].ForegroundColorNew));
+           Indexb:=GetIndexClosestColor(StringToColor(ATheme[Element].BackgroundColorNew));
+           {
+           RegFile.Add(Format('"Foreground Color"=dword:%x',[Indexf]));
+           RegFile.Add(Format('"Background Color"=dword:%x',[Indexb]));
+           }
+           Reg.WriteInteger('Foreground Color',Indexf);
+           Reg.WriteInteger('Background Color',Indexb);
+         end
+         else
+         begin
+         {$ENDIF}
+           Reg.WriteString('Bold',BoolToStr(ATheme[Element].Bold,True));
+           Reg.WriteString('Italic',BoolToStr(ATheme[Element].Italic,True));
+           Reg.WriteString('Underline',BoolToStr(ATheme[Element].Underline,True));
+           Reg.WriteString('Foreground Color New',ATheme[Element].ForegroundColorNew);
+           Reg.WriteString('Background Color New',ATheme[Element].BackgroundColorNew);
+           {
+           RegFile.Add(Format('"Bold"="%s"',[BoolToStr(ATheme[Element].Bold,True)]));
+           RegFile.Add(Format('"Italic"="%s"',[BoolToStr(ATheme[Element].Italic,True)]));
+           RegFile.Add(Format('"Underline"="%s"',[BoolToStr(ATheme[Element].Underline,True)]));
+           RegFile.Add(Format('"Foreground Color New"="%s"',[ATheme[Element].ForegroundColorNew]));
+           RegFile.Add(Format('"Background Color New"="%s"',[ATheme[Element].BackgroundColorNew]));
+           }
+         {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+         end;
+         {$ENDIF}
+         Result:=True;
+       end;
+
+       //RegFile.Add('');
+    end;
+
+    //Result:=Format('%s%s_%s.reg',[IncludeTrailingPathDelimiter(Path),Name,DelphiVersionsNames[DelphiVersion]]);
+    //RegFile.SaveToFile(Result,TEncoding.Unicode);
+  finally
+   Reg.Free;
   end;
 end;
 
