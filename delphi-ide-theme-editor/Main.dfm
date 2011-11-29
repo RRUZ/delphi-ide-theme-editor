@@ -864,10 +864,9 @@ object FrmMain: TFrmMain
     Top = 393
     Width = 138
     Height = 25
+    Action = ActionApplyTheme
     Anchors = [akLeft, akBottom]
-    Caption = 'Apply current theme'
     TabOrder = 16
-    OnClick = BtnApplyClick
   end
   object EditThemeName: TEdit
     Left = 8
@@ -884,10 +883,9 @@ object FrmMain: TFrmMain
     Top = 393
     Width = 137
     Height = 25
+    Action = ActionSaveChanges
     Anchors = [akLeft, akBottom]
-    Caption = 'Save Changes'
     TabOrder = 15
-    OnClick = BtnSaveClick
   end
   object BtnApplyFont: TButton
     Left = 701
@@ -1099,7 +1097,7 @@ object FrmMain: TFrmMain
     Left = 568
     Top = 311
     Bitmap = {
-      494C010106000900E4000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000900F0000B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1272,7 +1270,7 @@ object FrmMain: TFrmMain
     Left = 456
     Top = 307
     Bitmap = {
-      494C010107000800B80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800C40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1548,28 +1546,19 @@ object FrmMain: TFrmMain
     Left = 80
     Top = 208
     object ApplyTheme1: TMenuItem
-      Caption = '&Apply Theme'
-      ImageIndex = 6
-      OnClick = BtnApplyClick
+      Action = ActionApplyTheme
     end
     object CloneTheme1: TMenuItem
-      Caption = '&CloneTheme'
-      ImageIndex = 5
-      OnClick = CloneTheme1Click
+      Action = ActionCloneTheme
     end
     object DeleteTheme1: TMenuItem
-      Caption = '&Delete Theme'
-      ImageIndex = 3
-      OnClick = DeleteTheme1Click
+      Action = ActionDeleteTheme
     end
     object SaveChanges1: TMenuItem
-      Caption = '&Save Changes'
-      ImageIndex = 4
-      OnClick = BtnSaveClick
+      Action = ActionSaveChanges
     end
     object SaveAs1: TMenuItem
-      Caption = 'Sa&ve As...'
-      OnClick = SaveAs1Click
+      Action = ActionSaveAs
     end
   end
   object SynExporterHTML1: TSynExporterHTML
@@ -1604,5 +1593,35 @@ object FrmMain: TFrmMain
   object PopupMenu1: TPopupMenu
     Left = 664
     Top = 40
+  end
+  object ActionList1: TActionList
+    Images = ImageList1
+    Left = 600
+    Top = 32
+    object ActionApplyTheme: TAction
+      Caption = 'Apply Theme'
+      ImageIndex = 6
+      OnExecute = ActionApplyThemeExecute
+    end
+    object ActionCloneTheme: TAction
+      Caption = 'Clone Theme'
+      ImageIndex = 5
+      OnExecute = ActionCloneThemeExecute
+    end
+    object ActionDeleteTheme: TAction
+      Caption = 'Delete Theme'
+      ImageIndex = 3
+      ShortCut = 46
+      OnExecute = ActionDeleteThemeExecute
+    end
+    object ActionSaveChanges: TAction
+      Caption = 'Save Changes'
+      ImageIndex = 4
+      OnExecute = ActionSaveChangesExecute
+    end
+    object ActionSaveAs: TAction
+      Caption = 'Save As...'
+      OnExecute = ActionSaveAsExecute
+    end
   end
 end

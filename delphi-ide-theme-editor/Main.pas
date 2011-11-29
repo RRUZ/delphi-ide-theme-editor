@@ -70,7 +70,7 @@ uses
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, JvBaseDlg,
-  JvBrowseFolder,  Generics.Defaults, Generics.Collections;
+  JvBrowseFolder,  Generics.Defaults, Generics.Collections, Vcl.ActnList;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -137,14 +137,18 @@ type
     ComboBoxExIDEs: TComboBoxEx;
     ImageListThemes: TImageList;
     PopupMenu1: TPopupMenu;
+    ActionList1: TActionList;
+    ActionApplyTheme: TAction;
+    ActionCloneTheme: TAction;
+    ActionDeleteTheme: TAction;
+    ActionSaveChanges: TAction;
+    ActionSaveAs: TAction;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
     procedure CbElementChange(Sender: TObject);
     procedure CbIDEFontsChange(Sender: TObject);
     procedure CblForegroundChange(Sender: TObject);
-    procedure BtnSaveClick(Sender: TObject);
-    procedure BtnApplyClick(Sender: TObject);
     procedure BtnApplyFontClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure LvThemesChange(Sender: TObject; Item: TListItem; Change: TItemChange);
@@ -163,13 +167,15 @@ type
     procedure BtnSelForColorClick(Sender: TObject);
     procedure ImageBugClick(Sender: TObject);
     procedure BtnSelBackColorClick(Sender: TObject);
-    procedure DeleteTheme1Click(Sender: TObject);
-    procedure CloneTheme1Click(Sender: TObject);
-    procedure SaveAs1Click(Sender: TObject);
     procedure BtnContributeClick(Sender: TObject);
     procedure BtnExportToLazarusThemeClick(Sender: TObject);
     procedure ImageUpdateClick(Sender: TObject);
     procedure ComboBoxExIDEsChange(Sender: TObject);
+    procedure ActionDeleteThemeExecute(Sender: TObject);
+    procedure ActionCloneThemeExecute(Sender: TObject);
+    procedure ActionSaveAsExecute(Sender: TObject);
+    procedure ActionApplyThemeExecute(Sender: TObject);
+    procedure ActionSaveChangesExecute(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -201,8 +207,20 @@ type
     { Public declarations }
   end;
 
+  TLoadThemesImages = class(TThread)
+  private
+    FPath :String;
+    FImageList : TImageList;
+    FListview  : TListView;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(const Path : string;ImageList:TImageList;ListView: TListView);
+  end;
+
 var
-  FrmMain: TFrmMain;
+  FrmMain : TFrmMain;
+  FLoaded : Boolean;
 
 implementation
 
@@ -222,6 +240,7 @@ uses
   uMisc,
   uLazarusIDEHighlight,
   uStackTrace,
+  ActiveX,
   uCheckUpdate;
 
 const
@@ -234,6 +253,225 @@ const
 {$R *.dfm}
 {$R ManAdmin.RES}
 
+{ TLoadThemes }
+
+constructor TLoadThemesImages.Create(const Path : string;ImageList:TImageList;ListView: TListView);
+begin
+   inherited Create(False);
+   FPath:=Path;
+   FImageList:=ImageList;
+   FListview:=ListView;
+   FreeOnTerminate:=True;
+end;
+
+procedure TLoadThemesImages.Execute;
+var
+  Item    : TListItem;
+  FileName: string;
+  ImpTheme: TIDETheme;
+  Bmp     : TBitmap;
+  i       : Integer;
+begin
+  inherited;
+  if not TDirectory.Exists(FPath) then
+    exit;
+
+  FListview.SmallImages:=nil;
+  FImageList.Clear;
+  CoInitialize(nil);
+  try
+    for i:=0 to FListview.Items.Count-1 do
+    begin
+      Item:=FListview.Items.Item[i];
+      FileName:=IncludeTrailingPathDelimiter(FPath)+ Item.Caption + '.theme.xml';
+      LoadThemeFromXMLFile(ImpTheme, FileName);
+      Bmp:=TBitmap.Create;
+      try
+       //CreateBitmapSolidColor(16,16,[StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),StringToColor(ImpTheme[ReservedWord].ForegroundColorNew)], Bmp);
+       CreateArrayBitmap(16,16,[StringToColor(ImpTheme[ReservedWord].ForegroundColorNew),StringToColor(ImpTheme[ReservedWord].BackgroundColorNew)], Bmp);
+
+       Synchronize(
+         procedure
+         begin
+           FImageList.Add(Bmp, nil);
+           Item.ImageIndex:=FImageList.Count-1;
+         end
+       );
+
+      finally
+         Bmp.Free;
+      end;
+    end;
+
+  finally
+    CoUninitialize;
+    FListview.SmallImages:=FImageList;
+  end;
+
+  {
+  CoInitialize(nil);
+  try
+    FListview.Items.Clear;
+    for FileName in TDirectory.GetFiles(FPath, '*.theme.xml') do
+    begin
+        Synchronize(
+          procedure
+          begin
+            Item := FListview.Items.Add;
+            Item.Caption := Copy(ExtractFileName(FileName), 1, Pos('.theme', ExtractFileName(FileName)) - 1);
+            Item.SubItems.Add(FileName);
+          end
+        );
+
+      LoadThemeFromXMLFile(ImpTheme, FileName);
+
+      Bmp:=TBitmap.Create;
+      try
+       //CreateBitmapSolidColor(16,16,[StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),StringToColor(ImpTheme[ReservedWord].ForegroundColorNew)], Bmp);
+       CreateArrayBitmap(16,16,[StringToColor(ImpTheme[ReservedWord].ForegroundColorNew),StringToColor(ImpTheme[ReservedWord].BackgroundColorNew)], Bmp);
+
+       Synchronize(
+         procedure
+         begin
+           FImageList.Add(Bmp, nil);
+           Item.ImageIndex:=FImageList.Count-1;
+         end
+       );
+
+      finally
+         Bmp.Free;
+      end;
+    end;
+  finally
+    CoUninitialize;
+  end;
+  }
+  FLoaded:=True;
+end;
+
+
+procedure TFrmMain.ActionApplyThemeExecute(Sender: TObject);
+begin
+  try
+    if (ComboBoxExIDEs.ItemIndex>=0) and (LvThemes.Selected <> nil) then
+      if IsAppRunning(IDEData.Path) then
+        MsgBox(Format('Before to continue you must close all running instances of the %s IDE',
+          [IDEData.Name]))
+      else
+      if MessageDlg(
+        Format('Do you want apply the theme "%s" to the %s IDE?',
+        [LvThemes.Selected.Caption, IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+        ApplyCurentTheme;
+  except
+    on E: Exception do
+      MsgBox(Format('Error setting theme - Message : %s : Trace %s',
+        [E.Message, E.StackTrace]));
+  end;
+end;
+
+
+procedure TFrmMain.ActionCloneThemeExecute(Sender: TObject);
+var
+  index    : integer;
+  FileName : string;
+  NFileName: string;
+begin
+  try
+    if LvThemes.Selected <> nil then
+    begin
+      index    := LvThemes.Selected.Index;
+      FileName :=LvThemes.Selected.SubItems[0];
+      NFileName:=ChangeFileExt(ExtractFileName(FileName),'');//remove .xml
+      NFileName:=ChangeFileExt(ExtractFileName(NFileName),'');//remove .theme
+      NFileName:=ExtractFilePath(FileName)+NFileName+'-Clone.theme.xml';
+      DeleteFile(NFileName);
+      TFile.Copy(FileName,NFileName);
+      LoadThemes;
+      if index >= 0 then
+      begin
+        LvThemes.Selected := LvThemes.Items.Item[index];
+        LvThemes.Selected.MakeVisible(True);
+      end;
+    end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error deleting theme message : %s : trace %s',[E.Message, E.StackTrace]));
+  end;
+end;
+
+procedure TFrmMain.ActionDeleteThemeExecute(Sender: TObject);
+var
+  index: integer;
+begin
+  try
+    if LvThemes.Selected <> nil then
+      if MessageDlg(
+        Format('Do you want delete the theme "%s"?',[LvThemes.Selected.Caption]), mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
+    begin
+      index := LvThemes.Selected.Index;
+      DeleteFile(LvThemes.Selected.SubItems[0]);
+      LoadThemes;
+      if index >= 0 then
+      begin
+        LvThemes.Selected := LvThemes.Items.Item[index];
+        LvThemes.Selected.MakeVisible(True);
+      end;
+    end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error deleting theme message : %s : trace %s',[E.Message, E.StackTrace]));
+  end;
+end;
+
+procedure TFrmMain.ActionSaveAsExecute(Sender: TObject);
+var
+  index: integer;
+  Value: string;
+begin
+  //detect name in list show msg overwrite
+  Value:=EditThemeName.Text;
+  try
+
+   if InputQuery('Save As..','Enter the new name of the theme',Value) then
+   begin
+    EditThemeName.Text:=Value;
+    CreateThemeFile;
+    LoadThemes;
+    index := GetThemeIndex(EditThemeName.Text);
+    if index >= 0 then
+    begin
+      LvThemes.Selected := LvThemes.Items.Item[index];
+      LvThemes.Selected.MakeVisible(True);
+    end;
+   end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
+        [E.Message, E.StackTrace]));
+  end;
+end;
+
+
+procedure TFrmMain.ActionSaveChangesExecute(Sender: TObject);
+var
+  index: integer;
+begin
+  //detect name in list show msg overwrite
+  try
+    CreateThemeFile;
+    LoadThemes;
+    index := GetThemeIndex(EditThemeName.Text);
+    if index >= 0 then
+    begin
+      LvThemes.Selected := LvThemes.Items.Item[index];
+      LvThemes.Selected.MakeVisible(True);
+    end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
+        [E.Message, E.StackTrace]));
+  end;
+end;
 
 procedure TFrmMain.ApplyCurentTheme;
 var
@@ -263,24 +501,6 @@ begin
   end;
 end;
 
-procedure TFrmMain.BtnApplyClick(Sender: TObject);
-begin
-  try
-    if (ComboBoxExIDEs.ItemIndex>=0) and (LvThemes.Selected <> nil) then
-      if IsAppRunning(IDEData.Path) then
-        MsgBox(Format('Before to continue you must close all running instances of the %s IDE',
-          [IDEData.Name]))
-      else
-      if MessageDlg(
-        Format('Do you want apply the theme "%s" to the %s IDE?',
-        [LvThemes.Selected.Caption, IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-        ApplyCurentTheme;
-  except
-    on E: Exception do
-      MsgBox(Format('Error setting theme - Message : %s : Trace %s',
-        [E.Message, E.StackTrace]));
-  end;
-end;
 
 procedure TFrmMain.BtnApplyFontClick(Sender: TObject);
 var
@@ -400,26 +620,6 @@ begin
   end;
 end;
 
-procedure TFrmMain.BtnSaveClick(Sender: TObject);
-var
-  index: integer;
-begin
-  //detect name in list show msg overwrite
-  try
-    CreateThemeFile;
-    LoadThemes;
-    index := GetThemeIndex(EditThemeName.Text);
-    if index >= 0 then
-    begin
-      LvThemes.Selected := LvThemes.Items.Item[index];
-      LvThemes.Selected.MakeVisible(True);
-    end;
-  except
-    on E: Exception do
-      MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
-        [E.Message, E.StackTrace]));
-  end;
-end;
 
 procedure TFrmMain.BtnSetDefaultClick(Sender: TObject);
 begin
@@ -682,6 +882,7 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
+  FLoaded   := False;
   IDEsList:=TList<TDelphiVersionData>.Create;
   FChanging := False;
   FSettings := TSettings.Create;
@@ -723,15 +924,11 @@ begin
   FillListIDEThemesImport(CbIDEThemeImport.Items);
   CbIDEThemeImport.ItemIndex := 0;
 
-
   LabelVersion.Caption := Format('Version %s', [uMisc.GetFileVersion(ParamStr(0))]);
-
-
   FillListDelphiVersions(IDEsList);
 
   if IsLazarusInstalled then
    FillListLazarusVersions(IDEsList);
-
 
   for Index:=0 to IDEsList.Count-1 do
   begin
@@ -740,10 +937,8 @@ begin
     ComboBoxExIDEs.ItemsEx.AddItem(IDEData.Name,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,0, IDEsList[Index]);
   end;
 
-
   LoadFixedWidthFonts;
   LoadThemes;
-
 
   if ComboBoxExIDEs.Items.Count > 0 then
   begin
@@ -912,14 +1107,18 @@ end;
 
 procedure TFrmMain.LoadThemes;
 var
-  Item:     TListItem;
+  Item    : TListItem;
   FileName: string;
-  ImpTheme: TIDETheme;
-  Bmp     : TBitmap;
+  //ImpTheme: TIDETheme;
+  //Bmp     : TBitmap;
+
+  ThrLoadThemes :  TLoadThemesImages;
+
 begin
+  //if not FLoaded then
+  //ThrLoadThemes:=TLoadThemes.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
   if not TDirectory.Exists(FSettings.ThemePath) then
     exit;
-
 
   ImageListThemes.Clear;
   LvThemes.Items.BeginUpdate;
@@ -931,6 +1130,7 @@ begin
       Item.Caption := Copy(ExtractFileName(FileName), 1, Pos('.theme', ExtractFileName(FileName)) - 1);
       Item.SubItems.Add(FileName);
 
+      {
       LoadThemeFromXMLFile(ImpTheme, FileName);
       Bmp:=TBitmap.Create;
       try
@@ -941,11 +1141,14 @@ begin
       finally
          Bmp.Free;
       end;
+      }
     end;
     FThemeChangued := False;
   finally
     LvThemes.Items.EndUpdate;
   end;
+
+  TLoadThemesImages.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
 
 end;
 
@@ -1080,36 +1283,6 @@ begin
 end;
 
 
-procedure TFrmMain.CloneTheme1Click(Sender: TObject);
-var
-  index    : integer;
-  FileName : string;
-  NFileName: string;
-begin
-  try
-    if LvThemes.Selected <> nil then
-    begin
-      index    := LvThemes.Selected.Index;
-      FileName :=LvThemes.Selected.SubItems[0];
-      NFileName:=ChangeFileExt(ExtractFileName(FileName),'');//remove .xml
-      NFileName:=ChangeFileExt(ExtractFileName(NFileName),'');//remove .theme
-      NFileName:=ExtractFilePath(FileName)+NFileName+'-Clone.theme.xml';
-      DeleteFile(NFileName);
-      TFile.Copy(FileName,NFileName);
-      LoadThemes;
-      if index >= 0 then
-      begin
-        LvThemes.Selected := LvThemes.Items.Item[index];
-        LvThemes.Selected.MakeVisible(True);
-      end;
-    end;
-  except
-    on E: Exception do
-      MsgBox(Format('Error deleting theme message : %s : trace %s',[E.Message, E.StackTrace]));
-  end;
-end;
-
-
 procedure TFrmMain.ComboBoxExIDEsChange(Sender: TObject);
 var
   DelphiVersion: TDelphiVersions;
@@ -1178,30 +1351,6 @@ begin
       FileName := SaveDelphiIDEThemeToXmlFile(FCurrentTheme, FSettings.ThemePath, EditThemeName.Text);
       MsgBox(Format('The theme was saved to the file %s', [FileName]));
     end;
-  end;
-end;
-
-procedure TFrmMain.DeleteTheme1Click(Sender: TObject);
-var
-  index: integer;
-begin
-  try
-    if LvThemes.Selected <> nil then
-      if MessageDlg(
-        Format('Do you want delete the theme "%s"?',[LvThemes.Selected.Caption]), mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
-    begin
-      index := LvThemes.Selected.Index;
-      DeleteFile(LvThemes.Selected.SubItems[0]);
-      LoadThemes;
-      if index >= 0 then
-      begin
-        LvThemes.Selected := LvThemes.Items.Item[index];
-        LvThemes.Selected.MakeVisible(True);
-      end;
-    end;
-  except
-    on E: Exception do
-      MsgBox(Format('Error deleting theme message : %s : trace %s',[E.Message, E.StackTrace]));
   end;
 end;
 
@@ -1281,34 +1430,6 @@ begin
     }
 
     SynEditCode.Repaint;
-  end;
-end;
-
-procedure TFrmMain.SaveAs1Click(Sender: TObject);
-var
-  index: integer;
-  Value: string;
-begin
-  //detect name in list show msg overwrite
-  Value:=EditThemeName.Text;
-  try
-
-   if InputQuery('Save As..','Enter the new name of the theme',Value) then
-   begin
-    EditThemeName.Text:=Value;
-    CreateThemeFile;
-    LoadThemes;
-    index := GetThemeIndex(EditThemeName.Text);
-    if index >= 0 then
-    begin
-      LvThemes.Selected := LvThemes.Items.Item[index];
-      LvThemes.Selected.MakeVisible(True);
-    end;
-   end;
-  except
-    on E: Exception do
-      MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
-        [E.Message, E.StackTrace]));
   end;
 end;
 
@@ -1415,6 +1536,7 @@ procedure TFrmMain.SynEditCodeSpecialLineColors(Sender: TObject;
   end;
 
 begin
+  if LvThemes.Selected<>nil then
   case Line of
     InvalidBreakLine  : SetColorSpecialLine(InvalidBreak);
     ExecutionPointLine: SetColorSpecialLine(ExecutionPoint);
@@ -1438,6 +1560,8 @@ begin
     then
     Msg.Result := htCaption;
 end;
+
+
 
 initialization
    TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
