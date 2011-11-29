@@ -1111,9 +1111,7 @@ var
   FileName: string;
   //ImpTheme: TIDETheme;
   //Bmp     : TBitmap;
-
-  ThrLoadThemes :  TLoadThemesImages;
-
+  //ThrLoadThemes :  TLoadThemesImages;
 begin
   //if not FLoaded then
   //ThrLoadThemes:=TLoadThemes.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
