@@ -78,6 +78,7 @@
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<VerInfo_Build>260</VerInfo_Build>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.260;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
@@ -123,6 +124,12 @@
 				<Form>FrmCheckUpdate</Form>
 			</DCCReference>
 			<DCCReference Include="Units\uWinInet.pas"/>
+			<DCCReference Include="IDE PlugIn\uColorizerSettings.pas">
+				<Form>FrmIDEColorizerSettings</Form>
+			</DCCReference>
+			<DCCReference Include="IDE PlugIn\uStoreColorMap.pas"/>
+			<DCCReference Include="IDE PlugIn\uIDEExpertUtils.pas"/>
+			<DCCReference Include="IDE PlugIn\uClrSettings.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

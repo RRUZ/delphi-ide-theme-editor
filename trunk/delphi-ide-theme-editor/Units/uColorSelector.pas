@@ -97,6 +97,7 @@ type
     property OnChange : TNotifyEvent read FOnChange write FOnChange;
   end;
 
+function DialogSelectColor(SelectedColor: TColor): TColor;
 
 implementation
 
@@ -105,6 +106,22 @@ uses
 
 {$R *.dfm}
 
+
+function DialogSelectColor(SelectedColor: TColor): TColor;
+var
+   Frm : TDialogColorSelector;
+begin
+   Frm := TDialogColorSelector.Create(nil);
+   try
+     Frm.SelectedColor:=SelectedColor;
+     if Frm.Execute then
+       Result:=Frm.SelectedColor
+     else
+       Result:=clNone;
+   finally
+     Frm.Free;
+   end;
+end;
 
 procedure TDialogColorSelector.BtnApplyClick(Sender: TObject);
 begin

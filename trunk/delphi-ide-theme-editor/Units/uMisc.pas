@@ -29,7 +29,7 @@ uses
 
 
 procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
-procedure ExtractIconFile(Icon: TIcon; const Filename: string);
+procedure ExtractIconFile(Icon: TIcon; const Filename: string;IconType : Cardinal);
 function  GetFileVersion(const FileName: string): string;
 function  IsAppRunning(const FileName: string): boolean;
 function  GetLocalAppDataFolder: string;
@@ -158,7 +158,7 @@ begin
   Result := FSO.GetFileVersion(FileName);
 end;
 
-procedure ExtractIconFile(Icon: TIcon; const Filename: string);
+procedure ExtractIconFile(Icon: TIcon; const Filename: string;IconType : Cardinal);
 var
   FileInfo: TShFileInfo;
 begin
@@ -166,7 +166,7 @@ begin
   begin
     FillChar(FileInfo, SizeOf(FileInfo), 0);
     SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
-      SHGFI_ICON or SHGFI_SMALLICON);
+      SHGFI_ICON or IconType);
     if FileInfo.hIcon <> 0 then
       Icon.Handle:=FileInfo.hIcon;
   end;
