@@ -21,7 +21,11 @@ uses
   uCheckUpdate in 'Units\uCheckUpdate.pas' {FrmCheckUpdate},
   uWinInet in 'Units\uWinInet.pas',
   Vcl.Themes,
-  Vcl.Styles;
+  Vcl.Styles,
+  uColorizerSettings in 'IDE PlugIn\uColorizerSettings.pas' {FrmIDEColorizerSettings},
+  uStoreColorMap in 'IDE PlugIn\uStoreColorMap.pas',
+  uIDEExpertUtils in 'IDE PlugIn\uIDEExpertUtils.pas',
+  uClrSettings in 'IDE PlugIn\uClrSettings.pas';
 
 {$R *.res}
 

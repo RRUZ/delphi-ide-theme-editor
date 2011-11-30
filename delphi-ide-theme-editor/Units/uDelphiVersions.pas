@@ -59,12 +59,14 @@ type
     FPath: string;
     FIcon: TIcon;
     FIDEType: TSupportedIDEs;
+    //FSupportsColorizer: Boolean;
   public
     property Version : TDelphiVersions read FVersion;
     property Path    : string read FPath write FPath;
     property Name    : string read FName write FName;
     property Icon    : TIcon read FIcon write FIcon;
     property IDEType : TSupportedIDEs read FIDEType write FIDEType;
+    //property SupportsColorizer : Boolean read FSupportsColorizer write FSupportsColorizer;
   end;
 
 
@@ -164,12 +166,7 @@ Color15=$FFFFFF
     );
 
 
-
-
-
-procedure FillListViewDelphiVersions(ListView: TListView);
 procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
-
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
 function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
 function GetIndexClosestColor(AColor:TColor) : Integer;
@@ -283,49 +280,13 @@ begin
       VersionData.FName   :=DelphiVersionsNames[DelphiComp];
       VersionData.FIDEType:=TSupportedIDEs.DelphiIDE;
       VersionData.Icon    :=TIcon.Create;
-      ExtractIconFile(VersionData.FIcon, Filename);
+      ExtractIconFile(VersionData.FIcon, Filename, SHGFI_SMALLICON);
       AList.Add(VersionData);
     end;
   end;
 
 end;
 
-
-procedure FillListViewDelphiVersions(ListView: TListView);
-var
-  DelphiComp: TDelphiVersions;
-  FileName: string;
-  Found: boolean;
-  Item: TListItem;
-begin
-  for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
-  begin
-    Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_CURRENT_USER);
-    if Found then
-      Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName,
-        HKEY_CURRENT_USER) and
-        FileExists(FileName);
-
-    if not Found then
-    begin
-      Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_LOCAL_MACHINE);
-      if Found then
-        Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName,
-          HKEY_LOCAL_MACHINE) and FileExists(FileName);
-    end;
-
-    if Found then
-    begin
-      ExtractIconFileToImageList(ListView.SmallImages, Filename);
-      Item := ListView.Items.Add;
-      Item.ImageIndex := ListView.SmallImages.Count - 1;
-      Item.Caption := DelphiVersionsNames[DelphiComp];
-      item.SubItems.Add(FileName);
-      item.SubItems.Add(IntToStr(Ord(TSupportedIDEs.DelphiIDE)));
-      Item.Data := Pointer(Ord(DelphiComp));
-    end;
-  end;
-end;
 
 
 end.

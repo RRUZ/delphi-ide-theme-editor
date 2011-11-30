@@ -143,6 +143,7 @@ type
     ActionDeleteTheme: TAction;
     ActionSaveChanges: TAction;
     ActionSaveAs: TAction;
+    BtnIDEColorizer: TButton;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -176,6 +177,7 @@ type
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionApplyThemeExecute(Sender: TObject);
     procedure ActionSaveChangesExecute(Sender: TObject);
+    procedure BtnIDEColorizerClick(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -202,7 +204,7 @@ type
     {$ENDIF}
     function GetDelphiVersionData(Index:Integer) : TDelphiVersionData;
     function GetIDEData: TDelphiVersionData;
-    property IDEData : TDelphiVersionData read GetIDEData write FIDEData;
+    property IDEData   : TDelphiVersionData read GetIDEData write FIDEData;
   public
     { Public declarations }
   end;
@@ -217,6 +219,12 @@ type
   public
     constructor Create(const Path : string;ImageList:TImageList;ListView: TListView);
   end;
+
+  TMyClass = class(TFormStyleHook)
+  protected
+   procedure PaintBackground(Canvas: TCanvas); override;
+  end;
+
 
 var
   FrmMain : TFrmMain;
@@ -241,7 +249,7 @@ uses
   uLazarusIDEHighlight,
   uStackTrace,
   ActiveX,
-  uCheckUpdate;
+  uCheckUpdate, uColorizerSettings;
 
 const
   InvalidBreakLine   = 9;
@@ -768,6 +776,27 @@ begin
 
 end;
 
+procedure TFrmMain.BtnIDEColorizerClick(Sender: TObject);
+Var
+  Frm : TFrmIDEColorizerSettings;
+  Icon: TIcon;
+begin
+
+  Frm:=TFrmIDEColorizerSettings.Create(nil);
+  Icon:=TIcon.Create;
+  try
+    Frm.IDEData:=FIDEData;
+    Frm.init();
+    //ImageListDelphiVersion.GetIcon(ComboBoxExIDEs.ItemsEx[ComboBoxExIDEs.ItemIndex].ImageIndex, Icon);
+    ExtractIconFile(Icon,IDEData.Path, SHGFI_LARGEICON);
+    Frm.ImageIDELogo.Picture.Icon:=Icon;
+    Frm.ShowModal();
+  finally
+    Icon.Free;
+    Frm.Free;
+  end;
+end;
+
 procedure TFrmMain.BtnImportClick(Sender: TObject);
 var
   ThemeName: string;
@@ -882,6 +911,9 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
+  {$WARN SYMBOL_PLATFORM OFF}
+  BtnIDEColorizer.Visible:=DebugHook<>0;
+  {$WARN SYMBOL_PLATFORM ON}
   FLoaded   := False;
   IDEsList:=TList<TDelphiVersionData>.Create;
   FChanging := False;
@@ -1294,6 +1326,8 @@ begin
      DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elemnents
 
 
+    BtnIDEColorizer.Enabled:= (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
+
     FillListAvailableElements(DelphiVersion, CbElement.Items);
 
     SynEditCode.Gutter.Visible :=
@@ -1561,7 +1595,28 @@ end;
 
 
 
+{ TMyClass }
+
+procedure TMyClass.PaintBackground(Canvas: TCanvas);
+var
+  Details: TThemedElementDetails;
+  R: TRect;
+begin
+  if StyleServices.Available then
+  begin
+    Details.Element := teWindow;
+    Details.Part := 0;
+    R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
+    //if (GetWindowLong(Form.Handle,GWL_EXSTYLE) AND WS_EX_TRANSPARENT) = WS_EX_TRANSPARENT  then
+     if Form.Brush.Style = bsClear then Exit;
+      StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
+end;
+
+
 initialization
-   TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
+  TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
+  TStyleManager.Engine.UnRegisterStyleHook(TCustomForm, TFormStyleHook);
+  TStyleManager.Engine.RegisterStyleHook(TCustomForm, TMyClass);
 
 end.

@@ -108,7 +108,7 @@ begin
       VersionData.Name   :=Format('Lazarus %s',[uMisc.GetFileVersion(FileName)]);
       VersionData.IDEType:=TSupportedIDEs.LazarusIDE;
       VersionData.Icon    :=TIcon.Create;
-      ExtractIconFile(VersionData.Icon, Filename);
+      ExtractIconFile(VersionData.Icon, Filename, SHGFI_SMALLICON);
       AList.Add(VersionData);
   end;
 
