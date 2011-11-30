@@ -23,17 +23,20 @@ unit uRttiHelper;
 
 interface
 
+{$IF CompilerVersion > 20}
 uses
-  Rtti,
-  TypInfo,
+ Rtti,
+ TypInfo,
   Classes,
   Generics.Collections,
   SysUtils;
 
 function  DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+{$IFEND}
 
 implementation
 
+{$IF CompilerVersion > 20}
 function  DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
 
   //add and format a field
@@ -70,6 +73,7 @@ var
   Definition: TObjectDictionary<string, TStringList>;
   i         : TMemberVisibility;
 begin
+
    Result:='No Rtti Information';
    ctx       := TRttiContext.Create;
    Definition:= TObjectDictionary<string, TStringList>.Create([doOwnsValues]);
@@ -170,6 +174,7 @@ begin
     ctx.free;
    end;
 end;
+{$IFEND}
 
 
 end.

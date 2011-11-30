@@ -45,9 +45,7 @@ procedure SetVirtualMethod(AClass: TClass; const VmtOffset: Integer; const Metho
 procedure HookProc(Proc, Dest: Pointer; var BackupCode: TXRedirCode);
 procedure UnhookProc(Proc: Pointer; var BackupCode: TXRedirCode);
 
-
 implementation
-
 
 uses
  SysUtils,
