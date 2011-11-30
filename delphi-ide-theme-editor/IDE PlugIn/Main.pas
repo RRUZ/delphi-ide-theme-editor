@@ -249,7 +249,9 @@ end;
 constructor TIDEWizard.Create;
 begin
   inherited;
+  {$WARN SYMBOL_PLATFORM OFF}
   ReportMemoryLeaksOnShutdown:=DebugHook<>0;
+  {$WARN SYMBOL_PLATFORM ON}
   AColorMap:=nil;
   Settings:=TSettings.Create;
   //ColorizerForm := nil;

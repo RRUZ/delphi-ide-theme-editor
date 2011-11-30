@@ -49,7 +49,12 @@ implementation
 {.$DEFINE DEBUG_PROFILER}
 
 uses
- Rtti,
+ {$IF CompilerVersion > 20}
+ Rtti
+ {$ELSE}
+ Variants,
+ TypInfo
+ {$IFEND},
  Types,
  Forms,
  Menus,
@@ -70,7 +75,6 @@ uses
  Windows,
  uRttiHelper;
 
-var
 {$IFDEF DEBUG_MODE}
   lcomp         : TStringList;
 {$ENDIF}
@@ -80,7 +84,10 @@ var
   lpignored     : TStringList;
 {$ENDIF}
 
+ {$IF CompilerVersion > 20}
+ var
   ctx           : TRttiContext;
+ {$IFEND}
   //Drawer        : TComponentDrawer;
 
 
@@ -174,7 +181,7 @@ begin
   AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;
 end;
 
-
+{$IF CompilerVersion > 20}
 procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:TValue);
 var
   RttiProperty     : TRttiProperty;
@@ -201,6 +208,78 @@ begin
     end;
   end;
 end;
+{$ELSE}
+procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:Variant);
+var
+  RttiProperty     : PPropInfo;
+  Obj              : TObject;
+  MainProp         : String;
+  ChildProp        : String;
+  vType            : Integer;
+  //PropInfos        : PPropList;
+  //Count,i          : Integer;
+  //Ok               : Boolean;
+
+
+  Procedure SetValue(Instance : TObject);
+  begin
+    vType := VarType(Value) and VarTypeMask;
+    if Assigned(RttiProperty) then
+    case vType of
+      varDispatch,
+      varError,
+      varVariant,
+      varUnknown,
+      varEmpty,
+      varNull,
+      varAny,
+      varTypeMask  : ;
+
+      varSmallInt,
+      varInteger,
+      varBoolean,
+      varByte,
+      varWord,
+      varLongWord,
+      varInt64     : SetOrdProp(Instance, RttiProperty, Value);
+
+      varSingle,
+      varDouble,
+      varCurrency,
+      varDate      : SetFloatProp(Instance, RttiProperty, Value);
+
+      varOleStr,
+      varStrArg,
+      varString    : SetStrProp(Instance, RttiProperty, Value);
+    end;
+
+  end;
+
+begin
+  if Pos('.',PropName)=0 then
+  begin
+    RttiProperty := GetPropInfo(AComponent.ClassInfo, PropName);
+    SetValue(AComponent);
+  end
+  else
+  begin
+    MainProp     := Copy(PropName,1,Pos('.',PropName)-1);
+    ChildProp    := Copy(PropName,Pos('.',PropName)+1);
+
+    Obj:=AComponent;
+    RttiProperty := GetPropInfo(Obj.ClassInfo, MainProp);
+    if Assigned(RttiProperty) and (RttiProperty.PropType^.Kind=tkClass) then
+    begin
+       Obj:=TObject(GetOrdProp(Obj, RttiProperty));
+       if Assigned(Obj) then
+       begin
+         RttiProperty := GetPropInfo(Obj, ChildProp);
+         SetValue(Obj);
+       end;
+    end;
+  end;
+end;
+{$IFEND}
 
 
 //check these windows when an app is debuged
@@ -281,7 +360,9 @@ end;
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AComponent: TComponent);
 var
   I     : Integer;
+{$IF CompilerVersion > 20}
   f     : TRttiField;
+{$IFEND}
 begin
 
  if not Assigned(AComponent) then  exit;
@@ -488,7 +569,7 @@ begin
           if p<>nil then
           SetWindowTheme(p.GetValue(AComponent).AsInteger,'','');
         }
-
+        {$IF CompilerVersion > 20}
         f := ctx.GetType(AComponent.ClassInfo).GetField('FColor');
         if f<>nil then
           f.SetValue(AComponent,AColorMap.MenuColor);
@@ -496,6 +577,7 @@ begin
         m:=ctx.GetType(AComponent.ClassInfo).GetMethod('Update');
         m.Invoke(p.GetValue(AComponent).AsObject,[]);
               }
+       {$IFEND}
 
        SetRttiPropertyValue(AComponent,'LeftButton.BackgroundColor',AColorMap.Color);
        SetRttiPropertyValue(AComponent,'LeftButton.Transparent',False);
@@ -565,11 +647,11 @@ begin
     with TControlBar(AComponent) do
     begin
       Color := AColorMap.Color;//$00F1E9E0;
-      {$IF COMPILERVERSION > 21}
+      {.$IF COMPILERVERSION > 21}
       DrawingStyle := dsGradient;
       GradientStartColor :=  AColorMap.Color;//$00D1B499
       GradientEndColor   :=  AColorMap.Color;//$00D1B499
-      {$IFEND};
+      {.$IFEND};
     end
     else
     if AComponent.ClassName = 'TDockToolBar' then
@@ -578,11 +660,11 @@ begin
       with TToolBar(AComponent) do
       begin
         Color              := AColorMap.Color;
-        {$IF COMPILERVERSION > 21}
+        {.$IF COMPILERVERSION > 21}
         DrawingStyle       := TTBDrawingStyle(dsGradient);
         GradientStartColor := AColorMap.MenuColor;
         GradientEndColor   := AColorMap.Color;//$00D1B499;
-        {$IFEND}
+        {.$IFEND}
         HotTrackColor      := AColorMap.SelectedColor;
         Font.Color         := AColorMap.FontColor;
       end;
@@ -684,8 +766,10 @@ initialization
   HookedWindows:=TStringList.Create;
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
 
-
+{$IF CompilerVersion > 20}
   ctx:=TRttiContext.Create;
+{$IFEND}
+
 {$IFDEF DEBUG_PROFILER}
   lprofiler:=TStringList.Create;
   lpignored:=TStringList.Create;
@@ -694,7 +778,9 @@ initialization
 finalization
   HookedWindows.Free;
   HookedWindows:=nil;
+{$IF CompilerVersion > 20}
   ctx.Free;
+{$IFEND}
 {$IFDEF DEBUG_PROFILER}
   lprofiler.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\delphi-ide-colorizer\profiler.txt');
   lprofiler.Free;
