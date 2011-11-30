@@ -73,7 +73,8 @@ end;
 
 procedure SetVirtualMethod(AClass: TClass; const VmtOffset: Integer; const Method: Pointer);
 var
-  WrittenBytes: DWORD;
+  WrittenBytes: {$IF CompilerVersion > 22} NativeUInt {$ELSE} Cardinal {$IFEND};
+
   PatchAddress: PPointer;
 begin
   PatchAddress := Pointer(Integer(AClass) + VmtOffset);
@@ -82,7 +83,7 @@ end;
 
 procedure HookProc(Proc, Dest: Pointer; var BackupCode: TXRedirCode);
 var
-  n: DWORD;
+  n: {$IF CompilerVersion > 22} NativeUInt {$ELSE} Cardinal {$IFEND};
   Code: TXRedirCode;
 begin
   Proc := GetActualAddr(Proc);
@@ -97,7 +98,7 @@ end;
 
 procedure UnhookProc(Proc: Pointer; var BackupCode: TXRedirCode);
 var
-  n: Cardinal;
+  n: {$IF CompilerVersion > 22} NativeUInt {$ELSE} Cardinal {$IFEND};
 begin
   if (BackupCode.Jump <> 0) and (Proc <> nil) then
   begin
