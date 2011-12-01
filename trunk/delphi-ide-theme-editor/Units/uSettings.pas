@@ -32,9 +32,11 @@ type
   private
     FThemePath: string;
     FVCLStyle: string;
+    FActivateColorizer: Boolean;
   public
     property ThemePath: string Read FThemePath Write FThemePath;
     property VCLStyle: string Read FVCLStyle Write FVCLStyle;
+    property ActivateColorizer: Boolean Read FActivateColorizer write FActivateColorizer;
   end;
 
 
@@ -105,6 +107,7 @@ var
 begin
   iniFile := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Settings.ini');
   try
+    Settings.ActivateColorizer:= iniFile.ReadBool('Global', 'ActivateColorizer',  False);
     Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Windows');
     Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  ExtractFilePath(ParamStr(0)) + 'Themes');
     if not TDirectory.Exists(Settings.ThemePath) then

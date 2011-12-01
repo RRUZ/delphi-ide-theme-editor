@@ -5,7 +5,7 @@ object FrmSettings: TFrmSettings
   BorderStyle = bsSingle
   Caption = 'Settings'
   ClientHeight = 188
-  ClientWidth = 508
+  ClientWidth = 504
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

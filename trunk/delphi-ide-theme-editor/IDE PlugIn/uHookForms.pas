@@ -25,10 +25,14 @@ interface
 implementation
 
 uses
+ {$IF CompilerVersion >= 23}
+ uVCLStyleUtils,
+ {$IFEND}
  Classes,
  Forms,
  Windows,
  SysUtils,
+ Dialogs,
  uColorizerUtils;
 
 var
@@ -56,17 +60,23 @@ begin
           Win32Check(RetVal <> 0);
           {$WARN SYMBOL_PLATFORM ON}
           Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-          if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
-          begin
+          //if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
             for i := 0 to Screen.FormCount-1 do
              if Screen.Forms[i].Handle=hTemp then
-               if not (csDesigning in Screen.Forms[i].ComponentState) then
+               if (HookedWindows.IndexOf(ClassNameBuffer)<>-1) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
+                  //ShowMessage('Hooked');
                   uColorizerUtils.ProcessComponent(uColorizerUtils.GlobalColorMap,Screen.Forms[i]);
                   //Screen.Forms[i].Color:=Main.AColorMap.Color;
                   Break;
+               end
+               {$IF CompilerVersion >= 23}
+               else
+               begin
+                 //ShowMessage('RemoveVCLStyleHook '+Screen.Forms[i].ClassName);
+                 RemoveVCLStyleHook(Screen.Forms[i].ClassType);
                end;
-          end;
+              {$IFEND}
        end;
      end;
    end;

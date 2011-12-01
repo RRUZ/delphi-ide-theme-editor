@@ -18,9 +18,6 @@
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {                                                                                                  }
-{ Contributors:                                                                                    }
-{                                                                                                  }
-{   Simon J Stuart (LaKraven)                                                                      }
 {                                                                                                  }
 {**************************************************************************************************}
 
@@ -72,6 +69,10 @@ implementation
 {$R DelphiIDEColorizer.res}
 
 uses
+ {$IF CompilerVersion >= 23}
+ Vcl.Styles,
+ Vcl.Themes,
+ {$IFEND}
  Classes,
  ActnMan,
  Windows,
@@ -190,6 +191,9 @@ end;
 procedure TIDEWizard.InitColorizer;
 var
   LServices : INTAServices;
+{$IF CompilerVersion >= 23}
+  StyleFile : string;
+{$IFEND}
 begin
   if BorlandIDEServices <> nil then
   begin
@@ -213,6 +217,21 @@ begin
           //AColorMap.Color           :=clWebDarkSeaGreen;
           //AColorMap.Color           :=clWebSteelBlue;
           LoadSettings(AColorMap, Settings);
+          GlobalSettings:=Settings;
+          {$IF CompilerVersion >= 23}
+          if Settings.UseVCLStyles then
+          begin
+            StyleFile:=IncludeTrailingPathDelimiter(Settings.VCLStylesPath)+Settings.VCLStyleName;
+            //MessageDlg(StyleFile, mtInformation, [mbOK], 0);
+            if FileExists(StyleFile) then
+            begin
+              TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
+              GenerateColorMap(AColorMap,TStyleManager.ActiveStyle.GetStyleColor(scGenericBackground));
+            end
+            else
+              MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
+          end;
+          {$IFEND}
           RefreshIDETheme(AColorMap);
         finally
           {$IFDEF DEBUG_MODE}
