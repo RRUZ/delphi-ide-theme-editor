@@ -43,6 +43,7 @@ contains
   uHookLib in 'uHookLib.pas',
   uVclControlsHooks in 'uVclControlsHooks.pas',
   uStoreColorMap in 'uStoreColorMap.pas',
-  uRttiHelper in 'uRttiHelper.pas';
+  uRttiHelper in 'uRttiHelper.pas',
+  uVCLStyleUtils in 'uVCLStyleUtils.pas';
 
 end.

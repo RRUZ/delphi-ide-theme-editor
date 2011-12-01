@@ -2,8 +2,8 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
   Left = 509
   Top = 252
   Caption = 'Delphi IDE Colorizer Settings'
-  ClientHeight = 296
-  ClientWidth = 564
+  ClientHeight = 266
+  ClientWidth = 570
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -24,22 +24,25 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
   object PanelMain: TPanel
     Left = 0
     Top = 0
-    Width = 564
-    Height = 296
+    Width = 570
+    Height = 266
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
     TabOrder = 0
+    ExplicitHeight = 283
     object PageControlSettings: TPageControl
       Left = 5
       Top = 5
-      Width = 554
-      Height = 286
+      Width = 560
+      Height = 215
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
+      ExplicitHeight = 287
       object TabSheetMain: TTabSheet
         Caption = 'Main Settings'
+        ExplicitHeight = 258
         object ImageIDELogo: TImage
           Left = 3
           Top = 4
@@ -47,36 +50,29 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Height = 33
         end
         object Label1: TLabel
-          Left = 8
-          Top = 61
+          Left = 3
+          Top = 53
           Width = 37
           Height = 13
           Caption = 'Themes'
         end
-        object Label2: TLabel
-          Left = 8
-          Top = 197
-          Width = 264
-          Height = 13
-          Caption = 'For more details about this feature please read this link'
-        end
         object Label3: TLabel
-          Left = 408
-          Top = 67
+          Left = 403
+          Top = 59
           Width = 95
           Height = 13
           Caption = 'Elements to colorize'
         end
         object Label7: TLabel
-          Left = 159
-          Top = 127
+          Left = 154
+          Top = 119
           Width = 25
           Height = 13
           Caption = 'Color'
         end
         object Label6: TLabel
-          Left = 8
-          Top = 127
+          Left = 3
+          Top = 119
           Width = 38
           Height = 13
           Caption = 'Element'
@@ -89,148 +85,134 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Caption = 'LabelSetting'
         end
         object CheckBoxEnabled: TCheckBox
-          Left = 182
-          Top = 225
+          Left = 3
+          Top = 165
           Width = 65
           Height = 17
           Caption = 'Enabled'
           DoubleBuffered = True
           ParentDoubleBuffered = False
-          TabOrder = 0
+          TabOrder = 13
         end
         object cbThemeName: TComboBox
-          Left = 8
-          Top = 79
+          Left = 3
+          Top = 71
           Width = 264
           Height = 21
-          TabOrder = 3
+          TabOrder = 4
           OnChange = cbThemeNameChange
         end
         object Button3: TButton
-          Left = 278
-          Top = 77
+          Left = 273
+          Top = 69
           Width = 75
           Height = 25
           Caption = 'Save'
-          TabOrder = 2
+          TabOrder = 3
           OnClick = Button3Click
         end
         object CheckBoxActivateDWM: TCheckBox
-          Left = 8
-          Top = 174
+          Left = 175
+          Top = 166
           Width = 145
           Height = 17
           Caption = 'Activate Glass colorization'
-          Checked = True
           DoubleBuffered = True
           ParentDoubleBuffered = False
-          State = cbChecked
-          TabOrder = 13
-        end
-        object BtnApply: TButton
-          Left = 8
-          Top = 225
-          Width = 75
-          Height = 25
-          Caption = 'Apply'
-          TabOrder = 14
-          OnClick = BtnApplyClick
-        end
-        object BtnCancel: TButton
-          Left = 89
-          Top = 225
-          Width = 75
-          Height = 25
-          Caption = 'Cancel'
           TabOrder = 15
-          OnClick = BtnCancelClick
+          Visible = False
         end
         object CheckBoxFixIDEDrawIcon: TCheckBox
-          Left = 400
-          Top = 44
+          Left = 403
+          Top = 36
           Width = 129
           Height = 17
           Caption = 'Fix disabled icons draw'
-          TabOrder = 1
+          TabOrder = 2
         end
         object CheckBoxMainMenu: TCheckBox
-          Left = 408
-          Top = 86
+          Left = 403
+          Top = 78
           Width = 73
           Height = 17
           Caption = 'Main Menu'
-          TabOrder = 4
+          TabOrder = 5
+          Visible = False
         end
         object CheckBoxComponentsTabs: TCheckBox
-          Left = 408
-          Top = 107
+          Left = 403
+          Top = 99
           Width = 113
           Height = 17
           Caption = 'Components Tabs'
-          TabOrder = 6
+          TabOrder = 7
+          Visible = False
         end
         object CheckBoxCodeEditor: TCheckBox
-          Left = 408
-          Top = 127
+          Left = 403
+          Top = 119
           Width = 121
           Height = 17
           Caption = 'Code Editor Windows'
-          TabOrder = 7
+          TabOrder = 8
+          Visible = False
         end
         object CheckBox7: TCheckBox
-          Left = 408
-          Top = 173
+          Left = 403
+          Top = 165
           Width = 95
           Height = 17
           Caption = 'IDE Options'
-          TabOrder = 12
+          TabOrder = 14
+          Visible = False
         end
         object CheckBoxIDEDockWindows: TCheckBox
-          Left = 408
-          Top = 150
+          Left = 403
+          Top = 142
           Width = 135
           Height = 17
           Caption = 'IDE Dockable Windows'
-          TabOrder = 11
+          TabOrder = 12
+          Visible = False
         end
         object CbClrElement: TColorBox
-          Left = 159
-          Top = 146
+          Left = 154
+          Top = 138
           Width = 166
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 9
+          TabOrder = 10
           OnChange = CbClrElementChange
         end
         object BtnSelForColor: TButton
-          Left = 331
-          Top = 146
+          Left = 326
+          Top = 138
           Width = 22
           Height = 22
           ImageIndex = 2
           Images = ImageList1
-          TabOrder = 10
+          TabOrder = 11
           OnClick = BtnSelForColorClick
         end
         object cbColorElements: TComboBox
-          Left = 8
-          Top = 146
+          Left = 3
+          Top = 138
           Width = 145
           Height = 21
           Style = csDropDownList
-          TabOrder = 8
+          TabOrder = 9
           OnChange = cbColorElementsChange
         end
         object CheckBoxAutoColor: TCheckBox
-          Left = 8
-          Top = 104
+          Left = 3
+          Top = 96
           Width = 156
           Height = 17
           Caption = 'Auto Generate Color Values'
           Checked = True
           State = cbChecked
-          TabOrder = 5
+          TabOrder = 6
         end
         object BtnInstall: TButton
           Left = 278
@@ -238,7 +220,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 75
           Height = 25
           Caption = 'Install'
-          TabOrder = 16
+          TabOrder = 0
           OnClick = BtnInstallClick
         end
         object BtnUnInstall: TButton
@@ -247,7 +229,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 75
           Height = 25
           Caption = 'UnInstall'
-          TabOrder = 17
+          TabOrder = 1
           OnClick = BtnUnInstallClick
         end
       end
@@ -255,9 +237,10 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
+        ExplicitHeight = 258
         DesignSize = (
-          546
-          258)
+          552
+          187)
         object Label4: TLabel
           Left = 3
           Top = 3
@@ -276,7 +259,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Left = 3
           Top = 23
           Width = 250
-          Height = 232
+          Height = 161
           Anchors = [akLeft, akTop, akBottom]
           Columns = <
             item
@@ -285,15 +268,16 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
             end>
           ReadOnly = True
           RowSelect = True
-          TabOrder = 0
+          TabOrder = 1
           ViewStyle = vsReport
           OnChange = ListViewTypesChange
+          ExplicitHeight = 232
         end
         object ListViewProps: TListView
           Left = 267
           Top = 22
           Width = 250
-          Height = 232
+          Height = 161
           Anchors = [akLeft, akTop, akBottom]
           Columns = <
             item
@@ -302,9 +286,91 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
             end>
           ReadOnly = True
           RowSelect = True
-          TabOrder = 1
+          TabOrder = 0
           ViewStyle = vsReport
+          ExplicitHeight = 232
         end
+      end
+      object TabSheetVCLStyles: TTabSheet
+        Caption = 'VCL Styles'
+        ImageIndex = 2
+        ExplicitHeight = 259
+        object Label8: TLabel
+          Left = 3
+          Top = 26
+          Width = 75
+          Height = 13
+          Caption = 'VCL Styles Path'
+        end
+        object Label9: TLabel
+          Left = 3
+          Top = 72
+          Width = 24
+          Height = 13
+          Caption = 'Style'
+        end
+        object CheckBoxUseVClStyles: TCheckBox
+          Left = 3
+          Top = 3
+          Width = 97
+          Height = 17
+          Caption = 'Use VCL Styles'
+          TabOrder = 0
+        end
+        object EditVCLStylesPath: TEdit
+          Left = 3
+          Top = 45
+          Width = 414
+          Height = 21
+          TabOrder = 1
+        end
+        object BtnSelDir: TButton
+          Left = 423
+          Top = 45
+          Width = 26
+          Height = 21
+          Caption = '...'
+          TabOrder = 2
+          OnClick = BtnSelDirClick
+        end
+        object CbStyles: TComboBox
+          Left = 3
+          Top = 91
+          Width = 414
+          Height = 21
+          Style = csDropDownList
+          TabOrder = 3
+        end
+      end
+    end
+    object Panel1: TPanel
+      Left = 5
+      Top = 220
+      Width = 560
+      Height = 41
+      Align = alBottom
+      BevelOuter = bvNone
+      TabOrder = 1
+      ExplicitLeft = 168
+      ExplicitTop = 0
+      ExplicitWidth = 185
+      object BtnCancel: TButton
+        Left = 88
+        Top = 6
+        Width = 75
+        Height = 25
+        Caption = 'Cancel'
+        TabOrder = 1
+        OnClick = BtnCancelClick
+      end
+      object BtnApply: TButton
+        Left = 7
+        Top = 6
+        Width = 75
+        Height = 25
+        Caption = 'Apply'
+        TabOrder = 0
+        OnClick = BtnApplyClick
       end
     end
   end
@@ -313,7 +379,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     Left = 504
     Top = 240
     Bitmap = {
-      494C0101070008003C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800400110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -590,5 +656,9 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     UnusedColor = clWhite
     Left = 465
     Top = 237
+  end
+  object JvBrowseForFolderDialog1: TJvBrowseForFolderDialog
+    Left = 448
+    Top = 120
   end
 end

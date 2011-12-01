@@ -911,15 +911,16 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
-  {$WARN SYMBOL_PLATFORM OFF}
-  BtnIDEColorizer.Visible:=DebugHook<>0;
-  {$WARN SYMBOL_PLATFORM ON}
   FLoaded   := False;
   IDEsList:=TList<TDelphiVersionData>.Create;
   FChanging := False;
   FSettings := TSettings.Create;
   ReadSettings(FSettings);
   LoadVCLStyle(FSettings.VCLStyle);
+  {.$WARN SYMBOL_PLATFORM OFF}
+  //BtnIDEColorizer.Visible:=DebugHook<>0;
+  {.$WARN SYMBOL_PLATFORM ON}
+  BtnIDEColorizer.Visible:=FSettings.ActivateColorizer;
 
   FMapHighlightElementsTSynAttr := TStringList.Create;
   with SynPasSyn1 do

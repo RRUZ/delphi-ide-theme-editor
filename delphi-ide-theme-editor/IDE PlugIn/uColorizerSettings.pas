@@ -25,19 +25,17 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, pngimage, ExtCtrls, StdCtrls, Grids, ComCtrls, ImgList,
-  ActnMan, ActnColorMaps, uClrSettings, uDelphiVersions;
+  ActnMan, ActnColorMaps, uClrSettings, uDelphiVersions, JvBaseDlg,
+  JvBrowseFolder;
 
 type
   TFrmIDEColorizerSettings = class(TForm)
     ImageIDELogo: TImage;
     CheckBoxEnabled: TCheckBox;
-    BtnApply: TButton;
-    BtnCancel: TButton;
     cbThemeName: TComboBox;
     Label1: TLabel;
     Button3: TButton;
     CheckBoxActivateDWM: TCheckBox;
-    Label2: TLabel;
     CheckBoxFixIDEDrawIcon: TCheckBox;
     CheckBoxMainMenu: TCheckBox;
     CheckBoxComponentsTabs: TCheckBox;
@@ -64,6 +62,17 @@ type
     LabelSetting: TLabel;
     BtnInstall: TButton;
     BtnUnInstall: TButton;
+    TabSheetVCLStyles: TTabSheet;
+    CheckBoxUseVClStyles: TCheckBox;
+    EditVCLStylesPath: TEdit;
+    Label8: TLabel;
+    BtnSelDir: TButton;
+    CbStyles: TComboBox;
+    Label9: TLabel;
+    Panel1: TPanel;
+    BtnCancel: TButton;
+    BtnApply: TButton;
+    JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -79,6 +88,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure BtnInstallClick(Sender: TObject);
     procedure BtnUnInstallClick(Sender: TObject);
+    procedure BtnSelDirClick(Sender: TObject);
   private
     { Private declarations }
     FSettings: TSettings;
@@ -91,6 +101,7 @@ type
     function  GetIDEData: TDelphiVersionData;
     function  GetIDEThemesFolder : String;
     function  GetSettingsFolder : String;
+    procedure LoadVClStylesList(const Path : string);
   public
     property IDEData   : TDelphiVersionData read GetIDEData write FIDEData;
     procedure Init;
@@ -188,6 +199,15 @@ begin
 end;
 
 
+procedure TFrmIDEColorizerSettings.BtnSelDirClick(Sender: TObject);
+begin
+  if DirectoryExists(EditVCLStylesPath.Text) then
+    JvBrowseForFolderDialog1.Directory := EditVCLStylesPath.Text;
+
+  if JvBrowseForFolderDialog1.Execute then
+    EditVCLStylesPath.Text := JvBrowseForFolderDialog1.Directory;
+end;
+
 procedure TFrmIDEColorizerSettings.BtnSelForColorClick(Sender: TObject);
 Var
  AColor : TColor;
@@ -225,6 +245,10 @@ begin
     FSettings.EnableDWMColorization   := CheckBoxActivateDWM.Checked;
     FSettings.FixIDEDisabledIconsDraw   := CheckBoxFixIDEDrawIcon.Checked;
     FSettings.AutogenerateColors   := CheckBoxAutoColor.Checked;
+
+    FSettings.UseVCLStyles :=CheckBoxUseVClStyles.Checked;
+    FSettings.VCLStylesPath:=EditVCLStylesPath.Text;
+    FSettings.VCLStyleName :=CbStyles.Text;
     WriteSettings(FSettings, GetSettingsFolder);
     Close();
   end;
@@ -346,6 +370,7 @@ end;
 
 procedure TFrmIDEColorizerSettings.Init;
 begin
+  TabSheetVCLStyles.TabVisible:=IDEData.Version=TDelphiVersions.DelphiXE2;
   LoadColorElements;
   LoadThemes;
   LoadSettings;
@@ -416,6 +441,11 @@ begin
   CheckBoxAutoColor.Checked:=FSettings.AutogenerateColors;
   cbThemeName.Text:=FSettings.ThemeName;
   cbThemeNameChange(nil);
+
+  CheckBoxUseVClStyles.Checked:=FSettings.UseVCLStyles;
+  LoadVClStylesList(FSettings.VCLStylesPath);
+  EditVCLStylesPath.Text:=FSettings.VCLStylesPath;
+  CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
 end;
 
 procedure TFrmIDEColorizerSettings.LoadThemes;
@@ -427,6 +457,19 @@ begin
   begin
     FileName:=ChangeFileExt(ExtractFileName(sValue),'');
     cbThemeName.Items.Add(FileName);
+  end;
+end;
+
+procedure TFrmIDEColorizerSettings.LoadVClStylesList(const Path: string);
+var
+ sValue, FileName : string;
+begin
+  CbStyles.Items.Clear;
+  if DirectoryExists(Path) then
+  for sValue in TDirectory.GetFiles(ExcludeTrailingPathDelimiter(Path),'*.vsf') do
+  begin
+    FileName:=ExtractFileName(sValue);
+    CbStyles.Items.Add(FileName);
   end;
 end;
 

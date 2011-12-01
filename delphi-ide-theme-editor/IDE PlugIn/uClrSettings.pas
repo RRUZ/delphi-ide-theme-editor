@@ -31,12 +31,19 @@ type
     FThemeName: string;
     FFixIDEDisabledIconsDraw: boolean;
     FAutogenerateColors: boolean;
+    FVCLStyleName: string;
+    FUseVCLStyles: boolean;
+    FVCLStylesPath: string;
   public
     property EnableDWMColorization : boolean read FEnableDWMColorization write FEnableDWMColorization;
     property Enabled : boolean read FEnabled write FEnabled;
     property ThemeName : string read FThemeName write FThemeName;
     property FixIDEDisabledIconsDraw : boolean read FFixIDEDisabledIconsDraw write FFixIDEDisabledIconsDraw;
     property AutogenerateColors : boolean read FAutogenerateColors write FAutogenerateColors;
+
+    property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
+    property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
+    property VCLStylesPath : string read FVCLStylesPath write FVCLStylesPath;
   end;
 
   procedure ReadSettings(Settings: TSettings;Const Path:String);
@@ -59,6 +66,9 @@ begin
     Settings.FixIDEDisabledIconsDraw := iniFile.ReadBool('Global', 'FixIDEDisabledIconsDraw', True);
     Settings.AutogenerateColors      := iniFile.ReadBool('Global', 'AutogenerateColors', True);
     Settings.ThemeName               := iniFile.ReadString('Global', 'ThemeName', '');
+    Settings.VCLStyleName            := iniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
+    Settings.UseVCLStyles            := iniFile.ReadBool('Global', 'UseVCLStyles', False);
+    Settings.VCLStylesPath           := iniFile.ReadString('Global', 'VCLStylesPath', '');
   finally
     iniFile.Free;
   end;
@@ -75,6 +85,9 @@ begin
     iniFile.WriteBool('Global', 'FixIDEDisabledIconsDraw', Settings.FixIDEDisabledIconsDraw);
     iniFile.WriteBool('Global', 'AutogenerateColors', Settings.AutogenerateColors);
     iniFile.WriteString('Global', 'ThemeName', Settings.ThemeName);
+    iniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
+    iniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
+    iniFile.WriteString('Global', 'VCLStylesPath', Settings.VCLStylesPath);
   finally
     iniFile.Free;
   end;

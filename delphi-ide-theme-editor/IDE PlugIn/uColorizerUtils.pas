@@ -42,6 +42,7 @@ var
   DelphiTheme   : TXPManifest;
   GlobalColorMap: TXPColorMap;
   HookedWindows : TStringList;
+  GlobalSettings: TSettings;
 
 implementation
 
@@ -49,6 +50,9 @@ implementation
 {.$DEFINE DEBUG_PROFILER}
 
 uses
+ {$IF CompilerVersion >= 23}
+ uVCLStyleUtils,
+ {$IFEND}
  {$IF CompilerVersion > 20}
  Rtti
  {$ELSE}
@@ -122,9 +126,19 @@ begin
   if GlobalSettings.EnableDWMColorization and DwmIsEnabled then
    SetCompositionColor(AColorMap.Color);
  }
+
   for Index := 0 to Screen.FormCount-1 do
+  if HookedWindows.IndexOf(Screen.Forms[Index].ClassName)<>-1 then
+  begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
      ProcessComponent(AColorMap,Screen.Forms[Index]);
+  end
+  {$IF CompilerVersion >= 23}
+  else
+  ;//RemoveVCLStyleHook(Screen.Forms[Index].ClassType);
+  {$IFEND}
+
+
 end;
 
 
@@ -763,6 +777,7 @@ end;
 
 initialization
   GlobalColorMap:=nil;
+  GlobalSettings:=nil;
   HookedWindows:=TStringList.Create;
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
 
