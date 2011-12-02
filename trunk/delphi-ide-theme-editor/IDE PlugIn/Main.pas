@@ -24,6 +24,10 @@
 //TODO
 
 {
+
+  * check for color key in OTA ;) done :(
+
+
   * options-enviroment variables crash    -> TDefaultEnvironmentDialog  GExperts????
   * tidegradeint buttons , not paint correctly
   * border of panel in  options window is not painted corectly
@@ -33,6 +37,8 @@
 
 //options
 {
+
+
   * Fix icons gray
   * hook main menu
   * Hook ide code editor
@@ -226,7 +232,7 @@ begin
             if FileExists(StyleFile) then
             begin
               TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
-              GenerateColorMap(AColorMap,TStyleManager.ActiveStyle.GetStyleColor(scGenericBackground));
+              GenerateColorMap(AColorMap,TStyleManager.ActiveStyle);
             end
             else
               MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);

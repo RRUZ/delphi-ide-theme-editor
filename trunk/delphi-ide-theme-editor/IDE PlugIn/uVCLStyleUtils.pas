@@ -25,12 +25,13 @@ interface
 {$IF CompilerVersion >= 23}
 Uses
   Rtti,
+  Vcl.Themes,
+  Vcl.Styles,
   Classes;
 
-Procedure RestoreVCLStyleHook(AClass :TClass);
-Procedure RemoveVCLStyleHook(AClass :TClass);overload;
-Procedure RemoveVCLStyleHook(const AClassName :string);overload;
-
+Procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
+Procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
+function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
 {$IFEND}
 
 implementation
@@ -38,9 +39,7 @@ implementation
 
 {$IF CompilerVersion >= 23}
 uses
- Generics.Collections,
- Vcl.Styles,
- Vcl.Themes;
+ Generics.Collections;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
@@ -56,7 +55,19 @@ begin
   Result:= Self.FRegisteredStyleHooks;
 end;
 
-Procedure RestoreVCLStyleHook(AClass :TClass);
+function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
+var
+  List    : TStyleHookList;
+begin
+ Result:=False;
+    if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(ControlClass) then
+    begin
+      List := TCustomStyleEngine.GetRegisteredStyleHooks[ControlClass];
+      Result:=List.IndexOf(StyleHookClass) <> -1;
+    end;
+end;
+
+Procedure RestoreVCLStyleHook(ControlClass :TClass);
 {
 var
   List    : TStyleHookList;
@@ -72,30 +83,18 @@ begin
 }
 end;
 
-Procedure RemoveVCLStyleHook(AClass :TClass);
-{
-var
-  List    : TStyleHookList;
-}
+Procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
 begin
-{
-    if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(AClass) then
-    begin
-      List := TCustomStyleEngine.GetRegisteredStyleHooks[AClass];
-      if List.IndexOf(TStyleHook) <> -1 then
-      TStyleManager.Engine.UnRegisterStyleHook(AClass, TStyleHook);
-    end;
-}
+   if not IsStyleHookRegistered(ControlClass, TStyleHook) then
+    TStyleManager.Engine.RegisterStyleHook(ControlClass, TStyleHook);
 end;
 
-Procedure RemoveVCLStyleHook(const AClassName :string);
-//var
- // t  : TRttiType;
+Procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
 begin
-  //TRttiContext.Create.FindType();
-
-
+   if IsStyleHookRegistered(ControlClass, TStyleHook) then
+    TStyleManager.Engine.UnRegisterStyleHook(ControlClass, TStyleHook);
 end;
+
 
 {$IFEND}
 end.

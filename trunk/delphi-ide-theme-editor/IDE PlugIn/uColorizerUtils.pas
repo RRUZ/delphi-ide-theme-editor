@@ -24,6 +24,10 @@ unit uColorizerUtils;
 interface
 
 uses
+ {$IF CompilerVersion >= 23}
+ VCL.Themes,
+ VCL.Styles,
+ {$IFEND}
  XPMan,
  ActnMan,
  ActnColorMaps,
@@ -34,7 +38,11 @@ uses
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap);
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AComponent: TComponent);
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);
+procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
+{$IF CompilerVersion >= 23}
+procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
+{$IFEND}
+
 function  GetBplLocation : string;
 
 
@@ -79,23 +87,27 @@ uses
  Windows,
  uRttiHelper;
 
+
+
 {$IFDEF DEBUG_MODE}
   lcomp         : TStringList;
 {$ENDIF}
 
 {$IFDEF DEBUG_PROFILER}
+var
   lprofiler     : TStringList;
   lpignored     : TStringList;
+  lDumped       : TStringList;
 {$ENDIF}
 
- {$IF CompilerVersion > 20}
- var
+{$IF CompilerVersion > 20}
+var
   ctx           : TRttiContext;
- {$IFEND}
+{$IFEND}
   //Drawer        : TComponentDrawer;
 
 
-{$IFDEF DEBUG_MODE}
+{$IFDEF DEBUG_PROFILER}
 procedure DumpComponent(AComponent: TComponent);
 var
 l2 : TStrings;
@@ -104,7 +116,7 @@ begin
   try
    l2.Text:=DumpTypeDefinition(AComponent.ClassInfo);
   finally
-   l2.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\Delphi IDE Colorizer\Galileo\'+AComponent.ClassName+'.txt');
+   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+AComponent.ClassName+'.pas');
    l2.Free;
   end;
 end;
@@ -126,7 +138,6 @@ begin
   if GlobalSettings.EnableDWMColorization and DwmIsEnabled then
    SetCompositionColor(AColorMap.Color);
  }
-
   for Index := 0 to Screen.FormCount-1 do
   if HookedWindows.IndexOf(Screen.Forms[Index].ClassName)<>-1 then
   begin
@@ -135,10 +146,9 @@ begin
   end
   {$IF CompilerVersion >= 23}
   else
-  ;//RemoveVCLStyleHook(Screen.Forms[Index].ClassType);
+  if (csDesigning in Screen.Forms[index].ComponentState) then
+    ApplyEmptyVCLStyleHook(Screen.Forms[index].ClassType);
   {$IFEND}
-
-
 end;
 
 
@@ -195,105 +205,30 @@ begin
   AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;
 end;
 
-{$IF CompilerVersion > 20}
-procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:TValue);
-var
-  RttiProperty     : TRttiProperty;
-  RttiPropertyChild: TRttiProperty;
-  MainProp         : String;
-  ChildProp        : String;
+{$IF CompilerVersion >= 23}
+procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);
 begin
-  if Pos('.',PropName)=0 then
-  begin
-    RttiProperty := ctx.GetType(AComponent.ClassInfo).GetProperty(PropName);
-    if RttiProperty<>nil then
-      RttiProperty.SetValue(AComponent,Value);
-  end
-  else
-  begin
-    MainProp     :=Copy(PropName,1,Pos('.',PropName)-1);
-    ChildProp    :=Copy(PropName,Pos('.',PropName)+1);
-    RttiProperty := ctx.GetType(AComponent.ClassInfo).GetProperty(MainProp);
-    if RttiProperty<>nil then
-    begin
-        RttiPropertyChild := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(ChildProp);
-        if RttiPropertyChild<>nil then
-         RttiPropertyChild.SetValue(RttiProperty.GetValue(AComponent).AsObject,Value);
-    end;
-  end;
-end;
-{$ELSE}
-procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:Variant);
-var
-  RttiProperty     : PPropInfo;
-  Obj              : TObject;
-  MainProp         : String;
-  ChildProp        : String;
-  vType            : Integer;
-  //PropInfos        : PPropList;
-  //Count,i          : Integer;
-  //Ok               : Boolean;
+  AColorMap.Color                 :=Style.GetStyleColor(scPanel);
+  AColorMap.ShadowColor           :=GetShadowColor(AColorMap.Color);
+  AColorMap.FontColor             :=Style.GetStyleFontColor(sfButtonTextNormal);
 
+  AColorMap.MenuColor             :=AColorMap.Color;
+  AColorMap.HighlightColor        :=GetHighLightColor(AColorMap.MenuColor);
+  AColorMap.BtnSelectedColor      :=AColorMap.Color;
+  AColorMap.BtnSelectedFont       :=AColorMap.FontColor;
 
-  Procedure SetValue(Instance : TObject);
-  begin
-    vType := VarType(Value) and VarTypeMask;
-    if Assigned(RttiProperty) then
-    case vType of
-      varDispatch,
-      varError,
-      varVariant,
-      varUnknown,
-      varEmpty,
-      varNull,
-      varAny,
-      varTypeMask  : ;
+  AColorMap.SelectedColor         :=GetHighLightColor(AColorMap.Color,50);
+  AColorMap.SelectedFontColor     :=AColorMap.FontColor;
 
-      varSmallInt,
-      varInteger,
-      varBoolean,
-      varByte,
-      varWord,
-      varLongWord,
-      varInt64     : SetOrdProp(Instance, RttiProperty, Value);
-
-      varSingle,
-      varDouble,
-      varCurrency,
-      varDate      : SetFloatProp(Instance, RttiProperty, Value);
-
-      varOleStr,
-      varStrArg,
-      varString    : SetStrProp(Instance, RttiProperty, Value);
-    end;
-
-  end;
-
-begin
-  if Pos('.',PropName)=0 then
-  begin
-    RttiProperty := GetPropInfo(AComponent.ClassInfo, PropName);
-    SetValue(AComponent);
-  end
-  else
-  begin
-    MainProp     := Copy(PropName,1,Pos('.',PropName)-1);
-    ChildProp    := Copy(PropName,Pos('.',PropName)+1);
-
-    Obj:=AComponent;
-    RttiProperty := GetPropInfo(Obj.ClassInfo, MainProp);
-    if Assigned(RttiProperty) and (RttiProperty.PropType^.Kind=tkClass) then
-    begin
-       Obj:=TObject(GetOrdProp(Obj, RttiProperty));
-       if Assigned(Obj) then
-       begin
-         RttiProperty := GetPropInfo(Obj, ChildProp);
-         SetValue(Obj);
-       end;
-    end;
-  end;
+  AColorMap.BtnFrameColor         :=GetShadowColor(AColorMap.Color);
+  AColorMap.FrameTopLeftInner     :=GetShadowColor(AColorMap.Color);
+  AColorMap.FrameTopLeftOuter     :=AColorMap.FrameTopLeftInner;
+  AColorMap.FrameBottomRightInner :=AColorMap.FrameTopLeftInner;
+  AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;
 end;
 {$IFEND}
+
+
 
 
 //check these windows when an app is debuged
@@ -385,6 +320,11 @@ begin
 
 {$IFDEF DEBUG_PROFILER}
  lprofiler.Add(Format('%s Processing component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
+  if lDumped.IndexOf(AComponent.ClassName)=-1 then
+  begin
+    lDumped.Add(AComponent.ClassName);
+    DumpComponent(AComponent);
+  end;
 {$ENDIF}
 
 
@@ -528,6 +468,14 @@ begin
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+
+       {$IF CompilerVersion >= 23}
+        if GlobalSettings.UseVCLStyles then
+        begin
+        //  if not IsStyleHookRegistered(AComponent.ClassType, TTreeViewStyleHook) then
+        //   TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
+        end;
+       {$IFEND}
     end
     else
     if AComponent.ClassName='TVirtualStringTree' then
@@ -555,6 +503,13 @@ begin
         //	__property Graphics::TColor TreeLineColor = {read=GetColor, write=SetColor, index=5, default=-16777200};
         //	__property Graphics::TColor UnfocusedSelectionColor = {read=GetColor, write=SetColor, index=6, default=-16777201};
         //	__property Graphics::TColor UnfocusedSelectionBorderColor = {read=GetColor, write=SetColor, index=10, default=-16777201};
+       {$IF CompilerVersion >= 23}
+        if GlobalSettings.UseVCLStyles then
+        begin
+          if not IsStyleHookRegistered(AComponent.ClassType, TTreeViewStyleHook) then
+           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
+        end;
+       {$IFEND}
     end
     else
     if AComponent.ClassName='TCodeEditorTabControl' then
@@ -578,6 +533,17 @@ begin
     else
     if AComponent.ClassName='TClosableTabScroller' then //experimental
     begin
+
+       {$IF CompilerVersion >= 23}
+       {
+        if GlobalSettings.UseVCLStyles then
+        begin
+          if not IsStyleHookRegistered(AComponent.ClassType, TTabControlStyleHook) then
+           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTabControlStyleHook);
+        end;
+       }
+       {$IFEND}
+
         {
           p := ctx.GetType(AComponent.ClassInfo).GetProperty('Handle');
           if p<>nil then
@@ -610,6 +576,13 @@ begin
     else
     if AComponent.ClassName='TEditControl' then   //TODO
     begin
+       {$IF CompilerVersion >= 23}
+        if GlobalSettings.UseVCLStyles then
+        begin
+          if not IsStyleHookRegistered(AComponent.ClassType, TMemoStyleHook) then
+           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TMemoStyleHook);
+        end;
+       {$IFEND}
         {
         l2 := TStringList.Create;
         try
@@ -728,6 +701,17 @@ begin
          SetRttiPropertyValue(AComponent,'TabColors.InActiveStart',AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd',AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+
+       {$IF CompilerVersion >= 23}
+        {
+        if GlobalSettings.UseVCLStyles then
+        begin
+          if not IsStyleHookRegistered(AComponent.ClassType, TTabControlStyleHook) then
+           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTabControlStyleHook);
+        end;
+        }
+       {$IFEND}
+
     end
     else
     if AComponent.ClassName='TTabSheet'  then
@@ -759,7 +743,6 @@ begin
       {$IFDEF DEBUG_PROFILER}
         lpignored.Add(Format('%s component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
       {$ENDIF}
-
     end;
 
     {$IFDEF DEBUG_PROFILER}
@@ -786,8 +769,10 @@ initialization
 {$IFEND}
 
 {$IFDEF DEBUG_PROFILER}
+  ShowMessage('warning DEBUG_PROFILER mode Activated');
   lprofiler:=TStringList.Create;
   lpignored:=TStringList.Create;
+  lDumped  :=TStringList.Create;
 {$ENDIF}
 
 finalization
@@ -796,11 +781,13 @@ finalization
 {$IF CompilerVersion > 20}
   ctx.Free;
 {$IFEND}
+
 {$IFDEF DEBUG_PROFILER}
-  lprofiler.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\delphi-ide-colorizer\profiler.txt');
+  lprofiler.SaveToFile(ExtractFilePath(GetBplLocation())+'Profiler\profiler.txt');
   lprofiler.Free;
-  lpignored.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\delphi-ide-colorizer\ignored.txt');
+  lpignored.SaveToFile(ExtractFilePath(GetBplLocation())+'Profiler\ignored.txt');
   lpignored.Free;
+  lDumped.Free;
 {$ENDIF}
 
 

@@ -72,9 +72,10 @@ begin
                end
                {$IF CompilerVersion >= 23}
                else
+               if (csDesigning in Screen.Forms[i].ComponentState) then
                begin
-                 //ShowMessage('RemoveVCLStyleHook '+Screen.Forms[i].ClassName);
-                 RemoveVCLStyleHook(Screen.Forms[i].ClassType);
+                 //ShowMessage('ApplyEmptyVCLStyleHook '+Screen.Forms[i].ClassName);
+                 ApplyEmptyVCLStyleHook(Screen.Forms[i].ClassType);
                end;
               {$IFEND}
        end;
