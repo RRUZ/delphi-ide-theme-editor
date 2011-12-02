@@ -23,18 +23,33 @@ unit uRttiHelper;
 
 interface
 
-{$IF CompilerVersion > 20}
 uses
- Rtti,
- TypInfo,
-  Classes,
+{$IF CompilerVersion > 20}
+  Rtti,
   Generics.Collections,
+{$IFEND}
+  Variants,
+  TypInfo,
+  Classes,
   SysUtils;
 
-function  DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+
+{$IF CompilerVersion > 20}
+function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:TValue);
+{$ELSE}
+procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:Variant);
 {$IFEND}
 
+
+
 implementation
+
+{$IF CompilerVersion > 20}
+var
+  ctx: TRttiContext;
+{$IFEND}
+
 
 {$IF CompilerVersion > 20}
 function  DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
@@ -176,5 +191,115 @@ begin
 end;
 {$IFEND}
 
+{$IF CompilerVersion > 20}
+procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:TValue);
+var
+  RttiProperty     : TRttiProperty;
+  RttiPropertyChild: TRttiProperty;
+  MainProp         : String;
+  ChildProp        : String;
+begin
+  if Pos('.',PropName)=0 then
+  begin
+    RttiProperty := ctx.GetType(AComponent.ClassInfo).GetProperty(PropName);
+    if RttiProperty<>nil then
+      RttiProperty.SetValue(AComponent,Value);
+  end
+  else
+  begin
+    MainProp     :=Copy(PropName,1,Pos('.',PropName)-1);
+    ChildProp    :=Copy(PropName,Pos('.',PropName)+1);
+    RttiProperty := ctx.GetType(AComponent.ClassInfo).GetProperty(MainProp);
+    if Assigned(RttiProperty) and (RttiProperty.PropertyType.TypeKind in [tkClass]) then
+    begin
+        RttiPropertyChild := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(ChildProp);
+        if Assigned(RttiPropertyChild) then
+         RttiPropertyChild.SetValue(RttiProperty.GetValue(AComponent).AsObject,Value);
+    end;
+  end;
+end;
+{$ELSE}
+procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:Variant);
+var
+  RttiProperty     : PPropInfo;
+  Obj              : TObject;
+  MainProp         : String;
+  ChildProp        : String;
+  vType            : Integer;
+  //PropInfos        : PPropList;
+  //Count,i          : Integer;
+  //Ok               : Boolean;
+
+
+  Procedure SetValue(Instance : TObject);
+  begin
+    vType := VarType(Value) and VarTypeMask;
+    if Assigned(RttiProperty) then
+    case vType of
+      varDispatch,
+      varError,
+      varVariant,
+      varUnknown,
+      varEmpty,
+      varNull,
+      varAny,
+      varTypeMask  : ;
+
+      varSmallInt,
+      varInteger,
+      varBoolean,
+      varByte,
+      varWord,
+      varLongWord,
+      varInt64     : SetOrdProp(Instance, RttiProperty, Value);
+
+      varSingle,
+      varDouble,
+      varCurrency,
+      varDate      : SetFloatProp(Instance, RttiProperty, Value);
+
+      varOleStr,
+      varStrArg,
+      varString    : SetStrProp(Instance, RttiProperty, Value);
+    end;
+
+  end;
+
+begin
+  if Pos('.',PropName)=0 then
+  begin
+    RttiProperty := GetPropInfo(AComponent.ClassInfo, PropName);
+    SetValue(AComponent);
+  end
+  else
+  begin
+    MainProp     := Copy(PropName,1,Pos('.',PropName)-1);
+    ChildProp    := Copy(PropName,Pos('.',PropName)+1);
+    Obj:=AComponent;
+    RttiProperty := GetPropInfo(Obj.ClassInfo, MainProp);
+    if Assigned(RttiProperty) and (RttiProperty.PropType^.Kind in [tkClass]) then
+    begin
+       Obj:=TObject(GetOrdProp(Obj, RttiProperty));
+       if Assigned(Obj) then
+       begin
+         RttiProperty := GetPropInfo(Obj, ChildProp);
+         SetValue(Obj);
+       end;
+    end;
+  end;
+end;
+{$IFEND}
+
+
+initialization
+
+{$IF CompilerVersion > 20}
+  ctx:=TRttiContext.Create;
+{$IFEND}
+
+finalization
+{$IF CompilerVersion > 20}
+  ctx.Free;
+{$IFEND}
 
 end.
