@@ -762,8 +762,9 @@ initialization
   GlobalColorMap:=nil;
   GlobalSettings:=nil;
   HookedWindows:=TStringList.Create;
+  //ShowMessage(ParamStr(0));
+  //ShowMessage(GetBplLocation);
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
-
 {$IF CompilerVersion > 20}
   ctx:=TRttiContext.Create;
 {$IFEND}

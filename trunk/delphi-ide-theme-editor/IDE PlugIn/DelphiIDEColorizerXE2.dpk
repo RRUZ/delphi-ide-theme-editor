@@ -27,6 +27,7 @@ package DelphiIDEColorizerXE2;
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'Delphi IDE Colorizer'}
+{$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
 requires

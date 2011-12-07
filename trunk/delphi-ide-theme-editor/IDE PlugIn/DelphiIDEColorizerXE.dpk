@@ -24,6 +24,7 @@ package DelphiIDEColorizerXE;
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
 {$DESCRIPTION 'Delphi IDE Colorizer'}
+{$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
 requires

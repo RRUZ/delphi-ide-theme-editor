@@ -4,7 +4,7 @@
 			<MainSource>DelphiIDEThemeEditor.dpr</MainSource>
 			<ProjectVersion>13.4</ProjectVersion>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<AppType>Application</AppType>
 			<FrameworkType>VCL</FrameworkType>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -155,7 +155,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">256</VersionInfo>
+						<VersionInfo Name="Build">258</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -167,7 +167,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.0.256</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.0.258</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
