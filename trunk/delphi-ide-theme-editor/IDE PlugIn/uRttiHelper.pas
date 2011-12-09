@@ -36,9 +36,10 @@ uses
 
 {$IF CompilerVersion > 20}
 function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
-procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:TValue);
+procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
+function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
 {$ELSE}
-procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:Variant);
+procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 {$IFEND}
 
 
@@ -192,34 +193,73 @@ end;
 {$IFEND}
 
 {$IF CompilerVersion > 20}
-procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:TValue);
+procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
 var
-  RttiProperty     : TRttiProperty;
-  RttiPropertyChild: TRttiProperty;
-  MainProp         : String;
-  ChildProp        : String;
+  RttiProperty : TRttiProperty;
+  Instance     : Pointer;
+  Props        : TStringList;
+  i            : integer;
 begin
-  if Pos('.',PropName)=0 then
-  begin
-    RttiProperty := ctx.GetType(AComponent.ClassInfo).GetProperty(PropName);
-    if RttiProperty<>nil then
-      RttiProperty.SetValue(AComponent,Value);
-  end
-  else
-  begin
-    MainProp     :=Copy(PropName,1,Pos('.',PropName)-1);
-    ChildProp    :=Copy(PropName,Pos('.',PropName)+1);
-    RttiProperty := ctx.GetType(AComponent.ClassInfo).GetProperty(MainProp);
-    if Assigned(RttiProperty) and (RttiProperty.PropertyType.TypeKind in [tkClass]) then
-    begin
-        RttiPropertyChild := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(ChildProp);
-        if Assigned(RttiPropertyChild) then
-         RttiPropertyChild.SetValue(RttiProperty.GetValue(AComponent).AsObject,Value);
-    end;
+  Props:=TStringList.Create;
+  try
+    Props.Delimiter:='.';
+    Props.DelimitedText:=PropName;
+    Instance:=Obj;
+
+    if Props.Count>0 then
+     RttiProperty := ctx.GetType(Obj.ClassInfo).GetProperty(Props[0]);
+
+    for i:=1 to Props.Count-1 do
+     begin
+        if RttiProperty.PropertyType.TypeKind=tkClass then
+         Instance          := RttiProperty.GetValue(Instance).AsObject
+        else
+        raise Exception.Create(Format('The property %s is not a class',[Props[i]]));
+
+        RttiProperty := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(Props[i]);
+     end;
+
+    if Assigned(RttiProperty) then
+      RttiProperty.SetValue(Instance, AValue);
+  finally
+    Props.Free;
   end;
 end;
+
+function  GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+var
+  RttiProperty     : TRttiProperty;
+  Instance         : Pointer;
+  Props            : TStringList;
+  i                : integer;
+begin
+  Props:=TStringList.Create;
+  try
+    Props.Delimiter:='.';
+    Props.DelimitedText:=PropName;
+    Instance:=Obj;
+
+    if Props.Count>0 then
+     RttiProperty := ctx.GetType(Obj.ClassInfo).GetProperty(Props[0]);
+
+    for i:=1 to Props.Count-1 do
+     begin
+        if RttiProperty.PropertyType.TypeKind=tkClass then
+         Instance          := RttiProperty.GetValue(Instance).AsObject
+        else
+        raise Exception.Create(Format('The property %s is not a class',[Props[i]]));
+          RttiProperty := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(Props[i]);
+     end;
+
+    if Assigned(RttiProperty) then
+      Result:= RttiProperty.GetValue(Instance);
+  finally
+    Props.Free;
+  end;
+end;
+
 {$ELSE}
-procedure  SetRttiPropertyValue(const AComponent:  TComponent;const PropName:String; Value:Variant);
+procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 var
   RttiProperty     : PPropInfo;
   Obj              : TObject;
