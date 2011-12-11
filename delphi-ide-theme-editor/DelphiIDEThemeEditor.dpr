@@ -25,7 +25,9 @@ uses
   uColorizerSettings in 'IDE PlugIn\uColorizerSettings.pas' {FrmIDEColorizerSettings},
   uStoreColorMap in 'IDE PlugIn\uStoreColorMap.pas',
   uIDEExpertUtils in 'IDE PlugIn\uIDEExpertUtils.pas',
-  uClrSettings in 'IDE PlugIn\uClrSettings.pas';
+  uClrSettings in 'IDE PlugIn\uClrSettings.pas',
+  uVclStylesFix in 'Units\uVclStylesFix.pas',
+  uLoadThemesImages in 'Units\uLoadThemesImages.pas';
 
 {$R *.res}
 

@@ -30,7 +30,6 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     BevelOuter = bvNone
     BorderWidth = 5
     TabOrder = 0
-    ExplicitHeight = 283
     object PageControlSettings: TPageControl
       Left = 5
       Top = 5
@@ -39,10 +38,8 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 287
       object TabSheetMain: TTabSheet
         Caption = 'Main Settings'
-        ExplicitHeight = 258
         object ImageIDELogo: TImage
           Left = 3
           Top = 4
@@ -237,7 +234,6 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
-        ExplicitHeight = 258
         DesignSize = (
           552
           187)
@@ -271,7 +267,6 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           TabOrder = 1
           ViewStyle = vsReport
           OnChange = ListViewTypesChange
-          ExplicitHeight = 232
         end
         object ListViewProps: TListView
           Left = 267
@@ -288,13 +283,11 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           RowSelect = True
           TabOrder = 0
           ViewStyle = vsReport
-          ExplicitHeight = 232
         end
       end
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
-        ExplicitHeight = 259
         object Label8: TLabel
           Left = 3
           Top = 26
@@ -351,9 +344,6 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitLeft = 168
-      ExplicitTop = 0
-      ExplicitWidth = 185
       object BtnCancel: TButton
         Left = 88
         Top = 6
@@ -379,7 +369,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     Left = 504
     Top = 240
     Bitmap = {
-      494C010107000800400110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800440110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -656,9 +646,5 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     UnusedColor = clWhite
     Left = 465
     Top = 237
-  end
-  object JvBrowseForFolderDialog1: TJvBrowseForFolderDialog
-    Left = 448
-    Top = 120
   end
 end

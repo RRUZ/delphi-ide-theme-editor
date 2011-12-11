@@ -25,7 +25,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, JvBaseDlg, JvBrowseFolder, ExtCtrls;
+  Dialogs, StdCtrls, ExtCtrls;
 
 type
   TSettings = class
@@ -46,7 +46,6 @@ type
     EditThemesFolder: TEdit;
     BtnSelFolderThemes: TButton;
     BtnCancel: TButton;
-    JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
     Bevel1:    TBevel;
     Label9: TLabel;
     ComboBoxVCLStyle: TComboBox;
@@ -70,6 +69,9 @@ procedure LoadVCLStyle(Const StyleName:String);
 implementation
 
 uses
+  {$WARN SYMBOL_PLATFORM OFF}
+  Vcl.FileCtrl,
+  {$WARN SYMBOL_PLATFORM ON}
   Vcl.Styles,
   Vcl.Themes,
   IOUtils,
@@ -113,7 +115,7 @@ begin
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
       Settings.ThemePath := ExtractFilePath(ParamStr(0)) + 'Themes';
-      ForceDirectories(Settings.ThemePath);
+      SysUtils.ForceDirectories(Settings.ThemePath);
     end;
   finally
     iniFile.Free;
@@ -151,13 +153,17 @@ begin
 end;
 
 procedure TFrmSettings.BtnSelFolderThemesClick(Sender: TObject);
+var
+  Directory: string;
 begin
-  if DirectoryExists(EditThemesFolder.Text) then
-    JvBrowseForFolderDialog1.Directory := EditThemesFolder.Text;
+  Directory:='';
+  if SysUtils.DirectoryExists(EditThemesFolder.Text) then
+    Directory := EditThemesFolder.Text;
 
-  if JvBrowseForFolderDialog1.Execute then
-    EditThemesFolder.Text := JvBrowseForFolderDialog1.Directory;
+  if SelectDirectory('Select directory',Directory,Directory,[sdNewFolder, sdNewUI, sdShowEdit, sdValidateDir, sdShowShares], nil) then
+    EditThemesFolder.Text := Directory;
 end;
+
 
 procedure TFrmSettings.ComboBoxVCLStyleChange(Sender: TObject);
 begin

@@ -69,8 +69,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions,
-  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, JvBaseDlg,
-  JvBrowseFolder,  Generics.Defaults, Generics.Collections, Vcl.ActnList;
+  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -131,7 +130,6 @@ type
     BtnContribute: TButton;
     SynExporterHTML1: TSynExporterHTML;
     BtnExportToLazarusTheme: TButton;
-    JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
     OpenDialogExport: TOpenDialog;
     ImageUpdate: TImage;
     ComboBoxExIDEs: TComboBoxEx;
@@ -209,47 +207,35 @@ type
     { Public declarations }
   end;
 
-  TLoadThemesImages = class(TThread)
-  private
-    FPath :String;
-    FImageList : TImageList;
-    FListview  : TListView;
-  protected
-    procedure Execute; override;
-  public
-    constructor Create(const Path : string;ImageList:TImageList;ListView: TListView);
-  end;
-
-  TMyClass = class(TFormStyleHook)
-  protected
-   procedure PaintBackground(Canvas: TCanvas); override;
-  end;
-
 
 var
   FrmMain : TFrmMain;
-  FLoaded : Boolean;
 
 implementation
 
 uses
-  VCl.Styles,
-  VCl.Themes,
+  {$WARN SYMBOL_PLATFORM OFF}
+  Vcl.FileCtrl,
+  {$WARN SYMBOL_PLATFORM ON}
   Diagnostics,
   ShellApi,
   IOUtils,
   StrUtils,
+  GraphUtil,
+  CommCtrl,
+  VCl.Styles,
+  VCl.Themes,
+  uVclStylesFix,
   uHueSat,
   uColorSelector,
   EclipseThemes,
-  GraphUtil,
-  CommCtrl,
   VSThemes,
   uMisc,
   uLazarusIDEHighlight,
   uStackTrace,
-  ActiveX,
-  uCheckUpdate, uColorizerSettings;
+  uCheckUpdate,
+  uLoadThemesImages,
+  uColorizerSettings;
 
 const
   InvalidBreakLine   = 9;
@@ -260,103 +246,6 @@ const
 
 {$R *.dfm}
 {$R ManAdmin.RES}
-
-{ TLoadThemes }
-
-constructor TLoadThemesImages.Create(const Path : string;ImageList:TImageList;ListView: TListView);
-begin
-   inherited Create(False);
-   FPath:=Path;
-   FImageList:=ImageList;
-   FListview:=ListView;
-   FreeOnTerminate:=True;
-end;
-
-procedure TLoadThemesImages.Execute;
-var
-  Item    : TListItem;
-  FileName: string;
-  ImpTheme: TIDETheme;
-  Bmp     : TBitmap;
-  i       : Integer;
-begin
-  inherited;
-  if not TDirectory.Exists(FPath) then
-    exit;
-
-  FListview.SmallImages:=nil;
-  FImageList.Clear;
-  CoInitialize(nil);
-  try
-    for i:=0 to FListview.Items.Count-1 do
-    begin
-      Item:=FListview.Items.Item[i];
-      FileName:=IncludeTrailingPathDelimiter(FPath)+ Item.Caption + '.theme.xml';
-      LoadThemeFromXMLFile(ImpTheme, FileName);
-      Bmp:=TBitmap.Create;
-      try
-       //CreateBitmapSolidColor(16,16,[StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),StringToColor(ImpTheme[ReservedWord].ForegroundColorNew)], Bmp);
-       CreateArrayBitmap(16,16,[StringToColor(ImpTheme[ReservedWord].ForegroundColorNew),StringToColor(ImpTheme[ReservedWord].BackgroundColorNew)], Bmp);
-
-       Synchronize(
-         procedure
-         begin
-           FImageList.Add(Bmp, nil);
-           Item.ImageIndex:=FImageList.Count-1;
-         end
-       );
-
-      finally
-         Bmp.Free;
-      end;
-    end;
-
-  finally
-    CoUninitialize;
-    FListview.SmallImages:=FImageList;
-  end;
-
-  {
-  CoInitialize(nil);
-  try
-    FListview.Items.Clear;
-    for FileName in TDirectory.GetFiles(FPath, '*.theme.xml') do
-    begin
-        Synchronize(
-          procedure
-          begin
-            Item := FListview.Items.Add;
-            Item.Caption := Copy(ExtractFileName(FileName), 1, Pos('.theme', ExtractFileName(FileName)) - 1);
-            Item.SubItems.Add(FileName);
-          end
-        );
-
-      LoadThemeFromXMLFile(ImpTheme, FileName);
-
-      Bmp:=TBitmap.Create;
-      try
-       //CreateBitmapSolidColor(16,16,[StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),StringToColor(ImpTheme[ReservedWord].ForegroundColorNew)], Bmp);
-       CreateArrayBitmap(16,16,[StringToColor(ImpTheme[ReservedWord].ForegroundColorNew),StringToColor(ImpTheme[ReservedWord].BackgroundColorNew)], Bmp);
-
-       Synchronize(
-         procedure
-         begin
-           FImageList.Add(Bmp, nil);
-           Item.ImageIndex:=FImageList.Count-1;
-         end
-       );
-
-      finally
-         Bmp.Free;
-      end;
-    end;
-  finally
-    CoUninitialize;
-  end;
-  }
-  FLoaded:=True;
-end;
-
 
 procedure TFrmMain.ActionApplyThemeExecute(Sender: TObject);
 begin
@@ -387,7 +276,7 @@ begin
   try
     if LvThemes.Selected <> nil then
     begin
-      index    := LvThemes.Selected.Index;
+      Index    :=LvThemes.Selected.Index;
       FileName :=LvThemes.Selected.SubItems[0];
       NFileName:=ChangeFileExt(ExtractFileName(FileName),'');//remove .xml
       NFileName:=ChangeFileExt(ExtractFileName(NFileName),'');//remove .theme
@@ -562,18 +451,19 @@ var
   OutPutFolder : String;
   GoNext : Boolean;
   s  : TStopwatch;
+  Directory : String;
 begin
   try
 
+    Directory:='';
     OutPutFolder:=IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Themes Lazarus';
-    if DirectoryExists(OutPutFolder) then
-      JvBrowseForFolderDialog1.Directory := OutPutFolder;
+    if SysUtils.DirectoryExists(OutPutFolder) then
+     Directory := OutPutFolder;
 
-    if JvBrowseForFolderDialog1.Execute then
-      OutPutFolder := JvBrowseForFolderDialog1.Directory
+    if SelectDirectory('Select directory',Directory,Directory,[sdNewFolder, sdNewUI, sdShowEdit, sdValidateDir, sdShowShares], nil) then
+      OutPutFolder := Directory
     else
       Exit;
-
 
     OpenDialogExport.InitialDir := ExtractFilePath(ParamStr(0));
     if OpenDialogExport.Execute(Handle) then
@@ -787,7 +677,6 @@ begin
   try
     Frm.IDEData:=FIDEData;
     Frm.init();
-    //ImageListDelphiVersion.GetIcon(ComboBoxExIDEs.ItemsEx[ComboBoxExIDEs.ItemIndex].ImageIndex, Icon);
     ExtractIconFile(Icon,IDEData.Path, SHGFI_LARGEICON);
     Frm.ImageIDELogo.Picture.Icon:=Icon;
     Frm.ShowModal();
@@ -911,7 +800,6 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
-  FLoaded   := False;
   IDEsList:=TList<TDelphiVersionData>.Create;
   FChanging := False;
   FSettings := TSettings.Create;
@@ -1121,7 +1009,6 @@ begin
   end;
 end;
 
-//\HKCU\Software\CodeGear\ETM\12.0\Color
 procedure TFrmMain.LoadFixedWidthFonts;
 var
   sDC:     integer;
@@ -1142,12 +1029,7 @@ procedure TFrmMain.LoadThemes;
 var
   Item    : TListItem;
   FileName: string;
-  //ImpTheme: TIDETheme;
-  //Bmp     : TBitmap;
-  //ThrLoadThemes :  TLoadThemesImages;
 begin
-  //if not FLoaded then
-  //ThrLoadThemes:=TLoadThemes.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
   if not TDirectory.Exists(FSettings.ThemePath) then
     exit;
 
@@ -1160,19 +1042,6 @@ begin
       Item := LvThemes.Items.Add;
       Item.Caption := Copy(ExtractFileName(FileName), 1, Pos('.theme', ExtractFileName(FileName)) - 1);
       Item.SubItems.Add(FileName);
-
-      {
-      LoadThemeFromXMLFile(ImpTheme, FileName);
-      Bmp:=TBitmap.Create;
-      try
-       //CreateBitmapSolidColor(16,16,[StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),StringToColor(ImpTheme[ReservedWord].ForegroundColorNew)], Bmp);
-       CreateArrayBitmap(16,16,[StringToColor(ImpTheme[ReservedWord].ForegroundColorNew),StringToColor(ImpTheme[ReservedWord].BackgroundColorNew)], Bmp);
-       ImageListThemes.Add(Bmp, nil);
-       Item.ImageIndex:=ImageListThemes.Count-1;
-      finally
-         Bmp.Free;
-      end;
-      }
     end;
     FThemeChangued := False;
   finally
@@ -1180,7 +1049,6 @@ begin
   end;
 
   TLoadThemesImages.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
-
 end;
 
 procedure TFrmMain.LoadValuesElements;
@@ -1594,30 +1462,5 @@ begin
     Msg.Result := htCaption;
 end;
 
-
-
-{ TMyClass }
-
-procedure TMyClass.PaintBackground(Canvas: TCanvas);
-var
-  Details: TThemedElementDetails;
-  R: TRect;
-begin
-  if StyleServices.Available then
-  begin
-    Details.Element := teWindow;
-    Details.Part := 0;
-    R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
-    //if (GetWindowLong(Form.Handle,GWL_EXSTYLE) AND WS_EX_TRANSPARENT) = WS_EX_TRANSPARENT  then
-     if Form.Brush.Style = bsClear then Exit;
-      StyleServices.DrawElement(Canvas.Handle, Details, R);
-  end;
-end;
-
-
-initialization
-  TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
-  TStyleManager.Engine.UnRegisterStyleHook(TCustomForm, TFormStyleHook);
-  TStyleManager.Engine.RegisterStyleHook(TCustomForm, TMyClass);
 
 end.

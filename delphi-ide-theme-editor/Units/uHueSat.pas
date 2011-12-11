@@ -26,7 +26,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, Mask, JvExMask, JvSpin, ComCtrls, uDelphiVersions,
+  Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, uDelphiVersions,
   SynEdit,
   uSettings,
   uHSLUtils,
@@ -34,16 +34,13 @@ uses
   SynEditHighlighter,
   SynHighlighterPas,
   Generics.Defaults,
-  Generics.Collections;
+  Generics.Collections, Vcl.ImgList;
 
 type
   TFrmHueSat = class(TForm)
     BtnApply:    TButton;
     Bevel1:      TBevel;
     TrackBarHue: TTrackBar;
-    JvSpinEditLight: TJvSpinEdit;
-    JvSpinEditSat: TJvSpinEdit;
-    JvSpinEditHue: TJvSpinEdit;
     ButtonLightness: TButton;
     TrackBarLightness: TTrackBar;
     ButtonSaturation: TButton;
@@ -56,9 +53,13 @@ type
     Bevel4:      TBevel;
     Label1:      TLabel;
     BtnSaveAs:   TButton;
-    procedure JvSpinEditHueChange(Sender: TObject);
-    procedure JvSpinEditLightChange(Sender: TObject);
-    procedure JvSpinEditSatChange(Sender: TObject);
+    UpDownHue: TUpDown;
+    EditHue: TEdit;
+    ImageList1: TImageList;
+    UpDownSat: TUpDown;
+    EditSat: TEdit;
+    UpDownLight: TUpDown;
+    EditLight: TEdit;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -69,6 +70,12 @@ type
     procedure TrackBarSaturationChange(Sender: TObject);
     procedure BtnApplyClick(Sender: TObject);
     procedure BtnSaveAsClick(Sender: TObject);
+    procedure EditHueExit(Sender: TObject);
+    procedure UpDownHueChanging(Sender: TObject; var AllowChange: Boolean);
+    procedure EditSatExit(Sender: TObject);
+    procedure UpDownSatChanging(Sender: TObject; var AllowChange: Boolean);
+    procedure EditLightExit(Sender: TObject);
+    procedure UpDownLightChanging(Sender: TObject; var AllowChange: Boolean);
   private
     FSynEditor: TSynEdit;
     FColorList: TColorList;
@@ -239,8 +246,8 @@ begin
       'Do you want overwrite the current theme "%s" with the changes made to hue/saturation?',
       [FThemeName]), mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
     begin
-      ApplyHueSaturationToIDETheme(FTheme, Trunc(JvSpinEditHue.Value),
-        Trunc(JvSpinEditSat.Value), Trunc(JvSpinEditLight.Value));
+      ApplyHueSaturationToIDETheme(FTheme, Trunc(UpDownHue.Position),
+        Trunc(UpDownSat.Position), Trunc(UpDownLight.Position));
       //SaveDelphiIDEThemeToXmlFile(DelphiVersion, FTheme, FSettings.ThemePath, FThemeName);
       SaveDelphiIDEThemeToXmlFile(FTheme, FSettings.ThemePath, FThemeName);
       ShowMessage(Format('Changes saved to the theme "%s"', [FThemeName]));
@@ -263,8 +270,8 @@ begin
     if NewThemeName <> '' then
     begin
       NewTheme := FTheme;
-      ApplyHueSaturationToIDETheme(NewTheme, Trunc(JvSpinEditHue.Value),
-        Trunc(JvSpinEditSat.Value), Trunc(JvSpinEditLight.Value));
+      ApplyHueSaturationToIDETheme(NewTheme, Trunc(UpDownHue.Position),
+        Trunc(UpDownSat.Position), Trunc(UpDownLight.Position));
       //SaveDelphiIDEThemeToXmlFile(DelphiVersion, NewTheme, FSettings.ThemePath, NewThemeName);
       SaveDelphiIDEThemeToXmlFile(NewTheme, FSettings.ThemePath, NewThemeName);
       ShowMessage(Format('The theme "%s" was created', [NewThemeName]));
@@ -279,21 +286,74 @@ end;
 
 procedure TFrmHueSat.ButtonHueClick(Sender: TObject);
 begin
-  JvSpinEditHue.Value  := DefHue;
+  UpDownHue.Position   := DefHue;
   TrackBarHue.Position := DefHue;
 end;
 
 procedure TFrmHueSat.ButtonLightnessClick(Sender: TObject);
 begin
-  JvSpinEditLight.Value      := DefLig;
+  UpDownLight.Position       := DefLig;
   TrackBarLightness.Position := DefLig;
 end;
 
 procedure TFrmHueSat.ButtonSaturationClick(Sender: TObject);
 begin
-  JvSpinEditSat.Value := DefSat;
+  UpDownSat.Position := DefSat;
   TrackBarSaturation.Position := DefSat;
 end;
+
+procedure TFrmHueSat.EditHueExit(Sender: TObject);
+Var
+  Value : Integer;
+  Allow : Boolean;
+begin
+  if TryStrToInt(EditHue.Text, Value) then
+  begin
+    if Value< UpDownHue.Min then
+     EditHue.Text:=IntToStr(UpDownHue.Min)
+    else
+    if Value> UpDownHue.Max then
+     EditHue.Text:=IntToStr(UpDownHue.Max);
+
+     UpDownHueChanging(nil, Allow);
+  end;
+end;
+
+procedure TFrmHueSat.EditLightExit(Sender: TObject);
+Var
+  Value : Integer;
+  Allow : Boolean;
+begin
+  if TryStrToInt(EditLight.Text, Value) then
+  begin
+    if Value< UpDownLight.Min then
+     EditLight.Text:=IntToStr(UpDownLight.Min)
+    else
+    if Value> UpDownLight.Max then
+     EditLight.Text:=IntToStr(UpDownLight.Max);
+
+    UpDownLightChanging(nil, Allow);
+  end;
+end;
+
+
+procedure TFrmHueSat.EditSatExit(Sender: TObject);
+Var
+  Value : Integer;
+  Allow : Boolean;
+begin
+  if TryStrToInt(EditSat.Text, Value) then
+  begin
+    if Value< UpDownSat.Min then
+     EditSat.Text:=IntToStr(UpDownSat.Min)
+    else
+    if Value> UpDownSat.Max then
+     EditSat.Text:=IntToStr(UpDownSat.Max);
+
+    UpDownSatChanging(nil, Allow);
+  end;
+end;
+
 
 procedure TFrmHueSat.FormCreate(Sender: TObject);
 begin
@@ -381,42 +441,51 @@ begin
   FHueColorList.AddRange(FColorList);
 end;
 
-procedure TFrmHueSat.JvSpinEditHueChange(Sender: TObject);
-begin
-  TrackBarHue.Position := Trunc(TJvSpinEdit(Sender).Value);
-end;
-
-procedure TFrmHueSat.JvSpinEditLightChange(Sender: TObject);
-begin
-  TrackBarLightness.Position := Trunc(TJvSpinEdit(Sender).Value);
-end;
-
-procedure TFrmHueSat.JvSpinEditSatChange(Sender: TObject);
-begin
-  TrackBarSaturation.Position := Trunc(TJvSpinEdit(Sender).Value);
-end;
-
-
 procedure TFrmHueSat.TrackBarHueChange(Sender: TObject);
 begin
-  JvSpinEditHue.Value := TrackBarHue.Position;
-  Hue(Trunc(JvSpinEditHue.Value));
-  if JvSpinEditSat.Value <> 0 then
-    Saturation(Trunc(JvSpinEditSat.Value));
-  if JvSpinEditLight.Value <> 0 then
-    Lightness(Trunc(JvSpinEditLight.Value));
+  //JvSpinEditHue.Value := TrackBarHue.Position;
+  //Hue(Trunc(JvSpinEditHue.Value));
+  UpDownHue.Position := TrackBarHue.Position;
+  Hue(Trunc(UpDownHue.Position));
+
+  if UpDownSat.Position <> 0 then
+    Saturation(Trunc(UpDownSat.Position));
+
+  if UpDownLight.Position <> 0 then
+    Lightness(Trunc(UpDownLight.Position));
 end;
 
 procedure TFrmHueSat.TrackBarLightnessChange(Sender: TObject);
 begin
-  JvSpinEditLight.Value := TrackBarLightness.Position;
-  Lightness(Trunc(JvSpinEditLight.Value));
+  UpDownLight.Position := TrackBarLightness.Position;
+  Lightness(Trunc(UpDownLight.Position));
 end;
 
 procedure TFrmHueSat.TrackBarSaturationChange(Sender: TObject);
 begin
-  JvSpinEditSat.Value := TrackBarSaturation.Position;
-  Saturation(Trunc(JvSpinEditSat.Value));
+  UpDownSat.Position := TrackBarSaturation.Position;
+  Saturation(Trunc(UpDownSat.Position));
+end;
+
+procedure TFrmHueSat.UpDownHueChanging(Sender: TObject;
+  var AllowChange: Boolean);
+begin
+  TrackBarHue.Position := UpDownHue.Position;
+  AllowChange:=True;
+end;
+
+procedure TFrmHueSat.UpDownLightChanging(Sender: TObject;
+  var AllowChange: Boolean);
+begin
+  TrackBarLightness.Position := UpDownLight.Position;
+  AllowChange:=True;
+end;
+
+procedure TFrmHueSat.UpDownSatChanging(Sender: TObject;
+  var AllowChange: Boolean);
+begin
+  TrackBarSaturation.Position := UpDownSat.Position;
+  AllowChange:=True;
 end;
 
 end.

@@ -24,6 +24,7 @@ unit uVclControlsHooks;
 interface
 
 uses
+  Dialogs,
   Windows,
   Classes,
   SysUtils,
@@ -48,6 +49,12 @@ var
   OrgTTabSheet_NewInstance            : Pointer;
   OrgTPageControl_NewInstance         : Pointer;
 {$ENDIF}
+
+ OrgFoo            : procedure;
+ FooBackUp         : TXRedirCode;
+
+Const
+  FooMethod='@Editcolorpage@TEditorColor@SetColorSpeedSetting$qqr26Vedopts@TColorSpeedSetting';
 
 
 procedure Bitmap2GrayScale(const BitMap: TBitmap);
@@ -127,6 +134,15 @@ begin
 end;
 }
 
+
+{
+procedure Test;
+begin
+  OrgFoo;
+  ShowMessage('Foo');
+end;
+}
+
 procedure InstallHooks;
 {$IFOPT W+}{$DEFINE WARN}{$ENDIF}{$WARNINGS OFF} // no compiler warning
 const
@@ -144,6 +160,13 @@ begin
   OrgTPageControl_NewInstance := GetVirtualMethod(TPageControl, vmtNewInstance);
   SetVirtualMethod(ComCtrls.TPageControl, vmtNewInstance, @TPageControl_NewInstance);
 {$ENDIF}
+
+{
+
+  OrgFoo := GetProcAddress(LoadPackage(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'coreide160.bpl'), FooMethod);
+  if @OrgFoo <> nil then
+    HookProc(@OrgFoo, @Test, FooBackUp);
+}
 end;
 
 procedure RemoveHooks;
@@ -159,6 +182,11 @@ begin
   SetVirtualMethod(ComCtrls.TTabSheet, vmtNewInstance, OrgTTabSheet_NewInstance);
   SetVirtualMethod(ComCtrls.TPageControl, vmtNewInstance, OrgTPageControl_NewInstance);
 {$ENDIF}
+
+{
+  if @OrgFoo <> nil then
+    UnhookProc(@OrgFoo, FooBackUp);
+}
 end;
 
 

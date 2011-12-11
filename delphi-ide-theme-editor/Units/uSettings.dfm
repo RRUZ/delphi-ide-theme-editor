@@ -5,7 +5,7 @@ object FrmSettings: TFrmSettings
   BorderStyle = bsSingle
   Caption = 'Settings'
   ClientHeight = 188
-  ClientWidth = 504
+  ClientWidth = 512
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -84,9 +84,5 @@ object FrmSettings: TFrmSettings
     Style = csDropDownList
     TabOrder = 4
     OnChange = ComboBoxVCLStyleChange
-  end
-  object JvBrowseForFolderDialog1: TJvBrowseForFolderDialog
-    Left = 472
-    Top = 56
   end
 end
