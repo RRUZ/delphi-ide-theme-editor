@@ -74,6 +74,8 @@ implementation
 
 {$R DelphiIDEColorizer.res}
 
+{.$DEFINE USE_DUMP_TIMER}
+
 uses
  {$IF CompilerVersion >= 23}
  Vcl.Styles,
@@ -94,21 +96,29 @@ uses
  XPMan,
  Menus,
  ComObj,
+ {$IFDEF USE_DUMP_TIMER}
+ ExtCtrls,
+ {$ENDIF}
  uClrSettings;
 
 
 type
   TIDEWizard = class(TInterfacedObject, IOTAWizard, IOTANotifier)
   private
-    //ColorizerForm: TFrmIDEColorizerSettings;
+    {$IFDEF USE_DUMP_TIMER}
+    FDumperTimer : TTimer;
+    {$ENDIF}
     Settings : TSettings;
     AColorMap:TXPColorMap;
-    //ExplorerItem: TMenuItem;
+    ExplorerItem: TMenuItem;
     //ExplorerSeparator: TMenuItem;
     procedure AddMenuItems;
     procedure RemoveMenuItems;
     procedure InitColorizer;
     procedure FinalizeColorizer;
+    {$IFDEF USE_DUMP_TIMER}
+    procedure OnDumper(Sender : TObject);
+    {$ENDIF}
   public
     constructor Create;
     destructor Destroy; override;
@@ -123,66 +133,58 @@ type
     procedure ExplorerItemClick(Sender: TObject);
   end;
 
-
 var
   SplashBmp     : Graphics.TBitmap;
   AboutBmp      : Graphics.TBitmap;
-{$IFDEF Use_Notifiers}
-  NotifierIndex : Integer;
 
 type
-  TToolbarIDENotifier = class(TNotifierObject, IOTANotifier, INTACustomizeToolbarNotifier)
-  protected
-    procedure ShowToolbar(Toolbar: TWinControl; Show: Boolean);
-    procedure CreateButton(AOwner: TComponent; var Button: TControl;
-      Action: TBasicAction);
-    procedure FilterAction(Action: TBasicAction; ViewingAllCommands: Boolean;
-      var DisplayName: string; var Display: Boolean; var Handled: Boolean);
-    procedure FilterCategory(var Category: string; var Display: Boolean;
-      var Handled: Boolean);
-    procedure ResetToolbar(var Toolbar: TWinControl);
-    procedure ToolbarModified(Toolbar: TWinControl);
-  end;
-
-type
-  TToolbarIDEStreamNotifier = class(TNotifierObject, IOTANotifier, INTAToolbarStreamNotifier)
-  public
-    procedure AfterSave;overload;
-    procedure BeforeSave;overload;
-    procedure AfterSave(Toolbar: TWinControl);overload;
-    procedure BeforeSave(Toolbar: TWinControl);overload;
-    procedure ToolbarLoaded(Toolbar: TWinControl);
-  end;
-{$ENDIF}
+  TMyIDEHotKey = class(TNotifierObject, IOTAKeyboardBinding)
+  private
+     procedure Dump(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
+  private
+     function GetBindingType: TBindingType;
+     function GetDisplayName: string;
+     function GetName: string;
+     procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
+  end ;
 
 
 procedure Register;
-{$IFDEF Use_Notifiers}
+{
 var
-  Services: INTAServices;
-{$ENDIF}
+ KbServices: IOTAKeyBoardServices;
+ kb        : TMyIDEHotKey;
+}
 begin
-{$IFDEF Use_Notifiers}
-  Services := BorlandIDEServices as INTAServices;
-  Assert(Assigned(Services), 'INTAServices not available');
-  NotifierIndex := Services.RegisterToolbarNotifier(TToolbarIDENotifier.Create);
-{$ENDIF}
-  RegisterPackageWizard(TIDEWizard.Create);
+   RegisterPackageWizard(TIDEWizard.Create);
+   {
+   kb := TMyIDEHotKey.Create;
+   KbServices := BorlandIDEServices as IOTAKeyBoardServices;
+   KbServices.AddKeyboardBinding(Kb);
+   }
 end;
 
-{$IFDEF Use_Notifiers}
-procedure RemoveNotifier;
+procedure SaveComponentToFile(Component: TComponent; const FileName: TFileName);
 var
-  Services: INTAServices;
+  FileStream : TFileStream;
+  MemStream : TMemoryStream;
 begin
-  if NotifierIndex <> -1 then
-  begin
-    Services := BorlandIDEServices as INTAServices;
-    Assert(Assigned(Services), 'IOTAServices not available');
-    Services.UnregisterToolbarNotifier(NotifierIndex);
+  if not Assigned(Component) then exit;
+  FileStream := TFileStream.Create(FileName,fmCreate);
+  try
+    MemStream := TMemoryStream.Create;
+    try
+      MemStream.WriteComponent(Component);
+      MemStream.Position := 0;
+      ObjectBinaryToText(MemStream, FileStream);
+    finally
+     MemStream.Free;
+    end;
+  finally
+    FileStream.Free;
   end;
 end;
-{$ENDIF}
+
 
 function GetFileVersion(const FileName: string): string;
 var
@@ -336,6 +338,13 @@ begin
   //ShowMessage(GetBplLocation);
   AddMenuItems;
   InitColorizer();
+
+  {$IFDEF USE_DUMP_TIMER}
+  FDumperTimer:=TTimer.Create(nil);
+  FDumperTimer.OnTimer :=OnDumper;
+  FDumperTimer.Interval:=1000;
+  FDumperTimer.Enabled:=True;
+  {$ENDIF}
 end;
 
 
@@ -346,10 +355,10 @@ var
   ToolsMenu: TMenuItem;
   I, InsertPosition: Integer;
   Image : TIcon;
-}
+                }
 begin
   inherited;
-  {
+                {
   if BorlandIDEServices <> nil then
   begin
     MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
@@ -363,11 +372,12 @@ begin
       end;
 
     InsertPosition:=ToolsMenu.Count - 1;
-    ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
-    ToolsMenu.InsertComponent(ExplorerSeparator);
-    ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
+    //ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
+    //ToolsMenu.InsertComponent(ExplorerSeparator);
+    //ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
 
-    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, 0, False, True, ExplorerItemClick, 0, 'IdeClorItem');
+
+    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, Menus.ShortCut(Word('D'), [ssCtrl]), False, True, ExplorerItemClick, 0, 'IdeClorItem');
 
 
     Image:=TIcon.Create;
@@ -381,7 +391,7 @@ begin
     ToolsMenu.InsertComponent(ExplorerItem);
     ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
   end;
-  }
+               }
 end;
 
 procedure TIDEWizard.AfterSave;
@@ -406,7 +416,10 @@ begin
     AboutBmp.Free;
 
   FinalizeColorizer();
-
+  {$IFDEF USE_DUMP_TIMER}
+  FDumperTimer.Enabled:=False;
+  FDumperTimer.Free;
+  {$ENDIF}
   //ColorizerForm.Free;
   inherited;
 end;
@@ -421,6 +434,7 @@ end;
 
 procedure TIDEWizard.ExplorerItemClick(Sender: TObject);
 begin
+ShowMessage('Foo');
   //ColorizerForm := TFrmIDEColorizerSettings.Create(nil);
   //ColorizerForm.Name := 'DelphiIDEColorizer_SettingsForm';
   //ColorizerForm.ShowModal();
@@ -445,83 +459,53 @@ procedure TIDEWizard.Modified;
 begin
 end;
 
+{$IFDEF USE_DUMP_TIMER}
+procedure TIDEWizard.OnDumper(Sender: TObject);
+Var
+  FileName : String;
+begin
+  FileName:=ExtractFilePath(GetBplLocation())+'Galileo\Dump_'+Screen.ActiveForm.Name+'.dfm';
+  if not FileExists(FileName) then
+  SaveComponentToFile(Screen.ActiveForm, FileName);
+end;
+{$ENDIF}
+
 procedure TIDEWizard.RemoveMenuItems;
 begin
-{
-  ExplorerItem.Free;
-  ExplorerSeparator.Free;
-}
+  //ExplorerItem.Free;
+  //ExplorerSeparator.Free;
 end;
 
-{$IFDEF Use_Notifiers}
 
-procedure TToolbarIDENotifier.CreateButton(AOwner: TComponent;
-  var Button: TControl; Action: TBasicAction);
+{ TMyIDEHotKey }
+
+procedure TMyIDEHotKey.BindKeyboard(
+  const BindingServices: IOTAKeyBindingServices);
 begin
-
+   BindingServices.AddKeyBinding([ShortCut(Word('P'), [ssCtrl])], Dump, nil);
 end;
 
-procedure TToolbarIDENotifier.FilterAction(Action: TBasicAction;
-  ViewingAllCommands: Boolean; var DisplayName: string; var Display,
-  Handled: Boolean);
+procedure TMyIDEHotKey.Dump(const Context: IOTAKeyContext; KeyCode: TShortCut;
+  var BindingResult: TKeyBindingResult);
 begin
-
+  SaveComponentToFile(Screen.ActiveForm, ExtractFilePath(GetBplLocation())+'Galileo\Dump_'+Screen.ActiveForm.Name+'.dfm');
+  BindingResult := krHandled;
 end;
 
-procedure TToolbarIDENotifier.FilterCategory(var Category: string; var Display,
-  Handled: Boolean);
+function TMyIDEHotKey.GetBindingType: TBindingType;
 begin
-
+  Result := btPartial;
 end;
 
-procedure TToolbarIDENotifier.ResetToolbar(var Toolbar: TWinControl);
+function TMyIDEHotKey.GetDisplayName: string;
 begin
- if Assigned(Toolbar) then
-   ShowMessage(Format('ResetToolbar Class %s Name %',[Toolbar.ClassName, Toolbar.Name]));
+  Result := 'Foo Dump';
 end;
 
-procedure TToolbarIDENotifier.ShowToolbar(Toolbar: TWinControl; Show: Boolean);
+function TMyIDEHotKey.GetName: string;
 begin
- if Assigned(Toolbar) then
-   ShowMessage(Format('ShowToolbar Class %s Name %',[Toolbar.ClassName, Toolbar.Name]));
+  Result := 'Foo Dump';
 end;
-
-
-procedure TToolbarIDENotifier.ToolbarModified(Toolbar: TWinControl);
-begin
- if Assigned(Toolbar) then
-   ShowMessage(Format('ToolbarModified Class %s Name %',[Toolbar.ClassName, Toolbar.Name]));
-end;
-
-
-procedure TToolbarIDEStreamNotifier.AfterSave(Toolbar: TWinControl);
-begin
-
-end;
-
-procedure TToolbarIDEStreamNotifier.AfterSave;
-begin
-
-end;
-
-procedure TToolbarIDEStreamNotifier.BeforeSave(Toolbar: TWinControl);
-begin
-
-end;
-
-procedure TToolbarIDEStreamNotifier.BeforeSave;
-begin
-
-end;
-
-procedure TToolbarIDEStreamNotifier.ToolbarLoaded(Toolbar: TWinControl);
-begin
- if Assigned(Toolbar) then
-   ShowMessage(Format('ToolbarLoaded Class %s Name %',[Toolbar.ClassName, Toolbar.Name]));
-
-end;
-
-{$ENDIF}
 
 initialization
 

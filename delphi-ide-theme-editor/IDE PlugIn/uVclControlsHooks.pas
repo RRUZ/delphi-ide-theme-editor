@@ -54,7 +54,8 @@ var
  FooBackUp         : TXRedirCode;
 
 Const
-  FooMethod='@Editcolorpage@TEditorColor@SetColorSpeedSetting$qqr26Vedopts@TColorSpeedSetting';
+  //FooMethod='@Editcolorpage@TEditorColor@SetColorSpeedSetting$qqr26Vedopts@TColorSpeedSetting';
+  FooMethod='@Editcolorpage@TEditorColor@ColorSpeedSettingClick$qqrp14System@TObject';
 
 
 procedure Bitmap2GrayScale(const BitMap: TBitmap);
@@ -135,13 +136,13 @@ end;
 }
 
 
-{
+
 procedure Test;
 begin
-  OrgFoo;
+  //OrgFoo;
   ShowMessage('Foo');
 end;
-}
+
 
 procedure InstallHooks;
 {$IFOPT W+}{$DEFINE WARN}{$ENDIF}{$WARNINGS OFF} // no compiler warning
@@ -161,12 +162,12 @@ begin
   SetVirtualMethod(ComCtrls.TPageControl, vmtNewInstance, @TPageControl_NewInstance);
 {$ENDIF}
 
-{
+
 
   OrgFoo := GetProcAddress(LoadPackage(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'coreide160.bpl'), FooMethod);
   if @OrgFoo <> nil then
     HookProc(@OrgFoo, @Test, FooBackUp);
-}
+
 end;
 
 procedure RemoveHooks;
@@ -183,10 +184,9 @@ begin
   SetVirtualMethod(ComCtrls.TPageControl, vmtNewInstance, OrgTPageControl_NewInstance);
 {$ENDIF}
 
-{
+
   if @OrgFoo <> nil then
     UnhookProc(@OrgFoo, FooBackUp);
-}
 end;
 
 
