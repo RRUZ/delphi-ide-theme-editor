@@ -3412,7 +3412,7 @@ object DialogColorSelector: TDialogColorSelector
   end
   object mbColorPreview2: TmbColorPreview
     Left = 268
-    Top = 165
+    Top = 161
     Width = 55
     Height = 55
     Color = clLime
@@ -3435,7 +3435,7 @@ object DialogColorSelector: TDialogColorSelector
   end
   object mbColorPreview1: TmbColorPreview
     Left = 243
-    Top = 143
+    Top = 145
     Width = 55
     Height = 55
     Color = clLime
@@ -3503,14 +3503,10 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet2: TTabSheet
       Caption = 'Web Palette'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object mbColorPalette1: TmbColorPalette
         Left = 0
         Top = 0
-        Width = 196
+        Width = 210
         Height = 184
         Align = alClient
         Colors.Strings = (
@@ -3781,10 +3777,6 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet4: TTabSheet
       Caption = 'HSL'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object HSLColorPicker1: THSLColorPicker
         Left = 0
         Top = 0
@@ -3805,10 +3797,6 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheet3: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object HSVColorPicker1: THSVColorPicker
         Left = 3
         Top = 17
@@ -3928,7 +3916,7 @@ object DialogColorSelector: TDialogColorSelector
     Left = 184
     Top = 231
     Bitmap = {
-      494C0101010020004C0018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101002000500018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000

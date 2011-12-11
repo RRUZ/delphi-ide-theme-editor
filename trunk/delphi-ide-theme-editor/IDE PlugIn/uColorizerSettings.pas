@@ -25,8 +25,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, pngimage, ExtCtrls, StdCtrls, Grids, ComCtrls, ImgList,
-  ActnMan, ActnColorMaps, uClrSettings, uDelphiVersions, JvBaseDlg,
-  JvBrowseFolder;
+  ActnMan, ActnColorMaps, uClrSettings, uDelphiVersions;
 
 type
   TFrmIDEColorizerSettings = class(TForm)
@@ -72,7 +71,6 @@ type
     Panel1: TPanel;
     BtnCancel: TButton;
     BtnApply: TButton;
-    JvBrowseForFolderDialog1: TJvBrowseForFolderDialog;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -146,6 +144,9 @@ implementation
 
 Uses
  //uDWM,
+ {$WARN SYMBOL_PLATFORM OFF}
+ Vcl.FileCtrl,
+ {$WARN SYMBOL_PLATFORM ON}
  uMisc,
  IOUtils,
  uStoreColorMap,
@@ -200,13 +201,17 @@ end;
 
 
 procedure TFrmIDEColorizerSettings.BtnSelDirClick(Sender: TObject);
+var
+  Directory: string;
 begin
-  if DirectoryExists(EditVCLStylesPath.Text) then
-    JvBrowseForFolderDialog1.Directory := EditVCLStylesPath.Text;
+  Directory:='';
+  if SysUtils.DirectoryExists(EditVCLStylesPath.Text) then
+    Directory := EditVCLStylesPath.Text;
 
-  if JvBrowseForFolderDialog1.Execute then
-    EditVCLStylesPath.Text := JvBrowseForFolderDialog1.Directory;
+  if SelectDirectory('Select directory',Directory,Directory,[sdNewFolder, sdNewUI, sdShowEdit, sdValidateDir, sdShowShares], nil) then
+    EditVCLStylesPath.Text := Directory;
 end;
+
 
 procedure TFrmIDEColorizerSettings.BtnSelForColorClick(Sender: TObject);
 Var
@@ -465,7 +470,7 @@ var
  sValue, FileName : string;
 begin
   CbStyles.Items.Clear;
-  if DirectoryExists(Path) then
+  if SysUtils.DirectoryExists(Path) then
   for sValue in TDirectory.GetFiles(ExcludeTrailingPathDelimiter(Path),'*.vsf') do
   begin
     FileName:=ExtractFileName(sValue);
