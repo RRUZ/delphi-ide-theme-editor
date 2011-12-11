@@ -515,6 +515,15 @@ Source: Themes\Zenburn.theme.xml; DestDir: {app}\Themes\
 Source: Themes\zenzaloth.theme.xml; DestDir: {app}\Themes\
 Source: Themes\zeym.theme.xml; DestDir: {app}\Themes\
 Source: Themes\zhech.theme.xml; DestDir: {app}\Themes\
+Source: Images\brush.png; DestDir: {app}\Images\
+Source: Images\Bug.png; DestDir: {app}\Images\
+Source: Images\BugBN.png; DestDir: {app}\Images\
+Source: Images\Conf.png; DestDir: {app}\Images\
+Source: Images\ConfBN.png; DestDir: {app}\Images\
+Source: Images\hue.png; DestDir: {app}\Images\
+Source: Images\hueBN.png; DestDir: {app}\Images\
+Source: Images\Update.png; DestDir: {app}\Images\
+Source: Images\UpdateBN.png; DestDir: {app}\Images\
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -538,7 +547,7 @@ WizardImageFile=Extras\Office2007Gray.bmp
 AppContact=theroadtodelphi@gmail.com
 DisableProgramGroupPage=false
 AppID=DelphiIDEThemeEditor
-SetupIconFile=Images\Delphi_Ide_Theme_Editor.ico
+SetupIconFile=Extras\Delphi_Ide_Theme_Editor.ico
 DefaultGroupName=Delphi IDE Theme Editor
 [Run]
 Filename: {app}\DelphiIDEThemeEditor.exe; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent
@@ -549,6 +558,7 @@ Name: {app}\Themes VS
 Name: {app}\Themes Lazarus
 Name: {app}\Styles
 Name: {app}\Themes
+Name: {app}\Images
 [Icons]
 Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
 Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}

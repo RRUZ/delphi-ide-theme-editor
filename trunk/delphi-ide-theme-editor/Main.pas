@@ -74,7 +74,17 @@ uses
 {.$DEFINE ENABLE_THEME_EXPORT}
 
 type
-  //THackSynPasSyn= class(TSynPasSyn);
+  TCompPngImages=class
+  private
+    FNormal: TPngImage;
+    FBN: TPngImage;
+  public
+   property Normal : TPngImage read FNormal write FNormal;
+   property BN     : TPngImage read FBN write FBN;
+   destructor destroy; override;
+  end;
+
+
   TFrmMain = class(TForm)
     ImageListDelphiVersion: TImageList;
     Label1:      TLabel;
@@ -176,6 +186,8 @@ type
     procedure ActionApplyThemeExecute(Sender: TObject);
     procedure ActionSaveChangesExecute(Sender: TObject);
     procedure BtnIDEColorizerClick(Sender: TObject);
+    procedure ImageBugMouseEnter(Sender: TObject);
+    procedure ImageBugMouseLeave(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -185,6 +197,8 @@ type
     IDEsList:TList<TDelphiVersionData>;
     FIDEData: TDelphiVersionData;
 
+    ActionImages : TObjectDictionary<string,TCompPngImages>;
+    procedure LoadActionImages;
     procedure LoadThemes;
     procedure LoadFixedWidthFonts;
     procedure LoadValuesElements;
@@ -800,6 +814,11 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
+  ActionImages:=TObjectDictionary<string,TCompPngImages>.Create([doOwnsValues]);
+  LoadActionImages;
+
+
+
   IDEsList:=TList<TDelphiVersionData>.Create;
   FChanging := False;
   FSettings := TSettings.Create;
@@ -891,6 +910,8 @@ begin
   end;
 
   IDEsList.Free;
+
+  ActionImages.Free;
 end;
 
 procedure TFrmMain.FormShow(Sender: TObject);
@@ -939,6 +960,16 @@ end;
 procedure TFrmMain.ImageBugClick(Sender: TObject);
 begin
   ShellExecute(Handle, 'open', 'http://code.google.com/p/delphi-ide-theme-editor/issues/list',nil,nil, SW_SHOWNORMAL) ;
+end;
+
+procedure TFrmMain.ImageBugMouseEnter(Sender: TObject);
+begin
+  TImage(Sender).Picture.Assign(ActionImages.Items[TImage(Sender).Name].Normal);
+end;
+
+procedure TFrmMain.ImageBugMouseLeave(Sender: TObject);
+begin
+  TImage(Sender).Picture.Assign(ActionImages.Items[TImage(Sender).Name].BN);
 end;
 
 procedure TFrmMain.ImageConfClick(Sender: TObject);
@@ -1007,6 +1038,31 @@ begin
   finally
     Frm.Free;
   end;
+end;
+
+procedure TFrmMain.LoadActionImages;
+
+ procedure AddImage(Image:TImage;Const Normal, BN:string);
+  Var
+   Png : TPngImage;
+ begin
+  ActionImages.Add(Image.Name,TCompPngImages.Create);
+  ActionImages.Items[Image.Name].Normal:=TPngImage.Create;
+  Png:=ActionImages.Items[Image.Name].Normal;
+  Png.LoadFromFile(Normal);
+
+  ActionImages.Items[Image.Name].BN:=TPngImage.Create;
+  Png:=ActionImages.Items[Image.Name].BN;
+  Png.LoadFromFile(BN);
+  Image.Picture.Assign(ActionImages.Items[Image.Name].BN);
+ end;
+
+
+begin
+  AddImage(ImageBug,ExtractFilePath(ParamStr(0))+'images\Bug.png',ExtractFilePath(ParamStr(0))+'images\BugBN.png');
+  AddImage(ImageUpdate,ExtractFilePath(ParamStr(0))+'images\Update.png',ExtractFilePath(ParamStr(0))+'images\UpdateBN.png');
+  AddImage(ImageHue,ExtractFilePath(ParamStr(0))+'images\Hue.png',ExtractFilePath(ParamStr(0))+'images\HueBN.png');
+  AddImage(ImageConf,ExtractFilePath(ParamStr(0))+'images\Conf.png',ExtractFilePath(ParamStr(0))+'images\ConfBN.png');
 end;
 
 procedure TFrmMain.LoadFixedWidthFonts;
@@ -1462,5 +1518,18 @@ begin
     Msg.Result := htCaption;
 end;
 
+
+{ TCompPngImages }
+
+destructor TCompPngImages.destroy;
+begin
+ if Assigned(FNormal) then
+  FNormal.Free;
+
+ if Assigned(FBN) then
+  FBN.Free;
+
+ Inherited;
+end;
 
 end.
