@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DelphiColorizerTheme modified="2011-12-12 00:03:59" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
+  <ColorMap>
+    <BtnFrameColor>$005A2DB5</BtnFrameColor>
+    <BtnSelectedColor>$009370DB</BtnSelectedColor>
+    <BtnSelectedFont>clWindowText</BtnSelectedFont>
+    <Color>$009370DB</Color>
+    <DisabledColor>clGray</DisabledColor>
+    <DisabledFontColor>clGrayText</DisabledFontColor>
+    <DisabledFontShadow>clBtnHighlight</DisabledFontShadow>
+    <FontColor>clWindowText</FontColor>
+    <FrameBottomRightInner>$005A2DB5</FrameBottomRightInner>
+    <FrameBottomRightOuter>$005A2DB5</FrameBottomRightOuter>
+    <FrameTopLeftInner>$005A2DB5</FrameTopLeftInner>
+    <FrameTopLeftOuter>$005A2DB5</FrameTopLeftOuter>
+    <HighlightColor>$00C6B4EB</HighlightColor>
+    <HotColor>clDefault</HotColor>
+    <HotFontColor>clDefault</HotFontColor>
+    <MenuColor>$00AD92E3</MenuColor>
+    <SelectedColor>$00D5C6F1</SelectedColor>
+    <SelectedFontColor>clWindowText</SelectedFontColor>
+    <ShadowColor>$005A2DB5</ShadowColor>
+    <UnusedColor>clWhite</UnusedColor>
+  </ColorMap>
+</DelphiColorizerTheme>

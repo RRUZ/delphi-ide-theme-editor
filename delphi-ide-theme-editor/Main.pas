@@ -827,7 +827,7 @@ begin
   {.$WARN SYMBOL_PLATFORM OFF}
   //BtnIDEColorizer.Visible:=DebugHook<>0;
   {.$WARN SYMBOL_PLATFORM ON}
-  BtnIDEColorizer.Visible:=FSettings.ActivateColorizer;
+  //BtnIDEColorizer.Visible:=FSettings.ActivateColorizer;
 
   FMapHighlightElementsTSynAttr := TStringList.Create;
   with SynPasSyn1 do
@@ -1251,7 +1251,7 @@ begin
      DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elemnents
 
 
-    BtnIDEColorizer.Enabled:= (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
+    BtnIDEColorizer.Enabled:=FSettings.ActivateColorizer and (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
 
     FillListAvailableElements(DelphiVersion, CbElement.Items);
 

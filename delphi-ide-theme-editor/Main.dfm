@@ -56,7 +56,7 @@ object FrmMain: TFrmMain
   end
   object Label5: TLabel
     Left = 543
-    Top = 63
+    Top = 16
     Width = 85
     Height = 13
     Caption = 'Global Editor Font'
@@ -414,7 +414,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 21
     Style = csDropDownList
-    TabOrder = 3
+    TabOrder = 7
     OnChange = CbElementChange
   end
   object GroupBox1: TGroupBox
@@ -423,7 +423,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 46
     Caption = 'Text Attributes'
-    TabOrder = 7
+    TabOrder = 8
     object CheckBold: TCheckBox
       Left = 16
       Top = 19
@@ -458,7 +458,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 46
     Caption = 'Use defaults for'
-    TabOrder = 8
+    TabOrder = 9
     object CheckForeground: TCheckBox
       Left = 16
       Top = 19
@@ -485,7 +485,7 @@ object FrmMain: TFrmMain
     Height = 22
     NoneColorColor = 16729138
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-    TabOrder = 9
+    TabOrder = 10
     OnChange = CblForegroundChange
   end
   object CblBackground: TColorBox
@@ -494,12 +494,12 @@ object FrmMain: TFrmMain
     Width = 143
     Height = 22
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-    TabOrder = 11
+    TabOrder = 12
     OnChange = CblForegroundChange
   end
   object CbIDEFonts: TComboBox
     Left = 543
-    Top = 82
+    Top = 35
     Width = 107
     Height = 21
     Style = csDropDownList
@@ -509,7 +509,7 @@ object FrmMain: TFrmMain
   end
   object EditFontSize: TEdit
     Left = 656
-    Top = 82
+    Top = 35
     Width = 23
     Height = 21
     ReadOnly = True
@@ -519,7 +519,7 @@ object FrmMain: TFrmMain
   end
   object UpDownFontSize: TUpDown
     Left = 679
-    Top = 82
+    Top = 35
     Width = 16
     Height = 21
     Associate = EditFontSize
@@ -535,8 +535,7 @@ object FrmMain: TFrmMain
     Height = 25
     Action = ActionApplyTheme
     Anchors = [akLeft, akBottom]
-    TabOrder = 16
-    ExplicitTop = 393
+    TabOrder = 17
   end
   object EditThemeName: TEdit
     Left = 8
@@ -546,8 +545,7 @@ object FrmMain: TFrmMain
     Anchors = [akLeft, akBottom]
     DoubleBuffered = True
     ParentDoubleBuffered = False
-    TabOrder = 14
-    ExplicitTop = 366
+    TabOrder = 15
   end
   object BtnSave: TButton
     Left = 8
@@ -556,17 +554,16 @@ object FrmMain: TFrmMain
     Height = 25
     Action = ActionSaveChanges
     Anchors = [akLeft, akBottom]
-    TabOrder = 15
-    ExplicitTop = 393
+    TabOrder = 16
   end
   object BtnApplyFont: TButton
     Left = 701
-    Top = 78
+    Top = 31
     Width = 75
     Height = 25
     Caption = 'Apply Font'
     Enabled = False
-    TabOrder = 2
+    TabOrder = 0
     OnClick = BtnApplyFontClick
   end
   object LvThemes: TListView
@@ -591,10 +588,9 @@ object FrmMain: TFrmMain
     PopupMenu = PopupMenuThemes
     ShowColumnHeaders = False
     SmallImages = ImageListThemes
-    TabOrder = 0
+    TabOrder = 2
     ViewStyle = vsReport
     OnChange = LvThemesChange
-    ExplicitHeight = 308
   end
   object BtnImport: TButton
     Left = 264
@@ -603,9 +599,8 @@ object FrmMain: TFrmMain
     Height = 21
     Anchors = [akLeft, akBottom]
     Caption = '>'
-    TabOrder = 18
+    TabOrder = 19
     OnClick = BtnImportClick
-    ExplicitTop = 424
   end
   object BtnImportRegTheme: TButton
     Left = 8
@@ -614,9 +609,8 @@ object FrmMain: TFrmMain
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Import current IDE theme from registry'
-    TabOrder = 19
+    TabOrder = 21
     OnClick = BtnImportRegThemeClick
-    ExplicitTop = 455
   end
   object BtnSetDefault: TButton
     Left = 8
@@ -625,9 +619,8 @@ object FrmMain: TFrmMain
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Set default theme values for selected IDE'
-    TabOrder = 22
+    TabOrder = 23
     OnClick = BtnSetDefaultClick
-    ExplicitTop = 524
   end
   object ProgressBar1: TProgressBar
     Left = 8
@@ -635,9 +628,8 @@ object FrmMain: TFrmMain
     Width = 281
     Height = 17
     Anchors = [akLeft, akBottom]
-    TabOrder = 21
+    TabOrder = 22
     Visible = False
-    ExplicitTop = 486
   end
   object SynEditCode: TSynEdit
     Left = 304
@@ -653,7 +645,7 @@ object FrmMain: TFrmMain
     Font.Name = 'Consolas'
     Font.Pitch = fpFixed
     Font.Style = []
-    TabOrder = 13
+    TabOrder = 14
     OnClick = SynEditCodeClick
     Gutter.BorderColor = clYellow
     Gutter.DigitCount = 3
@@ -692,7 +684,6 @@ object FrmMain: TFrmMain
     ReadOnly = True
     OnGutterClick = SynEditCodeGutterClick
     OnSpecialLineColors = SynEditCodeSpecialLineColors
-    ExplicitHeight = 381
   end
   object CbIDEThemeImport: TComboBox
     Left = 8
@@ -701,8 +692,7 @@ object FrmMain: TFrmMain
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    TabOrder = 17
-    ExplicitTop = 424
+    TabOrder = 18
   end
   object BtnSelForColor: TButton
     Left = 515
@@ -711,7 +701,7 @@ object FrmMain: TFrmMain
     Height = 22
     ImageIndex = 2
     Images = ImageList1
-    TabOrder = 10
+    TabOrder = 11
     OnClick = BtnSelForColorClick
   end
   object BtnSelBackColor: TButton
@@ -721,7 +711,7 @@ object FrmMain: TFrmMain
     Height = 22
     ImageIndex = 2
     Images = ImageList1
-    TabOrder = 12
+    TabOrder = 13
     OnClick = BtnSelBackColorClick
   end
   object BtnContribute: TButton
@@ -731,9 +721,8 @@ object FrmMain: TFrmMain
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Contribute'
-    TabOrder = 23
+    TabOrder = 24
     OnClick = BtnContributeClick
-    ExplicitTop = 556
   end
   object BtnExportToLazarusTheme: TButton
     Left = 8
@@ -745,27 +734,26 @@ object FrmMain: TFrmMain
     TabOrder = 20
     Visible = False
     OnClick = BtnExportToLazarusThemeClick
-    ExplicitTop = 455
   end
   object ComboBoxExIDEs: TComboBoxEx
     Left = 304
     Top = 35
-    Width = 233
+    Width = 129
     Height = 22
     ItemsEx = <>
     Style = csExDropDownList
-    TabOrder = 1
+    TabOrder = 3
     OnChange = ComboBoxExIDEsChange
     Images = ImageListDelphiVersion
   end
   object BtnIDEColorizer: TButton
-    Left = 543
+    Left = 439
     Top = 32
-    Width = 107
+    Width = 98
     Height = 25
     Caption = 'IDE Colorizer'
     Enabled = False
-    TabOrder = 24
+    TabOrder = 1
     OnClick = BtnIDEColorizerClick
   end
   object ImageListDelphiVersion: TImageList
@@ -788,7 +776,7 @@ object FrmMain: TFrmMain
     Left = 568
     Top = 311
     Bitmap = {
-      494C01010600090024010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101060009002C010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -961,7 +949,7 @@ object FrmMain: TFrmMain
     Left = 456
     Top = 307
     Bitmap = {
-      494C010107000800F80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800000110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1276,12 +1264,12 @@ object FrmMain: TFrmMain
     Top = 96
   end
   object PopupMenu1: TPopupMenu
-    Left = 552
-    Top = 128
+    Left = 592
+    Top = 232
   end
   object ActionList1: TActionList
-    Left = 520
-    Top = 128
+    Left = 552
+    Top = 224
     object ActionApplyTheme: TAction
       Caption = 'Apply Theme'
       ImageIndex = 6

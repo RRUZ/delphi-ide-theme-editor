@@ -2,7 +2,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
   Left = 509
   Top = 252
   Caption = 'Delphi IDE Colorizer Settings'
-  ClientHeight = 266
+  ClientHeight = 273
   ClientWidth = 570
   Color = clBtnFace
   DoubleBuffered = True
@@ -25,21 +25,26 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     Left = 0
     Top = 0
     Width = 570
-    Height = 266
+    Height = 273
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 5
     TabOrder = 0
+    ExplicitHeight = 266
     object PageControlSettings: TPageControl
       Left = 5
       Top = 5
       Width = 560
-      Height = 215
+      Height = 222
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
+      ExplicitHeight = 215
       object TabSheetMain: TTabSheet
         Caption = 'Main Settings'
+        ExplicitLeft = 0
+        ExplicitTop = 22
+        ExplicitHeight = 232
         object ImageIDELogo: TImage
           Left = 3
           Top = 4
@@ -48,7 +53,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
         end
         object Label1: TLabel
           Left = 3
-          Top = 53
+          Top = 38
           Width = 37
           Height = 13
           Caption = 'Themes'
@@ -59,17 +64,18 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 95
           Height = 13
           Caption = 'Elements to colorize'
+          Visible = False
         end
         object Label7: TLabel
           Left = 154
-          Top = 119
+          Top = 141
           Width = 25
           Height = 13
           Caption = 'Color'
         end
         object Label6: TLabel
           Left = 3
-          Top = 119
+          Top = 141
           Width = 38
           Height = 13
           Caption = 'Element'
@@ -81,51 +87,38 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Height = 13
           Caption = 'LabelSetting'
         end
-        object CheckBoxEnabled: TCheckBox
+        object Image1: TImage
           Left = 3
-          Top = 165
+          Top = 87
+          Width = 260
+          Height = 25
+        end
+        object CheckBoxEnabled: TCheckBox
+          Left = 440
+          Top = 10
           Width = 65
           Height = 17
           Caption = 'Enabled'
           DoubleBuffered = True
           ParentDoubleBuffered = False
-          TabOrder = 13
+          TabOrder = 12
         end
         object cbThemeName: TComboBox
           Left = 3
-          Top = 71
+          Top = 56
           Width = 264
           Height = 21
-          TabOrder = 4
+          TabOrder = 3
           OnChange = cbThemeNameChange
         end
         object Button3: TButton
           Left = 273
-          Top = 69
+          Top = 54
           Width = 75
           Height = 25
           Caption = 'Save'
-          TabOrder = 3
-          OnClick = Button3Click
-        end
-        object CheckBoxActivateDWM: TCheckBox
-          Left = 175
-          Top = 166
-          Width = 145
-          Height = 17
-          Caption = 'Activate Glass colorization'
-          DoubleBuffered = True
-          ParentDoubleBuffered = False
-          TabOrder = 15
-          Visible = False
-        end
-        object CheckBoxFixIDEDrawIcon: TCheckBox
-          Left = 403
-          Top = 36
-          Width = 129
-          Height = 17
-          Caption = 'Fix disabled icons draw'
           TabOrder = 2
+          OnClick = Button3Click
         end
         object CheckBoxMainMenu: TCheckBox
           Left = 403
@@ -133,7 +126,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 73
           Height = 17
           Caption = 'Main Menu'
-          TabOrder = 5
+          TabOrder = 4
           Visible = False
         end
         object CheckBoxComponentsTabs: TCheckBox
@@ -142,7 +135,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 113
           Height = 17
           Caption = 'Components Tabs'
-          TabOrder = 7
+          TabOrder = 6
           Visible = False
         end
         object CheckBoxCodeEditor: TCheckBox
@@ -151,7 +144,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 121
           Height = 17
           Caption = 'Code Editor Windows'
-          TabOrder = 8
+          TabOrder = 7
           Visible = False
         end
         object CheckBox7: TCheckBox
@@ -160,7 +153,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 95
           Height = 17
           Caption = 'IDE Options'
-          TabOrder = 14
+          TabOrder = 13
           Visible = False
         end
         object CheckBoxIDEDockWindows: TCheckBox
@@ -169,47 +162,47 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Width = 135
           Height = 17
           Caption = 'IDE Dockable Windows'
-          TabOrder = 12
+          TabOrder = 11
           Visible = False
         end
         object CbClrElement: TColorBox
           Left = 154
-          Top = 138
+          Top = 160
           Width = 166
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 10
+          TabOrder = 9
           OnChange = CbClrElementChange
         end
         object BtnSelForColor: TButton
           Left = 326
-          Top = 138
+          Top = 160
           Width = 22
           Height = 22
           ImageIndex = 2
           Images = ImageList1
-          TabOrder = 11
+          TabOrder = 10
           OnClick = BtnSelForColorClick
         end
         object cbColorElements: TComboBox
           Left = 3
-          Top = 138
+          Top = 160
           Width = 145
           Height = 21
           Style = csDropDownList
-          TabOrder = 9
+          TabOrder = 8
           OnChange = cbColorElementsChange
         end
         object CheckBoxAutoColor: TCheckBox
           Left = 3
-          Top = 96
+          Top = 118
           Width = 156
           Height = 17
           Caption = 'Auto Generate Color Values'
           Checked = True
           State = cbChecked
-          TabOrder = 6
+          TabOrder = 5
         end
         object BtnInstall: TButton
           Left = 278
@@ -234,9 +227,10 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
+        ExplicitHeight = 187
         DesignSize = (
           552
-          187)
+          194)
         object Label4: TLabel
           Left = 3
           Top = 3
@@ -255,7 +249,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           Left = 3
           Top = 23
           Width = 250
-          Height = 161
+          Height = 168
           Anchors = [akLeft, akTop, akBottom]
           Columns = <
             item
@@ -267,12 +261,13 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           TabOrder = 1
           ViewStyle = vsReport
           OnChange = ListViewTypesChange
+          ExplicitHeight = 161
         end
         object ListViewProps: TListView
           Left = 267
           Top = 22
           Width = 250
-          Height = 161
+          Height = 168
           Anchors = [akLeft, akTop, akBottom]
           Columns = <
             item
@@ -283,11 +278,13 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           RowSelect = True
           TabOrder = 0
           ViewStyle = vsReport
+          ExplicitHeight = 161
         end
       end
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
+        ExplicitHeight = 187
         object Label8: TLabel
           Left = 3
           Top = 26
@@ -335,15 +332,40 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
           TabOrder = 3
         end
       end
+      object TabSheet1: TTabSheet
+        Caption = 'Options'
+        ImageIndex = 3
+        ExplicitHeight = 187
+        object CheckBoxFixIDEDrawIcon: TCheckBox
+          Left = 3
+          Top = 11
+          Width = 129
+          Height = 17
+          Caption = 'Fix disabled icons draw'
+          TabOrder = 0
+        end
+        object CheckBoxActivateDWM: TCheckBox
+          Left = 3
+          Top = 34
+          Width = 145
+          Height = 17
+          Caption = 'Activate Glass colorization'
+          DoubleBuffered = True
+          ParentDoubleBuffered = False
+          TabOrder = 1
+          Visible = False
+        end
+      end
     end
     object Panel1: TPanel
       Left = 5
-      Top = 220
+      Top = 227
       Width = 560
       Height = 41
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitTop = 220
       object BtnCancel: TButton
         Left = 88
         Top = 6
@@ -369,7 +391,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     Left = 504
     Top = 240
     Bitmap = {
-      494C010107000800440110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101070008004C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F

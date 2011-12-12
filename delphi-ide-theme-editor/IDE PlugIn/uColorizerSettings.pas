@@ -34,8 +34,6 @@ type
     cbThemeName: TComboBox;
     Label1: TLabel;
     Button3: TButton;
-    CheckBoxActivateDWM: TCheckBox;
-    CheckBoxFixIDEDrawIcon: TCheckBox;
     CheckBoxMainMenu: TCheckBox;
     CheckBoxComponentsTabs: TCheckBox;
     CheckBoxCodeEditor: TCheckBox;
@@ -71,6 +69,10 @@ type
     Panel1: TPanel;
     BtnCancel: TButton;
     BtnApply: TButton;
+    TabSheet1: TTabSheet;
+    CheckBoxFixIDEDrawIcon: TCheckBox;
+    Image1: TImage;
+    CheckBoxActivateDWM: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -100,6 +102,7 @@ type
     function  GetIDEThemesFolder : String;
     function  GetSettingsFolder : String;
     procedure LoadVClStylesList(const Path : string);
+    procedure GenerateIDEThemes(const Path : string);
   public
     property IDEData   : TDelphiVersionData read GetIDEData write FIDEData;
     procedure Init;
@@ -147,6 +150,7 @@ Uses
  {$WARN SYMBOL_PLATFORM OFF}
  Vcl.FileCtrl,
  {$WARN SYMBOL_PLATFORM ON}
+ System.Types,
  uMisc,
  IOUtils,
  uStoreColorMap,
@@ -300,6 +304,7 @@ begin
    end;
 end;
 
+
 procedure TFrmIDEColorizerSettings.CbClrElementChange(Sender: TObject);
 Var
  PropName : string;
@@ -325,12 +330,45 @@ end;
 procedure TFrmIDEColorizerSettings.cbThemeNameChange(Sender: TObject);
 Var
   FileName : string;
+  Bmp      : TBitmap;
 begin
   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+cbThemeName.Text+'.idetheme';
   if FileExists(FileName)  then
   begin
     LoadColorMapFromXmlFile(ColorMap,FileName);
     cbColorElementsChange(nil);
+
+    Bmp:=TBitmap.Create;
+    try
+
+     CreateArrayBitmap(275,25,[
+      ColorMap.ShadowColor,
+      ColorMap.Color,
+      ColorMap.DisabledColor,
+      ColorMap.DisabledFontColor,
+      ColorMap.DisabledFontShadow,
+      ColorMap.FontColor,
+      ColorMap.HighlightColor,
+      ColorMap.HotColor,
+      ColorMap.HotFontColor,
+      ColorMap.MenuColor,
+      ColorMap.FrameTopLeftInner,
+      ColorMap.FrameTopLeftOuter,
+      ColorMap.FrameBottomRightInner,
+      ColorMap.FrameBottomRightOuter,
+      ColorMap.BtnFrameColor,
+      ColorMap.BtnSelectedColor,
+      ColorMap.BtnSelectedFont,
+      ColorMap.SelectedColor,
+      ColorMap.SelectedFontColor,
+      ColorMap.UnusedColor
+      ], Bmp);
+     Image1.Picture.Assign(Bmp);
+    finally
+      Bmp.Free;
+    end;
+
+
   end;
 end;
 
@@ -356,6 +394,20 @@ begin
   LabelSetting.Caption:=Format('Settings for %s',[IDEData.Name]);
   BtnInstall.Enabled  :=not ExpertInstalled(DelphiIDEExpertsNames[IDEData.Version]+'.bpl',IDEData.Version);
   BtnUnInstall.Enabled:=not BtnInstall.Enabled;
+end;
+
+procedure TFrmIDEColorizerSettings.GenerateIDEThemes(const Path: string);
+Var
+  i        : integer;
+  FileName : string;
+begin
+   for i:=0 to WebNamedColorsCount-1 do
+   begin
+     GenerateColorMap(ColorMap,WebNamedColors[i].Value);
+     FileName:=StringReplace(WebNamedColors[i].Name,'clWeb','',[rfReplaceAll]);
+     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'.idetheme';
+     SaveColorMapToXmlFile(ColorMap,FileName);
+   end;
 end;
 
 function TFrmIDEColorizerSettings.GetIDEData: TDelphiVersionData;
@@ -456,9 +508,18 @@ end;
 procedure TFrmIDEColorizerSettings.LoadThemes;
 var
  sValue, FileName : string;
+ Files : TStringDynArray;
 begin
   cbThemeName.Items.Clear;
-  for sValue in TDirectory.GetFiles(GetIDEThemesFolder,'*.idetheme') do
+  Files:=TDirectory.GetFiles(GetIDEThemesFolder,'*.idetheme');
+  if Length(Files)=0 then
+  begin
+    GenerateIDEThemes(GetIDEThemesFolder);
+    Files:=TDirectory.GetFiles(GetIDEThemesFolder,'*.idetheme');
+  end;
+
+
+  for sValue in Files do
   begin
     FileName:=ChangeFileExt(ExtractFileName(sValue),'');
     cbThemeName.Items.Add(FileName);
