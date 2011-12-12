@@ -96,9 +96,7 @@ uses
  XPMan,
  Menus,
  ComObj,
- {$IFDEF USE_DUMP_TIMER}
  ExtCtrls,
- {$ENDIF}
  uClrSettings;
 
 
@@ -108,6 +106,7 @@ type
     {$IFDEF USE_DUMP_TIMER}
     FDumperTimer : TTimer;
     {$ENDIF}
+    FTimerRefresher: TTimer;
     Settings : TSettings;
     AColorMap:TXPColorMap;
     ExplorerItem: TMenuItem;
@@ -116,6 +115,7 @@ type
     procedure RemoveMenuItems;
     procedure InitColorizer;
     procedure FinalizeColorizer;
+    procedure OnRefreher(Sender : TObject);
     {$IFDEF USE_DUMP_TIMER}
     procedure OnDumper(Sender : TObject);
     {$ENDIF}
@@ -345,6 +345,11 @@ begin
   FDumperTimer.Interval:=1000;
   FDumperTimer.Enabled:=True;
   {$ENDIF}
+
+  FTimerRefresher:=TTimer.Create(nil);
+  FTimerRefresher.OnTimer :=OnRefreher;
+  FTimerRefresher.Interval:=1500;
+  FTimerRefresher.Enabled:=True;
 end;
 
 
@@ -420,6 +425,8 @@ begin
   FDumperTimer.Enabled:=False;
   FDumperTimer.Free;
   {$ENDIF}
+  FTimerRefresher.Enabled:=False;
+  FTimerRefresher.Free;
   //ColorizerForm.Free;
   inherited;
 end;
@@ -457,6 +464,16 @@ end;
 
 procedure TIDEWizard.Modified;
 begin
+end;
+
+procedure TIDEWizard.OnRefreher(Sender: TObject);
+begin
+ if Assigned(AColorMap) and Assigned(Settings) and Settings.Enabled then
+ begin
+  RefreshIDETheme(AColorMap);
+  FTimerRefresher.Enabled:=False;
+  //ShowMessage('Timer');
+ end;
 end;
 
 {$IFDEF USE_DUMP_TIMER}
