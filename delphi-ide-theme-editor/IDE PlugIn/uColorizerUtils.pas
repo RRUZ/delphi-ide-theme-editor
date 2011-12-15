@@ -62,6 +62,8 @@ uses
  uVCLStyleUtils,
  {$IFEND}
  {$IF CompilerVersion > 20}
+ IOUtils,
+ TypInfo,
  Rtti
  {$ELSE}
  Variants,
@@ -103,6 +105,8 @@ var
 {$IF CompilerVersion > 20}
 var
   ctx           : TRttiContext;
+  //RttiType      : TRttiType;
+
 {$IFEND}
   //Drawer        : TComponentDrawer;
 
@@ -767,6 +771,15 @@ initialization
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
 {$IF CompilerVersion > 20}
   ctx:=TRttiContext.Create;
+  {
+  for RttiType in ctx.GetTypes do
+   if RttiType.TypeKind=tkClass then
+    try
+     TFile.WriteAllText(ExtractFilePath(GetBplLocation())+'Types Dump\'+RttiType.Name+'.txt', DumpTypeDefinition(RttiType.Handle));
+    except
+    end;
+  }
+
 {$IFEND}
 
 {$IFDEF DEBUG_PROFILER}
