@@ -3411,8 +3411,8 @@ object DialogColorSelector: TDialogColorSelector
     Caption = 'Hex'
   end
   object mbColorPreview2: TmbColorPreview
-    Left = 268
-    Top = 161
+    Left = 287
+    Top = 165
     Width = 55
     Height = 55
     Color = clLime
@@ -3435,7 +3435,7 @@ object DialogColorSelector: TDialogColorSelector
   end
   object mbColorPreview1: TmbColorPreview
     Left = 243
-    Top = 145
+    Top = 141
     Width = 55
     Height = 55
     Color = clLime
@@ -3916,7 +3916,7 @@ object DialogColorSelector: TDialogColorSelector
     Left = 184
     Top = 231
     Bitmap = {
-      494C010101002000500018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101002000540018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000

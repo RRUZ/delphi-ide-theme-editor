@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-11-29 00:31:48" author="Delphi IDE Theme Editor" versionapp="65536">
+<DelphiIDETheme modified="2011-12-18 13:50:35" author="Delphi IDE Theme Editor" versionapp="1.1.12.9">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
@@ -141,8 +141,8 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
-    <BackgroundColorNew>$0030312F</BackgroundColorNew>
+    <ForegroundColorNew>$006CE595</ForegroundColorNew>
+    <BackgroundColorNew>$00333333</BackgroundColorNew>
   </Float>
   <FoldedCode>
     <Bold>False</Bold>
@@ -159,7 +159,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$006CE595</ForegroundColorNew>
     <BackgroundColorNew>$0030312F</BackgroundColorNew>
   </Hex>
   <HotLink>
@@ -240,7 +240,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$006CE595</ForegroundColorNew>
     <BackgroundColorNew>$0030312F</BackgroundColorNew>
   </Number>
   <Octal>

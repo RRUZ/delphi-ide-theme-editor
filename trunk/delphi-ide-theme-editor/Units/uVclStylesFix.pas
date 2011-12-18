@@ -60,14 +60,14 @@ begin
     Details.Part := 0;
     R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
     //if (GetWindowLong(Form.Handle,GWL_EXSTYLE) AND WS_EX_TRANSPARENT) = WS_EX_TRANSPARENT  then
-     if Form.Brush.Style = bsClear then Exit;
+     if Form.Brush.Style = bsClear then
+      Exit;
       StyleServices.DrawElement(Canvas.Handle, Details, R);
   end;
 end;
 
 initialization
   TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
-  TStyleManager.Engine.UnRegisterStyleHook(TCustomForm, TFormStyleHook);
   TStyleManager.Engine.RegisterStyleHook(TCustomForm, TMyClass);
-
+  TStyleManager.Engine.RegisterStyleHook(TForm, TMyClass);
 end.
