@@ -27,7 +27,8 @@ uses
   uIDEExpertUtils in 'IDE PlugIn\uIDEExpertUtils.pas',
   uClrSettings in 'IDE PlugIn\uClrSettings.pas',
   uVclStylesFix in 'Units\uVclStylesFix.pas',
-  uLoadThemesImages in 'Units\uLoadThemesImages.pas';
+  uLoadThemesImages in 'Units\uLoadThemesImages.pas',
+  uVCLStyleUtils in 'Units\uVCLStyleUtils.pas';
 
 {$R *.res}
 
