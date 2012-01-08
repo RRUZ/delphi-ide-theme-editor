@@ -49,6 +49,7 @@ type
     Bevel1:    TBevel;
     Label9: TLabel;
     ComboBoxVCLStyle: TComboBox;
+    ImageVCLStyle: TImage;
     procedure BtnSelFolderThemesClick(Sender: TObject);
     procedure BtnSaveClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
@@ -57,6 +58,7 @@ type
   private
     FSettings: TSettings;
     procedure  LoadStyles;
+    procedure DrawSeletedVCLStyle;
   public
     property Settings: TSettings Read FSettings Write FSettings;
     procedure LoadSettings;
@@ -74,6 +76,7 @@ uses
   {$WARN SYMBOL_PLATFORM ON}
   Vcl.Styles,
   Vcl.Themes,
+  uVCLStyleUtils,
   IOUtils,
   IniFiles;
 
@@ -148,6 +151,7 @@ begin
     FSettings.ThemePath := EditThemesFolder.Text;
     FSettings.VCLStyle  := ComboBoxVCLStyle.Text;
     WriteSettings(FSettings);
+    LoadVCLStyle(ComboBoxVCLStyle.Text);
     Close();
   end;
 end;
@@ -167,7 +171,39 @@ end;
 
 procedure TFrmSettings.ComboBoxVCLStyleChange(Sender: TObject);
 begin
- LoadVCLStyle(ComboBoxVCLStyle.Text);
+ //LoadVCLStyle(ComboBoxVCLStyle.Text);
+ DrawSeletedVCLStyle;
+end;
+
+procedure TFrmSettings.DrawSeletedVCLStyle;
+var
+  StyleName : string;
+  LBitmap   : TBitmap;
+  LStyle    : TCustomStyleExt;
+  SourceInfo: TSourceInfo;
+begin
+   ImageVCLStyle.Picture:=nil;
+
+   StyleName:=ComboBoxVCLStyle.Text;
+   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
+   begin
+    LBitmap:=TBitmap.Create;
+    try
+       LBitmap.PixelFormat:=pf32bit;
+       LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
+       LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
+       SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
+       LStyle:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+       try
+         DrawSampleWindow(LStyle, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName);
+         ImageVCLStyle.Picture.Assign(LBitmap);
+       finally
+         LStyle.Free;
+       end;
+    finally
+      LBitmap.Free;
+    end;
+   end;
 end;
 
 procedure TFrmSettings.FormCreate(Sender: TObject);
@@ -180,6 +216,7 @@ begin
   ReadSettings(FSettings);
   EditThemesFolder.Text := FSettings.ThemePath;
   ComboBoxVCLStyle.ItemIndex:=ComboBoxVCLStyle.Items.IndexOf(FSettings.VCLStyle);
+  DrawSeletedVCLStyle;
 end;
 
 procedure TFrmSettings.LoadStyles;

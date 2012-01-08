@@ -4,7 +4,7 @@ object FrmSettings: TFrmSettings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Settings'
-  ClientHeight = 188
+  ClientHeight = 289
   ClientWidth = 512
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -30,7 +30,7 @@ object FrmSettings: TFrmSettings
   end
   object Bevel1: TBevel
     Left = 8
-    Top = 140
+    Top = 228
     Width = 497
     Height = 9
     Shape = bsTopLine
@@ -42,12 +42,18 @@ object FrmSettings: TFrmSettings
     Height = 13
     Caption = 'VCL Style'
   end
+  object ImageVCLStyle: TImage
+    Left = 8
+    Top = 103
+    Width = 202
+    Height = 119
+  end
   object BtnSave: TButton
     Left = 8
-    Top = 155
+    Top = 243
     Width = 75
     Height = 25
-    Caption = 'Save'
+    Caption = 'Apply'
     TabOrder = 0
     OnClick = BtnSaveClick
   end
@@ -69,7 +75,7 @@ object FrmSettings: TFrmSettings
   end
   object BtnCancel: TButton
     Left = 89
-    Top = 155
+    Top = 243
     Width = 75
     Height = 25
     Caption = 'Cancel'

@@ -40,6 +40,7 @@ type
 implementation
 
 uses
+  uVCLStyleUtils,
   Vcl.StdCtrls,
   SynEdit,
   Types,
@@ -67,7 +68,8 @@ begin
 end;
 
 initialization
-  TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TMemoStyleHook);
+   if not IsStyleHookRegistered(TCustomSynEdit, TScrollingStyleHook) then
+     TStyleManager.Engine.RegisterStyleHook(TCustomSynEdit, TScrollingStyleHook);
   TStyleManager.Engine.RegisterStyleHook(TCustomForm, TMyClass);
   TStyleManager.Engine.RegisterStyleHook(TForm, TMyClass);
 end.
