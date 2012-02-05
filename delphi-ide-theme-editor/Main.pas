@@ -42,7 +42,7 @@ interface
  //translate
  //update online   (check new version) - done
 
- //import from http://studiostyl.es/schemes
+ //import from http://studiostyl.es/schemes done
  //import from notepad++
  //http://www.eclipsecolorthemes.org/   done
 
@@ -218,7 +218,7 @@ type
     function GetIDEData: TDelphiVersionData;
     property IDEData   : TDelphiVersionData read GetIDEData write FIDEData;
   public
-    { Public declarations }
+    property Settings : TSettings read FSettings;
   end;
 
 

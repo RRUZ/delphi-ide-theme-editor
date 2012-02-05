@@ -49,8 +49,11 @@ type
     FInstallerFileName: string;
     FTempInstallerFileName: string;
     FStopwatch : TStopwatch;
+    FCheckExternal: boolean;
+    FErrorUpdate : boolean;
     procedure ReadRemoteInfo;
     procedure ReadLocalInfo;
+    function GetUpdateAvailable: Boolean;
     property XmlVersionInfo : string read FXmlVersionInfo write FXmlVersionInfo;
     property RemoteVersion : string read FRemoteVersion write FRemoteVersion;
     property LocalVersion  : string read FLocalVersion write FLocalVersion;
@@ -62,17 +65,22 @@ type
     procedure ExecuteInstaller;
     procedure DownloadCallBack(BytesRead:Integer);
   public
-    function UpdateAvailable : Boolean;
+    property  CheckExternal   : boolean read FCheckExternal write FCheckExternal;
+    property  UpdateAvailable : Boolean read GetUpdateAvailable;
+    procedure ExecuteUpdater;
   end;
 
 implementation
 
 
 uses
+  ShellAPI,
   uMisc,
   ComObj,
-  ShellAPI,
   uWinInet;
+
+Type
+   TProcCallBack= procedure(BytesRead:Integer) of object;
 
 const
   sRemoteVersionFile       = 'http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Version.xml';
@@ -81,32 +89,15 @@ const
   sXPathUrlInstaller       = '/versioninfo/@url';
   sXPathInstallerFileName  = '/versioninfo/@installerfilename';
 
+
 {$R *.dfm}
+
+
 
 { TFrmCheckUpdate }
 procedure TFrmCheckUpdate.BtnCheckUpdatesClick(Sender: TObject);
 begin
-  try
-    ProgressBar1.Style:=pbstMarquee;
-    BtnCheckUpdates.Enabled:=False;
-    try
-      ReadRemoteInfo;
-      if not UpdateAvailable then
-      begin
-       MsgBox(Format('%s is up to date',[sApplicationName]));
-       Close;
-      end
-      else
-      if MessageDlg(Format('Exist a new version available %s , Do you want download the new version?',[RemoteVersion]),
-      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-        Download;
-    finally
-      ProgressBar1.Style:=pbstNormal;
-      BtnCheckUpdates.Enabled:=True;
-    end;
-  except on E : Exception do
-    SetMsg(Format('Error checking updates %s',[E.Message]));
-  end;
+ ExecuteUpdater;
 end;
 
 procedure TFrmCheckUpdate.BtnInstallClick(Sender: TObject);
@@ -122,6 +113,7 @@ begin
    ProgressBar1.Style:=pbstNormal;
    SetMsg('Getting Application information');
    ProgressBar1.Max:= GetRemoteFileSize(UrlInstaller);
+   SetMsg(Format('%s bytes to download ',[FormatFloat('#,', ProgressBar1.Max)]));
    FTempInstallerFileName:=IncludeTrailingPathDelimiter(GetTempDirectory)+InstallerFileName;
    DeleteFile(TempInstallerFileName);
    FileStream:=TFileStream.Create(TempInstallerFileName,fmCreate);
@@ -135,7 +127,7 @@ begin
    end;
      BtnInstall.Visible:=FileExists(TempInstallerFileName);
      BtnCheckUpdates.Visible:=not BtnInstall.Visible;
-     if BtnInstall.Visible then ExecuteInstaller;
+     if BtnInstall.Visible and not CheckExternal then ExecuteInstaller;
   except on E : Exception do
     SetMsg(Format('Error checking updates %s',[E.Message]));
   end;
@@ -154,8 +146,8 @@ begin
      Max:=ProgressBar1.Max;
      Rate:=0;
      ProgressBar1.Position:=Pos;
-     if FStopwatch.Elapsed.Seconds>0 then
-     Rate:= Round(Max/1024/FStopwatch.Elapsed.Seconds);
+     if FStopwatch.Elapsed.TotalSeconds>0 then
+     Rate:= Round(Max/1024/FStopwatch.Elapsed.TotalSeconds);
      sRate:= Format('%d Kbytes x second',[Rate]);
      SetMsg(Format('Downloaded %s of %s bytes %n%% %sTransfer Rate %s',[FormatFloat('#,',Pos),FormatFloat('#,',Max),Pos*100/Max,#13#10,sRate]));
    end;
@@ -169,21 +161,59 @@ begin
     ShellExecute(Handle, 'Open', PChar(TempInstallerFileName), nil, nil, SW_SHOWNORMAL) ;
     Application.Terminate;
   end;
+end;
 
+procedure TFrmCheckUpdate.ExecuteUpdater;
+begin
+  try
+    ProgressBar1.Style:=pbstMarquee;
+    BtnCheckUpdates.Enabled:=False;
+    try
+      if not UpdateAvailable then
+      begin
+       if not FErrorUpdate then
+        MessageDlg(Format('%s is up to date',[sApplicationName]), mtConfirmation, [mbOK], 0);
+       Close;
+      end
+      else
+      if MessageDlg(Format('Exist a new version available (%s) of the %s , Do you want download the new version?',[RemoteVersion, sApplicationName]),
+      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+      begin
+       if not Visible then
+         Show;
+
+        Download;
+        if CheckExternal then
+         ExecuteInstaller;
+      end;
+
+
+    finally
+      ProgressBar1.Style:=pbstNormal;
+      BtnCheckUpdates.Enabled:=True;
+    end;
+  except on E : Exception do
+    SetMsg(Format('Error checking updates %s',[E.Message]));
+  end;
 end;
 
 procedure TFrmCheckUpdate.FormActivate(Sender: TObject);
 begin
-   BtnCheckUpdates.Click;
+  if not CheckExternal then
+   ExecuteUpdater;
 end;
 
 procedure TFrmCheckUpdate.FormCreate(Sender: TObject);
 begin
+   FRemoteVersion:='';
+   FErrorUpdate  :=False;
+   FCheckExternal:=False;
    FStopwatch:=TStopwatch.Create;
    ReadLocalInfo;
    LabelVersion.Caption:=Format('Current Version %s',[LocalVersion]);
    SetMsg('');
 end;
+
 
 procedure TFrmCheckUpdate.ReadLocalInfo;
 begin
@@ -224,12 +254,26 @@ begin
   LabelMsg.Update;
 end;
 
-function TFrmCheckUpdate.UpdateAvailable: Boolean;
+
+function TFrmCheckUpdate.GetUpdateAvailable: Boolean;
 begin
+ Result:=False;
+ try
+   if FRemoteVersion='' then
+     ReadRemoteInfo;
+
    if DebugHook<>0 then
      Result:=True
    else
-     Result:=FRemoteVersion>FLocalVersion;
+     Result:=(FRemoteVersion>FLocalVersion);
+ except on E : Exception do
+   begin
+    FErrorUpdate:=True;
+    MessageDlg(Format('Error checking updates %s',[E.Message]), mtWarning, [mbOK], 0);
+   end;
+ end;
 end;
 
+
 end.
+

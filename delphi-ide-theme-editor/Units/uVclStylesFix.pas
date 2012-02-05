@@ -40,7 +40,7 @@ type
 implementation
 
 uses
-  uVCLStyleUtils,
+  Vcl.Styles.Ext,
   Vcl.StdCtrls,
   SynEdit,
   Types,

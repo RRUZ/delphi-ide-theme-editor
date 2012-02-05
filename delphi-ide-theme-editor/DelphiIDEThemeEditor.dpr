@@ -28,14 +28,32 @@ uses
   uClrSettings in 'IDE PlugIn\uClrSettings.pas',
   uVclStylesFix in 'Units\uVclStylesFix.pas',
   uLoadThemesImages in 'Units\uLoadThemesImages.pas',
-  uVCLStyleUtils in 'Units\uVCLStyleUtils.pas';
+  Vcl.Styles.Ext in 'Units\Vcl.Styles.Ext.pas';
 
 {$R *.res}
+
+procedure UpdateApp;
+var
+  Frm: TFrmCheckUpdate;
+begin
+  Frm := TFrmCheckUpdate.Create(nil);
+  try
+    Frm.CheckExternal:=True;
+    if Frm.UpdateAvailable then
+      Frm.ExecuteUpdater;
+  finally
+    Frm.Free;
+  end;
+end;
 
 begin
   ReportMemoryLeaksOnShutdown := DebugHook <> 0;
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);
+  if FrmMain.Settings.CheckForUpdates then
+   UpdateApp;
+
+
   Application.Run;
 end.
