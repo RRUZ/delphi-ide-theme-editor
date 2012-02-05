@@ -91,4 +91,12 @@ object FrmSettings: TFrmSettings
     TabOrder = 4
     OnChange = ComboBoxVCLStyleChange
   end
+  object CheckBoxUpdates: TCheckBox
+    Left = 256
+    Top = 78
+    Width = 161
+    Height = 17
+    Caption = 'Check for updates in start up.'
+    TabOrder = 5
+  end
 end

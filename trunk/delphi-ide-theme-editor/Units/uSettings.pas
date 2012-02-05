@@ -33,10 +33,12 @@ type
     FThemePath: string;
     FVCLStyle: string;
     FActivateColorizer: Boolean;
+    FCheckForUpdates: Boolean;
   public
     property ThemePath: string Read FThemePath Write FThemePath;
     property VCLStyle: string Read FVCLStyle Write FVCLStyle;
     property ActivateColorizer: Boolean Read FActivateColorizer write FActivateColorizer;
+    property CheckForUpdates : Boolean Read  FCheckForUpdates write FCheckForUpdates;
   end;
 
 
@@ -50,6 +52,7 @@ type
     Label9: TLabel;
     ComboBoxVCLStyle: TComboBox;
     ImageVCLStyle: TImage;
+    CheckBoxUpdates: TCheckBox;
     procedure BtnSelFolderThemesClick(Sender: TObject);
     procedure BtnSaveClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
@@ -76,7 +79,7 @@ uses
   {$WARN SYMBOL_PLATFORM ON}
   Vcl.Styles,
   Vcl.Themes,
-  uVCLStyleUtils,
+  Vcl.Styles.Ext,
   IOUtils,
   IniFiles;
 
@@ -115,6 +118,7 @@ begin
     Settings.ActivateColorizer:= iniFile.ReadBool('Global', 'ActivateColorizer',  False);
     Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Windows');
     Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  ExtractFilePath(ParamStr(0)) + 'Themes');
+    Settings.CheckForUpdates :=iniFile.ReadBool('Global', 'CheckForUpdates',  True);
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
       Settings.ThemePath := ExtractFilePath(ParamStr(0)) + 'Themes';
@@ -133,6 +137,7 @@ begin
   try
     iniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
     iniFile.WriteString('Global', 'VCLStyle', Settings.VCLStyle);
+    iniFile.WriteBool('Global', 'CheckForUpdates', Settings.CheckForUpdates);
   finally
     iniFile.Free;
   end;
@@ -150,6 +155,7 @@ begin
   begin
     FSettings.ThemePath := EditThemesFolder.Text;
     FSettings.VCLStyle  := ComboBoxVCLStyle.Text;
+    FSettings.CheckForUpdates :=CheckBoxUpdates.Checked;
     WriteSettings(FSettings);
     LoadVCLStyle(ComboBoxVCLStyle.Text);
     Close();
@@ -216,6 +222,7 @@ begin
   ReadSettings(FSettings);
   EditThemesFolder.Text := FSettings.ThemePath;
   ComboBoxVCLStyle.ItemIndex:=ComboBoxVCLStyle.Items.IndexOf(FSettings.VCLStyle);
+  CheckBoxUpdates.Checked:=FSettings.CheckForUpdates;
   DrawSeletedVCLStyle;
 end;
 
