@@ -211,7 +211,7 @@ begin
 
     for i:=1 to Props.Count-1 do
      begin
-        if RttiProperty.PropertyType.TypeKind=tkClass then
+        if Assigned(RttiProperty) and (RttiProperty.PropertyType.TypeKind=tkClass) then
          Instance          := RttiProperty.GetValue(Instance).AsObject
         else
         raise Exception.Create(Format('The property %s is not a class',[Props[i]]));
@@ -244,7 +244,7 @@ begin
 
     for i:=1 to Props.Count-1 do
      begin
-        if RttiProperty.PropertyType.TypeKind=tkClass then
+        if Assigned(RttiProperty) and (RttiProperty.PropertyType.TypeKind=tkClass) then
          Instance          := RttiProperty.GetValue(Instance).AsObject
         else
         raise Exception.Create(Format('The property %s is not a class',[Props[i]]));

@@ -59,7 +59,7 @@ implementation
 
 uses
  {$IF CompilerVersion >= 23}
- uVCLStyleUtils,
+ Vcl.Styles.Ext,
  {$IFEND}
  {$IF CompilerVersion > 20}
  IOUtils,

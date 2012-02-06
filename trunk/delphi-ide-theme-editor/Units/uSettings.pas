@@ -74,9 +74,9 @@ procedure LoadVCLStyle(Const StyleName:String);
 implementation
 
 uses
-  {$WARN SYMBOL_PLATFORM OFF}
+  {$WARN UNIT_PLATFORM OFF}
   Vcl.FileCtrl,
-  {$WARN SYMBOL_PLATFORM ON}
+  {$WARN UNIT_PLATFORM ON}
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Styles.Ext,
@@ -91,7 +91,7 @@ begin
    if TStyleManager.IsValidStyle(StyleFileName) then
      TStyleManager.LoadFromFile(StyleFileName)
    else
-     ShowMessage('the Style is not valid');
+     ShowMessage('The Vcl Style file is not valid');
 end;
 
 procedure LoadVCLStyle(Const StyleName:String);

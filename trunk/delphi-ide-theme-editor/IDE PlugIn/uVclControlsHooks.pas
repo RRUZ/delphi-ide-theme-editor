@@ -49,13 +49,13 @@ var
   OrgTTabSheet_NewInstance            : Pointer;
   OrgTPageControl_NewInstance         : Pointer;
 {$ENDIF}
-
+  {
  OrgFoo            : procedure;
  FooBackUp         : TXRedirCode;
-
-Const
+   }
+//Const
   //FooMethod='@Editcolorpage@TEditorColor@SetColorSpeedSetting$qqr26Vedopts@TColorSpeedSetting';
-  FooMethod='@Editcolorpage@TEditorColor@ColorSpeedSettingClick$qqrp14System@TObject';
+  //FooMethod='@Editcolorpage@TEditorColor@ColorSpeedSettingClick$qqrp14System@TObject';
 
 
 procedure Bitmap2GrayScale(const BitMap: TBitmap);
@@ -163,11 +163,11 @@ begin
 {$ENDIF}
 
 
-
+{
   OrgFoo := GetProcAddress(LoadPackage(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'coreide160.bpl'), FooMethod);
   if @OrgFoo <> nil then
     HookProc(@OrgFoo, @Test, FooBackUp);
-
+}
 end;
 
 procedure RemoveHooks;
@@ -184,9 +184,10 @@ begin
   SetVirtualMethod(ComCtrls.TPageControl, vmtNewInstance, OrgTPageControl_NewInstance);
 {$ENDIF}
 
-
+      {
   if @OrgFoo <> nil then
     UnhookProc(@OrgFoo, FooBackUp);
+     }
 end;
 
 {
@@ -214,9 +215,6 @@ end;
     004AA8D4 17390 1F4C __fastcall Editcolorpage::initialization()
 }
 
-{
-
-}
 
 initialization
  InstallHooks;
