@@ -90,6 +90,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_Define>EUREKALOG;EUREKALOG_VER6;$(DCC_Define)</DCC_Define>
 			<VerInfo_MinorVer>1</VerInfo_MinorVer>
 			<VerInfo_Release>18</VerInfo_Release>
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
@@ -106,9 +107,9 @@
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
 			<VerInfo_MinorVer>1</VerInfo_MinorVer>
 			<VerInfo_Build>5</VerInfo_Build>
-			<VerInfo_Release>20</VerInfo_Release>
+			<VerInfo_Release>21</VerInfo_Release>
 			<DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.20.5;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.21.5;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 		</PropertyGroup>
 		<ItemGroup>
@@ -176,7 +177,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">271</VersionInfo>
+						<VersionInfo Name="Build">272</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -188,7 +189,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.0.271</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.0.272</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
@@ -792,5 +793,5 @@ Count mtException_AntiFreeze=1
 mtException_AntiFreeze0="The application seems to be frozen."
 Count mtInvalidEmailMsg=1
 mtInvalidEmailMsg0="Invalid email."
-TextsCollection=English
+TextsCollection=
 EurekaLog Last Line -->

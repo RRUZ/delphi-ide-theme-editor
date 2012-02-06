@@ -88,7 +88,7 @@
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">2</VersionInfo>
-						<VersionInfo Name="Build">158</VersionInfo>
+						<VersionInfo Name="Build">173</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -100,7 +100,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">0.1.2.158</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.2.173</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
@@ -130,7 +130,7 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=6025
+EurekaLog Version=6104
 Activate=0
 Activate Handle=1
 Save Log File=1
@@ -290,6 +290,7 @@ loFreeAllLeaks=1
 loCatchLeaksExceptions=1
 cfoReduceFileSize=1
 cfoCheckFileCorruption=0
+cfoUseEL7=0
 Count mtInformationMsgCaption=1
 mtInformationMsgCaption0="Information."
 Count mtQuestionMsgCaption=1
@@ -609,5 +610,5 @@ Count mtException_AntiFreeze=1
 mtException_AntiFreeze0="The application seems to be frozen."
 Count mtInvalidEmailMsg=1
 mtInvalidEmailMsg0="Invalid email."
-TextsCollection=English
+TextsCollection=
 EurekaLog Last Line -->

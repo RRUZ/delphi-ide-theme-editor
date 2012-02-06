@@ -14,7 +14,7 @@
 { The Original Code is uColorizerSettings.pas.                                                     }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2012 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -146,10 +146,9 @@ const
 implementation
 
 Uses
- //uDWM,
- {$WARN SYMBOL_PLATFORM OFF}
+ {$WARN UNIT_PLATFORM OFF}
  Vcl.FileCtrl,
- {$WARN SYMBOL_PLATFORM ON}
+ {$WARN UNIT_PLATFORM ON}
  System.Types,
  uMisc,
  IOUtils,

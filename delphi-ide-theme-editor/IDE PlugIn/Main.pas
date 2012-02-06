@@ -109,7 +109,7 @@ type
     FTimerRefresher: TTimer;
     Settings : TSettings;
     AColorMap:TXPColorMap;
-    ExplorerItem: TMenuItem;
+    //ExplorerItem: TMenuItem;
     //ExplorerSeparator: TMenuItem;
     procedure AddMenuItems;
     procedure RemoveMenuItems;
@@ -335,8 +335,7 @@ begin
   Settings:=TSettings.Create;
   //ColorizerForm := nil;
   RegisterPlugIn;
-  //ShowMessage(GetBplLocation);
-  AddMenuItems;
+  //AddMenuItems;
   InitColorizer();
 
   {$IFDEF USE_DUMP_TIMER}
@@ -411,9 +410,7 @@ end;
 destructor TIDEWizard.Destroy;
 begin
   Settings.Free;
-
-  RemoveMenuItems;
-
+  //RemoveMenuItems;
   if Assigned(SplashBmp) then
     SplashBmp.Free;
 
@@ -523,14 +520,6 @@ function TMyIDEHotKey.GetName: string;
 begin
   Result := 'Foo Dump';
 end;
-
-initialization
-
-
-finalization
-{$IFDEF Use_Notifiers}
-  RemoveNotifier;
-{$ENDIF}
 
 end.
 

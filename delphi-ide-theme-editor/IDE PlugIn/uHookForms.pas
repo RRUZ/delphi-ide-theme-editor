@@ -26,7 +26,7 @@ implementation
 
 uses
  {$IF CompilerVersion >= 23}
- uVCLStyleUtils,
+ Vcl.Styles.Ext,
  {$IFEND}
  Classes,
  Forms,
@@ -56,11 +56,13 @@ begin
        if (Screen<>nil) and (hTemp>0) then
        begin
           RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
-          {$WARN SYMBOL_PLATFORM OFF}
-          Win32Check(RetVal <> 0);
-          {$WARN SYMBOL_PLATFORM ON}
-          Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-          //if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
+          if RetVal>0 then
+          begin
+            {.$WARN SYMBOL_PLATFORM OFF}
+            //Win32Check(RetVal <> 0);
+            {.$WARN SYMBOL_PLATFORM ON}
+             Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
+            //if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
             for i := 0 to Screen.FormCount-1 do
              if Screen.Forms[i].Handle=hTemp then
                if (HookedWindows.IndexOf(ClassNameBuffer)<>-1) and not (csDesigning in Screen.Forms[i].ComponentState) then
@@ -78,6 +80,7 @@ begin
                  ApplyEmptyVCLStyleHook(Screen.Forms[i].ClassType);
                end;
               {$IFEND}
+          end;
        end;
      end;
    end;
