@@ -2,8 +2,8 @@
     <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
       <assemblyIdentity
         type="win32"
-        name="CodeGear RAD Studio"
-        version="15.0.3890.34076" 
+        name="Delphi.IDE.Theme.Editor"
+        version="1.1.21.5" 
         processorArchitecture="*"/>
       <dependency>
         <dependentAssembly>

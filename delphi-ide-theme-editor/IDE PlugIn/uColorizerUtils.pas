@@ -111,7 +111,42 @@ var
   //Drawer        : TComponentDrawer;
 
 
+
+
 {$IFDEF DEBUG_PROFILER}
+
+procedure DumpType(const QualifiedName:string);
+var
+  l2 : TStrings;
+begin
+  l2 := TStringList.Create;
+  try
+   l2.Text:=DumpTypeDefinition(TRttiContext.Create.FindType(QualifiedName).Handle);
+  finally
+   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+QualifiedName+'.pas');
+   l2.Free;
+  end;
+end;
+
+
+procedure DumpAllTypes;
+var
+l2 : TStrings;
+t  : TRttiType;
+begin
+  l2 := TStringList.Create;
+  try
+    for t in TRttiContext.Create.GetTypes do
+    if t.IsInstance then
+     l2.Add(t.AsInstance.DeclaringUnitName +' '+t.Name);
+  finally
+   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\Types.txt');
+   l2.Free;
+  end;
+end;
+
+
+
 procedure DumpComponent(AComponent: TComponent);
 var
 l2 : TStrings;
@@ -374,7 +409,19 @@ begin
     if AComponent.ClassName='TPropertySheetControl' then
     begin
 
-    end
+    end  {
+    else
+    if AComponent.ClassName='TEditWindow' then
+    begin
+       for i:=0 to AComponent.ComponentCount-1 do
+        if AComponent.Components[i] is TPanel then
+        begin
+         TPanel(AComponent.Components[i]).ParentBackground:=False;
+         TPanel(AComponent.Components[i]).ParentColor:=False;
+         TPanel(AComponent.Components[i]).Color:=AColorMap.Color;
+         //ShowMessage(AComponent.Components[i].Name);
+        end;
+    end   }
     else
     if AComponent.ClassName='TEdit' then
     begin
@@ -700,6 +747,8 @@ begin
          p2.SetValue(p.GetValue(AComponent).AsObject,AColorMap.Color);
          }
 
+         //DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
+
          SetRttiPropertyValue(AComponent,'TabColors.ActiveStart',AColorMap.Color);
          SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd',AColorMap.Color);
          SetRttiPropertyValue(AComponent,'TabColors.InActiveStart',AColorMap.MenuColor);
@@ -763,6 +812,10 @@ begin
 end;
 
 initialization
+{$IFDEF DEBUG_PROFILER}
+  DumpAllTypes;
+{$ENDIF}
+
   GlobalColorMap:=nil;
   GlobalSettings:=nil;
   HookedWindows:=TStringList.Create;

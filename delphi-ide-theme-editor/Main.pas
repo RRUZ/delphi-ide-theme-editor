@@ -259,7 +259,7 @@ const
   ErrorLineLine      = 14;
 
 {$R *.dfm}
-{$R ManAdmin.RES}
+{.$R Manbdmin.RES}
 
 procedure TFrmMain.ActionApplyThemeExecute(Sender: TObject);
 begin

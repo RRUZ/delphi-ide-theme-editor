@@ -96,7 +96,7 @@
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<VerInfo_Build>1</VerInfo_Build>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.18.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<Manifest_File>ManAdmin.manifest</Manifest_File>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
