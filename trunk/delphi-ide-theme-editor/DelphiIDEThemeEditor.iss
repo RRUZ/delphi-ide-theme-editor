@@ -64,20 +64,6 @@ Source: Themes Lazarus\ColorVibrant_Ink_theme.xml; DestDir: {app}\Themes Lazarus
 Source: Themes Lazarus\Colorwekeroad_ink_theme.xml; DestDir: {app}\Themes Lazarus\
 Source: Themes Lazarus\Colorzenburn_2010_theme.xml; DestDir: {app}\Themes Lazarus\
 Source: Themes Lazarus\ColorZenburn_theme.xml; DestDir: {app}\Themes Lazarus\
-Source: Styles\AmethystKamri.vsf; DestDir: {app}\Styles\
-Source: Styles\AquaGraphite.vsf; DestDir: {app}\Styles\
-Source: Styles\AquaLightSlate.vsf; DestDir: {app}\Styles\
-Source: Styles\Carbon.vsf; DestDir: {app}\Styles\
-Source: Styles\CobaltXEMedia.vsf; DestDir: {app}\Styles\
-Source: Styles\EmeraldLightSlate.vsf; DestDir: {app}\Styles\
-Source: Styles\GoldenGraphite.vsf; DestDir: {app}\Styles\
-Source: Styles\IcebergClassico.vsf; DestDir: {app}\Styles\
-Source: Styles\LavenderClassico.vsf; DestDir: {app}\Styles\
-Source: Styles\RubyGraphite.vsf; DestDir: {app}\Styles\
-Source: Styles\SapphireKamri.vsf; DestDir: {app}\Styles\
-Source: Styles\Sky.vsf; DestDir: {app}\Styles\
-Source: Styles\SlateClassico.vsf; DestDir: {app}\Styles\
-Source: Styles\SmokeyQuartzKamri.vsf; DestDir: {app}\Styles\
 Source: Themes\afterthought.theme.xml; DestDir: {app}\Themes\
 Source: Themes\aggie.theme.xml; DestDir: {app}\Themes\
 Source: Themes\ajinomoto.theme.xml; DestDir: {app}\Themes\
@@ -804,6 +790,39 @@ Source: BPL\XE2\Themes\Yellow.idetheme; DestDir: {app}\BPL\XE2\Themes
 Source: BPL\XE2\Themes\YellowGreen.idetheme; DestDir: {app}\BPL\XE2\Themes
 Source: BPL\XE2\DelphiIDEColorizerXE2.bpl; DestDir: {app}\BPL\XE2
 Source: BPL\XE2\HookedWindows.dat; DestDir: {app}\BPL\XE2
+Source: Styles\Amakrits.vsf; DestDir: {app}\Styles\
+Source: Styles\AmethystKamri.vsf; DestDir: {app}\Styles\
+Source: Styles\AquaGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\AquaLightSlate.vsf; DestDir: {app}\Styles\
+Source: Styles\Auric.vsf; DestDir: {app}\Styles\
+Source: Styles\BlueGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\Carbon.vsf; DestDir: {app}\Styles\
+Source: Styles\CharcoalDarkSlate.vsf; DestDir: {app}\Styles\
+Source: Styles\CobaltXEMedia.vsf; DestDir: {app}\Styles\
+Source: Styles\CyanDusk.vsf; DestDir: {app}\Styles\
+Source: Styles\CyanNight.vsf; DestDir: {app}\Styles\
+Source: Styles\EmeraldLightSlate.vsf; DestDir: {app}\Styles\
+Source: Styles\GoldenGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\GreenGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\IcebergClassico.vsf; DestDir: {app}\Styles\
+Source: Styles\khaki.vsf; DestDir: {app}\Styles\
+Source: Styles\LavenderClassico.vsf; DestDir: {app}\Styles\
+Source: Styles\LightGreen.vsf; DestDir: {app}\Styles\
+Source: Styles\lilac.vsf; DestDir: {app}\Styles\
+Source: Styles\MetroBlack.vsf; DestDir: {app}\Styles\
+Source: Styles\MetroBlue.vsf; DestDir: {app}\Styles\
+Source: Styles\MetroGreen.vsf; DestDir: {app}\Styles\
+Source: Styles\Orange.vsf; DestDir: {app}\Styles\
+Source: Styles\OrangeGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\Pink.vsf; DestDir: {app}\Styles\
+Source: Styles\RubyGraphite.vsf; DestDir: {app}\Styles\
+Source: Styles\SapphireKamri.vsf; DestDir: {app}\Styles\
+Source: Styles\sepia.vsf; DestDir: {app}\Styles\
+Source: Styles\Sky.vsf; DestDir: {app}\Styles\
+Source: Styles\SlateClassico.vsf; DestDir: {app}\Styles\
+Source: Styles\SmokeyQuartzKamri.vsf; DestDir: {app}\Styles\
+Source: Styles\TurquoiseGray.vsf; DestDir: {app}\Styles\
+Source: Styles\YellowGraphite.vsf; DestDir: {app}\Styles\
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -836,15 +855,14 @@ Name: {app}\default
 Name: {app}\Themes Eclipse
 Name: {app}\Themes VS
 Name: {app}\Themes Lazarus
-Name: {app}\Styles
 Name: {app}\Themes
 Name: {app}\Images
 Name: {app}\BPL
 Name: {app}\BPL\XE
 Name: {app}\BPL\XE\Themes
 Name: {app}\BPL\XE2
-Name: {app}\BPL\XE2\.svn
 Name: {app}\BPL\XE2\Themes
+Name: {app}\Styles
 [Icons]
 Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
 Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DelphiIDEThemeEditor.exe; WorkingDir: {app}
