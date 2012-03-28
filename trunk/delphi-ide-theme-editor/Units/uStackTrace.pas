@@ -22,11 +22,16 @@ unit uStackTrace;
 
 interface
 
+{.$DEFINE ENABLE_STACKTRACE}
+
+{$IFDEF ENABLE_STACKTRACE}
 uses
   SysUtils, Classes, JclDebug;
+{$ENDIF}
 
 implementation
 
+{$IFDEF ENABLE_STACKTRACE}
 function GetExceptionStackInfoProc(P: PExceptionRecord):Pointer;
 begin
   Result := TJclStackInfoList.Create(False, 0, nil);
@@ -69,4 +74,5 @@ finalization
     Exception.CleanUpStackInfoProc      := nil;
     JclStopExceptionTracking;
   end;
+{$ENDIF}
 end.
