@@ -68,8 +68,9 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
-  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions,
-  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList;
+  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,
+  pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
+  Vcl.PlatformDefaultStyleActnCtrls;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -84,6 +85,8 @@ type
    destructor destroy; override;
   end;
 
+
+  TPopupMenu=class(Vcl.ActnPopup.TPopupActionBar);
 
   TFrmMain = class(TForm)
     ImageListDelphiVersion: TImageList;
@@ -152,6 +155,7 @@ type
     ActionSaveChanges: TAction;
     ActionSaveAs: TAction;
     BtnIDEColorizer: TButton;
+    PopupActionBar1: TPopupActionBar;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -249,6 +253,7 @@ uses
   uStackTrace,
   uCheckUpdate,
   uLoadThemesImages,
+  uStdActionsPopMenu,
   uColorizerSettings;
 
 const
@@ -817,6 +822,8 @@ begin
   ActionImages:=TObjectDictionary<string,TCompPngImages>.Create([doOwnsValues]);
   LoadActionImages;
 
+  FillPopupActionBar(PopupActionBar1);
+  AssignStdActionsPopUpMenu(Self, PopupActionBar1);
 
 
   IDEsList:=TList<TDelphiVersionData>.Create;

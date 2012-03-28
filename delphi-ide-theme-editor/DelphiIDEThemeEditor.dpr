@@ -28,7 +28,8 @@ uses
   uClrSettings in 'IDE PlugIn\uClrSettings.pas',
   uVclStylesFix in 'Units\uVclStylesFix.pas',
   uLoadThemesImages in 'Units\uLoadThemesImages.pas',
-  Vcl.Styles.Ext in 'Units\Vcl.Styles.Ext.pas';
+  Vcl.Styles.Ext in 'Units\Vcl.Styles.Ext.pas',
+  uStdActionsPopMenu in 'Units\uStdActionsPopMenu.pas';
 
 {$R *.res}
 
