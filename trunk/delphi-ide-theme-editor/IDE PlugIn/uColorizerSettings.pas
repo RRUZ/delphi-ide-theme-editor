@@ -124,8 +124,8 @@ const
     '',
     '',
     'BPL\XE',
-    'BPL\XE2'
-    );
+    'BPL\XE2',
+    '');
 
   DelphiIDEExpertsNames: array[TDelphiVersions] of string = (
   {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -140,7 +140,8 @@ const
     '',
     '',
     'DelphiIDEColorizerXE',
-    'DelphiIDEColorizerXE2'
+    'DelphiIDEColorizerXE2',
+    'DelphiIDEColorizerXE3'
     );
 
 implementation

@@ -1,4 +1,4 @@
-program DelphiIDEThemeEditor;
+program DITE;
 {$WARN SYMBOL_PLATFORM OFF}
 
 uses
