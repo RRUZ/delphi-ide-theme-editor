@@ -40,6 +40,10 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Main Settings'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object ImageIDELogo: TImage
           Left = 3
           Top = 4
@@ -222,6 +226,10 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           552
           194)
@@ -276,6 +284,10 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 26
@@ -326,6 +338,10 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
       object TabSheet1: TTabSheet
         Caption = 'Options'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object CheckBoxFixIDEDrawIcon: TCheckBox
           Left = 3
           Top = 11
@@ -380,7 +396,7 @@ object FrmIDEColorizerSettings: TFrmIDEColorizerSettings
     Left = 504
     Top = 240
     Bitmap = {
-      494C010107000800500110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800540110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F

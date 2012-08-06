@@ -49,8 +49,9 @@ type
     Delphi2009,
     Delphi2010,
     DelphiXE,
-    DelphiXE2
-    );
+    DelphiXE2,
+    DelphiXE3
+);
 
   TDelphiVersionData=Class
   private
@@ -127,8 +128,9 @@ Color15=$FFFFFF
     'RAD Studio 2009',
     'RAD Studio 2010',
     'RAD Studio XE',
-    'RAD Studio XE2'
-    );
+    'RAD Studio XE2',
+    'RAD Studio XE3'
+        );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
     (
@@ -144,7 +146,8 @@ Color15=$FFFFFF
     20,      // 'RAD Studio 2009',
     21,      // 'RAD Studio 2010',
     22,      // 'RAD Studio XE'
-    23       // 'RAD Studio XE2'
+    23,      // 'RAD Studio XE2'
+    24       // 'RAD Studio XE2'
     );
 
 
@@ -162,7 +165,8 @@ Color15=$FFFFFF
     '\Software\CodeGear\BDS\6.0',
     '\Software\CodeGear\BDS\7.0',
     '\Software\Embarcadero\BDS\8.0',
-    '\Software\Embarcadero\BDS\9.0'
+    '\Software\Embarcadero\BDS\9.0',
+    '\Software\Embarcadero\BDS\10.0'
     );
 
 
