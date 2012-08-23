@@ -404,7 +404,7 @@ begin
 
 
     if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
-      if ApplyDelphiIDETheme(DelphiVersion, FCurrentTheme) then
+      if ApplyDelphiIDETheme(DelphiVersion, FCurrentTheme, LvThemes.Selected.Caption) then
         MsgBox('The theme was successfully applied')
       else
         MsgBox('Error setting theme')
@@ -1248,9 +1248,12 @@ end;
 procedure TFrmMain.ComboBoxExIDEsChange(Sender: TObject);
 var
   DelphiVersion: TDelphiVersions;
+  CurrentThemeName : string;
+  i: integer;
 begin
   if ComboBoxExIDEs.ItemIndex >= 0 then
   begin
+    CurrentThemeName:='';
     if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
      DelphiVersion := IDEData.Version
     else
@@ -1271,10 +1274,16 @@ begin
       TIDEHighlightElements.LineNumber];
 
     if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
-      UpDownFontSize.Position := GetDelphiIDEFontSize(DelphiVersion)
+    begin
+      UpDownFontSize.Position := GetDelphiIDEFontSize(DelphiVersion);
+      CurrentThemeName:= GetDelphiIDEThemeName(DelphiVersion);
+    end
     else
     if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
+    begin
       UpDownFontSize.Position := GetLazarusIDEFontSize;
+      CurrentThemeName:=GetLazarusIDEThemeName;
+    end;
 
 
     if CbIDEFonts.Items.Count > 0 then
@@ -1289,6 +1298,15 @@ begin
 
     BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEData.IDEType=TSupportedIDEs.DelphiIDE);
     BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
+
+    if CurrentThemeName<>'' then
+      for i:=0 to LvThemes.Items.Count-1 do
+        if SameText(CurrentThemeName, LvThemes.Items[i].Caption) then
+         begin
+           LvThemes.Selected:=LvThemes.Items[i];
+           LvThemes.Selected.MakeVisible(false);
+           Break;
+         end;
 
     if (LvThemes.Selected <> nil) and (CbElement.Items.Count > 0) then
     begin

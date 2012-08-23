@@ -245,13 +245,14 @@ function  ImportDelphiIDEThemeToRegistry(DelphiVersion:TDelphiVersions;const ATh
 
 function  GetDelphiIDEFontName(DelphiVersion:TDelphiVersions):string;
 function  GetDelphiIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
+function  GetDelphiIDEThemeName(DelphiVersion:TDelphiVersions):string;
 function  SetDelphiIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
 function  SaveDelphiIDEThemeToRegFile(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme;Path,Name:string):TFileName;
 function  SaveDelphiIDEThemeToXmlFile(const ATheme : TIDETheme;const Path,Name:string):TFileName;
 
 function  LoadThemeFromXMLFile(var ATheme : TIDETheme;const FileName:TFileName):Boolean;
 function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
-function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
+function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme; const ThemeName : string) : Boolean;
 function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
 
 function  ExistDelphiIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
@@ -326,9 +327,11 @@ begin
   end;
 end;
 
-function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme) : Boolean;
+function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme; const ThemeName : string) : Boolean;
 begin
   Result:=ImportDelphiIDEThemeToRegistry(DelphiVersion, ATheme);
+  if Result then
+     Result:= RegWriteStr(Format('%s\Editor\DITE',[DelphiRegPaths[DelphiVersion]]),'ThemeName', ThemeName,HKEY_CURRENT_USER);
 end;
 
 function  SetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): Boolean;
@@ -349,6 +352,7 @@ begin
   Delphi2010 RCDATA 2010.reg
   DelphiXE  RCDATA XE.reg
   DelphiXE2 RCDATA XE2.reg
+  DelphiXE3 RCDATA XE3.reg
  }
 
 
@@ -869,6 +873,13 @@ begin
  if not RegReadInt(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Font Size',Result,HKEY_CURRENT_USER) then
   Result:=0;
 end;
+
+function  GetDelphiIDEThemeName(DelphiVersion:TDelphiVersions):string;
+begin
+ if not RegReadStr(Format('%s\Editor\DITE',[DelphiRegPaths[DelphiVersion]]),'ThemeName',Result,HKEY_CURRENT_USER) then
+  Result:='';
+end;
+
 
 function  SetDelphiIDEFont(DelphiVersion:TDelphiVersions;const FontName:String;FontSize:Integer):Boolean;
 begin

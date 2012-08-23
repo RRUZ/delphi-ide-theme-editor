@@ -31,6 +31,7 @@ const
 
 function  GetLazarusIDEFontSize : Integer;
 function  GetLazarusIDEFontName : string;
+function  GetLazarusIDEThemeName : string;
 function  SetLazarusIDEFont(const FontName:String;FontSize:Integer):Boolean;
 function  ApplyLazarusIDETheme(const ATheme:TIDETheme;const ThemeName:string) : Boolean;
 
@@ -139,6 +140,8 @@ begin
   if Result='' then
     Result:=sDefaultLazarusFont;
 end;
+
+
 
 function  SetLazarusIDEFont(const FontName:String;FontSize:Integer):Boolean;
 begin
@@ -510,6 +513,12 @@ begin
   Result:=DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutPutFolder);
   if Result then
    Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
+end;
+
+
+function  GetLazarusIDEThemeName : string;
+begin
+  Result:=GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value');
 end;
 
 function  DelphiIDEThemeToLazarusTheme(const DelphiIdeTheme, OutputFolder:string) : Boolean;overload;
