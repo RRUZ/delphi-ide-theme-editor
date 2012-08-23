@@ -105,10 +105,10 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
 			<VerInfo_MinorVer>1</VerInfo_MinorVer>
-			<VerInfo_Build>12</VerInfo_Build>
-			<VerInfo_Release>26</VerInfo_Release>
+			<VerInfo_Build>15</VerInfo_Build>
+			<VerInfo_Release>27</VerInfo_Release>
 			<DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.26.12;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.27.15;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 		</PropertyGroup>
 		<ItemGroup>
