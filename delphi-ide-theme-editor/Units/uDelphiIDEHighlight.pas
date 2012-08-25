@@ -368,7 +368,8 @@ begin
    finally
     FStream.Free;
    end;
-   Result:= FileExists(FileName) and RunAndWait(0,'regedit.exe','/S "'+FileName+'"');
+    Result:= FileExists(FileName) and RunAndWait(0,'regedit.exe','/S "'+FileName+'"');
+    //Result:= FileExists(FileName) and RegLoadKey(Format('%s\Editor\Highlight',[DelphiRegPaths[DelphiVersion]]), FileName, HKEY_CURRENT_USER);
   finally
    //TFile.Delete(FileName);
    AStream.Free;

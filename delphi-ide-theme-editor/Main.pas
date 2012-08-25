@@ -14,7 +14,7 @@
 { The Original Code is Main.pas.                                                                   }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2012 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -82,7 +82,7 @@ type
   public
    property Normal : TPngImage read FNormal write FNormal;
    property BN     : TPngImage read FBN write FBN;
-   destructor destroy; override;
+   destructor Destroy; override;
   end;
 
 
@@ -232,9 +232,9 @@ var
 implementation
 
 uses
-  {$WARN SYMBOL_PLATFORM OFF}
+  {$WARN UNIT_PLATFORM OFF}
   Vcl.FileCtrl,
-  {$WARN SYMBOL_PLATFORM ON}
+  {$WARN UNIT_PLATFORM ON}
   Diagnostics,
   ShellApi,
   IOUtils,
@@ -924,6 +924,7 @@ end;
 procedure TFrmMain.FormShow(Sender: TObject);
 begin
   BtnApplyFont.Enabled := False;
+  ComboBoxExIDEsChange(ComboBoxExIDEs);
 end;
 
 function TFrmMain.GetDelphiVersionData(Index: Integer): TDelphiVersionData;

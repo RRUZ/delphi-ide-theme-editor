@@ -105,10 +105,10 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
 			<VerInfo_MinorVer>1</VerInfo_MinorVer>
-			<VerInfo_Build>15</VerInfo_Build>
+			<VerInfo_Build>22</VerInfo_Build>
 			<VerInfo_Release>27</VerInfo_Release>
 			<DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.27.15;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.27.22;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 		</PropertyGroup>
 		<ItemGroup>
@@ -177,7 +177,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">273</VersionInfo>
+						<VersionInfo Name="Build">277</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -189,7 +189,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.0.273</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.0.277</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
@@ -202,6 +202,7 @@
 						<Source Name="MainSource">DITE.dpr</Source>
 					</Source>
 					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\fmidesigner160.bpl">FMI Form designer and property and component editors</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>

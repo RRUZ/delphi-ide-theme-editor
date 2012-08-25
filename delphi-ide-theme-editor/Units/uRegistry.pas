@@ -32,8 +32,46 @@ function RegReadInt(const RegPath, RegValue: string; var IntValue: integer; cons
 function RegWriteStr(const RegPath, RegValue: string; const Str: string; const RootKey: HKEY): boolean;
 function RegWriteInt(const RegPath, RegValue: string; IntValue: integer; const RootKey: HKEY): boolean;
 function RegKeyExists(const RegPath: string; const RootKey: HKEY): boolean;
+function RegLoadKey(const RegPath, FileName: string; const RootKey: HKEY): boolean;
+function RegSaveKey(const RegPath, FileName: string; const RootKey: HKEY): boolean;
 
 implementation
+
+function RegLoadKey(const RegPath, FileName: string; const RootKey: HKEY): boolean;
+var
+  Reg: TRegistry;
+begin
+  try
+    Reg := TRegistry.Create;
+    try
+      Reg.RootKey := RootKey;
+      Result      := Reg.LoadKey(RegPath, FileName);
+      Reg.CloseKey;
+    finally
+      Reg.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function RegSaveKey(const RegPath, FileName: string; const RootKey: HKEY): boolean;
+var
+  Reg: TRegistry;
+begin
+  try
+    Reg := TRegistry.Create;
+    try
+      Reg.RootKey := RootKey;
+      Result      := Reg.SaveKey(RegPath, FileName);
+      Reg.CloseKey;
+    finally
+      Reg.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
 
 function RegWriteStr(const RegPath, RegValue: string; const Str: string; const RootKey: HKEY): boolean;
 var
