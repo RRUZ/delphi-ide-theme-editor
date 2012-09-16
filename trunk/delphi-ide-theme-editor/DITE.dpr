@@ -29,7 +29,8 @@ uses
   uVclStylesFix in 'Units\uVclStylesFix.pas',
   uLoadThemesImages in 'Units\uLoadThemesImages.pas',
   Vcl.Styles.Ext in 'Units\Vcl.Styles.Ext.pas',
-  uStdActionsPopMenu in 'Units\uStdActionsPopMenu.pas';
+  uStdActionsPopMenu in 'Units\uStdActionsPopMenu.pas',
+  uHelpInsight in 'Units\uHelpInsight.pas';
 
 {$R *.res}
 
