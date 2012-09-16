@@ -823,6 +823,9 @@ Source: Styles\SlateClassico.vsf; DestDir: {app}\Styles\
 Source: Styles\SmokeyQuartzKamri.vsf; DestDir: {app}\Styles\
 Source: Styles\TurquoiseGray.vsf; DestDir: {app}\Styles\
 Source: Styles\YellowGraphite.vsf; DestDir: {app}\Styles\
+Source: HelpInsight\HelpInsight.css; DestDir: {app}\HelpInsight\
+Source: HelpInsight\HelpInsightGradient.gif; DestDir: {app}\HelpInsight\
+Source: HelpInsight\HelpInsight_Template.css; DestDir: {app}\HelpInsight\
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -863,6 +866,7 @@ Name: {app}\BPL\XE\Themes
 Name: {app}\BPL\XE2
 Name: {app}\BPL\XE2\Themes
 Name: {app}\Styles
+Name: {app}\HelpInsight
 [Icons]
 Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DITE.exe; WorkingDir: {app}
 Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DITE.exe; WorkingDir: {app}

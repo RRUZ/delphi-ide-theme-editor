@@ -253,6 +253,7 @@ uses
   uStackTrace,
   uCheckUpdate,
   uLoadThemesImages,
+  uHelpInsight,
   uStdActionsPopMenu,
   uColorizerSettings;
 
@@ -404,10 +405,15 @@ begin
 
 
     if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
+    begin
       if ApplyDelphiIDETheme(DelphiVersion, FCurrentTheme, LvThemes.Selected.Caption) then
         MsgBox('The theme was successfully applied')
       else
-        MsgBox('Error setting theme')
+        MsgBox('Error setting theme');
+
+      if Settings.ApplyThemeHelpInsight then
+         ApplyThemeHelpInsight(FCurrentTheme, IDEData);
+    end
     else
     if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
       if ApplyLazarusIDETheme(FCurrentTheme,EditThemeName.Text) then
@@ -551,6 +557,9 @@ begin
             MsgBox('Default theme was applied')
           else
             MsgBox('Error setting theme');
+
+          if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
+             SetHelpInsightDefault(IDEData);
         end;
   except
     on E: Exception do

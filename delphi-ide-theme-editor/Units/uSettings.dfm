@@ -4,8 +4,8 @@ object FrmSettings: TFrmSettings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Settings'
-  ClientHeight = 289
-  ClientWidth = 259
+  ClientHeight = 316
+  ClientWidth = 257
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -30,27 +30,27 @@ object FrmSettings: TFrmSettings
   end
   object Bevel1: TBevel
     Left = 7
-    Top = 241
+    Top = 265
     Width = 497
     Height = 9
     Shape = bsTopLine
   end
   object Label9: TLabel
     Left = 8
-    Top = 70
+    Top = 94
     Width = 45
     Height = 13
     Caption = 'VCL Style'
   end
   object ImageVCLStyle: TImage
     Left = 8
-    Top = 116
+    Top = 140
     Width = 234
     Height = 119
   end
   object BtnSave: TButton
     Left = 8
-    Top = 256
+    Top = 280
     Width = 75
     Height = 25
     Caption = 'Apply'
@@ -75,7 +75,7 @@ object FrmSettings: TFrmSettings
   end
   object BtnCancel: TButton
     Left = 89
-    Top = 256
+    Top = 280
     Width = 75
     Height = 25
     Caption = 'Cancel'
@@ -84,7 +84,7 @@ object FrmSettings: TFrmSettings
   end
   object ComboBoxVCLStyle: TComboBox
     Left = 8
-    Top = 89
+    Top = 113
     Width = 234
     Height = 21
     Style = csDropDownList
@@ -98,5 +98,13 @@ object FrmSettings: TFrmSettings
     Height = 17
     Caption = 'Check for updates in start up.'
     TabOrder = 2
+  end
+  object CheckBoxHelpInsight: TCheckBox
+    Left = 8
+    Top = 71
+    Width = 156
+    Height = 17
+    Caption = 'Apply theme to Help Insight'
+    TabOrder = 6
   end
 end

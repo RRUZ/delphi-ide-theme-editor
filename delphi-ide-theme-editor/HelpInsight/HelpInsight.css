@@ -1,0 +1,105 @@
+BODY
+{
+	font-family:verdana,arial,helvetica;
+	font-size:10pt;
+	margin:1px;
+	background-color:#ffffff;
+	color:#000000;
+        overflow-y:auto;
+        overflow-x:hidden;
+}
+
+H1
+{
+	font-family:verdana,arial,helvetica;
+	font-size:165%;
+	margin-bottom:10px;
+}
+
+H2
+{
+	font-size:125%;
+	margin-top:1em;
+	margin-bottom:0px;
+}
+
+H3
+{
+	font-size:115%;
+	margin-bottom:0px;
+}
+
+
+P
+{
+	margin-left: 20px;
+	margin-top:5px;
+	margin-bottom:5px;}
+
+H4
+{
+	font-family: "ms sans serif";
+	font-size: 10pt;
+	font-weight: bold;
+
+	margin-bottom:0px;
+	margin-top:0px;
+	margin-left: 0px;
+}
+
+B.le
+{
+	font-family: "ms sans serif";
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+DL
+{
+	margin-bottom:0px;
+	margin-top:0px;
+	margin-left: 8px;
+}
+
+DT
+{
+	margin-bottom:0px;
+	margin-top:0px;
+	margin-left: 15px;
+}
+
+DD
+{
+	margin-bottom:0px;
+	margin-top:0px;
+	margin-left: 30px;
+}
+
+.maincaption
+{
+	font-size: 10pt;
+	font-weight: bold;
+
+	margin-top:0px;
+	margin-bottom:1px;
+	margin-left: 5px;
+}
+
+.codelink
+{
+	margin-left: 0px;
+	font-size: 10pt;
+	font-weight: normal;
+
+	margin-bottom:0px;
+	margin-top:0px;
+	margin-left: 0px;
+}
+
+
+.code
+{
+	color: black;
+	font-family: "courier new", courier, monospace;
+	margin-left: 20px
+}
