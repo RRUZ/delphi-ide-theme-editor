@@ -2,6 +2,8 @@ unit ScreenWin;
 
 interface
 
+{$I mxs.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ExtCtrls,
   StdCtrls, PalUtils;
@@ -37,6 +39,11 @@ var
   ScreenForm: TScreenForm;
 
 implementation
+
+{$IFDEF DELPHI_XE3_UP}
+uses
+ System.Types;
+{$ENDIF}
 
 {$R *.dfm}
 {$R PickCursor.res}

@@ -103,6 +103,9 @@ type
 
 implementation
 
+uses
+  System.UITypes;
+
 {$R *.dfm}
 
 

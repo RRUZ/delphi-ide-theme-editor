@@ -54,6 +54,7 @@ uses
   ShellAPI,
   Classes,
   Dialogs,
+  System.UITypes,
   SysUtils;
 
 function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;

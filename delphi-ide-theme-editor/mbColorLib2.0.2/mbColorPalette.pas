@@ -157,6 +157,11 @@ procedure Register;
 
 implementation
 
+{$IFDEF DELPHI_XE3_UP}
+uses
+ System.Types;
+{$ENDIF}
+
 procedure Register;
 begin
   RegisterComponents('mbColor Lib', [TmbColorPalette]);

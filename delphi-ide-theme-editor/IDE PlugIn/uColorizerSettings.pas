@@ -153,6 +153,7 @@ Uses
  System.Types,
  uMisc,
  IOUtils,
+ System.UITypes,
  uStoreColorMap,
  GraphUtil,
  uIDEExpertUtils,

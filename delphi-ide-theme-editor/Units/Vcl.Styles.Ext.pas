@@ -33,10 +33,58 @@ Uses
   Generics.Collections,
   Winapi.Windows,
   Vcl.Graphics,
+  Vcl.Controls,
+  Vcl.ExtCtrls,
   System.Classes;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
+
+type
+  /// <summary> The <c>TVclStylesPreview</c> class, is a control for display  a preview of any Vcl style loaded
+  /// </summary>
+  /// <remarks>
+  /// sample of use
+  /// <code>
+  /// var <para></para>
+  ///   StyleName : string;<para></para>
+  ///   SourceInfo: TSourceInfo;<para></para>
+  ///   LStyle    : TCustomStyleServices;<para></para>
+  ///   FPreview  : TVclStylesPreview;<para></para>
+  /// begin<para></para>
+  ///    FPreview:=TVclStylesPreview.Create(Self);<para></para>
+  ///    FPreview.Parent:=PanelPreview;<para></para>
+  ///    FPreview.BoundsRect := PanelPreview.ClientRect;<para></para>
+  ///    StyleName:='Carbon';<para></para>
+  ///    if (StyleName &lt;&gt;'') and (not SameText(StyleName, 'Windows')) then<para></para>
+  ///    begin<para></para>
+  ///      TStyleManager.StyleNames;//call DiscoverStyleResources<para></para>
+  ///      LStyle:=TStyleManager.Style[StyleName];<para></para>
+  ///      FPreview.Caption:=StyleName;<para></para>
+  ///      FPreview.Style:=LStyle;<para></para>
+  ///      TVclStylesPreviewClass(FPreview).Paint;<para></para>
+  ///    end;<para></para>
+  ///    ....<para></para>
+  /// end;<para></para>
+  /// </code>
+  /// </remarks>
+  TVclStylesPreview = class(TCustomControl)
+  private
+    FStyle: TCustomStyleServices;//TCustomStyle;
+    FIcon: HICON;
+    FCaption: TCaption;
+    FRegion : HRGN;
+    FBitmap: TBitmap;
+  protected
+    procedure Paint; override;
+  public
+    property Icon:HICON read FIcon Write FIcon;
+    property Style:TCustomStyleServices read FStyle Write FStyle;
+    property Caption : TCaption read FCaption write FCaption;
+    property BitMap : TBitmap read FBitmap write FBitmap;
+    constructor Create(AControl: TComponent); override;
+    destructor Destroy; override;
+  end;
 
 
   TStyleServicesHandle = type Pointer;
@@ -46,7 +94,7 @@ type
   end;
 
   {$REGION 'Documentation'}
-  ///	<summary>Heper for the TStyleManager class
+  ///	<summary>Helper class for the TStyleManager
   ///	</summary>
   {$ENDREGION}
   TStyleManagerHelper = Class Helper for TStyleManager
@@ -114,7 +162,7 @@ procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
 procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
 function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
 function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
-procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string;hIcon:HICON=0);
+procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string;hIcon:HICON=0);overload;
 
 
 {$IFDEF USE_VCL_STYLESAPI}
@@ -199,16 +247,24 @@ uses
 {$ENDIF}
  Rtti,
  Vcl.Dialogs,
- Vcl.Controls,
+ System.Types,
  System.Sysutils;
 
 {$IFDEF USE_VCL_STYLESAPI}
-{$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
-{$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleAPI.inc'}
+ {$IFDEF VER230}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleAPI.inc'}
+ {$ENDIF}
+ {$IFDEF VER240}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleUtils.inc'}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleAPI.inc'}
+ {$ENDIF}
 {$ENDIF}
 
 
 type
+  TCustomControlClass = class(TCustomControl);
+
   TStyleHookDictionary = TDictionary<TClass, TStyleHookList>;
   TCustomStyleEngineHelper = Class Helper for TCustomStyleEngine
   public
@@ -412,6 +468,8 @@ begin
 end;
 
 constructor TCustomStyleExt.Create(const Stream: TStream);
+var
+  LSource: TObject;
 begin
   inherited Create;
   FStream:=TMemoryStream.Create;
@@ -419,10 +477,9 @@ begin
   Stream.Seek(0, soBeginning); //index 0 to load
   FStream.CopyFrom(Stream, Stream.Size);
   Stream.Seek(0, soBeginning); //restore index 0 after
-
-
+  LSource:=Source;
   FStream.Seek(0, soBeginning);//index 0 to load
-  TseStyle(Source).LoadFromStream(FStream);
+  TseStyle(LSource).LoadFromStream(FStream);
 end;
 
 
@@ -436,35 +493,56 @@ end;
 
 function TCustomStyleExt.GetBitmapList: TObjectList<TBitmap>;
 var
-  I: Integer;
+  LSource: TObject;
+  I{,Lindex}: Integer;
+  LseBitmap : TseBitmap;
+
 begin
+  LSource:=Source;
   Result:=TObjectList<TBitmap>.Create;
-  for I:=0 to TseStyle(Source).StyleSource.Bitmaps.Count-1 do
+           {
+  Lindex:=0;
+  for I:=0 to Length(TseStyle(LSource).FObjects)-1 do
+  if (TseStyle(LSource).FObjects[i]<>nil) and (TSeStyleObject(TseStyle(LSource).FObjects[i]).Bitmaps<>nil) then
+  begin
+    Result.Add(TBitmap.Create);
+    Result[Lindex].PixelFormat:=pf32bit;
+    LseBitmap:=TSeStyleObject(TseStyle(LSource).FObjects[i]).Bitmaps[0];
+    Result[Lindex].Width := LseBitmap.Width;
+    Result[Lindex].Height:= LseBitmap.Height;
+    LseBitmap.Draw(Result[Lindex].Canvas,0,0);
+    //Result[Lindex].SaveToFile(Format('C:\Users\Dexter\Desktop\Brazil\%d.bmp',[LIndex]));
+    inc(Lindex);
+    break;
+  end;
+         }
+
+  for I:=0 to TseStyle(LSource).StyleSource.Bitmaps.Count-1 do
   begin
     Result.Add(TBitmap.Create);
     Result[I].PixelFormat:=pf32bit;
-    Result[I].Width := TseStyle(Source).StyleSource.Bitmaps[I].Width;
-    Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
-    TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
+    LseBitmap:=TseStyle(LSource).StyleSource.Bitmaps[I];
+    Result[I].Width := LseBitmap.Width;
+    Result[I].Height:= LseBitmap.Height;
+    LseBitmap.Draw(Result[I].Canvas,0,0);
   end;
-
-//  TseStyle(Source).StyleSource.Colors
 end;
 
 procedure TCustomStyleExt.ReplaceBitmap(DestIndex: Integer; Src: TBitmap);
 var
   BF          : TBlendFunction;
   Canvas      : TCanvas;
-  BitMap      : TseBitmap;
+  LBitMap      : TseBitmap;
   DstRect, SrcRect: TRect;
 begin
-  BitMap:=TseStyle(Source).StyleSource.Bitmaps[DestIndex];
+  LBitMap:=TseStyle(Source).StyleSource.Bitmaps[DestIndex];
+
   SrcRect:=Rect(0 ,0, Src.Width, Src.Height);
   DstRect:=Rect(0 ,0, Src.Width, Src.Height);
 
-  Canvas:= BitMap.Canvas;
+  Canvas:= LBitMap.Canvas;
   SetStretchBltMode(Canvas.Handle, COLORONCOLOR);
-  if BitMap.AlphaBlend then
+  if LBitMap.AlphaBlend then
   begin
     BF.BlendOp := AC_SRC_OVER;
     BF.BlendFlags := 0;
@@ -474,7 +552,7 @@ begin
       Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, BF);
   end
   else
-  if BitMap.Transparent then
+  if LBitMap.Transparent then
   begin
     Winapi.Windows.TransparentBlt(Canvas.Handle, DstRect.Left, DstRect.Top, DstRect.Right - DstRect.Left, DstRect.Bottom - DstRect.Top,
       Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, seTransparent);
@@ -657,6 +735,7 @@ end;
 //
 {$ENDIF}
 
+
 procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string;hIcon:HICON=0);
 var
   LDetails        : TThemedElementDetails;
@@ -831,6 +910,212 @@ begin
   Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
   Style.DrawText(Canvas.Handle, LDetails, 'Cancel', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
 end;
+
+
+{ TVclStylePreview }
+
+constructor TVclStylesPreview.Create(AControl: TComponent);
+begin
+  inherited;
+  FRegion := 0;
+  FStyle:=nil;
+  FCaption:='';
+  FIcon:=0;
+  FBitmap:=TBitmap.Create;
+  FBitmap.PixelFormat:=pf32bit;
+end;
+
+destructor TVclStylesPreview.Destroy;
+begin
+  if FRegion <> 0 then
+  begin
+    DeleteObject(FRegion);
+    FRegion := 0;
+  end;
+  FBitmap.Free;
+  inherited;
+end;
+
+procedure TVclStylesPreview.Paint;
+var
+  LDetails        : TThemedElementDetails;
+  CaptionDetails  : TThemedElementDetails;
+  IconDetails     : TThemedElementDetails;
+  IconRect        : TRect;
+  BorderRect      : TRect;
+  CaptionRect     : TRect;
+  ButtonRect      : TRect;
+  TextRect        : TRect;
+  CaptionBitmap   : TBitmap;
+  //LBitmap         : TBitmap;
+  ThemeTextColor  : TColor;
+  ARect           : TRect;
+  //BlendFunction   : TBlendFunction;
+  LRegion         : HRgn;
+
+    function GetBorderSize: TRect;
+    var
+      Size: TSize;
+      Details: TThemedElementDetails;
+      Detail: TThemedWindow;
+    begin
+      Result  := Rect(0, 0, 0, 0);
+      Detail  := twCaptionActive;
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
+      Result.Top := Size.cy;
+      Detail := twFrameLeftActive;
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
+      Result.Left := Size.cx;
+      Detail := twFrameRightActive;
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
+      Result.Right := Size.cx;
+      Detail := twFrameBottomActive;
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
+      Result.Bottom := Size.cy;
+    end;
+
+    function RectVCenter(var R: TRect; Bounds: TRect): TRect;
+    begin
+      OffsetRect(R, -R.Left, -R.Top);
+      OffsetRect(R, 0, (Bounds.Height - R.Height) div 2);
+      OffsetRect(R, Bounds.Left, Bounds.Top);
+      Result := R;
+    end;
+
+begin
+  if FStyle=nil then Exit;
+
+  BorderRect := GetBorderSize;
+  ARect:=ClientRect;
+  CaptionBitmap := TBitmap.Create;
+  CaptionBitmap.SetSize(ARect.Width, BorderRect.Top);
+      {
+  LBitmap:=TBitmap.Create;
+  LBitmap.PixelFormat:=pf32bit;
+  }
+  FBitmap.Width :=ClientRect.Width;
+  FBitmap.Height:=ClientRect.Height;
+
+  //Draw background
+  LDetails.Element := teWindow;
+  LDetails.Part := 0;
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ARect);
+
+  //Draw caption border
+  CaptionRect := Rect(0, 0, CaptionBitmap.Width, CaptionBitmap.Height);
+  LDetails := Style.GetElementDetails(twCaptionActive);
+
+  LRegion := FRegion;
+  try
+    Style.GetElementRegion(LDetails, ARect, FRegion);
+    SetWindowRgn(Handle, FRegion, True);
+  finally
+    if LRegion <> 0 then
+      DeleteObject(LRegion);
+  end;
+
+       {
+  Style.GetElementRegion(LDetails, ARect, Region);
+  SetWindowRgn(Handle, Region, True);
+      }
+
+  Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, CaptionRect);
+  TextRect := CaptionRect;
+  CaptionDetails := LDetails;
+
+  //Draw icon
+  IconDetails := Style.GetElementDetails(twSysButtonNormal);
+  if not Style.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
+    ButtonRect := Rect(0, 0, 0, 0);
+  IconRect := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+  RectVCenter(IconRect, ButtonRect);
+  if ButtonRect.Width > 0 then
+
+   if FIcon<>0 then
+    DrawIconEx(CaptionBitmap.Canvas.Handle, IconRect.Left, IconRect.Top, FIcon, 0, 0, 0, 0, DI_NORMAL);
+
+  Inc(TextRect.Left, ButtonRect.Width + 5);
+
+  //Draw buttons
+
+  //Close button
+  LDetails := Style.GetElementDetails(twCloseButtonNormal);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+   Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  //Maximize button
+  LDetails := Style.GetElementDetails(twMaxButtonNormal);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  //Minimize button
+  LDetails := Style.GetElementDetails(twMinButtonNormal);
+
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  //Help button
+  LDetails := Style.GetElementDetails(twHelpButtonNormal);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  if ButtonRect.Left > 0 then
+    TextRect.Right := ButtonRect.Left;
+
+  //Draw text
+  Style.DrawText(CaptionBitmap.Canvas.Handle, CaptionDetails, FCaption, TextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
+
+  //Draw caption
+  FBitmap.Canvas.Draw(0, 0, CaptionBitmap);
+
+
+  CaptionBitmap.Free;
+
+  //Draw left border
+  CaptionRect := Rect(0, BorderRect.Top, BorderRect.Left, ARect.Height - BorderRect.Bottom);
+  LDetails := Style.GetElementDetails(twFrameLeftActive);
+  if CaptionRect.Bottom - CaptionRect.Top > 0 then
+    Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
+
+  //Draw right border
+  CaptionRect := Rect(ARect.Width - BorderRect.Right, BorderRect.Top, ARect.Width, ARect.Height - BorderRect.Bottom);
+  LDetails := Style.GetElementDetails(twFrameRightActive);
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
+
+  //Draw Bottom border
+  CaptionRect := Rect(0, ARect.Height - BorderRect.Bottom, ARect.Width, ARect.Height);
+  LDetails := Style.GetElementDetails(twFrameBottomActive);
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
+
+
+  //Draw Ok button
+  LDetails := Style.GetElementDetails(tbPushButtonNormal);
+  ButtonRect.Left:=30;
+  ButtonRect.Top:=ARect.Height-45;
+  ButtonRect.Width:=75;
+  ButtonRect.Height:=25;
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'OK', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+
+  //Draw Cancel button
+  ButtonRect.Left:=110;
+  ButtonRect.Top:=ARect.Height-45;
+  ButtonRect.Width:=75;
+  ButtonRect.Height:=25;
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Cancel', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+
+  Canvas.Draw(0,0,FBitmap);
+end;
+
 
 
 initialization

@@ -145,6 +145,12 @@ type
 
 implementation
 
+{$IFDEF DELPHI_XE3_UP}
+uses
+ System.Types;
+{$ENDIF}
+
+
 {TmbTrackBarPicker}
 
 constructor TmbTrackBarPicker.Create(AOwner: TComponent);

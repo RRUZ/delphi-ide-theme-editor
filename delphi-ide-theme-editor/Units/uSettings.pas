@@ -83,6 +83,8 @@ uses
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Styles.Ext,
+  System.Types,
+  System.UITypes,
   IOUtils,
   IniFiles;
 
