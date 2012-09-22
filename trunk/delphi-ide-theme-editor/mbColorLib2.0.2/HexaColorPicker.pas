@@ -180,7 +180,13 @@ procedure Register;
 
 implementation
 
-uses PalUtils;
+uses
+ PalUtils
+{$IFDEF DELPHI_XE3_UP}
+ ,System.Types
+{$ENDIF}
+;
+
 
 procedure Register;
 begin

@@ -74,6 +74,7 @@ implementation
 
 
 uses
+  System.UITypes,
   ShellAPI,
   uMisc,
   ComObj,

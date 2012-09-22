@@ -70,7 +70,7 @@ uses
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
-  Vcl.PlatformDefaultStyleActnCtrls;
+  Vcl.PlatformDefaultStyleActnCtrls, System.Actions;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -236,6 +236,8 @@ uses
   Vcl.FileCtrl,
   {$WARN UNIT_PLATFORM ON}
   Diagnostics,
+  System.UITypes,
+  System.Types,
   ShellApi,
   IOUtils,
   StrUtils,

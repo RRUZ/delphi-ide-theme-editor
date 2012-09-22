@@ -2,6 +2,8 @@ unit HRingPicker;
 
 interface
 
+{$I mxs.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Controls, Graphics, Math, RGBHSVUtils,
   Forms, {IFDEF DELPHI_7_UP Themes, $ENDIF} HTMLColors, mbColorPickerControl,
@@ -62,6 +64,11 @@ type
 procedure Register;
 
 implementation
+
+{$IFDEF DELPHI_XE3_UP}
+uses
+ System.Types;
+{$ENDIF}
 
 procedure Register;
 begin
