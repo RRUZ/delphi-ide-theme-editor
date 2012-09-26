@@ -14,7 +14,7 @@
 { The Original Code is uRttiHelper.pas.                                                            }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2012 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -200,6 +200,7 @@ var
   Props        : TStringList;
   i            : integer;
 begin
+  RttiProperty:=nil;
   Props:=TStringList.Create;
   try
     Props.Delimiter:='.';
@@ -233,6 +234,7 @@ var
   Props            : TStringList;
   i                : integer;
 begin
+  RttiProperty:=nil;
   Props:=TStringList.Create;
   try
     Props.Delimiter:='.';
@@ -262,7 +264,7 @@ end;
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 var
   RttiProperty     : PPropInfo;
-  Obj              : TObject;
+  LObject          : TObject;
   MainProp         : String;
   ChildProp        : String;
   vType            : Integer;
@@ -308,22 +310,22 @@ var
 begin
   if Pos('.',PropName)=0 then
   begin
-    RttiProperty := GetPropInfo(AComponent.ClassInfo, PropName);
-    SetValue(AComponent);
+    RttiProperty := GetPropInfo(Obj.ClassInfo, PropName);
+    SetValue(Obj);
   end
   else
   begin
     MainProp     := Copy(PropName,1,Pos('.',PropName)-1);
     ChildProp    := Copy(PropName,Pos('.',PropName)+1);
-    Obj:=AComponent;
-    RttiProperty := GetPropInfo(Obj.ClassInfo, MainProp);
+    LObject      := Obj;
+    RttiProperty := GetPropInfo(LObject.ClassInfo, MainProp);
     if Assigned(RttiProperty) and (RttiProperty.PropType^.Kind in [tkClass]) then
     begin
-       Obj:=TObject(GetOrdProp(Obj, RttiProperty));
-       if Assigned(Obj) then
+       LObject:=TObject(GetOrdProp(LObject, RttiProperty));
+       if Assigned(LObject) then
        begin
-         RttiProperty := GetPropInfo(Obj, ChildProp);
-         SetValue(Obj);
+         RttiProperty := GetPropInfo(LObject, ChildProp);
+         SetValue(LObject);
        end;
     end;
   end;
