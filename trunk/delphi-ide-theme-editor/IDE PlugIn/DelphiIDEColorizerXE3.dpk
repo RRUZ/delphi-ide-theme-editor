@@ -1,0 +1,50 @@
+// JCL_DEBUG_EXPERT_INSERTJDBG OFF
+package DelphiIDEColorizerXE3;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS OFF}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO OFF}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE RELEASE}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'Delphi IDE Colorizer'}
+{$DESIGNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  DesignIDE,
+  rtl,
+  vcl,
+  vclimg;
+
+contains
+  Main in 'Main.pas',
+  uColorizerUtils in 'uColorizerUtils.pas',
+  uClrSettings in 'uClrSettings.pas',
+  uHookForms in 'uHookForms.pas',
+  uHookLib in 'uHookLib.pas',
+  uVclControlsHooks in 'uVclControlsHooks.pas',
+  uStoreColorMap in 'uStoreColorMap.pas',
+  uRttiHelper in 'uRttiHelper.pas',
+  Vcl.Styles.Ext in '..\Units\Vcl.Styles.Ext.pas';
+
+end.

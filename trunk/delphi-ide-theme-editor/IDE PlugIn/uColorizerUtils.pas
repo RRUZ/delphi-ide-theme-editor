@@ -14,7 +14,7 @@
 { The Original Code is uColorizerUtils.pas.                                                        }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2012 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -820,7 +820,7 @@ initialization
   GlobalSettings:=nil;
   HookedWindows:=TStringList.Create;
   //ShowMessage(ParamStr(0));
-  //ShowMessage(GetBplLocation);
+  //ShowMessage(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
 {$IF CompilerVersion > 20}
   ctx:=TRttiContext.Create;
