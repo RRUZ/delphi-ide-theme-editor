@@ -347,7 +347,14 @@ begin
   FTimerRefresher.OnTimer :=OnRefreher;
   FTimerRefresher.Interval:=1500;
   FTimerRefresher.Enabled:=True;
+
+   {
+  use Alpha pro
+  Form1 := TForm1.Create(Application);
+  Form1.Show;
+  }
 end;
+
 
 
 procedure TIDEWizard.AddMenuItems;
@@ -394,6 +401,8 @@ begin
     ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
   end;
                }
+
+
 end;
 
 procedure TIDEWizard.AfterSave;
