@@ -51,7 +51,9 @@ type
 
 implementation
 
+
 uses
+  Dialogs,
   SysUtils,
   IniFiles;
 
@@ -59,6 +61,8 @@ procedure ReadSettings(Settings: TSettings;Const Path:String);
 var
   iniFile: TIniFile;
 begin
+  //ShowMessage(Path);
+
   iniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
     Settings.EnableDWMColorization   := iniFile.ReadBool('Global', 'EnableDWMColorization', True);

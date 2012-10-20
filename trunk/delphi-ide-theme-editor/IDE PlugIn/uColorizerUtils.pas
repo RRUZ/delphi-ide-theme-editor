@@ -31,6 +31,7 @@ uses
  XPMan,
  ActnMan,
  ActnColorMaps,
+ Windows,
  Graphics,
  uClrSettings,
  Classes;
@@ -83,14 +84,29 @@ uses
  CategoryButtons,
  XPStyleActnCtrls,
  ActnCtrls,
+ ActnPopup,
  ActnMenus,
  uStoreColorMap,
  Dialogs,
- Windows,
  uRttiHelper;
 
 
+type
+  TPopupActionBarHelper=class helper for TPopupActionBar
+  private
+    function GetActionManager :TCustomActionManager;
+  public
+    property  ActionManager: TCustomActionManager read  GetActionManager;
+  end;
 
+  THelperClass=class
+  public
+    procedure PopupActionBar1GetControlClass(Sender: TCustomActionBar;
+      AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
+  end;
+
+var
+  HelperClass   : THelperClass;
 {$IFDEF DEBUG_MODE}
   lcomp         : TStringList;
 {$ENDIF}
@@ -160,6 +176,13 @@ begin
   end;
 end;
 {$ENDIF}
+
+
+function TPopupActionBarHelper.GetActionManager :TCustomActionManager;
+begin
+ Result:=Self.FActionManager;
+end;
+
 
 function  GetBplLocation : string;
 begin
@@ -351,6 +374,7 @@ var
 {$IF CompilerVersion > 20}
   f     : TRttiField;
 {$IFEND}
+Glyph: TBitmap;
 begin
 
  if not Assigned(AComponent) then  exit;
@@ -423,10 +447,37 @@ begin
         end;
     end   }
     else
+    if AComponent is TPopupActionBar then
+    begin
+      if not Assigned(TPopupActionBar(AComponent).OnGetControlClass) then
+        TPopupActionBar(AComponent).OnGetControlClass:=HelperClass.PopupActionBar1GetControlClass;
+
+
+
+       // ShowMessage('hi');
+
+
+    end
+    else
     if AComponent.ClassName='TEdit' then
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+    end
+    else
+    if AComponent.ClassName='TPropCheckBox' then
+    begin
+      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+    end
+    else
+    if AComponent.ClassName='TDesktopComboBox' then
+    begin
+      SetWindowTheme(TWinControl(AComponent).Handle,'','');
+      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'BevelKind', Integer(bkFlat));
+      SetRttiPropertyValue(AComponent,'BevelInner', Integer(bvNone));
     end
     else
     if AComponent.ClassName='TComboBox' then
@@ -445,8 +496,9 @@ begin
     if AComponent.ClassName='TPanel' then
     with TPanel(AComponent) do
     begin
-      {
+
       Color      := AColorMap.Color;
+      {
       Ctl3D      := False;
       BevelInner := bvNone;
       BevelOuter := bvNone;
@@ -577,12 +629,22 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
     end
     else
+    if AComponent.ClassName='TGradientButton' then
+    begin
+      //Glyph:= TBitmap(GetRttiPropertyValue(AComponent,'Glyph').AsObject);
+      //Glyph.SaveToFile('C:\Users\Dexter\Desktop\CMMS\Test.bmp');
+
+       SetRttiPropertyValue(AComponent,'Color',AColorMap.Color);
+       ShowMessage('Hi');
+    end
+    else
+
     if AComponent.ClassName='TScrollerButton' then
     begin
 
     end
     else
-    if AComponent.ClassName='TClosableTabScroller' then //experimental
+    if AComponent.ClassName='TClosableTabScroller' then
     begin
 
        {$IF CompilerVersion >= 23}
@@ -610,9 +672,15 @@ begin
               }
        {$IFEND}
 
-       SetRttiPropertyValue(AComponent,'LeftButton.BackgroundColor',AColorMap.Color);
-       SetRttiPropertyValue(AComponent,'LeftButton.Transparent',False);
-       SetRttiPropertyValue(AComponent,'LeftButton.Flat',True);
+       SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor',AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'CloseButton.Transparent',False);
+       //SetRttiPropertyValue(AComponent,'CloseButton.Flat',True);
+
+       SetRttiPropertyValue(AComponent,'DropDownButton.BackgroundColor',AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'DropDownButton.Transparent',False);
+       //SetRttiPropertyValue(AComponent,'DropDownButton.Flat',True);
+
+       SetRttiPropertyValue(AComponent,'Brush.Color',AColorMap.Color);
 
                    {
              BackgroundColor
@@ -755,6 +823,9 @@ begin
          SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd',AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
 
+         SetRttiPropertyValue(AComponent,'Brush.Color',AColorMap.Color);
+
+         SetRttiPropertyValue(AComponent,'ParentBackground',False);
        {$IF CompilerVersion >= 23}
         {
         if GlobalSettings.UseVCLStyles then
@@ -777,8 +848,12 @@ begin
     if AComponent is TStatusBar then
     with TStatusBar(AComponent) do
     begin
-       //SetWindowTheme(TStatusBar(AComponent).Handle,'','');
+       //theme is removed to allow paint TStatusBar
+       SetWindowTheme(TStatusBar(AComponent).Handle,'','');
+       //SizeGrip is removed because can't be painted
+       SizeGrip:=False;
        Color := AColorMap.Color;
+       //remove the bevels
        for i := 0 to TStatusBar(AComponent).Panels.Count-1 do
         TStatusBar(AComponent).Panels[i].Bevel:=pbNone;
 
@@ -811,7 +886,19 @@ begin
     end;
 end;
 
+{ THelperClass }
+
+procedure THelperClass.PopupActionBar1GetControlClass(Sender: TCustomActionBar;
+  AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
+begin
+//http://qc.embarcadero.com/wc/qcmain.aspx?d=67021
+  if Assigned( TCustomActionPopupMenuEx(Sender).PopupMenu) then
+    PopupActionBar1.PopupMenu.ColorMap:= TwilightColorMap1;
+
+end;
+
 initialization
+  HelperClass:=THelperClass.Create;
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
@@ -856,6 +943,7 @@ finalization
   lpignored.Free;
   lDumped.Free;
 {$ENDIF}
+  HelperClass.Free;
 
 
 end.
