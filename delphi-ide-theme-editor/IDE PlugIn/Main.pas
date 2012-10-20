@@ -24,13 +24,16 @@
 //TODO
 
 {
+  * gutter code editor
+  * popup menu code editor
+  * panel separation (space)
+  * TIDEGradientTabSet background
+
 
   * check for color key in OTA ;) done :(
-  * options-enviroment variables crash    -> TDefaultEnvironmentDialog  GExperts????
-  * tidegradeint buttons , not paint correctly
-  * border of panel in  options window is not painted corectly
-  * popup action bar, set colormap
-  * gutter
+  * options-enviroment variables crash    -> TDefaultEnvironmentDialog  GExperts????    done:)
+  * tidegradeint buttons , not paint correctly  done:)
+  * border of panel in options window is not painted corectly
 }
 
 //options
@@ -348,11 +351,11 @@ begin
   FTimerRefresher.Interval:=1500;
   FTimerRefresher.Enabled:=True;
 
+
    {
-  use Alpha pro
   Form1 := TForm1.Create(Application);
   Form1.Show;
-  }
+   }
 end;
 
 
