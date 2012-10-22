@@ -38,6 +38,7 @@ uses
 function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
 function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
 {$ELSE}
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 {$IFEND}
@@ -227,6 +228,46 @@ begin
   end;
 end;
 
+procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
+var
+  RttiField : TRttiField;
+  RttiProperty  : TRttiProperty;
+  Instance  : Pointer;
+  Fields    : TStringList;
+  i         : integer;
+begin
+  RttiField:=nil;
+  RttiProperty:=nil;
+  Fields:=TStringList.Create;
+  try
+    Fields.Delimiter:='.';
+    Fields.DelimitedText:=FieldName;
+    Instance:=Obj;
+
+    if Fields.Count>0 then
+     RttiField := ctx.GetType(Obj.ClassInfo).GetField(Fields[0]);
+
+    for i:=1 to Fields.Count-1 do
+     begin
+        if Assigned(RttiField) and (RttiField.FieldType.TypeKind=tkClass) then
+         Instance          := RttiField.GetValue(Instance).AsObject
+        else
+        raise Exception.Create(Format('The field %s is not a class',[Fields[i]]));
+
+        //RttiField := ctx.GetType(RttiField.FieldType.Handle).GetField(Fields[i]);
+        RttiProperty:= ctx.GetType(RttiField.FieldType.Handle).GetProperty(Fields[i]);
+     end;
+
+    if Assigned(RttiProperty) then
+       RttiProperty.SetValue(Instance, AValue)
+    else
+    if Assigned(RttiField) then
+      RttiField.SetValue(Instance, AValue);
+  finally
+    Fields.Free;
+  end;
+end;
+
 function  GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
 var
   RttiProperty     : TRttiProperty;
@@ -268,10 +309,6 @@ var
   MainProp         : String;
   ChildProp        : String;
   vType            : Integer;
-  //PropInfos        : PPropList;
-  //Count,i          : Integer;
-  //Ok               : Boolean;
-
 
   Procedure SetValue(Instance : TObject);
   begin
