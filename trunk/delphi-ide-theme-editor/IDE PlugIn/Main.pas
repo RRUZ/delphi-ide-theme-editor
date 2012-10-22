@@ -25,7 +25,7 @@
 
 {
   * gutter code editor
-  * popup menu code editor
+  * popup menu code editor   done :)
   * panel separation (space)
   * TIDEGradientTabSet background
 
@@ -94,11 +94,15 @@ uses
  SysUtils,
  Forms,
  Dialogs,
- XPMan,
+ //XPMan,
  Menus,
  ComObj,
  ExtCtrls,
- uClrSettings;
+ uClrSettings,
+ {$IF CompilerVersion>=23} //XE2
+ PlatformDefaultStyleActnCtrls,
+ {$IFEND}
+ ColorXPStyleActnCtrls;
 
 
 type
@@ -208,7 +212,7 @@ const
   'Delphi IDE Colorizer'+#13#10+
   ''+#13#10+
   'Version %s'+#13#10+
-  'Copyright: 2011 Rodrigo Ruz V.'+#13#10+
+  'Copyright: 2011-2012 Rodrigo Ruz V.'+#13#10+
   'All rights reserved.'+#13#10+
   ''+#13#10+
   'This is a freeware, you can use it freely without any fee.'+#13#10+
@@ -265,10 +269,10 @@ begin
        lcomp:= TStringList.Create;
        {$ENDIF}
         try
-          DelphiTheme := TXPManifest.Create(nil);
+          //DelphiTheme := TXPManifest.Create(nil);
           //AColorMap:=TTwilightColorMap.Create(nil);  usar para ver color de fuentes
           //AColorMap:=TStandardColorMap.Create(nil);
-          AColorMap:=TXPColorMap.Create(nil);
+          AColorMap:=TColorXPColorMap.Create(nil);
           GlobalColorMap:=AColorMap;
           AColorMap.FontColor:=clBlack;
           //GenerateColorMap(AColorMap,clWebKhaki);
@@ -277,6 +281,7 @@ begin
           //AColorMap.Color:=clDkGray;
           //AColorMap.Color           :=clWebDarkSeaGreen;
           //AColorMap.Color           :=clWebSteelBlue;
+
           LoadSettings(AColorMap, Settings);
           GlobalSettings:=Settings;
           {$IF CompilerVersion >= 23}
@@ -293,7 +298,7 @@ begin
               MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
           end;
           {$IFEND}
-          RefreshIDETheme(AColorMap);
+          RefreshIDETheme(AColorMap, ColorXPStyle);
         finally
           {$IFDEF DEBUG_MODE}
            //lcomp.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\pkgDelphiWithTheme\Components.txt');
@@ -306,8 +311,8 @@ end;
 
 procedure TIDEWizard.FinalizeColorizer;
 begin
-  if Assigned(DelphiTheme) then
-    DelphiTheme.Free;
+  //if Assigned(DelphiTheme) then
+  //  DelphiTheme.Free;
   if Assigned(AColorMap) then
     AColorMap.Free;
 end;
@@ -477,7 +482,7 @@ procedure TIDEWizard.OnRefreher(Sender: TObject);
 begin
  if Assigned(AColorMap) and Assigned(Settings) and Settings.Enabled then
  begin
-  RefreshIDETheme(AColorMap);
+  RefreshIDETheme(AColorMap, ColorXPStyle);
   FTimerRefresher.Enabled:=False;
   //ShowMessage('Timer');
  end;
@@ -531,6 +536,17 @@ begin
   Result := 'Foo Dump';
 end;
 
+  {
+var
+ NativeColorMap : TCustomActionBarColorMap;
+
+initialization
+
+finalization
+  NativeColorMap:=TStandardColorMap.Create(nil);
+  RefreshIDETheme(NativeColorMap, PlatformDefaultStyle);
+
+  }
 end.
 
 

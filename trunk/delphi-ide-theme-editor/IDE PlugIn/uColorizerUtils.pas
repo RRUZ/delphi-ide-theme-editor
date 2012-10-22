@@ -36,9 +36,9 @@ uses
  uClrSettings,
  Classes;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap);
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle);
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;Settings : TSettings);
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AComponent: TComponent);
+procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IF CompilerVersion >= 23}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
@@ -48,7 +48,7 @@ function  GetBplLocation : string;
 
 
 var
-  DelphiTheme   : TXPManifest;
+  //DelphiTheme   : TXPManifest;
   GlobalColorMap: TXPColorMap;
   HookedWindows : TStringList;
   GlobalSettings: TSettings;
@@ -59,6 +59,7 @@ implementation
 {.$DEFINE DEBUG_PROFILER}
 
 uses
+ //System.Generics.Collections,
  {$IF CompilerVersion >= 23}
  Vcl.Styles.Ext,
  {$IFEND}
@@ -82,7 +83,8 @@ uses
  GraphUtil,
  UxTheme,
  CategoryButtons,
- XPStyleActnCtrls,
+ //XPStyleActnCtrls,
+ ColorXPStyleActnCtrls,
  ActnCtrls,
  ActnPopup,
  ActnMenus,
@@ -90,7 +92,7 @@ uses
  Dialogs,
  uRttiHelper;
 
-
+             {
 type
   TPopupActionBarHelper=class helper for TPopupActionBar
   private
@@ -99,17 +101,24 @@ type
     property  ActionManager: TCustomActionManager read  GetActionManager;
   end;
 
+          
   THelperClass=class
+  private
+    FPopupMenu: TCustomActionPopupMenuEx;
+    FColorMap: TCustomActionBarColorMap;
   public
     procedure PopupActionBar1GetControlClass(Sender: TCustomActionBar;
       AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
+    procedure PopupActionBar1Popup(Sender: TObject);
+    property PopupMenu: TCustomActionPopupMenuEx read FPopupMenu write FPopupMenu;
+    property ColorMap:TCustomActionBarColorMap read FColorMap write FColorMap;
   end;
-
-var
-  HelperClass   : THelperClass;
+       }
 {$IFDEF DEBUG_MODE}
+var
   lcomp         : TStringList;
 {$ENDIF}
+  {LObjectList   : TObjectList<THelperClass>;  }
 
 {$IFDEF DEBUG_PROFILER}
 var
@@ -127,10 +136,7 @@ var
   //Drawer        : TComponentDrawer;
 
 
-
-
 {$IFDEF DEBUG_PROFILER}
-
 procedure DumpType(const QualifiedName:string);
 var
   l2 : TStrings;
@@ -143,7 +149,6 @@ begin
    l2.Free;
   end;
 end;
-
 
 procedure DumpAllTypes;
 var
@@ -177,12 +182,12 @@ begin
 end;
 {$ENDIF}
 
-
+             {
 function TPopupActionBarHelper.GetActionManager :TCustomActionManager;
 begin
  Result:=Self.FActionManager;
 end;
-
+              }
 
 function  GetBplLocation : string;
 begin
@@ -192,7 +197,7 @@ begin
 end;
 
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap);
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle);
 var
   index     : Integer;
 begin
@@ -204,7 +209,7 @@ begin
   if HookedWindows.IndexOf(Screen.Forms[Index].ClassName)<>-1 then
   begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
-     ProcessComponent(AColorMap,Screen.Forms[Index]);
+     ProcessComponent(AColorMap, AStyle, Screen.Forms[Index]);
   end
   {$IF CompilerVersion >= 23}
   else
@@ -218,6 +223,7 @@ procedure LoadSettings(AColorMap:TCustomActionBarColorMap;Settings : TSettings);
 Var
  ThemeFileName : string;
 begin
+  if Settings=nil then exit;
   ReadSettings(Settings, ExtractFilePath(GetBplLocation()));
   ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
   if FileExists(ThemeFileName) then
@@ -368,13 +374,12 @@ begin
     end
 end;
 
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AComponent: TComponent);
+procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 var
   I     : Integer;
 {$IF CompilerVersion > 20}
   f     : TRttiField;
 {$IFEND}
-Glyph: TBitmap;
 begin
 
  if not Assigned(AComponent) then  exit;
@@ -449,14 +454,16 @@ begin
     else
     if AComponent is TPopupActionBar then
     begin
+      {
       if not Assigned(TPopupActionBar(AComponent).OnGetControlClass) then
-        TPopupActionBar(AComponent).OnGetControlClass:=HelperClass.PopupActionBar1GetControlClass;
-
-
-
-       // ShowMessage('hi');
-
-
+      begin
+        LObjectList.Add(THelperClass.Create);
+        LObjectList[LObjectList.Count-1].PopupMenu:=TPopupActionBar(AComponent).PopupMenu;
+        LObjectList[LObjectList.Count-1].ColorMap:=AColorMap;
+        TPopupActionBar(AComponent).OnGetControlClass:=LObjectList[LObjectList.Count-1].PopupActionBar1GetControlClass;
+        TPopupActionBar(AComponent).OnPopup          :=LObjectList[LObjectList.Count-1].PopupActionBar1Popup;
+      end;
+      }
     end
     else
     if AComponent.ClassName='TEdit' then
@@ -635,7 +642,7 @@ begin
       //Glyph.SaveToFile('C:\Users\Dexter\Desktop\CMMS\Test.bmp');
 
        SetRttiPropertyValue(AComponent,'Color',AColorMap.Color);
-       ShowMessage('Hi');
+       //ShowMessage('Hi');
     end
     else
 
@@ -789,7 +796,7 @@ begin
     if AComponent is TActionManager then
     with TActionManager(AComponent) do
     begin
-      Style := XPStyle;
+      Style := AStyle;//XPStyle;
     end
     else
     if AComponent.ClassName = 'TTabSet' then
@@ -882,23 +889,33 @@ begin
      {$IFDEF DEBUG_MODE}
      //lcomp.Add(Format('     %s : %s',[AComponent.Components[I].Name,AComponent.Components[I].ClassName]));
      {$ENDIF}
-     ProcessComponent(AColorMap, AComponent.Components[I]);
+     ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[I]);
     end;
 end;
 
-{ THelperClass }
-
+{
 procedure THelperClass.PopupActionBar1GetControlClass(Sender: TCustomActionBar;
   AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
 begin
-//http://qc.embarcadero.com/wc/qcmain.aspx?d=67021
-  if Assigned( TCustomActionPopupMenuEx(Sender).PopupMenu) then
-    PopupActionBar1.PopupMenu.ColorMap:= TwilightColorMap1;
+  if Assigned(PopupMenu) then
+  begin
+    PopupMenu.ColorMap:= ColorMap;
+    OutputDebugString('PopupActionBar1GetControlClass');
+  end;
 
 end;
 
+procedure THelperClass.PopupActionBar1Popup(Sender: TObject);
+begin
+  if Assigned(PopupMenu) then
+  begin
+    PopupMenu.ColorMap:= ColorMap;
+    OutputDebugString('PopupActionBar1Popup');
+  end;
+end;
+   }
 initialization
-  HelperClass:=THelperClass.Create;
+  //LObjectList:=TObjectList<THelperClass>.Create;
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
@@ -943,7 +960,7 @@ finalization
   lpignored.Free;
   lDumped.Free;
 {$ENDIF}
-  HelperClass.Free;
+  //LObjectList.Free;
 
 
 end.

@@ -33,6 +33,7 @@ uses
  Windows,
  SysUtils,
  Dialogs,
+ ColorXPStyleActnCtrls,
  uColorizerUtils;
 
 var
@@ -68,7 +69,7 @@ begin
                if (HookedWindows.IndexOf(ClassNameBuffer)<>-1) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
                   //ShowMessage('Hooked');
-                  uColorizerUtils.ProcessComponent(uColorizerUtils.GlobalColorMap,Screen.Forms[i]);
+                  uColorizerUtils.ProcessComponent(uColorizerUtils.GlobalColorMap, ColorXPStyle,Screen.Forms[i]);
                   //Screen.Forms[i].Color:=Main.AColorMap.Color;
                   Break;
                end
