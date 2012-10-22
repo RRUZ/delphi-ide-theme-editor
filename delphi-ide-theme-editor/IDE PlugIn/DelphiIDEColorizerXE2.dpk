@@ -45,6 +45,7 @@ contains
   uVclControlsHooks in 'uVclControlsHooks.pas',
   uStoreColorMap in 'uStoreColorMap.pas',
   uRttiHelper in 'uRttiHelper.pas',
-  Vcl.Styles.Ext in '..\Units\Vcl.Styles.Ext.pas';
+  Vcl.Styles.Ext in '..\Units\Vcl.Styles.Ext.pas',
+  ColorXPStyleActnCtrls in 'ColorXPStyleActnCtrls.pas';
 
 end.
