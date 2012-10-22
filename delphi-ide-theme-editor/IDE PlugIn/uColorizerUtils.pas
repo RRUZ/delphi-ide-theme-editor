@@ -28,7 +28,6 @@ uses
  VCL.Themes,
  VCL.Styles,
  {$IFEND}
- XPMan,
  ActnMan,
  ActnColorMaps,
  Windows,
@@ -48,7 +47,6 @@ function  GetBplLocation : string;
 
 
 var
-  //DelphiTheme   : TXPManifest;
   GlobalColorMap: TXPColorMap;
   HookedWindows : TStringList;
   GlobalSettings: TSettings;
@@ -92,33 +90,12 @@ uses
  Dialogs,
  uRttiHelper;
 
-             {
-type
-  TPopupActionBarHelper=class helper for TPopupActionBar
-  private
-    function GetActionManager :TCustomActionManager;
-  public
-    property  ActionManager: TCustomActionManager read  GetActionManager;
-  end;
 
-          
-  THelperClass=class
-  private
-    FPopupMenu: TCustomActionPopupMenuEx;
-    FColorMap: TCustomActionBarColorMap;
-  public
-    procedure PopupActionBar1GetControlClass(Sender: TCustomActionBar;
-      AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
-    procedure PopupActionBar1Popup(Sender: TObject);
-    property PopupMenu: TCustomActionPopupMenuEx read FPopupMenu write FPopupMenu;
-    property ColorMap:TCustomActionBarColorMap read FColorMap write FColorMap;
-  end;
-       }
 {$IFDEF DEBUG_MODE}
 var
   lcomp         : TStringList;
 {$ENDIF}
-  {LObjectList   : TObjectList<THelperClass>;  }
+
 
 {$IFDEF DEBUG_PROFILER}
 var
@@ -130,10 +107,7 @@ var
 {$IF CompilerVersion > 20}
 var
   ctx           : TRttiContext;
-  //RttiType      : TRttiType;
-
 {$IFEND}
-  //Drawer        : TComponentDrawer;
 
 
 {$IFDEF DEBUG_PROFILER}
@@ -167,7 +141,6 @@ begin
 end;
 
 
-
 procedure DumpComponent(AComponent: TComponent);
 var
 l2 : TStrings;
@@ -182,12 +155,6 @@ begin
 end;
 {$ENDIF}
 
-             {
-function TPopupActionBarHelper.GetActionManager :TCustomActionManager;
-begin
- Result:=Self.FActionManager;
-end;
-              }
 
 function  GetBplLocation : string;
 begin
@@ -195,7 +162,6 @@ begin
   GetModuleFileName(HInstance,PChar(Result),MAX_PATH);
   Result:=PChar(Result);
 end;
-
 
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle);
 var
@@ -377,9 +343,6 @@ end;
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 var
   I     : Integer;
-{$IF CompilerVersion > 20}
-  f     : TRttiField;
-{$IFEND}
 begin
 
  if not Assigned(AComponent) then  exit;
@@ -438,19 +401,7 @@ begin
     if AComponent.ClassName='TPropertySheetControl' then
     begin
 
-    end  {
-    else
-    if AComponent.ClassName='TEditWindow' then
-    begin
-       for i:=0 to AComponent.ComponentCount-1 do
-        if AComponent.Components[i] is TPanel then
-        begin
-         TPanel(AComponent.Components[i]).ParentBackground:=False;
-         TPanel(AComponent.Components[i]).ParentColor:=False;
-         TPanel(AComponent.Components[i]).Color:=AColorMap.Color;
-         //ShowMessage(AComponent.Components[i].Name);
-        end;
-    end   }
+    end
     else
     if AComponent is TPopupActionBar then
     begin
@@ -503,7 +454,6 @@ begin
     if AComponent.ClassName='TPanel' then
     with TPanel(AComponent) do
     begin
-
       Color      := AColorMap.Color;
       {
       Ctl3D      := False;
@@ -645,7 +595,6 @@ begin
        //ShowMessage('Hi');
     end
     else
-
     if AComponent.ClassName='TScrollerButton' then
     begin
 
@@ -653,31 +602,6 @@ begin
     else
     if AComponent.ClassName='TClosableTabScroller' then
     begin
-
-       {$IF CompilerVersion >= 23}
-       {
-        if GlobalSettings.UseVCLStyles then
-        begin
-          if not IsStyleHookRegistered(AComponent.ClassType, TTabControlStyleHook) then
-           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTabControlStyleHook);
-        end;
-       }
-       {$IFEND}
-
-        {
-          p := ctx.GetType(AComponent.ClassInfo).GetProperty('Handle');
-          if p<>nil then
-          SetWindowTheme(p.GetValue(AComponent).AsInteger,'','');
-        }
-        {$IF CompilerVersion > 20}
-        f := ctx.GetType(AComponent.ClassInfo).GetField('FColor');
-        if f<>nil then
-          f.SetValue(AComponent,AColorMap.MenuColor);
-              {
-        m:=ctx.GetType(AComponent.ClassInfo).GetMethod('Update');
-        m.Invoke(p.GetValue(AComponent).AsObject,[]);
-              }
-       {$IFEND}
 
        SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor',AColorMap.MenuColor);
        SetRttiPropertyValue(AComponent,'CloseButton.Transparent',False);
@@ -688,11 +612,6 @@ begin
        //SetRttiPropertyValue(AComponent,'DropDownButton.Flat',True);
 
        SetRttiPropertyValue(AComponent,'Brush.Color',AColorMap.Color);
-
-                   {
-             BackgroundColor
-             RightButton
-                   }
     end
     else
     if AComponent.ClassName='TTabScroller' then
@@ -709,45 +628,14 @@ begin
            TStyleEngine.RegisterStyleHook(AComponent.ClassType, TMemoStyleHook);
         end;
        {$IFEND}
-        {
-        l2 := TStringList.Create;
-        try
-         l2.Text:=DumpTypeDefinition(AComponent.ClassInfo);
-        finally
-         l2.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\pkgDelphiWithTheme\TEditControl.txt');
-         l2.Free;
-        end;
-        }
-        {
-          p := ctx.GetType(AComponent.ClassInfo).GetProperty('Handle');
-          if p<>nil then
-          SetWindowTheme(p.GetValue(AComponent).AsInteger,'','');
-        }
-(*
-        f := ctx.GetType(AComponent.ClassInfo).GetField('CurBackColor');
-        if f<>nil then
-        begin
-          f.SetValue(AComponent,AColorMap.Color);
-          {$IFDEF DEBUG_PROFILER}
-           lprofiler.Add('********CurBackColor******');
-          {$ENDIF}
-
-        end;
-*)
-         {
-         f := ctx.GetType(AComponent.ClassInfo).GetField('GutterBrush');
-         p2 := ctx.GetType(f.FieldType.Handle).GetProperty('Color');
-         }
-{
-   CurForeColor        :TColor;
-   CurBackColor        :TColor;
-
-}
-
-         //showMessage('ColorMap '+IntToStr(AColorMap.Color));
-         //showMessage('Before '+p2.GetValue(f.GetValue(AComponent).AsObject).ToString());
-         //p2.SetValue(f.GetValue(AComponent).AsObject,AColorMap.Color);
-         //showMessage('After '+p2.GetValue(f.GetValue(AComponent).AsObject).ToString());
+       //CurForeColor        :TColor;
+       //CurBackColor        :TColor;
+       //GutterBrush         :TBrush;
+       //Brush               :TBrush;
+       {
+       SetRttiFieldValue(AComponent,'GutterBrush.Color',  clYellow);
+       SetRttiPropertyValue(AComponent,'Brush.Color',  clRed);
+       }
     end
     else
     if AComponent is TActionToolBar then
@@ -810,18 +698,6 @@ begin
     else
     if (AComponent.ClassName = 'TIDEGradientTabSet') or (AComponent.ClassName = 'TGradientTabSet') then
     begin
-         {
-         f := ctx.GetType(AComponent.ClassInfo).GetField('FColor');
-         f.SetValue(AComponent,AColorMap.Color);
-
-         p := ctx.GetType(AComponent.ClassInfo).GetProperty('ParentBackground');
-         p.SetValue(AComponent,false);
-
-         p := ctx.GetType(AComponent.ClassInfo).GetProperty('Brush');
-         p2 := ctx.GetType(p.PropertyType.Handle).GetProperty('Color');
-         p2.SetValue(p.GetValue(AComponent).AsObject,AColorMap.Color);
-         }
-
          //DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
 
          SetRttiPropertyValue(AComponent,'TabColors.ActiveStart',AColorMap.Color);
@@ -842,7 +718,6 @@ begin
         end;
         }
        {$IFEND}
-
     end
     else
     if AComponent.ClassName='TTabSheet'  then
@@ -893,33 +768,12 @@ begin
     end;
 end;
 
-{
-procedure THelperClass.PopupActionBar1GetControlClass(Sender: TCustomActionBar;
-  AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
-begin
-  if Assigned(PopupMenu) then
-  begin
-    PopupMenu.ColorMap:= ColorMap;
-    OutputDebugString('PopupActionBar1GetControlClass');
-  end;
 
-end;
-
-procedure THelperClass.PopupActionBar1Popup(Sender: TObject);
-begin
-  if Assigned(PopupMenu) then
-  begin
-    PopupMenu.ColorMap:= ColorMap;
-    OutputDebugString('PopupActionBar1Popup');
-  end;
-end;
-   }
 initialization
   //LObjectList:=TObjectList<THelperClass>.Create;
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
-
   GlobalColorMap:=nil;
   GlobalSettings:=nil;
   HookedWindows:=TStringList.Create;
@@ -928,15 +782,6 @@ initialization
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
 {$IF CompilerVersion > 20}
   ctx:=TRttiContext.Create;
-  {
-  for RttiType in ctx.GetTypes do
-   if RttiType.TypeKind=tkClass then
-    try
-     TFile.WriteAllText(ExtractFilePath(GetBplLocation())+'Types Dump\'+RttiType.Name+'.txt', DumpTypeDefinition(RttiType.Handle));
-    except
-    end;
-  }
-
 {$IFEND}
 
 {$IFDEF DEBUG_PROFILER}
@@ -960,7 +805,4 @@ finalization
   lpignored.Free;
   lDumped.Free;
 {$ENDIF}
-  //LObjectList.Free;
-
-
 end.

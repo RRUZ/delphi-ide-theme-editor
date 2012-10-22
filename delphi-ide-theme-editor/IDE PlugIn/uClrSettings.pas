@@ -53,7 +53,6 @@ implementation
 
 
 uses
-  Dialogs,
   SysUtils,
   IniFiles;
 
@@ -61,7 +60,7 @@ procedure ReadSettings(Settings: TSettings;Const Path:String);
 var
   iniFile: TIniFile;
 begin
-  //ShowMessage(Path);
+  //C:\Users\Public\Documents\RAD Studio\Projects\XE2\delphi-ide-theme-editor\IDE PlugIn\
   iniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
     Settings.EnableDWMColorization   := iniFile.ReadBool('Global', 'EnableDWMColorization', True);

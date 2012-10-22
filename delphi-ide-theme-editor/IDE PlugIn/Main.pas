@@ -94,7 +94,6 @@ uses
  SysUtils,
  Forms,
  Dialogs,
- //XPMan,
  Menus,
  ComObj,
  ExtCtrls,
