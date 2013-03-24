@@ -86,7 +86,7 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <DCC_Define>EUREKALOG;EUREKALOG_VER6;$(DCC_Define)</DCC_Define>
+        <DCC_Define>EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_Release>18</VerInfo_Release>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
@@ -104,11 +104,15 @@
         <DCC_DebugInformation>false</DCC_DebugInformation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <DCC_DebugInformation>true</DCC_DebugInformation>
+        <DCC_Define>EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
+        <DCC_MapFile>3</DCC_MapFile>
+        <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
-        <VerInfo_Build>3</VerInfo_Build>
-        <VerInfo_Release>31</VerInfo_Release>
+        <VerInfo_Build>12</VerInfo_Build>
+        <VerInfo_Release>32</VerInfo_Release>
         <DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.31.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.32.12;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
     <ItemGroup>
@@ -153,6 +157,8 @@
         <DCCReference Include="Units\Vcl.Styles.Ext.pas"/>
         <DCCReference Include="Units\uStdActionsPopMenu.pas"/>
         <DCCReference Include="Units\uHelpInsight.pas"/>
+        <DCCReference Include="Units\Vcl.Styles.OwnerDrawFix.pas"/>
+        <DCCReference Include="Units\Vcl.Styles.Fixes.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -178,7 +184,7 @@
                     <VersionInfo Name="MajorVer">1</VersionInfo>
                     <VersionInfo Name="MinorVer">0</VersionInfo>
                     <VersionInfo Name="Release">0</VersionInfo>
-                    <VersionInfo Name="Build">278</VersionInfo>
+                    <VersionInfo Name="Build">280</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -190,7 +196,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">1.0.0.278</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">1.0.0.280</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
                     <VersionInfoKeys Name="LegalTrademarks"/>
@@ -311,3 +317,24 @@
     </ProjectExtensions>
     <Import Condition="Exists('$(MSBuildProjectName).deployproj')" Project="$(MSBuildProjectName).deployproj"/>
 </Project>
+
+<!-- EurekaLog First Line
+[Exception Log]
+EurekaLog Version=7001
+Activate=1
+atVCL=1
+dpJCL=1
+Encrypt Password=""
+idEurekaLog=1
+idEurekaLogDetailed=1
+idMSClassic=1
+idStepsToReproduce=1
+InjectCode=1
+InjectInfo=1
+InjectOptions=1
+loCatchLeaks=0
+loCatchLeaksExceptions=0
+loMaxLeaks=0
+ProjectID="{28E5DE24-EE6F-49DE-BB13-F042D3FBECA6}"
+sndShowFailureMsg=1
+EurekaLog Last Line -->

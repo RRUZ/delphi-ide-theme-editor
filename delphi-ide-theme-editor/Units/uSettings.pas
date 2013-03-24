@@ -25,7 +25,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls;
+  Dialogs, StdCtrls, ExtCtrls, Vcl.Styles.Ext;
 
 type
   TSettings = class
@@ -53,16 +53,18 @@ type
     Bevel1:    TBevel;
     Label9: TLabel;
     ComboBoxVCLStyle: TComboBox;
-    ImageVCLStyle: TImage;
     CheckBoxUpdates: TCheckBox;
     CheckBoxHelpInsight: TCheckBox;
+    PanelPreview: TPanel;
     procedure BtnSelFolderThemesClick(Sender: TObject);
     procedure BtnSaveClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxVCLStyleChange(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     FSettings: TSettings;
+    FPreview:TVclStylesPreview;
     procedure  LoadStyles;
     procedure DrawSeletedVCLStyle;
   public
@@ -82,7 +84,6 @@ uses
   {$WARN UNIT_PLATFORM ON}
   Vcl.Styles,
   Vcl.Themes,
-  Vcl.Styles.Ext,
   System.Types,
   System.UITypes,
   IOUtils,
@@ -90,6 +91,9 @@ uses
 
 
 {$R *.dfm}
+
+type
+ TVclStylesPreviewClass = class(TVclStylesPreview);
 
 procedure RegisterVCLStyle(const StyleFileName: string);
 begin
@@ -192,37 +196,32 @@ end;
 procedure TFrmSettings.DrawSeletedVCLStyle;
 var
   StyleName : string;
-  LBitmap   : TBitmap;
-  LStyle    : TCustomStyleExt;
-  SourceInfo: TSourceInfo;
+  LStyle    : TCustomStyleServices;
 begin
-   ImageVCLStyle.Picture:=nil;
-
    StyleName:=ComboBoxVCLStyle.Text;
-   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
+   if (StyleName<>'') and (not SameText(StyleName, 'Windows')) then
    begin
-    LBitmap:=TBitmap.Create;
-    try
-       LBitmap.PixelFormat:=pf32bit;
-       LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
-       LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
-       SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-       LStyle:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
-       try
-         DrawSampleWindow(LStyle, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName);
-         ImageVCLStyle.Picture.Assign(LBitmap);
-       finally
-         LStyle.Free;
-       end;
-    finally
-      LBitmap.Free;
-    end;
+     TStyleManager.StyleNames;//call DiscoverStyleResources
+     LStyle:=TStyleManager.Style[StyleName];
+     FPreview.Caption:=StyleName;
+     FPreview.Style:=LStyle;
+     TVclStylesPreviewClass(FPreview).Paint;
    end;
 end;
 
+
 procedure TFrmSettings.FormCreate(Sender: TObject);
 begin
+  FPreview:=TVclStylesPreview.Create(Self);
+  FPreview.Parent:=PanelPreview;
+  FPreview.BoundsRect := PanelPreview.ClientRect;
+
   LoadStyles;
+end;
+
+procedure TFrmSettings.FormDestroy(Sender: TObject);
+begin
+  FPreview.Free;
 end;
 
 procedure TFrmSettings.LoadSettings;

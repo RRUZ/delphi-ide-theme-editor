@@ -2,6 +2,15 @@ program DITE;
 {$WARN SYMBOL_PLATFORM OFF}
 
 uses
+  EMemLeaks,
+  EResLeaks,
+  EDialogWinAPIMSClassic,
+  EDialogWinAPIEurekaLogDetailed,
+  EDialogWinAPIStepsToReproduce,
+  EDebugExports,
+  EDebugJCL,
+  EAppVCL,
+  ExceptionLog7,
   uStackTrace in 'Units\uStackTrace.pas',
   Forms,
   Main in 'Main.pas' {FrmMain},
@@ -30,7 +39,9 @@ uses
   uLoadThemesImages in 'Units\uLoadThemesImages.pas',
   Vcl.Styles.Ext in 'Units\Vcl.Styles.Ext.pas',
   uStdActionsPopMenu in 'Units\uStdActionsPopMenu.pas',
-  uHelpInsight in 'Units\uHelpInsight.pas';
+  uHelpInsight in 'Units\uHelpInsight.pas',
+  Vcl.Styles.OwnerDrawFix in 'Units\Vcl.Styles.OwnerDrawFix.pas',
+  Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas';
 
 {$R *.res}
 
@@ -49,7 +60,7 @@ begin
 end;
 
 begin
-  ReportMemoryLeaksOnShutdown := DebugHook <> 0;
+  //ReportMemoryLeaksOnShutdown := DebugHook <> 0;
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);
