@@ -19,6 +19,7 @@ object FrmSettings: TFrmSettings
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -41,12 +42,6 @@ object FrmSettings: TFrmSettings
     Width = 45
     Height = 13
     Caption = 'VCL Style'
-  end
-  object ImageVCLStyle: TImage
-    Left = 8
-    Top = 140
-    Width = 234
-    Height = 119
   end
   object BtnSave: TButton
     Left = 8
@@ -106,5 +101,13 @@ object FrmSettings: TFrmSettings
     Height = 17
     Caption = 'Apply theme to Help Insight'
     TabOrder = 6
+  end
+  object PanelPreview: TPanel
+    Left = 8
+    Top = 140
+    Width = 234
+    Height = 119
+    BevelOuter = bvNone
+    TabOrder = 7
   end
 end

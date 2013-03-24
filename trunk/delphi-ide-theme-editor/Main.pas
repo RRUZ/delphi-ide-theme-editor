@@ -70,7 +70,7 @@ uses
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
-  Vcl.PlatformDefaultStyleActnCtrls, System.Actions;
+  Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -87,6 +87,7 @@ type
 
 
   TPopupMenu=class(Vcl.ActnPopup.TPopupActionBar);
+
 
   TFrmMain = class(TForm)
     ImageListDelphiVersion: TImageList;
@@ -215,6 +216,7 @@ type
     function GetElementIndex(Element: TIDEHighlightElements): integer;
     procedure OnSelForegroundColorChange(Sender: TObject);
     procedure OnSelBackGroundColorChange(Sender: TObject);
+    procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
     {$IFDEF ENABLE_THEME_EXPORT}
     procedure ExportThemeHtml;
     {$ENDIF}
@@ -250,6 +252,7 @@ uses
   uColorSelector,
   EclipseThemes,
   VSThemes,
+  Vcl.Styles.OwnerDrawFix,
   uMisc,
   uLazarusIDEHighlight,
   uStackTrace,
@@ -833,6 +836,7 @@ begin
   ActionImages:=TObjectDictionary<string,TCompPngImages>.Create([doOwnsValues]);
   LoadActionImages;
 
+
   FillPopupActionBar(PopupActionBar1);
   AssignStdActionsPopUpMenu(Self, PopupActionBar1);
 
@@ -1108,6 +1112,7 @@ begin
   if not TDirectory.Exists(FSettings.ThemePath) then
     exit;
 
+  LvThemes.SmallImages:=nil;
   ImageListThemes.Clear;
   LvThemes.Items.BeginUpdate;
   try
@@ -1122,6 +1127,7 @@ begin
   finally
     LvThemes.Items.EndUpdate;
   end;
+  LvThemes.SmallImages:=ImageListThemes;
 
   TLoadThemesImages.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
 end;
@@ -1256,6 +1262,46 @@ begin
   end;
 end;
 
+
+procedure TFrmMain.CMStyleChanged(var Message: TMessage);
+begin
+  CbElement.Style:=csDropDownList;
+  CbElement.OnDrawItem:=nil;
+
+  CbIDEFonts.Style:=csDropDownList;
+  CbIDEFonts.OnDrawItem:=nil;
+
+  CbIDEThemeImport.Style:=csDropDownList;
+  CbIDEThemeImport.OnDrawItem:=nil;
+
+  LvThemes.OwnerDraw  :=false;
+  LvThemes.OnDrawItem :=nil;
+  LvThemes.OnMouseDown:=nil;
+
+
+  if not TStyleManager.ActiveStyle.IsSystemStyle then
+  begin
+    CbElement.Style:=csOwnerDrawFixed;
+    CbElement.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+
+    CbIDEFonts.Style:=csOwnerDrawFixed;
+    CbIDEFonts.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+
+    CbIDEThemeImport.Style:=csOwnerDrawFixed;
+    CbIDEThemeImport.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+
+    LvThemes.OwnerDraw  :=True;
+    LvThemes.OnDrawItem :=VclStylesOwnerDrawFix.ListViewDrawItem;
+    LvThemes.OnMouseDown:=VclStylesOwnerDrawFix.ListViewMouseDown;
+  end;
+
+
+  {
+  ApplyVclStylesOwnerDrawFix(Self, false);
+  if not TStyleManager.ActiveStyle.IsSystemStyle then
+  ApplyVclStylesOwnerDrawFix(Self, true);
+  }
+end;
 
 procedure TFrmMain.ComboBoxExIDEsChange(Sender: TObject);
 var
@@ -1568,5 +1614,10 @@ begin
 
  Inherited;
 end;
+
+initialization
+   TStyleManager.Engine.RegisterStyleHook(TComboBoxEx, TComboBoxExStyleHookFix);
+
+
 
 end.

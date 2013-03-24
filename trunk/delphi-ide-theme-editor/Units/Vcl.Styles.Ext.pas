@@ -215,6 +215,7 @@ type
     procedure SetStyleColor(Color: TStyleColor; NewColor: TColor);
     procedure SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
     procedure SetSystemColor(Color: TColor; NewColor: TColor);
+    procedure SetStyleFont(Font: TStyleFont; NewFont: TFont);
   end;
 
         {
@@ -247,7 +248,6 @@ uses
 {$ENDIF}
  Rtti,
  Vcl.Dialogs,
- System.Types,
  System.Sysutils;
 
 {$IFDEF USE_VCL_STYLESAPI}
@@ -597,6 +597,97 @@ begin
     scToolBarGradientEnd:  if TSeStyle(Source).Colors[ktcToolBarGradientEnd]<>NewColor then TSeStyle(Source).Colors[ktcToolBarGradientEnd]:=NewColor;
     scTreeView:  if TSeStyle(Source).Colors[ktcTreeView]<>NewColor then TSeStyle(Source).Colors[ktcTreeView]:=NewColor;
     scWindow: if TSeStyle(Source).Colors[ktcWindow]<>NewColor then TSeStyle(Source).Colors[ktcWindow]:=NewColor;
+  end;
+end;
+
+procedure TCustomStyleExt.SetStyleFont(Font: TStyleFont; NewFont: TFont);
+begin
+  case Font of
+    sfButtonTextDisabled: if TSeStyle(Source).Fonts[ktfButtonTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfButtonTextDisabled]:=NewFont;
+    sfButtonTextFocused: if TSeStyle(Source).Fonts[ktfButtonTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfButtonTextFocused]:=NewFont;
+    sfButtonTextHot: if TSeStyle(Source).Fonts[ktfButtonTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfButtonTextHot]:=NewFont;
+    sfButtonTextNormal: if TSeStyle(Source).Fonts[ktfButtonTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfButtonTextNormal]:=NewFont;
+    sfButtonTextPressed: if TSeStyle(Source).Fonts[ktfButtonTextPressed]<> NewFont then TSeStyle(Source).Fonts[ktfButtonTextPressed]:=NewFont;
+    sfCaptionTextInactive: if TSeStyle(Source).Fonts[ktfCaptionTextInactive]<> NewFont then TSeStyle(Source).Fonts[ktfCaptionTextInactive]:=NewFont;
+    sfCaptionTextNormal: if TSeStyle(Source).Fonts[ktfCaptionTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfCaptionTextNormal]:=NewFont;
+    sfCategoryPanelGroupHeaderHot: if TSeStyle(Source).Fonts[ktfCategoryPanelGroupHeaderHot]<> NewFont then TSeStyle(Source).Fonts[ktfCategoryPanelGroupHeaderHot]:=NewFont;
+    sfCategoryPanelGroupHeaderNormal: if TSeStyle(Source).Fonts[ktfCategoryPanelGroupHeaderNormal]<> NewFont then TSeStyle(Source).Fonts[ktfCategoryPanelGroupHeaderNormal]:=NewFont;
+    sfCatgeoryButtonsCategoryNormal: if TSeStyle(Source).Fonts[ktfCatgeoryButtonsCategoryNormal]<> NewFont then TSeStyle(Source).Fonts[ktfCatgeoryButtonsCategoryNormal]:=NewFont;
+    sfCatgeoryButtonsCategorySelected: if TSeStyle(Source).Fonts[ktfCatgeoryButtonsCategorySelected]<> NewFont then TSeStyle(Source).Fonts[ktfCatgeoryButtonsCategorySelected]:=NewFont;
+    sfCatgeoryButtonsHot: if TSeStyle(Source).Fonts[ktfCatgeoryButtonsHot]<> NewFont then TSeStyle(Source).Fonts[ktfCatgeoryButtonsHot]:=NewFont;
+    sfCatgeoryButtonsNormal: if TSeStyle(Source).Fonts[ktfCatgeoryButtonsNormal]<> NewFont then TSeStyle(Source).Fonts[ktfCatgeoryButtonsNormal]:=NewFont;
+    sfCatgeoryButtonsSelected: if TSeStyle(Source).Fonts[ktfCatgeoryButtonsSelected]<> NewFont then TSeStyle(Source).Fonts[ktfCatgeoryButtonsSelected]:=NewFont;
+    sfCheckBoxTextDisabled: if TSeStyle(Source).Fonts[ktfCheckBoxTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfCheckBoxTextDisabled]:=NewFont;
+    sfCheckBoxTextFocused: if TSeStyle(Source).Fonts[ktfCheckBoxTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfCheckBoxTextFocused]:=NewFont;
+    sfCheckBoxTextHot: if TSeStyle(Source).Fonts[ktfCheckBoxTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfCheckBoxTextHot]:=NewFont;
+    sfCheckBoxTextNormal: if TSeStyle(Source).Fonts[ktfCheckBoxTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfCheckBoxTextNormal]:=NewFont;
+    sfCheckBoxTextPressed: if TSeStyle(Source).Fonts[ktfCheckBoxTextPressed]<> NewFont then TSeStyle(Source).Fonts[ktfCheckBoxTextPressed]:=NewFont;
+    sfComboBoxItemDisabled: if TSeStyle(Source).Fonts[ktfComboBoxItemDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfComboBoxItemDisabled]:=NewFont;
+    sfComboBoxItemFocused: if TSeStyle(Source).Fonts[ktfComboBoxItemFocused]<> NewFont then TSeStyle(Source).Fonts[ktfComboBoxItemFocused]:=NewFont;
+    sfComboBoxItemHot: if TSeStyle(Source).Fonts[ktfComboBoxItemHot]<> NewFont then TSeStyle(Source).Fonts[ktfComboBoxItemHot]:=NewFont;
+    sfComboBoxItemNormal: if TSeStyle(Source).Fonts[ktfComboBoxItemNormal]<> NewFont then TSeStyle(Source).Fonts[ktfComboBoxItemNormal]:=NewFont;
+    sfComboBoxItemSelected: if TSeStyle(Source).Fonts[ktfComboBoxItemSelected]<> NewFont then TSeStyle(Source).Fonts[ktfComboBoxItemSelected]:=NewFont;
+    sfEditBoxTextDisabled: if TSeStyle(Source).Fonts[ktfEditBoxTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfEditBoxTextDisabled]:=NewFont;
+    sfEditBoxTextFocused: if TSeStyle(Source).Fonts[ktfEditBoxTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfEditBoxTextFocused]:=NewFont;
+    sfEditBoxTextHot: if TSeStyle(Source).Fonts[ktfEditBoxTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfEditBoxTextHot]:=NewFont;
+    sfEditBoxTextNormal: if TSeStyle(Source).Fonts[ktfEditBoxTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfEditBoxTextNormal]:=NewFont;
+    sfEditBoxTextSelected: if TSeStyle(Source).Fonts[ktfEditBoxTextSelected]<> NewFont then TSeStyle(Source).Fonts[ktfEditBoxTextSelected]:=NewFont;
+    sfGridItemFixedHot: if TSeStyle(Source).Fonts[ktfGridItemFixedHot]<> NewFont then TSeStyle(Source).Fonts[ktfGridItemFixedHot]:=NewFont;
+    sfGridItemFixedNormal: if TSeStyle(Source).Fonts[ktfGridItemFixedNormal]<> NewFont then TSeStyle(Source).Fonts[ktfGridItemFixedNormal]:=NewFont;
+    sfGridItemFixedPressed: if TSeStyle(Source).Fonts[ktfGridItemFixedPressed]<> NewFont then TSeStyle(Source).Fonts[ktfGridItemFixedPressed]:=NewFont;
+    sfGridItemNormal: if TSeStyle(Source).Fonts[ktfGridItemNormal]<> NewFont then TSeStyle(Source).Fonts[ktfGridItemNormal]:=NewFont;
+    sfGridItemSelected: if TSeStyle(Source).Fonts[ktfGridItemSelected]<> NewFont then TSeStyle(Source).Fonts[ktfGridItemSelected]:=NewFont;
+    sfGroupBoxTextDisabled: if TSeStyle(Source).Fonts[ktfGroupBoxTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfGroupBoxTextDisabled]:=NewFont;
+    sfGroupBoxTextNormal: if TSeStyle(Source).Fonts[ktfGroupBoxTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfGroupBoxTextNormal]:=NewFont;
+    sfHeaderSectionTextDisabled: if TSeStyle(Source).Fonts[ktfHeaderSectionTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfHeaderSectionTextDisabled]:=NewFont;
+    sfHeaderSectionTextHot: if TSeStyle(Source).Fonts[ktfHeaderSectionTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfHeaderSectionTextHot]:=NewFont;
+    sfHeaderSectionTextNormal: if TSeStyle(Source).Fonts[ktfHeaderSectionTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfHeaderSectionTextNormal]:=NewFont;
+    sfHeaderSectionTextPressed: if TSeStyle(Source).Fonts[ktfHeaderSectionTextPressed]<> NewFont then TSeStyle(Source).Fonts[ktfHeaderSectionTextPressed]:=NewFont;
+    sfListItemTextDisabled: if TSeStyle(Source).Fonts[ktfListItemTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfListItemTextDisabled]:=NewFont;
+    sfListItemTextFocused: if TSeStyle(Source).Fonts[ktfListItemTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfListItemTextFocused]:=NewFont;
+    sfListItemTextHot: if TSeStyle(Source).Fonts[ktfListItemTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfListItemTextHot]:=NewFont;
+    sfListItemTextNormal: if TSeStyle(Source).Fonts[ktfListItemTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfListItemTextNormal]:=NewFont;
+    sfListItemTextSelected: if TSeStyle(Source).Fonts[ktfListItemTextSelected]<> NewFont then TSeStyle(Source).Fonts[ktfListItemTextSelected]:=NewFont;
+    sfMenuItemTextDisabled: if TSeStyle(Source).Fonts[ktfMenuItemTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfMenuItemTextDisabled]:=NewFont;
+    sfMenuItemTextHot: if TSeStyle(Source).Fonts[ktfMenuItemTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfMenuItemTextHot]:=NewFont;
+    sfMenuItemTextNormal: if TSeStyle(Source).Fonts[ktfMenuItemTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfMenuItemTextNormal]:=NewFont;
+    sfMenuItemTextSelected: if TSeStyle(Source).Fonts[ktfMenuItemTextSelected]<> NewFont then TSeStyle(Source).Fonts[ktfMenuItemTextSelected]:=NewFont;
+    sfPanelTextDisabled: if TSeStyle(Source).Fonts[ktfPanelTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfPanelTextDisabled]:=NewFont;
+    sfPanelTextNormal: if TSeStyle(Source).Fonts[ktfPanelTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfPanelTextNormal]:=NewFont;
+    sfPopupMenuItemTextDisabled: if TSeStyle(Source).Fonts[ktfPopupMenuItemTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfPopupMenuItemTextDisabled]:=NewFont;
+    sfPopupMenuItemTextHot: if TSeStyle(Source).Fonts[ktfPopupMenuItemTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfPopupMenuItemTextHot]:=NewFont;
+    sfPopupMenuItemTextNormal: if TSeStyle(Source).Fonts[ktfPopupMenuItemTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfPopupMenuItemTextNormal]:=NewFont;
+    sfPopupMenuItemTextSelected: if TSeStyle(Source).Fonts[ktfPopupMenuItemTextSelected]<> NewFont then TSeStyle(Source).Fonts[ktfPopupMenuItemTextSelected]:=NewFont;
+    sfRadioButtonTextDisabled: if TSeStyle(Source).Fonts[ktfRadioButtonTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfRadioButtonTextDisabled]:=NewFont;
+    sfRadioButtonTextFocused: if TSeStyle(Source).Fonts[ktfRadioButtonTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfRadioButtonTextFocused]:=NewFont;
+    sfRadioButtonTextHot: if TSeStyle(Source).Fonts[ktfRadioButtonTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfRadioButtonTextHot]:=NewFont;
+    sfRadioButtonTextNormal: if TSeStyle(Source).Fonts[ktfRadioButtonTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfRadioButtonTextNormal]:=NewFont;
+    sfRadioButtonTextPressed: if TSeStyle(Source).Fonts[ktfRadioButtonTextPressed]<> NewFont then TSeStyle(Source).Fonts[ktfRadioButtonTextPressed]:=NewFont;
+    sfSmCaptionTextInactive: if TSeStyle(Source).Fonts[ktfSmCaptionTextInactive]<> NewFont then TSeStyle(Source).Fonts[ktfSmCaptionTextInactive]:=NewFont;
+    sfSmCaptionTextNormal: if TSeStyle(Source).Fonts[ktfSmCaptionTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfSmCaptionTextNormal]:=NewFont;
+    sfStatusPanelTextDisabled: if TSeStyle(Source).Fonts[ktfStatusPanelTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfStatusPanelTextDisabled]:=NewFont;
+    sfStatusPanelTextNormal: if TSeStyle(Source).Fonts[ktfStatusPanelTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfStatusPanelTextNormal]:=NewFont;
+    sfTabTextActiveDisabled: if TSeStyle(Source).Fonts[ktfTabTextActiveDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfTabTextActiveDisabled]:=NewFont;
+    sfTabTextActiveHot: if TSeStyle(Source).Fonts[ktfTabTextActiveHot]<> NewFont then TSeStyle(Source).Fonts[ktfTabTextActiveHot]:=NewFont;
+    sfTabTextActiveNormal: if TSeStyle(Source).Fonts[ktfTabTextActiveNormal]<> NewFont then TSeStyle(Source).Fonts[ktfTabTextActiveNormal]:=NewFont;
+    sfTabTextInactiveDisabled: if TSeStyle(Source).Fonts[ktfTabTextInactiveDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfTabTextInactiveDisabled]:=NewFont;
+    sfTabTextInactiveHot: if TSeStyle(Source).Fonts[ktfTabTextInactiveHot]<> NewFont then TSeStyle(Source).Fonts[ktfTabTextInactiveHot]:=NewFont;
+    sfTabTextInactiveNormal: if TSeStyle(Source).Fonts[ktfTabTextInactiveNormal]<> NewFont then TSeStyle(Source).Fonts[ktfTabTextInactiveNormal]:=NewFont;
+    sfTextLabelDisabled: if TSeStyle(Source).Fonts[ktfStaticTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfStaticTextDisabled]:=NewFont;
+    sfTextLabelFocused: if TSeStyle(Source).Fonts[ktfStaticTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfStaticTextFocused]:=NewFont;
+    sfTextLabelHot: if TSeStyle(Source).Fonts[ktfStaticTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfStaticTextHot]:=NewFont;
+    sfTextLabelNormal: if TSeStyle(Source).Fonts[ktfStaticTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfStaticTextNormal]:=NewFont;
+    sfToolItemTextDisabled: if TSeStyle(Source).Fonts[ktfToolItemTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfToolItemTextDisabled]:=NewFont;
+    sfToolItemTextHot: if TSeStyle(Source).Fonts[ktfToolItemTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfToolItemTextHot]:=NewFont;
+    sfToolItemTextNormal: if TSeStyle(Source).Fonts[ktfToolItemTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfToolItemTextNormal]:=NewFont;
+    sfToolItemTextSelected: if TSeStyle(Source).Fonts[ktfToolItemTextSelected]<> NewFont then TSeStyle(Source).Fonts[ktfToolItemTextSelected]:=NewFont;
+    sfTreeItemTextDisabled: if TSeStyle(Source).Fonts[ktfTreeItemTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfTreeItemTextDisabled]:=NewFont;
+    sfTreeItemTextFocused: if TSeStyle(Source).Fonts[ktfTreeItemTextFocused]<> NewFont then TSeStyle(Source).Fonts[ktfTreeItemTextFocused]:=NewFont;
+    sfTreeItemTextHot: if TSeStyle(Source).Fonts[ktfTreeItemTextHot]<> NewFont then TSeStyle(Source).Fonts[ktfTreeItemTextHot]:=NewFont;
+    sfTreeItemTextNormal: if TSeStyle(Source).Fonts[ktfTreeItemTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfTreeItemTextNormal]:=NewFont;
+    sfTreeItemTextSelected: if TSeStyle(Source).Fonts[ktfTreeItemTextSelected]<> NewFont then TSeStyle(Source).Fonts[ktfTreeItemTextSelected]:=NewFont;
+    sfWindowTextDisabled: if TSeStyle(Source).Fonts[ktfWindowTextDisabled]<> NewFont then TSeStyle(Source).Fonts[ktfWindowTextDisabled]:=NewFont;
+    sfWindowTextNormal: if TSeStyle(Source).Fonts[ktfWindowTextNormal]<> NewFont then TSeStyle(Source).Fonts[ktfWindowTextNormal]:=NewFont;
   end;
 end;
 
