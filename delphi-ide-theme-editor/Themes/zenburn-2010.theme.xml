@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-03-20 19:19:43" author="Delphi IDE Theme Editor" versionapp="1.0.0.90">
+<DelphiIDETheme modified="2013-04-24 20:49:30" author="Delphi IDE Theme Editor" versionapp="1.1.18.1">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$00455E1C</BackgroundColorNew>
   </AdditionalSearchMatchHighlight>
   <Assembler>
@@ -42,7 +42,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$0030332E</BackgroundColorNew>
   </BraceHighlight>
   <Character>
@@ -60,7 +60,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00808080</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$003F3F3F</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
@@ -204,7 +204,7 @@
     <Underline>False</Underline>
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$00455E1C</BackgroundColorNew>
   </LineHighlight>
   <LineNumber>
@@ -213,16 +213,16 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$007D9B7D</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$003F3F3F</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
-    <DefaultForeground>False</DefaultForeground>
+    <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$00455E1C</BackgroundColorNew>
   </MarkedBlock>
   <ModifiedLine>
@@ -285,7 +285,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$00F0F0F0</BackgroundColorNew>
   </RightMargin>
   <Scripts>
@@ -303,7 +303,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00C8D7D7</ForegroundColorNew>
     <BackgroundColorNew>$00455E1C</BackgroundColorNew>
   </SearchMatch>
   <String>

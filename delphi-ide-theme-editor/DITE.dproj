@@ -86,15 +86,19 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <VerInfo_MajorVer>9</VerInfo_MajorVer>
         <DCC_Define>EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
-        <VerInfo_MinorVer>1</VerInfo_MinorVer>
-        <VerInfo_Release>18</VerInfo_Release>
+        <VerInfo_MinorVer>9</VerInfo_MinorVer>
+        <VerInfo_Release>99</VerInfo_Release>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
-        <VerInfo_Build>1</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.18.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>9999</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=9.9.99.9999;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <Manifest_File>ManAdmin.manifest</Manifest_File>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_Build>0</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -105,14 +109,12 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <DCC_DebugInformation>true</DCC_DebugInformation>
-        <DCC_Define>EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-        <VerInfo_MinorVer>1</VerInfo_MinorVer>
-        <VerInfo_Build>12</VerInfo_Build>
-        <VerInfo_Release>32</VerInfo_Release>
+        <VerInfo_MinorVer>2</VerInfo_MinorVer>
+        <VerInfo_Build>6</VerInfo_Build>
         <DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.32.12;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.2.0.6;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
     <ItemGroup>
@@ -159,6 +161,9 @@
         <DCCReference Include="Units\uHelpInsight.pas"/>
         <DCCReference Include="Units\Vcl.Styles.OwnerDrawFix.pas"/>
         <DCCReference Include="Units\Vcl.Styles.Fixes.pas"/>
+        <DCCReference Include="Units\uColorPanel.pas">
+            <Form>ColorPanel</Form>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -184,7 +189,7 @@
                     <VersionInfo Name="MajorVer">1</VersionInfo>
                     <VersionInfo Name="MinorVer">0</VersionInfo>
                     <VersionInfo Name="Release">0</VersionInfo>
-                    <VersionInfo Name="Build">280</VersionInfo>
+                    <VersionInfo Name="Build">281</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -196,7 +201,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">1.0.0.280</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">1.0.0.281</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
                     <VersionInfoKeys Name="LegalTrademarks"/>
@@ -321,17 +326,15 @@
 <!-- EurekaLog First Line
 [Exception Log]
 EurekaLog Version=7001
-Activate=1
+Activate=0
 atVCL=1
+DeleteMapAfterCompile=0
 dpJCL=1
 Encrypt Password=""
 idEurekaLog=1
 idEurekaLogDetailed=1
 idMSClassic=1
 idStepsToReproduce=1
-InjectCode=1
-InjectInfo=1
-InjectOptions=1
 loCatchLeaks=0
 loCatchLeaksExceptions=0
 loMaxLeaks=0

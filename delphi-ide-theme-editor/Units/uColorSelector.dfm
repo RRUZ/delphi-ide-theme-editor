@@ -3,8 +3,8 @@ object DialogColorSelector: TDialogColorSelector
   Top = 364
   BorderStyle = bsDialog
   Caption = 'Color Selector'
-  ClientHeight = 292
-  ClientWidth = 354
+  ClientHeight = 379
+  ClientWidth = 243
   Color = clBtnFace
   TransparentColorValue = clFuchsia
   DoubleBuffered = True
@@ -3361,130 +3361,29 @@ object DialogColorSelector: TDialogColorSelector
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
-    Left = 243
-    Top = 9
-    Width = 19
-    Height = 13
-    Caption = 'Red'
-  end
-  object Label2: TLabel
-    Left = 278
-    Top = 9
-    Width = 29
-    Height = 13
-    Caption = 'Green'
-  end
-  object Label3: TLabel
-    Left = 313
-    Top = 9
-    Width = 20
-    Height = 13
-    Caption = 'Blue'
-  end
-  object Label4: TLabel
-    Left = 243
-    Top = 49
-    Width = 19
-    Height = 13
-    Caption = 'Hue'
-  end
-  object Label5: TLabel
-    Left = 278
-    Top = 49
-    Width = 19
-    Height = 13
-    Caption = 'Lum'
-  end
-  object Label6: TLabel
-    Left = 313
-    Top = 49
-    Width = 16
-    Height = 13
-    Caption = 'Sat'
-  end
-  object Label7: TLabel
-    Left = 243
-    Top = 97
-    Width = 19
-    Height = 13
-    Caption = 'Hex'
-  end
   object mbColorPreview2: TmbColorPreview
-    Left = 287
-    Top = 165
+    Left = 55
+    Top = 141
     Width = 55
     Height = 55
     Color = clLime
     Opacity = 50
   end
-  object mbDeskPickerButton1: TmbDeskPickerButton
-    Left = 243
-    Top = 252
-    Width = 99
-    Height = 32
-    Caption = 'Pick a Color'
-    DoubleBuffered = True
-    ImageIndex = 0
-    Images = ImageList1
-    ParentDoubleBuffered = False
-    TabOrder = 9
-    OnSelColorChange = mbDeskPickerButton1SelColorChange
-    ScreenHintFormat = 'RGB(%r, %g, %b)'#13'Hex: %h'
-    ShowScreenHint = True
-  end
   object mbColorPreview1: TmbColorPreview
-    Left = 243
-    Top = 141
+    Left = 11
+    Top = 117
     Width = 55
     Height = 55
     Color = clLime
   end
-  object Red: TEdit
-    Left = 243
-    Top = 28
-    Width = 29
-    Height = 19
-    Ctl3D = False
-    MaxLength = 3
-    NumbersOnly = True
-    ParentCtl3D = False
-    TabOrder = 1
-    Text = '255'
-    OnExit = RedExit
-  end
-  object Green: TEdit
-    Left = 278
-    Top = 28
-    Width = 29
-    Height = 19
-    Ctl3D = False
-    MaxLength = 3
-    NumbersOnly = True
-    ParentCtl3D = False
-    TabOrder = 2
-    OnExit = RedExit
-  end
-  object Blue: TEdit
-    Left = 313
-    Top = 28
-    Width = 29
-    Height = 19
-    Ctl3D = False
-    MaxLength = 3
-    NumbersOnly = True
-    ParentCtl3D = False
-    TabOrder = 3
-    OnExit = RedExit
-  end
   object PageControl1: TPageControl
-    Left = 8
-    Top = 8
+    Left = 10
+    Top = 105
     Width = 225
     Height = 212
-    ActivePage = TabSheet1
+    ActivePage = TabSheetHexa
     TabOrder = 0
-    object TabSheet1: TTabSheet
+    object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
       object HexaColorPicker1: THexaColorPicker
         Left = 0
@@ -3500,7 +3399,7 @@ object DialogColorSelector: TDialogColorSelector
         OnChange = HexaColorPicker1Change
       end
     end
-    object TabSheet2: TTabSheet
+    object TabSheetWEB: TTabSheet
       Caption = 'Web Palette'
       ImageIndex = 1
       object mbColorPalette1: TmbColorPalette
@@ -3774,7 +3673,7 @@ object DialogColorSelector: TDialogColorSelector
         OnSelColorChange = mbColorPalette1SelColorChange
       end
     end
-    object TabSheet4: TTabSheet
+    object TabSheetHSL: TTabSheet
       Caption = 'HSL'
       ImageIndex = 3
       object HSLColorPicker1: THSLColorPicker
@@ -3794,7 +3693,7 @@ object DialogColorSelector: TDialogColorSelector
           184)
       end
     end
-    object TabSheet3: TTabSheet
+    object TabSheetHSV: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
       object HSVColorPicker1: THSVColorPicker
@@ -3831,82 +3730,189 @@ object DialogColorSelector: TDialogColorSelector
   end
   object BtnApply: TButton
     Left = 8
-    Top = 259
+    Top = 344
     Width = 75
     Height = 25
     Caption = 'Apply'
-    TabOrder = 10
+    TabOrder = 2
     OnClick = BtnApplyClick
   end
-  object Button2: TButton
+  object ButtonCancel: TButton
     Left = 89
-    Top = 259
+    Top = 344
     Width = 75
     Height = 25
     Caption = 'Cancel'
-    TabOrder = 11
-    OnClick = Button2Click
-  end
-  object Hue: TEdit
-    Left = 243
-    Top = 68
-    Width = 29
-    Height = 19
-    Ctl3D = False
-    MaxLength = 3
-    NumbersOnly = True
-    ParentCtl3D = False
-    TabOrder = 4
-    Text = '255'
-    OnExit = HueExit
-  end
-  object Lum: TEdit
-    Left = 278
-    Top = 68
-    Width = 29
-    Height = 19
-    Ctl3D = False
-    MaxLength = 3
-    NumbersOnly = True
-    ParentCtl3D = False
-    TabOrder = 5
-    OnExit = HueExit
-  end
-  object Sat: TEdit
-    Left = 313
-    Top = 68
-    Width = 29
-    Height = 19
-    Ctl3D = False
-    MaxLength = 3
-    NumbersOnly = True
-    ParentCtl3D = False
-    TabOrder = 6
-    OnExit = HueExit
-  end
-  object Hex: TEdit
-    Left = 243
-    Top = 116
-    Width = 100
-    Height = 19
-    CharCase = ecUpperCase
-    Ctl3D = False
-    MaxLength = 6
-    ParentCtl3D = False
-    TabOrder = 7
-    Text = '255'
-    OnExit = HexExit
-    OnKeyPress = HexKeyPress
+    TabOrder = 3
+    OnClick = ButtonCancelClick
   end
   object CheckBoxLive: TCheckBox
     Left = 8
-    Top = 236
+    Top = 321
     Width = 89
     Height = 17
     Caption = 'Live Preview'
     Checked = True
     State = cbChecked
-    TabOrder = 8
+    TabOrder = 1
+  end
+  object PanelValues: TPanel
+    Left = 8
+    Top = 8
+    Width = 233
+    Height = 89
+    TabOrder = 6
+    object Label1: TLabel
+      Left = 12
+      Top = 1
+      Width = 19
+      Height = 13
+      Caption = 'Red'
+    end
+    object Label2: TLabel
+      Left = 47
+      Top = 1
+      Width = 29
+      Height = 13
+      Caption = 'Green'
+    end
+    object Label3: TLabel
+      Left = 82
+      Top = 1
+      Width = 20
+      Height = 13
+      Caption = 'Blue'
+    end
+    object Label4: TLabel
+      Left = 130
+      Top = 1
+      Width = 19
+      Height = 13
+      Caption = 'Hue'
+    end
+    object Label5: TLabel
+      Left = 165
+      Top = 1
+      Width = 19
+      Height = 13
+      Caption = 'Lum'
+    end
+    object Label6: TLabel
+      Left = 200
+      Top = 1
+      Width = 16
+      Height = 13
+      Caption = 'Sat'
+    end
+    object Label7: TLabel
+      Left = 12
+      Top = 41
+      Width = 19
+      Height = 13
+      Caption = 'Hex'
+    end
+    object Blue: TEdit
+      Left = 82
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 0
+      OnExit = RedExit
+    end
+    object Green: TEdit
+      Left = 47
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 1
+      OnExit = RedExit
+    end
+    object Hex: TEdit
+      Left = 12
+      Top = 60
+      Width = 100
+      Height = 19
+      CharCase = ecUpperCase
+      Ctl3D = False
+      MaxLength = 6
+      ParentCtl3D = False
+      TabOrder = 2
+      Text = '255'
+      OnExit = HexExit
+      OnKeyPress = HexKeyPress
+    end
+    object Hue: TEdit
+      Left = 130
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 3
+      Text = '255'
+      OnExit = HueExit
+    end
+    object Lum: TEdit
+      Left = 165
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 4
+      OnExit = HueExit
+    end
+    object mbDeskPickerButton1: TmbDeskPickerButton
+      Left = 130
+      Top = 47
+      Width = 28
+      Height = 32
+      DoubleBuffered = True
+      ImageIndex = 0
+      Images = ImageList1
+      ParentDoubleBuffered = False
+      TabOrder = 5
+      OnSelColorChange = mbDeskPickerButton1SelColorChange
+      ScreenHintFormat = 'RGB(%r, %g, %b)'#13'Hex: %h'
+      ShowScreenHint = True
+    end
+    object Red: TEdit
+      Left = 12
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 6
+      Text = '255'
+      OnExit = RedExit
+    end
+    object Sat: TEdit
+      Left = 200
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 7
+      OnExit = HueExit
+    end
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
@@ -3914,9 +3920,9 @@ object DialogColorSelector: TDialogColorSelector
     Height = 24
     Width = 24
     Left = 184
-    Top = 231
+    Top = 191
     Bitmap = {
-      494C010101002000540018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101002000580018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000

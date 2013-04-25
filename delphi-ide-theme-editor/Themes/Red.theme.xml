@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-05-22 20:10:34" author="Delphi IDE Theme Editor" versionapp="1.0.0.143">
+<DelphiIDETheme modified="2013-04-24 20:47:37" author="Delphi IDE Theme Editor" versionapp="1.1.18.1">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$001000C0</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$00784F26</BackgroundColorNew>
   </AdditionalSearchMatchHighlight>
   <Assembler>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$004642FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00AF912B</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Assembler>
   <AttributeNames>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00FEC05F</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </AttributeNames>
   <AttributeValues>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00C11673</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00AEBABC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </AttributeValues>
   <BraceHighlight>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$000013CC</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$00B88D61</BackgroundColorNew>
   </BraceHighlight>
   <Character>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00C11673</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00859DD6</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Character>
   <CodeFoldingTree>
     <Bold>False</Bold>
@@ -60,17 +60,17 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clGray</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$003948BC</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$004E8B60</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Comment>
   <DiffAddition>
     <Bold>False</Bold>
@@ -79,7 +79,7 @@
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$00FFCCEA</BackgroundColorNew>
+    <BackgroundColorNew>$00CCFFCC</BackgroundColorNew>
   </DiffAddition>
   <DiffDeletion>
     <Bold>False</Bold>
@@ -88,7 +88,7 @@
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$00C7E8FF</BackgroundColorNew>
+    <BackgroundColorNew>$00FFC7C7</BackgroundColorNew>
   </DiffDeletion>
   <DiffMove>
     <Bold>False</Bold>
@@ -97,7 +97,7 @@
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$00FFCDAA</BackgroundColorNew>
+    <BackgroundColorNew>$00AAFFFF</BackgroundColorNew>
   </DiffMove>
   <DisabledBreak>
     <Bold>False</Bold>
@@ -136,13 +136,13 @@
     <BackgroundColorNew>$009999CC</BackgroundColorNew>
   </ExecutionPoint>
   <Float>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00C5E8D0</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Float>
   <FoldedCode>
     <Bold>False</Bold>
@@ -150,44 +150,44 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$0099B7CC</ForegroundColorNew>
+    <ForegroundColorNew>$00CC9999</ForegroundColorNew>
     <BackgroundColorNew>clWhite</BackgroundColorNew>
   </FoldedCode>
   <Hex>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00C5E8D0</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Hex>
   <HotLink>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00C11673</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00D69C56</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </HotLink>
   <Identifier>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Identifier>
   <IllegalChar>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$0095FF00</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$000000FF</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </IllegalChar>
   <InvalidBreak>
     <Bold>False</Bold>
@@ -204,8 +204,8 @@
     <Underline>False</Underline>
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$001000C0</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$00784F26</BackgroundColorNew>
   </LineHighlight>
   <LineNumber>
     <Bold>False</Bold>
@@ -213,17 +213,17 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
-    <DefaultForeground>False</DefaultForeground>
+    <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$001000C0</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$00784F26</BackgroundColorNew>
   </MarkedBlock>
   <ModifiedLine>
     <Bold>False</Bold>
@@ -231,53 +231,53 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00FF0095</ForegroundColorNew>
-    <BackgroundColorNew>$00FF6A00</BackgroundColorNew>
+    <ForegroundColorNew>clLime</ForegroundColorNew>
+    <BackgroundColorNew>clYellow</BackgroundColorNew>
   </ModifiedLine>
   <Number>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00C5E8D0</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Number>
   <Octal>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00C5E8D0</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Octal>
   <PlainText>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </PlainText>
   <Preprocessor>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$004C00FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$009B9B9B</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Preprocessor>
   <ReservedWord>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$004642FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00BB9C56</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </ReservedWord>
   <RightMargin>
     <Bold>False</Bold>
@@ -285,8 +285,8 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$00F0F0F0</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$00333333</BackgroundColorNew>
   </RightMargin>
   <Scripts>
     <Bold>False</Bold>
@@ -294,7 +294,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>True</DefaultBackground>
-    <ForegroundColorNew>$00008035</ForegroundColorNew>
+    <ForegroundColorNew>clPurple</ForegroundColorNew>
     <BackgroundColorNew>clWhite</BackgroundColorNew>
   </Scripts>
   <SearchMatch>
@@ -303,26 +303,26 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$001000C0</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$00784F26</BackgroundColorNew>
   </SearchMatch>
   <String>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00C11673</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00859DD6</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </String>
   <Symbol>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Symbol>
   <SyncEditBackground>
     <Bold>False</Bold>
@@ -331,7 +331,7 @@
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>clBlack</ForegroundColorNew>
-    <BackgroundColorNew>$00F5E6FF</BackgroundColorNew>
+    <BackgroundColorNew>$00FAFFE6</BackgroundColorNew>
   </SyncEditBackground>
   <SyncEditHighlight>
     <Bold>False</Bold>
@@ -339,7 +339,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$000095FF</ForegroundColorNew>
+    <ForegroundColorNew>clBlue</ForegroundColorNew>
     <BackgroundColorNew>clWhite</BackgroundColorNew>
   </SyncEditHighlight>
   <Tags>
@@ -348,16 +348,16 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>True</DefaultBackground>
-    <ForegroundColorNew>$00004B80</ForegroundColorNew>
+    <ForegroundColorNew>clNavy</ForegroundColorNew>
     <BackgroundColorNew>clWhite</BackgroundColorNew>
   </Tags>
   <Whitespace>
-    <Bold>True</Bold>
+    <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00D2D1FF</ForegroundColorNew>
-    <BackgroundColorNew>$001B2146</BackgroundColorNew>
+    <ForegroundColorNew>$00DCDCDC</ForegroundColorNew>
+    <BackgroundColorNew>$001E1E1E</BackgroundColorNew>
   </Whitespace>
 </DelphiIDETheme>

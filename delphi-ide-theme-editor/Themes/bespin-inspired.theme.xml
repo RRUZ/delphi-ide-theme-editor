@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-12-15 02:05:50" author="Delphi IDE Theme Editor" versionapp="1.1.12.7">
+<DelphiIDETheme modified="2013-04-24 20:42:25" author="Delphi IDE Theme Editor" versionapp="1.1.18.1">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$00542CC4</BackgroundColorNew>
   </AdditionalSearchMatchHighlight>
   <Assembler>
@@ -42,7 +42,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$00555555</BackgroundColorNew>
   </BraceHighlight>
   <Character>
@@ -55,12 +55,12 @@
     <BackgroundColorNew>$001C212A</BackgroundColorNew>
   </Character>
   <CodeFoldingTree>
-    <Bold>False</Bold>
+    <Bold>True</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00808080</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$001C212A</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
@@ -141,7 +141,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clWhite</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$001C212A</BackgroundColorNew>
   </Float>
   <FoldedCode>
@@ -159,7 +159,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clWhite</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$001C212A</BackgroundColorNew>
   </Hex>
   <HotLink>
@@ -204,7 +204,7 @@
     <Underline>False</Underline>
     <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$00542CC4</BackgroundColorNew>
   </LineHighlight>
   <LineNumber>
@@ -220,9 +220,9 @@
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
-    <DefaultForeground>False</DefaultForeground>
+    <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$00542CC4</BackgroundColorNew>
   </MarkedBlock>
   <ModifiedLine>
@@ -240,7 +240,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>clWhite</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$001C212A</BackgroundColorNew>
   </Number>
   <Octal>
@@ -249,7 +249,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$001C212A</BackgroundColorNew>
   </Octal>
   <PlainText>
@@ -285,7 +285,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$00F0F0F0</BackgroundColorNew>
   </RightMargin>
   <Scripts>
@@ -303,7 +303,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <ForegroundColorNew>$00D2D3D4</ForegroundColorNew>
     <BackgroundColorNew>$00542CC4</BackgroundColorNew>
   </SearchMatch>
   <String>

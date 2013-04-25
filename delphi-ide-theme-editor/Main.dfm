@@ -3,7 +3,7 @@ object FrmMain: TFrmMain
   Top = 215
   Caption = 'Delphi IDE Theme Editor'
   ClientHeight = 623
-  ClientWidth = 784
+  ClientWidth = 965
   Color = clBtnFace
   Constraints.MinHeight = 600
   Constraints.MinWidth = 800
@@ -22,40 +22,26 @@ object FrmMain: TFrmMain
   OnDestroy = FormDestroy
   OnShow = FormShow
   DesignSize = (
-    784
+    965
     623)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 304
+    Left = 244
     Top = 16
     Width = 66
     Height = 13
     Caption = 'Installed IDEs'
   end
   object Label2: TLabel
-    Left = 304
+    Left = 244
     Top = 63
     Width = 38
     Height = 13
     Caption = 'Element'
   end
-  object Label3: TLabel
-    Left = 304
-    Top = 167
-    Width = 56
-    Height = 13
-    Caption = 'Foreground'
-  end
-  object Label4: TLabel
-    Left = 543
-    Top = 167
-    Width = 56
-    Height = 13
-    Caption = 'Background'
-  end
   object Label5: TLabel
-    Left = 543
+    Left = 483
     Top = 16
     Width = 85
     Height = 13
@@ -334,7 +320,7 @@ object FrmMain: TFrmMain
     ExplicitTop = 508
   end
   object ImageConf: TImage
-    Left = 734
+    Left = 915
     Top = 583
     Width = 32
     Height = 32
@@ -347,10 +333,11 @@ object FrmMain: TFrmMain
     OnClick = ImageConfClick
     OnMouseEnter = ImageBugMouseEnter
     OnMouseLeave = ImageBugMouseLeave
+    ExplicitLeft = 734
     ExplicitTop = 542
   end
   object ImageHue: TImage
-    Left = 696
+    Left = 877
     Top = 583
     Width = 32
     Height = 32
@@ -363,10 +350,11 @@ object FrmMain: TFrmMain
     OnClick = ImageHueClick
     OnMouseEnter = ImageBugMouseEnter
     OnMouseLeave = ImageBugMouseLeave
+    ExplicitLeft = 696
     ExplicitTop = 542
   end
   object ImageBug: TImage
-    Left = 658
+    Left = 839
     Top = 583
     Width = 32
     Height = 32
@@ -379,6 +367,7 @@ object FrmMain: TFrmMain
     OnClick = ImageBugClick
     OnMouseEnter = ImageBugMouseEnter
     OnMouseLeave = ImageBugMouseLeave
+    ExplicitLeft = 658
     ExplicitTop = 542
   end
   object LabelMsg: TLabel
@@ -392,7 +381,7 @@ object FrmMain: TFrmMain
     ExplicitTop = 449
   end
   object ImageUpdate: TImage
-    Left = 620
+    Left = 801
     Top = 583
     Width = 32
     Height = 32
@@ -405,10 +394,11 @@ object FrmMain: TFrmMain
     OnClick = ImageUpdateClick
     OnMouseEnter = ImageBugMouseEnter
     OnMouseLeave = ImageBugMouseLeave
+    ExplicitLeft = 620
     ExplicitTop = 542
   end
   object CbElement: TComboBox
-    Left = 304
+    Left = 244
     Top = 82
     Width = 233
     Height = 21
@@ -417,7 +407,7 @@ object FrmMain: TFrmMain
     OnChange = CbElementChange
   end
   object GroupBox1: TGroupBox
-    Left = 304
+    Left = 244
     Top = 110
     Width = 233
     Height = 46
@@ -452,7 +442,7 @@ object FrmMain: TFrmMain
     end
   end
   object GroupBox2: TGroupBox
-    Left = 543
+    Left = 483
     Top = 110
     Width = 233
     Height = 46
@@ -478,9 +468,9 @@ object FrmMain: TFrmMain
     end
   end
   object CblForeground: TColorBox
-    Left = 366
+    Left = 325
     Top = 164
-    Width = 145
+    Width = 124
     Height = 22
     NoneColorColor = 16729138
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
@@ -488,16 +478,17 @@ object FrmMain: TFrmMain
     OnChange = CblForegroundChange
   end
   object CblBackground: TColorBox
-    Left = 605
+    Left = 568
     Top = 164
-    Width = 143
+    Width = 120
     Height = 22
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
+    Enabled = False
     TabOrder = 12
     OnChange = CblForegroundChange
   end
   object CbIDEFonts: TComboBox
-    Left = 543
+    Left = 483
     Top = 35
     Width = 107
     Height = 21
@@ -507,7 +498,7 @@ object FrmMain: TFrmMain
     OnChange = CbIDEFontsChange
   end
   object EditFontSize: TEdit
-    Left = 656
+    Left = 596
     Top = 35
     Width = 23
     Height = 21
@@ -517,7 +508,7 @@ object FrmMain: TFrmMain
     OnChange = CbIDEFontsChange
   end
   object UpDownFontSize: TUpDown
-    Left = 679
+    Left = 619
     Top = 35
     Width = 16
     Height = 21
@@ -528,9 +519,9 @@ object FrmMain: TFrmMain
     TabOrder = 6
   end
   object BtnApply: TButton
-    Left = 151
+    Left = 128
     Top = 374
-    Width = 138
+    Width = 110
     Height = 25
     Action = ActionApplyTheme
     Anchors = [akLeft, akBottom]
@@ -539,7 +530,7 @@ object FrmMain: TFrmMain
   object EditThemeName: TEdit
     Left = 8
     Top = 347
-    Width = 281
+    Width = 230
     Height = 21
     Anchors = [akLeft, akBottom]
     DoubleBuffered = True
@@ -549,14 +540,14 @@ object FrmMain: TFrmMain
   object BtnSave: TButton
     Left = 8
     Top = 374
-    Width = 137
+    Width = 114
     Height = 25
     Action = ActionSaveChanges
     Anchors = [akLeft, akBottom]
     TabOrder = 16
   end
   object BtnApplyFont: TButton
-    Left = 701
+    Left = 641
     Top = 31
     Width = 75
     Height = 25
@@ -568,13 +559,13 @@ object FrmMain: TFrmMain
   object LvThemes: TListView
     Left = 8
     Top = 35
-    Width = 281
+    Width = 230
     Height = 289
     Anchors = [akLeft, akTop, akBottom]
     Columns = <
       item
         Caption = 'Theme'
-        Width = 260
+        Width = 200
       end
       item
         Caption = 'Path'
@@ -593,7 +584,7 @@ object FrmMain: TFrmMain
     OnChange = LvThemesChange
   end
   object BtnImport: TButton
-    Left = 264
+    Left = 213
     Top = 405
     Width = 25
     Height = 21
@@ -605,7 +596,7 @@ object FrmMain: TFrmMain
   object BtnImportRegTheme: TButton
     Left = 8
     Top = 436
-    Width = 281
+    Width = 225
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Import current IDE theme from registry'
@@ -615,7 +606,7 @@ object FrmMain: TFrmMain
   object BtnSetDefault: TButton
     Left = 8
     Top = 505
-    Width = 281
+    Width = 225
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Set default theme values for selected IDE'
@@ -625,15 +616,15 @@ object FrmMain: TFrmMain
   object ProgressBar1: TProgressBar
     Left = 8
     Top = 467
-    Width = 281
+    Width = 225
     Height = 17
     Anchors = [akLeft, akBottom]
     TabOrder = 22
     Visible = False
   end
   object SynEditCode: TSynEdit
-    Left = 304
-    Top = 200
+    Left = 244
+    Top = 192
     Width = 472
     Height = 362
     Anchors = [akLeft, akTop, akRight, akBottom]
@@ -689,14 +680,14 @@ object FrmMain: TFrmMain
   object CbIDEThemeImport: TComboBox
     Left = 8
     Top = 405
-    Width = 250
+    Width = 199
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
     TabOrder = 18
   end
   object BtnSelForColor: TButton
-    Left = 515
+    Left = 455
     Top = 164
     Width = 22
     Height = 22
@@ -706,19 +697,20 @@ object FrmMain: TFrmMain
     OnClick = BtnSelForColorClick
   end
   object BtnSelBackColor: TButton
-    Left = 754
+    Left = 694
     Top = 164
     Width = 22
     Height = 22
+    Enabled = False
     ImageIndex = 2
     Images = ImageList1
     TabOrder = 13
     OnClick = BtnSelBackColorClick
   end
   object BtnContribute: TButton
-    Left = 214
-    Top = 537
-    Width = 75
+    Left = 166
+    Top = 536
+    Width = 67
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Contribute'
@@ -728,7 +720,7 @@ object FrmMain: TFrmMain
   object BtnExportToLazarusTheme: TButton
     Left = 8
     Top = 436
-    Width = 281
+    Width = 225
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = 'Export Theme to Lazarus Color Scheme'
@@ -737,7 +729,7 @@ object FrmMain: TFrmMain
     OnClick = BtnExportToLazarusThemeClick
   end
   object ComboBoxExIDEs: TComboBoxEx
-    Left = 304
+    Left = 244
     Top = 35
     Width = 129
     Height = 22
@@ -748,7 +740,7 @@ object FrmMain: TFrmMain
     Images = ImageListDelphiVersion
   end
   object BtnIDEColorizer: TButton
-    Left = 439
+    Left = 379
     Top = 32
     Width = 98
     Height = 25
@@ -757,30 +749,67 @@ object FrmMain: TFrmMain
     TabOrder = 1
     OnClick = BtnIDEColorizerClick
   end
+  object Button1: TButton
+    Left = 483
+    Top = 79
+    Width = 122
+    Height = 25
+    Caption = 'Generate Thumbnails'
+    TabOrder = 25
+    Visible = False
+    OnClick = Button1Click
+  end
+  object PanelColors: TPanel
+    Left = 722
+    Top = 16
+    Width = 236
+    Height = 546
+    TabOrder = 26
+  end
+  object RadioButtonFore: TRadioButton
+    Left = 244
+    Top = 164
+    Width = 77
+    Height = 17
+    Caption = 'Foreground'
+    Checked = True
+    TabOrder = 27
+    TabStop = True
+    OnClick = RadioButtonForeClick
+  end
+  object RadioButtonBack: TRadioButton
+    Left = 483
+    Top = 164
+    Width = 79
+    Height = 17
+    Caption = 'Background'
+    TabOrder = 28
+    OnClick = RadioButtonForeClick
+  end
   object ImageListDelphiVersion: TImageList
-    Left = 383
+    Left = 323
     Top = 291
   end
   object SynPasSyn1: TSynPasSyn
     Options.AutoDetectEnabled = False
     Options.AutoDetectLineLimit = 0
     Options.Visible = False
-    Left = 408
+    Left = 348
     Top = 227
   end
   object OpenDialogImport: TOpenDialog
     Filter = 'Visual Studio Configuration File|*.vssettings'
     Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
-    Left = 240
-    Top = 184
+    Left = 160
+    Top = 176
   end
   object ImageListlGutterGlyphs: TImageList
     Height = 14
     Width = 11
-    Left = 568
+    Left = 508
     Top = 311
     Bitmap = {
-      494C01010600090064010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101060009007C010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -950,10 +979,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 456
+    Left = 396
     Top = 307
     Bitmap = {
-      494C010107000800380110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800500110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1254,25 +1283,25 @@ object FrmMain: TFrmMain
     Highlighter = SynPasSyn1
     Title = 'Untitled'
     UseBackground = True
-    Left = 481
+    Left = 421
     Top = 227
   end
   object OpenDialogExport: TOpenDialog
     Filter = 'Delphi IDE Themes|*.theme.xml'
     Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
-    Left = 232
-    Top = 248
+    Left = 168
+    Top = 224
   end
   object ImageListThemes: TImageList
     Left = 56
     Top = 96
   end
   object PopupMenu1: TPopupMenu
-    Left = 592
+    Left = 532
     Top = 232
   end
   object ActionList1: TActionList
-    Left = 552
+    Left = 492
     Top = 224
     object ActionApplyTheme: TAction
       Caption = 'Apply Theme'

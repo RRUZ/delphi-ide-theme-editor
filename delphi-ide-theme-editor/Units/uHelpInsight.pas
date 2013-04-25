@@ -43,7 +43,8 @@ const
     '\ObjRepos\en',  //2010
     '\ObjRepos\en',  //XE
     '\ObjRepos\en',  //XE2
-    '\ObjRepos\en'   //XE3
+    '\ObjRepos\en',  //XE3
+    '\ObjRepos\en'   //XE4
     );
 
 
