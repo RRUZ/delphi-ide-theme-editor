@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2011-03-20 19:19:37" author="Delphi IDE Theme Editor" versionapp="1.0.0.90">
+<DelphiIDETheme modified="2013-04-24 20:45:27" author="Delphi IDE Theme Editor" versionapp="1.1.18.1">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
@@ -60,7 +60,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00808080</ForegroundColorNew>
+    <ForegroundColorNew>$02000000</ForegroundColorNew>
     <BackgroundColorNew>$00C1D5E3</BackgroundColorNew>
   </CodeFoldingTree>
   <Comment>
@@ -213,14 +213,14 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$004A8AA6</ForegroundColorNew>
-    <BackgroundColorNew>$00A3CFED</BackgroundColorNew>
+    <ForegroundColorNew>$02000000</ForegroundColorNew>
+    <BackgroundColorNew>$00C1D5E3</BackgroundColorNew>
   </LineNumber>
   <MarkedBlock>
     <Bold>False</Bold>
     <Italic>False</Italic>
     <Underline>False</Underline>
-    <DefaultForeground>False</DefaultForeground>
+    <DefaultForeground>True</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
     <ForegroundColorNew>$02000000</ForegroundColorNew>
     <BackgroundColorNew>$00FF9933</BackgroundColorNew>

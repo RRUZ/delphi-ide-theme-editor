@@ -2,15 +2,6 @@ program DITE;
 {$WARN SYMBOL_PLATFORM OFF}
 
 uses
-  EMemLeaks,
-  EResLeaks,
-  EDialogWinAPIMSClassic,
-  EDialogWinAPIEurekaLogDetailed,
-  EDialogWinAPIStepsToReproduce,
-  EDebugExports,
-  EDebugJCL,
-  EAppVCL,
-  ExceptionLog7,
   uStackTrace in 'Units\uStackTrace.pas',
   Forms,
   Main in 'Main.pas' {FrmMain},
@@ -41,7 +32,8 @@ uses
   uStdActionsPopMenu in 'Units\uStdActionsPopMenu.pas',
   uHelpInsight in 'Units\uHelpInsight.pas',
   Vcl.Styles.OwnerDrawFix in 'Units\Vcl.Styles.OwnerDrawFix.pas',
-  Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas';
+  Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas',
+  uColorPanel in 'Units\uColorPanel.pas' {ColorPanel};
 
 {$R *.res}
 

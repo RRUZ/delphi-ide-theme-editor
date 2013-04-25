@@ -66,8 +66,8 @@ interface
 
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, uColorPanel,
+  Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,  uColorSelector,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes;
@@ -102,9 +102,7 @@ type
     CheckForeground: TCheckBox;
     CheckBackground: TCheckBox;
     CblForeground: TColorBox;
-    Label3:      TLabel;
     CblBackground: TColorBox;
-    Label4:      TLabel;
     SynPasSyn1:  TSynPasSyn;
     Label5:      TLabel;
     CbIDEFonts:  TComboBox;
@@ -157,6 +155,10 @@ type
     ActionSaveAs: TAction;
     BtnIDEColorizer: TButton;
     PopupActionBar1: TPopupActionBar;
+    Button1: TButton;
+    PanelColors: TPanel;
+    RadioButtonFore: TRadioButton;
+    RadioButtonBack: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -193,6 +195,8 @@ type
     procedure BtnIDEColorizerClick(Sender: TObject);
     procedure ImageBugMouseEnter(Sender: TObject);
     procedure ImageBugMouseLeave(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure RadioButtonForeClick(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -201,6 +205,8 @@ type
     FMapHighlightElementsTSynAttr: TStrings;
     IDEsList:TList<TDelphiVersionData>;
     FIDEData: TDelphiVersionData;
+    FrmColorPanel      : TColorPanel;
+
 
     ActionImages : TObjectDictionary<string,TCompPngImages>;
     procedure LoadActionImages;
@@ -217,6 +223,7 @@ type
     procedure OnSelForegroundColorChange(Sender: TObject);
     procedure OnSelBackGroundColorChange(Sender: TObject);
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
+    procedure GenerateThumbnail;
     {$IFDEF ENABLE_THEME_EXPORT}
     procedure ExportThemeHtml;
     {$ENDIF}
@@ -249,7 +256,6 @@ uses
   VCl.Themes,
   uVclStylesFix,
   uHueSat,
-  uColorSelector,
   EclipseThemes,
   VSThemes,
   Vcl.Styles.OwnerDrawFix,
@@ -573,6 +579,64 @@ begin
   end;
 end;
 
+procedure TFrmMain.Button1Click(Sender: TObject);
+var
+  i : Integer;
+begin
+  ProgressBar1.Visible := True;
+  try
+    ProgressBar1.Position := 0;
+    ProgressBar1.Max      := LvThemes.Items.Count;
+    LabelMsg.Visible:=True;
+    for i := 0 to LvThemes.Items.Count - 1 do
+    begin
+      LvThemes.Selected:=LvThemes.Items[i];
+      LabelMsg.Caption:=Format('processing %s theme',[LvThemes.Items[i].Caption]);
+      GenerateThumbnail;
+      ProgressBar1.Position := i;
+    end;
+  finally
+    ProgressBar1.Visible := False;
+    LabelMsg.Visible:=False;
+  end;
+end;
+
+procedure PrintControl(AControl :TWinControl;ARect:TRect;AOut:TBitmap);
+var
+  DC: HDC;
+begin
+  DC :=GetWindowDC(AControl.Handle);
+  AOut.Width  :=ARect.Width;
+  AOut.Height :=ARect.Height;
+  with AOut do
+  BitBlt(
+    Canvas.Handle, 0, 0, Width, Height, DC, ARect.Left, ARect.Top, SrcCopy
+  );
+  ReleaseDC(AControl.Handle, DC);
+end;
+
+procedure TFrmMain.GenerateThumbnail;
+var
+  LBitmap : TBitmap;
+  LPNG    : TPngImage;
+begin
+  LBitmap:=TBitmap.Create;
+  try
+    PrintControl(SynEditCode, Rect(0,0,450,150), LBitmap);
+    LPNG:=TPngImage.Create;
+    try
+      //ResizeBitmap(LBitmap, 225,75, clBlack);
+      //SmoothResize(LBitmap, 225,75);
+      LPNG.Assign(LBitmap);
+      LPNG.SaveToFile('C:\Users\Dexter\Desktop\RAD Studio Projects\XE2\delphi-ide-theme-editor\Thumbnails\'+EditThemeName.Text+'.png');
+    finally
+      LPNG.Free;
+    end;
+  finally
+    LBitmap.Free;
+  end;
+end;
+
 
 procedure TFrmMain.BtnContributeClick(Sender: TObject);
 begin
@@ -634,14 +698,24 @@ end;
 
 procedure TFrmMain.OnSelForegroundColorChange(Sender: TObject);
 begin
-  CblForeground.Selected:=TDialogColorSelector(Sender).SelectedColor;
-  CblForegroundChange(CblForeground);
+  if Sender is TDialogColorSelector then
+    CblForeground.Selected:=TDialogColorSelector(Sender).SelectedColor
+  else
+  if Sender is TColorPanel then
+    CblForeground.Selected:=TColorPanel(Sender).SelectedColor;
+
+  CblForegroundChange(nil);
 end;
 
 procedure TFrmMain.OnSelBackGroundColorChange(Sender: TObject);
 begin
-  CblBackground.Selected:=TDialogColorSelector(Sender).SelectedColor;
-  CblForegroundChange(CblBackground);
+  if Sender is TDialogColorSelector then
+    CblBackground.Selected:=TDialogColorSelector(Sender).SelectedColor
+  else
+  if Sender is TColorPanel then
+    CblBackground.Selected:=TColorPanel(Sender).SelectedColor;
+
+  CblForegroundChange(nil);
 end;
 
 procedure TFrmMain.BtnImportRegThemeClick(Sender: TObject);
@@ -915,6 +989,14 @@ begin
 
   if LvThemes.Items.Count > 0 then
     LvThemes.Selected := LvThemes.Items.Item[0];
+
+  FrmColorPanel:=TColorPanel.Create(PanelColors);
+  FrmColorPanel.Parent:=PanelColors;
+  FrmColorPanel.BorderStyle := bsNone;
+  FrmColorPanel.Align := alClient;
+  FrmColorPanel.OnChange:=OnSelForegroundColorChange;
+  FrmColorPanel.Show;
+
 end;
 
 
@@ -941,6 +1023,7 @@ begin
   BtnApplyFont.Enabled := False;
   ComboBoxExIDEsChange(ComboBoxExIDEs);
 end;
+
 
 function TFrmMain.GetDelphiVersionData(Index: Integer): TDelphiVersionData;
 begin
@@ -1141,6 +1224,21 @@ begin
     Element := TIDEHighlightElements(CbElement.Items.Objects[CbElement.ItemIndex]);
     CblForeground.Selected := StringToColor(FCurrentTheme[Element].ForegroundColorNew);
     CblBackground.Selected := StringToColor(FCurrentTheme[Element].BackgroundColorNew);
+
+    if FrmColorPanel<>nil then
+    begin
+      if RadioButtonFore.Checked then
+      begin
+       FrmColorPanel.SelectedColor:=CblForeground.Selected;
+       FrmColorPanel.OnChange:=OnSelForegroundColorChange;
+      end
+      else
+      begin
+       FrmColorPanel.SelectedColor:=CblBackground.Selected;
+       FrmColorPanel.OnChange:=OnSelBackGroundColorChange;
+      end;
+    end;
+
     FChanging:=True;
     try
       CheckBold.Checked      := FCurrentTheme[Element].Bold;
@@ -1259,6 +1357,20 @@ begin
     FCurrentTheme[Element].DefaultBackground := CheckBackground.Checked;
 
     RefreshPasSynEdit;
+
+    if Sender<>nil then
+    begin
+      if RadioButtonFore.Checked then
+      begin
+       FrmColorPanel.SelectedColor:=CblForeground.Selected;
+       FrmColorPanel.OnChange:=OnSelForegroundColorChange;
+      end
+      else
+      begin
+       FrmColorPanel.SelectedColor:=CblBackground.Selected;
+       FrmColorPanel.OnChange:=OnSelBackGroundColorChange;
+      end;
+    end;
   end;
 end;
 
@@ -1405,6 +1517,26 @@ begin
   SynExporterHTML1.SaveToFile('C:\Users\Dexter\Desktop\demo.html');
 end;
 {$ENDIF}
+
+procedure TFrmMain.RadioButtonForeClick(Sender: TObject);
+begin
+  CblForeground.Enabled:=RadioButtonFore.Checked;
+  BtnSelForColor.Enabled:=RadioButtonFore.Checked;
+
+  CblBackground.Enabled:=RadioButtonBack.Checked;
+  BtnSelBackColor.Enabled:=RadioButtonBack.Checked;
+
+  if RadioButtonFore.Checked then
+  begin
+   FrmColorPanel.OnChange:=OnSelForegroundColorChange;
+   FrmColorPanel.SelectedColor:=CblForeground.Selected;
+  end
+  else
+  begin
+   FrmColorPanel.OnChange:=OnSelBackGroundColorChange;
+   FrmColorPanel.SelectedColor:=CblBackground.Selected;
+  end;
+end;
 
 procedure TFrmMain.RefreshPasSynEdit;
 var

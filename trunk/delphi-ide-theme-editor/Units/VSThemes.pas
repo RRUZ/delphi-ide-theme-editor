@@ -52,6 +52,7 @@ var
   BoldFont                   : string;
 
   BackgroundPatch            : string;
+  ForegroundPatch            : string;
 
   NewTheme                   : TIDETheme;
 
@@ -117,24 +118,32 @@ var
 
   Procedure SetIDEHighlightElement(Element:TIDEHighlightElements;const VsElement:String);
   var
-   UseBackgroundPatch:Boolean;
+    UseBackgroundPatch:Boolean;
+    UseForegroundPatch:Boolean;
   begin
 
       if GetDataVSTheme(VsElement) then
       begin
           UseBackgroundPatch:=(Background='0x02000000');
+          UseForegroundPatch:=(Foreground='0x02000000');
 
           NewTheme[Element].Bold:=BoldFont='Yes';
           NewTheme[Element].Italic:=False;
           NewTheme[Element].Underline:=False;
           NewTheme[Element].DefaultForeground:=False;
           NewTheme[Element].DefaultBackground:=False;
-          NewTheme[Element].ForegroundColorNew:=StringReplace(Foreground,'0x','$',[rfReplaceAll]);
+          //NewTheme[Element].ForegroundColorNew:=StringReplace(Foreground,'0x','$',[rfReplaceAll]);
 
           if UseBackgroundPatch then
             NewTheme[Element].BackgroundColorNew:=BackgroundPatch
           else
             NewTheme[Element].BackgroundColorNew:=StringReplace(Background,'0x','$',[rfReplaceAll]);
+
+          if UseForegroundPatch then
+            NewTheme[Element].ForegroundColorNew:=ForegroundPatch
+          else
+            NewTheme[Element].ForegroundColorNew:=StringReplace(Foreground,'0x','$',[rfReplaceAll]);
+
       end
       else
       begin
@@ -173,6 +182,7 @@ begin
 
     GetDataVSTheme('Plain Text');
     BackgroundPatch:=StringReplace(Background,'0x','$',[rfReplaceAll]);
+    ForegroundPatch:=StringReplace(Foreground,'0x','$',[rfReplaceAll]);
 
     SetIDEHighlightElement(TIDEHighlightElements.AdditionalSearchMatchHighlight,'Selected Text');
     NewTheme[TIDEHighlightElements.AdditionalSearchMatchHighlight].DefaultForeground:=True;
@@ -182,7 +192,8 @@ begin
     SetIDEHighlightElement(TIDEHighlightElements.AttributeValues,'HTML Attribute Value');
     SetIDEHighlightElement(TIDEHighlightElements.BraceHighlight,'Brace Matching (Rectangle)');
     SetIDEHighlightElement(TIDEHighlightElements.Character,'String');
-    SetIDEHighlightElement(TIDEHighlightElements.CodeFoldingTree,'Collapsible Text');
+    //SetIDEHighlightElement(TIDEHighlightElements.CodeFoldingTree,'Collapsible Text');
+    SetIDEHighlightElement(TIDEHighlightElements.CodeFoldingTree,'Plain Text');
     SetIDEHighlightElement(TIDEHighlightElements.Comment,'Comment');
     SetIDEHighlightElement(TIDEHighlightElements.DiffAddition,sEmpty);
     SetIDEHighlightElement(TIDEHighlightElements.DiffDeletion,sEmpty);
@@ -192,7 +203,7 @@ begin
     SetIDEHighlightElement(TIDEHighlightElements.ErrorLine,sEmpty);
     SetIDEHighlightElement(TIDEHighlightElements.ExecutionPoint,sEmpty);
     SetIDEHighlightElement(TIDEHighlightElements.Float,'Number');
-    SetIDEHighlightElement(TIDEHighlightElements.FoldedCode,sEmpty);
+    SetIDEHighlightElement(TIDEHighlightElements.FoldedCode,'Brace Matching (Rectangle)');
     SetIDEHighlightElement(TIDEHighlightElements.Hex,'Number');
     SetIDEHighlightElement(TIDEHighlightElements.HotLink,'urlformat');
     SetIDEHighlightElement(TIDEHighlightElements.Identifier,'Plain Text');//'Identifier');
@@ -207,6 +218,8 @@ begin
 
 
     SetIDEHighlightElement(TIDEHighlightElements.MarkedBlock,'Selected Text');
+    NewTheme[TIDEHighlightElements.MarkedBlock].DefaultForeground:=True;
+
     SetIDEHighlightElement(TIDEHighlightElements.ModifiedLine,sEmpty);
     SetIDEHighlightElement(TIDEHighlightElements.Number,'Number');
     SetIDEHighlightElement(TIDEHighlightElements.Octal,'Number');

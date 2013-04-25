@@ -125,6 +125,7 @@ const
     '',
     'BPL\XE',
     'BPL\XE2',
+    '',
     '');
 
   DelphiIDEExpertsNames: array[TDelphiVersions] of string = (
@@ -141,7 +142,8 @@ const
     '',
     'DelphiIDEColorizerXE',
     'DelphiIDEColorizerXE2',
-    'DelphiIDEColorizerXE3'
+    'DelphiIDEColorizerXE3',
+    'DelphiIDEColorizerXE4'
     );
 
 implementation

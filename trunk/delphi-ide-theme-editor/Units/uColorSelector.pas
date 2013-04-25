@@ -14,7 +14,7 @@
 { The Original Code is uColorSelector.pas.                                                         }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {  Based in the components of                                                                      }
@@ -46,17 +46,17 @@ type
     Label3: TLabel;
     mbColorPreview2: TmbColorPreview;
     PageControl1: TPageControl;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
+    TabSheetHexa: TTabSheet;
+    TabSheetWEB: TTabSheet;
     HexaColorPicker1: THexaColorPicker;
     mbColorPalette1: TmbColorPalette;
-    TabSheet4: TTabSheet;
+    TabSheetHSL: TTabSheet;
     HSLColorPicker1: THSLColorPicker;
-    TabSheet3: TTabSheet;
+    TabSheetHSV: TTabSheet;
     HSVColorPicker1: THSVColorPicker;
     VColorPicker1: TVColorPicker;
     BtnApply: TButton;
-    Button2: TButton;
+    ButtonCancel: TButton;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
@@ -66,12 +66,13 @@ type
     Label7: TLabel;
     Hex: TEdit;
     CheckBoxLive: TCheckBox;
+    PanelValues: TPanel;
     procedure mbDeskPickerButton1SelColorChange(Sender: TObject);
     procedure mbColorPalette1SelColorChange(Sender: TObject);
     procedure HSVColorPicker1Change(Sender: TObject);
     procedure VColorPicker1Change(Sender: TObject);
     procedure HexaColorPicker1Change(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure ButtonCancelClick(Sender: TObject);
     procedure BtnApplyClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure HSLColorPicker1Change(Sender: TObject);
@@ -129,7 +130,7 @@ begin
   Close;
 end;
 
-procedure TDialogColorSelector.Button2Click(Sender: TObject);
+procedure TDialogColorSelector.ButtonCancelClick(Sender: TObject);
 begin
   FStatus:=False;
   Close;
