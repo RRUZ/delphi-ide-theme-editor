@@ -907,6 +907,17 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
+  IDEsList:=TList<TDelphiVersionData>.Create;
+  FillListDelphiVersions(IDEsList);
+
+  for Index:=0 to IDEsList.Count-1 do
+  begin
+    IDEData:=IDEsList[Index];
+    ImageList_AddIcon(ImageListDelphiVersion.Handle, IDEData.Icon.Handle);
+    ComboBoxExIDEs.ItemsEx.AddItem(IDEData.Name,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,0, IDEsList[Index]);
+  end;
+
+
   ActionImages:=TObjectDictionary<string,TCompPngImages>.Create([doOwnsValues]);
   LoadActionImages;
 
@@ -915,7 +926,6 @@ begin
   AssignStdActionsPopUpMenu(Self, PopupActionBar1);
 
 
-  IDEsList:=TList<TDelphiVersionData>.Create;
   FChanging := False;
   FSettings := TSettings.Create;
   ReadSettings(FSettings);
@@ -961,20 +971,14 @@ begin
   CbIDEThemeImport.ItemIndex := 0;
 
   LabelVersion.Caption := Format('Version %s', [uMisc.GetFileVersion(ParamStr(0))]);
-  FillListDelphiVersions(IDEsList);
 
   if IsLazarusInstalled then
    FillListLazarusVersions(IDEsList);
 
-  for Index:=0 to IDEsList.Count-1 do
-  begin
-    IDEData:=IDEsList[Index];
-    ImageList_AddIcon(ImageListDelphiVersion.Handle, IDEData.Icon.Handle);
-    ComboBoxExIDEs.ItemsEx.AddItem(IDEData.Name,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,0, IDEsList[Index]);
-  end;
 
   LoadFixedWidthFonts;
   LoadThemes;
+
 
   if ComboBoxExIDEs.Items.Count > 0 then
   begin

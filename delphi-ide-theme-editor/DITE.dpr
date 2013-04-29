@@ -3,6 +3,8 @@ program DITE;
 
 uses
   uStackTrace in 'Units\uStackTrace.pas',
+  Generics.Defaults,
+  Generics.Collections,
   Forms,
   Main in 'Main.pas' {FrmMain},
   uDelphiIDEHighlight in 'Units\uDelphiIDEHighlight.pas',
@@ -51,7 +53,19 @@ begin
   end;
 end;
 
+Var
+  IDEsList:TList<TDelphiVersionData>;
 begin
+  IDEsList:=TList<TDelphiVersionData>.Create;
+  FillListDelphiVersions(IDEsList);
+  if IDEsList.Count = 0 then
+  begin
+    IDEsList.Free;
+    MsgBox('You don''t have a Object Pascal IDE installed');
+    Halt(0);
+  end;
+  IDEsList.Free;
+
   //ReportMemoryLeaksOnShutdown := DebugHook <> 0;
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

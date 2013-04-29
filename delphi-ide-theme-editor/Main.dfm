@@ -3,10 +3,10 @@ object FrmMain: TFrmMain
   Top = 215
   Caption = 'Delphi IDE Theme Editor'
   ClientHeight = 623
-  ClientWidth = 965
+  ClientWidth = 964
   Color = clBtnFace
   Constraints.MinHeight = 600
-  Constraints.MinWidth = 800
+  Constraints.MinWidth = 980
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,7 +22,7 @@ object FrmMain: TFrmMain
   OnDestroy = FormDestroy
   OnShow = FormShow
   DesignSize = (
-    965
+    964
     623)
   PixelsPerInch = 96
   TextHeight = 13
@@ -320,7 +320,7 @@ object FrmMain: TFrmMain
     ExplicitTop = 508
   end
   object ImageConf: TImage
-    Left = 915
+    Left = 914
     Top = 583
     Width = 32
     Height = 32
@@ -337,7 +337,7 @@ object FrmMain: TFrmMain
     ExplicitTop = 542
   end
   object ImageHue: TImage
-    Left = 877
+    Left = 876
     Top = 583
     Width = 32
     Height = 32
@@ -354,7 +354,7 @@ object FrmMain: TFrmMain
     ExplicitTop = 542
   end
   object ImageBug: TImage
-    Left = 839
+    Left = 838
     Top = 583
     Width = 32
     Height = 32
@@ -381,7 +381,7 @@ object FrmMain: TFrmMain
     ExplicitTop = 449
   end
   object ImageUpdate: TImage
-    Left = 801
+    Left = 800
     Top = 583
     Width = 32
     Height = 32
@@ -625,7 +625,7 @@ object FrmMain: TFrmMain
   object SynEditCode: TSynEdit
     Left = 244
     Top = 192
-    Width = 472
+    Width = 471
     Height = 362
     Anchors = [akLeft, akTop, akRight, akBottom]
     Color = clSilver
@@ -760,10 +760,11 @@ object FrmMain: TFrmMain
     OnClick = Button1Click
   end
   object PanelColors: TPanel
-    Left = 722
+    Left = 721
     Top = 16
     Width = 236
     Height = 546
+    Anchors = [akTop, akRight, akBottom]
     TabOrder = 26
   end
   object RadioButtonFore: TRadioButton
@@ -809,7 +810,7 @@ object FrmMain: TFrmMain
     Left = 508
     Top = 311
     Bitmap = {
-      494C0101060009007C010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010600090080010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -982,7 +983,7 @@ object FrmMain: TFrmMain
     Left = 396
     Top = 307
     Bitmap = {
-      494C010107000800500110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800540110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
