@@ -490,9 +490,8 @@ var
   Directory : String;
 begin
   try
-
     Directory:='';
-    OutPutFolder:=IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Themes Lazarus';
+    OutPutFolder:=GetSettingsFolder+'Themes Lazarus';
     if SysUtils.DirectoryExists(OutPutFolder) then
      Directory := OutPutFolder;
 
@@ -501,7 +500,7 @@ begin
     else
       Exit;
 
-    OpenDialogExport.InitialDir := ExtractFilePath(ParamStr(0));
+    OpenDialogExport.InitialDir := GetSettingsFolder;
     if OpenDialogExport.Execute(Handle) then
     begin
 
@@ -549,7 +548,7 @@ begin
 
   except
     on E: Exception do
-      MsgBox(Format('Error importing theme from registry - Message : %s : Trace %s',
+      MsgBox(Format('Error exporting themes - Message : %s : Trace %s',
         [E.Message, E.StackTrace]));
   end;
 end;
@@ -910,6 +909,9 @@ begin
   IDEsList:=TList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);
 
+  if IsLazarusInstalled then
+   FillListLazarusVersions(IDEsList);
+
   for Index:=0 to IDEsList.Count-1 do
   begin
     IDEData:=IDEsList[Index];
@@ -972,8 +974,6 @@ begin
 
   LabelVersion.Caption := Format('Version %s', [uMisc.GetFileVersion(ParamStr(0))]);
 
-  if IsLazarusInstalled then
-   FillListLazarusVersions(IDEsList);
 
 
   LoadFixedWidthFonts;

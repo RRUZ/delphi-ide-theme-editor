@@ -75,6 +75,8 @@ type
 procedure ReadSettings(var Settings: TSettings);
 procedure WriteSettings(const Settings: TSettings);
 procedure LoadVCLStyle(Const StyleName:String);
+function GetSettingsFolder : string;
+
 
 implementation
 
@@ -86,6 +88,8 @@ uses
   Vcl.Themes,
   System.Types,
   System.UITypes,
+  uMisc,
+  ShlObj,
   IOUtils,
   IniFiles;
 
@@ -94,6 +98,15 @@ uses
 
 type
  TVclStylesPreviewClass = class(TVclStylesPreview);
+
+
+function GetSettingsFolder : string;
+begin
+ Result:=IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_APPDATA))+ 'DITE\';
+ //C:\Users\Dexter\AppData\Roaming\WDCC\Cache
+ SysUtils.ForceDirectories(Result);
+end;
+
 
 procedure RegisterVCLStyle(const StyleFileName: string);
 begin
@@ -122,16 +135,16 @@ procedure ReadSettings(var Settings: TSettings);
 var
   iniFile: TIniFile;
 begin
-  iniFile := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Settings.ini');
+  iniFile := TIniFile.Create(GetSettingsFolder + 'Settings.ini');
   try
     Settings.ActivateColorizer:= iniFile.ReadBool('Global', 'ActivateColorizer',  False);
     Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Windows');
-    Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  ExtractFilePath(ParamStr(0)) + 'Themes');
+    Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  GetSettingsFolder + 'Themes');
     Settings.CheckForUpdates :=iniFile.ReadBool('Global', 'CheckForUpdates',  True);
     Settings.ApplyThemeHelpInsight :=iniFile.ReadBool('Global', 'ApplyThemeHelpInsight',  True);
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
-      Settings.ThemePath := ExtractFilePath(ParamStr(0)) + 'Themes';
+      Settings.ThemePath := GetSettingsFolder + 'Themes';
       SysUtils.ForceDirectories(Settings.ThemePath);
     end;
   finally
@@ -143,7 +156,7 @@ procedure WriteSettings(const Settings: TSettings);
 var
   iniFile: TIniFile;
 begin
-  iniFile := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Settings.ini');
+  iniFile := TIniFile.Create(GetSettingsFolder + 'Settings.ini');
   try
     iniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
     iniFile.WriteString('Global', 'VCLStyle', Settings.VCLStyle);

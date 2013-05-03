@@ -14,7 +14,7 @@
 { The Original Code is uMisc.pas.                                                                  }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -37,6 +37,7 @@ function  GetTempDirectory: string;
 procedure MsgBox(const Msg: string);
 function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
 procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+function  GetSpecialFolder(const CSIDL: integer) : string;
 
 
 implementation
@@ -56,6 +57,22 @@ uses
   Dialogs,
   System.UITypes,
   SysUtils;
+
+function GetSpecialFolder(const CSIDL: integer) : string;
+var
+  lpszPath : PWideChar;
+begin
+  lpszPath := StrAlloc(MAX_PATH);
+  try
+     ZeroMemory(lpszPath, MAX_PATH);
+    if SHGetSpecialFolderPath(0, lpszPath, CSIDL, False)  then
+      Result := lpszPath
+    else
+      Result := '';
+  finally
+    StrDispose(lpszPath);
+  end;
+end;
 
 function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
   FontType: integer; Data: Pointer): integer; stdcall;
