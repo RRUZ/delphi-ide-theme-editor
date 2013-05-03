@@ -134,8 +134,7 @@ begin
   LocalFolder := GetLazarusLocalFolder;
   if LocalFolder <> '' then
   begin
-    FileName := Format('%s%s', [IncludeTrailingPathDelimiter(LocalFolder),
-      sLazarusConfigFile]);
+    FileName := Format('%s%s', [IncludeTrailingPathDelimiter(LocalFolder),  sLazarusConfigFile]);
     if FileExists(FileName) then
     begin
       XmlDoc := CreateOleObject('Msxml2.DOMDocument.6.0');
