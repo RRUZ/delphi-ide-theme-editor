@@ -1229,22 +1229,26 @@ begin
     CblForeground.Selected := StringToColor(FCurrentTheme[Element].ForegroundColorNew);
     CblBackground.Selected := StringToColor(FCurrentTheme[Element].BackgroundColorNew);
 
-    if FrmColorPanel<>nil then
-    begin
-      if RadioButtonFore.Checked then
-      begin
-       FrmColorPanel.SelectedColor:=CblForeground.Selected;
-       FrmColorPanel.OnChange:=OnSelForegroundColorChange;
-      end
-      else
-      begin
-       FrmColorPanel.SelectedColor:=CblBackground.Selected;
-       FrmColorPanel.OnChange:=OnSelBackGroundColorChange;
-      end;
-    end;
 
     FChanging:=True;
     try
+
+      if FrmColorPanel<>nil then
+      begin
+        if RadioButtonFore.Checked then
+        begin
+         FrmColorPanel.SelectedColor:=CblForeground.Selected;
+         FrmColorPanel.OnChange:=OnSelForegroundColorChange;
+        end
+        else
+        begin
+         FrmColorPanel.SelectedColor:=CblBackground.Selected;
+         FrmColorPanel.OnChange:=OnSelBackGroundColorChange;
+        end;
+      end;
+
+
+
       CheckBold.Checked      := FCurrentTheme[Element].Bold;
       CheckItalic.Checked    := FCurrentTheme[Element].Italic;
       CheckUnderline.Checked := FCurrentTheme[Element].Underline;
