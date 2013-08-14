@@ -205,9 +205,9 @@ begin
    if odSelected in State then
     begin
      {$IFDEF DELPHI_7_UP}
-     if ThemeServices.ThemesEnabled then
+     if {$IFDEF DELPHI_XE2_UP}StyleServices.Enabled{$ELSE}ThemeServices.ThemesEnabled{$ENDIF} then
       begin
-       ThemeServices.DrawElement(Canvas.Handle, ThemeServices.GetElementDetails(teEditTextNormal), SR);
+       {$IFDEF DELPHI_XE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.DrawElement(Canvas.Handle, {$IFDEF DELPHI_XE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.GetElementDetails(teEditTextNormal), SR);
        InflateRect(SR, -2, -2);
        Brush.Color := Blend(Colors[Index].value, clBlack, 80);
        FillRect(SR);
@@ -246,9 +246,9 @@ begin
     begin
      //windows XP
      {$IFDEF DELPHI_7_UP}
-     if ThemeServices.ThemesEnabled then
+     if {$IFDEF DELPHI_XE2_UP}StyleServices.Enabled{$ELSE}ThemeServices.ThemesEnabled{$ENDIF} then
       begin
-       ThemeServices.DrawElement(Canvas.Handle, ThemeServices.GetElementDetails(teEditTextNormal), SR);
+       {$IFDEF DELPHI_XE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.DrawElement(Canvas.Handle, {$IFDEF DELPHI_XE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.GetElementDetails(teEditTextNormal), SR);
        InflateRect(SR, -2, -2);
        Brush.Color := Colors[Index].value;
        FillRect(SR);

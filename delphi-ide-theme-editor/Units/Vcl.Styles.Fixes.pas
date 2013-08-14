@@ -403,14 +403,15 @@ begin
       Canvas.Font.Color := StyleServices.GetStyleFontColor(FontStates[Enabled]);
     {$ENDIF}
 
-    {$IFDEF VER240}
+    {$IF CompilerVersion > 23.0}
     if seClient in StyleElements then
       Canvas.Brush.Color := StyleServices.GetStyleColor(ColorStates[Enabled])
     else
       Canvas.Brush := Brush;
     if seFont in StyleElements then
       Canvas.Font.Color := StyleServices.GetStyleFontColor(FontStates[Enabled]);
-    {$ENDIF}
+    {$IFEND}
+
   end
   else
     Canvas.Brush := Brush;

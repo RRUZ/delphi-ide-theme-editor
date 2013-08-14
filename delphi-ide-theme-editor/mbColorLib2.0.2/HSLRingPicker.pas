@@ -329,8 +329,8 @@ begin
  PBack.Canvas.FillRect(PBack.Canvas.ClipRect);
  {$IFDEF DELPHI_7_UP}
  if ParentBackground then
-  with ThemeServices do
-   if ThemesEnabled then
+  with {$IFDEF DELPHI_XE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF} do
+   if {$IFDEF DELPHI_XE2_UP}StyleServices.Enabled{$ELSE}ThemesEnabled{$ENDIF} then
     begin
      MemDC := CreateCompatibleDC(0);
      OldBMP := SelectObject(MemDC, PBack.Handle);

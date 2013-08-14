@@ -14,7 +14,7 @@
 { The Original Code is uCheckUpdate.pas.                                                           }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -126,9 +126,9 @@ begin
    finally
      FileStream.Free;
    end;
-     BtnInstall.Visible:=FileExists(TempInstallerFileName);
-     BtnCheckUpdates.Visible:=not BtnInstall.Visible;
-     if BtnInstall.Visible and not CheckExternal then ExecuteInstaller;
+   BtnInstall.Visible:=FileExists(TempInstallerFileName);
+   BtnCheckUpdates.Visible:=not BtnInstall.Visible;
+   if BtnInstall.Visible and not CheckExternal then ExecuteInstaller;
   except on E : Exception do
     SetMsg(Format('Error checking updates %s',[E.Message]));
   end;
@@ -262,10 +262,10 @@ begin
  try
    if FRemoteVersion='' then
      ReadRemoteInfo;
-
+                 {
    if DebugHook<>0 then
      Result:=True
-   else
+   else           }
      Result:=(FRemoteVersion>FLocalVersion);
  except on E : Exception do
    begin

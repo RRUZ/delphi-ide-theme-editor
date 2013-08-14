@@ -2,9 +2,9 @@
     <PropertyGroup>
         <ProjectGuid>{070E7AF4-DE7B-4A14-A9BC-894BF4D296B5}</ProjectGuid>
         <MainSource>DITE.dpr</MainSource>
-        <ProjectVersion>14.3</ProjectVersion>
+        <ProjectVersion>14.6</ProjectVersion>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <AppType>Application</AppType>
         <FrameworkType>VCL</FrameworkType>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -225,21 +225,21 @@
                 <Platform value="Win64">True</Platform>
             </Platforms>
             <Deployment>
+                <DeployFile LocalName="DITE.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32"/>
+                </DeployFile>
+                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32"/>
+                </DeployFile>
                 <DeployFile LocalName="DelphiIDEThemeEditor.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>DelphiIDEThemeEditor.rsm</RemoteName>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="DITE.exe" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="Win32"/>
-                </DeployFile>
                 <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>DITE.rsm</RemoteName>
                     </Platform>
-                </DeployFile>
-                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32"/>
                 </DeployFile>
                 <DeployClass Required="true" Name="ProjectOutput">
                     <Platform Name="OSX32">
@@ -337,15 +337,10 @@ EurekaLog Version=7001
 Activate=0
 atVCL=1
 DeleteMapAfterCompile=0
-dpJCL=1
 Encrypt Password=""
 idEurekaLog=1
 idEurekaLogDetailed=1
 idMSClassic=1
 idStepsToReproduce=1
-loCatchLeaks=0
-loCatchLeaksExceptions=0
-loMaxLeaks=0
-ProjectID="{28E5DE24-EE6F-49DE-BB13-F042D3FBECA6}"
-sndShowFailureMsg=1
+ProjectID="{3704271E-2F5D-4ECC-A75F-3EAFB9F55B9C}"
 EurekaLog Last Line -->

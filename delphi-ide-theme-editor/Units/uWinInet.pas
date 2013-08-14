@@ -13,7 +13,7 @@
 { The Original Code is uWinInet.pas.                                                               }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -190,6 +190,7 @@ begin
       Stream.Seek(0,0);
       GetMem(Buffer,BuffSize);
       try
+          Sleep(15000);
           hFile := InternetOpenUrl(hInter, PChar(Url), nil, 0, INTERNET_FLAG_RELOAD, 0);
           if hFile=nil then
           begin
