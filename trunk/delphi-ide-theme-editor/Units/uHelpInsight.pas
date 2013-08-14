@@ -48,13 +48,14 @@ const
     );
 
 
-function  ApplyThemeHelpInsight(const  ATheme : TIDETheme; IDEData   : TDelphiVersionData) : Boolean;
+procedure  ApplyThemeHelpInsight(const  ATheme : TIDETheme; IDEData   : TDelphiVersionData);
 function  SetHelpInsightDefault(IDEData : TDelphiVersionData) : Boolean;
 
 
 implementation
 
 uses
+  uMisc,
   Winapi.Windows,
   Vcl.Graphics,
   Vcl.GraphUtil,
@@ -79,20 +80,32 @@ begin
   begin
     //restore HelpInsight.css
     CssFile:=ExtractFileDir(ExtractFileDir(IDEData.Path))+HelpInsightPaths[IDEData.Version]+'\HelpInsight.css';
-    Result:= CopyFile(PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'HelpInsight\HelpInsight.css'), PChar(CssFile), false);
+    if (not IsUACEnabled) and (CurrentUserIsAdmin) then
+     Result:= CopyFile(PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'HelpInsight\HelpInsight.css'), PChar(CssFile), false)
+    else
+    begin
+     RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s"',[IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'HelpInsight\HelpInsight.css', CssFile]));
+     Result:=True;
+    end;
 
     if Result then
     begin
       //restore HelpInsightGradient.gif
       GifFile:=ExtractFileDir(ExtractFileDir(IDEData.Path))+HelpInsightPaths[IDEData.Version]+'\HelpInsightGradient.gif';
-      Result:=CopyFile(PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'HelpInsight\HelpInsightGradient.gif'), PChar(GifFile), false);
+      if (not IsUACEnabled) and (CurrentUserIsAdmin) then
+       Result:=CopyFile(PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'HelpInsight\HelpInsightGradient.gif'), PChar(GifFile), false)
+      else
+      begin
+       RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s"',[IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'HelpInsight\HelpInsightGradient.gif', GifFile]));
+       Result:=True;
+      end;
     end;
   end;
 end;
 
-function  ApplyThemeHelpInsight(const  ATheme : TIDETheme; IDEData   : TDelphiVersionData) : Boolean;
+procedure ApplyThemeHelpInsight(const  ATheme : TIDETheme; IDEData   : TDelphiVersionData);
 Var
-  Css, CssFile, GifFile : string;
+  Css, TempCssFile ,CssFile, TempGifFile, GifFile : string;
   Color : TColor;
   LBmp : TBitmap;
   LGif  : TGIFImage;
@@ -112,10 +125,19 @@ begin
     //Color:=GetHighLightColor(StringToColor(ATheme[TIDEHighlightElements.LineHighlight].BackgroundColorNew));
     Color:=StringToColor(ATheme[TIDEHighlightElements.MarkedBlock].ForegroundColorNew);
     Css:=StringReplace(Css,HelpInsightCaptionColor,ColorToWebColorStr(Color),[rfReplaceAll]);
-    TFile.WriteAllText(CssFile, Css);
+
+    if (not IsUACEnabled) and CurrentUserIsAdmin then
+     TFile.WriteAllText(CssFile, Css)
+    else
+    begin
+      TempCssFile:=IncludeTrailingPathDelimiter(GetTempDirectory)+'HelpInsight.css';
+      TFile.WriteAllText(TempCssFile, Css);
+      RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s"',[TempCssFile, CssFile]));
+    end;
 
     //create  HelpInsightGradient.gif
     //Color:=StringToColor(ATheme[TIDEHighlightElements.LineHighlight].BackgroundColorNew);
+
     Color:=StringToColor(ATheme[TIDEHighlightElements.MarkedBlock].BackgroundColorNew);
     LBmp:=TBitmap.Create;
     try
@@ -126,9 +148,14 @@ begin
       LBmp.Canvas.FillRect(Rect(0,0, LBmp.Width, LBmp.Height));
        LGif:=TGIFImage.Create;
        try
+         TempGifFile:=IncludeTrailingPathDelimiter(GetTempDirectory)+'HelpInsightGradient.gif';
          GifFile:=ExtractFileDir(ExtractFileDir(IDEData.Path))+HelpInsightPaths[IDEData.Version]+'\HelpInsightGradient.gif';
+
          LGif.Assign(LBmp);
-         LGif.SaveToFile(GifFile);
+         if (not IsUACEnabled)  and CurrentUserIsAdmin then
+           LGif.SaveToFile(GifFile)
+         else
+           RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s"',[TempGifFile, GifFile]));
        finally
          LGif.Free;
        end;

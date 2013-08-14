@@ -38,7 +38,10 @@ procedure MsgBox(const Msg: string);
 function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
 procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
 function  GetSpecialFolder(const CSIDL: integer) : string;
-
+function  IsUACEnabled: Boolean;
+procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
+function  CurrentUserIsAdmin: Boolean;
+function  RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=False) : Boolean;
 
 implementation
 
@@ -56,7 +59,106 @@ uses
   Classes,
   Dialogs,
   System.UITypes,
+  Registry,
   SysUtils;
+
+Const
+ SECURITY_NT_AUTHORITY: TSIDIdentifierAuthority = (Value: (0, 0, 0, 0, 0, 5));
+ SECURITY_BUILTIN_DOMAIN_RID = $00000020;
+ DOMAIN_ALIAS_RID_ADMINS     = $00000220;
+ DOMAIN_ALIAS_RID_USERS      = $00000221;
+ DOMAIN_ALIAS_RID_GUESTS     = $00000222;
+ DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
+
+function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+
+function IsUACEnabled: Boolean;
+var
+  LRegistry: TRegistry;
+begin
+  Result := False;
+  if CheckWin32Version(6, 0) then
+  begin
+    LRegistry := TRegistry.Create;
+    try
+      LRegistry.RootKey := HKEY_LOCAL_MACHINE;
+      if LRegistry.OpenKeyReadOnly('SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System') then
+        Exit(LRegistry.ValueExists('EnableLUA') and LRegistry.ReadBool('EnableLUA'));
+    finally
+      LRegistry.Free;
+    end;
+  end;
+end;
+
+
+function  UserInGroup(Group :DWORD) : Boolean;
+ var
+  pIdentifierAuthority :TSIDIdentifierAuthority;
+  pSid : Windows.PSID;
+  IsMember    : BOOL;
+ begin
+  pIdentifierAuthority := SECURITY_NT_AUTHORITY;
+  Result := AllocateAndInitializeSid(pIdentifierAuthority,2, SECURITY_BUILTIN_DOMAIN_RID, Group, 0, 0, 0, 0, 0, 0, pSid);
+  try
+    if Result then
+      if not CheckTokenMembership(0, pSid, IsMember) then //passing 0 means which the function will be use the token of the calling thread.
+         Result:= False
+      else
+         Result:=IsMember;
+  finally
+     FreeSid(pSid);
+  end;
+ end;
+
+function  CurrentUserIsAdmin: Boolean;
+begin
+ Result:=UserInGroup(DOMAIN_ALIAS_RID_ADMINS);
+end;
+
+procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
+var
+  sei: TShellExecuteInfo;
+begin
+  ZeroMemory(@sei, SizeOf(sei));
+  sei.cbSize := SizeOf(sei);
+  sei.Wnd := hWnd;
+  sei.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI;
+  sei.lpVerb := 'runas';
+  sei.lpFile := PChar(FileName);
+  sei.lpParameters := PChar(Params);
+  sei.nShow := SW_SHOWNORMAL;
+  if not ShellExecuteEx(@sei) then
+    RaiseLastOSError;
+end;
+
+function RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=False):Boolean;
+var
+  sei: TShellExecuteInfo;
+  lpExitCode: DWORD;
+begin
+  Result:=False;
+  FillChar(sei, SizeOf(sei), 0);
+  sei.cbSize := SizeOf(sei);
+  sei.Wnd := hWnd;
+  sei.fMask := SEE_MASK_FLAG_NO_UI or SEE_MASK_NOCLOSEPROCESS;
+  if RunAs then
+    sei.lpVerb := 'runas';
+  sei.lpFile := PChar(FileName);
+  sei.lpParameters := PChar(Params);
+  sei.nShow := SW_SHOWNORMAL;
+
+  if not ShellExecuteEx(@sei) then
+    RaiseLastOSError;
+
+  if sei.hProcess <> 0 then
+  begin
+    while WaitForSingleObject(sei.hProcess, 50) = WAIT_TIMEOUT do
+      Application.ProcessMessages;
+    GetExitCodeProcess(sei.hProcess, lpExitCode);
+    Result:=lpExitCode=0;
+    CloseHandle(sei.hProcess);
+  end;
+end;
 
 function GetSpecialFolder(const CSIDL: integer) : string;
 var
