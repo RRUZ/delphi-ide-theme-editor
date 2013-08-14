@@ -252,6 +252,7 @@ end;
 procedure TColorPanel.SetSelectedColor(const Value: TColor);
 begin
   FSelectedColor := Value;
+  if HexaColorPicker1<>nil then
   HexaColorPicker1.SelectedColor:=Value;
   //RefreshColors(Value);
 end;

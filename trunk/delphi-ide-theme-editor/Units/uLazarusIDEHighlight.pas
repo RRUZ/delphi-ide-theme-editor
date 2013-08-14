@@ -14,7 +14,7 @@
 { The Original Code is uLazarusIDEHighlight.pas.                                                   }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -27,7 +27,7 @@ uses
   uDelphiIDEHighlight;
 
 const
- LazarusOffsetFont=6;
+ LazarusOffsetFont=0;
 
 function  GetLazarusIDEFontSize : Integer;
 function  GetLazarusIDEFontName : string;
@@ -56,18 +56,18 @@ const
   sXMLLazarusEditorOptions=
                             '<?xml version="1.0"?> '+
                             '<CONFIG> '+
-                            '  <EditorOptions Version="6"> '+
+                            '  <EditorOptions Version="9"> '+
                             '    <KeyMapping> '+
                             '      <default> '+
                             '        <Version Value="6"/> '+
                             '      </default> '+
                             '    </KeyMapping> '+
-                            '    <Color Version="6"> '+
-                            '      <LangObjectPascal Version="6"> '+
+                            '    <Color Version="9"> '+
+                            '      <LangObjectPascal> '+
                             '        <ColorScheme Value="Default"/> '+
                             '      </LangObjectPascal> '+
                             '    </Color> '+
-                            '    <Display EditorFont="Courier New" EditorFontHeight="15" DisableAntialiasing="False"/> '+
+                            '    <Display DoNotWarnForFont="Courier New" EditorFont="Courier New" EditorFontSize="15" DisableAntialiasing="False"/> '+
                             '  </EditorOptions> '+
                             '</CONFIG>';
 
@@ -116,7 +116,9 @@ begin
 
     Node := XmlDoc.selectSingleNode(XPath);
     if not VarIsClear(Node) then
-      Node.Text:=Value;
+      Node.Text:=Value
+    else
+     Exit(False);
 
     XmlDoc.Save(GetLazarusEditorOptionsFileName);
     Result:=True;
@@ -128,7 +130,7 @@ end;
 
 function  GetLazarusIDEFontSize : Integer;
 begin
-  if TryStrToInt(GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontHeight'),Result) then
+  if TryStrToInt(GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize'),Result) then
     Result:=Result-LazarusOffsetFont
   else
     Result:=sDefaultLazarusFontSize;
@@ -147,7 +149,7 @@ function  SetLazarusIDEFont(const FontName:String;FontSize:Integer):Boolean;
 begin
   Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont',FontName);
   if Result then
-    Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontHeight',FontSize+LazarusOffsetFont);
+    Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize',FontSize+LazarusOffsetFont);
 end;
 
 function MakeValidTagName(const s: string): string;
