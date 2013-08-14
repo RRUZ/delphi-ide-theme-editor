@@ -93,6 +93,8 @@ implementation
 uses
   Winapi.CommCtrl,
   Vcl.Themes,
+  System.Classes,
+  System.UITypes,
   System.Types;
 
 type

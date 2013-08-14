@@ -5,7 +5,7 @@ object FrmSettings: TFrmSettings
   BorderStyle = bsSingle
   Caption = 'Settings'
   ClientHeight = 316
-  ClientWidth = 257
+  ClientWidth = 300
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -97,15 +97,15 @@ object FrmSettings: TFrmSettings
   object CheckBoxHelpInsight: TCheckBox
     Left = 8
     Top = 71
-    Width = 156
+    Width = 265
     Height = 17
-    Caption = 'Apply theme to Help Insight'
+    Caption = 'Apply theme to Help Insight (Elevation is required)'
     TabOrder = 6
   end
   object PanelPreview: TPanel
     Left = 8
     Top = 140
-    Width = 234
+    Width = 281
     Height = 119
     BevelOuter = bvNone
     TabOrder = 7

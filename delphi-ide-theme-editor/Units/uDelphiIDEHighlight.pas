@@ -299,33 +299,7 @@ begin
    end;
 end;
 
-function RunAndWait(hWnd: HWND; const aFile, aParameters: string) : Boolean;
-var
-  sei: TShellExecuteInfo;
-  lpExitCode: DWORD;
-begin
-  Result:=False;
-  FillChar(sei, SizeOf(sei), 0);
-  sei.cbSize := SizeOf(sei);
-  sei.Wnd := hWnd;
-  sei.fMask := SEE_MASK_FLAG_NO_UI or SEE_MASK_NOCLOSEPROCESS;
-  //sei.lpVerb := 'runas';
-  sei.lpFile := PChar(aFile);
-  sei.lpParameters := PChar(aParameters);
-  sei.nShow := SW_SHOWNORMAL;
 
-  if not ShellExecuteEx(@sei) then
-    RaiseLastOSError;
-
-  if sei.hProcess <> 0 then
-  begin
-    while WaitForSingleObject(sei.hProcess, 50) = WAIT_TIMEOUT do
-      Application.ProcessMessages;
-    GetExitCodeProcess(sei.hProcess, lpExitCode);
-    Result:=lpExitCode=0;
-    CloseHandle(sei.hProcess);
-  end;
-end;
 
 function  ApplyDelphiIDETheme(DelphiVersion:TDelphiVersions;const  ATheme : TIDETheme; const ThemeName : string) : Boolean;
 begin
@@ -359,7 +333,8 @@ begin
   //Result:=False;
   ResName  := GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiVersion));
   FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
-  TFile.Delete(FileName);
+  if TFile.Exists(FileName) then
+    TFile.Delete(FileName);
   AStream  := TResourceStream.Create(hInstance, ResName, RT_RCDATA) ;
   try
    FStream := TFileStream.Create(FileName, fmCreate) ;
@@ -368,7 +343,11 @@ begin
    finally
     FStream.Free;
    end;
-    Result:= FileExists(FileName) and RunAndWait(0,'regedit.exe','/S "'+FileName+'"');
+
+    Result:= FileExists(FileName) and RunAndWait(0,'regedit.exe','/S "'+FileName+'"', IsUACEnabled or not CurrentUserIsAdmin);
+    if Result then
+     RegWriteStr(Format('%s\Editor\DITE',[DelphiRegPaths[DelphiVersion]]),'ThemeName', 'default', HKEY_CURRENT_USER);
+
     //Result:= FileExists(FileName) and RegLoadKey(Format('%s\Editor\Highlight',[DelphiRegPaths[DelphiVersion]]), FileName, HKEY_CURRENT_USER);
   finally
    //TFile.Delete(FileName);
@@ -386,26 +365,31 @@ function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
 begin
   ResName  := GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiVersion));
   FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
-  TFile.Delete(FileName);
+  if TFile.Exists(FileName) then
+    TFile.Delete(FileName);
   AStream  := TResourceStream.Create(hInstance, ResName, RT_RCDATA) ;
-  RegFile  := TStringList.Create;
   try
-   FStream := TFileStream.Create(FileName, fmCreate) ;
-   try
-    FStream.CopyFrom(AStream, 0) ;
-   finally
-    FStream.Free;
-   end;
+    RegFile  := TStringList.Create;
+    try
+     FStream := TFileStream.Create(FileName, fmCreate);
+       try
+        FStream.CopyFrom(AStream, 0) ;
+       finally
+        FStream.Free;
+       end;
 
-   RegFile.LoadFromFile(FileName,TEncoding.Unicode);
-   RegFile.Text:=StringReplace(RegFile.Text,'\Editor\Highlight','\Editor\DelphiTheme\Highlight',[rfReplaceAll]);
-   RegFile.SaveToFile(FileName,TEncoding.Unicode);
-   RunAndWait(0,'regedit.exe','/S "'+FileName+'"');
-   ImportDelphiIDEThemeFromRegExt(Result,DelphiVersion);
+       RegFile.LoadFromFile(FileName,TEncoding.Unicode);
+       RegFile.Text:=StringReplace(RegFile.Text,'\Editor\Highlight','\Editor\DelphiTheme\Highlight',[rfReplaceAll]);
+       RegFile.SaveToFile(FileName,TEncoding.Unicode);
+       RunAndWait(0,'regedit.exe','/S "'+FileName+'"', IsUACEnabled or not CurrentUserIsAdmin);
+       ImportDelphiIDEThemeFromRegExt(Result,DelphiVersion);
+    finally
+     if TFile.Exists(FileName) then
+       TFile.Delete(FileName);
+     RegFile.Free;
+    end;
   finally
-   TFile.Delete(FileName);
-   AStream.Free;
-   RegFile.Free;
+    AStream.Free;
   end;
 end;
 
@@ -413,7 +397,7 @@ function  IsValidDelphiIDETheme(ATheme : TIDETheme) : Boolean;
 var
   Element        : TIDEHighlightElements;
 begin
- Result:=True;
+ //Result:=True;
   for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
   begin
     Result:= (Trim(ATheme[Element].ForegroundColorNew)<>'') and  (Trim(ATheme[Element].BackgroundColorNew)<>'');

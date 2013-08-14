@@ -570,6 +570,8 @@ begin
 
           if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
              SetHelpInsightDefault(IDEData);
+
+          ComboBoxExIDEsChange(nil);
         end;
   except
     on E: Exception do
@@ -1455,6 +1457,7 @@ begin
     begin
       UpDownFontSize.Position := GetDelphiIDEFontSize(DelphiVersion);
       CurrentThemeName:= GetDelphiIDEThemeName(DelphiVersion);
+      if CurrentThemeName='' then CurrentThemeName:='default';
     end
     else
     if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
