@@ -58,10 +58,11 @@ Var
 begin
   IDEsList:=TList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);
-  if IDEsList.Count = 0 then
+
+  if (not IsLazarusInstalled) and (IDEsList.Count = 0) then
   begin
     IDEsList.Free;
-    MsgBox('You don''t have a Object Pascal IDE installed');
+    MsgBox('You don''t have a Object Pascal IDE installed (1)');
     Halt(0);
   end;
   IDEsList.Free;

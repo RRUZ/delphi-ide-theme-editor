@@ -44,9 +44,14 @@ implementation
 uses
   Variants,
   SysUtils,
-  IOUtils,
+  XmlDoc,
+  Xml.Xmldom,
+  Xml.XMLIntf,
   StrUtils,
   ComObj,
+  Dialogs,
+  System.IOUtils,
+  System.Types,
   uLazarusVersions;
 
 const
@@ -71,6 +76,23 @@ const
                             '  </EditorOptions> '+
                             '</CONFIG>';
 
+
+function MakeValidTagName(const s: string): string;
+var
+  c: Char;
+  i: Integer;
+begin
+  SetLength(Result, Length(s));
+  i:=0;
+  for c in s do
+  begin
+   Inc(i);
+    if CharInSet(c,['A'..'Z', 'a'..'z', '0'..'9']) then
+      Result[i] := c
+    else
+      Result[i] := '_';
+  end;
+end;
 
 function GetEditorOptionsXMLValue(const XPath:string)  : string;
 var
@@ -143,31 +165,68 @@ begin
     Result:=sDefaultLazarusFont;
 end;
 
+function CreateLazarusEditorOptionsXMLValue(const XPath: string; Value:OleVariant) : boolean;
+var
+  XML : IXMLDocument;
+  RootNode, CurNode : IXMLNode;
+  NodesArr : TStringDynArray;
+  sAttr, sNode : string;
+begin
+  Result:=False;
+  sAttr:='';
+  XML := NewXMLDocument;
+  XML.LoadFromFile(GetLazarusEditorOptionsFileName);
+  RootNode:=XML.DocumentElement;
+  NodesArr:=SplitString(XPath,'/');
+  CurNode:=RootNode;
+  for sNode in  NodesArr do
+   if (sNode<>'') then
+    if not StartsText('@', sNode) then
+      CurNode:=CurNode.ChildNodes[sNode]
+    else
+    begin
+      sAttr:= ReplaceStr(sNode,'@','');
+      break;
+    end;
+
+  if (sAttr<>'') and (CurNode<>RootNode) then
+  begin
+    CurNode.Attributes[sAttr]:=Value;
+    XML.SaveToFile(GetLazarusEditorOptionsFileName);
+    Result:=True;
+  end;
+end;
+
+function  ApplyLazarusIDETheme(const ATheme:TIDETheme;const ThemeName:string) : Boolean;
+var
+  OutPutFolder : String;
+begin
+  OutPutFolder:=IncludeTrailingPathDelimiter(GetLazarusLocalFolder)+'userschemes';
+  ForceDirectories(OutPutFolder);
+
+  Result:=DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutPutFolder);
+  if Result then
+   Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
+
+  if not Result then
+    Result:=CreateLazarusEditorOptionsXMLValue('/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
+end;
 
 
 function  SetLazarusIDEFont(const FontName:String;FontSize:Integer):Boolean;
 begin
-  Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont',FontName);
+  Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont', FontName);
+  if not Result then
+    Result:=CreateLazarusEditorOptionsXMLValue('/EditorOptions/Display/@EditorFont', FontName);
+
   if Result then
     Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize',FontSize+LazarusOffsetFont);
+
+  if not Result then
+    Result:=CreateLazarusEditorOptionsXMLValue('/EditorOptions/Display/@EditorFontSize', FontSize+LazarusOffsetFont);
 end;
 
-function MakeValidTagName(const s: string): string;
-var
-  c: Char;
-  i: Integer;
-begin
-  SetLength(Result, Length(s));
-  i:=0;
-  for c in s do
-  begin
-   Inc(i);
-    if CharInSet(c,['A'..'Z', 'a'..'z', '0'..'9']) then
-      Result[i] := c
-    else
-      Result[i] := '_';
-  end;
-end;
+
 
 
 function  DelphiIDEThemeToLazarusTheme(const ATheme:TIDETheme;const ThemeName,OutputFolder:string) : Boolean;
@@ -505,17 +564,6 @@ begin
   end;
 end;
 
-function  ApplyLazarusIDETheme(const ATheme:TIDETheme;const ThemeName:string) : Boolean;
-var
-  OutPutFolder : String;
-begin
-  OutPutFolder:=IncludeTrailingPathDelimiter(GetLazarusLocalFolder)+'userschemes';
-  ForceDirectories(OutPutFolder);
-
-  Result:=DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutPutFolder);
-  if Result then
-   Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
-end;
 
 
 function  GetLazarusIDEThemeName : string;
