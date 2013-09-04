@@ -261,7 +261,9 @@ uses
   Vcl.Styles.OwnerDrawFix,
   uMisc,
   uLazarusIDEHighlight,
+  uSMSIDEHighlight,
   uStackTrace,
+  uSMSVersions,
   uCheckUpdate,
   uLoadThemesImages,
   uHelpInsight,
@@ -412,7 +414,7 @@ begin
      DelphiVersion := IDEData.Version
     else
     //if IDEType=TSupportedIDEs.LazarusIDE then
-     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elements
+     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus or SMS use the Delphi XE elements
 
 
     if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
@@ -427,11 +429,17 @@ begin
     end
     else
     if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
-      if ApplyLazarusIDETheme(FCurrentTheme,EditThemeName.Text) then
+      if ApplyLazarusIDETheme(FCurrentTheme, EditThemeName.Text) then
+        MsgBox('The theme was successfully applied')
+      else
+        MsgBox('Error setting theme')
+    else
+    if IDEData.IDEType=TSupportedIDEs.SMSIDE then
+      if ApplySMSIDETheme(FCurrentTheme, EditThemeName.Text) then
         MsgBox('The theme was successfully applied')
       else
         MsgBox('Error setting theme');
-  end;
+   end;
 end;
 
 
@@ -453,7 +461,7 @@ begin
          DelphiVersion := IDEData.Version
         else
         //if IDEType=TSupportedIDEs.LazarusIDE then
-         DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elements
+         DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus or SMS use the Delphi XE elements
 
 
         if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
@@ -467,6 +475,14 @@ begin
         if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
         begin
           if SetLazarusIDEFont(CbIDEFonts.Text, UpDownFontSize.Position) then
+            MsgBox('The font was successfully applied')
+          else
+            MsgBox('Error setting font');
+        end
+        else
+        if IDEData.IDEType=TSupportedIDEs.SMSIDE then
+        begin
+          if SetSMSIDEFont(CbIDEFonts.Text, UpDownFontSize.Position) then
             MsgBox('The font was successfully applied')
           else
             MsgBox('Error setting font');
@@ -914,6 +930,10 @@ begin
   if IsLazarusInstalled then
    FillListLazarusVersions(IDEsList);
 
+  if IsSMSInstalled then
+   FillListSMSVersions(IDEsList);
+
+
   for Index:=0 to IDEsList.Count-1 do
   begin
     IDEData:=IDEsList[Index];
@@ -925,10 +945,8 @@ begin
   ActionImages:=TObjectDictionary<string,TCompPngImages>.Create([doOwnsValues]);
   LoadActionImages;
 
-
   FillPopupActionBar(PopupActionBar1);
   AssignStdActionsPopUpMenu(Self, PopupActionBar1);
-
 
   FChanging := False;
   FSettings := TSettings.Create;
@@ -976,11 +994,8 @@ begin
 
   LabelVersion.Caption := Format('Version %s', [uMisc.GetFileVersion(ParamStr(0))]);
 
-
-
   LoadFixedWidthFonts;
   LoadThemes;
-
 
   if ComboBoxExIDEs.Items.Count > 0 then
   begin
@@ -1002,7 +1017,6 @@ begin
   FrmColorPanel.Align := alClient;
   FrmColorPanel.OnChange:=OnSelForegroundColorChange;
   FrmColorPanel.Show;
-
 end;
 
 
@@ -1231,7 +1245,6 @@ begin
     CblForeground.Selected := StringToColor(FCurrentTheme[Element].ForegroundColorNew);
     CblBackground.Selected := StringToColor(FCurrentTheme[Element].BackgroundColorNew);
 
-
     FChanging:=True;
     try
 
@@ -1248,8 +1261,6 @@ begin
          FrmColorPanel.OnChange:=OnSelBackGroundColorChange;
         end;
       end;
-
-
 
       CheckBold.Checked      := FCurrentTheme[Element].Bold;
       CheckItalic.Checked    := FCurrentTheme[Element].Italic;
@@ -1291,7 +1302,6 @@ begin
     else
     if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
       UpDownFontSize.Position := GetLazarusIDEFontSize;
-
 
     if CbIDEFonts.Items.Count > 0 then
       if IDEData.IDEType=TSupportedIDEs.DelphiIDE then
@@ -1400,7 +1410,6 @@ begin
   LvThemes.OnDrawItem :=nil;
   LvThemes.OnMouseDown:=nil;
 
-
   if not TStyleManager.ActiveStyle.IsSystemStyle then
   begin
     CbElement.Style:=csOwnerDrawFixed;
@@ -1438,7 +1447,7 @@ begin
      DelphiVersion := IDEData.Version
     else
     //if IDEType=TSupportedIDEs.LazarusIDE then
-     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus use the Delphi XE elemnents
+     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus or SMS use the Delphi XE elemnents
 
 
     BtnIDEColorizer.Enabled:=FSettings.ActivateColorizer and (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
@@ -1464,6 +1473,12 @@ begin
     begin
       UpDownFontSize.Position := GetLazarusIDEFontSize;
       CurrentThemeName:=GetLazarusIDEThemeName;
+    end
+    else
+    if IDEData.IDEType=TSupportedIDEs.SMSIDE then
+    begin
+      UpDownFontSize.Position := GetSMSIDEFontSize;
+      CurrentThemeName:=GetSMSIDEThemeName;
     end;
 
 
@@ -1472,7 +1487,11 @@ begin
         CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetDelphiIDEFontName(DelphiVersion))
       else
       if IDEData.IDEType=TSupportedIDEs.LazarusIDE then
-        CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetLazarusIDEFontName);
+        CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetLazarusIDEFontName)
+      else
+      if IDEData.IDEType=TSupportedIDEs.SMSIDE then
+        CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(GetSMSIDEFontName);
+
 
     CbIDEFontsChange(nil);
     BtnApplyFont.Enabled := False;

@@ -731,7 +731,7 @@ object FrmMain: TFrmMain
   object ComboBoxExIDEs: TComboBoxEx
     Left = 244
     Top = 35
-    Width = 129
+    Width = 233
     Height = 22
     ItemsEx = <>
     Style = csExDropDownList
@@ -740,13 +740,14 @@ object FrmMain: TFrmMain
     Images = ImageListDelphiVersion
   end
   object BtnIDEColorizer: TButton
-    Left = 379
-    Top = 32
+    Left = 617
+    Top = 79
     Width = 98
     Height = 25
     Caption = 'IDE Colorizer'
     Enabled = False
     TabOrder = 1
+    Visible = False
     OnClick = BtnIDEColorizerClick
   end
   object Button1: TButton
@@ -761,10 +762,11 @@ object FrmMain: TFrmMain
   end
   object PanelColors: TPanel
     Left = 721
-    Top = 16
+    Top = 15
     Width = 236
     Height = 546
     Anchors = [akTop, akRight, akBottom]
+    BevelOuter = bvNone
     TabOrder = 26
   end
   object RadioButtonFore: TRadioButton
@@ -788,6 +790,7 @@ object FrmMain: TFrmMain
     OnClick = RadioButtonForeClick
   end
   object ImageListDelphiVersion: TImageList
+    ColorDepth = cd32Bit
     Left = 323
     Top = 291
   end
@@ -810,7 +813,7 @@ object FrmMain: TFrmMain
     Left = 508
     Top = 311
     Bitmap = {
-      494C010106000900A4010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000900B4010B000E00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000002C0000001C00000001002000000000004013
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -983,7 +986,7 @@ object FrmMain: TFrmMain
     Left = 396
     Top = 307
     Bitmap = {
-      494C010107000800780110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800880110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -1294,6 +1297,7 @@ object FrmMain: TFrmMain
     Top = 224
   end
   object ImageListThemes: TImageList
+    ColorDepth = cd32Bit
     Left = 56
     Top = 96
   end

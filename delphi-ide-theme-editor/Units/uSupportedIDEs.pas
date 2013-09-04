@@ -24,9 +24,9 @@ unit uSupportedIDEs;
 interface
 
 type
-  TSupportedIDEs = (DelphiIDE,LazarusIDE);
+  TSupportedIDEs = (DelphiIDE,LazarusIDE, SMSIDE);
 const
-  ListSupportedIDEs : array[TSupportedIDEs] of string = ('Delphi IDE','Lazarus IDE');
+  ListSupportedIDEs : array[TSupportedIDEs] of string = ('Delphi IDE','Lazarus IDE', 'Smart Mobile Studio IDE');
 
 implementation
 
