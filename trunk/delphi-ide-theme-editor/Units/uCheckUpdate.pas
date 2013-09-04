@@ -259,13 +259,16 @@ end;
 function TFrmCheckUpdate.GetUpdateAvailable: Boolean;
 begin
  Result:=False;
+ if DebugHook<>0 then exit;
+
+
  try
    if FRemoteVersion='' then
      ReadRemoteInfo;
-                 {
+
    if DebugHook<>0 then
      Result:=True
-   else           }
+   else
      Result:=(FRemoteVersion>FLocalVersion);
  except on E : Exception do
    begin

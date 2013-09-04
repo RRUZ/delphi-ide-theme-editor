@@ -33,6 +33,8 @@ procedure ExtractIconFile(Icon: TIcon; const Filename: string;IconType : Cardina
 function  GetFileVersion(const FileName: string): string;
 function  IsAppRunning(const FileName: string): boolean;
 function  GetLocalAppDataFolder: string;
+function  GetAppDataFolder: string;
+function  GetSpecialFolderLocation(nFolder: Integer): string;
 function  GetTempDirectory: string;
 procedure MsgBox(const Msg: string);
 function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
@@ -42,6 +44,7 @@ function  IsUACEnabled: Boolean;
 procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
 function  CurrentUserIsAdmin: Boolean;
 function  RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=False) : Boolean;
+function  MakeValidTagName(const s: string): string;
 
 implementation
 
@@ -59,6 +62,7 @@ uses
   Classes,
   Dialogs,
   System.UITypes,
+  WinApi.SHFolder,
   Registry,
   SysUtils;
 
@@ -71,6 +75,25 @@ Const
  DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
 
 function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+
+
+function MakeValidTagName(const s: string): string;
+var
+  c: Char;
+  i: Integer;
+begin
+  SetLength(Result, Length(s));
+  i:=0;
+  for c in s do
+  begin
+   Inc(i);
+    if CharInSet(c,['A'..'Z', 'a'..'z', '0'..'9']) then
+      Result[i] := c
+    else
+      Result[i] := '_';
+  end;
+end;
+
 
 function IsUACEnabled: Boolean;
 var
@@ -201,9 +224,7 @@ begin
   Result := StrPas(lpBuffer);
 end;
 
-function GetLocalAppDataFolder: string;
-const
-  CSIDL_LOCAL_APPDATA = $001C;
+function  GetSpecialFolderLocation(nFolder: Integer): string;
 var
   ppMalloc: IMalloc;
   ppidl:    PItemIdList;
@@ -212,7 +233,7 @@ begin
   try
     if SHGetMalloc(ppMalloc) = S_OK then
     begin
-      SHGetSpecialFolderLocation(0, CSIDL_LOCAL_APPDATA, ppidl);
+      SHGetSpecialFolderLocation(0, nFolder, ppidl);
       SetLength(Result, MAX_PATH);
       if not SHGetPathFromIDList(ppidl, PChar(Result)) then
         RaiseLastOSError;
@@ -224,6 +245,15 @@ begin
   end;
 end;
 
+function GetLocalAppDataFolder: string;
+begin
+  Result:=GetSpecialFolderLocation(CSIDL_LOCAL_APPDATA);
+end;
+
+function GetAppDataFolder: string;
+begin
+  Result:=GetSpecialFolderLocation(CSIDL_APPDATA);
+end;
 
 function ProcessFileName(dwProcessId: DWORD): string;
 var
@@ -285,8 +315,8 @@ begin
   if FileExists(Filename) then
   begin
     FillChar(FileInfo, SizeOf(FileInfo), 0);
-    SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
-      SHGFI_ICON or IconType);
+    if SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
+      SHGFI_ICON or IconType)=0 then RaiseLastOSError;
     if FileInfo.hIcon <> 0 then
       Icon.Handle:=FileInfo.hIcon;
   end;

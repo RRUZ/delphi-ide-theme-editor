@@ -51,6 +51,7 @@ uses
   ComObj,
   Dialogs,
   System.IOUtils,
+  uMisc,
   System.Types,
   uLazarusVersions;
 
@@ -77,22 +78,7 @@ const
                             '</CONFIG>';
 
 
-function MakeValidTagName(const s: string): string;
-var
-  c: Char;
-  i: Integer;
-begin
-  SetLength(Result, Length(s));
-  i:=0;
-  for c in s do
-  begin
-   Inc(i);
-    if CharInSet(c,['A'..'Z', 'a'..'z', '0'..'9']) then
-      Result[i] := c
-    else
-      Result[i] := '_';
-  end;
-end;
+
 
 function GetEditorOptionsXMLValue(const XPath:string)  : string;
 var

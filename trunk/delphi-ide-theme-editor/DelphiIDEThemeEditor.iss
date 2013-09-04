@@ -8,6 +8,7 @@ Source: Extras\Office2007.cjstyles; DestDir: {tmp}; Flags: dontcopy
 Source: DITE.exe; DestDir: {app}
 Source: default\ColorDummy.xml; DestDir: {app}\default\
 Source: default\default.theme.xml; DestDir: {app}\default\
+Source: default\Default.shi; DestDir: {app}\default\
 Source: Themes Eclipse\EclipseThemes.zip; DestDir: {userappdata}\DITE\Themes Eclipse\
 Source: Themes VS\VsThemes.rar; DestDir: {userappdata}\DITE\Themes VS\
 Source: Themes Lazarus\ColorAqua_theme.xml; DestDir: {userappdata}\DITE\Themes Lazarus\
@@ -2175,6 +2176,7 @@ Source: Themes\zero-reqiem.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\zeym.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\zhech.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\ziyong.theme.xml; DestDir: {userappdata}\DITE\Themes\
+
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}

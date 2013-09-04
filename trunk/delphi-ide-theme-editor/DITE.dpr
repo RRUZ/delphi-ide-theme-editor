@@ -35,7 +35,9 @@ uses
   uHelpInsight in 'Units\uHelpInsight.pas',
   Vcl.Styles.OwnerDrawFix in 'Units\Vcl.Styles.OwnerDrawFix.pas',
   Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas',
-  uColorPanel in 'Units\uColorPanel.pas' {ColorPanel};
+  uColorPanel in 'Units\uColorPanel.pas' {ColorPanel},
+  uSMSIDEHighlight in 'Units\uSMSIDEHighlight.pas',
+  uSMSVersions in 'Units\uSMSVersions.pas';
 
 {$R *.res}
 
@@ -59,7 +61,7 @@ begin
   IDEsList:=TList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);
 
-  if (not IsLazarusInstalled) and (IDEsList.Count = 0) then
+  if (not IsSMSInstalled) and (not IsLazarusInstalled) and (IDEsList.Count = 0) then
   begin
     IDEsList.Free;
     MsgBox('You don''t have a Object Pascal IDE installed (1)');

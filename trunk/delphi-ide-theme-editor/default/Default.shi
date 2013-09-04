@@ -1,0 +1,51 @@
+<Highlighter Background="16777215" Foreground="0" Style="0">
+  <ObjectPascal>
+    <Assembler Background="536870911" Foreground="128" Style="0" />
+    <Character Background="536870911" Foreground="16711680" Style="0" />
+    <Comment Background="536870911" Foreground="32768" Style="2" />
+    <Float Background="536870911" Foreground="16711680" Style="0" />
+    <Hexadecimal Background="536870911" Foreground="16711680" Style="0" />
+    <Identifier Background="536870911" Foreground="0" Style="0" />
+    <Number Background="536870911" Foreground="16711680" Style="0" />
+    <Preprocessor Background="536870911" Foreground="8421376" Style="2" />
+    <ReservedWord Background="536870911" Foreground="16711680" Style="1" />
+    <Space Background="536870911" Foreground="536870911" Style="0" />
+    <String Background="536870911" Foreground="8421504" Style="0" />
+    <Symbol Background="536870911" Foreground="8388608" Style="0" />
+  </ObjectPascal>
+  <JavaScript>
+    <Comment Background="536870911" Foreground="32768" Style="2" />
+    <Event Background="536870911" Foreground="536870911" Style="0" />
+    <Identifier Background="536870911" Foreground="0" Style="0" />
+    <NonreservedKeyword Background="536870911" Foreground="16711680" Style="0" />
+    <Number Background="536870911" Foreground="536870911" Style="0" />
+    <ReservedWord Background="536870911" Foreground="16711680" Style="1" />
+    <Space Background="536870911" Foreground="536870911" Style="0" />
+    <String Background="536870911" Foreground="8421504" Style="0" />
+    <Symbol Background="536870911" Foreground="8388608" Style="0" />
+  </JavaScript>
+  <HTML>
+    <Comment Background="536870911" Foreground="32768" Style="2" />
+    <EscapeAmpersand Background="536870911" Foreground="65280" Style="1" />
+    <Identifier Background="536870911" Foreground="536870911" Style="1" />
+    <ReservedWord Background="536870911" Foreground="16711680" Style="1" />
+    <Space Background="536870911" Foreground="536870911" Style="0" />
+    <Symbol Background="536870911" Foreground="8388608" Style="0" />
+    <Text Background="536870911" Foreground="536870911" Style="0" />
+    <UnknownWord Background="536870911" Foreground="255" Style="1" />
+    <Value Background="536870911" Foreground="16744448" Style="0" />
+  </HTML>
+  <CascadingStyleSheet>
+    <ColorValue Background="536870911" Foreground="536870911" Style="0" />
+    <Comment Background="536870911" Foreground="32768" Style="0" />
+    <Number Background="536870911" Foreground="536870911" Style="0" />
+    <Property Background="536870911" Foreground="0" Style="1" />
+    <ReservedWord Background="536870911" Foreground="16711680" Style="1" />
+    <Space Background="536870911" Foreground="536870911" Style="0" />
+    <String Background="536870911" Foreground="8421504" Style="0" />
+    <Symbol Background="536870911" Foreground="8388608" Style="0" />
+    <Text Background="536870911" Foreground="0" Style="0" />
+    <UndefinedProperty Background="536870911" Foreground="16711808" Style="1" />
+    <Value Background="536870911" Foreground="16744448" Style="0" />
+  </CascadingStyleSheet>
+</Highlighter>

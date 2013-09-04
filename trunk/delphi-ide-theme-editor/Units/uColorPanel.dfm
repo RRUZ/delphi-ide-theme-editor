@@ -3362,8 +3362,8 @@ object ColorPanel: TColorPanel
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl
-    Left = 10
-    Top = 105
+    Left = 8
+    Top = 106
     Width = 225
     Height = 212
     ActivePage = TabSheetHexa
@@ -3390,6 +3390,7 @@ object ColorPanel: TColorPanel
     Top = 8
     Width = 233
     Height = 89
+    BevelOuter = bvNone
     TabOrder = 1
     object Label1: TLabel
       Left = 6
@@ -3608,7 +3609,7 @@ object ColorPanel: TColorPanel
     Left = 184
     Top = 191
     Bitmap = {
-      494C010101002000680018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010020006C0018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000
