@@ -107,14 +107,14 @@
         <DCC_DebugInformation>false</DCC_DebugInformation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <VerInfo_Release>6</VerInfo_Release>
+        <VerInfo_Release>1</VerInfo_Release>
         <DCC_DebugInformation>true</DCC_DebugInformation>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-        <VerInfo_MinorVer>2</VerInfo_MinorVer>
-        <VerInfo_Build>12</VerInfo_Build>
+        <VerInfo_MinorVer>3</VerInfo_MinorVer>
+        <VerInfo_Build>0</VerInfo_Build>
         <DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.2.6.12;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.3.1.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
     <ItemGroup>
@@ -230,18 +230,18 @@
                 <DeployFile LocalName="DITE.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32"/>
                 </DeployFile>
-                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32"/>
+                <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
+                    <Platform Name="Win32">
+                        <RemoteName>DITE.rsm</RemoteName>
+                    </Platform>
                 </DeployFile>
                 <DeployFile LocalName="DelphiIDEThemeEditor.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>DelphiIDEThemeEditor.rsm</RemoteName>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
-                    <Platform Name="Win32">
-                        <RemoteName>DITE.rsm</RemoteName>
-                    </Platform>
+                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32"/>
                 </DeployFile>
                 <DeployClass Required="true" Name="ProjectOutput">
                     <Platform Name="OSX32">
