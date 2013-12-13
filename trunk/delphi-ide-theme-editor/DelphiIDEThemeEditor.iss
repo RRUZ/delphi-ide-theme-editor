@@ -3,8 +3,6 @@
 #define MyAppName 'Delphi IDE Theme Editor'
 #define MyAppVersion GetFileVersion('DITE.exe')
 [Files]
-Source: Extras\ISSkin.dll; DestDir: {app}; Flags: dontcopy
-Source: Extras\Office2007.cjstyles; DestDir: {tmp}; Flags: dontcopy
 Source: DITE.exe; DestDir: {app}
 Source: default\ColorDummy.xml; DestDir: {app}\default\
 Source: default\default.theme.xml; DestDir: {app}\default\
@@ -2176,7 +2174,8 @@ Source: Themes\zero-reqiem.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\zeym.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\zhech.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\ziyong.theme.xml; DestDir: {userappdata}\DITE\Themes\
-
+Source: Installer\VclStylesInno.dll; DestDir: {app}; Flags: dontcopy
+Source: Installer\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -2195,8 +2194,8 @@ UsePreviousAppDir=true
 AppendDefaultDirName=true
 PrivilegesRequired=admin
 WindowVisible=false
-WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
-WizardImageFile=Extras\Office2007Gray.bmp
+WizardSmallImageFile=Installer\WizModernSmallImage-IS_BW.bmp
+WizardImageFile=Installer\WizModernImage-IS_BW.bmp
 AppContact=theroadtodelphi@gmail.com
 DisableProgramGroupPage=false
 AppID=DelphiIDEThemeEditor
@@ -2223,9 +2222,11 @@ Name: {app}\HelpInsight
 Name: {group}\Delphi IDE Theme Editor; Filename: {app}\DITE.exe; WorkingDir: {app}
 Name: {userdesktop}\Delphi IDE Theme Editor; Filename: {app}\DITE.exe; WorkingDir: {app}
 [Code]
-procedure LoadSkin(lpszPath: String; lpszIniFileName: String); external 'LoadSkin@files:isskin.dll stdcall';
-procedure UnloadSkin(); external 'UnloadSkin@files:isskin.dll stdcall';
-function  ShowWindow(hWnd: Integer; uType: Integer): Integer; external 'ShowWindow@user32.dll stdcall';
+// Import the LoadVCLStyle function from VclStylesInno.DLL
+procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
+// Import the UnLoadVCLStyles function from VclStylesInno.DLL
+procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll stdcall';
+
 
 function GetUninstallString(): String;
 var
@@ -2264,15 +2265,14 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-   ExtractTemporaryFile('Office2007.cjstyles');
-   LoadSkin(ExpandConstant('{tmp}\Office2007.cjstyles'), 'NormalBlack.ini');
+	ExtractTemporaryFile('Amakrits.vsf');
+	LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
    Result:=True;
 end;
 
 procedure DeinitializeSetup();
 begin
-	ShowWindow(StrToInt(ExpandConstant('{wizardhwnd}')), 0);
-	UnloadSkin();
+	UnLoadVCLStyles;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
