@@ -1,23 +1,23 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit uDelphiVersions                                                                             }
-{ unit for the Delphi IDE Theme Editor                                                             }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is uDelphiVersions.pas.                                                        }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit uDelphiVersions
+// unit for the Delphi IDE Theme Editor
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is uDelphiVersions.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 
 unit uDelphiVersions;
 
@@ -52,7 +52,8 @@ type
     DelphiXE2,
     DelphiXE3,
     DelphiXE4,
-    DelphiXE5
+    DelphiXE5,
+    Appmethod
 );
 
   TDelphiVersionData=Class
@@ -133,7 +134,8 @@ Color15=$FFFFFF
     'RAD Studio XE2',
     'RAD Studio XE3',
     'RAD Studio XE4',
-    'RAD Studio XE5'
+    'RAD Studio XE5',
+    'Appmethod 1.13'
     );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
@@ -153,7 +155,8 @@ Color15=$FFFFFF
     23,      // 'RAD Studio XE2'
     24,      // 'RAD Studio XE3'
     25,      // 'RAD Studio XE4'
-    26       // 'RAD Studio XE5'
+    26,      // 'RAD Studio XE5'
+    26       // 'Appmethod 1.13'
     );
 
 
@@ -174,7 +177,8 @@ Color15=$FFFFFF
     '\Software\Embarcadero\BDS\9.0',
     '\Software\Embarcadero\BDS\10.0',
     '\Software\Embarcadero\BDS\11.0',
-    '\Software\Embarcadero\BDS\12.0'
+    '\Software\Embarcadero\BDS\12.0',
+    '\Software\Embarcadero\BDS\13.0'
     );
 
 

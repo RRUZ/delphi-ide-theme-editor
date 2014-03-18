@@ -93,6 +93,7 @@ begin
   try
     LIniFileName.WriteString('editor','use_fontname', FontName);
     LIniFileName.WriteInteger('editor','use_font_size', FontSize);
+    Result:=True;
   finally
     LIniFileName.Free;
   end;
@@ -213,7 +214,7 @@ const
 var
   XmlStr: string;
   XmlDoc: olevariant;
-  Node:   olevariant;
+  //Node:   olevariant;
 
   procedure SetElement(const XPath,Name : string; Element :TItemIDEHighlightElementsAttributes);
   var
