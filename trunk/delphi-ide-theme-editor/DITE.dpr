@@ -37,7 +37,8 @@ uses
   Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas',
   uColorPanel in 'Units\uColorPanel.pas' {ColorPanel},
   uSMSIDEHighlight in 'Units\uSMSIDEHighlight.pas',
-  uSMSVersions in 'Units\uSMSVersions.pas';
+  uSMSVersions in 'Units\uSMSVersions.pas',
+  uAppMethodVersions in 'Units\uAppMethodVersions.pas';
 
 {$R *.res}
 

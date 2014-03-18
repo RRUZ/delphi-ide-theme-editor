@@ -1,23 +1,23 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit Main                                                                                        }
-{ Main Form  for the Delphi IDE Theme Editor                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is Main.pas.                                                                   }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit Main
+// Main Form  for the Delphi IDE Theme Editor
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is Main.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 
 unit Main;
 
@@ -68,7 +68,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, uColorPanel,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,  uColorSelector,
-  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,
+  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,  uAppMethodVersions,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes;
 
@@ -933,6 +933,7 @@ begin
   if IsSMSInstalled then
    FillListSMSVersions(IDEsList);
 
+  //FillListAppMethodVersions(IDEsList);
 
   for Index:=0 to IDEsList.Count-1 do
   begin
@@ -1447,7 +1448,7 @@ begin
      DelphiVersion := IDEData.Version
     else
     //if IDEType=TSupportedIDEs.LazarusIDE then
-     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus or SMS use the Delphi XE elemnents
+     DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus, SMS or Appmethod use the Delphi XE elements
 
 
     BtnIDEColorizer.Enabled:=FSettings.ActivateColorizer and (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);

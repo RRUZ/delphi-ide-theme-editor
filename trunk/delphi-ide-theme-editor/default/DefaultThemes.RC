@@ -2,12 +2,19 @@ Delphi5 RCDATA 5.reg
 Delphi6 RCDATA 6.reg
 Delphi7 RCDATA 7.reg
 Delphi2005 RCDATA 2005.reg
+
 Delphi2006 RCDATA 2006.reg
+
 Delphi2007 RCDATA 2007.reg
+
 Delphi2009 RCDATA 2009.reg
+
 Delphi2010 RCDATA 2010.reg
+
 DelphiXE RCDATA XE.reg
 DelphiXE2 RCDATA XE2.reg
+
 DelphiXE3 RCDATA XE3.reg
 DelphiXE4 RCDATA XE4.reg
 DelphiXE5 RCDATA XE5.reg
+Appmethod RCDATA Appmethod.reg
