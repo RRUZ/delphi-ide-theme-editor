@@ -2176,6 +2176,8 @@ Source: Themes\zhech.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\ziyong.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Installer\VclStylesInno.dll; DestDir: {app}; Flags: dontcopy
 Source: Installer\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
+Source: Installer\background.bmp; Flags: dontcopy
+
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
@@ -2262,6 +2264,42 @@ begin
     Result := 1;
 end;
 
+procedure BitmapImageOnClick(Sender: TObject);
+var
+  ErrorCode : Integer;
+begin
+  ShellExec('open', 'http://code.google.com/p/delphi-ide-theme-editor/', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+end;
+
+procedure CreateWizardPages;
+var
+  Page: TWizardPage;
+  BitmapImage: TBitmapImage;
+  BitmapFileName: String;
+begin
+  BitmapFileName := ExpandConstant('{tmp}\background.bmp');
+  ExtractTemporaryFile(ExtractFileName(BitmapFileName));
+
+  { TBitmapImage }
+  Page := CreateCustomPage(wpInstalling, 'Contributions',
+  'If you want show your appreciation for this project. Go to the code google page, login with you google account and star the project.');
+
+  BitmapImage := TBitmapImage.Create(Page);
+  BitmapImage.AutoSize := True;
+  BitmapImage.Left := 0;
+  BitmapImage.Top  := 0;
+  BitmapImage.Bitmap.LoadFromFile(BitmapFileName);
+  BitmapImage.Cursor := crHand;
+  BitmapImage.OnClick := @BitmapImageOnClick;
+  BitmapImage.Parent := Page.Surface;
+  BitmapImage.Align:=alCLient;
+  BitmapImage.Stretch:=True;
+end;
+
+procedure InitializeWizard();
+begin
+  CreateWizardPages;
+end;
 
 function InitializeSetup(): Boolean;
 begin
