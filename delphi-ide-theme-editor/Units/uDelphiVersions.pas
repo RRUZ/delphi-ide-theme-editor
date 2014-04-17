@@ -53,7 +53,8 @@ type
     DelphiXE3,
     DelphiXE4,
     DelphiXE5,
-    Appmethod
+    Appmethod,
+    DelphiXE6
 );
 
   TDelphiVersionData=Class
@@ -135,7 +136,8 @@ Color15=$FFFFFF
     'RAD Studio XE3',
     'RAD Studio XE4',
     'RAD Studio XE5',
-    'Appmethod 1.13'
+    'Appmethod 1.13',
+    'RAD Studio XE6'
     );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
@@ -156,7 +158,8 @@ Color15=$FFFFFF
     24,      // 'RAD Studio XE3'
     25,      // 'RAD Studio XE4'
     26,      // 'RAD Studio XE5'
-    26       // 'Appmethod 1.13'
+    27,      // 'Appmethod 1.13'
+    27       // 'RAD Studio XE6'
     );
 
 
@@ -178,7 +181,8 @@ Color15=$FFFFFF
     '\Software\Embarcadero\BDS\10.0',
     '\Software\Embarcadero\BDS\11.0',
     '\Software\Embarcadero\BDS\12.0',
-    '\Software\Embarcadero\BDS\13.0'
+    '\Software\Embarcadero\BDS\13.0',
+    '\Software\Embarcadero\BDS\14.0'
     );
 
 

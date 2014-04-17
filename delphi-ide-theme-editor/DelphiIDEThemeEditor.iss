@@ -2303,8 +2303,8 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-	ExtractTemporaryFile('Amakrits.vsf');
-	LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
+   ExtractTemporaryFile('Amakrits.vsf');
+   LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
    Result:=True;
 end;
 
