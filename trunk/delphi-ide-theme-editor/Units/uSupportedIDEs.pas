@@ -26,7 +26,7 @@ interface
 type
   TSupportedIDEs = (DelphiIDE,LazarusIDE, SMSIDE, AppMethodIDE);
 const
-  ListSupportedIDEs : array[TSupportedIDEs] of string = ('Delphi IDE','Lazarus IDE', 'Smart Mobile Studio IDE', 'AppMethod IDE');
+  ListSupportedIDEs : array[TSupportedIDEs] of string = ('Delphi IDE', 'Lazarus IDE', 'Smart Mobile Studio IDE', 'AppMethod IDE');
 
 implementation
 
