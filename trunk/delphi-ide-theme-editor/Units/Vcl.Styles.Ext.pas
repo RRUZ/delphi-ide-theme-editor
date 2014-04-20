@@ -1,24 +1,24 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit Vcl.Styles.Ext                                                                              }
-{ unit for the VCL Styles Utils                                                                    }
-{ http://code.google.com/p/vcl-styles-utils/                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is Vcl.Styles.Ext.pas.                                                         }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2013 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit Vcl.Styles.Ext
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is Vcl.Styles.Ext.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 unit Vcl.Styles.Ext;
 
 interface
@@ -27,11 +27,11 @@ interface
 
 
 Uses
+  Winapi.Windows,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Forms,
-  Generics.Collections,
-  Winapi.Windows,
+  System.Generics.Collections,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.ExtCtrls,
@@ -229,6 +229,7 @@ type
     procedure SetSystemColor(Color: TColor; NewColor: TColor);
   End;
       }
+//function DoHasElementFixedPosition(Details: TThemedElementDetails): Boolean;
 
 {$ENDIF}
 
@@ -246,25 +247,16 @@ uses
  Vcl.Imaging.pngimage,
  Winapi.Messages,
 {$ENDIF}
- Rtti,
+ System.Rtti,
  System.Types,
  Vcl.Dialogs,
  System.Sysutils;
 
-{$IFDEF USE_VCL_STYLESAPI}
- {$IFDEF VER230}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
- {$IFDEF VER240}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
- {$IFDEF VER250}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
-{$ENDIF}
+
+{$IF (DEFINED (USE_VCL_STYLESAPI) and (CompilerVersion >=23))}
+{$I '..\source\vcl\StyleUtils.inc'}
+{$I '..\source\vcl\StyleAPI.inc'}
+{$IFEND}
 
 
 type
@@ -275,9 +267,68 @@ type
   public
     class function GetRegisteredStyleHooks : TStyleHookDictionary;
   End;
+{
+const
+  THEME_WP_CAPTION = 77;
+  THEME_WP_SMALLCAPTION = 78;
+  THEME_WP_MINCAPTION = 79;
+  THEME_WP_SMALLMINCAPTION = 80;
+  THEME_WP_MAXCAPTION = 81;
+  THEME_WP_SMALLMAXCAPTION = 82;
+  THEME_WP_FRAMELEFT = 83;
+  THEME_WP_FRAMERIGHT = 84;
+  THEME_WP_FRAMEBOTTOM = 85;
+  THEME_WP_SMALLFRAMELEFT = 86;
+  THEME_WP_SMALLFRAMERIGHT = 87;
+  THEME_WP_SMALLFRAMEBOTTOM = 88;
 
+  THEME_WP_SYSBUTTON = 89;
+  THEME_WP_MDISYSBUTTON = 90;
+  THEME_WP_MINBUTTON = 91;
+  THEME_WP_MDIMINBUTTON = 92;
+  THEME_WP_MAXBUTTON = 93;
+  THEME_WP_CLOSEBUTTON = 94;
+  THEME_WP_SMALLCLOSEBUTTON = 95;
+  THEME_WP_MDICLOSEBUTTON = 96;
+  THEME_WP_RESTOREBUTTON = 97;
+  THEME_WP_MDIRESTOREBUTTON = 98;
+  THEME_WP_HELPBUTTON = 99;
+  THEME_WP_MDIHELPBUTTON = 100;
+  THEME_WP_HORZSCROLL = 101;
+  THEME_WP_HORZTHUMB = 102;
+  THEME_WP_VERTSCROLL = 103;
+  THEME_WP_VERTTHUMB = 104;
+  THEME_WP_DIALOG = 105;
+  THEME_WP_CAPTIONSIZINGTEMPLATE = 106;
+  THEME_WP_SMALLCAPTIONSIZINGTEMPLATE = 107;
+  THEME_WP_FRAMELEFTSIZINGTEMPLATE = 108;
+  THEME_WP_SMALLFRAMELEFTSIZINGTEMPLATE = 109;
+  THEME_WP_FRAMERIGHTSIZINGTEMPLATE = 110;
+  THEME_WP_SMALLFRAMERIGHTSIZINGTEMPLATE = 111;
+  THEME_WP_FRAMEBOTTOMSIZINGTEMPLATE = 112;
+  THEME_WP_SMALLFRAMEBOTTOMSIZINGTEMPLATE = 113;
+  THEME_WP_FRAME = 114;
 
-
+function DoHasElementFixedPosition(Details: TThemedElementDetails): Boolean;
+begin
+  Result := False;
+  if Details.Element <> teWindow then Exit;
+  case Details.Part of
+    THEME_WP_SMALLCLOSEBUTTON, THEME_WP_SMALLCAPTION:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscToolWindow, kwbClose);
+    THEME_WP_CLOSEBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbClose);
+    THEME_WP_HELPBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbHelp);
+    THEME_WP_MAXBUTTON, THEME_WP_RESTOREBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbMax);
+    THEME_WP_MINBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbMin);
+    THEME_WP_SYSBUTTON, THEME_WP_CAPTION:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbSysMenu);
+  end;
+end;
+}
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
 begin
   Result:= Self.FRegisteredStyleHooks;
@@ -1046,8 +1097,10 @@ var
   //LBitmap         : TBitmap;
   ThemeTextColor  : TColor;
   ARect           : TRect;
+  LRect           : TRect;
   //BlendFunction   : TBlendFunction;
   LRegion         : HRgn;
+  i               : Integer;
 
     function GetBorderSize: TRect;
     var
@@ -1088,88 +1141,90 @@ begin
   BorderRect := GetBorderSize;
   ARect:=ClientRect;
   CaptionBitmap := TBitmap.Create;
-  CaptionBitmap.SetSize(ARect.Width, BorderRect.Top);
-      {
-  LBitmap:=TBitmap.Create;
-  LBitmap.PixelFormat:=pf32bit;
-  }
-  FBitmap.Width :=ClientRect.Width;
-  FBitmap.Height:=ClientRect.Height;
-
-  //Draw background
-  LDetails.Element := teWindow;
-  LDetails.Part := 0;
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ARect);
-
-  //Draw caption border
-  CaptionRect := Rect(0, 0, CaptionBitmap.Width, CaptionBitmap.Height);
-  LDetails := Style.GetElementDetails(twCaptionActive);
-
-  LRegion := FRegion;
   try
-    Style.GetElementRegion(LDetails, ARect, FRegion);
-    SetWindowRgn(Handle, FRegion, True);
+    CaptionBitmap.SetSize(ARect.Width, BorderRect.Top);
+        {
+    LBitmap:=TBitmap.Create;
+    LBitmap.PixelFormat:=pf32bit;
+    }
+    FBitmap.Width :=ClientRect.Width;
+    FBitmap.Height:=ClientRect.Height;
+
+    //Draw background
+    LDetails.Element := teWindow;
+    LDetails.Part := 0;
+    Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ARect);
+
+    //Draw caption border
+    CaptionRect := Rect(0, 0, CaptionBitmap.Width, CaptionBitmap.Height);
+    LDetails := Style.GetElementDetails(twCaptionActive);
+
+    LRegion := FRegion;
+    try
+      Style.GetElementRegion(LDetails, ARect, FRegion);
+      SetWindowRgn(Handle, FRegion, True);
+    finally
+      if LRegion <> 0 then
+        DeleteObject(LRegion);
+    end;
+
+         {
+    Style.GetElementRegion(LDetails, ARect, Region);
+    SetWindowRgn(Handle, Region, True);
+        }
+
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, CaptionRect);
+    TextRect := CaptionRect;
+    CaptionDetails := LDetails;
+
+    //Draw icon
+    IconDetails := Style.GetElementDetails(twSysButtonNormal);
+    if not Style.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
+      ButtonRect := Rect(0, 0, 0, 0);
+    IconRect := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+    RectVCenter(IconRect, ButtonRect);
+    if ButtonRect.Width > 0 then
+
+     if FIcon<>0 then
+      DrawIconEx(CaptionBitmap.Canvas.Handle, IconRect.Left, IconRect.Top, FIcon, 0, 0, 0, 0, DI_NORMAL);
+
+    Inc(TextRect.Left, ButtonRect.Width + 5);
+
+    //Draw buttons
+
+    //Close button
+    LDetails := Style.GetElementDetails(twCloseButtonNormal);
+    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+     Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+    //Maximize button
+    LDetails := Style.GetElementDetails(twMaxButtonNormal);
+    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+      Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+    //Minimize button
+    LDetails := Style.GetElementDetails(twMinButtonNormal);
+
+    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+      Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+    //Help button
+    LDetails := Style.GetElementDetails(twHelpButtonNormal);
+    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+      Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+    if ButtonRect.Left > 0 then
+      TextRect.Right := ButtonRect.Left;
+
+    //Draw text
+    Style.DrawText(CaptionBitmap.Canvas.Handle, CaptionDetails, FCaption, TextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
+
+    //Draw caption
+    FBitmap.Canvas.Draw(0, 0, CaptionBitmap);
+
   finally
-    if LRegion <> 0 then
-      DeleteObject(LRegion);
+    CaptionBitmap.Free;
   end;
-
-       {
-  Style.GetElementRegion(LDetails, ARect, Region);
-  SetWindowRgn(Handle, Region, True);
-      }
-
-  Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, CaptionRect);
-  TextRect := CaptionRect;
-  CaptionDetails := LDetails;
-
-  //Draw icon
-  IconDetails := Style.GetElementDetails(twSysButtonNormal);
-  if not Style.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
-    ButtonRect := Rect(0, 0, 0, 0);
-  IconRect := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
-  RectVCenter(IconRect, ButtonRect);
-  if ButtonRect.Width > 0 then
-
-   if FIcon<>0 then
-    DrawIconEx(CaptionBitmap.Canvas.Handle, IconRect.Left, IconRect.Top, FIcon, 0, 0, 0, 0, DI_NORMAL);
-
-  Inc(TextRect.Left, ButtonRect.Width + 5);
-
-  //Draw buttons
-
-  //Close button
-  LDetails := Style.GetElementDetails(twCloseButtonNormal);
-  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-   Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-  //Maximize button
-  LDetails := Style.GetElementDetails(twMaxButtonNormal);
-  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-  //Minimize button
-  LDetails := Style.GetElementDetails(twMinButtonNormal);
-
-  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-  //Help button
-  LDetails := Style.GetElementDetails(twHelpButtonNormal);
-  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-  if ButtonRect.Left > 0 then
-    TextRect.Right := ButtonRect.Left;
-
-  //Draw text
-  Style.DrawText(CaptionBitmap.Canvas.Handle, CaptionDetails, FCaption, TextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
-
-  //Draw caption
-  FBitmap.Canvas.Draw(0, 0, CaptionBitmap);
-
-
-  CaptionBitmap.Free;
 
   //Draw left border
   CaptionRect := Rect(0, BorderRect.Top, BorderRect.Left, ARect.Height - BorderRect.Bottom);
@@ -1187,27 +1242,76 @@ begin
   LDetails := Style.GetElementDetails(twFrameBottomActive);
   Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
 
+  //Draw Main Menu
+  LDetails:= Style.GetElementDetails(tmMenuBarBackgroundActive);
+  LRect:=Rect(BorderRect.Left, BorderRect.Top+1, ARect.Width-BorderRect.Left,BorderRect.Top+1+20);
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, LRect);
 
-  //Draw Ok button
+  LDetails := Style.GetElementDetails(tmMenuBarItemNormal);
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'File', Rect(LRect.Left+10,LRect.Top+3, LRect.Right ,LRect.Bottom), 0, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Edit', Rect(LRect.Left+40,LRect.Top+3, LRect.Right ,LRect.Bottom), 0, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'View', Rect(LRect.Left+70,LRect.Top+3, LRect.Right ,LRect.Bottom), 0, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Help', Rect(LRect.Left+100,LRect.Top+3, LRect.Right ,LRect.Bottom), 0, ThemeTextColor);
+
+
+  //Draw ToolButtons
+  for i := 1 to 3 do
+  begin
+    LDetails := Style.GetElementDetails(ttbButtonNormal);
+    ButtonRect.Left:=BorderRect.Left+5+((i-1)*76);
+    ButtonRect.Top:=LRect.Top+30;
+    ButtonRect.Width:=75;
+    ButtonRect.Height:=25;
+    Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+    Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+    Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'ToolButton'+IntToStr(i), ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+  end;
+
+  //Draw Normal
   LDetails := Style.GetElementDetails(tbPushButtonNormal);
-  ButtonRect.Left:=30;
+  ButtonRect.Left:=BorderRect.Left+5;
   ButtonRect.Top:=ARect.Height-45;
   ButtonRect.Width:=75;
   ButtonRect.Height:=25;
   Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
 
   Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'OK', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Normal', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
 
-  //Draw Cancel button
-  ButtonRect.Left:=110;
+  //Draw Hot
+  LDetails := Style.GetElementDetails(tbPushButtonHot);
+  ButtonRect.Left:=BorderRect.Left+85;
   ButtonRect.Top:=ARect.Height-45;
   ButtonRect.Width:=75;
   ButtonRect.Height:=25;
   Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
 
   Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Cancel', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Hot', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+
+  //Draw Pressed
+  LDetails := Style.GetElementDetails(tbPushButtonPressed);
+  ButtonRect.Left:=BorderRect.Left+165;
+  ButtonRect.Top:=ARect.Height-45;
+  ButtonRect.Width:=75;
+  ButtonRect.Height:=25;
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Pressed', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+
+  //Draw Disabled
+  LDetails := Style.GetElementDetails(tbPushButtonDisabled);
+  ButtonRect.Left:=BorderRect.Left+245;
+  ButtonRect.Top:=ARect.Height-45;
+  ButtonRect.Width:=75;
+  ButtonRect.Height:=25;
+  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Disabled', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
 
   Canvas.Draw(0,0,FBitmap);
 end;

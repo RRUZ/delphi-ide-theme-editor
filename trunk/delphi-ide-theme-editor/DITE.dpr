@@ -38,7 +38,17 @@ uses
   uColorPanel in 'Units\uColorPanel.pas' {ColorPanel},
   uSMSIDEHighlight in 'Units\uSMSIDEHighlight.pas',
   uSMSVersions in 'Units\uSMSVersions.pas',
-  uAppMethodVersions in 'Units\uAppMethodVersions.pas';
+  uAppMethodVersions in 'Units\uAppMethodVersions.pas',
+  Vcl.Styles.Hooks in 'Units\Vcl.Styles.Hooks.pas',
+  KOLDetours in 'Units\KOLDetours.pas',
+  Vcl.Styles.Utils.ComCtrls in 'Units\Vcl.Styles.Utils.ComCtrls.pas',
+  Vcl.Styles.Utils.Forms in 'Units\Vcl.Styles.Utils.Forms.pas',
+  Vcl.Styles.Utils.Menus in 'Units\Vcl.Styles.Utils.Menus.pas',
+  Vcl.Styles.Utils.ScreenTips in 'Units\Vcl.Styles.Utils.ScreenTips.pas',
+  Vcl.Styles.Utils.StdCtrls in 'Units\Vcl.Styles.Utils.StdCtrls.pas',
+  Vcl.Styles.Utils.SysControls in 'Units\Vcl.Styles.Utils.SysControls.pas',
+  Vcl.Styles.Utils.SysStyleHook in 'Units\Vcl.Styles.Utils.SysStyleHook.pas',
+  Vcl.Styles.Utils.SystemMenu in 'Units\Vcl.Styles.Utils.SystemMenu.pas';
 
 {$R *.res}
 

@@ -4,8 +4,8 @@ object FrmSettings: TFrmSettings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Settings'
-  ClientHeight = 316
-  ClientWidth = 300
+  ClientHeight = 407
+  ClientWidth = 393
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -30,8 +30,8 @@ object FrmSettings: TFrmSettings
     Caption = 'Themes Folder'
   end
   object Bevel1: TBevel
-    Left = 7
-    Top = 265
+    Left = 8
+    Top = 359
     Width = 497
     Height = 9
     Shape = bsTopLine
@@ -45,7 +45,7 @@ object FrmSettings: TFrmSettings
   end
   object BtnSave: TButton
     Left = 8
-    Top = 280
+    Top = 368
     Width = 75
     Height = 25
     Caption = 'Apply'
@@ -70,7 +70,7 @@ object FrmSettings: TFrmSettings
   end
   object BtnCancel: TButton
     Left = 89
-    Top = 280
+    Top = 368
     Width = 75
     Height = 25
     Caption = 'Cancel'
@@ -105,8 +105,8 @@ object FrmSettings: TFrmSettings
   object PanelPreview: TPanel
     Left = 8
     Top = 140
-    Width = 281
-    Height = 119
+    Width = 369
+    Height = 213
     BevelOuter = bvNone
     TabOrder = 7
   end
