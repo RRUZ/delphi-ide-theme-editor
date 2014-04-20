@@ -43,68 +43,17 @@ type
     procedure ListViewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   end;
 
-
 var
   VclStylesOwnerDrawFix : TVclStylesOwnerDrawFix;
-       {
-procedure ApplyVclStylesOwnerDrawFix(Parent: TComponent;Active:Boolean);
-       }
 
 implementation
 
+uses
+  System.SysUtils;
 
-
-Type
+type
   TCustomListViewClass=class(TCustomListView);
 
-  {
-procedure ApplyVclStylesOwnerDrawFix(Parent: TComponent;Active:Boolean);
-var
- i : Integer;
-begin                 //fails en mutilples cambios
-
-  for i:=0 to Parent.ComponentCount-1 do
-    if (Parent.Components[i] is TComboBox) and Active and (TComboBox(Parent.Components[i]).Style<>csOwnerDrawFixed) then
-    begin
-     TComboBox(Parent.Components[i]).Style     :=csOwnerDrawFixed;
-     TComboBox(Parent.Components[i]).OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
-    end
-    else
-    if (Parent.Components[i] is TComboBox) and (not Active) and (TComboBox(Parent.Components[i]).Style=csOwnerDrawFixed) then
-    begin
-     TComboBox(Parent.Components[i]).Style     :=csOwnerDrawFixed;//store this value in list
-     TComboBox(Parent.Components[i]).OnDrawItem:=nil;
-    end
-    else
-    if (Parent.Components[i] is TListBox) and Active and (TListBox(Parent.Components[i]).Style<>lbOwnerDrawFixed) then
-    begin
-     TListBox(Parent.Components[i]).Style     :=lbOwnerDrawFixed;
-     TListBox(Parent.Components[i]).OnDrawItem:=VclStylesOwnerDrawFix.ListBoxDrawItem;
-    end
-    else
-    if (Parent.Components[i] is TListBox) and (not Active) and (TListBox(Parent.Components[i]).Style=lbOwnerDrawFixed) then
-    begin
-     TListBox(Parent.Components[i]).Style     :=lbStandard;//store this value in list
-     TListBox(Parent.Components[i]).OnDrawItem:=nil;
-    end
-    else
-    if (Parent.Components[i] is TListView) and Active and (not TListView(Parent.Components[i]).OwnerDraw) then
-    begin
-     TListView(Parent.Components[i]).OwnerDraw  :=True;
-     TListView(Parent.Components[i]).OnDrawItem :=VclStylesOwnerDrawFix.ListViewDrawItem;
-     TListView(Parent.Components[i]).OnMouseDown:=VclStylesOwnerDrawFix.ListViewMouseDown;
-    end
-    else
-    if (Parent.Components[i] is TListView) and (not Active) and (TListView(Parent.Components[i]).OwnerDraw) then
-    begin
-     TListView(Parent.Components[i]).OwnerDraw :=False;
-     TListView(Parent.Components[i]).OnDrawItem:=nil;
-     TListView(Parent.Components[i]).OnMouseDown:=nil;
-    end
-    else
-     ApplyVclStylesOwnerDrawFix(Parent.Components[i], Active);
-end;
-     }
 { TVclStylesOwnerDrawFix }
 
 procedure TVclStylesOwnerDrawFix.ComboBoxDrawItem(Control: TWinControl;
@@ -162,7 +111,10 @@ end;
 
 procedure TVclStylesOwnerDrawFix.ListViewDrawItem(Sender: TCustomListView;
   Item: TListItem; Rect: TRect; State: TOwnerDrawState);
+const
+  Spacing =4;
 var
+  Dx        : Integer;
   r         : TRect;
   rc        : TRect;
   ColIdx    : Integer;
@@ -170,12 +122,10 @@ var
   LDetails  : TThemedElementDetails;
   LStyles   : TCustomStyleServices;
   BoxSize   : TSize;
-  Spacing   : Integer;
   LColor    : TColor;
   ImageSize : Integer;
 begin
-  Spacing:=4;
-  //ImageSize:=0;
+  ImageSize:=0;
   LStyles:=StyleServices;
   if not LStyles.GetElementColor(LStyles.GetElementDetails(ttItemNormal), ecTextColor, LColor) or  (LColor = clNone) then
   LColor := LStyles.GetSystemColor(clWindowText);
@@ -188,9 +138,10 @@ begin
   inc(r.Left, Spacing);
   for ColIdx := 0 to TListView(Sender).Columns.Count - 1 do
   begin
+    Dx:=0;
     r.Right := r.Left + Sender.Column[ColIdx].Width;
 
-    if ColIdx > 0 then
+    if (ColIdx > 0) and (Item.SubItems.Count>=ColIdx) then
       s := Item.SubItems[ColIdx - 1]
     else
     begin
@@ -198,7 +149,10 @@ begin
       BoxSize.cy := GetSystemMetrics(SM_CYMENUCHECK);
       s := Item.Caption;
       if TListView(Sender).Checkboxes then
+      begin
+       Inc(Dx,BoxSize.cx+3);
        r.Left:=r.Left+BoxSize.cx+3;
+      end;
     end;
 
     if ColIdx = 0 then
@@ -227,6 +181,7 @@ begin
     begin
       ImageList_Draw(TCustomListViewClass(Sender).SmallImages.Handle, Item.ImageIndex, Sender.Canvas.Handle, R.Left - 2, R.Top, ILD_NORMAL);
       ImageSize:=TCustomListViewClass(Sender).SmallImages.Width;
+      Inc(Dx,ImageSize);
       r.Left:=r.Left+ImageSize;
     end;
 
@@ -247,16 +202,16 @@ begin
       rc.Right  := rc.Left + BoxSize.cx;
 
       if Item.Checked then
-       LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal)
+       LDetails := StyleServices.GetElementDetails(tbCheckBoxCheckedNormal)
       else
-       LDetails := StyleServices.GetElementDetails(tbCheckBoxcheckedNormal);
+       LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
 
       LStyles.DrawElement(Sender.Canvas.Handle, LDetails, Rc);
     end;
 
     if ColIdx=0 then
-     r.Left:=Sender.Column[ColIdx].Width + Spacing
-    else
+     r.Left:=r.Left - Dx;
+   { else         }
      inc(r.Left, Sender.Column[ColIdx].Width);
   end;
 
@@ -265,10 +220,23 @@ end;
 
 procedure TVclStylesOwnerDrawFix.ListViewMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+const
+  Spacing =4;
+var
+  LDetails  : TThemedElementDetails;
+  Size      : TSize;
 begin
- if TListView(Sender).OwnerDraw then
-  if X<=13 then
-   TListView(Sender).Selected.Checked:=not TListView(Sender).Selected.Checked;
+ if TListView(Sender).OwnerDraw and (TListView(Sender).Checkboxes) then
+  begin
+   LDetails := StyleServices.GetElementDetails(tbCheckBoxCheckedNormal);
+   Size.cx:=0;
+   Size.cy:=0;
+
+   if StyleServices.GetElementSize(TListView(Sender).Canvas.Handle, LDetails, esMinimum, Size) and (X>Spacing) and (X<=Size.Width) then
+    TListView(Sender).Selected.Checked:=not TListView(Sender).Selected.Checked;
+
+   //OutputDebugString(PChar(Format('X %d Size.Width %d',[X, Size.Width])));
+  end;
 end;
 
 initialization
