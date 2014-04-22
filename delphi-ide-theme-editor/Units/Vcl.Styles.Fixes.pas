@@ -66,7 +66,7 @@ type
       const Text: string; IsPressed, IsBackground: Boolean); override;
   end;
 
-  /// <summary> This interposer class fix the QC #114032  for Delphi XE2 and Delphi XE3
+  /// <summary> This interposer class fix the QC #114032  for Delphi XE2-XE6
   /// </summary>
   /// <remarks>
   /// To use this class add the Vcl.Styles.Fixes unit to your uses list after of  the Vcl.ExtCtrls unit
@@ -76,7 +76,7 @@ type
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
   end;
 
-  /// <summary> The <c>TComboBoxExStyleHookFix</c> vcl style hook fix the QC #108678 for Delphi XE2 and Delphi XE3
+  /// <summary> The <c>TComboBoxExStyleHookFix</c> vcl style hook fix the QC #114040 for Delphi XE2-XE6
   /// </summary>
   /// <remarks>
   /// Use this hook in this way
@@ -437,24 +437,22 @@ begin
   Canvas.Font := Font;
   if TStyleManager.IsCustomStyleActive then
   begin
-{$IFDEF VER230}
+{$IF CompilerVersion<=23}  //XE2
     Canvas.Brush.Color := StyleServices.GetStyleColor(ColorStates[Enabled]);
     Canvas.Font.Color := StyleServices.GetStyleFontColor(FontStates[Enabled]);
-{$ENDIF}
-{$IFDEF VER240}
+{$ELSE}
     if seClient in StyleElements then
       Canvas.Brush.Color := StyleServices.GetStyleColor(ColorStates[Enabled])
     else
       Canvas.Brush := Brush;
     if seFont in StyleElements then
       Canvas.Font.Color := StyleServices.GetStyleFontColor(FontStates[Enabled]);
-{$ENDIF}
+{$IFEND}
   end
   else
     Canvas.Brush := Brush;
   if (Integer(Message.DrawItemStruct^.itemID) >= 0) and
-    (odSelected in LState){$IFDEF VER240} and (seClient in StyleElements)
-{$ENDIF} then
+    (odSelected in LState){$IF CompilerVersion>23}  and (seClient in StyleElements) {$IFEND} then
   begin
     if TStyleManager.IsCustomStyleActive then
     begin

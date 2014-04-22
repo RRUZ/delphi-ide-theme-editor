@@ -76,7 +76,7 @@
 			<DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;acntDelphiXE2_R;$(DCC_UsePackage)</DCC_UsePackage>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<DCC_BplOutput>C:\Users\Public\Documents\RAD Studio\Projects\XE2\delphi-ide-theme-editor\IDE PlugIn</DCC_BplOutput>
+			<DCC_BplOutput>.\</DCC_BplOutput>
 			<DCC_MapFile>3</DCC_MapFile>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_Optimize>false</DCC_Optimize>

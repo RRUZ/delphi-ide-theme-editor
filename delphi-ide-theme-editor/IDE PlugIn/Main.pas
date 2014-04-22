@@ -274,13 +274,13 @@ begin
           AColorMap:=TColorXPColorMap.Create(nil);
           GlobalColorMap:=AColorMap;
           AColorMap.FontColor:=clBlack;
-          //GenerateColorMap(AColorMap,clWebKhaki);
+          //GenerateColorMap(AColorMap, clWebKhaki);
           //AColorMap:=TThemedColorMap.Create(nil);
           //AColorMap.Color:=clWebLemonChiffon;
           //AColorMap.Color:=clDkGray;
-          //AColorMap.Color           :=clWebDarkSeaGreen;
-          //AColorMap.Color           :=clWebSteelBlue;
-
+          //AColorMap.Color:=clWebDarkSeaGreen;
+          //AColorMap.Color:=clWebSteelBlue;
+          //ShowMessage(GetBplLocation());
           LoadSettings(AColorMap, Settings);
           GlobalSettings:=Settings;
           {$IF CompilerVersion >= 23}

@@ -34,12 +34,10 @@ uses
   uStdActionsPopMenu in 'Units\uStdActionsPopMenu.pas',
   uHelpInsight in 'Units\uHelpInsight.pas',
   Vcl.Styles.OwnerDrawFix in 'Units\Vcl.Styles.OwnerDrawFix.pas',
-  Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas',
   uColorPanel in 'Units\uColorPanel.pas' {ColorPanel},
   uSMSIDEHighlight in 'Units\uSMSIDEHighlight.pas',
   uSMSVersions in 'Units\uSMSVersions.pas',
   uAppMethodVersions in 'Units\uAppMethodVersions.pas',
-  Vcl.Styles.Hooks in 'Units\Vcl.Styles.Hooks.pas',
   KOLDetours in 'Units\KOLDetours.pas',
   Vcl.Styles.Utils.ComCtrls in 'Units\Vcl.Styles.Utils.ComCtrls.pas',
   Vcl.Styles.Utils.Forms in 'Units\Vcl.Styles.Utils.Forms.pas',
@@ -48,7 +46,9 @@ uses
   Vcl.Styles.Utils.StdCtrls in 'Units\Vcl.Styles.Utils.StdCtrls.pas',
   Vcl.Styles.Utils.SysControls in 'Units\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in 'Units\Vcl.Styles.Utils.SysStyleHook.pas',
-  Vcl.Styles.Utils.SystemMenu in 'Units\Vcl.Styles.Utils.SystemMenu.pas';
+  Vcl.Styles.Utils.SystemMenu in 'Units\Vcl.Styles.Utils.SystemMenu.pas',
+  Vcl.Styles.Fixes in 'Units\Vcl.Styles.Fixes.pas',
+  Vcl.Styles.Hooks in 'Units\Vcl.Styles.Hooks.pas';
 
 {$R *.res}
 

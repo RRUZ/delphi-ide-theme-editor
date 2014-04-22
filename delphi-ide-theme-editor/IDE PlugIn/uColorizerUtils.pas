@@ -158,8 +158,8 @@ end;
 
 function  GetBplLocation : string;
 begin
-  SetLength(Result,MAX_PATH);
-  GetModuleFileName(HInstance,PChar(Result),MAX_PATH);
+  SetLength(Result, MAX_PATH);
+  GetModuleFileName(HInstance, PChar(Result), MAX_PATH);
   Result:=PChar(Result);
 end;
 
@@ -193,7 +193,7 @@ begin
   ReadSettings(Settings, ExtractFilePath(GetBplLocation()));
   ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
   if FileExists(ThemeFileName) then
-   LoadColorMapFromXmlFile(TXPColorMap(AColorMap),ThemeFileName);
+   LoadColorMapFromXmlFile(TXPColorMap(AColorMap), ThemeFileName);
 end;
 
 
@@ -777,8 +777,6 @@ initialization
   GlobalColorMap:=nil;
   GlobalSettings:=nil;
   HookedWindows:=TStringList.Create;
-  //ShowMessage(ParamStr(0));
-  //ShowMessage(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
   HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
 {$IF CompilerVersion > 20}
   ctx:=TRttiContext.Create;
