@@ -1,23 +1,23 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit uRttiHelper                                                                                 }
-{ unit uRttiHelper  for the Delphi IDE Colorizer                                                   }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is uRttiHelper.pas.                                                            }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2012 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit uRttiHelper
+// unit uRttiHelper  for the Delphi IDE Colorizer
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is uRttiHelper.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 
 unit uRttiHelper;
 
@@ -39,6 +39,8 @@ function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) :
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
 function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
 procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
+procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
+
 {$ELSE}
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 {$IFEND}
@@ -266,6 +268,15 @@ begin
   finally
     Fields.Free;
   end;
+end;
+
+procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
+var
+  m : TRttiMethod;
+begin
+  m:=ctx.GetType(Obj.ClassInfo).GetMethod(Method);
+  if m<>nil then
+    m.Invoke(Obj, []);
 end;
 
 function  GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
