@@ -26,9 +26,10 @@
 {
   * gutter code editor
   * popup menu code editor   done :)
+  * popup menu tool bars (ex :recent files) -> create hook using colormap
   * panel separation (space)
   * TIDEGradientTabSet background
-
+  * remove access viuolations on manual unload of package - done
 
   * check for color key in OTA ;) done :(
   * options-enviroment variables crash    -> TDefaultEnvironmentDialog  GExperts????    done:)
@@ -98,23 +99,20 @@ uses
  ComObj,
  ExtCtrls,
  uClrSettings,
- {$IF CompilerVersion>=23} //XE2
- PlatformDefaultStyleActnCtrls,
- {$IFEND}
  ColorXPStyleActnCtrls;
 
 
 type
   TIDEWizard = class(TInterfacedObject, IOTAWizard, IOTANotifier)
   private
-    {$IFDEF USE_DUMP_TIMER}
-    FDumperTimer : TTimer;
-    {$ENDIF}
-    FTimerRefresher: TTimer;
-    Settings : TSettings;
-    AColorMap:TXPColorMap;
     //ExplorerItem: TMenuItem;
     //ExplorerSeparator: TMenuItem;
+    AColorMap      : TXPColorMap;
+    {$IFDEF USE_DUMP_TIMER}
+    FDumperTimer   : TTimer;
+    {$ENDIF}
+    FTimerRefresher: TTimer;
+    Settings       : TSettings;
     procedure AddMenuItems;
     procedure RemoveMenuItems;
     procedure InitColorizer;
@@ -138,34 +136,30 @@ type
   end;
 
 var
-  SplashBmp     : Graphics.TBitmap;
-  AboutBmp      : Graphics.TBitmap;
+  SplashBmp      : Graphics.TBitmap;
+  AboutBmp       : Graphics.TBitmap;
 
-type
-  TMyIDEHotKey = class(TNotifierObject, IOTAKeyboardBinding)
-  private
-     procedure Dump(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
-  private
-     function GetBindingType: TBindingType;
-     function GetDisplayName: string;
-     function GetName: string;
-     procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
-  end ;
+//type
+//  TMyIDEHotKey = class(TNotifierObject, IOTAKeyboardBinding)
+//  private
+//     procedure Dump(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
+//  private
+//     function GetBindingType: TBindingType;
+//     function GetDisplayName: string;
+//     function GetName: string;
+//     procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
+//  end ;
 
 
 procedure Register;
-{
-var
- KbServices: IOTAKeyBoardServices;
- kb        : TMyIDEHotKey;
-}
+//var
+// KbServices: IOTAKeyBoardServices;
+// kb        : TMyIDEHotKey;
 begin
-   RegisterPackageWizard(TIDEWizard.Create);
-   {
-   kb := TMyIDEHotKey.Create;
-   KbServices := BorlandIDEServices as IOTAKeyBoardServices;
-   KbServices.AddKeyboardBinding(Kb);
-   }
+   RegisterPackageWizard(TIDEWizard.Create as IOTAWizard);
+//   kb := TMyIDEHotKey.Create;
+//   KbServices := BorlandIDEServices as IOTAKeyBoardServices;
+//   KbServices.AddKeyboardBinding(Kb);
 end;
 
 procedure SaveComponentToFile(Component: TComponent; const FileName: TFileName);
@@ -211,7 +205,7 @@ const
   'Delphi IDE Colorizer'+#13#10+
   ''+#13#10+
   'Version %s'+#13#10+
-  'Copyright: 2011-2012 Rodrigo Ruz V.'+#13#10+
+  'Copyright: 2011-2014 Rodrigo Ruz V.'+#13#10+
   'All rights reserved.'+#13#10+
   ''+#13#10+
   'This is a freeware, you can use it freely without any fee.'+#13#10+
@@ -272,6 +266,7 @@ begin
           //AColorMap:=TTwilightColorMap.Create(nil);  usar para ver color de fuentes
           //AColorMap:=TStandardColorMap.Create(nil);
           AColorMap:=TColorXPColorMap.Create(nil);
+          //AColorMap:=TColorXPColorMap.Create(Application);
           GlobalColorMap:=AColorMap;
           AColorMap.FontColor:=clBlack;
           //GenerateColorMap(AColorMap, clWebKhaki);
@@ -287,7 +282,6 @@ begin
           if Settings.UseVCLStyles then
           begin
             StyleFile:=IncludeTrailingPathDelimiter(Settings.VCLStylesPath)+Settings.VCLStyleName;
-            //MessageDlg(StyleFile, mtInformation, [mbOK], 0);
             if FileExists(StyleFile) then
             begin
               TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
@@ -310,23 +304,8 @@ end;
 
 procedure TIDEWizard.FinalizeColorizer;
 begin
-  //if Assigned(DelphiTheme) then
-  //  DelphiTheme.Free;
-  if Assigned(AColorMap) then
-    AColorMap.Free;
+    FreeAndNil(AColorMap);
 end;
-
-{
-procedure GetComponentNames(lst: TStrings);
-var
-  i       : Integer;
-  Packges : IOTAPackageServices;
-begin
-  Packges:= IOTAPackageServices(BorlandIDEServices);
-  for i := 0 to Packges.PackageCount-1 do
-   lst.Add(Packges.Package[i].FileName);
-end;
-}
 
 { TIDEWizard }
 
@@ -334,9 +313,9 @@ constructor TIDEWizard.Create;
 begin
   inherited;
   {$WARN SYMBOL_PLATFORM OFF}
-  ReportMemoryLeaksOnShutdown:=DebugHook<>0;
+  //ReportMemoryLeaksOnShutdown:=DebugHook<>0;
   {$WARN SYMBOL_PLATFORM ON}
-  AColorMap:=nil;
+  //AColorMap:=nil;
   Settings:=TSettings.Create;
   //ColorizerForm := nil;
   RegisterPlugIn;
@@ -354,62 +333,50 @@ begin
   FTimerRefresher.OnTimer :=OnRefreher;
   FTimerRefresher.Interval:=1500;
   FTimerRefresher.Enabled:=True;
-
-
-   {
-  Form1 := TForm1.Create(Application);
-  Form1.Show;
-   }
 end;
 
 
 
 procedure TIDEWizard.AddMenuItems;
-{
-var
-  MainMenu: TMainMenu;
-  ToolsMenu: TMenuItem;
-  I, InsertPosition: Integer;
-  Image : TIcon;
-                }
+//var
+//  MainMenu: TMainMenu;
+//  ToolsMenu: TMenuItem;
+//  I, InsertPosition: Integer;
+//  Image : TIcon;
 begin
   inherited;
-                {
-  if BorlandIDEServices <> nil then
-  begin
-    MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
-    ToolsMenu := MainMenu.Items[8];
-
-    for I := 0 to MainMenu.Items.Count - 1 do
-      if CompareText(MainMenu.Items[I].Name, 'ToolsMenu') = 0 then
-      begin
-        ToolsMenu := MainMenu.Items[I];
-        Break;
-      end;
-
-    InsertPosition:=ToolsMenu.Count - 1;
-    //ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
-    //ToolsMenu.InsertComponent(ExplorerSeparator);
-    //ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
-
-
-    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, Menus.ShortCut(Word('D'), [ssCtrl]), False, True, ExplorerItemClick, 0, 'IdeClorItem');
-
-
-    Image:=TIcon.Create;
-    try
-     Image.Handle := LoadIcon(hInstance, sLogoIcon16);
-     ExplorerItem.ImageIndex:=MainMenu.Images.AddIcon(Image);
-    finally
-      Image.Free;
-    end;
-
-    ToolsMenu.InsertComponent(ExplorerItem);
-    ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
-  end;
-               }
-
-
+//  if BorlandIDEServices <> nil then
+//  begin
+//    MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
+//    ToolsMenu := MainMenu.Items[8];
+//
+//    for I := 0 to MainMenu.Items.Count - 1 do
+//      if CompareText(MainMenu.Items[I].Name, 'ToolsMenu') = 0 then
+//      begin
+//        ToolsMenu := MainMenu.Items[I];
+//        Break;
+//      end;
+//
+//    InsertPosition:=ToolsMenu.Count - 1;
+//    //ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
+//    //ToolsMenu.InsertComponent(ExplorerSeparator);
+//    //ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
+//
+//
+//    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, Menus.ShortCut(Word('D'), [ssCtrl]), False, True, ExplorerItemClick, 0, 'IdeClorItem');
+//
+//
+//    Image:=TIcon.Create;
+//    try
+//     Image.Handle := LoadIcon(hInstance, sLogoIcon16);
+//     ExplorerItem.ImageIndex:=MainMenu.Images.AddIcon(Image);
+//    finally
+//      Image.Free;
+//    end;
+//
+//    ToolsMenu.InsertComponent(ExplorerItem);
+//    ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
+//  end;
 end;
 
 procedure TIDEWizard.AfterSave;
@@ -423,13 +390,10 @@ end;
 
 destructor TIDEWizard.Destroy;
 begin
-  Settings.Free;
+  FreeAndNil(Settings);
   //RemoveMenuItems;
-  if Assigned(SplashBmp) then
-    SplashBmp.Free;
-
-  if Assigned(AboutBmp) then
-    AboutBmp.Free;
+  SplashBmp.Free;
+  AboutBmp.Free;
 
   FinalizeColorizer();
   {$IFDEF USE_DUMP_TIMER}
@@ -452,7 +416,6 @@ end;
 
 procedure TIDEWizard.ExplorerItemClick(Sender: TObject);
 begin
-ShowMessage('Foo');
   //ColorizerForm := TFrmIDEColorizerSettings.Create(nil);
   //ColorizerForm.Name := 'DelphiIDEColorizer_SettingsForm';
   //ColorizerForm.ShowModal();
@@ -483,7 +446,6 @@ begin
  begin
   RefreshIDETheme(AColorMap, ColorXPStyle);
   FTimerRefresher.Enabled:=False;
-  //ShowMessage('Timer');
  end;
 end;
 
@@ -507,45 +469,35 @@ end;
 
 { TMyIDEHotKey }
 
-procedure TMyIDEHotKey.BindKeyboard(
-  const BindingServices: IOTAKeyBindingServices);
-begin
-   BindingServices.AddKeyBinding([ShortCut(Word('P'), [ssCtrl])], Dump, nil);
-end;
+//procedure TMyIDEHotKey.BindKeyboard(
+//  const BindingServices: IOTAKeyBindingServices);
+//begin
+//   BindingServices.AddKeyBinding([ShortCut(Word('P'), [ssCtrl])], Dump, nil);
+//end;
+//
+//procedure TMyIDEHotKey.Dump(const Context: IOTAKeyContext; KeyCode: TShortCut;
+//  var BindingResult: TKeyBindingResult);
+//begin
+//  SaveComponentToFile(Screen.ActiveForm, ExtractFilePath(GetBplLocation())+'Galileo\Dump_'+Screen.ActiveForm.Name+'.dfm');
+//  BindingResult := krHandled;
+//end;
+//
+//function TMyIDEHotKey.GetBindingType: TBindingType;
+//begin
+//  Result := btPartial;
+//end;
+//
+//function TMyIDEHotKey.GetDisplayName: string;
+//begin
+//  Result := 'Foo Dump';
+//end;
+//
+//function TMyIDEHotKey.GetName: string;
+//begin
+//  Result := 'Foo Dump';
+//end;
 
-procedure TMyIDEHotKey.Dump(const Context: IOTAKeyContext; KeyCode: TShortCut;
-  var BindingResult: TKeyBindingResult);
-begin
-  SaveComponentToFile(Screen.ActiveForm, ExtractFilePath(GetBplLocation())+'Galileo\Dump_'+Screen.ActiveForm.Name+'.dfm');
-  BindingResult := krHandled;
-end;
 
-function TMyIDEHotKey.GetBindingType: TBindingType;
-begin
-  Result := btPartial;
-end;
-
-function TMyIDEHotKey.GetDisplayName: string;
-begin
-  Result := 'Foo Dump';
-end;
-
-function TMyIDEHotKey.GetName: string;
-begin
-  Result := 'Foo Dump';
-end;
-
-  {
-var
- NativeColorMap : TCustomActionBarColorMap;
-
-initialization
-
-finalization
-  NativeColorMap:=TStandardColorMap.Create(nil);
-  RefreshIDETheme(NativeColorMap, PlatformDefaultStyle);
-
-  }
 end.
 
 
