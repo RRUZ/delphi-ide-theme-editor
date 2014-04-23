@@ -113,8 +113,8 @@ type
     {$ENDIF}
     FTimerRefresher: TTimer;
     Settings       : TSettings;
-    procedure AddMenuItems;
-    procedure RemoveMenuItems;
+    //procedure AddMenuItems;
+    //procedure RemoveMenuItems;
     procedure InitColorizer;
     procedure FinalizeColorizer;
     procedure OnRefreher(Sender : TObject);
@@ -337,14 +337,14 @@ end;
 
 
 
-procedure TIDEWizard.AddMenuItems;
+//procedure TIDEWizard.AddMenuItems;
 //var
 //  MainMenu: TMainMenu;
 //  ToolsMenu: TMenuItem;
 //  I, InsertPosition: Integer;
 //  Image : TIcon;
-begin
-  inherited;
+//begin
+//  inherited;
 //  if BorlandIDEServices <> nil then
 //  begin
 //    MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
@@ -377,7 +377,7 @@ begin
 //    ToolsMenu.InsertComponent(ExplorerItem);
 //    ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
 //  end;
-end;
+//end;
 
 procedure TIDEWizard.AfterSave;
 begin
@@ -460,11 +460,11 @@ begin
 end;
 {$ENDIF}
 
-procedure TIDEWizard.RemoveMenuItems;
-begin
+//procedure TIDEWizard.RemoveMenuItems;
+//begin
   //ExplorerItem.Free;
   //ExplorerSeparator.Free;
-end;
+//end;
 
 
 { TMyIDEHotKey }
