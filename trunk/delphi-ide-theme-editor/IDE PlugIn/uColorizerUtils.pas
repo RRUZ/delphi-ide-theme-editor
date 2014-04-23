@@ -786,8 +786,8 @@ var
   LActionManager : TActionManager;
 begin
   if ActnStyleList.Count>0 then
-    for LActionManager in ActnStyleList.Keys do
-       LActionManager.Style:= ActnStyleList.Items[LActionManager];
+    for LActionManager in ActnStyleList.Keys do                     //if Assigned(ActionBarStyles) then
+       LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
 end;
 
 

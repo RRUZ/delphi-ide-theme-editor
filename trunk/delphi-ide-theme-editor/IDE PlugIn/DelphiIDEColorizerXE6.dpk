@@ -1,12 +1,12 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG OFF
-package DelphiIDEColorizerXE5;
+package DelphiIDEColorizerXE6;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO ON}
+{$DEBUGINFO OFF}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
