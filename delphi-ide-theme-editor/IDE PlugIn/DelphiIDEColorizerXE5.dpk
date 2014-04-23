@@ -1,5 +1,5 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG OFF
-package DelphiIDEColorizerXE4;
+package DelphiIDEColorizerXE5;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -46,10 +46,8 @@ contains
   uStoreColorMap in 'uStoreColorMap.pas',
   uRttiHelper in 'uRttiHelper.pas',
   Vcl.Styles.Ext in '..\Units\Vcl.Styles.Ext.pas',
-  ColorXPStyleActnCtrls in 'ColorXPStyleActnCtrls.pas',
   Vcl.Styles.Utils.Menus in 'Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.SysControls in 'Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in 'Vcl.Styles.Utils.SysStyleHook.pas';
 
 end.
-

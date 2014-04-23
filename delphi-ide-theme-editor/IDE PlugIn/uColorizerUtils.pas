@@ -57,14 +57,17 @@ implementation
 {.$DEFINE DEBUG_PROFILER}
 
 uses
- //System.Generics.Collections,
+ {$IF CompilerVersion>=23} //XE2
+ PlatformDefaultStyleActnCtrls,
+ {$IFEND}
  {$IF CompilerVersion >= 23}
  Vcl.Styles.Ext,
  {$IFEND}
  {$IF CompilerVersion > 20}
  IOUtils,
  TypInfo,
- Rtti
+ Rtti,
+ System.Generics.Collections
  {$ELSE}
  Variants,
  TypInfo
@@ -107,6 +110,7 @@ var
 {$IF CompilerVersion > 20}
 var
   ctx           : TRttiContext;
+  ActnStyleList : TDictionary<TActionManager, TActionBarStyle>;
 {$IFEND}
 
 
@@ -179,7 +183,7 @@ begin
   end
   {$IF CompilerVersion >= 23}
   else
-  if (csDesigning in Screen.Forms[index].ComponentState) then
+  if (GlobalSettings<>nil) and (GlobalSettings.UseVCLStyles) and (csDesigning in Screen.Forms[index].ComponentState) then
     ApplyEmptyVCLStyleHook(Screen.Forms[index].ClassType);
   {$IFEND}
 end;
@@ -266,7 +270,7 @@ end;
 
 
 //check these windows when an app is debuged
-function SkinDebuggerWindows(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
+function ProcessDebuggerWindows(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
 const
   NumWin  = 4;
   CompList : array  [0..NumWin-1] of string = ('TDisassemblerView','TRegisterView','TFlagsView','TDumpView');
@@ -283,7 +287,7 @@ begin
     end
 end;
 
-function SkinVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
+function ProcessVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
 const
   NumWin  = 7;
   CompList : array  [0..NumWin-1] of string = ('TMemo','TListView','TTreeView','TListBox','TCheckListBox','TExplorerCheckListBox','THintListView');
@@ -303,7 +307,7 @@ begin
 end;
 
 //todo color themed tcheckbox , tradiobutton
-function SkinStdVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
+function ProcessStdVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
 const
   NumWin  = 2;
   CompList : array  [0..NumWin-1] of string = ('TLabel','TCheckBox');
@@ -320,7 +324,7 @@ begin
     end
 end;
 
-function SkinVclGroupControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
+function ProcessVclGroupControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
 const
   NumWin  = 3;
   CompList : array  [0..NumWin-1] of string = ('TGroupBox','TRadioGroup','TPropRadioGroup');
@@ -342,8 +346,10 @@ end;
 
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 var
-  I     : Integer;
-  LPanel: TPanel;
+  I              : Integer;
+  LPanel         : TPanel;
+  LColorMap      : TCustomActionBarColorMap;
+  LActionManager : TActionManager;
 begin
 
  if not Assigned(AComponent) then  exit;
@@ -358,11 +364,6 @@ begin
     DumpComponent(AComponent);
   end;
 {$ENDIF}
-
-
-        {
- if CompareText('TDefaultEnvironmentDialog',AComponent.ClassName)=0 then exit;
-           }
 
 
 {$IFDEF DEBUG_MODE}
@@ -480,13 +481,13 @@ begin
       }
     end
     else
-    if SkinStdVclControls(AColorMap,AComponent) then
+    if ProcessStdVclControls(AColorMap,AComponent) then
     else
-    if SkinVclControls(AColorMap,AComponent) then
+    if ProcessVclControls(AColorMap,AComponent) then
     else
-    if SkinDebuggerWindows(AColorMap,AComponent) then
+    if ProcessDebuggerWindows(AColorMap,AComponent) then
     else
-    if SkinVclGroupControls(AColorMap,AComponent) then
+    if ProcessVclGroupControls(AColorMap,AComponent) then
     else
     if AComponent.ClassName='TInspListBox' then
     begin
@@ -647,18 +648,19 @@ begin
     if AComponent is TActionToolBar then
     with TActionToolBar(AComponent) do
     begin
-      ColorMap:=AColorMap;
+      LColorMap:=TXPColorMap.Create(AComponent);
+      LColorMap.Assign(AColorMap);
+      LColorMap.OnColorChange:=nil;
+      ColorMap:=LColorMap;
     end
     else
     if AComponent is TControlBar then
     with TControlBar(AComponent) do
     begin
-      Color := AColorMap.Color;//$00F1E9E0;
-      {.$IF COMPILERVERSION > 21}
+      Color := AColorMap.Color;
       DrawingStyle := dsGradient;
-      GradientStartColor :=  AColorMap.Color;//$00D1B499
-      GradientEndColor   :=  AColorMap.Color;//$00D1B499
-      {.$IFEND};
+      GradientStartColor :=  AColorMap.Color;
+      GradientEndColor   :=  AColorMap.Color;
     end
     else
     if AComponent.ClassName = 'TDockToolBar' then
@@ -667,11 +669,9 @@ begin
       with TToolBar(AComponent) do
       begin
         Color              := AColorMap.Color;
-        {.$IF COMPILERVERSION > 21}
         DrawingStyle       := TTBDrawingStyle(dsGradient);
         GradientStartColor := AColorMap.MenuColor;
         GradientEndColor   := AColorMap.Color;//$00D1B499;
-        {.$IFEND}
         HotTrackColor      := AColorMap.SelectedColor;
         Font.Color         := AColorMap.FontColor;
       end;
@@ -680,17 +680,23 @@ begin
     if AComponent is TActionMainMenuBar then
     with TActionMainMenuBar(AComponent) do
     begin
+      LColorMap:=TXPColorMap.Create(AComponent);
+      LColorMap.Assign(AColorMap);
+      LColorMap.OnColorChange:=nil;
+      ColorMap:=LColorMap;
       AnimationStyle  := asFade;
       AnimateDuration := 1200;
       Shadows         := True;
-      ColorMap        := AColorMap;
       Font.Color      := AColorMap.FontColor;
     end
     else
     if AComponent is TActionManager then
-    with TActionManager(AComponent) do
     begin
-      Style := AStyle;//XPStyle;
+      LActionManager:=TActionManager(AComponent);
+      if not ActnStyleList.ContainsKey(LActionManager) then
+          ActnStyleList.Add(LActionManager, LActionManager.Style);
+
+      LActionManager.Style := AStyle;//XPStyle;
     end
     else
     if AComponent.ClassName = 'TTabSet' then
@@ -775,8 +781,22 @@ begin
 end;
 
 
+procedure RestoreActnManagerStyles;
+var
+  LActionManager : TActionManager;
+begin
+  if ActnStyleList.Count>0 then
+    for LActionManager in ActnStyleList.Keys do
+       LActionManager.Style:= ActnStyleList.Items[LActionManager];
+end;
+
+
+var
+ NativeColorMap : TCustomActionBarColorMap;
+
 initialization
   //LObjectList:=TObjectList<THelperClass>.Create;
+  ActnStyleList := TDictionary<TActionManager, TActionBarStyle>.Create;
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
@@ -796,6 +816,21 @@ initialization
 {$ENDIF}
 
 finalization
+  if GlobalSettings.UseVCLStyles then
+    if not TStyleManager.ActiveStyle.IsSystemStyle  then
+     TStyleManager.SetStyle('Windows');
+
+
+  NativeColorMap:=TThemedColorMap.Create(nil);
+  //NativeColorMap:=TStandardColorMap.Create(nil);
+  try
+    RefreshIDETheme(NativeColorMap, PlatformDefaultStyle);
+  finally
+    NativeColorMap.Free;
+  end;
+
+  RestoreActnManagerStyles();
+  ActnStyleList.Free;
   HookedWindows.Free;
   HookedWindows:=nil;
 {$IF CompilerVersion > 20}
