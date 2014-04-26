@@ -64,7 +64,6 @@ type
     FPath: string;
     FIcon: TIcon;
     FIDEType: TSupportedIDEs;
-    //FSupportsColorizer: Boolean;
   public
     property Version : TDelphiVersions read FVersion;
     property Path    : string read FPath write FPath;
@@ -186,6 +185,7 @@ Color15=$FFFFFF
     );
 
 
+procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
 procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
 function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
@@ -272,6 +272,31 @@ begin
 {$ENDIF}
 end;
 
+procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
+var
+  List :TList<TDelphiVersionData>;
+  LData : TDelphiVersionData;
+  s : string;
+begin
+  s:=ParamStr(0);
+  List:= TList<TDelphiVersionData>.Create;
+  try
+    FillListDelphiVersions(List);
+    for LData in List do
+    if SameText(LData.Path, s) then
+    begin
+      Data.FVersion :=LData.Version;
+      Data.Path    :=LData.Path;
+      Data.Name    :=LData.Name;
+      Data.Icon    :=LData.Icon;
+      Data.IDEType :=LData.IDEType;
+      break;
+    end;
+  finally
+    List.free;
+  end;
+end;
+
 procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
 Var
   VersionData : TDelphiVersionData;
@@ -299,7 +324,7 @@ begin
       VersionData.FVersion:=DelphiComp;
       VersionData.FName   :=DelphiVersionsNames[DelphiComp];
       VersionData.FIDEType:=TSupportedIDEs.DelphiIDE;
-      VersionData.Icon    :=TIcon.Create;
+      VersionData.Icon     :=TIcon.Create;
       ExtractIconFile(VersionData.FIcon, Filename, SHGFI_SMALLICON);
       AList.Add(VersionData);
     end;
@@ -310,3 +335,4 @@ end;
 
 
 end.
+

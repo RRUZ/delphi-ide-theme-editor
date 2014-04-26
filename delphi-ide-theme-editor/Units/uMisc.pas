@@ -49,7 +49,6 @@ function  MakeValidTagName(const s: string): string;
 implementation
 
 uses
-  Main,
   Forms,
   ActiveX,
   ShlObj,
@@ -201,12 +200,15 @@ end;
 
 function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
   FontType: integer; Data: Pointer): integer; stdcall;
+var
+  List : TStrings;
 begin
   //  if ((FontType and TrueType_FontType) <> 0) and  ((LogFont.lfPitchAndFamily and VARIABLE_PITCH) = 0) then
+   List := TStrings(Data);
   if ((LogFont.lfPitchAndFamily and FIXED_PITCH) <> 0) then
     if not StartsText('@', LogFont.lfFaceName) and
-      (FrmMain.CbIDEFonts.Items.IndexOf(LogFont.lfFaceName) < 0) then
-      FrmMain.CbIDEFonts.Items.Add(LogFont.lfFaceName);
+      (List.IndexOf(LogFont.lfFaceName) < 0) then
+      List.Add(LogFont.lfFaceName);
 
   Result := 1;
 end;
