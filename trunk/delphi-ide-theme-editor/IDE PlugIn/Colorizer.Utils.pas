@@ -23,11 +23,13 @@ unit Colorizer.Utils;
 
 interface
 
+{$I ..\Common\Jedi.inc}
+
 uses
- {$IF CompilerVersion >= 23}
+ {$IFDEF DELPHIXE2_UP}
  VCL.Themes,
  VCL.Styles,
- {$IFEND}
+ {$ENDIF}
  ActnMan,
  ActnColorMaps,
  Windows,
@@ -40,9 +42,9 @@ procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarS
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
-{$IF CompilerVersion >= 23}
+{$IFDEF DELPHIXE2_UP}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
-{$IFEND}
+{$ENDIF}
 
 function  GetBplLocation : string;
 
@@ -62,21 +64,25 @@ implementation
 {.$DEFINE DEBUG_PROFILER}
 
 uses
- {$IF CompilerVersion>=23} //XE2
+ {$IFDEF DELPHIXE_UP}
  PlatformDefaultStyleActnCtrls,
- {$IFEND}
- {$IF CompilerVersion >= 23}
+ {$ELSE}
+ XPStyleActnCtrls,
+ {$ENDIF}
+ {$IFDEF DELPHIXE2_UP}
  Vcl.Styles.Ext,
- {$IFEND}
- {$IF CompilerVersion > 20}
+ {$ENDIF}
+ {$IFDEF DELPHI2009_UP}
+ PngImage,
+ System.Generics.Collections,
+ {$ENDIF}
+ {$IFDEF DELPHI2010_UP}
  IOUtils,
- TypInfo,
  Rtti,
- System.Generics.Collections
  {$ELSE}
  Variants,
- TypInfo
- {$IFEND},
+ TypInfo,
+ {$ENDIF}
  Types,
  Forms,
  Menus,
@@ -88,7 +94,6 @@ uses
  ExtCtrls,
  GraphUtil,
  UxTheme,
- PngImage,
  CategoryButtons,
  ImgList,
  ActnCtrls,
@@ -112,11 +117,15 @@ var
   lDumped       : TStringList;
 {$ENDIF}
 
-{$IF CompilerVersion > 20}
+{$IFDEF DELPHI2010_UP}
 var
   ctx           : TRttiContext;
+{$ENDIF}
+
+{$IFDEF DELPHI2009_UP}
+var
   ActnStyleList : TDictionary<TActionManager, TActionBarStyle>;
-{$IFEND}
+{$ENDIF}
 
 
 {$IFDEF DEBUG_PROFILER}
@@ -186,11 +195,11 @@ begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
      ProcessComponent(AColorMap, AStyle, Screen.Forms[Index]);
   end
-  {$IF CompilerVersion >= 23}
+  {$IFDEF DELPHIXE2_UP}
   else
   if (TColorizerLocalSettings.Settings<>nil) and (TColorizerLocalSettings.Settings.UseVCLStyles) and (csDesigning in Screen.Forms[index].ComponentState) then
     ApplyEmptyVCLStyleHook(Screen.Forms[index].ClassType);
-  {$IFEND}
+  {$ENDIF}
 end;
 
 
@@ -248,7 +257,7 @@ begin
   AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;
 end;
 
-{$IF CompilerVersion >= 23}
+{$IFDEF DELPHIXE2_UP}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);
 begin
   AColorMap.Color                 :=Style.GetStyleColor(scPanel);
@@ -269,7 +278,7 @@ begin
   AColorMap.FrameBottomRightInner :=AColorMap.FrameTopLeftInner;
   AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;
 end;
-{$IFEND}
+{$ENDIF}
 
 //check these windows when an app is debuged
 function ProcessDebuggerWindows(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
@@ -354,11 +363,16 @@ begin
   Intrans.PixelFormat := pf24bit;
 end;
 
+
+
 procedure ImageListReplace(LImages : TImageList;Index: Integer;const ResourceName: String);
+{$IFDEF DELPHI2009_UP}
 var
  LPngImage: TPngImage;
  LBitMap: TBitmap;
+{$ENDIF}
 begin
+{$IFDEF DELPHI2009_UP}
   LPngImage:=TPNGImage.Create;
   try
     LPngImage.LoadFromResourceName(HInstance, ResourceName);
@@ -373,13 +387,17 @@ begin
   finally
     LPngImage.free;
   end;
+{$ENDIF}
 end;
 
 procedure ImageListAdd(LImages : TImageList;Index: Integer;const ResourceName: String);
+{$IFDEF DELPHI2009_UP}
 var
  LPngImage: TPngImage;
  LBitMap: TBitmap;
+{$ENDIF}
 begin
+{$IFDEF DELPHI2009_UP}
   LPngImage:=TPNGImage.Create;
   try
     LPngImage.LoadFromResourceName(HInstance, ResourceName);
@@ -394,6 +412,7 @@ begin
   finally
     LPngImage.free;
   end;
+{$ENDIF}
 end;
 
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
@@ -479,8 +498,10 @@ begin
              begin
               //LImages:=TImageList.Create(nil);
               LImages.Clear;
+              {$IF CompilerVersion > 20}
               LImages.ColorDepth:=TColorDepth.cd32Bit;
-              LImages.DrawingStyle:=TDrawingStyle.dsNormal;
+              {$IFEND}
+              LImages.DrawingStyle:=dsNormal;
               LImages.Width:=15;
               LImages.Height:=15;
 
@@ -617,13 +638,13 @@ begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
 
-       {$IF CompilerVersion >= 23}
+       {$IFDEF DELPHIXE2_UP}
         if TColorizerLocalSettings.Settings.UseVCLStyles then
         begin
         //  if not IsStyleHookRegistered(AComponent.ClassType, TTreeViewStyleHook) then
         //   TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
         end;
-       {$IFEND}
+       {$ENDIF}
     end
     else
     if SameText(AComponent.ClassName, 'TVirtualStringTree') then
@@ -651,13 +672,13 @@ begin
         //	__property Graphics::TColor TreeLineColor = {read=GetColor, write=SetColor, index=5, default=-16777200};
         //	__property Graphics::TColor UnfocusedSelectionColor = {read=GetColor, write=SetColor, index=6, default=-16777201};
         //	__property Graphics::TColor UnfocusedSelectionBorderColor = {read=GetColor, write=SetColor, index=10, default=-16777201};
-       {$IF CompilerVersion >= 23}
+       {$IFDEF DELPHIXE2_UP}
         if TColorizerLocalSettings.Settings.UseVCLStyles then
         begin
           if not IsStyleHookRegistered(AComponent.ClassType, TTreeViewStyleHook) then
            TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
         end;
-       {$IFEND}
+       {$ENDIF}
     end
     else
     if SameText(AComponent.ClassName, 'TCodeEditorTabControl') then
@@ -708,13 +729,13 @@ begin
     else
     if SameText(AComponent.ClassName, 'TEditControl') then   //TODO
     begin
-       {$IF CompilerVersion >= 23}
+       {$IFDEF DELPHIXE2_UP}
         if TColorizerLocalSettings.Settings.UseVCLStyles then
         begin
           if not IsStyleHookRegistered(AComponent.ClassType, TMemoStyleHook) then
            TStyleEngine.RegisterStyleHook(AComponent.ClassType, TMemoStyleHook);
         end;
-       {$IFEND}
+       {$ENDIF}
        // Set these properties and Fields has not effect in the gutter color.
        //SetRttiFieldValue(AComponent,'GutterBrush.Color',  clYellow);
        //SetRttiPropertyValue(AComponent,'Brush.Color',  clRed);
@@ -787,9 +808,10 @@ begin
     if AComponent is TActionManager then
     begin
       LActionManager:=TActionManager(AComponent);
+      {$IFDEF DELPHI2009_UP}
       if not ActnStyleList.ContainsKey(LActionManager) then
           ActnStyleList.Add(LActionManager, LActionManager.Style);
-
+      {$ENDIF}
       LActionManager.Style := AStyle;//XPStyle;
     end
     else
@@ -815,7 +837,7 @@ begin
          SetRttiPropertyValue(AComponent,'Brush.Color',AColorMap.Color);
 
          SetRttiPropertyValue(AComponent,'ParentBackground',False);
-       {$IF CompilerVersion >= 23}
+       {$IFDEF DELPHIXE2_UP}
         {
         if GlobalSettings.UseVCLStyles then
         begin
@@ -823,7 +845,7 @@ begin
            TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTabControlStyleHook);
         end;
         }
-       {$IFEND}
+       {$ENDIF}
     end
     else
     if SameText(AComponent.ClassName, 'TTabSheet')  then
@@ -879,9 +901,14 @@ procedure RestoreActnManagerStyles;
 var
   LActionManager : TActionManager;
 begin
+{$IFDEF DELPHI2009_UP}
   if ActnStyleList.Count>0 then
     for LActionManager in ActnStyleList.Keys do   //if Assigned(ActionBarStyles) then
        LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+{$ELSE}
+   //TODO
+
+{$ENDIF}
 end;
 
 var
@@ -889,7 +916,9 @@ var
 
 initialization
   //LObjectList:=TObjectList<THelperClass>.Create;
+{$IFDEF DELPHI2009_UP}
   ActnStyleList := TDictionary<TActionManager, TActionBarStyle>.Create;
+{$ENDIF}
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
@@ -898,9 +927,9 @@ initialization
   TColorizerLocalSettings.ImagesGutterChanged:=False;
   TColorizerLocalSettings.HookedWindows:=TStringList.Create;
   TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
-{$IF CompilerVersion > 20}
+{$IFDEF DELPHI2010_UP}
   ctx:=TRttiContext.Create;
-{$IFEND}
+{$ENDIF}
 
 {$IFDEF DEBUG_PROFILER}
   ShowMessage('warning DEBUG_PROFILER mode Activated');
@@ -910,26 +939,38 @@ initialization
 {$ENDIF}
 
 finalization
+{$IFDEF DELPHIXE2_UP}
   if TColorizerLocalSettings.Settings.UseVCLStyles then
     if not TStyleManager.ActiveStyle.IsSystemStyle  then
      TStyleManager.SetStyle('Windows');
+{$ENDIF}
 
+{$IFDEF DELPHIXE_UP}
   NativeColorMap:=TThemedColorMap.Create(nil);
-  //NativeColorMap:=TStandardColorMap.Create(nil);
+{$ELSE}
+  NativeColorMap:=TStandardColorMap.Create(nil);
+{$ENDIF}
+
   try
+  {$IFDEF DELPHIXE_UP}
     RefreshIDETheme(NativeColorMap, PlatformDefaultStyle);
+  {$ELSE}
+    RefreshIDETheme(NativeColorMap, XPStyle);
+  {$ENDIF}
   finally
     NativeColorMap.Free;
   end;
 
   RestoreActnManagerStyles();
   FreeAndNil(TColorizerLocalSettings.Settings);
+{$IFDEF DELPHI2009_UP} //2009
   ActnStyleList.Free;
+{$ENDIF}
   TColorizerLocalSettings.HookedWindows.Free;
   TColorizerLocalSettings.HookedWindows:=nil;
-{$IF CompilerVersion > 20}
+{$IFDEF DELPHI2010_UP}
   ctx.Free;
-{$IFEND}
+{$ENDIF}
 
 {$IFDEF DEBUG_PROFILER}
   lprofiler.SaveToFile(ExtractFilePath(GetBplLocation())+'Profiler\profiler.txt');

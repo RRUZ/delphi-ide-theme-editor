@@ -23,7 +23,7 @@ unit Colorizer.OptionsDlg;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Windows, Messages, SysUtils, Variants, Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ToolsAPI, Vcl.StdCtrls;
 
 type

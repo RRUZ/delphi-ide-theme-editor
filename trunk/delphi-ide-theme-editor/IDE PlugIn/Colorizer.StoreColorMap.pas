@@ -83,35 +83,31 @@ procedure  SaveColorMapToXmlFile(AColorMap : TXPColorMap;const FileName:string);
 var
   PropName  : string;
   AColor    : TColor;
-  Doc       : TXMLDocument;
+  LXMLDocument       : TXMLDocument;
   RootNode, ChildNode, oNode : IXMLNode;
   Count, Index: Integer;
   Properties  : TPropList;
 begin
-  Doc   :=TXMLDocument.Create(nil);
-  try
-    Doc.Active := True;
-    Doc.Version:='1.0';
-    Doc.Encoding:='utf-8';
-    Doc.Options := [doNodeAutoIndent];
-    RootNode    := Doc.AddChild('DelphiColorizerTheme');
-    RootNode.Attributes['modified'] := FormatDateTime('YYYY-MM-DD HH:NN:SS',Now);
-    RootNode.Attributes['author']   := 'Delphi IDE Theme Colorizer';
-    RootNode.Attributes['versionapp']  := '1.0.0.0';//GetFileVersion(ParamStr(0));
-    ChildNode := RootNode.AddChild('ColorMap');
-    Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
-      for Index := 0 to Pred(Count) do
-       if SameText(String(Properties[Index]^.PropType^.Name),'TColor') then
-        begin
-          PropName:=String(Properties[Index]^.Name);
-          AColor :=GetOrdProp(AColorMap,PropName);
-          oNode  := ChildNode.AddChild(PropName);
-          oNode.Text:=ColorToString(AColor);
-        end;
-    Doc.SaveToFile(FileName);
-  finally
-   Doc:=nil;
-  end;
+  LXMLDocument   :=TXMLDocument.Create(nil);
+  LXMLDocument.Active := True;
+  LXMLDocument.Version:='1.0';
+  LXMLDocument.Encoding:='utf-8';
+  LXMLDocument.Options := [doNodeAutoIndent];
+  RootNode    := LXMLDocument.AddChild('DelphiColorizerTheme');
+  RootNode.Attributes['modified'] := FormatDateTime('YYYY-MM-DD HH:NN:SS',Now);
+  RootNode.Attributes['author']   := 'Delphi IDE Theme Colorizer';
+  RootNode.Attributes['versionapp']  := '1.0.0.0';//GetFileVersion(ParamStr(0));
+  ChildNode := RootNode.AddChild('ColorMap');
+  Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
+    for Index := 0 to Pred(Count) do
+     if SameText(String(Properties[Index]^.PropType^.Name),'TColor') then
+      begin
+        PropName:=String(Properties[Index]^.Name);
+        AColor :=GetOrdProp(AColorMap,PropName);
+        oNode  := ChildNode.AddChild(PropName);
+        oNode.Text:=ColorToString(AColor);
+      end;
+  LXMLDocument.SaveToFile(FileName);
 end;
 
 end.

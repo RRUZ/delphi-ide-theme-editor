@@ -25,6 +25,7 @@
 
 {
   * gutter code editor   - done:
+  * restore support for Delphi 2007 - use jedi.inc (DELPHIUP)
   * popup menu code editor  -done :)
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * panel separation (space)

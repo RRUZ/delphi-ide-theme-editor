@@ -150,27 +150,27 @@
         <DCCReference Include="Units\uWinInet.pas"/>
         <DCCReference Include="Units\uVclStylesFix.pas"/>
         <DCCReference Include="Units\uLoadThemesImages.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Ext.pas"/>
         <DCCReference Include="Units\uStdActionsPopMenu.pas"/>
         <DCCReference Include="Units\uHelpInsight.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.OwnerDrawFix.pas"/>
         <DCCReference Include="Units\uColorPanel.pas">
             <Form>ColorPanel</Form>
         </DCCReference>
         <DCCReference Include="Units\uSMSIDEHighlight.pas"/>
         <DCCReference Include="Units\uSMSVersions.pas"/>
         <DCCReference Include="Units\uAppMethodVersions.pas"/>
-        <DCCReference Include="Units\KOLDetours.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.ComCtrls.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.Forms.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.Menus.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.ScreenTips.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.StdCtrls.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.SysControls.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.SysStyleHook.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Utils.SystemMenu.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Fixes.pas"/>
-        <DCCReference Include="Units\Vcl.Styles.Hooks.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Fixes.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Hooks.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.OwnerDrawFix.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.ComCtrls.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.Forms.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.ScreenTips.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.StdCtrls.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\Vcl.Styles.Utils.SystemMenu.pas"/>
+        <DCCReference Include="Common\Vcl Styles Utils\KOLDetours.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -235,18 +235,18 @@
                 <DeployFile LocalName="DITE.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32"/>
                 </DeployFile>
-                <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
-                    <Platform Name="Win32">
-                        <RemoteName>DITE.rsm</RemoteName>
-                    </Platform>
+                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32"/>
                 </DeployFile>
                 <DeployFile LocalName="DelphiIDEThemeEditor.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>DelphiIDEThemeEditor.rsm</RemoteName>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32"/>
+                <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
+                    <Platform Name="Win32">
+                        <RemoteName>DITE.rsm</RemoteName>
+                    </Platform>
                 </DeployFile>
                 <DeployClass Required="true" Name="ProjectOutput">
                     <Platform Name="OSX32">

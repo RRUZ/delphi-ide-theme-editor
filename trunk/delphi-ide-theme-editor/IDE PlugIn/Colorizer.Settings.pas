@@ -58,6 +58,7 @@ uses
   SysUtils,
   IniFiles;
 
+
 procedure ReadSettings(Settings: TSettings;Const Path:String);
 var
   iniFile: TIniFile;
