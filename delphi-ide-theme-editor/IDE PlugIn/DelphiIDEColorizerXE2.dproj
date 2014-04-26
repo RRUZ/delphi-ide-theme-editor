@@ -55,7 +55,6 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.1.2.156;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_Description>Delphi IDE Colorizer</DCC_Description>
 			<GenPackage>true</GenPackage>
-			<DCC_CBuilderOutput>All</DCC_CBuilderOutput>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_DcuOutput>.\$(Config)\$(Platform)</DCC_DcuOutput>
@@ -105,13 +104,7 @@
 			<DCCReference Include="Colorizer.HookForms.pas"/>
 			<DCCReference Include="Colorizer.Hooks.pas"/>
 			<DCCReference Include="Colorizer.StoreColorMap.pas"/>
-			<DCCReference Include="..\Units\Vcl.Styles.Ext.pas"/>
 			<DCCReference Include="ColorXPStyleActnCtrls.pas"/>
-			<DCCReference Include="Vcl.Styles.Utils.Menus.pas"/>
-			<DCCReference Include="Vcl.Styles.Utils.SysControls.pas"/>
-			<DCCReference Include="Vcl.Styles.Utils.SysStyleHook.pas"/>
-			<DCCReference Include="delphi-detours-library\DDetours.pas"/>
-			<DCCReference Include="delphi-detours-library\InstDecode.pas"/>
 			<DCCReference Include="Colorizer.OptionsDlg.pas">
 				<Form>FrameColorizer</Form>
 				<DesignClass>TFrame</DesignClass>
@@ -125,6 +118,12 @@
 			<DCCReference Include="..\Units\uRegistry.pas"/>
 			<DCCReference Include="uRttiHelper.pas"/>
 			<DCCReference Include="uIDEExpertUtils.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SystemMenu.pas"/>
+			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
+			<DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -150,7 +149,7 @@
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">2</VersionInfo>
-						<VersionInfo Name="Build">170</VersionInfo>
+						<VersionInfo Name="Build">174</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -162,7 +161,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">0.1.2.170</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.2.174</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
@@ -172,7 +171,7 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="C:\Users\Public\Documents\RAD Studio\9.0\Bpl\OleVariantVisualizer_XE2.bpl">File C:\Users\Public\Documents\RAD Studio\9.0\Bpl\OleVariantVisualizer_XE2.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Users\Public\Documents\RAD Studio\9.0\Bpl\ChromeTabs_XE2_D.bpl">Chrome Tabs Design Time</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>

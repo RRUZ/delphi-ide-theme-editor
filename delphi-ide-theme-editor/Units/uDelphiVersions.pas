@@ -184,6 +184,27 @@ Color15=$FFFFFF
     '\Software\Embarcadero\BDS\14.0'
     );
 
+  DelphiVCLStylesPaths: array[TDelphiVersions] of string = (
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+    '',
+    '',
+  {$ENDIF}
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'RAD Studio\9.0\Styles',
+    'RAD Studio\10.0\Styles',
+    'RAD Studio\11.0\Styles',
+    'RAD Studio\12.0\Styles',
+    '',
+    'Embarcadero\Studio\14.0\Styles'
+    );
+
 
 procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
 procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
@@ -193,6 +214,7 @@ function GetIndexClosestColor(AColor:TColor) : Integer;
 {$ENDIF}
 
 function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions) : TColor;
+function GetVCLStylesFolder(DelphiVersion:TDelphiVersions) : string;
 
 {
 
@@ -217,9 +239,11 @@ uses
   ImgList,
   CommCtrl,
   ShellAPI,
+  ShlObj,
   Windows,
   uRegistry,
   Registry;
+
 
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
 function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
@@ -270,6 +294,28 @@ begin
   if DelphiIsOldVersion(DelphiVersion) then
   Result:= DelphiOldColorsList[GetIndexClosestColor(AColor)];
 {$ENDIF}
+end;
+
+function  GetVCLStylesFolder(DelphiVersion:TDelphiVersions) : string;
+var
+  List :TList<TDelphiVersionData>;
+  LData : TDelphiVersionData;
+begin
+  result:='';
+  List:= TList<TDelphiVersionData>.Create;
+  try
+    FillListDelphiVersions(List);
+    for LData in List do
+    if LData.Version=DelphiVersion then
+    begin
+      Result:= IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_DOCUMENTS))+DelphiVCLStylesPaths[DelphiVersion];
+      if not DirectoryExists(Result) then
+       Result:='';
+      break;
+    end;
+  finally
+    List.free;
+  end;
 end;
 
 procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
