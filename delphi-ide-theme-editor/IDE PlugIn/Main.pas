@@ -25,12 +25,13 @@
 
 {
   * gutter code editor   - done:
-  * restore support for Delphi 2007 - use jedi.inc (DELPHIUP)
+  * restore support for Delphi 2007 -
+  * detect parent object from class (vmt tObject)
   * popup menu code editor  -done :)
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * panel separation (space)
   * TIDEGradientTabSet background
-  * remove access viuolations on manual unload of package - done
+  * remove access violations on manual unload of package - done
 
   * check for color key in OTA ;) done :(
   * options-enviroment variables crash    -> TDefaultEnvironmentDialog  GExperts????    done:)
@@ -100,6 +101,8 @@ uses
  Menus,
  ComObj,
  ExtCtrls,
+ uDelphiVersions,
+ Colorizer.SettingsForm,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
  ColorXPStyleActnCtrls;
@@ -108,14 +111,14 @@ uses
 type
   TIDEWizard = class(TInterfacedObject, IOTAWizard, IOTANotifier)
   private
-    //ExplorerItem: TMenuItem;
+    ExplorerItem: TMenuItem;
     //ExplorerSeparator: TMenuItem;
     {$IFDEF USE_DUMP_TIMER}
     FDumperTimer   : TTimer;
     {$ENDIF}
     FTimerRefresher: TTimer;
-    //procedure AddMenuItems;
-    //procedure RemoveMenuItems;
+    procedure AddMenuItems;
+    procedure RemoveMenuItems;
     procedure InitColorizer;
     procedure FinalizeColorizer;
     procedure OnRefreher(Sender : TObject);
@@ -147,6 +150,7 @@ var
 //  private
 //     function GetBindingType: TBindingType;
 //     function GetDisplayName: string;
+
 //     function GetName: string;
 //     procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
 //  end ;
@@ -251,7 +255,8 @@ procedure TIDEWizard.InitColorizer;
 var
   LServices : INTAServices;
 {$IF CompilerVersion >= 23}
-  StyleFile : string;
+  found : Boolean;
+  s : string;
 {$IFEND}
 begin
   if BorlandIDEServices <> nil then
@@ -270,7 +275,9 @@ begin
           TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
           //AColorMap:=TColorXPColorMap.Create(Application);
           //TColorizerLocalSettings.GlobalColorMap:=AColorMap;
-          TColorizerLocalSettings.ColorMap.FontColor:=clBlack;
+
+        //  TColorizerLocalSettings.ColorMap.FontColor:=clBlack;
+
           //GenerateColorMap(AColorMap, clWebKhaki);
           //AColorMap:=TThemedColorMap.Create(nil);
           //AColorMap.Color:=clWebLemonChiffon;
@@ -281,16 +288,25 @@ begin
           LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
           //TColorizerLocalSettings.GlobalSettings:=Settings;
           {$IF CompilerVersion >= 23}
-          if TColorizerLocalSettings.Settings.UseVCLStyles then
+          if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
           begin
-            StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.Settings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
-            if FileExists(StyleFile) then
+            //StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
+            RegisterVClStylesFiles();
+            found:=false;
+            for s in TStyleManager.StyleNames do
+             if not SameText(s, 'Windows') and SameText(s, TColorizerLocalSettings.Settings.VCLStyleName) then
+             begin
+               found:=True;
+               break;
+             end;
+
+            if found then
             begin
-              TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
+              TStyleManager.SetStyle(TColorizerLocalSettings.Settings.VCLStyleName);
               GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
             end
             else
-              MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
+              MessageDlg(Format('The VCL Style %s was not found',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);
           end;
           {$IFEND}
           RefreshIDETheme(TColorizerLocalSettings.ColorMap, ColorXPStyle);
@@ -322,7 +338,7 @@ begin
   TColorizerLocalSettings.Settings:=TSettings.Create;
   //ColorizerForm := nil;
   RegisterPlugIn;
-  //AddMenuItems;
+  AddMenuItems;
   InitColorizer();
 
   {$IFDEF USE_DUMP_TIMER}
@@ -340,47 +356,44 @@ end;
 
 
 
-//procedure TIDEWizard.AddMenuItems;
-//var
-//  MainMenu: TMainMenu;
-//  ToolsMenu: TMenuItem;
-//  I, InsertPosition: Integer;
-//  Image : TIcon;
-//begin
-//  inherited;
-//  if BorlandIDEServices <> nil then
-//  begin
-//    MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
-//    ToolsMenu := MainMenu.Items[8];
-//
-//    for I := 0 to MainMenu.Items.Count - 1 do
-//      if CompareText(MainMenu.Items[I].Name, 'ToolsMenu') = 0 then
-//      begin
-//        ToolsMenu := MainMenu.Items[I];
-//        Break;
-//      end;
-//
-//    InsertPosition:=ToolsMenu.Count - 1;
-//    //ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
-//    //ToolsMenu.InsertComponent(ExplorerSeparator);
-//    //ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
-//
-//
-//    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, Menus.ShortCut(Word('D'), [ssCtrl]), False, True, ExplorerItemClick, 0, 'IdeClorItem');
-//
-//
-//    Image:=TIcon.Create;
-//    try
-//     Image.Handle := LoadIcon(hInstance, sLogoIcon16);
-//     ExplorerItem.ImageIndex:=MainMenu.Images.AddIcon(Image);
-//    finally
-//      Image.Free;
-//    end;
-//
-//    ToolsMenu.InsertComponent(ExplorerItem);
-//    ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
-//  end;
-//end;
+procedure TIDEWizard.AddMenuItems;
+var
+  MainMenu: TMainMenu;
+  ToolsMenu: TMenuItem;
+  I, InsertPosition: Integer;
+  LIcon : TIcon;
+begin
+  inherited;
+  if BorlandIDEServices <> nil then
+  begin
+    MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
+    ToolsMenu := MainMenu.Items[8];
+
+    for I := 0 to MainMenu.Items.Count - 1 do
+      if CompareText(MainMenu.Items[I].Name, 'ToolsMenu') = 0 then
+      begin
+        ToolsMenu := MainMenu.Items[I];
+        Break;
+      end;
+
+    InsertPosition:=ToolsMenu.Count - 1;
+    //ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
+    //ToolsMenu.InsertComponent(ExplorerSeparator);
+    //ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
+    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, Menus.ShortCut(Word('D'), [ssCtrl]), False, True, ExplorerItemClick, 0, 'IdeClorItem');
+
+    LIcon:=TIcon.Create;
+    try
+     LIcon.Handle := LoadIcon(hInstance, sLogoIcon16);
+     ExplorerItem.ImageIndex:=MainMenu.Images.AddIcon(LIcon);
+    finally
+      LIcon.Free;
+    end;
+
+    ToolsMenu.InsertComponent(ExplorerItem);
+    ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
+  end;
+end;
 
 procedure TIDEWizard.AfterSave;
 begin
@@ -393,8 +406,7 @@ end;
 
 destructor TIDEWizard.Destroy;
 begin
-  //
-  //RemoveMenuItems;
+  RemoveMenuItems;
   SplashBmp.Free;
   AboutBmp.Free;
 
@@ -418,10 +430,16 @@ begin
 end;
 
 procedure TIDEWizard.ExplorerItemClick(Sender: TObject);
+var
+  ColorizerForm : TFormIDEColorizerSettings;
 begin
-  //ColorizerForm := TFrmIDEColorizerSettings.Create(nil);
-  //ColorizerForm.Name := 'DelphiIDEColorizer_SettingsForm';
-  //ColorizerForm.ShowModal();
+  ColorizerForm := TFormIDEColorizerSettings.Create(nil);
+  ColorizerForm.Name := 'DelphiIDEColorizer_SettingsForm';
+  ColorizerForm.LabelSetting.Caption:='Delphi IDE Colorizer for '+TColorizerLocalSettings.IDEData.Name;
+  ColorizerForm.Init;
+  ColorizerForm.PanelMain.BorderWidth:=5;
+  ColorizerForm.TabSheetVCLStyles.TabVisible:=TColorizerLocalSettings.IDEData.Version=TDelphiVersions.DelphiXE2;
+  ColorizerForm.ShowModal();
 end;
 
 function TIDEWizard.GetIDString: string;
@@ -463,11 +481,11 @@ begin
 end;
 {$ENDIF}
 
-//procedure TIDEWizard.RemoveMenuItems;
-//begin
-  //ExplorerItem.Free;
-  //ExplorerSeparator.Free;
-//end;
+procedure TIDEWizard.RemoveMenuItems;
+begin
+  ExplorerItem.Free;
+//  ExplorerSeparator.Free;
+end;
 
 
 { TMyIDEHotKey }

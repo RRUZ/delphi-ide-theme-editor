@@ -31,6 +31,7 @@ uses
  VCL.Styles,
  {$ENDIF}
  ActnMan,
+ uDelphiVersions,
  ActnColorMaps,
  Windows,
  Graphics,
@@ -44,6 +45,7 @@ procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBar
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
+procedure RegisterVClStylesFiles;
 {$ENDIF}
 
 function  GetBplLocation : string;
@@ -53,9 +55,11 @@ function  GetBplLocation : string;
    public
     class var ColorMap : TXPColorMap;
     class var HookedWindows : TStringList;
+    class var VCLStylesPath: string;
     class var Settings: TSettings;
     class var ImagesGutterChanged : Boolean;
-    class var ColorXPStyle: TColorXPStyleActionBars
+    class var ColorXPStyle: TColorXPStyleActionBars;
+    class var IDEData   : TDelphiVersionData;
     end;
 
 implementation
@@ -127,6 +131,25 @@ var
   ActnStyleList : TDictionary<TActionManager, TActionBarStyle>;
 {$ENDIF}
 
+{$IFDEF DELPHIXE2_UP}
+procedure RegisterVClStylesFiles;
+var
+ s, sPath, FileName : string;
+begin
+  sPath:=TColorizerLocalSettings.VCLStylesPath;
+  if SysUtils.DirectoryExists(sPath) then
+  for FileName in TDirectory.GetFiles(sPath, '*.vsf') do
+  if TStyleManager.IsValidStyle(FileName) then
+  begin
+     try
+       TStyleManager.LoadFromFile(FileName);
+     except
+       on EDuplicateStyleException do
+     end;
+  end;
+end;
+
+{$ENDIF}
 
 {$IFDEF DEBUG_PROFILER}
 procedure DumpType(const QualifiedName:string);
@@ -922,7 +945,7 @@ initialization
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
-  TColorizerLocalSettings.ColorMap      :=nil;
+  TColorizerLocalSettings.ColorMap:=nil;
   TColorizerLocalSettings.Settings:=nil;
   TColorizerLocalSettings.ImagesGutterChanged:=False;
   TColorizerLocalSettings.HookedWindows:=TStringList.Create;
@@ -938,6 +961,10 @@ initialization
   lDumped  :=TStringList.Create;
 {$ENDIF}
 
+  TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
+  FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
+
+  TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
 finalization
 {$IFDEF DELPHIXE2_UP}
   if TColorizerLocalSettings.Settings.UseVCLStyles then
@@ -963,6 +990,10 @@ finalization
 
   RestoreActnManagerStyles();
   FreeAndNil(TColorizerLocalSettings.Settings);
+  if Assigned(TColorizerLocalSettings.IDEData.Icon) then
+      TColorizerLocalSettings.IDEData.Icon.Free;
+  TColorizerLocalSettings.IDEData.Free;
+
 {$IFDEF DELPHI2009_UP} //2009
   ActnStyleList.Free;
 {$ENDIF}

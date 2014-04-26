@@ -85,24 +85,22 @@ type
     procedure CheckBoxGutterIconsClick(Sender: TObject);
     procedure CheckBoxEnabledClick(Sender: TObject);
     procedure CbStylesChange(Sender: TObject);
+    procedure CheckBoxUseVClStylesClick(Sender: TObject);
   private
     { Private declarations }
     FPreview:TVclStylesPreview;
     FSettings: TSettings;
-    FIDEData: TDelphiVersionData;
     FShowWarning : Boolean;
     procedure LoadColorElements;
     procedure LoadThemes;
     //procedure LoadProperties(lType: TRttiType);
     procedure LoadSettings;
-    function  GetIDEData: TDelphiVersionData;
     function  GetIDEThemesFolder : String;
     function  GetSettingsFolder : String;
     procedure LoadVClStylesList;
     procedure GenerateIDEThemes(const Path : string);
     procedure DrawSeletedVCLStyle;
   public
-    property IDEData   : TDelphiVersionData read GetIDEData write FIDEData;
     procedure Init;
   end;
 
@@ -174,7 +172,6 @@ Uses
 {
 TODO
   Enable / disable
-  register VCL styles from files.
 }
 
 
@@ -242,7 +239,7 @@ begin
 
     FSettings.UseVCLStyles :=CheckBoxUseVClStyles.Checked;
     FSettings.ChangeIconsGutter :=CheckBoxGutterIcons.Checked;
-    FSettings.VCLStylesPath:=EditVCLStylesPath.Text;
+    //FSettings.VCLStylesPath:=EditVCLStylesPath.Text;
     FSettings.VCLStyleName :=CbStyles.Text;
     WriteSettings(FSettings, GetSettingsFolder);
 
@@ -250,7 +247,7 @@ begin
     {$IF CompilerVersion >= 23}
     if TColorizerLocalSettings.Settings.UseVCLStyles then
     begin
-      StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.Settings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
+      StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
       if FileExists(StyleFile) then
       begin
         TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
@@ -388,9 +385,14 @@ begin
  FShowWarning :=True;
 end;
 
+procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
+begin
+ LoadVClStylesList;
+end;
+
 procedure TFormIDEColorizerSettings.FormActivate(Sender: TObject);
 begin
-  TabSheetVCLStyles.TabVisible:=IDEData.Version=TDelphiVersions.DelphiXE2;
+  TabSheetVCLStyles.TabVisible:=TColorizerLocalSettings.IDEData.Version=TDelphiVersions.DelphiXE2;
 end;
 
 procedure TFormIDEColorizerSettings.FormClose(Sender: TObject;
@@ -454,11 +456,6 @@ begin
      FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'.idetheme';
      SaveColorMapToXmlFile(ColorMap,FileName);
    end;
-end;
-
-function TFormIDEColorizerSettings.GetIDEData: TDelphiVersionData;
-begin
-  Result := FIDEData;
 end;
 
 function TFormIDEColorizerSettings.GetIDEThemesFolder: String;
@@ -547,7 +544,7 @@ begin
 
   CheckBoxUseVClStyles.Checked:=FSettings.UseVCLStyles;
   LoadVClStylesList;
-  EditVCLStylesPath.Text:=FSettings.VCLStylesPath;
+  //EditVCLStylesPath.Text:=FSettings.VCLStylesPath;
   CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
   DrawSeletedVCLStyle;
 end;
@@ -565,7 +562,6 @@ begin
     Files:=TDirectory.GetFiles(GetIDEThemesFolder,'*.idetheme');
   end;
 
-
   for sValue in Files do
   begin
     FileName:=ChangeFileExt(ExtractFileName(sValue),'');
@@ -576,16 +572,17 @@ end;
 
 procedure TFormIDEColorizerSettings.LoadVClStylesList;
 var
- sPath , sValue, FileName : string;
+ s : string;
 begin
-  sPath:=GetVCLStylesFolder(IDEData.Version);
+ if CheckBoxUseVClStyles.Checked then
+ begin
   CbStyles.Items.Clear;
-  if SysUtils.DirectoryExists(sPath) then
-  for sValue in TDirectory.GetFiles(sPath, '*.vsf') do
-  begin
-    FileName:=ExtractFileName(sValue);
-    CbStyles.Items.Add(FileName);
-  end;
+  RegisterVClStylesFiles();
+   for s in TStyleManager.StyleNames do
+    CbStyles.Items.Add(s);
+
+   CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
+ end;
 end;
 
 end.
