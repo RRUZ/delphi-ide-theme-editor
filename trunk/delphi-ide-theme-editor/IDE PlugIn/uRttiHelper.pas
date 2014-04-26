@@ -38,6 +38,7 @@ uses
 function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
 function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
 procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
 procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
 
@@ -309,6 +310,39 @@ begin
       Result:= RttiProperty.GetValue(Instance);
   finally
     Props.Free;
+  end;
+end;
+
+function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
+var
+  RttiField    : TRttiField;
+  Instance     : Pointer;
+  Fields       : TStringList;
+  i            : integer;
+begin
+  RttiField:=nil;
+  Fields:=TStringList.Create;
+  try
+    Fields.Delimiter:='.';
+    Fields.DelimitedText:=FieldName;
+    Instance:=Obj;
+
+    if Fields.Count>0 then
+     RttiField := ctx.GetType(Obj.ClassInfo).GetField(Fields[0]);
+
+    for i:=1 to Fields.Count-1 do
+     begin
+        if Assigned(RttiField) and (RttiField.FieldType.TypeKind=tkClass) then
+         Instance          := RttiField.GetValue(Instance).AsObject
+        else
+        raise Exception.Create(Format('The field %s is not a class',[Fields[i]]));
+          RttiField := ctx.GetType(RttiField.FieldType.Handle).GetField(Fields[i]);
+     end;
+
+    if Assigned(RttiField) then
+      Result:= RttiField.GetValue(Instance);
+  finally
+    fields.Free;
   end;
 end;
 

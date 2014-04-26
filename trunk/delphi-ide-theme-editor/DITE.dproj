@@ -148,12 +148,6 @@
             <Form>FrmCheckUpdate</Form>
         </DCCReference>
         <DCCReference Include="Units\uWinInet.pas"/>
-        <DCCReference Include="IDE PlugIn\uColorizerSettings.pas">
-            <Form>FrmIDEColorizerSettings</Form>
-        </DCCReference>
-        <DCCReference Include="IDE PlugIn\uStoreColorMap.pas"/>
-        <DCCReference Include="IDE PlugIn\uIDEExpertUtils.pas"/>
-        <DCCReference Include="IDE PlugIn\uClrSettings.pas"/>
         <DCCReference Include="Units\uVclStylesFix.pas"/>
         <DCCReference Include="Units\uLoadThemesImages.pas"/>
         <DCCReference Include="Units\Vcl.Styles.Ext.pas"/>
@@ -202,7 +196,7 @@
                     <VersionInfo Name="MajorVer">1</VersionInfo>
                     <VersionInfo Name="MinorVer">0</VersionInfo>
                     <VersionInfo Name="Release">0</VersionInfo>
-                    <VersionInfo Name="Build">298</VersionInfo>
+                    <VersionInfo Name="Build">299</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -214,7 +208,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName">TheRoadToDelphi</VersionInfoKeys>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">1.0.0.298</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">1.0.0.299</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright">Rodrigo Ruz V. 2011</VersionInfoKeys>
                     <VersionInfoKeys Name="LegalTrademarks"/>
@@ -241,18 +235,18 @@
                 <DeployFile LocalName="DITE.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32"/>
                 </DeployFile>
-                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32"/>
+                <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
+                    <Platform Name="Win32">
+                        <RemoteName>DITE.rsm</RemoteName>
+                    </Platform>
                 </DeployFile>
                 <DeployFile LocalName="DelphiIDEThemeEditor.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>DelphiIDEThemeEditor.rsm</RemoteName>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="DITE.rsm" Configuration="Release" Class="DebugSymbols">
-                    <Platform Name="Win32">
-                        <RemoteName>DITE.rsm</RemoteName>
-                    </Platform>
+                <DeployFile LocalName="DelphiIDEThemeEditor.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32"/>
                 </DeployFile>
                 <DeployClass Required="true" Name="ProjectOutput">
                     <Platform Name="OSX32">
@@ -343,17 +337,3 @@
     </ProjectExtensions>
     <Import Condition="Exists('$(MSBuildProjectName).deployproj')" Project="$(MSBuildProjectName).deployproj"/>
 </Project>
-
-<!-- EurekaLog First Line
-[Exception Log]
-EurekaLog Version=7001
-Activate=0
-atVCL=1
-DeleteMapAfterCompile=0
-Encrypt Password=""
-idEurekaLog=1
-idEurekaLogDetailed=1
-idMSClassic=1
-idStepsToReproduce=1
-ProjectID="{3704271E-2F5D-4ECC-A75F-3EAFB9F55B9C}"
-EurekaLog Last Line -->

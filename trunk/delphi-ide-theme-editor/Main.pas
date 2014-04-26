@@ -267,8 +267,7 @@ uses
   uCheckUpdate,
   uLoadThemesImages,
   uHelpInsight,
-  uStdActionsPopMenu,
-  uColorizerSettings;
+  uStdActionsPopMenu;
 
 const
   InvalidBreakLine   = 9;
@@ -791,23 +790,23 @@ begin
 end;
 
 procedure TFrmMain.BtnIDEColorizerClick(Sender: TObject);
-Var
-  Frm : TFrmIDEColorizerSettings;
-  Icon: TIcon;
+//Var
+//  Frm : TFrmIDEColorizerSettings;
+//  Icon: TIcon;
 begin
 
-  Frm:=TFrmIDEColorizerSettings.Create(nil);
-  Icon:=TIcon.Create;
-  try
-    Frm.IDEData:=FIDEData;
-    Frm.init();
-    ExtractIconFile(Icon,IDEData.Path, SHGFI_LARGEICON);
-    Frm.ImageIDELogo.Picture.Icon:=Icon;
-    Frm.ShowModal();
-  finally
-    Icon.Free;
-    Frm.Free;
-  end;
+//  Frm:=TFrmIDEColorizerSettings.Create(nil);
+//  Icon:=TIcon.Create;
+//  try
+//    Frm.IDEData:=FIDEData;
+//    Frm.init();
+//    ExtractIconFile(Icon,IDEData.Path, SHGFI_LARGEICON);
+//    Frm.ImageIDELogo.Picture.Icon:=Icon;
+//    Frm.ShowModal();
+//  finally
+//    Icon.Free;
+//    Frm.Free;
+//  end;
 end;
 
 procedure TFrmMain.BtnImportClick(Sender: TObject);
@@ -1202,7 +1201,7 @@ begin
   try
     ZeroMemory(@LogFont, sizeof(LogFont));
     LogFont.lfCharset := DEFAULT_CHARSET;
-    EnumFontFamiliesEx(sDC, LogFont, @EnumFontsProc, 0, 0);
+    EnumFontFamiliesEx(sDC, LogFont, @EnumFontsProc, Windows.LPARAM(CbIDEFonts.Items), 0);
   finally
     ReleaseDC(0, sDC);
   end;

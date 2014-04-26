@@ -24,8 +24,8 @@
 //TODO
 
 {
-  * gutter code editor
-  * popup menu code editor   done :)
+  * gutter code editor   - done:
+  * popup menu code editor  -done :)
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * panel separation (space)
   * TIDEGradientTabSet background
@@ -75,6 +75,7 @@ procedure Register;
 implementation
 
 {$R DelphiIDEColorizer.res}
+{$R Gutter.res}
 
 {.$DEFINE USE_DUMP_TIMER}
 
@@ -90,7 +91,7 @@ uses
  ToolsAPI,
  Graphics,
  UxTheme,
- uColorizerUtils,
+ Colorizer.Utils,
  ActnColorMaps,
  SysUtils,
  Forms,
@@ -98,7 +99,8 @@ uses
  Menus,
  ComObj,
  ExtCtrls,
- uClrSettings,
+ Colorizer.Settings,
+ Colorizer.OptionsDlg,
  ColorXPStyleActnCtrls;
 
 
@@ -107,12 +109,10 @@ type
   private
     //ExplorerItem: TMenuItem;
     //ExplorerSeparator: TMenuItem;
-    AColorMap      : TXPColorMap;
     {$IFDEF USE_DUMP_TIMER}
     FDumperTimer   : TTimer;
     {$ENDIF}
     FTimerRefresher: TTimer;
-    Settings       : TSettings;
     //procedure AddMenuItems;
     //procedure RemoveMenuItems;
     procedure InitColorizer;
@@ -258,6 +258,7 @@ begin
       LServices := (BorlandIDEServices as INTAServices);
       if LServices <> nil then
       begin
+       RegisterColorizerAddinOptions;
        {$IFDEF DEBUG_MODE}
        lcomp:= TStringList.Create;
        {$ENDIF}
@@ -265,10 +266,10 @@ begin
           //DelphiTheme := TXPManifest.Create(nil);
           //AColorMap:=TTwilightColorMap.Create(nil);  usar para ver color de fuentes
           //AColorMap:=TStandardColorMap.Create(nil);
-          AColorMap:=TColorXPColorMap.Create(nil);
+          TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
           //AColorMap:=TColorXPColorMap.Create(Application);
-          GlobalColorMap:=AColorMap;
-          AColorMap.FontColor:=clBlack;
+          //TColorizerLocalSettings.GlobalColorMap:=AColorMap;
+          TColorizerLocalSettings.ColorMap.FontColor:=clBlack;
           //GenerateColorMap(AColorMap, clWebKhaki);
           //AColorMap:=TThemedColorMap.Create(nil);
           //AColorMap.Color:=clWebLemonChiffon;
@@ -276,22 +277,22 @@ begin
           //AColorMap.Color:=clWebDarkSeaGreen;
           //AColorMap.Color:=clWebSteelBlue;
           //ShowMessage(GetBplLocation());
-          LoadSettings(AColorMap, Settings);
-          GlobalSettings:=Settings;
+          LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
+          //TColorizerLocalSettings.GlobalSettings:=Settings;
           {$IF CompilerVersion >= 23}
-          if Settings.UseVCLStyles then
+          if TColorizerLocalSettings.Settings.UseVCLStyles then
           begin
-            StyleFile:=IncludeTrailingPathDelimiter(Settings.VCLStylesPath)+Settings.VCLStyleName;
+            StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.Settings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
             if FileExists(StyleFile) then
             begin
               TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
-              GenerateColorMap(AColorMap,TStyleManager.ActiveStyle);
+              GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
             end
             else
               MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
           end;
           {$IFEND}
-          RefreshIDETheme(AColorMap, ColorXPStyle);
+          RefreshIDETheme(TColorizerLocalSettings.ColorMap, ColorXPStyle);
         finally
           {$IFDEF DEBUG_MODE}
            //lcomp.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\pkgDelphiWithTheme\Components.txt');
@@ -304,7 +305,8 @@ end;
 
 procedure TIDEWizard.FinalizeColorizer;
 begin
-    FreeAndNil(AColorMap);
+    FreeAndNil(TColorizerLocalSettings.ColorMap);
+    UnRegisterColorizerAddinOptions
 end;
 
 { TIDEWizard }
@@ -316,7 +318,7 @@ begin
   //ReportMemoryLeaksOnShutdown:=DebugHook<>0;
   {$WARN SYMBOL_PLATFORM ON}
   //AColorMap:=nil;
-  Settings:=TSettings.Create;
+  TColorizerLocalSettings.Settings:=TSettings.Create;
   //ColorizerForm := nil;
   RegisterPlugIn;
   //AddMenuItems;
@@ -390,7 +392,7 @@ end;
 
 destructor TIDEWizard.Destroy;
 begin
-  FreeAndNil(Settings);
+  //
   //RemoveMenuItems;
   SplashBmp.Free;
   AboutBmp.Free;
@@ -442,9 +444,9 @@ end;
 
 procedure TIDEWizard.OnRefreher(Sender: TObject);
 begin
- if Assigned(AColorMap) and Assigned(Settings) and Settings.Enabled then
+ if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
  begin
-  RefreshIDETheme(AColorMap, ColorXPStyle);
+  RefreshIDETheme(TColorizerLocalSettings.ColorMap, ColorXPStyle);
   FTimerRefresher.Enabled:=False;
  end;
 end;

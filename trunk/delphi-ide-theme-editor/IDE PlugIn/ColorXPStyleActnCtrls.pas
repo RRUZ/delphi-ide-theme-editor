@@ -11,7 +11,7 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is uHookLib.pas.
+// The Original Code is ColorXPStyleActnCtrls.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
@@ -56,7 +56,7 @@ var
 implementation
 
 uses
-  uColorizerUtils,
+  Colorizer.Utils,
   ListActns,
   XPActnCtrls,
   {$IF CompilerVersion>=23} //XE2
@@ -160,7 +160,7 @@ end;
 procedure TColorXPColorMap.UpdateColors;
 begin
   inherited;
-  LoadSettings(Self, GlobalSettings);
+  LoadSettings(Self, TColorizerLocalSettings.Settings);
 end;
 
 initialization
