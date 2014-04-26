@@ -35,15 +35,11 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       Top = 0
       Width = 503
       Height = 346
-      ActivePage = TabSheetVCLStyles
+      ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Main Settings'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label1: TLabel
           Left = 3
           Top = 22
@@ -271,6 +267,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 17
           Caption = 'Use VCL Styles'
           TabOrder = 0
+          OnClick = CheckBoxUseVClStylesClick
         end
         object EditVCLStylesPath: TEdit
           Left = 3
@@ -331,7 +328,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 368
     Top = 200
     Bitmap = {
-      494C010107000800AC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800C80110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F

@@ -33,7 +33,6 @@ type
     FAutogenerateColors: boolean;
     FVCLStyleName: string;
     FUseVCLStyles: boolean;
-    FVCLStylesPath: string;
     FChangeIconsGutter: boolean;
   public
     property EnableDWMColorization : boolean read FEnableDWMColorization write FEnableDWMColorization;
@@ -44,7 +43,6 @@ type
 
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
-    property VCLStylesPath : string read FVCLStylesPath write FVCLStylesPath;
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
   end;
 
@@ -74,7 +72,6 @@ begin
     Settings.VCLStyleName            := iniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
     Settings.UseVCLStyles            := iniFile.ReadBool('Global', 'UseVCLStyles', False);
     Settings.ChangeIconsGutter       := iniFile.ReadBool('Global', 'ChangeIconsGutter', True);
-    Settings.VCLStylesPath           := iniFile.ReadString('Global', 'VCLStylesPath', '');
   finally
     iniFile.Free;
   end;
@@ -94,7 +91,6 @@ begin
     iniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
     iniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
     iniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
-    iniFile.WriteString('Global', 'VCLStylesPath', Settings.VCLStylesPath);
   finally
     iniFile.Free;
   end;

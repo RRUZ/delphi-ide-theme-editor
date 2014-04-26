@@ -60,6 +60,7 @@ uses
   uMisc,
   ShellApi,
   uDelphiVersions,
+  Colorizer.Utils,
   Colorizer.SettingsForm;
 
 type
@@ -74,9 +75,7 @@ begin
   inherited  Create(AOwner);
   LForm := TFormIDEColorizerSettings.Create(AOwner);
   LForm.Name   := 'DelphiIDEColorizer_SettingsForm';
-  LForm.IDEData:= TDelphiVersionData.Create; //leak
-  FillCurrentDelphiVersion(LForm.IDEData);
-  LForm.LabelSetting.Caption:='Delphi IDE Colorizer for '+LForm.IDEData.Name;
+  LForm.LabelSetting.Caption:='Delphi IDE Colorizer for '+TColorizerLocalSettings.IDEData.Name;
   LForm.Parent := Self;
   LForm.Align := alClient;
   LForm.BorderIcons := [];
