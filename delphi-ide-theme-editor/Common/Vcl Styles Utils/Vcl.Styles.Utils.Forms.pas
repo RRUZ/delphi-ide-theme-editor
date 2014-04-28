@@ -39,8 +39,7 @@ uses
   Vcl.Controls;
 
 type
-  TSysScrollingType = (skNone, skTracking, skLineUp, skLineDown, skLineLeft,
-    skLineRight, skPageUp, skPageDown, skPageLeft, skPageRight);
+  TSysScrollingType = (skNone, skTracking, skLineUp, skLineDown, skLineLeft, skLineRight, skPageUp, skPageDown, skPageLeft, skPageRight);
 
   TSysScrollingStyleHook = class(TMouseTrackSysControlStyleHook)
   private
@@ -65,16 +64,13 @@ type
     FNCMouseDown: Boolean;
     FAllowScrolling: Boolean;
     FLstPos: Integer;
-    function NormalizePoint(P: TPoint): TPoint;
+    function NormalizePoint(const P: TPoint): TPoint;
     function GetDefaultScrollBarSize: TSize;
     procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
-    procedure WMNCLButtonDown(var Message: TWMNCLButtonDown);
-      message WM_NCLBUTTONDOWN;
-    procedure WMNCLButtonUp(var Message: TWMNCLButtonUp);
-      message WM_NCLBUTTONUP;
-    procedure CMSCROLLTRACKING(var Message: TMessage);
-      message CM_SCROLLTRACKING;
+    procedure WMNCLButtonDown(var Message: TWMNCLButtonDown); message WM_NCLBUTTONDOWN;
+    procedure WMNCLButtonUp(var Message: TWMNCLButtonUp); message WM_NCLBUTTONUP;
+    procedure CMSCROLLTRACKING(var Message: TMessage); message CM_SCROLLTRACKING;
     function GetVertScrollRect: TRect;
     function GetVertUpRect: TRect;
     function GetVertDownRect: TRect;
@@ -83,10 +79,10 @@ type
     function GetVertThumbSize: Integer;
     function GetVertTrackRect: TRect;
     function GetVertScrollInfo: TScrollInfo;
-    function GetVertThumbPosFromPos(Pos: Integer): Integer;
-    function GetVertScrollPosFromPoint(P: TPoint): Integer;
-    function GetHorzThumbPosFromPos(Pos: Integer): Integer;
-    function GetHorzScrollPosFromPoint(P: TPoint): Integer;
+    function GetVertThumbPosFromPos(const Pos: Integer): Integer;
+    function GetVertScrollPosFromPoint(const P: TPoint): Integer;
+    function GetHorzThumbPosFromPos(const Pos: Integer): Integer;
+    function GetHorzScrollPosFromPoint(const P: TPoint): Integer;
     function GetHorzSliderPos: Integer;
     function GetHorzThumbSize: Integer;
     function GetHorzLeftRect: TRect;
@@ -99,13 +95,11 @@ type
     function IsHorzScrollDisabled: Boolean;
     function IsVertScrollDisabled: Boolean;
   protected
-    procedure Scroll(Kind: TScrollBarKind; ScrollType: TSysScrollingType;
-      Pos, Delta: Integer); virtual;
-    procedure DoScroll(Kind: TScrollBarKind; ScrollType: TSysScrollingType;
-      Pos, Delta: Integer);
+    procedure Scroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer); virtual;
+    procedure DoScroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer);
     procedure DrawHorzScroll(DC: HDC); virtual;
     procedure DrawVertScroll(DC: HDC); virtual;
-    procedure DrawSmallRect(DC: HDC; SmallRect: TRect); virtual;
+    procedure DrawSmallRect(DC: HDC; const SmallRect: TRect); virtual;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
     procedure StartSliderTrackTimer;
@@ -158,12 +152,9 @@ type
     FSysCloseButtonDisabled: Boolean;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
     procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
-    procedure WMNCLButtonDown(var Message: TWMNCLButtonDown);
-      message WM_NCLBUTTONDOWN;
-    procedure WMNCLButtonUp(var Message: TWMNCLButtonUp);
-      message WM_NCLBUTTONUP;
-    procedure WMNCMouseMove(var Message: TWMNCHitMessage);
-      message WM_NCMOUSEMOVE;
+    procedure WMNCLButtonDown(var Message: TWMNCLButtonDown); message WM_NCLBUTTONDOWN;
+    procedure WMNCLButtonUp(var Message: TWMNCLButtonUp); message WM_NCLBUTTONUP;
+    procedure WMNCMouseMove(var Message: TWMNCHitMessage); message WM_NCMOUSEMOVE;
     procedure WMNCACTIVATE(var Message: TWMNCActivate); message WM_NCACTIVATE;
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
     procedure WMSIZE(var Message: TWMSize); message WM_SIZE;
@@ -180,8 +171,8 @@ type
     function GetRegion: HRGN;
     function GetIcon: TIcon;
     function GetIconFast: TIcon;
-    function NormalizePoint(P: TPoint): TPoint;
-    function GetHitTest(P: TPoint): Integer;
+    function NormalizePoint(const P: TPoint): TPoint;
+    function GetHitTest(const P: TPoint): Integer;
     function IsSysCloseButtonDisabled: Boolean;
     function GetSysMenu: HMENU;
     function GetUpdateRegion: Boolean;
@@ -216,8 +207,6 @@ type
     property SysCloseButtonDisabled: Boolean read FSysCloseButtonDisabled;
   end;
 
-
-
   {
     Note: The development of this class is not finished yet .
     Only ScrollBar with SIZEBOX is supported !!.
@@ -235,7 +224,17 @@ implementation
 uses
   Vcl.Styles.Utils.SysControls;
 
-function IsItemDisabled(Menu: HMENU; Index: Integer): Boolean;
+// -----------------------------------------------------------------------------------
+procedure FillDC(const DC: HDC; const R: TRect; const Color: TColor);
+var
+  Brush: HBRUSH;
+begin
+  Brush := CreateSolidBrush(Color);
+  FillRect(DC, R, Brush);
+  DeleteObject(Brush);
+end;
+
+function IsItemDisabled(const Menu: HMENU; const Index: Integer): Boolean;
 var
   Info: TMenuItemInfo;
 begin
@@ -247,12 +246,10 @@ begin
   Info.cbSize := sizeof(TMenuItemInfo);
   Info.fMask := MIIM_STATE;
   GetMenuItemInfo(Menu, Index, True, Info);
-  Result := (Info.fState and MFS_DISABLED = MFS_DISABLED) or
-    (Info.fState and MF_DISABLED = MF_DISABLED) or
-    (Info.fState and MF_GRAYED = MF_GRAYED);
+  Result := (Info.fState and MFS_DISABLED = MFS_DISABLED) or (Info.fState and MF_DISABLED = MF_DISABLED) or (Info.fState and MF_GRAYED = MF_GRAYED);
 end;
 
-function GetMenuItemPos(Menu: HMENU; ID: Integer): Integer;
+function GetMenuItemPos(const Menu: HMENU; const ID: Integer): Integer;
 var
   i: Integer;
   mii: MENUITEMINFO;
@@ -273,11 +270,10 @@ end;
 
 function IsWindowMsgBox(Handle: HWND): Boolean;
 begin
-  Result := ((FindWindowEx(Handle, 0, 'Edit', nil) = 0) and
-    (GetDlgItem(Handle, $FFFF) <> 0)) and
-    (GetWindowLongPtr(Handle, GWL_USERDATA) <> 0);
+  Result := ((FindWindowEx(Handle, 0, 'Edit', nil) = 0) and (GetDlgItem(Handle, $FFFF) <> 0)) and (GetWindowLongPtr(Handle, GWL_USERDATA) <> 0);
 end;
 
+// -----------------------------------------------------------------------------------------
 { TSysDialogStyleHook }
 
 procedure TSysDialogStyleHook.Close;
@@ -380,8 +376,7 @@ begin
         FButtonState := twSmallCloseButtonDisabled;
     end;
     LDetails := StyleServices.GetElementDetails(FButtonState);
-    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result)
-    then
+    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result) then
       Result := Rect(0, 0, 0, 0);
   end;
 end;
@@ -392,9 +387,7 @@ var
   LDetails: TThemedElementDetails;
 begin
   Result := Rect(0, 0, 0, 0);
-  if (biHelp in BorderIcons) and (biSystemMenu in BorderIcons) and
-    ((not(biMaximize in BorderIcons) and not(biMinimize in BorderIcons)) or
-    (BorderStyle = bsDialog)) then
+  if (biHelp in BorderIcons) and (biSystemMenu in BorderIcons) and ((not(biMaximize in BorderIcons) and not(biMinimize in BorderIcons)) or (BorderStyle = bsDialog)) then
   begin
     if (FPressedButton = HTHELP) and (FHotButton = HTHELP) then
       FButtonState := twHelpButtonPushed
@@ -406,13 +399,12 @@ begin
       FButtonState := twHelpButtonDisabled;
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result)
-    then
+    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result) then
       Result := Rect(0, 0, 0, 0);
   end;
 end;
 
-function TSysDialogStyleHook.GetHitTest(P: TPoint): Integer;
+function TSysDialogStyleHook.GetHitTest(const P: TPoint): Integer;
 begin
   Result := HTCAPTION;
   if CloseButtonRect.Contains(P) then
@@ -449,9 +441,7 @@ var
   LDetails: TThemedElementDetails;
 begin
   Result := Rect(0, 0, 0, 0);
-  if (biMaximize in BorderIcons) and (biSystemMenu in BorderIcons) and
-    (BorderStyle <> bsDialog) and (BorderStyle <> bsToolWindow) and
-    (BorderStyle <> bsSizeToolWin) then
+  if (biMaximize in BorderIcons) and (biSystemMenu in BorderIcons) and (BorderStyle <> bsDialog) and (BorderStyle <> bsToolWindow) and (BorderStyle <> bsSizeToolWin) then
   begin
     if WindowState = wsMaximized then
     begin
@@ -477,8 +467,7 @@ begin
     end;
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result)
-    then
+    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result) then
       Result := Rect(0, 0, 0, 0);
   end;
 end;
@@ -489,9 +478,7 @@ var
   LDetails: TThemedElementDetails;
 begin
   Result := Rect(0, 0, 0, 0);
-  if (biMinimize in BorderIcons) and (biSystemMenu in BorderIcons) and
-    (BorderStyle <> bsDialog) and (BorderStyle <> bsToolWindow) and
-    (BorderStyle <> bsSizeToolWin) then
+  if (biMinimize in BorderIcons) and (biSystemMenu in BorderIcons) and (BorderStyle <> bsDialog) and (BorderStyle <> bsToolWindow) and (BorderStyle <> bsSizeToolWin) then
   begin
     if (FPressedButton = HTMINBUTTON) and (FHotButton = HTMINBUTTON) then
       FButtonState := twMinButtonPushed
@@ -504,8 +491,7 @@ begin
 
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result)
-    then
+    if not StyleServices.GetElementContentRect(0, LDetails, CaptionRect, Result) then
       Result := Rect(0, 0, 0, 0);
   end;
 
@@ -593,8 +579,7 @@ begin
       Include(Result, biMaximize);
     if (Style and WS_MINIMIZEBOX = WS_MINIMIZEBOX) then
       Include(Result, biMinimize);
-    if (ExStyle and WS_EX_CONTEXTHELP = WS_EX_CONTEXTHELP) and
-      (not(biMaximize in Result)) and (not(biMinimize in Result)) then
+    if (ExStyle and WS_EX_CONTEXTHELP = WS_EX_CONTEXTHELP) and (not(biMaximize in Result)) and (not(biMinimize in Result)) then
       Include(Result, biHelp);
   end;
 end;
@@ -658,20 +643,13 @@ begin
     Exit(bsNone);
   with SysControl do
   begin
-    if (Style and WS_OVERLAPPED = WS_OVERLAPPED) or
-      (Style and WS_OVERLAPPEDWINDOW = WS_OVERLAPPEDWINDOW) or
-      (Style and WS_CAPTION = WS_CAPTION) or
-      (ExStyle and WS_EX_OVERLAPPEDWINDOW = WS_EX_OVERLAPPEDWINDOW) and
-      (ExStyle and WS_EX_TOOLWINDOW <> WS_EX_TOOLWINDOW) then
+    if (Style and WS_OVERLAPPED = WS_OVERLAPPED) or (Style and WS_OVERLAPPEDWINDOW = WS_OVERLAPPEDWINDOW) or (Style and WS_CAPTION = WS_CAPTION) or
+      (ExStyle and WS_EX_OVERLAPPEDWINDOW = WS_EX_OVERLAPPEDWINDOW) and (ExStyle and WS_EX_TOOLWINDOW <> WS_EX_TOOLWINDOW) then
     begin
-      if (Style and WS_SIZEBOX <> WS_SIZEBOX) and
-        ((Style and WS_MINIMIZEBOX = WS_MAXIMIZE) or
-        (Style and WS_MINIMIZEBOX = WS_MINIMIZEBOX)) then
+      if (Style and WS_SIZEBOX <> WS_SIZEBOX) and ((Style and WS_MINIMIZEBOX = WS_MAXIMIZE) or (Style and WS_MINIMIZEBOX = WS_MINIMIZEBOX)) then
         Result := bsSingle;
 
-      if (Style and WS_SIZEBOX <> WS_SIZEBOX) and
-        (Style and WS_MINIMIZEBOX <> WS_MAXIMIZE) and
-        (Style and WS_MINIMIZEBOX <> WS_MINIMIZEBOX) then
+      if (Style and WS_SIZEBOX <> WS_SIZEBOX) and (Style and WS_MINIMIZEBOX <> WS_MAXIMIZE) and (Style and WS_MINIMIZEBOX <> WS_MINIMIZEBOX) then
         Result := bsDialog;
 
       if (Style and WS_SIZEBOX = WS_SIZEBOX) then
@@ -731,16 +709,13 @@ begin
   Result := Rect(0, 0, 0, 0);
   LBorderStyle := BorderStyle;
   LBorderIcons := BorderIcons;
-  if (biSystemMenu in LBorderIcons) and (LBorderStyle <> bsDialog) and
-    (LBorderStyle <> bsToolWindow) and (LBorderStyle <> bsSizeToolWin) then
+  if (biSystemMenu in LBorderIcons) and (LBorderStyle <> bsDialog) and (LBorderStyle <> bsToolWindow) and (LBorderStyle <> bsSizeToolWin) then
   begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
-    if not StyleServices.GetElementContentRect(0, IconDetails, CaptionRect,
-      ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
     R := ButtonRect;
-    R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON),
-      GetSystemMetrics(SM_CYSMICON));
+    R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R, ButtonRect);
     Result := ButtonRect;
   end;
@@ -750,9 +725,7 @@ end;
 function TSysDialogStyleHook.GetUpdateRegion: Boolean;
 begin
   with SysControl do
-    Result := not((Style and WS_CAPTION <> WS_CAPTION) and
-      (Style and WS_SYSMENU <> WS_SYSMENU) and
-      (Style and WS_SIZEBOX <> WS_SIZEBOX));
+    Result := not((Style and WS_CAPTION <> WS_CAPTION) and (Style and WS_SYSMENU <> WS_SYSMENU) and (Style and WS_SIZEBOX <> WS_SIZEBOX));
 end;
 
 function TSysDialogStyleHook.GetIconFast: TIcon;
@@ -780,9 +753,9 @@ begin
   if TmpHandle = 0 then
   begin
     { Get instance }
-    GetClassName(Handle, @Buffer, SizeOf(Buffer));
-    FillChar(Info, SizeOf(Info), 0);
-    Info.cbSize := SizeOf(Info);
+    GetClassName(Handle, @Buffer, sizeof(Buffer));
+    FillChar(Info, sizeof(Info), 0);
+    Info.cbSize := sizeof(Info);
 
     if GetClassInfoEx(GetWindowLong(Handle, GWL_HINSTANCE), @Buffer, Info) then
     begin
@@ -829,7 +802,7 @@ var
   ItemDisabled: Boolean;
 begin
   LBorderStyle := BorderStyle;
-  if (LBorderStyle = bsNone) or (WindowState=wsMinimized) then  //  (WindowState=wsMinimized) avoid bug in windows 8.1  and increase performance
+  if (LBorderStyle = bsNone) or (WindowState = wsMinimized) then // (WindowState=wsMinimized) avoid bug in windows 8.1  and increase performance
     Exit;
 
   LBorderIcons := BorderIcons;
@@ -863,21 +836,17 @@ begin
 
   { Draw icon }
 
-  if (biSystemMenu in LBorderIcons) and (LBorderStyle <> bsDialog) and
-    (LBorderStyle <> bsToolWindow) and (LBorderStyle <> bsSizeToolWin) then
+  if (biSystemMenu in LBorderIcons) and (LBorderStyle <> bsDialog) and (LBorderStyle <> bsToolWindow) and (LBorderStyle <> bsSizeToolWin) then
   begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
-    if not StyleServices.GetElementContentRect(0, IconDetails, LCaptionRect,
-      ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, IconDetails, LCaptionRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
 
-    R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON),
-      GetSystemMetrics(SM_CYSMICON));
+    R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R, ButtonRect);
 
     if ButtonRect.Width > 0 then
-      DrawIconEx(CaptionBmp.Canvas.Handle, R.Left, R.Top, GetIconFast.Handle, 0,
-        0, 0, 0, DI_NORMAL);
+      DrawIconEx(CaptionBmp.Canvas.Handle, R.Left, R.Top, GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
     Inc(TextRect.Left, ButtonRect.Width + 5);
     FSysMenuButtonRect := ButtonRect;
   end
@@ -929,9 +898,7 @@ begin
       TextRect.Right := ButtonRect.Left;
   end;
 
-  if (biMaximize in LBorderIcons) and (biSystemMenu in LBorderIcons) and
-    (LBorderStyle <> bsDialog) and (LBorderStyle <> bsToolWindow) and
-    (LBorderStyle <> bsSizeToolWin) then
+  if (biMaximize in LBorderIcons) and (biSystemMenu in LBorderIcons) and (LBorderStyle <> bsDialog) and (LBorderStyle <> bsToolWindow) and (LBorderStyle <> bsSizeToolWin) then
   begin
     if WindowState = wsMaximized then
     begin
@@ -964,9 +931,7 @@ begin
       TextRect.Right := ButtonRect.Left;
   end;
 
-  if (biMinimize in LBorderIcons) and (biSystemMenu in LBorderIcons) and
-    (LBorderStyle <> bsDialog) and (LBorderStyle <> bsToolWindow) and
-    (LBorderStyle <> bsSizeToolWin) then
+  if (biMinimize in LBorderIcons) and (biSystemMenu in LBorderIcons) and (LBorderStyle <> bsDialog) and (LBorderStyle <> bsToolWindow) and (LBorderStyle <> bsSizeToolWin) then
   begin
     if (FPressedButton = HTMINBUTTON) and (FHotButton = HTMINBUTTON) then
       FButtonState := twMinButtonPushed
@@ -985,9 +950,7 @@ begin
       TextRect.Right := ButtonRect.Left;
   end;
 
-  if (biHelp in LBorderIcons) and (biSystemMenu in LBorderIcons) and
-    ((not(biMaximize in LBorderIcons) and not(biMinimize in LBorderIcons)) or
-    (LBorderStyle = bsDialog)) then
+  if (biHelp in LBorderIcons) and (biSystemMenu in LBorderIcons) and ((not(biMaximize in LBorderIcons) and not(biMinimize in LBorderIcons)) or (LBorderStyle = bsDialog)) then
   begin
     if (FPressedButton = HTHELP) and (FHotButton = HTHELP) then
       FButtonState := twHelpButtonPushed
@@ -999,8 +962,7 @@ begin
       FButtonState := twHelpButtonDisabled;
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, LCaptionRect,
-      ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, LCaptionRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
       StyleServices.DrawElement(CaptionBmp.Canvas.Handle, LDetails, ButtonRect);
@@ -1023,13 +985,11 @@ begin
   begin
     Inc(TextRect.Left, R.Left);
     MoveWindowOrg(CaptionBmp.Canvas.Handle, 0, TextTopOffset);
-    StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText,
-      TextRect, TextFormat);
+    StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
     MoveWindowOrg(CaptionBmp.Canvas.Handle, 0, -TextTopOffset);
   end
   else
-    StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText,
-      TextRect, TextFormat);
+    StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
 
   FCaptionRect := TextRect;
 
@@ -1074,8 +1034,7 @@ begin
     else
       LDetails := StyleServices.GetElementDetails(twSmallFrameRightInActive);
   end;
-  R := Rect(SysControl.Width - LBorderSize.Right, LCaptionRect.Height,
-    SysControl.Width, SysControl.Height);
+  R := Rect(SysControl.Width - LBorderSize.Right, LCaptionRect.Height, SysControl.Width, SysControl.Height);
   if SysControl.Width > LBorderSize.Right then
     StyleServices.DrawElement(DC, LDetails, R);
 
@@ -1094,8 +1053,7 @@ begin
     else
       LDetails := StyleServices.GetElementDetails(twSmallFrameBottomInActive);
   end;
-  R := Rect(0, SysControl.Height - LBorderSize.Bottom, SysControl.Width,
-    SysControl.Height);
+  R := Rect(0, SysControl.Height - LBorderSize.Bottom, SysControl.Width, SysControl.Height);
   StyleServices.DrawElement(DC, LDetails, R);
 end;
 
@@ -1132,7 +1090,7 @@ begin
   inherited;
 end;
 
-function TSysDialogStyleHook.NormalizePoint(P: TPoint): TPoint;
+function TSysDialogStyleHook.NormalizePoint(const P: TPoint): TPoint;
 var
   WindowPos, ClientPos: TPoint;
 begin
@@ -1159,15 +1117,13 @@ begin
     P := Point(Message.XPos, Message.YPos);
     P := NormalizePoint(P);
     Message.Result := GetHitTest(P);
-    if ((Message.Result <> HTCLOSE) and (Message.Result <> HTMAXBUTTON) and
-      (Message.Result <> HTMINBUTTON) and (Message.Result <> HTHELP)) then
+    if ((Message.Result <> HTCLOSE) and (Message.Result <> HTMAXBUTTON) and (Message.Result <> HTMINBUTTON) and (Message.Result <> HTHELP)) then
     begin
       // Message.Result := CallDefaultProc(TMessage(Message));
       { Check if form can be scrolled . }
       inherited;
       { We need to correct the result after calling the default message . }
-      if ((Message.Result = HTCLOSE) or (Message.Result = HTMAXBUTTON) or
-        (Message.Result = HTMINBUTTON) or (Message.Result = HTHELP)) then
+      if ((Message.Result = HTCLOSE) or (Message.Result = HTMAXBUTTON) or (Message.Result = HTMINBUTTON) or (Message.Result = HTHELP)) then
         Message.Result := HTCLIENT;
     end;
     Handled := True;
@@ -1184,8 +1140,7 @@ begin
 
   if OverridePaintNC then
   begin
-    if (Message.HitTest = HTCLOSE) or (Message.HitTest = HTMAXBUTTON) or
-      (Message.HitTest = HTMINBUTTON) or (Message.HitTest = HTHELP) then
+    if (Message.HitTest = HTCLOSE) or (Message.HitTest = HTMAXBUTTON) or (Message.HitTest = HTMINBUTTON) or (Message.HitTest = HTHELP) then
     begin
       FPressedButton := Message.HitTest;
       InvalidateNC;
@@ -1205,12 +1160,11 @@ begin
       GetCursorPos(P);
       P := NormalizePoint(P);
 
-
       case Message.HitTest of
 
         HTCLOSE:
           if CloseButtonRect.Contains(P) then
-            if Message.Result<>0 then //only if the app doesn't processes this message
+            if Message.Result <> 0 then // only if the app doesn't processes this message
               Close;
         HTMAXBUTTON:
           begin
@@ -1283,7 +1237,7 @@ var
   BorderSize: TRect;
   LParentHandle: HWND;
 begin
-   //Addlog(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+  // Addlog(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
   case Message.msg of
 
     WM_WINDOWPOSCHANGED:
@@ -1298,11 +1252,8 @@ begin
         DFBW := GetSystemMetrics(SM_CXBORDER);
         Inc(DFBW);
         BorderSize := GetBorderSize;
-        if (SysControl.Width > BorderSize.Left) and
-          (SysControl.Width > BorderSize.Right) then
-          SetWindowPos(Handle, 0, 0, 0, SysControl.Width + DFBW,
-            SysControl.Height + DFBW + 1, SWP_NOMOVE or SWP_NOZORDER or
-            SWP_FRAMECHANGED);
+        if (SysControl.Width > BorderSize.Left) and (SysControl.Width > BorderSize.Right) then
+          SetWindowPos(Handle, 0, 0, 0, SysControl.Width + DFBW, SysControl.Height + DFBW + 1, SWP_NOMOVE or SWP_NOZORDER or SWP_FRAMECHANGED);
         Exit;
       end;
 
@@ -1318,8 +1269,7 @@ begin
         begin
           { When destroying the child window ..
             the parent window must be repainted . }
-          RedrawWindow(LParentHandle, nil, 0, RDW_ERASE or RDW_FRAME or
-            RDW_INTERNALPAINT or RDW_INVALIDATE);
+          RedrawWindow(LParentHandle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INTERNALPAINT or RDW_INVALIDATE);
         end;
         Handled := True;
       end;
@@ -1328,7 +1278,7 @@ begin
 end;
 
 { TSysScrollingStyleHook }
-function TSysScrollingStyleHook.NormalizePoint(P: TPoint): TPoint;
+function TSysScrollingStyleHook.NormalizePoint(const P: TPoint): TPoint;
 var
   WindowPos, ClientPos: TPoint;
 begin
@@ -1420,8 +1370,7 @@ begin
   end;
 end;
 
-procedure TSysScrollingStyleHook.DoScroll(Kind: TScrollBarKind;
-  ScrollType: TSysScrollingType; Pos, Delta: Integer);
+procedure TSysScrollingStyleHook.DoScroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer);
 begin
   if ScrollType <> skNone then
   begin
@@ -1442,16 +1391,6 @@ begin
     FDownPoint := Point(-1, -1);
   end;
 end;
-
-procedure FillDC(DC: HDC; R: TRect; Color: TColor);
-var
-  Brush: HBRUSH;
-begin
-  Brush := CreateSolidBrush(Color);
-  FillRect(DC, R, Brush);
-  DeleteObject(Brush);
-end;
-
 
 procedure TSysScrollingStyleHook.DrawHorzScroll(DC: HDC);
 var
@@ -1541,8 +1480,7 @@ begin
       P.X := HorzScrollRect.Left;
       P.Y := HorzScrollRect.Top;
       P := NormalizePoint(P);
-      BitBlt(DC, P.X, P.Y, HorzScrollRect.Width, HorzScrollRect.Height,
-        B.Canvas.Handle, 0, 0, SRCCOPY);
+      BitBlt(DC, P.X, P.Y, HorzScrollRect.Width, HorzScrollRect.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
       B.Free;
       if LDC = 0 then
         ReleaseDC(Handle, DC);
@@ -1551,7 +1489,7 @@ begin
 
 end;
 
-procedure TSysScrollingStyleHook.DrawSmallRect(DC: HDC; SmallRect: TRect);
+procedure TSysScrollingStyleHook.DrawSmallRect(DC: HDC; const SmallRect: TRect);
 var
   sColor: TColor;
 begin
@@ -1639,8 +1577,7 @@ begin
       P.Y := VertScrollRect.Top;
       // ScreenToClient(Handle, P);
       P := NormalizePoint(P);
-      BitBlt(DC, P.X, P.Y, VertScrollRect.Width, VertScrollRect.Height,
-        B.Canvas.Handle, 0, 0, SRCCOPY);
+      BitBlt(DC, P.X, P.Y, VertScrollRect.Width, VertScrollRect.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
       B.Free;
       if LDC = 0 then
         ReleaseDC(Handle, DC);
@@ -1663,13 +1600,13 @@ end;
 
 function TSysScrollingStyleHook.GetHorzScrollInfo: TScrollInfo;
 begin
-  FillChar(Result, SizeOf(TScrollInfo), Char(0));
-  Result.cbSize := SizeOf(TScrollInfo);
+  FillChar(Result, sizeof(TScrollInfo), Char(0));
+  Result.cbSize := sizeof(TScrollInfo);
   Result.fMask := SIF_ALL;
   Winapi.Windows.GetScrollInfo(Handle, SB_HORZ, Result);
 end;
 
-function TSysScrollingStyleHook.GetHorzScrollPosFromPoint(P: TPoint): Integer;
+function TSysScrollingStyleHook.GetHorzScrollPosFromPoint(const P: TPoint): Integer;
 var
   TrackRect, WinRect: TRect;
   Pos, MaxMin: Integer;
@@ -1688,8 +1625,7 @@ begin
 
   MaxMin := LInfo.nMax - LInfo.nMin;
   if MaxMin > 0 then
-    Pos := MulDiv(Pos - TrackRect.Left, MaxMin - Integer(LInfo.nPage) + 1,
-      TrackRect.Width - ThumbSize)
+    Pos := MulDiv(Pos - TrackRect.Left, MaxMin - Integer(LInfo.nPage) + 1, TrackRect.Width - ThumbSize)
   else
     Pos := Pos - TrackRect.Left;
   if Pos < 0 then
@@ -1714,8 +1650,7 @@ begin
     Result.Top := Bottom - BtnSize.cy;
     Result.Bottom := Result.Top + BtnSize.cy;
   end;
-  if (BorderSize.Left > 0) or (BorderSize.Top > 0) or (BorderSize.Right > 0) or
-    (BorderSize.Bottom > 0) then
+  if (BorderSize.Left > 0) or (BorderSize.Top > 0) or (BorderSize.Right > 0) or (BorderSize.Bottom > 0) then
   begin
     Result.Left := Result.Left + BorderSize.Left;
     Result.Right := Result.Right - BorderSize.Right;
@@ -1753,7 +1688,7 @@ begin
 
 end;
 
-function TSysScrollingStyleHook.GetHorzThumbPosFromPos(Pos: Integer): Integer;
+function TSysScrollingStyleHook.GetHorzThumbPosFromPos(const Pos: Integer): Integer;
 var
   PosX: Integer;
 begin
@@ -1768,8 +1703,7 @@ function TSysScrollingStyleHook.GetHorzThumbSize: Integer;
 begin
   with HorzScrollInfo do
   begin
-    Result := MulDiv(nPage, HorzScrollRect.Width - (2 * BtnSize.cx),
-      nMax - nMin);
+    Result := MulDiv(nPage, HorzScrollRect.Width - (2 * BtnSize.cx), nMax - nMin);
     if Result < BtnSize.cy then
       Result := BtnSize.cy;
   end;
@@ -1836,8 +1770,7 @@ begin
       Result.Bottom := Bottom;
     end;
   end;
-  if (BorderSize.Left >= 0) or (BorderSize.Top >= 0) or (BorderSize.Right >= 0)
-    or (BorderSize.Bottom >= 0) then
+  if (BorderSize.Left >= 0) or (BorderSize.Top >= 0) or (BorderSize.Right >= 0) or (BorderSize.Bottom >= 0) then
   begin
     if not LeftScrollBar then
     begin
@@ -1860,13 +1793,13 @@ end;
 
 function TSysScrollingStyleHook.GetVertScrollInfo: TScrollInfo;
 begin
-  FillChar(Result, SizeOf(TScrollInfo), Char(0));
-  Result.cbSize := SizeOf(TScrollInfo);
+  FillChar(Result, sizeof(TScrollInfo), Char(0));
+  Result.cbSize := sizeof(TScrollInfo);
   Result.fMask := SIF_ALL;
   Winapi.Windows.GetScrollInfo(Handle, SB_VERT, Result);
 end;
 
-function TSysScrollingStyleHook.GetVertScrollPosFromPoint(P: TPoint): Integer;
+function TSysScrollingStyleHook.GetVertScrollPosFromPoint(const P: TPoint): Integer;
 var
   TrackRect, WinRect: TRect;
   Pos, MaxMin: Integer;
@@ -1885,8 +1818,7 @@ begin
 
   MaxMin := LInfo.nMax - LInfo.nMin;
   if MaxMin > 0 then
-    Pos := MulDiv(Pos - TrackRect.Top, MaxMin - Integer(LInfo.nPage) + 2,
-      (TrackRect.Height) - ThumbSize)
+    Pos := MulDiv(Pos - TrackRect.Top, MaxMin - Integer(LInfo.nPage) + 2, (TrackRect.Height) - ThumbSize)
   else
     Pos := Pos - TrackRect.Top;
   if Pos < 0 then
@@ -1918,7 +1850,7 @@ begin
   end;
 end;
 
-function TSysScrollingStyleHook.GetVertThumbPosFromPos(Pos: Integer): Integer;
+function TSysScrollingStyleHook.GetVertThumbPosFromPos(const Pos: Integer): Integer;
 var
   PosY: Integer;
 begin
@@ -1986,9 +1918,7 @@ procedure TSysScrollingStyleHook.MouseEnter;
 begin
   if FVertScrollBar and (not FNCMouseDown) and (not VertScrollDisabled) then
   begin
-    if (FBtnUpDetail <> tsArrowBtnUpNormal) or
-      (FBtnDownDetail <> tsArrowBtnDownNormal) or
-      (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
+    if (FBtnUpDetail <> tsArrowBtnUpNormal) or (FBtnDownDetail <> tsArrowBtnDownNormal) or (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
     begin
       FBtnUpDetail := tsArrowBtnUpNormal;
       FBtnDownDetail := tsArrowBtnDownNormal;
@@ -1998,9 +1928,7 @@ begin
   end;
   if FHorzScrollBar and (not FNCMouseDown) and (not HorzScrollDisabled) then
   begin
-    if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or
-      (FBtnRightDetail <> tsArrowBtnRightNormal) or
-      (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
+    if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or (FBtnRightDetail <> tsArrowBtnRightNormal) or (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
     begin
       FBtnLeftDetail := tsArrowBtnLeftNormal;
       FBtnRightDetail := tsArrowBtnRightNormal;
@@ -2016,9 +1944,7 @@ begin
   begin
     if FVertScrollBar and not VertScrollDisabled then
     begin
-      if (FBtnUpDetail <> tsArrowBtnUpNormal) or
-        (FBtnDownDetail <> tsArrowBtnDownNormal) or
-        (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
+      if (FBtnUpDetail <> tsArrowBtnUpNormal) or (FBtnDownDetail <> tsArrowBtnDownNormal) or (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
       begin
         FBtnUpDetail := tsArrowBtnUpNormal;
         FBtnDownDetail := tsArrowBtnDownNormal;
@@ -2028,9 +1954,7 @@ begin
     end;
     if FHorzScrollBar and not HorzScrollDisabled then
     begin
-      if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or
-        (FBtnRightDetail <> tsArrowBtnRightNormal) or
-        (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
+      if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or (FBtnRightDetail <> tsArrowBtnRightNormal) or (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
       begin
         FBtnLeftDetail := tsArrowBtnLeftNormal;
         FBtnRightDetail := tsArrowBtnRightNormal;
@@ -2052,8 +1976,7 @@ begin
   end;
 end;
 
-procedure TSysScrollingStyleHook.Scroll(Kind: TScrollBarKind;
-  ScrollType: TSysScrollingType; Pos, Delta: Integer);
+procedure TSysScrollingStyleHook.Scroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer);
 begin
   if Kind = sbVertical then
   begin
@@ -2065,14 +1988,10 @@ begin
           SendMessage(Handle, WM_VSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
           FAllowScrolling := False;
         end;
-      skLineUp:
-        SendMessage(Handle, WM_VSCROLL, SB_LINEUP, 0);
-      skLineDown:
-        SendMessage(Handle, WM_VSCROLL, SB_LINEDOWN, 0);
-      skPageUp:
-        SendMessage(Handle, WM_VSCROLL, SB_PAGEUP, 0);
-      skPageDown:
-        SendMessage(Handle, WM_VSCROLL, SB_PAGEDOWN, 0);
+      skLineUp: SendMessage(Handle, WM_VSCROLL, SB_LINEUP, 0);
+      skLineDown: SendMessage(Handle, WM_VSCROLL, SB_LINEDOWN, 0);
+      skPageUp: SendMessage(Handle, WM_VSCROLL, SB_PAGEUP, 0);
+      skPageDown: SendMessage(Handle, WM_VSCROLL, SB_PAGEDOWN, 0);
     end;
   end
   else if Kind = sbHorizontal then
@@ -2085,14 +2004,10 @@ begin
           SendMessage(Handle, WM_HSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
           FAllowScrolling := False;
         end;
-      skLineLeft:
-        SendMessage(Handle, WM_HSCROLL, SB_LINELEFT, 0);
-      skLineRight:
-        SendMessage(Handle, WM_HSCROLL, SB_LINERIGHT, 0);
-      skPageLeft:
-        SendMessage(Handle, WM_HSCROLL, SB_PAGELEFT, 0);
-      skPageRight:
-        SendMessage(Handle, WM_HSCROLL, SB_PAGERIGHT, 0);
+      skLineLeft: SendMessage(Handle, WM_HSCROLL, SB_LINELEFT, 0);
+      skLineRight: SendMessage(Handle, WM_HSCROLL, SB_LINERIGHT, 0);
+      skPageLeft: SendMessage(Handle, WM_HSCROLL, SB_PAGELEFT, 0);
+      skPageRight: SendMessage(Handle, WM_HSCROLL, SB_PAGERIGHT, 0);
     end;
   end;
 end;
@@ -2286,9 +2201,7 @@ begin
         else
         begin
           { Update ScrollBar state . }
-          if (FBtnUpDetail <> tsArrowBtnUpNormal) or
-            (FBtnDownDetail <> tsArrowBtnDownNormal) or
-            (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
+          if (FBtnUpDetail <> tsArrowBtnUpNormal) or (FBtnDownDetail <> tsArrowBtnDownNormal) or (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
           begin
             FBtnUpDetail := tsArrowBtnUpNormal;
             FBtnDownDetail := tsArrowBtnDownNormal;
@@ -2343,9 +2256,7 @@ begin
         else
         begin
           { Update ScrollBar state  . }
-          if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or
-            (FBtnRightDetail <> tsArrowBtnRightNormal) or
-            (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
+          if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or (FBtnRightDetail <> tsArrowBtnRightNormal) or (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
           begin
             FBtnLeftDetail := tsArrowBtnLeftNormal;
             FBtnRightDetail := tsArrowBtnRightNormal;
@@ -2588,12 +2499,9 @@ begin
           Exit;
         end;
         { Update ScrollBar State }
-        if (FVertScrollBar and SysControl.Enabled and (not FNCMouseDown) and
-          (not VertScrollDisabled)) then
+        if (FVertScrollBar and SysControl.Enabled and (not FNCMouseDown) and (not VertScrollDisabled)) then
         begin
-          if (FBtnUpDetail <> tsArrowBtnUpNormal) or
-            (FBtnDownDetail <> tsArrowBtnDownNormal) or
-            (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
+          if (FBtnUpDetail <> tsArrowBtnUpNormal) or (FBtnDownDetail <> tsArrowBtnDownNormal) or (FVertBtnSliderDetail <> tsThumbBtnVertNormal) then
           begin
             FBtnUpDetail := tsArrowBtnUpNormal;
             FBtnDownDetail := tsArrowBtnDownNormal;
@@ -2601,12 +2509,9 @@ begin
             DrawVertScroll(0);
           end;
         end;
-        if (FHorzScrollBar and SysControl.Enabled and (not FNCMouseDown) and
-          (not HorzScrollDisabled)) then
+        if (FHorzScrollBar and SysControl.Enabled and (not FNCMouseDown) and (not HorzScrollDisabled)) then
         begin
-          if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or
-            (FBtnRightDetail <> tsArrowBtnRightNormal) or
-            (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
+          if (FBtnLeftDetail <> tsArrowBtnLeftNormal) or (FBtnRightDetail <> tsArrowBtnRightNormal) or (FHorzBtnSliderDetail <> tsThumbBtnHorzNormal) then
           begin
             FBtnLeftDetail := tsArrowBtnLeftNormal;
             FBtnRightDetail := tsArrowBtnRightNormal;
@@ -2636,8 +2541,7 @@ begin
         end;
         Exit;
       end;
-  else
-    inherited;
+  else inherited;
   end;
 
 end;
@@ -2675,8 +2579,7 @@ begin
           Message.Result := CallDefaultProc(Message);
           Exit;
         end;
-        if ((SysControl.Style and SBS_SIZEGRIP = SBS_SIZEGRIP) or
-          (SysControl.Style and SBS_SIZEBOX = SBS_SIZEBOX)) then
+        if ((SysControl.Style and SBS_SIZEGRIP = SBS_SIZEGRIP) or (SysControl.Style and SBS_SIZEBOX = SBS_SIZEBOX)) then
         begin
           BeginPaint(Handle, PS);
           try
@@ -2717,8 +2620,6 @@ begin
 
   inherited;
 end;
-
-
 
 initialization
 

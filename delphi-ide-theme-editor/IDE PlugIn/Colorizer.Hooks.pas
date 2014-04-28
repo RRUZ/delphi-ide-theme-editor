@@ -24,6 +24,13 @@ unit Colorizer.Hooks;
 interface
 
 uses
+{$IF CompilerVersion >= 23}
+  Vcl.Styles,
+  Vcl.Themes,
+  Messages,
+  Controls,
+{$IFEND}
+  System.IOUtils,
   Dialogs,
   Windows,
   Classes,
@@ -31,6 +38,7 @@ uses
   Graphics,
   ImgList,
   CommCtrl,
+  JclDebug,
   Colorizer.Utils,
   DDetours;
 
@@ -40,13 +48,34 @@ type
   TCustomImageListClass = class(TCustomImageList);
 
 var
-  TrampolineCustomImageList_DoDraw    : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
-  Trampoline_TCanvas_FillRect         : procedure(Self: TCanvas;const Rect: TRect);
-  //procedure TCanvas.FillRect(const Rect: TRect);
+  TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
+  Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect);
+  Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 
+ //@Editorcontrol@TCustomEditControl@EVFillGutter$qqrrx18
+ //002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
+//  Trampoline_EVFillGutter              : procedure(Self: TObject;ARect:TRect; p1 : USHORT; p2 : Integer; p3 :Boolean; p4 : Integer);
+//  Addr_EVFillGutter                    : Pointer;
 //Const
   //FooMethod='@Editcolorpage@TEditorColor@SetColorSpeedSetting$qqr26Vedopts@TColorSpeedSetting';
   //FooMethod='@Editcolorpage@TEditorColor@ColorSpeedSettingClick$qqrp14System@TObject';
+
+
+//function GetBplMethodAddress(Method: Pointer): Pointer;
+//type
+//  PJmpCode = ^TJmpCode;
+//  TJmpCode = packed record
+//    Code: Word;
+//    Addr: ^Pointer;
+//  end;
+//const
+//  csJmp32Code = $25FF;
+//begin
+//  if PJmpCode(Method)^.Code = csJmp32Code then
+//    Result := PJmpCode(Method)^.Addr^
+//  else
+//    Result := Method;
+//end;
 
 procedure Bitmap2GrayScale(const BitMap: TBitmap);
 type
@@ -110,23 +139,60 @@ end;
 
 
 procedure  CustomFillRect(Self: TCanvas;const Rect: TRect);
+var
+  sCaller : string;
 begin
    if Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
-      Self.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+   begin
+     sCaller := ProcByLevel(1);
+     if SameText(sCaller, 'EditorControl.TCustomEditControl.EVFillGutter') or SameText(sCaller, 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap') then
+        Self.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+   end;
    Trampoline_TCanvas_FillRect(Self, Rect);
 end;
 
+function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
+begin
+  Result:=False;
+  if not Assigned(Control) then exit;
+  if csDesigning in Control.ComponentState then  exit;
 
+  Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
+end;
+
+
+//const
+// sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
 procedure InstallHooks;
+//var
+//  CorIdeModule  : HMODULE;
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
+  Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
+
+  //@Editorcontrol@TCustomEditControl@EVFillGutter$qqrrx18
+//  CorIdeModule := LoadLibrary('coreide180.bpl');//'coreide180.bpl'
+
+
+//  Addr_EVFillGutter:=GetProcAddress(CorIdeModule, sEVFillGutter);
+//    if Assigned(Addr_EVFillGutter) then
+//      ShowMessage('Foo');
+//
+//  if Assigned(Addr_EVFillGutter) then
+//  begin
+//    Addr_EVFillGutter := GetBplMethodAddress(Addr_EVFillGutter);
+//    if Assigned(Addr_EVFillGutter) then
+//      ShowMessage('Bar');
+//
+//  end;
 end;
 
 procedure RemoveHooks;
 begin
   InterceptRemove(@TrampolineCustomImageList_DoDraw);
   InterceptRemove(@Trampoline_TCanvas_FillRect);
+  InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
 end;
 
 {
@@ -152,6 +218,11 @@ end;
     0042238C 17398 1F4A __fastcall Editcolorpage::TEditorColor::UpdateSamplePane()
     00422814 17392 1F4B __fastcall Editcolorpage::TEditorColor::tbsetPreviewsChange(System::TObject *, int, bool&)
     004AA8D4 17390 1F4C __fastcall Editcolorpage::initialization()
+
+
+    002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
+
+
 }
 
 

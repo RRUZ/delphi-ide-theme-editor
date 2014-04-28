@@ -23,20 +23,16 @@ unit Vcl.Styles.Hooks;
 
 interface
 
-{$IFDEF CPUX64}
-  Sorry, this unit only can be used  in 32 bits mode
-{$ENDIF}
-
 implementation
 
 uses
   {.$IFDEF DEBUG}
   //System.IOUtils,
   {.$ENDIF}
+  DDetours,
   System.SysUtils,
   System.Types,
   System.Classes,
-  KOLDetours,
   Winapi.UxTheme,
   WinApi.Windows,
   Vcl.Styles,
@@ -239,19 +235,19 @@ initialization
 finalization
 
  if GetSysColorOrgPointer<>nil then
-  InterceptRemove(@TrampolineGetSysColor, @InterceptGetSysColor);
+  InterceptRemove(@TrampolineGetSysColor);
 
 // if GetThemeSysColorOrgPointer<>nil then
 //  InterceptRemove(@TrampolineGetThemeSysColor, @InterceptGetThemeSysColor);
 
  if OpenThemeDataOrgPointer<>nil then
-  InterceptRemove(@TrampolineOpenThemeData, @InterceptOpenThemeData);
+  InterceptRemove(@TrampolineOpenThemeData);
 
  if CloseThemeDataOrgPointer<>nil then
-  InterceptRemove(@TrampolineCloseThemeData, @InterceptCloseThemeData);
+  InterceptRemove(@TrampolineCloseThemeData);
 
  if DrawThemeBackgroundOrgPointer<>nil then
-  InterceptRemove(@TrampolineDrawThemeBackground, @InterceptDrawThemeBackground);
+  InterceptRemove(@TrampolineDrawThemeBackground);
 
  if HThemeClassesList<>nil then
    HThemeClassesList.Free;

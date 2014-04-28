@@ -1,7 +1,7 @@
 //**************************************************************************************************
 //
 // Unit Colorizer.Utils
-// unit Colorizer.Utils  for the Delphi IDE Colorizer
+// unit Colorizer.Utils for the Delphi IDE Colorizer
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -39,8 +39,10 @@ uses
  ColorXPStyleActnCtrls,
  Classes;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle);
-procedure LoadSettings(AColorMap:TCustomActionBarColorMap;Settings : TSettings);
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle); overload;
+procedure RefreshIDETheme; overload;
+
+procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
@@ -48,18 +50,21 @@ procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyle
 procedure RegisterVClStylesFiles;
 {$ENDIF}
 
-function  GetBplLocation : string;
 
  type
    TColorizerLocalSettings = class
    public
-    class var ColorMap : TXPColorMap;
-    class var HookedWindows : TStringList;
-    class var VCLStylesPath: string;
-    class var Settings: TSettings;
-    class var ImagesGutterChanged : Boolean;
-    class var ColorXPStyle: TColorXPStyleActionBars;
-    class var IDEData   : TDelphiVersionData;
+      class var ColorMap       : TCustomActionBarColorMap;
+      class var ActionBarStyle : TActionBarStyle;
+      class var HookedWindows  : TStringList;
+      class var VCLStylesPath  : string;
+      class var Settings       : TSettings;
+      class var ImagesGutterChanged : Boolean;
+//      class var ColorXPStyle   : TColorXPStyleActionBars;
+      class var IDEData        : TDelphiVersionData;
+//      class var TwilightColorMap: TTwilightColorMap;
+//      class var StandardColorMap: TStandardColorMap;
+//      class var XPColorMap: TXPColorMap;
     end;
 
 implementation
@@ -105,6 +110,7 @@ uses
  ActnMenus,
  Colorizer.StoreColorMap,
  Dialogs,
+ uMisc,
  uRttiHelper;
 
 
@@ -134,33 +140,47 @@ var
 {$IFDEF DELPHIXE2_UP}
 procedure RegisterVClStylesFiles;
 var
- s, sPath, FileName : string;
+ sPath, FileName : string;
 begin
   sPath:=TColorizerLocalSettings.VCLStylesPath;
   if SysUtils.DirectoryExists(sPath) then
   for FileName in TDirectory.GetFiles(sPath, '*.vsf') do
-  if TStyleManager.IsValidStyle(FileName) then
-  begin
-     try
-       TStyleManager.LoadFromFile(FileName);
-     except
-       on EDuplicateStyleException do
-     end;
-  end;
+   if TStyleManager.IsValidStyle(FileName) then
+    begin
+       try
+         TStyleManager.LoadFromFile(FileName);
+       except
+         on EDuplicateStyleException do
+       end;
+    end;
 end;
-
 {$ENDIF}
 
+
+
 {$IFDEF DEBUG_PROFILER}
+procedure DumpParentClass(AObject: TObject);
+var
+l2 : TStrings;
+begin
+  l2 := TStringList.Create;
+  try
+   l2.Text:=DumpTypeDefinition(AObject.ClassParent.ClassInfo);
+   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+AObject.ClassParent.ClassName+'.pas');
+  finally
+   l2.Free;
+  end;
+end;
+//DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
 procedure DumpType(const QualifiedName:string);
 var
   l2 : TStrings;
 begin
   l2 := TStringList.Create;
   try
-   l2.Text:=DumpTypeDefinition(TRttiContext.Create.FindType(QualifiedName).Handle);
+    l2.Text:=DumpTypeDefinition(TRttiContext.Create.FindType(QualifiedName).Handle);
+    l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+QualifiedName+'.pas');
   finally
-   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+QualifiedName+'.pas');
    l2.Free;
   end;
 end;
@@ -175,8 +195,8 @@ begin
     for t in TRttiContext.Create.GetTypes do
     if t.IsInstance then
      l2.Add(t.AsInstance.DeclaringUnitName +' '+t.Name);
-  finally
    l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\Types.txt');
+  finally
    l2.Free;
   end;
 end;
@@ -189,19 +209,19 @@ begin
   l2 := TStringList.Create;
   try
    l2.Text:=DumpTypeDefinition(AComponent.ClassInfo);
-  finally
    l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+AComponent.ClassName+'.pas');
+  finally
    l2.Free;
   end;
 end;
 {$ENDIF}
 
 
-function  GetBplLocation : string;
+
+
+procedure RefreshIDETheme;
 begin
-  SetLength(Result, MAX_PATH);
-  GetModuleFileName(HInstance, PChar(Result), MAX_PATH);
-  Result:=PChar(Result);
+   RefreshIDETheme(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle);
 end;
 
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle);
@@ -218,23 +238,26 @@ begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
      ProcessComponent(AColorMap, AStyle, Screen.Forms[Index]);
   end
-  {$IFDEF DELPHIXE2_UP}
-  else
-  if (TColorizerLocalSettings.Settings<>nil) and (TColorizerLocalSettings.Settings.UseVCLStyles) and (csDesigning in Screen.Forms[index].ComponentState) then
-    ApplyEmptyVCLStyleHook(Screen.Forms[index].ClassType);
-  {$ENDIF}
+//  {$IFDEF DELPHIXE2_UP}
+//  else
+//  if (TColorizerLocalSettings.Settings<>nil) and (TColorizerLocalSettings.Settings.UseVCLStyles) and (csDesigning in Screen.Forms[index].ComponentState) then
+//    ApplyEmptyVCLStyleHook(Screen.Forms[index].ClassType);
+//  {$ENDIF}
 end;
 
 
-procedure LoadSettings(AColorMap:TCustomActionBarColorMap;Settings : TSettings);
+procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
 Var
  ThemeFileName : string;
 begin
   if Settings=nil then exit;
-  ReadSettings(Settings, ExtractFilePath(GetBplLocation()));
-  ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
+  ReadSettings(Settings, ExtractFilePath(GeModuleLocation()));
+  ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GeModuleLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
   if FileExists(ThemeFileName) then
-   LoadColorMapFromXmlFile(TXPColorMap(AColorMap), ThemeFileName);
+   LoadColorMapFromXmlFile(AColorMap, ThemeFileName);
+
+//  if ActionBarStyles.IndexOf(Settings.StyleBarName)>=0 then
+//    ActionBarStyle:= TActionBarStyle(ActionBarStyles.Objects[ActionBarStyles.IndexOf(Settings.StyleBarName)]);
 end;
 
 
@@ -550,8 +573,9 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
     end
     else
-    if SameText(AComponent.ClassName ,'TDesktopComboBox') then
+    if SameText(AComponent.ClassName ,'TDesktopComboBox') or  SameText(AComponent.ClassName ,'THistoryPropComboBox') then
     begin
+      if not TColorizerLocalSettings.Settings.UseVCLStyles then
       SetWindowTheme(TWinControl(AComponent).Handle,'','');
       SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
@@ -569,44 +593,14 @@ begin
     begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
-      LForm.Font.Color:=AColorMap.FontColor;    {
-       if SameText(AComponent.ClassName, 'TEditWindow') then
-       begin
-        LImages:=TImageList(GetRttiFieldValue(AComponent, 'SearchBarImages').AsObject);
-        for i:=0 to LImages.Count-1 do
-          begin
-           LbitMap := TBitmap.create;
-           try
-             LBitMap.PixelFormat := pf32bit;
-             LBitMap.AlphaFormat := afIgnored;
-             LImages.GetBitmap(i, btBitmap);
-             LBitMap.savetofile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Images IDE TEditWindow\'+inttostr(i)+'.bmp');
-           finally
-             LBitMap.Free;
-           end;
-          end;
-       end;
-               }
+      LForm.Font.Color:=AColorMap.FontColor;
     end
     else
     if SameText(AComponent.ClassName, 'TPanel') then
     begin
-      LPanel        :=TPanel(AComponent);
+      LPanel        := TPanel(AComponent);
       LPanel.Color  := AColorMap.Color;
       LPanel.Invalidate;
-    end
-    else
-    if SameText(AComponent.ClassName, 'TPageControl') then
-    with TPageControl(AComponent) do
-    begin
-      {
-      if OwnerDraw=False then
-      begin
-        SetWindowTheme(TPageControl(AComponent).Handle,'','');
-        OwnerDraw:=True;
-        TPageControl(AComponent).OnDrawTab:=Drawer.PageControlDrawTab;
-      end;
-      }
     end
     else
     if ProcessStdVclControls(AColorMap,AComponent) then
@@ -767,6 +761,8 @@ begin
        //SetRttiFieldValue(AComponent,'CurForeColor',  clYellow);
        //SetRttiFieldValue(AComponent,'CurBackColor',  clRed);
        //ExecMethodRtti(AComponent, 'Invalidate');
+
+       //DumpParentClass(AComponent);
     end
     else
     if AComponent is TActionToolBar then
@@ -789,7 +785,6 @@ begin
     else
     if SameText(AComponent.ClassName, 'TDockToolBar') then
     begin
-      //DumpComponent(AComponent);
       with TToolBar(AComponent) do
       begin
         Color              := AColorMap.Color;
@@ -798,20 +793,6 @@ begin
         GradientEndColor   := AColorMap.Color;//$00D1B499;
         HotTrackColor      := AColorMap.SelectedColor;
         Font.Color         := AColorMap.FontColor;
-        {
-        for i:=0 to Images.Count-1 do
-          begin
-           btBitmap := tbitmap.create;
-           try
-             btBitmap.PixelFormat := pf32bit;
-             btBitmap.AlphaFormat := afIgnored;
-             Images.GetBitmap(i,btBitmap);
-             btBitmap.savetofile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Images IDE\'+inttostr(i)+'.bmp');
-           finally
-             btBitmap.Free;
-           end;
-          end;
-          }
       end;
     end
     else
@@ -835,7 +816,7 @@ begin
       if not ActnStyleList.ContainsKey(LActionManager) then
           ActnStyleList.Add(LActionManager, LActionManager.Style);
       {$ENDIF}
-      LActionManager.Style := AStyle;//XPStyle;
+      LActionManager.Style := AStyle;
     end
     else
     if SameText(AComponent.ClassName, 'TTabSet') then
@@ -849,16 +830,11 @@ begin
     else
     if SameText(AComponent.ClassName, 'TIDEGradientTabSet') or SameText(AComponent.ClassName, 'TGradientTabSet') then
     begin
-         //DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
-
          SetRttiPropertyValue(AComponent,'TabColors.ActiveStart',AColorMap.Color);
          SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd',AColorMap.Color);
          SetRttiPropertyValue(AComponent,'TabColors.InActiveStart',AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd',AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-
-         SetRttiPropertyValue(AComponent,'Brush.Color',AColorMap.Color);
-
          SetRttiPropertyValue(AComponent,'ParentBackground',False);
        {$IFDEF DELPHIXE2_UP}
         {
@@ -945,11 +921,15 @@ initialization
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
 {$ENDIF}
+//  TColorizerLocalSettings.XPColorMap      :=TXPColorMap.Create(nil);
+//  TColorizerLocalSettings.TwilightColorMap:=TTwilightColorMap.Create(nil);
+//  TColorizerLocalSettings.StandardColorMap:=TStandardColorMap.Create(nil);
+
   TColorizerLocalSettings.ColorMap:=nil;
   TColorizerLocalSettings.Settings:=nil;
   TColorizerLocalSettings.ImagesGutterChanged:=False;
   TColorizerLocalSettings.HookedWindows:=TStringList.Create;
-  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetBplLocation))+'HookedWindows.dat');
+  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GeModuleLocation))+'HookedWindows.dat');
 {$IFDEF DELPHI2010_UP}
   ctx:=TRttiContext.Create;
 {$ENDIF}
@@ -994,7 +974,11 @@ finalization
       TColorizerLocalSettings.IDEData.Icon.Free;
   TColorizerLocalSettings.IDEData.Free;
 
-{$IFDEF DELPHI2009_UP} //2009
+//  TColorizerLocalSettings.XPColorMap.Free;
+//  TColorizerLocalSettings.StandardColorMap.Free;
+//  TColorizerLocalSettings.TwilightColorMap.Free;
+
+{$IFDEF DELPHI2009_UP}
   ActnStyleList.Free;
 {$ENDIF}
   TColorizerLocalSettings.HookedWindows.Free;

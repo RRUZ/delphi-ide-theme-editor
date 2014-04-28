@@ -101,7 +101,7 @@ type
       function GetItemID: WORD;
       function GetVCLRealItem: TMenuItem;
     public
-      constructor Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; Index: integer; Menu: HMENU); virtual;
+      constructor Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU); virtual;
       Destructor Destroy; override;
       property ID: WORD read GetItemID;
       property ItemRect: TRect read GetItemRect;
@@ -137,9 +137,9 @@ type
     function GetSysPopupItem(Index: integer): TSysPopupItem;
     function GetRightToLeft: Boolean;
   protected
-    procedure EraseItem(Canvas: TCanvas; Index: integer; ItemRect: TRect); virtual;
-    procedure DoDrawItem(Canvas: TCanvas; Index: integer);
-    procedure DrawItem(Canvas: TCanvas; Index: integer; ItemRect: TRect; ItemText: String; State: TSysPopupItemState; Style: TSysPopupItemStyle); Virtual;
+    procedure EraseItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect); virtual;
+    procedure DoDrawItem(Canvas: TCanvas; const Index: integer);
+    procedure DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState; const Style: TSysPopupItemStyle); Virtual;
     procedure PaintBackground(Canvas: TCanvas); override;
     procedure WndProc(var Message: TMessage); override;
     procedure UpdateColors; override;
@@ -283,7 +283,7 @@ begin
   inherited;
 end;
 
-procedure TSysPopupStyleHook.DoDrawItem(Canvas: TCanvas; Index: integer);
+procedure TSysPopupStyleHook.DoDrawItem(Canvas: TCanvas; const Index: integer);
 var
   LItemRect: TRect;
   P: TPoint;
@@ -341,7 +341,7 @@ begin
   end;
 end;
 
-procedure TSysPopupStyleHook.DrawItem(Canvas: TCanvas; Index: integer; ItemRect: TRect; ItemText: String; State: TSysPopupItemState; Style: TSysPopupItemStyle);
+procedure TSysPopupStyleHook.DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState; const Style: TSysPopupItemStyle);
 var
   Detail: TThemedMenu;
   LDetails: TThemedElementDetails;
@@ -395,8 +395,7 @@ var
       else
         Dec(LSubMenuRect.Left, 4);
 
-      TransparentBlt(DC, LSubMenuRect.Left, LSubMenuRect.Top, SubMenuSize.Width, SubMenuSize.Height, Bmp.Canvas.Handle, 0, 0, SubMenuSize.Width,
-        SubMenuSize.Height, clFuchsia);
+      TransparentBlt(DC, LSubMenuRect.Left, LSubMenuRect.Top, SubMenuSize.Width, SubMenuSize.Height, Bmp.Canvas.Handle, 0, 0, SubMenuSize.Width, SubMenuSize.Height, clFuchsia);
     finally
       Bmp.Free;
     end;
@@ -429,7 +428,7 @@ var
     CloseThemeData(Theme);
   end;
 
-  procedure DrawSpecialChar(DC: HDC; Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False);
+  procedure DrawSpecialChar(DC: HDC; const Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False);
   var
     LogFont: TLogFont;
     pOldFont: HGDIOBJ;
@@ -699,7 +698,7 @@ begin
   end;
 end;
 
-procedure TSysPopupStyleHook.EraseItem(Canvas: TCanvas; Index: integer; ItemRect: TRect);
+procedure TSysPopupStyleHook.EraseItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect);
 var
   Bmp: TBitmap;
 begin
@@ -937,7 +936,8 @@ begin
   Handled := True;
 end;
 
-function IsItemSeparator(Menu: HMENU; ItemIndex: integer): Boolean;
+// ------------------------------------------------------------------------------
+function IsItemSeparator(Menu: HMENU; const ItemIndex: integer): Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -951,6 +951,7 @@ begin
   GetMenuItemInfo(Menu, ItemIndex, True, info);
   Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
 end;
+// ------------------------------------------------------------------------------
 
 procedure TSysPopupStyleHook.WndProc(var Message: TMessage);
 var
@@ -1135,7 +1136,7 @@ end;
 
 { TSysPopupItem }
 
-constructor TSysPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; Index: integer; Menu: HMENU);
+constructor TSysPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU);
 begin
   FSysPopupStyleHook := SysPopupStyleHook;
   FMenu := Menu;

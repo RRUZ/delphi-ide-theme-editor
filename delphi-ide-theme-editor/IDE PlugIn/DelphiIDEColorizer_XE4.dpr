@@ -1,43 +1,14 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG ON
-package DelphiIDEColorizerXE4;
+library DelphiIDEColorizer_XE4;
 
-{$R *.res}
-{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
-{$ALIGN 8}
-{$ASSERTIONS ON}
-{$BOOLEVAL OFF}
-{$DEBUGINFO ON}
-{$EXTENDEDSYNTAX ON}
-{$IMPORTEDDATA ON}
-{$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
-{$LONGSTRINGS ON}
-{$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
-{$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
-{$TYPEDADDRESS OFF}
-{$VARSTRINGCHECKS ON}
-{$WRITEABLECONST OFF}
-{$MINENUMSIZE 1}
-{$IMAGEBASE $400000}
-{$DEFINE DEBUG}
-{$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Delphi IDE Colorizer'}
-{$DESIGNONLY}
-{$IMPLICITBUILD ON}
-
-requires
-  DesignIDE,
-  rtl,
-  vcl,
-  vclimg,
-  Jcl;
-
-contains
+uses
+  {$IFDEF DEBUG}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+  {$ENDIF}
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
@@ -60,6 +31,7 @@ contains
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
   Vcl.Styles.Utils.Menus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas';
 
+{$R *.res}
+
+begin
 end.
-
-

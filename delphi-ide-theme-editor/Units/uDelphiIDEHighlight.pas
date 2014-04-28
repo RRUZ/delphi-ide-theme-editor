@@ -454,7 +454,6 @@ var
 begin
   Result:='';
   Doc   :=TXMLDocument.Create(nil);
-  try
     Doc.Active := True;
     Doc.Version:='1.0';
     Doc.Encoding:='utf-8';
@@ -496,9 +495,7 @@ begin
     ForceDirectories(Path);
     Result:=Format('%s%s.theme.xml',[IncludeTrailingPathDelimiter(Path),Name]);
     Doc.SaveToFile(Result);
-  finally
-   Doc:=nil;
-  end;
+
 end;
 
 

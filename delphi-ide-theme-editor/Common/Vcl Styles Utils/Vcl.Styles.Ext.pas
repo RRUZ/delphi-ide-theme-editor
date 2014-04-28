@@ -1249,18 +1249,22 @@ begin
 
   LDetails := Style.GetElementDetails(tmMenuBarItemNormal);
   Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'File', Rect(LRect.Left+10,LRect.Top+3, LRect.Right ,LRect.Bottom),  0, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Edit', Rect(LRect.Left+40,LRect.Top+3, LRect.Right ,LRect.Bottom),  0, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'View', Rect(LRect.Left+70,LRect.Top+3, LRect.Right ,LRect.Bottom),  0, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Help', Rect(LRect.Left+100,LRect.Top+3, LRect.Right ,LRect.Bottom), 0, ThemeTextColor);
 
-{
-    function DrawText(DC: HDC; Details: TThemedElementDetails;
-      const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean; overload;
+//    function DrawText(DC: HDC; Details: TThemedElementDetails;
+//      const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean; overload;
+//    function DrawText(DC: HDC; Details: TThemedElementDetails;
+//      const S: string; var R: TRect; Flags: TTextFormat; Options: TStyleTextOptions): Boolean; overload;
 
-    function DrawText(DC: HDC; Details: TThemedElementDetails;
-      const S: string; var R: TRect; Flags: TTextFormat; Options: TStyleTextOptions): Boolean; overload;
-}
+  CaptionRect := Rect(LRect.Left+10,LRect.Top+3, LRect.Right ,LRect.Bottom);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'File', CaptionRect, [tfLeft], ThemeTextColor);
+  CaptionRect := Rect(LRect.Left+40,LRect.Top+3, LRect.Right ,LRect.Bottom);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Edit', CaptionRect,  [tfLeft], ThemeTextColor);
+  CaptionRect := Rect(LRect.Left+70,LRect.Top+3, LRect.Right ,LRect.Bottom);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'View', CaptionRect,  [tfLeft], ThemeTextColor);
+  CaptionRect := Rect(LRect.Left+110,LRect.Top+3, LRect.Right ,LRect.Bottom);
+  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Help', CaptionRect,  [tfLeft], ThemeTextColor);
+
+
   //Draw ToolButtons
   for i := 1 to 3 do
   begin

@@ -1,0 +1,1 @@
+WriteRegStr HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4" "$INSTDIR\CnWizards_DXE4.dll"

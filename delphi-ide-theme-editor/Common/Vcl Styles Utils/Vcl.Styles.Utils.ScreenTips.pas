@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit Vcl.Styles.Utils.ScreenTips
 // unit for the VCL Styles Utils
@@ -17,7 +17,7 @@
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 unit Vcl.Styles.Utils.ScreenTips;
 
 interface
@@ -77,22 +77,17 @@ begin
   if StyleServices.Enabled then
   begin
     LDetails := StyleServices.GetElementDetails(thHintBalloon);
-    if StyleServices.GetElementColor(LDetails, ecBorderColor, LColor) and
-      (LColor <> clNone) then
+    if StyleServices.GetElementColor(LDetails, ecBorderColor, LColor) and (LColor <> clNone) then
       BkColor := LColor;
-    if StyleServices.GetElementColor(LDetails, ecGradientColor1, LColor) and
-      (LColor <> clNone) then
+    if StyleServices.GetElementColor(LDetails, ecGradientColor1, LColor) and (LColor <> clNone) then
       GradientStartColor := LColor;
-    if StyleServices.GetElementColor(LDetails, ecGradientColor2, LColor) and
-      (LColor <> clNone) then
+    if StyleServices.GetElementColor(LDetails, ecGradientColor2, LColor) and (LColor <> clNone) then
       GradientEndColor := LColor;
-    if StyleServices.GetElementColor(LDetails, ecTextColor, LColor) and
-      (LColor <> clNone) then
+    if StyleServices.GetElementColor(LDetails, ecTextColor, LColor) and (LColor <> clNone) then
       TextColor := LColor;
   end;
   { Draw Tooltips Face }
-  GradientFillCanvas(Canvas, GradientStartColor, GradientEndColor,
-    SysControl.ClientRect, gdVertical);
+  GradientFillCanvas(Canvas, GradientStartColor, GradientEndColor, SysControl.ClientRect, gdVertical);
   { Draw Tooltips Border }
   Brush := CreateSolidBrush(BkColor);
   FrameRect(DC, SysControl.ClientRect, Brush);
@@ -120,13 +115,13 @@ end;
 constructor TSysTooltipsStyleHook.Create(AHandle: THandle);
 begin
   inherited;
-  {$IF CompilerVersion > 23.0}
+{$IF CompilerVersion > 23.0}
   StyleElements := [seClient];
-  {$ELSE}
+{$ELSE}
   OverridePaint := True;
   OverridePaintNC := False;
   OverrideFont := False;
-  {$IFEND}
+{$IFEND}
 end;
 
 destructor TSysTooltipsStyleHook.Destroy;
@@ -147,10 +142,10 @@ end;
 initialization
 
 if StyleServices.Available then
-    TSysStyleManager.RegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
+  TSysStyleManager.RegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
 
 finalization
- TSysStyleManager.UnRegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
 
+TSysStyleManager.UnRegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
 
 end.

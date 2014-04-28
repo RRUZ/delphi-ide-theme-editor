@@ -66,7 +66,7 @@ type
       const Text: string; IsPressed, IsBackground: Boolean); override;
   end;
 
-  /// <summary> This interposer class fix the QC #114032  for Delphi XE2-XE6
+  /// <summary> This interposer class fix the QC #114032  for Delphi XE2 and Delphi XE3
   /// </summary>
   /// <remarks>
   /// To use this class add the Vcl.Styles.Fixes unit to your uses list after of  the Vcl.ExtCtrls unit
@@ -76,7 +76,7 @@ type
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
   end;
 
-  /// <summary> The <c>TComboBoxExStyleHookFix</c> vcl style hook fix the QC #114040 for Delphi XE2-XE6
+  /// <summary> The <c>TComboBoxExStyleHookFix</c> vcl style hook fix the QC #108678 for Delphi XE2 and Delphi XE3
   /// </summary>
   /// <remarks>
   /// Use this hook in this way
