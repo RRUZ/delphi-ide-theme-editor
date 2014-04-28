@@ -34,6 +34,8 @@ type
     FVCLStyleName: string;
     FUseVCLStyles: boolean;
     FChangeIconsGutter: boolean;
+//    FStyleBarName: string;
+//    FColorMapName: string;
   public
     property EnableDWMColorization : boolean read FEnableDWMColorization write FEnableDWMColorization;
     property Enabled : boolean read FEnabled write FEnabled;
@@ -44,6 +46,8 @@ type
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
+//    property ColorMapName  : string read FColorMapName write FColorMapName;
+//    property StyleBarName  : string read FStyleBarName write FStyleBarName;
   end;
 
   procedure ReadSettings(Settings: TSettings;Const Path:String);
@@ -72,6 +76,8 @@ begin
     Settings.VCLStyleName            := iniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
     Settings.UseVCLStyles            := iniFile.ReadBool('Global', 'UseVCLStyles', False);
     Settings.ChangeIconsGutter       := iniFile.ReadBool('Global', 'ChangeIconsGutter', True);
+//    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
+//    Settings.StyleBarName            := iniFile.ReadString('Global', 'StyleBarName', 'XP Style');
   finally
     iniFile.Free;
   end;
@@ -91,6 +97,8 @@ begin
     iniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
     iniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
     iniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
+//    iniFile.WriteString('Global', 'ColorMapName', Settings.ColorMapName);
+//    iniFile.WriteString('Global', 'StyleBarName', Settings.StyleBarName);
   finally
     iniFile.Free;
   end;

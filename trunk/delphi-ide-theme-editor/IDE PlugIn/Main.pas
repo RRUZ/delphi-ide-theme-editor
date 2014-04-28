@@ -24,24 +24,28 @@
 //TODO
 
 {
-  * gutter code editor   - done:
-  * restore support for Delphi 2007 -
-  * detect parent object from class (vmt tObject)
-  * popup menu code editor  -done :)
   * popup menu tool bars (ex :recent files) -> create hook using colormap
-  * panel separation (space)
-  * TIDEGradientTabSet background
-  * remove access violations on manual unload of package - done
+  * panel separation (space)  - hook, panel, statusbar, and so on
 
+
+
+  * restore support for Delphi 2007
+
+
+
+  * gutter code editor   - done:
+  * detect parent object from class - done via JCL ProcByLevel
+  * popup menu code editor  -done :)
+  * TIDEGradientTabSet background done
+  * remove access violations on manual unload of package - done
   * check for color key in OTA ;) done :(
   * options-enviroment variables crash    -> TDefaultEnvironmentDialog  GExperts????    done:)
   * tidegradeint buttons , not paint correctly  done:)
-  * border of panel in options window is not painted corectly
+  * border of panel in options window is not painted corectly done
 }
 
 //options
 {
-
 
   * Fix icons gray
   * hook main menu
@@ -66,13 +70,24 @@ unit Main;
 
 interface
 
+{.$DEFINE DLLWIZARD}
+
+uses
+ ToolsAPI;
+
 Const
   sLogoBitmap             = 'Logo';
   sLogoIcon16             = 'Logo16';
   sAboutBitnap            = 'About';
   sMenuItemIdeColorizer   = 'Delphi IDE Colorizer';
 
+{$IFDEF DLLWIZARD}
+function InitIDEColorizer(const BorlandIDEServices: IBorlandIDEServices; RegisterProc: TWizardRegisterProc; var Terminate: TWizardTerminateProc): Boolean; stdcall;
+exports   InitIDEColorizer name WizardEntryPoint;
+{$ELSE}
 procedure Register;
+{$ENDIF}
+
 
 implementation
 
@@ -90,7 +105,6 @@ uses
  ActnMan,
  Controls,
  Windows,
- ToolsAPI,
  Graphics,
  UxTheme,
  Colorizer.Utils,
@@ -105,7 +119,8 @@ uses
  Colorizer.SettingsForm,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
- ColorXPStyleActnCtrls;
+ ColorXPStyleActnCtrls,
+ uMisc;
 
 
 type
@@ -142,61 +157,52 @@ type
 var
   SplashBmp      : Graphics.TBitmap;
   AboutBmp       : Graphics.TBitmap;
-
-//type
-//  TMyIDEHotKey = class(TNotifierObject, IOTAKeyboardBinding)
-//  private
-//     procedure Dump(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
-//  private
-//     function GetBindingType: TBindingType;
-//     function GetDisplayName: string;
-
-//     function GetName: string;
-//     procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
-//  end ;
-
-
-procedure Register;
-//var
-// KbServices: IOTAKeyBoardServices;
-// kb        : TMyIDEHotKey;
-begin
-   RegisterPackageWizard(TIDEWizard.Create as IOTAWizard);
-//   kb := TMyIDEHotKey.Create;
-//   KbServices := BorlandIDEServices as IOTAKeyBoardServices;
-//   KbServices.AddKeyboardBinding(Kb);
-end;
-
-procedure SaveComponentToFile(Component: TComponent; const FileName: TFileName);
+{$IFDEF DLLWIZARD}
+  IDEWizard      : TIDEWizard;
+const
+  InvalidIndex = -1;
 var
-  FileStream : TFileStream;
-  MemStream : TMemoryStream;
+  FWizardIndex: Integer = InvalidIndex;
+
+procedure FinalizeIDEColorizer;
+var
+  WizardServices: IOTAWizardServices;
 begin
-  if not Assigned(Component) then exit;
-  FileStream := TFileStream.Create(FileName,fmCreate);
-  try
-    MemStream := TMemoryStream.Create;
-    try
-      MemStream.WriteComponent(Component);
-      MemStream.Position := 0;
-      ObjectBinaryToText(MemStream, FileStream);
-    finally
-     MemStream.Free;
-    end;
-  finally
-    FileStream.Free;
+  if FWizardIndex <> InvalidIndex then
+  begin
+    Assert(Assigned(BorlandIDEServices));
+    WizardServices := BorlandIDEServices as IOTAWizardServices;
+    Assert(Assigned(WizardServices));
+    WizardServices.RemoveWizard(FWizardIndex);
+    FWizardIndex := InvalidIndex;
   end;
 end;
 
-
-function GetFileVersion(const FileName: string): string;
+function InitIDEColorizer(const BorlandIDEServices: IBorlandIDEServices;
+  RegisterProc: TWizardRegisterProc;
+  var Terminate: TWizardTerminateProc): Boolean; stdcall;
 var
-  FSO  : OleVariant;
+  WizardServices: IOTAWizardServices;
 begin
-  FSO    := CreateOleObject('Scripting.FileSystemObject');
-  Result := FSO.GetFileVersion(FileName);
+  Result := BorlandIDEServices <> nil;
+  if Result then
+  begin
+    Assert(ToolsAPI.BorlandIDEServices = BorlandIDEServices);
+    Terminate := FinalizeIDEColorizer;
+    WizardServices := BorlandIDEServices as IOTAWizardServices;
+    Assert(Assigned(WizardServices));
+    IDEWizard := TIDEWizard.Create;
+    FWizardIndex := WizardServices.AddWizard(IDEWizard as IOTAWizard);
+    Result := (FWizardIndex >= 0);
+  end;
 end;
 
+{$ELSE}
+procedure Register;
+begin
+   RegisterPackageWizard(TIDEWizard.Create as IOTAWizard);
+end;
+{$ENDIF}
 
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
 begin
@@ -207,15 +213,15 @@ procedure RegisterPlugIn;
 const
   SColorizerPluginCaption    ='Delphi IDE Colorizer';
   SColorizerPluginDescription=
-  'Delphi IDE Colorizer'+#13#10+
-  ''+#13#10+
-  'Version %s'+#13#10+
-  'Copyright: 2011-2014 Rodrigo Ruz V.'+#13#10+
-  'All rights reserved.'+#13#10+
-  ''+#13#10+
-  'This is a freeware, you can use it freely without any fee.'+#13#10+
-  ''+#13#10+
-  'http://theroadtodelphi.wordpress.com/'+#13#10;
+  'Delphi IDE Colorizer'+sLineBreak+
+  ''+sLineBreak+
+  'Version %s'+sLineBreak+
+  'Copyright: 2011-2014 Rodrigo Ruz V.'+sLineBreak+
+  'All rights reserved.'+sLineBreak+
+  ''+sLineBreak+
+  'This is a freeware, you can use it freely without any fee.'+sLineBreak+
+  ''+sLineBreak+
+  'http://theroadtodelphi.wordpress.com/'+sLineBreak;
 var
   AboutSvcs: IOTAAboutBoxServices;
 begin
@@ -228,29 +234,10 @@ begin
   if Assigned(SplashScreenServices) then
     SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption, SplashBmp.Handle);
 
-  if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, AboutSvcs) then
-    AboutSvcs.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription,[GetFileVersion(GetBplLocation)]), AboutBmp.Handle, False, 'Freeware');
+    if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, AboutSvcs) then
+     AboutSvcs.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [uMisc.GetFileVersion(GeModuleLocation)]), AboutBmp.Handle, False, 'Freeware');
 end;
-      {
-function GetActiveFormEditor: IOTAFormEditor;
-var
-  Module: IOTAModule;
-  Editor: IOTAEditor;
-  i: Integer;
-begin
-  Result := nil;
-  Module := (BorlandIDEServices as IOTAModuleServices).CurrentModule;
-  if Module<>nil then
-  begin
-    for i := 0 to Module.GetModuleFileCount - 1 do
-    begin
-      Editor := Module.GetModuleFileEditor(i);
-      if Supports(Editor, IOTAFormEditor, Result) then
-        Break;
-    end;
-  end;
-end;
-            }
+
 procedure TIDEWizard.InitColorizer;
 var
   LServices : INTAServices;
@@ -285,7 +272,10 @@ begin
           //AColorMap.Color:=clWebDarkSeaGreen;
           //AColorMap.Color:=clWebSteelBlue;
           //ShowMessage(GetBplLocation());
-          LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
+          //ShowMessage( ActionBarStyles.Text);
+
+          //TColorizerLocalSettings.ActionBarStyle:=ColorXPStyle;
+          LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
           //TColorizerLocalSettings.GlobalSettings:=Settings;
           {$IF CompilerVersion >= 23}
           if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
@@ -309,7 +299,7 @@ begin
               MessageDlg(Format('The VCL Style %s was not found',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);
           end;
           {$IFEND}
-          RefreshIDETheme(TColorizerLocalSettings.ColorMap, ColorXPStyle);
+          RefreshIDETheme();
         finally
           {$IFDEF DEBUG_MODE}
            //lcomp.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\pkgDelphiWithTheme\Components.txt');
@@ -322,8 +312,8 @@ end;
 
 procedure TIDEWizard.FinalizeColorizer;
 begin
-    FreeAndNil(TColorizerLocalSettings.ColorMap);
-    UnRegisterColorizerAddinOptions
+  FreeAndNil(TColorizerLocalSettings.ColorMap);
+  UnRegisterColorizerAddinOptions
 end;
 
 { TIDEWizard }
@@ -438,7 +428,6 @@ begin
   ColorizerForm.LabelSetting.Caption:='Delphi IDE Colorizer for '+TColorizerLocalSettings.IDEData.Name;
   ColorizerForm.Init;
   ColorizerForm.PanelMain.BorderWidth:=5;
-  ColorizerForm.TabSheetVCLStyles.TabVisible:=TColorizerLocalSettings.IDEData.Version=TDelphiVersions.DelphiXE2;
   ColorizerForm.ShowModal();
 end;
 
@@ -465,7 +454,7 @@ procedure TIDEWizard.OnRefreher(Sender: TObject);
 begin
  if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
  begin
-  RefreshIDETheme(TColorizerLocalSettings.ColorMap, ColorXPStyle);
+  RefreshIDETheme();
   FTimerRefresher.Enabled:=False;
  end;
 end;
@@ -487,37 +476,24 @@ begin
 //  ExplorerSeparator.Free;
 end;
 
-
-{ TMyIDEHotKey }
-
-//procedure TMyIDEHotKey.BindKeyboard(
-//  const BindingServices: IOTAKeyBindingServices);
+//function GetActiveFormEditor: IOTAFormEditor;
+//var
+//  Module: IOTAModule;
+//  Editor: IOTAEditor;
+//  i: Integer;
 //begin
-//   BindingServices.AddKeyBinding([ShortCut(Word('P'), [ssCtrl])], Dump, nil);
+//  Result := nil;
+//  Module := (BorlandIDEServices as IOTAModuleServices).CurrentModule;
+//  if Module<>nil then
+//  begin
+//    for i := 0 to Module.GetModuleFileCount - 1 do
+//    begin
+//      Editor := Module.GetModuleFileEditor(i);
+//      if Supports(Editor, IOTAFormEditor, Result) then
+//        Break;
+//    end;
+//  end;
 //end;
-//
-//procedure TMyIDEHotKey.Dump(const Context: IOTAKeyContext; KeyCode: TShortCut;
-//  var BindingResult: TKeyBindingResult);
-//begin
-//  SaveComponentToFile(Screen.ActiveForm, ExtractFilePath(GetBplLocation())+'Galileo\Dump_'+Screen.ActiveForm.Name+'.dfm');
-//  BindingResult := krHandled;
-//end;
-//
-//function TMyIDEHotKey.GetBindingType: TBindingType;
-//begin
-//  Result := btPartial;
-//end;
-//
-//function TMyIDEHotKey.GetDisplayName: string;
-//begin
-//  Result := 'Foo Dump';
-//end;
-//
-//function TMyIDEHotKey.GetName: string;
-//begin
-//  Result := 'Foo Dump';
-//end;
-
 
 end.
 

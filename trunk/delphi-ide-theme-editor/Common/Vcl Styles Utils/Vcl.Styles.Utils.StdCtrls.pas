@@ -149,7 +149,7 @@ type
     function Style: TComboBoxStyle;
     function ListBoxBoundsRect: TRect;
     function ListBoxClientRect: TRect;
-    procedure ListBoxSetTimer(ATimerCode: Integer);
+    procedure ListBoxSetTimer(const ATimerCode: Integer);
     procedure ListBoxStopTimer;
     function ListBoxVertScrollRect: TRect;
     function ListBoxVertDownButtonRect: TRect;
@@ -170,8 +170,8 @@ type
   strict protected
     procedure UpdateColors; override;
     function IsChildHandle(AHandle: HWnd): Boolean; override;
-    procedure DrawItem(Canvas: TCanvas; Index: UINT; const R: TRect;
-      Selected: Boolean); virtual;
+    procedure DrawItem(Canvas: TCanvas;const Index: UINT; const R: TRect;
+     const Selected: Boolean); virtual;
     procedure HookListBox(AListHandle: HWnd);
     property ListBoxInstance: Pointer read FListBoxInstance;
     procedure ListBoxWndProc(var Msg: TMessage); virtual;
@@ -1001,8 +1001,8 @@ begin
   Handled := True;
 end;
 
-procedure TSysComboBoxStyleHook.DrawItem(Canvas: TCanvas; Index: UINT;
-  const R: TRect; Selected: Boolean);
+procedure TSysComboBoxStyleHook.DrawItem(Canvas: TCanvas;const Index: UINT;
+  const R: TRect;const Selected: Boolean);
 var
   DIS: TDrawItemStruct;
 begin
@@ -1167,7 +1167,7 @@ begin
   GetClientRect(FListHandle, Result);
 end;
 
-procedure TSysComboBoxStyleHook.ListBoxSetTimer(ATimerCode: Integer);
+procedure TSysComboBoxStyleHook.ListBoxSetTimer(const ATimerCode: Integer);
 begin
   if FListBoxTimerCode <> 0 then
     ListBoxStopTimer;

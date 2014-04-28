@@ -43,7 +43,7 @@ function CBT_FUNC(nCode: Integer; wParam: WPARAM; lParam: LPARAM): LRESULT; stdc
 const
   ClassNameBufferSize = 1024;
 var
- hTemp  : HWND;
+ LHWND  : HWND;
  i      : Integer;
  RetVal : Integer;
  ClassNameBuffer: Array[0..ClassNameBufferSize-1] of Char;
@@ -52,9 +52,9 @@ begin
    case nCode of
      HCBT_ACTIVATE:
      begin
-       hTemp := HWND(wParam);
+       LHWND := HWND(wParam);
 
-       if (Screen<>nil) and (hTemp>0) then
+       if (Screen<>nil) and (LHWND>0) then
        begin
           RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
           if RetVal>0 then
@@ -65,22 +65,20 @@ begin
              Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
             //if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
             for i := 0 to Screen.FormCount-1 do
-             if Screen.Forms[i].Handle=hTemp then
+             if Screen.Forms[i].Handle=LHWND then
                if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)<>-1) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
-                  //ShowMessage('Hooked');
                   Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, Screen.Forms[i]);
-                  //Screen.Forms[i].Color:=Main.AColorMap.Color;
                   Break;
-               end
-               {$IF CompilerVersion >= 23}
-               else
-               if (csDesigning in Screen.Forms[i].ComponentState) then
-               begin
-                 //ShowMessage('ApplyEmptyVCLStyleHook '+Screen.Forms[i].ClassName);
-                 ApplyEmptyVCLStyleHook(Screen.Forms[i].ClassType);
                end;
-              {$IFEND}
+//               {$IF CompilerVersion >= 23}
+//               else
+//               if (csDesigning in Screen.Forms[i].ComponentState) then
+//               begin
+//                 //ShowMessage('ApplyEmptyVCLStyleHook '+Screen.Forms[i].ClassName);
+//                 ApplyEmptyVCLStyleHook(Screen.Forms[i].ClassType);
+//               end;
+//              {$IFEND}
           end;
        end;
      end;

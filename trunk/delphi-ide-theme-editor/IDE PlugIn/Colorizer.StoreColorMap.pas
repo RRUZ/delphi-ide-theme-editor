@@ -24,10 +24,11 @@ unit Colorizer.StoreColorMap;
 interface
 
 uses
+  ActnMan,
   ActnColorMaps;
 
-procedure  LoadColorMapFromXmlFile(AColorMap : TXPColorMap;const FileName:string);
-procedure  SaveColorMapToXmlFile(AColorMap : TXPColorMap;const FileName:string);
+procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
+procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
 
 
 implementation
@@ -45,7 +46,7 @@ uses
 const
   Msxml2_DOMDocument='Msxml2.DOMDocument.6.0';
 
-procedure  LoadColorMapFromXmlFile(AColorMap : TXPColorMap;const FileName:string);
+procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
 var
   PropName  : string;
   XmlDocIDETheme : OleVariant;
@@ -79,7 +80,7 @@ begin
 end;
 
 
-procedure  SaveColorMapToXmlFile(AColorMap : TXPColorMap;const FileName:string);
+procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
 var
   PropName  : string;
   AColor    : TColor;

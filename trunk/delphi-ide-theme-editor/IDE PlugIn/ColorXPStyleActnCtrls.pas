@@ -160,7 +160,7 @@ end;
 procedure TColorXPColorMap.UpdateColors;
 begin
   inherited;
-  LoadSettings(Self, TColorizerLocalSettings.Settings);
+  LoadSettings(Self, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
 end;
 
 initialization

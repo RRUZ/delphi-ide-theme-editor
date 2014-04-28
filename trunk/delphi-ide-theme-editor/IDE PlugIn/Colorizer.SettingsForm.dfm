@@ -2,8 +2,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   Left = 509
   Top = 252
   Caption = 'Delphi IDE Colorizer Settings'
-  ClientHeight = 387
-  ClientWidth = 503
+  ClientHeight = 499
+  ClientWidth = 468
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -25,16 +25,16 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   object PanelMain: TPanel
     Left = 0
     Top = 0
-    Width = 503
-    Height = 387
+    Width = 468
+    Height = 499
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object PageControlSettings: TPageControl
       Left = 0
       Top = 0
-      Width = 503
-      Height = 346
+      Width = 468
+      Height = 458
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
@@ -42,21 +42,21 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         Caption = 'Main Settings'
         object Label1: TLabel
           Left = 3
-          Top = 22
+          Top = 70
           Width = 37
           Height = 13
           Caption = 'Themes'
         end
         object Label7: TLabel
           Left = 154
-          Top = 125
+          Top = 173
           Width = 25
           Height = 13
           Caption = 'Color'
         end
         object Label6: TLabel
           Left = 3
-          Top = 125
+          Top = 173
           Width = 38
           Height = 13
           Caption = 'Element'
@@ -70,27 +70,44 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object Image1: TImage
           Left = 3
-          Top = 71
+          Top = 119
           Width = 262
           Height = 25
         end
         object Bevel1: TBevel
           Left = 3
-          Top = 200
+          Top = 248
           Width = 310
           Height = 5
           Shape = bsTopLine
         end
         object Label2: TLabel
           Left = 3
-          Top = 181
+          Top = 229
           Width = 37
           Height = 13
           Caption = 'Options'
         end
+        object Label18: TLabel
+          Left = 3
+          Top = 376
+          Width = 45
+          Height = 13
+          Caption = 'ColorMap'
+          Visible = False
+        end
+        object Label23: TLabel
+          Left = 170
+          Top = 376
+          Width = 24
+          Height = 13
+          Caption = 'Style'
+          FocusControl = StyleCombo
+          Visible = False
+        end
         object CheckBoxEnabled: TCheckBox
-          Left = 363
-          Top = -1
+          Left = 379
+          Top = 3
           Width = 65
           Height = 17
           Caption = 'Enabled'
@@ -101,7 +118,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object cbThemeName: TComboBox
           Left = 3
-          Top = 40
+          Top = 88
           Width = 264
           Height = 21
           TabOrder = 1
@@ -109,7 +126,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object Button3: TButton
           Left = 273
-          Top = 38
+          Top = 86
           Width = 75
           Height = 25
           Caption = 'Save'
@@ -118,7 +135,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object CbClrElement: TColorBox
           Left = 154
-          Top = 144
+          Top = 192
           Width = 166
           Height = 22
           NoneColorColor = 16729138
@@ -128,7 +145,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object BtnSelForColor: TButton
           Left = 326
-          Top = 144
+          Top = 192
           Width = 22
           Height = 22
           ImageIndex = 2
@@ -138,7 +155,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object cbColorElements: TComboBox
           Left = 3
-          Top = 144
+          Top = 192
           Width = 145
           Height = 21
           Style = csDropDownList
@@ -147,7 +164,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object CheckBoxAutoColor: TCheckBox
           Left = 3
-          Top = 102
+          Top = 150
           Width = 156
           Height = 17
           Caption = 'Auto Generate Color Values'
@@ -157,15 +174,15 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object CheckBoxFixIDEDrawIcon: TCheckBox
           Left = 3
-          Top = 211
+          Top = 331
           Width = 254
           Height = 17
           Caption = 'Fix disabled icons draw in IDE Menus and toolbars'
           TabOrder = 7
         end
         object CheckBoxActivateDWM: TCheckBox
-          Left = 347
-          Top = 92
+          Left = 326
+          Top = 393
           Width = 145
           Height = 17
           Caption = 'Activate Glass colorization'
@@ -176,12 +193,30 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object CheckBoxGutterIcons: TCheckBox
           Left = 3
-          Top = 234
+          Top = 354
           Width = 110
           Height = 17
           Caption = 'Modify Gutter Icons'
           TabOrder = 9
           OnClick = CheckBoxGutterIconsClick
+        end
+        object ColorMapCombo: TComboBox
+          Left = 3
+          Top = 391
+          Width = 157
+          Height = 21
+          Style = csDropDownList
+          TabOrder = 10
+          Visible = False
+        end
+        object StyleCombo: TComboBox
+          Left = 168
+          Top = 391
+          Width = 145
+          Height = 21
+          Style = csDropDownList
+          TabOrder = 11
+          Visible = False
         end
       end
       object TabSheet2: TTabSheet
@@ -193,8 +228,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         ExplicitWidth = 0
         ExplicitHeight = 0
         DesignSize = (
-          495
-          318)
+          460
+          430)
         object Label4: TLabel
           Left = 3
           Top = 3
@@ -213,7 +248,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Left = 3
           Top = 23
           Width = 250
-          Height = 292
+          Height = 404
           Anchors = [akLeft, akTop, akBottom]
           Columns = <
             item
@@ -230,7 +265,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Left = 267
           Top = 22
           Width = 250
-          Height = 292
+          Height = 404
           Anchors = [akLeft, akTop, akBottom]
           Columns = <
             item
@@ -246,16 +281,13 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
-        object Label8: TLabel
-          Left = 3
-          Top = 26
-          Width = 75
-          Height = 13
-          Caption = 'VCL Styles Path'
-        end
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
-          Top = 72
+          Top = 26
           Width = 24
           Height = 13
           Caption = 'Style'
@@ -269,45 +301,29 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           TabOrder = 0
           OnClick = CheckBoxUseVClStylesClick
         end
-        object EditVCLStylesPath: TEdit
-          Left = 3
-          Top = 45
-          Width = 414
-          Height = 21
-          TabOrder = 1
-        end
-        object BtnSelDir: TButton
-          Left = 423
-          Top = 45
-          Width = 26
-          Height = 21
-          Caption = '...'
-          TabOrder = 2
-          OnClick = BtnSelDirClick
-        end
         object CbStyles: TComboBox
           Left = 3
-          Top = 91
+          Top = 45
           Width = 414
           Height = 21
           Style = csDropDownList
-          TabOrder = 3
+          TabOrder = 1
           OnChange = CbStylesChange
         end
         object PanelPreview: TPanel
           Left = 3
-          Top = 118
+          Top = 88
           Width = 414
-          Height = 182
+          Height = 212
           BevelOuter = bvNone
-          TabOrder = 4
+          TabOrder = 2
         end
       end
     end
     object Panel1: TPanel
       Left = 0
-      Top = 346
-      Width = 503
+      Top = 458
+      Width = 468
       Height = 41
       Align = alBottom
       BevelOuter = bvNone
@@ -328,7 +344,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 368
     Top = 200
     Bitmap = {
-      494C010107000800C80110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800FC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -599,15 +615,31 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
   end
-  object ColorMap: TXPColorMap
+  object XPColorMap: TXPColorMap
     HighlightColor = clWhite
     BtnSelectedColor = clBtnFace
     UnusedColor = clWhite
-    Left = 281
-    Top = 109
+    Left = 289
+    Top = 149
   end
   object ColorDialog1: TColorDialog
     Left = 364
     Top = 248
+  end
+  object TwilightColorMap: TTwilightColorMap
+    HighlightColor = clBlack
+    FrameBottomRightOuter = clBlack
+    BtnFrameColor = clBlack
+    DisabledColor = cl3DDkShadow
+    Left = 336
+    Top = 147
+  end
+  object StandardColorMap: TStandardColorMap
+    HighlightColor = clBtnHighlight
+    UnusedColor = 15988985
+    MenuColor = clMenu
+    SelectedColor = clHighlight
+    Left = 384
+    Top = 156
   end
 end
