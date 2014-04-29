@@ -25,14 +25,15 @@
 
 {
   * popup menu tool bars (ex :recent files) -> create hook using colormap
-  * panel separation (space)  - hook, panel, statusbar, and so on
-
-
+  * TIDEGradientTabSet border lines   -->  hook Pen.Color  ?
+  * TClosableTabScroller background
+  * TRefactoringTree
+  * Docked forms title (active/inactive).
 
   * restore support for Delphi 2007
 
-
-
+  * TStatusBar separators   done
+  * TTabSet background - done
   * gutter code editor   - done:
   * detect parent object from class - done via JCL ProcByLevel
   * popup menu code editor  -done :)
@@ -70,8 +71,6 @@ unit Main;
 
 interface
 
-{.$DEFINE DLLWIZARD}
-
 uses
  ToolsAPI;
 
@@ -79,7 +78,9 @@ Const
   sLogoBitmap             = 'Logo';
   sLogoIcon16             = 'Logo16';
   sAboutBitnap            = 'About';
-  sMenuItemIdeColorizer   = 'Delphi IDE Colorizer';
+  sMenuItemCaption        = 'Delphi IDE Colorizer';
+  sMenuItemName           = 'DelphiIDEClrItem';
+  sActionItemIdeColorizer = 'DelphiIDEClrAction';
 
 {$IFDEF DLLWIZARD}
 function InitIDEColorizer(const BorlandIDEServices: IBorlandIDEServices; RegisterProc: TWizardRegisterProc; var Terminate: TWizardTerminateProc): Boolean; stdcall;
@@ -103,6 +104,7 @@ uses
  {$IFEND}
  Classes,
  ActnMan,
+ ActnList,
  Controls,
  Windows,
  Graphics,
@@ -126,17 +128,14 @@ uses
 type
   TIDEWizard = class(TInterfacedObject, IOTAWizard, IOTANotifier)
   private
-    ExplorerItem: TMenuItem;
-    //ExplorerSeparator: TMenuItem;
-    {$IFDEF USE_DUMP_TIMER}
-    FDumperTimer   : TTimer;
-    {$ENDIF}
+    FDICConfMenuItem: TMenuItem;
     FTimerRefresher: TTimer;
     procedure AddMenuItems;
     procedure RemoveMenuItems;
     procedure InitColorizer;
     procedure FinalizeColorizer;
     procedure OnRefreher(Sender : TObject);
+    procedure DICConfClick(Sender: TObject);
     {$IFDEF USE_DUMP_TIMER}
     procedure OnDumper(Sender : TObject);
     {$ENDIF}
@@ -151,16 +150,16 @@ type
     procedure BeforeSave;
     procedure Destroyed;
     procedure Modified;
-    procedure ExplorerItemClick(Sender: TObject);
   end;
+const
+  InvalidIndex = -1;
 
 var
   SplashBmp      : Graphics.TBitmap;
   AboutBmp       : Graphics.TBitmap;
+  FPlugInInfo    : Integer = InvalidIndex;
 {$IFDEF DLLWIZARD}
   IDEWizard      : TIDEWizard;
-const
-  InvalidIndex = -1;
 var
   FWizardIndex: Integer = InvalidIndex;
 
@@ -223,7 +222,7 @@ const
   ''+sLineBreak+
   'http://theroadtodelphi.wordpress.com/'+sLineBreak;
 var
-  AboutSvcs: IOTAAboutBoxServices;
+  LAboutBoxServices: IOTAAboutBoxServices;
 begin
   SplashBmp:=Graphics.TBitmap.Create;
   SplashBmp.Handle := LoadBitmap(hInstance, sLogoBitmap);
@@ -234,8 +233,18 @@ begin
   if Assigned(SplashScreenServices) then
     SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption, SplashBmp.Handle);
 
-    if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, AboutSvcs) then
-     AboutSvcs.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [uMisc.GetFileVersion(GeModuleLocation)]), AboutBmp.Handle, False, 'Freeware');
+  if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) then
+   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [uMisc.GetFileVersion(GeModuleLocation)]), AboutBmp.Handle, False, 'Freeware');
+end;
+
+procedure UnRegisterPlugIn;
+var
+  LAboutBoxServices : IOTAAboutBoxServices;
+begin
+  if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) and (FPlugInInfo<>InvalidIndex) then
+     LAboutBoxServices.RemovePluginInfo(FPlugInInfo);
+
+  FPlugInInfo:=InvalidIndex;
 end;
 
 procedure TIDEWizard.InitColorizer;
@@ -263,7 +272,7 @@ begin
           //AColorMap:=TColorXPColorMap.Create(Application);
           //TColorizerLocalSettings.GlobalColorMap:=AColorMap;
 
-        //  TColorizerLocalSettings.ColorMap.FontColor:=clBlack;
+         //  TColorizerLocalSettings.ColorMap.FontColor:=clBlack;
 
           //GenerateColorMap(AColorMap, clWebKhaki);
           //AColorMap:=TThemedColorMap.Create(nil);
@@ -317,12 +326,11 @@ begin
 end;
 
 { TIDEWizard }
-
 constructor TIDEWizard.Create;
 begin
   inherited;
   {$WARN SYMBOL_PLATFORM OFF}
-  //ReportMemoryLeaksOnShutdown:=DebugHook<>0;
+  ReportMemoryLeaksOnShutdown:=DebugHook<>0;
   {$WARN SYMBOL_PLATFORM ON}
   //AColorMap:=nil;
   TColorizerLocalSettings.Settings:=TSettings.Create;
@@ -331,59 +339,72 @@ begin
   AddMenuItems;
   InitColorizer();
 
-  {$IFDEF USE_DUMP_TIMER}
-  FDumperTimer:=TTimer.Create(nil);
-  FDumperTimer.OnTimer :=OnDumper;
-  FDumperTimer.Interval:=1000;
-  FDumperTimer.Enabled:=True;
-  {$ENDIF}
-
   FTimerRefresher:=TTimer.Create(nil);
   FTimerRefresher.OnTimer :=OnRefreher;
   FTimerRefresher.Interval:=1500;
   FTimerRefresher.Enabled:=True;
 end;
 
-
-
 procedure TIDEWizard.AddMenuItems;
 var
-  MainMenu: TMainMenu;
-  ToolsMenu: TMenuItem;
-  I, InsertPosition: Integer;
+  Index: Integer;
+  IDEMenuItem, ToolsMenuItem: TMenuItem;
+  NTAServices: INTAServices;
   LIcon : TIcon;
 begin
   inherited;
-  if BorlandIDEServices <> nil then
-  begin
-    MainMenu  := (BorlandIDEServices as INTAServices).MainMenu;
-    ToolsMenu := MainMenu.Items[8];
 
-    for I := 0 to MainMenu.Items.Count - 1 do
-      if CompareText(MainMenu.Items[I].Name, 'ToolsMenu') = 0 then
-      begin
-        ToolsMenu := MainMenu.Items[I];
-        Break;
+   if BorlandIDEServices <> nil then
+   begin
+     NTAServices := (BorlandIDEServices as INTAServices);
+
+      IDEMenuItem := NTAServices.MainMenu.Items;
+      if not Assigned(IDEMenuItem) then
+        raise Exception.Create('Was not possible found IDE Menu Item');
+
+      ToolsMenuItem := nil;
+      for Index := 0 to IDEMenuItem.Count - 1 do
+        if CompareText(IDEMenuItem.Items[Index].Name, 'ToolsMenu') = 0 then
+          ToolsMenuItem := IDEMenuItem.Items[Index];
+      if not Assigned(ToolsMenuItem) then
+        raise Exception.Create('Was not possible found IDE Tools Menu Item');
+
+      FDICConfMenuItem := TMenuItem.Create(nil);
+      FDICConfMenuItem.Name := sMenuItemName;
+      FDICConfMenuItem.Caption := sMenuItemCaption;
+      FDICConfMenuItem.OnClick := DICConfClick;
+
+      LIcon := TIcon.Create;
+      try
+       LIcon.Handle := LoadIcon(hInstance, sLogoIcon16);
+        FDICConfMenuItem.ImageIndex := NTAServices.ImageList.AddIcon(LIcon);
+      finally
+        LIcon.Free;
       end;
 
-    InsertPosition:=ToolsMenu.Count - 1;
-    //ExplorerSeparator := Menus.NewItem('-', 0, False, False, nil, 0, 'IdeClorSeparator');
-    //ToolsMenu.InsertComponent(ExplorerSeparator);
-    //ToolsMenu.Insert(InsertPosition, ExplorerSeparator);
-    ExplorerItem := Menus.NewItem(sMenuItemIdeColorizer, Menus.ShortCut(Word('D'), [ssCtrl]), False, True, ExplorerItemClick, 0, 'IdeClorItem');
+      ToolsMenuItem.Insert(ToolsMenuItem.Count, FDICConfMenuItem);
+   end;
+end;
 
-    LIcon:=TIcon.Create;
-    try
-     LIcon.Handle := LoadIcon(hInstance, sLogoIcon16);
-     ExplorerItem.ImageIndex:=MainMenu.Images.AddIcon(LIcon);
-    finally
-      LIcon.Free;
+procedure TIDEWizard.DICConfClick(Sender: TObject);
+var
+  ColorizerForm : TFormIDEColorizerSettings;
+begin
+  try
+    ColorizerForm := TFormIDEColorizerSettings.Create(nil);
+    ColorizerForm.Name := 'DelphiIDEColorizer_SettingsForm';
+    ColorizerForm.LabelSetting.Caption:='Delphi IDE Colorizer for '+TColorizerLocalSettings.IDEData.Name;
+    ColorizerForm.Init;
+    ColorizerForm.PanelMain.BorderWidth:=5;
+    ColorizerForm.ShowModal();
+  except
+    on E: exception do
+    begin
+      ShowMessage(Format('%s : Error on dialog display %s', [sMenuItemCaption, E.message]));
     end;
-
-    ToolsMenu.InsertComponent(ExplorerItem);
-    ToolsMenu.Insert(InsertPosition+1, ExplorerItem);
   end;
 end;
+
 
 procedure TIDEWizard.AfterSave;
 begin
@@ -396,18 +417,13 @@ end;
 
 destructor TIDEWizard.Destroy;
 begin
+  UnRegisterPlugIn;
   RemoveMenuItems;
-  SplashBmp.Free;
-  AboutBmp.Free;
-
+  FreeAndNil(SplashBmp);
+  FreeAndNil(AboutBmp);
   FinalizeColorizer();
-  {$IFDEF USE_DUMP_TIMER}
-  FDumperTimer.Enabled:=False;
-  FDumperTimer.Free;
-  {$ENDIF}
   FTimerRefresher.Enabled:=False;
   FTimerRefresher.Free;
-  //ColorizerForm.Free;
   inherited;
 end;
 
@@ -419,17 +435,6 @@ procedure TIDEWizard.Execute;
 begin
 end;
 
-procedure TIDEWizard.ExplorerItemClick(Sender: TObject);
-var
-  ColorizerForm : TFormIDEColorizerSettings;
-begin
-  ColorizerForm := TFormIDEColorizerSettings.Create(nil);
-  ColorizerForm.Name := 'DelphiIDEColorizer_SettingsForm';
-  ColorizerForm.LabelSetting.Caption:='Delphi IDE Colorizer for '+TColorizerLocalSettings.IDEData.Name;
-  ColorizerForm.Init;
-  ColorizerForm.PanelMain.BorderWidth:=5;
-  ColorizerForm.ShowModal();
-end;
 
 function TIDEWizard.GetIDString: string;
 begin
@@ -459,22 +464,13 @@ begin
  end;
 end;
 
-{$IFDEF USE_DUMP_TIMER}
-procedure TIDEWizard.OnDumper(Sender: TObject);
-Var
-  FileName : String;
-begin
-  FileName:=ExtractFilePath(GetBplLocation())+'Galileo\Dump_'+Screen.ActiveForm.Name+'.dfm';
-  if not FileExists(FileName) then
-  SaveComponentToFile(Screen.ActiveForm, FileName);
-end;
-{$ENDIF}
+
 
 procedure TIDEWizard.RemoveMenuItems;
 begin
-  ExplorerItem.Free;
-//  ExplorerSeparator.Free;
+  FreeAndNil(FDICConfMenuItem);
 end;
+
 
 //function GetActiveFormEditor: IOTAFormEditor;
 //var

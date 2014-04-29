@@ -70,6 +70,7 @@ type
     StyleCombo: TComboBox;
     TwilightColorMap: TTwilightColorMap;
     StandardColorMap: TStandardColorMap;
+    Image2: TImage;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);

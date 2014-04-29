@@ -134,7 +134,8 @@ var
 
 {$IFDEF DELPHI2009_UP}
 var
-  ActnStyleList : TDictionary<TActionManager, TActionBarStyle>;
+  //ActnStyleList : TDictionary<TActionManager, TActionBarStyle>;
+  ActnStyleList : TList<TActionManager>;
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
@@ -654,17 +655,9 @@ begin
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-
-       {$IFDEF DELPHIXE2_UP}
-        if TColorizerLocalSettings.Settings.UseVCLStyles then
-        begin
-        //  if not IsStyleHookRegistered(AComponent.ClassType, TTreeViewStyleHook) then
-        //   TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
-        end;
-       {$ENDIF}
     end
     else
-    if SameText(AComponent.ClassName, 'TVirtualStringTree') then
+    if SameText(AComponent.ClassName, 'TVirtualStringTree') or SameText(AComponent.ClassName, 'TRefactoringTree') then
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
@@ -714,9 +707,6 @@ begin
     else
     if SameText(AComponent.ClassName, 'TGradientButton') then
     begin
-      //Glyph:= TBitmap(GetRttiPropertyValue(AComponent,'Glyph').AsObject);
-      //Glyph.SaveToFile('C:\Users\Dexter\Desktop\CMMS\Test.bmp');
-
        SetRttiPropertyValue(AComponent, 'Color', AColorMap.Color);
     end
     else
@@ -727,6 +717,7 @@ begin
     else
     if SameText(AComponent.ClassName, 'TClosableTabScroller') then
     begin
+       //SetRttiPropertyValue(AComponent,'BorderWidth', 0);
 
        SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor',AColorMap.MenuColor);
        SetRttiPropertyValue(AComponent,'CloseButton.Transparent',False);
@@ -813,8 +804,10 @@ begin
     begin
       LActionManager:=TActionManager(AComponent);
       {$IFDEF DELPHI2009_UP}
-      if not ActnStyleList.ContainsKey(LActionManager) then
-          ActnStyleList.Add(LActionManager, LActionManager.Style);
+//      if not ActnStyleList.ContainsKey(LActionManager) then
+//          ActnStyleList.Add(LActionManager, LActionManager.Style);
+      if ActnStyleList.IndexOf(LActionManager)=-1 then
+          ActnStyleList.Add(LActionManager);
       {$ENDIF}
       LActionManager.Style := AStyle;
     end
@@ -826,6 +819,7 @@ begin
       SelectedColor  :=AColorMap.Color;
       UnselectedColor:=AColorMap.MenuColor;
       Font.Color    := AColorMap.FontColor;
+      Style :=tsModernTabs; //necessary for allow paint backround color
     end
     else
     if SameText(AComponent.ClassName, 'TIDEGradientTabSet') or SameText(AComponent.ClassName, 'TGradientTabSet') then
@@ -858,6 +852,7 @@ begin
     with TStatusBar(AComponent) do
     begin
        //theme is removed to allow paint TStatusBar
+        if not TColorizerLocalSettings.Settings.UseVCLStyles then
        SetWindowTheme(TStatusBar(AComponent).Handle,'','');
        //SizeGrip is removed because can't be painted
        SizeGrip:=False;
@@ -901,9 +896,15 @@ var
   LActionManager : TActionManager;
 begin
 {$IFDEF DELPHI2009_UP}
-  if ActnStyleList.Count>0 then
-    for LActionManager in ActnStyleList.Keys do   //if Assigned(ActionBarStyles) then
-       LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+  if (ActnStyleList.Count>0)  and Assigned(ActionBarStyles) then
+    for LActionManager in ActnStyleList{.Keys} do
+       //LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+      if ActionBarStyles.IndexOf(DefaultActnBarStyle)>=0 then
+      try
+       LActionManager.Style:= ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+      except  //sometimes the references to the objects contained in ActionBarStyles are lost when the IDE is closed,
+              //So this is necesary to avoid access violations.
+      end
 {$ELSE}
    //TODO
 
@@ -916,7 +917,8 @@ var
 initialization
   //LObjectList:=TObjectList<THelperClass>.Create;
 {$IFDEF DELPHI2009_UP}
-  ActnStyleList := TDictionary<TActionManager, TActionBarStyle>.Create;
+  //ActnStyleList := TDictionary<TActionManager, TActionBarStyle>.Create;
+  ActnStyleList := TList<TActionManager>.Create;
 {$ENDIF}
 {$IFDEF DEBUG_PROFILER}
   DumpAllTypes;
@@ -969,6 +971,7 @@ finalization
   end;
 
   RestoreActnManagerStyles();
+
   FreeAndNil(TColorizerLocalSettings.Settings);
   if Assigned(TColorizerLocalSettings.IDEData.Icon) then
       TColorizerLocalSettings.IDEData.Icon.Free;
