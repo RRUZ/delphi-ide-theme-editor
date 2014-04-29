@@ -31,10 +31,12 @@ uses
   Controls,
 {$IFEND}
   System.IOUtils,
+  ExtCtrls,
   Dialogs,
   Windows,
   Classes,
   SysUtils,
+  ComCtrls,
   Graphics,
   ImgList,
   CommCtrl,
@@ -45,12 +47,54 @@ uses
 implementation
 
 type
-  TCustomImageListClass = class(TCustomImageList);
-
+ TWinControlClass      = class(TWinControl);
+ TCustomPanelClass     = class(TCustomPanel);
+ TCustomStatusBarClass = class(TCustomStatusBar);
 var
-  TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
-  Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect);
-  Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
+  TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
+  Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
+  Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
+  Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
+
+
+type
+  TCustomStatusBarHelper = class helper for TCustomStatusBar
+  private
+    function GetCanvasRW: TCanvas;
+    procedure SetCanvasRW(const Value: TCanvas);
+  public
+    function  WMPaintAddress: Pointer;
+    procedure DoUpdatePanels(UpdateRects, UpdateText: Boolean);
+    property  CanvasRW : TCanvas read GetCanvasRW Write SetCanvasRW;
+   end;
+
+
+
+{ TCustomStatusBarHelper }
+
+procedure TCustomStatusBarHelper.DoUpdatePanels(UpdateRects,
+  UpdateText: Boolean);
+begin
+  Self.UpdatePanels(UpdateRects, UpdateText);
+end;
+
+function TCustomStatusBarHelper.GetCanvasRW: TCanvas;
+begin
+ Result:= Self.FCanvas;
+end;
+
+procedure TCustomStatusBarHelper.SetCanvasRW(const Value: TCanvas);
+begin
+ Self.FCanvas:= Value;
+end;
+
+function TCustomStatusBarHelper.WMPaintAddress: Pointer;
+var
+  MethodAddr: procedure(var Message: TWMPaint) of object;
+begin
+  MethodAddr := Self.WMPaint;
+  Result     := TMethod(MethodAddr).Code;
+end;
 
  //@Editorcontrol@TCustomEditControl@EVFillGutter$qqrrx18
  //002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
@@ -108,6 +152,9 @@ begin
   end;
 end;
 
+type
+  TCustomImageListClass = class(TCustomImageList);
+
 procedure CustomImageListHack_DoDraw(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
 var
   MaskBitMap : TBitmap;
@@ -151,6 +198,8 @@ begin
    Trampoline_TCanvas_FillRect(Self, Rect);
 end;
 
+
+
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
   Result:=False;
@@ -160,43 +209,214 @@ begin
   Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
 end;
 
+procedure CustomStatusBarWMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
+var
+  DC: HDC;
+  Buffer: TBitmap;
+  LCanvas: TCanvas;
+  PS: TPaintStruct;
+
+      procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+        const S: string; var R: TRect; Flags: Cardinal);
+      var
+        ThemeTextColor: TColor;
+        TextFormat: TTextFormatFlags;
+      begin
+        Canvas.Font := TWinControlClass(Self).Font;
+        TextFormat := TTextFormatFlags(Flags);
+        if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
+        begin
+          if not Self.Enabled or (seFont in Self.StyleElements) then
+            Canvas.Font.Color := ThemeTextColor;
+          StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+        end
+        else
+        begin
+          Canvas.Refresh;
+          StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
+        end;
+      end;
+
+      procedure Paint(Canvas : TCanvas);
+      const
+        AlignStyles: array [TAlignment] of Integer = (DT_LEFT, DT_RIGHT, DT_CENTER);
+      var
+        R, R1: TRect;
+        Res, Count, I: Integer;
+        Idx, Flags: Cardinal;
+        Details: TThemedElementDetails;
+        LText: string;
+        Borders: array [0..2] of Integer;
+        SaveCanvas: TCanvas;
+      begin
+        if not StyleServices.Available then
+          Exit;
+
+        Details := StyleServices.GetElementDetails(tsStatusRoot);
+        //StyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, Self.Width, Self.Height));
+        if SendMessage(Self.Handle, SB_ISSIMPLE, 0, 0) > 0 then
+          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color
+        else
+          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.HighlightColor;
+        Canvas.FillRect(Rect(0, 0, Self.Width, Self.Height));
+
+
+        if SendMessage(Self.Handle, SB_ISSIMPLE, 0, 0) > 0 then
+        begin
+          R := Self.ClientRect;
+          FillChar(Borders, SizeOf(Borders), 0);
+          SendMessage(Self.Handle, SB_GETBORDERS, 0, IntPtr(@Borders));
+          R.Left := Borders[0] + Borders[2];
+          R.Top := Borders[1];
+          R.Bottom := R.Bottom - Borders[1];
+          R.Right := R.Right - Borders[2];
+
+          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+          Canvas.FillRect(R);
+
+          //R1 := Self.ClientRect;
+          //R1.Left := R1.Right - R.Height;
+          //Details := StyleServices.GetElementDetails(tsGripper);
+          //StyleServices.DrawElement(Canvas.Handle, Details, R1);
+
+          Details := StyleServices.GetElementDetails(tsPane);
+          SetLength(LText, Word(SendMessage(Self.Handle, SB_GETTEXTLENGTH, 0, 0)));
+          if Length(LText) > 0 then
+          begin
+           SendMessage(Self.Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
+           Flags := Self.DrawTextBiDiModeFlags(DT_LEFT);
+           DrawControlText(Canvas, Details, LText, R, Flags);
+          end;
+        end
+        else
+        begin
+          Count := Self.Panels.Count;
+          for I := 0 to Count - 1 do
+          begin
+            R := Rect(0, 0, 0, 0);
+            SendMessage(Self.Handle, SB_GETRECT, I, IntPtr(@R));
+            if IsRectEmpty(R) then
+              Exit;
+
+            Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+            Canvas.FillRect(R);
+
+//            if I = Count - 1 then
+//            begin
+//              R1 := Self.ClientRect;
+//              R1.Left := R1.Right - R.Height;
+//              Details := StyleServices.GetElementDetails(tsGripper);
+//              StyleServices.DrawElement(Canvas.Handle, Details, R1);
+//            end;
+            Details := StyleServices.GetElementDetails(tsPane);
+            InflateRect(R, -1, -1);
+            if Self is TCustomStatusBar then
+              Flags := Self.DrawTextBiDiModeFlags(AlignStyles[TCustomStatusBar(Self).Panels[I].Alignment])
+            else
+              Flags := Self.DrawTextBiDiModeFlags(DT_LEFT);
+            Idx := I;
+            SetLength(LText, Word(SendMessage(Self.Handle, SB_GETTEXTLENGTH, Idx, 0)));
+            if Length(LText) > 0 then
+            begin
+              Res := SendMessage(Self.Handle, SB_GETTEXT, Idx, IntPtr(@LText[1]));
+              if (Res and SBT_OWNERDRAW = 0) then
+                DrawControlText(Canvas, Details, LText, R, Flags)
+              else
+              if (Self is TCustomStatusBar) and Assigned(TCustomStatusBar(Self).OnDrawPanel) then
+              begin
+                SaveCanvas  := Self.Canvas;
+                Self.CanvasRW := Canvas;
+                try
+                  Self.OnDrawPanel(TCustomStatusBar(Self), Self.Panels[I], R);
+                finally
+                  Self.CanvasRW := SaveCanvas;
+                end;
+              end;
+            end
+            else if (Self is TCustomStatusBar) then
+             if (TCustomStatusBar(Self).Panels[I].Style <> psOwnerDraw) then
+               DrawControlText(Canvas, Details, TCustomStatusBar(Self).Panels[I].Text, R, Flags)
+             else
+               if Assigned(TCustomStatusBar(Self).OnDrawPanel) then
+               begin
+                 SaveCanvas := TCustomStatusBar(Self).Canvas;
+                 TCustomStatusBar(Self).CanvasRW := Canvas;
+                 try
+                   TCustomStatusBar(Self).OnDrawPanel(TCustomStatusBar(Self), TCustomStatusBar(Self).Panels[I], R);
+                 finally
+                   TCustomStatusBar(Self).CanvasRW := SaveCanvas;
+                 end;
+               end;
+          end;
+        end;
+
+      end;
+
+begin
+    if not Assigned(TColorizerLocalSettings.ColorMap) then  Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
+
+    Self.DoUpdatePanels(False, True);
+
+    DC := HDC(Message.DC);
+    LCanvas := TCanvas.Create;
+    try
+        if DC <> 0 then
+          LCanvas.Handle := DC
+        else
+        LCanvas.Handle := BeginPaint(Self.Handle, PS);
+        if (DC = 0) then
+        begin
+          Buffer := TBitmap.Create;
+          try
+            Buffer.SetSize(Self.Width, Self.Height);
+            LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+            LCanvas.FillRect(Self.ClientRect);
+            Paint(Buffer.Canvas);
+            // paint other controls
+            if Self is TWinControl then
+              TWinControlClass(Self).PaintControls(Buffer.Canvas.Handle, nil);
+            LCanvas.Draw(0, 0, Buffer);
+          finally
+            Buffer.Free;
+          end;
+        end;
+
+      if DC = 0 then
+        EndPaint(Self.Handle, PS);
+    finally
+      LCanvas.Handle := 0;
+      LCanvas.Free;
+    end;
+
+end;
+
 
 //const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
 procedure InstallHooks;
-//var
-//  CorIdeModule  : HMODULE;
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
-  Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
-
-  //@Editorcontrol@TCustomEditControl@EVFillGutter$qqrrx18
-//  CorIdeModule := LoadLibrary('coreide180.bpl');//'coreide180.bpl'
-
-
-//  Addr_EVFillGutter:=GetProcAddress(CorIdeModule, sEVFillGutter);
-//    if Assigned(Addr_EVFillGutter) then
-//      ShowMessage('Foo');
-//
-//  if Assigned(Addr_EVFillGutter) then
-//  begin
-//    Addr_EVFillGutter := GetBplMethodAddress(Addr_EVFillGutter);
-//    if Assigned(Addr_EVFillGutter) then
-//      ShowMessage('Bar');
-//
-//  end;
+  if TColorizerLocalSettings.Settings.UseVCLStyles then
+   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
+  if not TColorizerLocalSettings.Settings.UseVCLStyles then
+   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
 end;
 
 procedure RemoveHooks;
 begin
-  InterceptRemove(@TrampolineCustomImageList_DoDraw);
-  InterceptRemove(@Trampoline_TCanvas_FillRect);
-  InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
+  if Assigned(TrampolineCustomImageList_DoDraw) then
+    InterceptRemove(@TrampolineCustomImageList_DoDraw);
+  if Assigned(Trampoline_TCanvas_FillRect) then
+    InterceptRemove(@Trampoline_TCanvas_FillRect);
+  if Assigned(Trampoline_TStyleEngine_HandleMessage) then
+    InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
+  if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then
+    InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
+
 end;
 
 {
-
     004228A4 17391 1F38 __fastcall Editcolorpage::Finalization()
     00420B94 17411 1F39 Editcolorpage::TEditorColor::
     00422188 17400 1F3A __fastcall Editcolorpage::TEditorColor::ColorClick(System::TObject *)
@@ -219,10 +439,7 @@ end;
     00422814 17392 1F4B __fastcall Editcolorpage::TEditorColor::tbsetPreviewsChange(System::TObject *, int, bool&)
     004AA8D4 17390 1F4C __fastcall Editcolorpage::initialization()
 
-
     002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
-
-
 }
 
 

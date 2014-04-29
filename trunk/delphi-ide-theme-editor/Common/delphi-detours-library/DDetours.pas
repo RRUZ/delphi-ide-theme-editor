@@ -30,6 +30,9 @@ uses Windows, InstDecode;
 {$MESSAGE WARN 'BuildThreadSafe not defined , the library is not a thread safe .'}
 {$MESSAGE HINT 'Define BuildThreadSafe to make the library thread safe .'}
 {$ENDIF}
+{$IFNDEF DEBUG}
+{$WARN COMPARISON_TRUE OFF}
+{$ENDIF}
 // ---------------------------------------------------------------------------------
 function InterceptCreate(const TargetProc, InterceptProc: Pointer): Pointer;
 function InterceptRemove(var Trampoline: Pointer): Boolean;
@@ -43,7 +46,7 @@ uses TLHelp32;
 type
   TThreadsListID = class
   private
-    FCount: Integer;
+    FCount: UINT;
     FPointer: Pointer;
     FSize: UINT;
   public
@@ -51,12 +54,13 @@ type
     function GetID(const Index: UINT): DWORD;
     constructor Create; virtual;
     destructor Destroy; override;
-    property Count: Integer read FCount;
+    property Count: UINT read FCount;
     property ThreadIDs[const index: UINT]: DWORD read GetID;
   end;
 
 type
-  TOpenThread = function(dwDesiredAccess: DWORD; bInheritHandle: BOOL; dwThreadId: DWORD): THandle; stdcall;
+  TOpenThread = function(dwDesiredAccess: DWORD; bInheritHandle: BOOL;
+    dwThreadId: DWORD): THandle; stdcall;
 
 var
   OpenThread: TOpenThread;
@@ -118,17 +122,20 @@ const
 {$DEFINE SkipInt3}
 {$ENDIF}
 
-function HiQword(const Value: UINT64): DWORD; overload; {$IFDEF MustInline}inline; {$ENDIF}
+function HiQword(const Value: UINT64): DWORD; overload;
+{$IFDEF MustInline}inline; {$ENDIF}
 begin
   Result := (Value shr 32);
 end;
 
-function HiQword(const Value: Int64): DWORD; overload; {$IFDEF MustInline}inline; {$ENDIF}
+function HiQword(const Value: Int64): DWORD; overload;
+{$IFDEF MustInline}inline; {$ENDIF}
 begin
   Result := (Value shr 32);
 end;
 
-procedure FillNop(const Address: Pointer; const Count: Integer); {$IFDEF MustInline}inline; {$ENDIF}
+procedure FillNop(const Address: Pointer; const Count: Integer);
+{$IFDEF MustInline}inline; {$ENDIF}
 begin
   FillChar(Address^, Count, opNop);
 end;
@@ -165,7 +172,8 @@ begin
   end
   else if Inst.nOpCode = 2 then
   begin
-    Result := (HiByte(Inst.OpCode) = 0) and (Inst.ModRM.rReg = 6); // rReg = extension for opCode ! => JMPE .
+    Result := (HiByte(Inst.OpCode) = 0) and (Inst.ModRM.rReg = 6);
+    // rReg = extension for opCode ! => JMPE .
   end
   else
     Result := False;
@@ -217,7 +225,8 @@ begin
   end;
 end;
 
-function SetMemPermission(const Code: Pointer; const Size: Integer; const Permission: DWORD): DWORD;
+function SetMemPermission(const Code: Pointer; const Size: Integer;
+  const Permission: DWORD): DWORD;
 begin
   Result := 0;
   if Assigned(Code) and (Size > 0) and (Permission > 0) then
@@ -233,7 +242,8 @@ var
   OffsetAddr: Pointer;
 begin
   Q := PByte(Dst);
-  if (CPUX = CPUX64) and (Inst.JumpCall.Used) and (Inst.JumpCall.IndirectDispOnly) then
+  if (CPUX = CPUX64) and (Inst.JumpCall.Used) and
+    (Inst.JumpCall.IndirectDispOnly) then
   begin
     { e.g: jmp qword ptr [rel $0000ad9c] }
     // Addr := Inst.JumpCall.Address;
@@ -245,14 +255,16 @@ begin
     Inc(Q, Inst.InstSize - Inst.JumpCall.OffsetSize);
     PInteger(Q)^ := NewOffset;
   end
-  else if (CPUX = CPUX64) and (Inst.Displacement.Used) and (Inst.Displacement.Relative) then
+  else if (CPUX = CPUX64) and (Inst.Displacement.Used) and
+    (Inst.Displacement.Relative) then
   begin
     {
       mov rax,[rel $00000011]
       We can not copy this instruction directly .
       We need to correct the offset $00000011 .
     }
-    OffsetAddr := Pointer(UINT64(Src) + Inst.Displacement.Value + Inst.InstSize);
+    OffsetAddr := Pointer(UINT64(Src) + Inst.Displacement.Value +
+      Inst.InstSize);
     NewOffset := UINT64(OffsetAddr) - UINT64(Q) - Inst.InstSize;
     if Inst.Displacement.i32 then
     begin
@@ -274,9 +286,12 @@ begin
     NewOffset := UINT64(Addr) - UINT64(Dst) - Inst.InstSize;
     Inc(Q, Inst.InstSize - Inst.JumpCall.OffsetSize);
     case Inst.JumpCall.OffsetSize of
-      1: PShortInt(Q)^ := ShortInt(NewOffset);
-      2: PShort(Q)^ := Short(NewOffset);
-      4: PInteger(Q)^ := NewOffset;
+      1:
+        PShortInt(Q)^ := ShortInt(NewOffset);
+      2:
+        PShort(Q)^ := Short(NewOffset);
+      4:
+        PInteger(Q)^ := NewOffset;
     end;
   end;
 end;
@@ -309,7 +324,8 @@ begin
   end;
 end;
 
-function AddrAllocMem(const Addr: Pointer; const Size, flProtect: DWORD): Pointer;
+function AddrAllocMem(const Addr: Pointer;
+  const Size, flProtect: DWORD): Pointer;
 var
   mbi: TMemoryBasicInformation;
   Info: TSystemInfo;
@@ -348,13 +364,16 @@ begin
       begin
         { The RegionSize must be greater than the dwAllocationGranularity . }
         { The address (PP) must be multiple of the allocation granularity (dwAllocationGranularity) . }
-        PP := Pointer(Info.dwAllocationGranularity * (UINT64(PP) div Info.dwAllocationGranularity) + Info.dwAllocationGranularity);
+        PP := Pointer(Info.dwAllocationGranularity *
+          (UINT64(PP) div Info.dwAllocationGranularity) +
+          Info.dwAllocationGranularity);
         {
           If PP is multiple of dwAllocationGranularity then alloc memory .
           If PP is not multiple of dwAllocationGranularity ,the VirtualAlloc will fails .
         }
         if UINT64(PP) mod Info.dwAllocationGranularity = 0 then
-          Result := VirtualAlloc(PP, Size, MEM_COMMIT or MEM_RESERVE, flProtect);
+          Result := VirtualAlloc(PP, Size, MEM_COMMIT or MEM_RESERVE,
+            flProtect);
         if Result <> nil then
           Exit;
       end;
@@ -383,7 +402,8 @@ begin
 {$IFDEF CPUX64}
   Result := AddrAllocMem(TargetProc, TrampolineSize, PAGE_EXECUTE_READWRITE);
 {$ELSE}
-  Result := VirtualAlloc(nil, TrampolineSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+  Result := VirtualAlloc(nil, TrampolineSize, MEM_COMMIT,
+    PAGE_EXECUTE_READWRITE);
 {$ENDIF}
   Q := Result;
   if not Assigned(Result) then
@@ -391,7 +411,8 @@ begin
 
   Sb := 0;
   Size32 := True;
-  Inc(Q, SizeOf(TSaveData)); // Reserved for the extra bytes that hold information about address .
+  Inc(Q, SizeOf(TSaveData));
+  // Reserved for the extra bytes that hold information about address .
 
   { Offset between the trampoline and the target proc address . }
 {$IFDEF CPUX64}
@@ -443,7 +464,8 @@ begin
   CopyInstruction(P^, Q^, Sb);
 
   if Sb > nb then
-    FillNop(Pointer(P + nb), Sb - nb); // Fill the rest bytes with NOP instruction .
+    FillNop(Pointer(P + nb), Sb - nb);
+  // Fill the rest bytes with NOP instruction .
 
   if not Size32 then
   begin
@@ -467,7 +489,8 @@ begin
 {$IFDEF CPUX64}
   Offset := Int64(UINT64(PSave) - UINT64(P) - SizeOfJmp); // Sign Extended ! .
 {$ELSE}
-  Offset := Integer(UINT(InterceptProc) - UINT(P) - SizeOfJmp); // Sign Extended ! .
+  Offset := Integer(UINT(InterceptProc) - UINT(P) - SizeOfJmp);
+  // Sign Extended ! .
 {$ENDIF}
   { Insert JMP instruction . }
   PJmp := PJumpInst(P);
@@ -486,9 +509,11 @@ begin
 
   { Calculate the offset between the TargetProc variable and the jmp instruction (Trampoline proc) . }
 {$IFDEF CPUX64}
-  Offset := Int64((UINT64(PSave) + SizeOf(Pointer)) - UINT64(Q) - SizeOfJmp); // Sign Extended ! .
+  Offset := Int64((UINT64(PSave) + SizeOf(Pointer)) - UINT64(Q) - SizeOfJmp);
+  // Sign Extended ! .
 {$ELSE}
-  Offset := Integer((UINT(PSave^.D2) - UINT(Q) - SizeOfJmp)); // Sign Extended ! .
+  Offset := Integer((UINT(PSave^.D2) - UINT(Q) - SizeOfJmp));
+  // Sign Extended ! .
 {$ENDIF}
   { Insert JMP instruction . }
   PJmp := PJumpInst(Q);
@@ -514,7 +539,7 @@ var
   hSnap: THandle;
   PID: DWORD;
   te: TThreadEntry32;
-  nCount: Integer;
+  nCount: DWORD;
   hThread: THandle;
 begin
   PID := GetCurrentProcessId;
@@ -536,12 +561,14 @@ begin
           }
           if te.th32ThreadID <> GetCurrentThreadId then
           begin
-            hThread := OpenThread(THREAD_SUSPEND_RESUME, False, te.th32ThreadID);
+            hThread := OpenThread(THREAD_SUSPEND_RESUME, False,
+              te.th32ThreadID);
             if hThread <> INVALID_HANDLE_VALUE then
             begin
               nCount := SuspendThread(hThread);
               if nCount <> DWORD(-1) then // thread's previously was running  .
-                RTID.Add(te.th32ThreadID); // Only add threads that was running before suspending them !
+                RTID.Add(te.th32ThreadID);
+              // Only add threads that was running before suspending them !
 
               CloseHandle(hThread);
             end;
@@ -594,6 +621,7 @@ begin
   if Assigned(TargetProc) and Assigned(InterceptProc) then
   begin
 {$IFDEF BuildThreadSafe }
+    RTID := nil;
     if OpenThreadExist then
     begin
       RTID := TThreadsListID.Create;
@@ -609,7 +637,6 @@ begin
     begin
       ResumeSuspendedThreads(RTID);
       RTID.Free;
-      RTID := nil;
     end;
 {$ENDIF !BuildThreadSafe}
   end;
@@ -629,6 +656,7 @@ begin
   if Assigned(Trampoline) then
   begin
 {$IFDEF BuildThreadSafe }
+    RTID := nil;
     if OpenThreadExist then
     begin
       RTID := TThreadsListID.Create;
@@ -639,7 +667,8 @@ begin
     PSave := PSaveData(Q);
     Dec(PByte(PSave), SizeOf(TSaveData));
     P := PSave^.D2;
-    Dec(P, SizeOfJmp + (Byte(Byte(not PSave^.Size32) and Byte(CPUX = CPUX64)) * SizeOf(Pointer)));
+    Dec(P, SizeOfJmp + (Byte(Byte(not PSave^.Size32) and Byte(CPUX = CPUX64)) *
+      SizeOf(Pointer)));
     Sb := PSave^.Sb;
     OrgProcAccess := SetMemPermission(P, Sb, PAGE_EXECUTE_READWRITE);
     CopyInstruction(Q^, P^, Sb);
@@ -650,15 +679,15 @@ begin
     begin
       ResumeSuspendedThreads(RTID);
       RTID.Free;
-      RTID := nil;
     end;
 {$ENDIF !BuildThreadSafe}
   end;
 end;
 
 {$IFDEF BuildThreadSafe }
-// ----------------------------------------------------------------------------------------------------------------------
+{ ----------------------------------------------------- }
 { TThreadsListID }
+{ ----------------------------------------------------- }
 
 constructor TThreadsListID.Create;
 begin
@@ -689,7 +718,7 @@ begin
 
   { Calculate the delta position between the memory that will
     hold the value and the pointer value (FPointer). }
-  Delta := FCount * SizeOf(DWORD);
+  Delta := FCount shl 2; // FCount * SizeOf(DWORD);
 
   if Delta <> 0 then
     ReallocMem(FPointer, Delta + SizeOf(DWORD));
@@ -710,7 +739,8 @@ begin
 
   Delta := Index shl 2; // Index * SizeOf(DWORD) ;
 
-  if (Delta >= 0) and (Delta < FSize) and (Index >= 0) and (Index <= FCount) then
+  // if (Delta >= 0) and (Delta < FSize) and (Index >= 0) and (Index <= FCount) then
+  if (Delta < FSize) and (Index <= FCount) then
   begin
     { Not out of range ! }
     Inc(PByte(FPointer), Delta);
