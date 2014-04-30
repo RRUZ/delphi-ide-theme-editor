@@ -43,7 +43,10 @@ uses
   ImgList,
   CommCtrl,
   JclDebug,
+  PngImage,
   Colorizer.Utils,
+  CaptionedDockTree,
+  GraphUtil,
   DDetours;
 
 
@@ -54,12 +57,13 @@ type
  TWinControlClass      = class(TWinControl);
  TCustomPanelClass     = class(TCustomPanel);
  TCustomStatusBarClass = class(TCustomStatusBar);
+ TDockCaptionDrawerClass = class(TDockCaptionDrawer);
 var
   TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
-
+  Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
   FGutterBkColor : TColor = clNone;
 
 type
@@ -431,6 +435,271 @@ end;
 
 
 
+function CustomDrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
+var
+  LColor: TColor;
+  LStyle: TCustomStyleServices;
+  LDetails: TThemedElementDetails;
+
+  procedure DrawIcon;
+  var
+    FormBitmap: TBitmap;
+    DestBitmap: TBitmap;
+    ImageSize: Integer;
+    X, Y: Integer;
+  begin
+    if (State.Icon <> nil) and (State.Icon.HandleAllocated) then
+    begin
+      if Self.DockCaptionOrientation = dcoHorizontal then
+      begin
+        ImageSize := CaptionRect.Bottom - CaptionRect.Top - 3;
+        X := CaptionRect.Left;
+        Y := CaptionRect.Top + 2;
+      end
+      else
+      begin
+        ImageSize := CaptionRect.Right - CaptionRect.Left - 3;
+        X := CaptionRect.Left + 1;
+        Y := CaptionRect.Top;
+      end;
+
+      FormBitmap := nil;
+      DestBitmap := TBitmap.Create;
+      try
+        FormBitmap := TBitmap.Create;
+        DestBitmap.Width :=  ImageSize;
+        DestBitmap.Height := ImageSize;
+        DestBitmap.Canvas.Brush.Color := clFuchsia;
+        DestBitmap.Canvas.FillRect(Rect(0, 0, DestBitmap.Width, DestBitmap.Height));
+        FormBitmap.Width := State.Icon.Width;
+        FormBitmap.Height := State.Icon.Height;
+        FormBitmap.Canvas.Draw(0, 0, State.Icon);
+        ScaleImage(FormBitmap, DestBitmap, DestBitmap.Width / FormBitmap.Width);
+
+        DestBitmap.TransparentColor := DestBitmap.Canvas.Pixels[0, DestBitmap.Height - 1];
+        DestBitmap.Transparent := True;
+
+        Canvas.Draw(X, Y, DestBitmap);
+      finally
+        FormBitmap.Free;
+        DestBitmap.Free;
+      end;
+
+      if Self.DockCaptionOrientation = dcoHorizontal then
+        CaptionRect.Left := CaptionRect.Left + 6 + ImageSize
+      else
+        CaptionRect.Top := CaptionRect.Top + 6 + ImageSize;
+    end;
+  end;
+
+  function CalcButtonSize(
+    const CaptionRect: TRect): Integer;
+  const
+    cButtonBuffer = 8;
+  begin
+    if Self.DockCaptionOrientation = dcoHorizontal then
+      Result := CaptionRect.Bottom - CaptionRect.Top - cButtonBuffer
+    else
+      Result := CaptionRect.Right - CaptionRect.Left - cButtonBuffer;
+  end;
+
+  function GetCloseRect(const CaptionRect: TRect): TRect;
+  const
+    cSideBuffer = 4;
+  var
+    CloseSize: Integer;
+  begin
+    CloseSize := CalcButtonSize(CaptionRect);
+    if Self.DockCaptionOrientation = dcoHorizontal then
+    begin
+      Result.Left := CaptionRect.Right - CloseSize - cSideBuffer;
+      Result.Top := CaptionRect.Top + ((CaptionRect.Bottom - CaptionRect.Top) - CloseSize) div 2;
+    end
+    else
+    begin
+      Result.Left := CaptionRect.Left + ((CaptionRect.Right - CaptionRect.Left) - CloseSize) div 2;
+      Result.Top := CaptionRect.Top + 2 * cSideBuffer;
+    end;
+    Result.Right := Result.Left + CloseSize;
+    Result.Bottom := Result.Top + CloseSize;
+  end;
+
+  function GetPinRect(const CaptionRect: TRect): TRect;
+  const
+    cSideBuffer = 4;
+  var
+    PinSize: Integer;
+  begin
+    PinSize := CalcButtonSize(CaptionRect);
+    if Self.DockCaptionOrientation = dcoHorizontal then
+    begin
+      Result.Left := CaptionRect.Right - 2*PinSize - 2*cSideBuffer;
+      Result.Top := CaptionRect.Top + ((CaptionRect.Bottom - CaptionRect.Top) - PinSize) div 2;
+    end
+    else
+    begin
+      Result.Left := CaptionRect.Left + ((CaptionRect.Right - CaptionRect.Left) - PinSize) div 2;
+      Result.Top := CaptionRect.Top + 2*cSideBuffer + 2*PinSize;
+    end;
+    Result.Right := Result.Left + PinSize + 2;
+    Result.Bottom := Result.Top + PinSize;
+  end;
+
+const
+  CHorzStates: array[Boolean] of TThemedPanel = (tpDockPanelHorzNormal, tpDockPanelHorzSelected);
+  CVertStates: array[Boolean] of TThemedPanel = (tpDockPanelVertNormal, tpDockPanelVertSelected);
+
+var
+  ShouldDrawClose: Boolean;
+  CloseRect, PinRect: TRect;
+  LPngImage : TPngImage;
+begin
+
+  if  (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+  begin
+    Result:=Trampoline_TDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State);
+    exit;
+  end;
+
+  LStyle := StyleServices;
+  LDetails := LStyle.GetElementDetails(CHorzStates[State.Focused]);
+
+  Canvas.Font.Color :=  TColorizerLocalSettings.ColorMap.FontColor;
+  if Self.DockCaptionOrientation = dcoHorizontal then
+  begin
+
+    Canvas.Pen.Width := 1;
+    Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+
+    CaptionRect.Top := CaptionRect.Top + 1;
+
+    if State.Focused then
+      LColor := TColorizerLocalSettings.ColorMap.Color
+    else
+      LColor := TColorizerLocalSettings.ColorMap.MenuColor;
+
+    Canvas.Brush.Color := LColor;
+
+    Canvas.FillRect(Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom));
+
+    Canvas.Pen.Color := GetShadowColor(Canvas.Pen.Color, -20);
+    with CaptionRect do
+      Canvas.Polyline([Point(Left + 2, Top),
+        Point(Right - 2, Top),
+        Point(Right, Top + 2),
+        Point(Right, Bottom - 2),
+        Point(Right - 2, Bottom),
+        Point(Left + 2, Bottom),
+        Point(Left, Bottom - 2),
+        Point(Left, Top + 2),
+        Point(Left + 3, Top)]);
+
+    CloseRect := GetCloseRect(CaptionRect);
+
+    if Self.DockCaptionPinButton <> dcpbNone then
+    begin
+      PinRect := GetPinRect(CaptionRect);
+
+      LPngImage:=TPNGImage.Create;
+      try
+        if Self.DockCaptionPinButton = dcpbUp then
+         LPngImage.LoadFromResourceName(HInstance, 'pin_dock_left')
+        else
+         LPngImage.LoadFromResourceName(HInstance, 'pin_dock');
+
+        Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
+      finally
+        LPngImage.free;
+      end;
+
+      CaptionRect.Right := PinRect.Right - 2;
+    end
+    else
+      CaptionRect.Right := CloseRect.Right - 2;
+
+    CaptionRect.Left := CaptionRect.Left + 6;
+    DrawIcon;
+    ShouldDrawClose := CloseRect.Left >= CaptionRect.Left;
+
+  end
+  else
+  begin
+    Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Top + 1);
+    Canvas.LineTo(CaptionRect.Right - 1, CaptionRect.Top + 1);
+
+    LDetails := LStyle.GetElementDetails(CVertStates[State.Focused]);
+
+    if State.Focused then
+      LColor := TColorizerLocalSettings.ColorMap.Color
+    else
+      LColor := TColorizerLocalSettings.ColorMap.MenuColor;
+
+    Canvas.Brush.Color := LColor;
+
+    Canvas.FillRect(Rect(CaptionRect.Left, CaptionRect.Top + 2,
+      CaptionRect.Right, CaptionRect.Bottom));
+
+    Canvas.Pen.Color := State.EndColor;
+    Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Bottom);
+    Canvas.LineTo(CaptionRect.Right - 1, CaptionRect.Bottom);
+
+    Canvas.Font.Orientation := 900;
+    CloseRect := GetCloseRect(CaptionRect);
+
+    if Self.DockCaptionPinButton <> dcpbNone then
+    begin
+      PinRect := GetPinRect(CaptionRect);
+      LPngImage:=TPNGImage.Create;
+      try
+        if Self.DockCaptionPinButton = dcpbUp then
+         LPngImage.LoadFromResourceName(HInstance, 'pin_dock_left')
+        else
+         LPngImage.LoadFromResourceName(HInstance, 'pin_dock');
+
+        Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
+      finally
+        LPngImage.free;
+      end;
+      CaptionRect.Top := PinRect.Bottom + 2;
+    end
+    else
+      CaptionRect.Top := CloseRect.Bottom + 2;
+
+    ShouldDrawClose   := CaptionRect.Top < CaptionRect.Bottom;
+    CaptionRect.Right := CaptionRect.Left + (CaptionRect.Bottom - CaptionRect.Top - 2);
+    CaptionRect.Top   := CaptionRect.Top + Canvas.TextWidth(State.Caption) + 2;
+
+    if CaptionRect.Top > CaptionRect.Bottom then
+      CaptionRect.Top := CaptionRect.Bottom;
+  end;
+
+  Canvas.Brush.Style := bsClear;
+  if State.Caption <> '' then
+  begin
+    if State.Focused then
+      Canvas.Font.Style := Canvas.Font.Style + [fsBold]
+    else
+      Canvas.Font.Style := Canvas.Font.Style - [fsBold];
+
+   if ShouldDrawClose then
+     CaptionRect.Right := CaptionRect.Right - (CloseRect.Right - CloseRect.Left) - 4;
+
+    Canvas.TextRect(CaptionRect, State.Caption,
+      [tfEndEllipsis, tfVerticalCenter, tfSingleLine]);
+  end;
+
+  if ShouldDrawClose then
+  begin
+    LPngImage:=TPNGImage.Create;
+    try
+      LPngImage.LoadFromResourceName(HInstance, 'close_dock');
+      Canvas.Draw(CloseRect.Left, CloseRect.Top, LPngImage);
+    finally
+      LPngImage.free;
+    end;
+  end;
+end;
+
 //const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
 procedure InstallColorizerHooks;
@@ -439,6 +708,7 @@ begin
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
+  Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
 end;
 
 procedure RemoveColorizerHooks;
@@ -451,7 +721,8 @@ begin
     InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
   if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then
     InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
-
+  if Assigned(Trampoline_TDockCaptionDrawer_DrawDockCaption) then
+    InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);
 end;
 
 {
@@ -485,8 +756,5 @@ initialization
 
 finalization
   RemoveColorizerHooks;
-
-
-
 end.
 

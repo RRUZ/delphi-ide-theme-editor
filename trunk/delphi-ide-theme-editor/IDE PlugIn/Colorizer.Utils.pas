@@ -567,7 +567,7 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
     end
     else
-    if AComponent  is TForm then   //check for descendent classes
+    if AComponent is TForm then
     begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
@@ -830,8 +830,8 @@ begin
     with TStatusBar(AComponent) do
     begin
        //theme is removed to allow paint TStatusBar
-        if not TColorizerLocalSettings.Settings.UseVCLStyles then
-       SetWindowTheme(TStatusBar(AComponent).Handle,'','');
+//        if not TColorizerLocalSettings.Settings.UseVCLStyles then
+//       SetWindowTheme(TStatusBar(AComponent).Handle,'','');
        //SizeGrip is removed because can't be painted
        SizeGrip:=False;
        Color := AColorMap.Color;

@@ -311,6 +311,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           460
           430)
@@ -424,7 +428,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 368
     Top = 200
     Bitmap = {
-      494C010107000800000210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800080210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
