@@ -25,13 +25,13 @@
 
 {
   * popup menu tool bars (ex :recent files) -> create hook using colormap
-  * TIDEGradientTabSet border lines   -->  hook Pen.Color  ?
+  * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * TClosableTabScroller background
   * TRefactoringTree
-  * Docked forms title (active/inactive).
 
   * restore support for Delphi 2007
 
+  * Docked forms title (active/inactive). done
   * TStatusBar separators   done
   * TTabSet background - done
   * gutter code editor   - done:
@@ -94,6 +94,7 @@ implementation
 
 {$R DelphiIDEColorizer.res}
 {$R Gutter.res}
+{$R DICimages.res}
 
 uses
  {$IF CompilerVersion >= 23}

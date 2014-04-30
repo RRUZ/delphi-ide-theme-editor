@@ -1,0 +1,3 @@
+close_dock RCDATA  "close_dock.png"
+pin_dock   RCDATA  "pin_dock.png"
+pin_dock_left   RCDATA  "pin_dock_left.png"
