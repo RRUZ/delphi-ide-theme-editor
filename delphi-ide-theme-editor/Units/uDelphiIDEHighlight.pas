@@ -239,7 +239,7 @@ function  GetDefaultBackgroundValue(DelphiVersion:TDelphiVersions;Element:TIDEHi
 procedure FillListAvailableElements(DelphiVersion:TDelphiVersions;List: TStrings);
 procedure FillListIDEThemesImport(List: TStrings);
 
-procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);
+procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions;LoadDefaults : Boolean = True);
 procedure ImportDelphiIDEThemeFromRegExt(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);//internal use only
 function  ImportDelphiIDEThemeToRegistry(DelphiVersion:TDelphiVersions;const ATheme : TIDETheme):Boolean;
 
@@ -427,7 +427,7 @@ begin
 
       for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
       begin
-        ElementName:=GetEnumName(TypeInfo(TIDEHighlightElements),integer(Element));
+        ElementName:=GetEnumName(TypeInfo(TIDEHighlightElements), integer(Element));
         // /DelphiIDETheme/AdditionalSearchMatchHighlight/Bold
         xPathElement:=Format('//DelphiIDETheme/%s/',[ElementName]);
         ATheme[Element].Bold     :=CompareText(XmlDocIDETheme.selectSingleNode(Format('%s%s',[xPathElement,'Bold'])).text,'True')=0;
@@ -599,12 +599,13 @@ begin
 end;
 
 
-procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions);
+procedure ImportDelphiIDEThemeFromReg(var ATheme : TIDETheme;DelphiVersion:TDelphiVersions;LoadDefaults : Boolean = True);
 var
  Element      : TIDEHighlightElements;
  DefaultTheme : TIDETheme;
 begin
-    LoadThemeFromXMLFile(DefaultTheme,ExtractFilePath(ParamStr(0))+'default\Default.theme.xml');
+    if LoadDefaults then
+      LoadThemeFromXMLFile(DefaultTheme,ExtractFilePath(ParamStr(0))+'default\Default.theme.xml');
 
     for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
     begin
@@ -621,6 +622,7 @@ begin
       else
        //if the values are not present in the current theme  then
       //load the default values from default theme template (based on XE)
+      if LoadDefaults then
       begin
         ATheme[Element].Bold              :=DefaultTheme[Element].Bold;
         ATheme[Element].Italic            :=DefaultTheme[Element].Italic;
@@ -629,15 +631,6 @@ begin
         ATheme[Element].DefaultBackground :=DefaultTheme[Element].DefaultBackground;
         ATheme[Element].ForegroundColorNew:=DefaultTheme[Element].ForegroundColorNew;
         ATheme[Element].BackgroundColorNew:=DefaultTheme[Element].BackgroundColorNew;
-        {
-        ATheme[Element].Bold     :=false;
-        ATheme[Element].Italic   :=false;
-        ATheme[Element].Underline:=false;
-        ATheme[Element].DefaultForeground:=false;
-        ATheme[Element].DefaultBackground:=false;
-        ATheme[Element].ForegroundColorNew:='clDefault';
-        ATheme[Element].BackgroundColorNew:='clDefault';
-        }
       end;
     end;
 end;

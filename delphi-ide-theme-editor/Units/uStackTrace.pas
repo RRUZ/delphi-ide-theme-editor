@@ -22,7 +22,7 @@ unit uStackTrace;
 
 interface
 
-{.$DEFINE ENABLE_STACKTRACE}
+{.DEFINE ENABLE_STACKTRACE}
 
 {$IFDEF ENABLE_STACKTRACE}
 uses
