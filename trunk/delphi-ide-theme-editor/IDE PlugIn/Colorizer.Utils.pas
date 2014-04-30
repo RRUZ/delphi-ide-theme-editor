@@ -264,28 +264,6 @@ end;
 
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);
 begin
-{
-+    property ShadowColor default cl3DDkShadow;
-+    property Color default clBtnFace;
-    property DisabledColor default clGray;
-    property DisabledFontColor default clGrayText;
-    property DisabledFontShadow default clBtnHighlight;
-    property FontColor default clWindowText;
-+    property HighlightColor;
-    property HotColor default clDefault;
-    property HotFontColor default clDefault;
-    property MenuColor default clWindow;
-+    property FrameTopLeftInner default clWhite;
-+    property FrameTopLeftOuter default cXPFrameOuter;
-+    property FrameBottomRightInner default clWhite;
-+    property FrameBottomRightOuter default cXPFrameOuter;
-+    property BtnFrameColor default cXPBtnFrameColor;
-+    property BtnSelectedColor default clWhite;
-+    property BtnSelectedFont default clWindowText;
-+    property SelectedColor default cXPSelectedColor;
-+    property SelectedFontColor default clBlack;
-    property UnusedColor;
-}
   AColorMap.Color                 :=Color;
   AColorMap.ShadowColor           :=GetShadowColor(Color);
 
@@ -308,19 +286,21 @@ end;
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);
 begin
   AColorMap.Color                 :=Style.GetStyleColor(scPanel);
-  AColorMap.ShadowColor           :=GetShadowColor(AColorMap.Color);
+  AColorMap.ShadowColor           :=StyleServices.GetSystemColor(clBtnShadow);
   AColorMap.FontColor             :=Style.GetStyleFontColor(sfButtonTextNormal);
 
-  AColorMap.MenuColor             :=AColorMap.Color;
-  AColorMap.HighlightColor        :=GetHighLightColor(AColorMap.MenuColor);
-  AColorMap.BtnSelectedColor      :=AColorMap.Color;
-  AColorMap.BtnSelectedFont       :=AColorMap.FontColor;
+  AColorMap.MenuColor             :=Style.GetStyleColor(scWindow);
+  AColorMap.HighlightColor        :=StyleServices.GetSystemColor(clHighlight);
+  AColorMap.BtnSelectedColor      :=Style.GetStyleColor(scButtonHot);
 
-  AColorMap.SelectedColor         :=GetHighLightColor(AColorMap.Color,50);
-  AColorMap.SelectedFontColor     :=AColorMap.FontColor;
+  AColorMap.BtnSelectedFont       :=StyleServices.GetSystemColor(clHighlightText);
 
-  AColorMap.BtnFrameColor         :=GetShadowColor(AColorMap.Color);
-  AColorMap.FrameTopLeftInner     :=GetShadowColor(AColorMap.Color);
+  AColorMap.SelectedColor         :=StyleServices.GetSystemColor(clHighlight);
+  AColorMap.SelectedFontColor     :=StyleServices.GetSystemColor(clHighlightText);
+
+  AColorMap.BtnFrameColor         :=StyleServices.GetSystemColor(clBtnShadow);
+
+  AColorMap.FrameTopLeftInner     :=StyleServices.GetSystemColor(clBtnShadow);
   AColorMap.FrameTopLeftOuter     :=AColorMap.FrameTopLeftInner;
   AColorMap.FrameBottomRightInner :=AColorMap.FrameTopLeftInner;
   AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;
@@ -403,14 +383,11 @@ begin
 end;
 
 
-
 Procedure GenIntransparentBitmap(bmp, Intrans: TBitmap);
 begin
   Intrans.Assign(bmp);
   Intrans.PixelFormat := pf24bit;
 end;
-
-
 
 procedure ImageListReplace(LImages : TImageList;Index: Integer;const ResourceName: String);
 {$IFDEF DELPHI2009_UP}
@@ -657,10 +634,11 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
     end
     else
-    if SameText(AComponent.ClassName, 'TVirtualStringTree') or SameText(AComponent.ClassName, 'TRefactoringTree') then
+    if (SameText(AComponent.ClassName, 'TVirtualStringTree') or SameText(AComponent.ClassName, 'TRefactoringTree'))  then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+        SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+        SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+
       //SetRttiPropertyValue(AComponent,'TreeLineColor',AColorMap.FontColor);
         //  TVTColors
         //	__fastcall TVTColors(TBaseVirtualTree* AOwner);

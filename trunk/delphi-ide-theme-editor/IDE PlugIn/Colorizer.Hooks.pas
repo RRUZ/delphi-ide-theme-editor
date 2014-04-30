@@ -35,6 +35,8 @@ uses
   Dialogs,
   Windows,
   Classes,
+  uDelphiVersions,
+  uDelphiIDEHighlight,
   SysUtils,
   ComCtrls,
   Graphics,
@@ -43,6 +45,8 @@ uses
   JclDebug,
   Colorizer.Utils,
   DDetours;
+
+
 
 implementation
 
@@ -56,6 +60,7 @@ var
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
 
+  FGutterBkColor : TColor = clNone;
 
 type
   TCustomStatusBarHelper = class helper for TCustomStatusBar
@@ -184,6 +189,34 @@ begin
   end;
 end;
 
+function GetGutterBkColor : TColor;
+var
+  ATheme : TIDETheme;
+  sColor : string;
+begin
+  if FGutterBkColor<>clNone then
+   Result:=FGutterBkColor
+  else
+  begin
+    if Assigned(TColorizerLocalSettings.IDEData) then
+    begin
+      ImportDelphiIDEThemeFromReg(ATheme, TColorizerLocalSettings.IDEData.Version, False);
+      sColor:=ATheme[LineNumber].BackgroundColorNew;
+      try
+        Result:=StringToColor(sColor);
+      except
+        Result:=clBtnFace;
+      end;
+      FGutterBkColor:=Result;
+    end
+    else
+    if Assigned(TColorizerLocalSettings.ColorMap) then
+      Result:=TColorizerLocalSettings.ColorMap.Color
+    else
+      Result:=clBtnFace
+  end;
+end;
+
 
 procedure  CustomFillRect(Self: TCanvas;const Rect: TRect);
 var
@@ -192,7 +225,10 @@ begin
    if Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
    begin
      sCaller := ProcByLevel(1);
-     if SameText(sCaller, 'EditorControl.TCustomEditControl.EVFillGutter') or SameText(sCaller, 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap') then
+     if SameText(sCaller, 'EditorControl.TCustomEditControl.EVFillGutter') then
+        Self.Brush.Color:=GetGutterBkColor
+     else
+      if SameText(sCaller, 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap') then
         Self.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
    end;
    Trampoline_TCanvas_FillRect(Self, Rect);
@@ -202,10 +238,12 @@ end;
 
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
-  Result:=False;
-  if not Assigned(Control) then exit;
-  if csDesigning in Control.ComponentState then  exit;
-
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
+  begin
+    Result:=False;
+    if not Assigned(Control) then exit;
+    if csDesigning in Control.ComponentState then  exit;
+  end;
   Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
 end;
 
@@ -241,7 +279,7 @@ var
       const
         AlignStyles: array [TAlignment] of Integer = (DT_LEFT, DT_RIGHT, DT_CENTER);
       var
-        R, R1: TRect;
+        R : TRect;
         Res, Count, I: Integer;
         Idx, Flags: Cardinal;
         Details: TThemedElementDetails;
@@ -254,10 +292,7 @@ var
 
         Details := StyleServices.GetElementDetails(tsStatusRoot);
         //StyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, Self.Width, Self.Height));
-        if SendMessage(Self.Handle, SB_ISSIMPLE, 0, 0) > 0 then
-          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color
-        else
-          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.HighlightColor;
+        Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
         Canvas.FillRect(Rect(0, 0, Self.Width, Self.Height));
 
 
@@ -298,7 +333,7 @@ var
             if IsRectEmpty(R) then
               Exit;
 
-            Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+            Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.HighlightColor;
             Canvas.FillRect(R);
 
 //            if I = Count - 1 then
@@ -353,7 +388,11 @@ var
       end;
 
 begin
-    if not Assigned(TColorizerLocalSettings.ColorMap) then  Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
+    if (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+    begin
+     Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
+     exit;
+    end;
 
     Self.DoUpdatePanels(False, True);
 
@@ -391,19 +430,18 @@ begin
 end;
 
 
+
 //const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
-procedure InstallHooks;
+procedure InstallColorizerHooks;
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
-  if TColorizerLocalSettings.Settings.UseVCLStyles then
-   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
-  if not TColorizerLocalSettings.Settings.UseVCLStyles then
-   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
+  Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
+  Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
 end;
 
-procedure RemoveHooks;
+procedure RemoveColorizerHooks;
 begin
   if Assigned(TrampolineCustomImageList_DoDraw) then
     InterceptRemove(@TrampolineCustomImageList_DoDraw);
@@ -442,10 +480,13 @@ end;
     002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
 }
 
-
 initialization
- InstallHooks;
+  InstallColorizerHooks;
+
 finalization
- RemoveHooks;
+  RemoveColorizerHooks;
+
+
+
 end.
 

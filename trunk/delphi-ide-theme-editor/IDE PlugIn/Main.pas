@@ -95,8 +95,6 @@ implementation
 {$R DelphiIDEColorizer.res}
 {$R Gutter.res}
 
-{.$DEFINE USE_DUMP_TIMER}
-
 uses
  {$IF CompilerVersion >= 23}
  Vcl.Styles,
@@ -255,41 +253,18 @@ var
   s : string;
 {$IFEND}
 begin
-  if BorlandIDEServices <> nil then
-  begin
-      LServices := (BorlandIDEServices as INTAServices);
-      if LServices <> nil then
-      begin
-       RegisterColorizerAddinOptions;
-       {$IFDEF DEBUG_MODE}
-       lcomp:= TStringList.Create;
-       {$ENDIF}
-        try
-          //DelphiTheme := TXPManifest.Create(nil);
-          //AColorMap:=TTwilightColorMap.Create(nil);  usar para ver color de fuentes
-          //AColorMap:=TStandardColorMap.Create(nil);
+  try
+    if BorlandIDEServices <> nil then
+    begin
+        LServices := (BorlandIDEServices as INTAServices);
+        if LServices <> nil then
+        begin
+          RegisterColorizerAddinOptions;
           TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
-          //AColorMap:=TColorXPColorMap.Create(Application);
-          //TColorizerLocalSettings.GlobalColorMap:=AColorMap;
-
-         //  TColorizerLocalSettings.ColorMap.FontColor:=clBlack;
-
-          //GenerateColorMap(AColorMap, clWebKhaki);
-          //AColorMap:=TThemedColorMap.Create(nil);
-          //AColorMap.Color:=clWebLemonChiffon;
-          //AColorMap.Color:=clDkGray;
-          //AColorMap.Color:=clWebDarkSeaGreen;
-          //AColorMap.Color:=clWebSteelBlue;
-          //ShowMessage(GetBplLocation());
-          //ShowMessage( ActionBarStyles.Text);
-
-          //TColorizerLocalSettings.ActionBarStyle:=ColorXPStyle;
           LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
-          //TColorizerLocalSettings.GlobalSettings:=Settings;
           {$IF CompilerVersion >= 23}
           if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
           begin
-            //StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
             RegisterVClStylesFiles();
             found:=false;
             for s in TStyleManager.StyleNames do
@@ -309,13 +284,13 @@ begin
           end;
           {$IFEND}
           RefreshIDETheme();
-        finally
-          {$IFDEF DEBUG_MODE}
-           //lcomp.SaveToFile('C:\Users\Public\Documents\RAD Studio\Projects\2010\pkgDelphiWithTheme\Components.txt');
-           lcomp.Free;
-          {$ENDIF}
         end;
-      end;
+    end;
+  except
+    on E: exception do
+    begin
+      ShowMessage(Format('%s : Error on InitColorizer %s %s Trace %s', [sMenuItemCaption, E.message, sLineBreak, E.StackTrace]));
+    end;
   end;
 end;
 

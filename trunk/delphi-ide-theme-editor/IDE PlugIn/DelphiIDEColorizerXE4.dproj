@@ -90,6 +90,7 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <DCC_BplOutput>.\</DCC_BplOutput>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
         <VerInfo_MajorVer>1</VerInfo_MajorVer>
@@ -143,6 +144,8 @@
         <DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
         <DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas"/>
+        <DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
+        <DCCReference Include="..\Units\uStackTrace.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -168,7 +171,7 @@
                     <VersionInfo Name="MajorVer">0</VersionInfo>
                     <VersionInfo Name="MinorVer">1</VersionInfo>
                     <VersionInfo Name="Release">2</VersionInfo>
-                    <VersionInfo Name="Build">262</VersionInfo>
+                    <VersionInfo Name="Build">266</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -180,7 +183,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName"/>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">0.1.2.262</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">0.1.2.266</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright"/>
                     <VersionInfoKeys Name="LegalTrademarks"/>
@@ -194,7 +197,6 @@
                     <Excluded_Packages Name="$(BDSBIN)\bcbofficexp180.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k180.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp180.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\DelphiIDEColorizerXE4.bpl">Delphi IDE Colorizer</Excluded_Packages>
                 </Excluded_Packages>
                 <Source>
                     <Source Name="MainSource">DelphiIDEColorizerXE4.dpk</Source>
