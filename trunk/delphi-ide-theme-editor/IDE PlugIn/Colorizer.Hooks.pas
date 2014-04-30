@@ -54,13 +54,16 @@ uses
 implementation
 
 type
- TWinControlClass      = class(TWinControl);
- TCustomPanelClass     = class(TCustomPanel);
- TCustomStatusBarClass = class(TCustomStatusBar);
+ TWinControlClass        = class(TWinControl);
+ TCustomPanelClass       = class(TCustomPanel);
+ TCustomStatusBarClass   = class(TCustomStatusBar);
  TDockCaptionDrawerClass = class(TDockCaptionDrawer);
+
 var
   TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
+  //Trampoline_TCanvas_PolyLine          : procedure(Self: TCanvas;const Points: array of TPoint) = nil;
+  //Trampoline_TCanvas_LineTo            : procedure(Self: TCanvas;X, Y: Integer) = nil;
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
@@ -238,7 +241,27 @@ begin
    Trampoline_TCanvas_FillRect(Self, Rect);
 end;
 
+//procedure CustomPolyLine(Self: TCanvas;const Points: array of TPoint);
+//var
+//  sCaller : string;
+//begin
+//   sCaller := ProcByLevel(1);
+//   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\PolyLine.txt', Format('%s %s',[sCaller, SLineBreak]));
+//   Trampoline_TCanvas_PolyLine(Self, Points);
+//end;
 
+//procedure CustomLineTo(Self: TCanvas;X, Y: Integer);
+//var
+//  sCaller : string;
+//begin
+//   //if Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Pen.Color=clBtnFace) then
+//   begin
+//    sCaller := ProcByLevel(1);
+//    if sCaller<>'' then
+//     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\LineTo.txt', Format('%s %s %s',[sCaller, IntToHex(Self.Pen.Color, 8), SLineBreak]));
+//   end;
+//    Trampoline_TCanvas_LineTo(Self, X, Y);
+//end;
 
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
@@ -706,6 +729,8 @@ procedure InstallColorizerHooks;
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
+  //Trampoline_TCanvas_PolyLine     :=InterceptCreate(@TCanvas.PolyLine, @CustomPolyLine);
+  //Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @CustomLineTo);
   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
@@ -717,6 +742,10 @@ begin
     InterceptRemove(@TrampolineCustomImageList_DoDraw);
   if Assigned(Trampoline_TCanvas_FillRect) then
     InterceptRemove(@Trampoline_TCanvas_FillRect);
+//  if Assigned(Trampoline_TCanvas_PolyLine) then
+//    InterceptRemove(@Trampoline_TCanvas_PolyLine);
+//  if Assigned(Trampoline_TCanvas_LineTo) then
+//    InterceptRemove(@Trampoline_TCanvas_LineTo);
   if Assigned(Trampoline_TStyleEngine_HandleMessage) then
     InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
   if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then

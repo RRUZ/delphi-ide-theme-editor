@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiColorizerTheme modified="2011-12-12 00:03:59" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
+<DelphiColorizerTheme modified="2014-04-30 07:00:41" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
   <ColorMap>
     <BtnFrameColor>$00CACACA</BtnFrameColor>
     <BtnSelectedColor>clWhite</BtnSelectedColor>
-    <BtnSelectedFont>clWindowText</BtnSelectedFont>
+    <BtnSelectedFont>clBlack</BtnSelectedFont>
     <Color>clWhite</Color>
     <DisabledColor>clGray</DisabledColor>
     <DisabledFontColor>clGrayText</DisabledFontColor>
     <DisabledFontShadow>clBtnHighlight</DisabledFontShadow>
-    <FontColor>clWindowText</FontColor>
+    <FontColor>clBlack</FontColor>
     <FrameBottomRightInner>$00CACACA</FrameBottomRightInner>
     <FrameBottomRightOuter>$00CACACA</FrameBottomRightOuter>
     <FrameTopLeftInner>$00CACACA</FrameTopLeftInner>
@@ -18,7 +18,7 @@
     <HotFontColor>clDefault</HotFontColor>
     <MenuColor>clWhite</MenuColor>
     <SelectedColor>clWhite</SelectedColor>
-    <SelectedFontColor>clWindowText</SelectedFontColor>
+    <SelectedFontColor>clBlack</SelectedFontColor>
     <ShadowColor>$00CACACA</ShadowColor>
     <UnusedColor>clWhite</UnusedColor>
   </ColorMap>

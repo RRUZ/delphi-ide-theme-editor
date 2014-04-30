@@ -71,6 +71,16 @@ type
     TwilightColorMap: TTwilightColorMap;
     StandardColorMap: TStandardColorMap;
     Image2: TImage;
+    XPColorMap1: TXPColorMap;
+    Button1: TButton;
+    ColorBoxBase: TColorBox;
+    Label3: TLabel;
+    TabSheet1: TTabSheet;
+    ListBoxFormsHooked: TListBox;
+    EditFormClass: TEdit;
+    Label8: TLabel;
+    ButtonAddFormClass: TButton;
+    ButtonRemoveFormClass: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -84,16 +94,17 @@ type
     procedure BtnApplyClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
-    procedure CheckBoxGutterIconsClick(Sender: TObject);
-    procedure CheckBoxEnabledClick(Sender: TObject);
     procedure CbStylesChange(Sender: TObject);
     procedure CheckBoxUseVClStylesClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure ColorBoxBaseChange(Sender: TObject);
+    procedure ColorBoxBaseGetColors(Sender: TCustomColorBox; Items: TStrings);
+    procedure ButtonAddFormClassClick(Sender: TObject);
+    procedure ButtonRemoveFormClassClick(Sender: TObject);
   private
     { Private declarations }
     FPreview:TVclStylesPreview;
     FSettings: TSettings;
-    FShowWarning : Boolean;
     procedure LoadColorElements;
     procedure LoadThemes;
     //procedure LoadProperties(lType: TRttiType);
@@ -103,6 +114,7 @@ type
     procedure LoadVClStylesList;
     procedure GenerateIDEThemes(const Path : string);
     procedure DrawSeletedVCLStyle;
+    procedure DrawPalette;
   public
     procedure Init;
   end;
@@ -177,19 +189,13 @@ TODO
   Enable / disable
 }
 
-
-//procedure TFormIDEColorizerSettings.BtnSelDirClick(Sender: TObject);
-//var
-//  Directory: string;
-//begin
-//  Directory:='';
-//  if SysUtils.DirectoryExists(EditVCLStylesPath.Text) then
-//    Directory := EditVCLStylesPath.Text;
-//
-//  if SelectDirectory('Select directory',Directory,Directory,[sdNewFolder, sdNewUI, sdShowEdit, sdValidateDir, sdShowShares], nil) then
-//    EditVCLStylesPath.Text := Directory;
-//end;
-
+function GetTextColor(const BackgroundColor: TColor): TColor;
+begin
+  if (GetRValue(BackgroundColor) + GetGValue(BackgroundColor) + GetBValue(BackgroundColor)) > 384 then
+    result := clBlack
+  else
+    result := clWhite;
+end;
 
 procedure TFormIDEColorizerSettings.BtnSelForColorClick(Sender: TObject);
 Var
@@ -225,7 +231,10 @@ end;
 procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
    sMessage, StyleFile : string;
+   FShowWarning : Boolean;
 begin
+  FShowWarning:=(CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter);
+
   if FShowWarning then
     sMessage:= Format('Do you want apply the changes?'+sLineBreak+
     'Note : some changes will only take effect the next time the IDE is started', [])
@@ -247,6 +256,7 @@ begin
     FSettings.VCLStyleName :=CbStyles.Text;
     WriteSettings(FSettings, GetSettingsFolder);
 
+    ListBoxFormsHooked.Items.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
     Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
 
     {$IF CompilerVersion >= 23}
@@ -288,35 +298,63 @@ end;
 //  end;
 //end;
 
+procedure TFormIDEColorizerSettings.Button1Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ if ColorDialog1.Execute(Handle) then
+ begin
+   LColor:=ColorDialog1.Color;
+   if LColor<>clNone then
+    ColorBoxBase.Selected:=LColor;
+ end;
+end;
+
 procedure TFormIDEColorizerSettings.Button3Click(Sender: TObject);
 Var
-  FileName : string;
+  ThemeName, FileName : string;
 begin
-   if Trim(cbThemeName.Text)='' then
+   ThemeName:= Trim(cbThemeName.Text);
+   if ThemeName='' then
    begin
      MsgBox('The theme name is empty');
      exit;
    end;
 
-//   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'Twilight.idetheme';
-//   SaveColorMapToXmlFile(TwilightColorMap, FileName);
-//
-//   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'XPColorMap.idetheme';
-//   SaveColorMapToXmlFile(XPColorMap, FileName);
-//
-//   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'StandardColorMap.idetheme';
-//   SaveColorMapToXmlFile(StandardColorMap, FileName);
-
-
    FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+Trim(cbThemeName.Text)+'.idetheme';
-   SaveColorMapToXmlFile(XPColorMap,FileName);
+   if FileExists(FileName) then
+      if Application.MessageBox(PChar(Format('The theme %s already exists, Do you want overwritte the theme ?',[ThemeName])), 'Comfirmation',
+        MB_YESNO + MB_ICONQUESTION) = idNo then
+        exit;
+
+
+   SaveColorMapToXmlFile(XPColorMap, FileName);
    if FileExists(FileName) then
    begin
-    MsgBox(Format('The theme %s was saved',[cbThemeName.Text]));
+    MsgBox(Format('The theme %s was saved',[ThemeName]));
     LoadThemes;
+    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(ThemeName);
    end;
 end;
 
+
+procedure TFormIDEColorizerSettings.ButtonAddFormClassClick(Sender: TObject);
+var
+ sFormClass : string;
+begin
+ sFormClass:=Trim(EditFormClass.Text);
+ if (sFormClass<>'') then
+   if ListBoxFormsHooked.Items.IndexOf(sFormClass)>=0 then
+     ShowMessage(Format('The %s form is already included in the list', [sFormClass]))
+   else
+     ListBoxFormsHooked.Items.Add(sFormClass);
+end;
+
+procedure TFormIDEColorizerSettings.ButtonRemoveFormClassClick(Sender: TObject);
+begin
+ if ListBoxFormsHooked.ItemIndex<>-1 then
+   ListBoxFormsHooked.Items.Delete(ListBoxFormsHooked.ItemIndex);
+end;
 
 procedure TFormIDEColorizerSettings.CbClrElementChange(Sender: TObject);
 Var
@@ -326,8 +364,6 @@ begin
  PropName:=cbColorElements.Text;
  AColor:=CbClrElement.Selected;
  SetOrdProp(XPColorMap, PropName, AColor);
- if CheckBoxAutoColor.Checked then
-   GenerateColorMap(XPColorMap, XPColorMap.Color);
 end;
 
 procedure TFormIDEColorizerSettings.cbColorElementsChange(Sender: TObject);
@@ -336,7 +372,7 @@ Var
  AColor   : TColor;
 begin
  PropName:=cbColorElements.Text;
- AColor:= GetOrdProp(XPColorMap,PropName);
+ AColor:= GetOrdProp(XPColorMap, PropName);
  CbClrElement.Selected:=AColor;
 end;
 
@@ -348,56 +384,14 @@ end;
 procedure TFormIDEColorizerSettings.cbThemeNameChange(Sender: TObject);
 Var
   FileName : string;
-  Bmp      : TBitmap;
 begin
   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+cbThemeName.Text+'.idetheme';
   if FileExists(FileName)  then
   begin
-    LoadColorMapFromXmlFile(XPColorMap,FileName);
+    LoadColorMapFromXmlFile(XPColorMap, FileName);
     cbColorElementsChange(nil);
-
-    Bmp:=TBitmap.Create;
-    try
-
-     CreateArrayBitmap(275,25,[
-      XPColorMap.ShadowColor,
-      XPColorMap.Color,
-      XPColorMap.DisabledColor,
-      XPColorMap.DisabledFontColor,
-      XPColorMap.DisabledFontShadow,
-      XPColorMap.FontColor,
-      XPColorMap.HighlightColor,
-      XPColorMap.HotColor,
-      XPColorMap.HotFontColor,
-      XPColorMap.MenuColor,
-      XPColorMap.FrameTopLeftInner,
-      XPColorMap.FrameTopLeftOuter,
-      XPColorMap.FrameBottomRightInner,
-      XPColorMap.FrameBottomRightOuter,
-      XPColorMap.BtnFrameColor,
-      XPColorMap.BtnSelectedColor,
-      XPColorMap.BtnSelectedFont,
-      XPColorMap.SelectedColor,
-      XPColorMap.SelectedFontColor,
-      XPColorMap.UnusedColor
-      ], Bmp);
-     Image1.Picture.Assign(Bmp);
-    finally
-      Bmp.Free;
-    end;
-
-
+    DrawPalette;
   end;
-end;
-
-procedure TFormIDEColorizerSettings.CheckBoxEnabledClick(Sender: TObject);
-begin
- FShowWarning :=True;
-end;
-
-procedure TFormIDEColorizerSettings.CheckBoxGutterIconsClick(Sender: TObject);
-begin
- FShowWarning :=True;
 end;
 
 procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
@@ -405,9 +399,23 @@ begin
  LoadVClStylesList;
 end;
 
-procedure TFormIDEColorizerSettings.FormActivate(Sender: TObject);
+procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
 begin
-  //TabSheetVCLStyles.TabVisible:=TColorizerLocalSettings.IDEData.Version=TDelphiVersions.DelphiXE2;
+ if CheckBoxAutoColor.Checked then
+ begin
+   GenerateColorMap(XPColorMap, ColorBoxBase.Selected, GetTextColor(ColorBoxBase.Selected));
+   cbColorElementsChange(nil);
+   DrawPalette;
+ end;
+end;
+
+procedure TFormIDEColorizerSettings.ColorBoxBaseGetColors(
+  Sender: TCustomColorBox; Items: TStrings);
+Var
+ Item : TIdentMapEntry;
+begin
+  for Item in WebNamedColors do
+   Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]),TObject(Item.Value));
 end;
 
 procedure TFormIDEColorizerSettings.FormClose(Sender: TObject;
@@ -430,7 +438,6 @@ begin
   FPreview:=TVclStylesPreview.Create(Self);
   FPreview.Parent:=PanelPreview;
   FPreview.BoundsRect := PanelPreview.ClientRect;
-  FShowWarning:=False;
   FSettings:=TSettings.Create;
   //CheckBoxActivateDWM.Enabled:=DwmIsEnabled;
   {$IF CompilerVersion >= 23}
@@ -438,10 +445,45 @@ begin
   {$ELSE}
   TabSheetVCLStyles.TabVisible:=False;
   {$IFEND}
+  ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
 end;
 
 type
   TVclStylesPreviewClass = class(TVclStylesPreview);
+
+procedure TFormIDEColorizerSettings.DrawPalette;
+var
+  LBitMap : TBitmap;
+begin
+    LBitMap:=TBitmap.Create;
+    try
+     CreateArrayBitmap(275,25,[
+      XPColorMap.ShadowColor,
+      XPColorMap.Color,
+      XPColorMap.DisabledColor,
+      XPColorMap.DisabledFontColor,
+      XPColorMap.DisabledFontShadow,
+      XPColorMap.FontColor,
+      XPColorMap.HighlightColor,
+      XPColorMap.HotColor,
+      XPColorMap.HotFontColor,
+      XPColorMap.MenuColor,
+      XPColorMap.FrameTopLeftInner,
+      XPColorMap.FrameTopLeftOuter,
+      XPColorMap.FrameBottomRightInner,
+      XPColorMap.FrameBottomRightOuter,
+      XPColorMap.BtnFrameColor,
+      XPColorMap.BtnSelectedColor,
+      XPColorMap.BtnSelectedFont,
+      XPColorMap.SelectedColor,
+      XPColorMap.SelectedFontColor,
+      XPColorMap.UnusedColor
+      ], LBitMap);
+     Image1.Picture.Assign(LBitMap);
+    finally
+      LBitMap.Free;
+    end;
+end;
 
 procedure TFormIDEColorizerSettings.DrawSeletedVCLStyle;
 var
@@ -459,10 +501,6 @@ begin
    end;
 end;
 
-              //  porque no creo un clon del IDE?
-             //   obtener instancia form maoimn de bds (guardar en settins), util  pata iterar sobre menus y actionmanager
-                                    
-
 procedure TFormIDEColorizerSettings.FormDestroy(Sender: TObject);
 begin
   FPreview.Free;
@@ -476,17 +514,40 @@ begin
   //BtnUnInstall.Enabled:=not BtnInstall.Enabled;
 end;
 
+
 procedure TFormIDEColorizerSettings.GenerateIDEThemes(const Path: string);
 Var
   i        : integer;
   FileName : string;
 begin
+
+   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'Twilight.idetheme';
+   SaveColorMapToXmlFile(TwilightColorMap, FileName);
+
+   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'XPColorMap.idetheme';
+   SaveColorMapToXmlFile(XPColorMap1, FileName);
+
+   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'StandardColorMap.idetheme';
+   SaveColorMapToXmlFile(StandardColorMap, FileName);
+
+
    for i:=0 to WebNamedColorsCount-1 do
    begin
-     GenerateColorMap(XPColorMap,WebNamedColors[i].Value);
+     GenerateColorMap(XPColorMap, WebNamedColors[i].Value, GetTextColor(WebNamedColors[i].Value));
      FileName:=StringReplace(WebNamedColors[i].Name,'clWeb','',[rfReplaceAll]);
      FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'.idetheme';
      SaveColorMapToXmlFile(XPColorMap, FileName);
+
+//     GenerateColorMap(XPColorMap, GetHighLightColor(WebNamedColors[i].Value));
+//     FileName:=StringReplace(WebNamedColors[i].Name, 'clWeb', '',[rfReplaceAll]);
+//     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'Light.idetheme';
+//     SaveColorMapToXmlFile(XPColorMap, FileName);
+//
+//
+//     GenerateColorMap(XPColorMap, GetShadowColor(WebNamedColors[i].Value));
+//     FileName:=StringReplace(WebNamedColors[i].Name, 'clWeb', '',[rfReplaceAll]);
+//     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'Dark.idetheme';
+//     SaveColorMapToXmlFile(XPColorMap, FileName);
    end;
 end;
 
@@ -497,7 +558,7 @@ end;
 
 function TFormIDEColorizerSettings.GetSettingsFolder: String;
 begin
-  Result:=ExtractFilePath(GeModuleLocation());
+  Result:=ExtractFilePath(GetModuleLocation());
 end;
 
 procedure TFormIDEColorizerSettings.Init;

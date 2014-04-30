@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiColorizerTheme modified="2011-08-09 20:15:07" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
+<DelphiColorizerTheme modified="2014-04-30 07:00:41" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
   <ColorMap>
-    <BtnFrameColor>$00527F98</BtnFrameColor>
-    <BtnSelectedColor>$0091B0C3</BtnSelectedColor>
-    <BtnSelectedFont>clWindowText</BtnSelectedFont>
-    <Color>$0091B0C3</Color>
+    <BtnFrameColor>$002FD3E4</BtnFrameColor>
+    <BtnSelectedColor>$00D7F7F9</BtnSelectedColor>
+    <BtnSelectedFont>clBlack</BtnSelectedFont>
+    <Color>$008CE6F0</Color>
     <DisabledColor>clGray</DisabledColor>
     <DisabledFontColor>clGrayText</DisabledFontColor>
     <DisabledFontShadow>clBtnHighlight</DisabledFontShadow>
-    <FontColor>clWindowText</FontColor>
-    <FrameBottomRightInner>$00527F98</FrameBottomRightInner>
-    <FrameBottomRightOuter>$00527F98</FrameBottomRightOuter>
-    <FrameTopLeftInner>$00527F98</FrameTopLeftInner>
-    <FrameTopLeftOuter>$00527F98</FrameTopLeftOuter>
-    <HighlightColor>$00C7D7E1</HighlightColor>
+    <FontColor>clBlack</FontColor>
+    <FrameBottomRightInner>$002FD3E4</FrameBottomRightInner>
+    <FrameBottomRightOuter>$002FD3E4</FrameBottomRightOuter>
+    <FrameTopLeftInner>$002FD3E4</FrameTopLeftInner>
+    <FrameTopLeftOuter>$002FD3E4</FrameTopLeftOuter>
+    <HighlightColor>$00D7F7F9</HighlightColor>
     <HotColor>clDefault</HotColor>
     <HotFontColor>clDefault</HotFontColor>
-    <MenuColor>$00ACC4D2</MenuColor>
-    <SelectedColor>$00D7E3E8</SelectedColor>
-    <SelectedFontColor>clWindowText</SelectedFontColor>
-    <ShadowColor>$00527F98</ShadowColor>
+    <MenuColor>$00B1EEF5</MenuColor>
+    <SelectedColor>$00EBFBFC</SelectedColor>
+    <SelectedFontColor>clBlack</SelectedFontColor>
+    <ShadowColor>$002FD3E4</ShadowColor>
     <UnusedColor>clWhite</UnusedColor>
   </ColorMap>
 </DelphiColorizerTheme>

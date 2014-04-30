@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiColorizerTheme modified="2011-12-12 00:03:58" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
+<DelphiColorizerTheme modified="2014-04-30 07:00:41" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
   <ColorMap>
     <BtnFrameColor>$00DBA72D</BtnFrameColor>
-    <BtnSelectedColor>clSkyBlue</BtnSelectedColor>
-    <BtnSelectedFont>clWindowText</BtnSelectedFont>
-    <Color>clSkyBlue</Color>
+    <BtnSelectedColor>$00F7EACC</BtnSelectedColor>
+    <BtnSelectedFont>clBlack</BtnSelectedFont>
+    <Color>$00EBCE87</Color>
     <DisabledColor>clGray</DisabledColor>
     <DisabledFontColor>clGrayText</DisabledFontColor>
     <DisabledFontShadow>clBtnHighlight</DisabledFontShadow>
-    <FontColor>clWindowText</FontColor>
+    <FontColor>clBlack</FontColor>
     <FrameBottomRightInner>$00DBA72D</FrameBottomRightInner>
     <FrameBottomRightOuter>$00DBA72D</FrameBottomRightOuter>
     <FrameTopLeftInner>$00DBA72D</FrameTopLeftInner>
@@ -18,7 +18,7 @@
     <HotFontColor>clDefault</HotFontColor>
     <MenuColor>$00F1DCAA</MenuColor>
     <SelectedColor>$00FAF4E3</SelectedColor>
-    <SelectedFontColor>clWindowText</SelectedFontColor>
+    <SelectedFontColor>clBlack</SelectedFontColor>
     <ShadowColor>$00DBA72D</ShadowColor>
     <UnusedColor>clWhite</UnusedColor>
   </ColorMap>
