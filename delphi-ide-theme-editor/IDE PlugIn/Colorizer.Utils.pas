@@ -44,7 +44,7 @@ procedure RefreshIDETheme; overload;
 
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
+procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
 procedure RegisterVClStylesFiles;
@@ -202,7 +202,6 @@ begin
   end;
 end;
 
-
 procedure DumpComponent(AComponent: TComponent);
 var
 l2 : TStrings;
@@ -210,13 +209,14 @@ begin
   l2 := TStringList.Create;
   try
    l2.Text:=DumpTypeDefinition(AComponent.ClassInfo);
-   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+AComponent.ClassName+'.pas');
+   l2.SaveToFile(ExtractFilePath(GetModuleLocation())+'Galileo\'+AComponent.ClassName+'.pas');
   finally
    l2.Free;
   end;
 end;
-{$ENDIF}
 
+
+{$ENDIF}
 
 
 
@@ -252,8 +252,8 @@ Var
  ThemeFileName : string;
 begin
   if Settings=nil then exit;
-  ReadSettings(Settings, ExtractFilePath(GeModuleLocation()));
-  ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GeModuleLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
+  ReadSettings(Settings, ExtractFilePath(GetModuleLocation()));
+  ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
   if FileExists(ThemeFileName) then
    LoadColorMapFromXmlFile(AColorMap, ThemeFileName);
 
@@ -262,17 +262,17 @@ begin
 end;
 
 
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color:TColor);
+procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);
 begin
   AColorMap.Color                 :=Color;
   AColorMap.ShadowColor           :=GetShadowColor(Color);
-
+  AColorMap.FontColor             :=FontColor;
   AColorMap.MenuColor             :=GetHighLightColor(Color);
   AColorMap.HighlightColor        :=GetHighLightColor(AColorMap.MenuColor);
-  AColorMap.BtnSelectedColor      :=Color;
+  AColorMap.BtnSelectedColor      :=GetHighLightColor(AColorMap.MenuColor);
   AColorMap.BtnSelectedFont       :=AColorMap.FontColor;
 
-  AColorMap.SelectedColor         :=GetHighLightColor(Color,50);
+  AColorMap.SelectedColor         :=GetHighLightColor(Color, 50);
   AColorMap.SelectedFontColor     :=AColorMap.FontColor;
 
   AColorMap.BtnFrameColor         :=GetShadowColor(Color);
@@ -441,7 +441,7 @@ end;
 
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 var
-  I              : Integer;
+  I, Index       : Integer;
   LPanel         : TPanel;
   LColorMap      : TCustomActionBarColorMap;
   LActionManager : TActionManager;
@@ -481,6 +481,25 @@ begin
          LCategoryButtons.Categories[i].Color:=AColorMap.Color;
 
       LCategoryButtons.Font.Color:=AColorMap.FontColor;
+    end
+    else
+    if SameText(AComponent.ClassName, 'TDisassemblerView') then
+    begin
+       //DumpComponent(AComponent);
+      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'BreakpointColor',AColorMap.SelectedColor);
+      SetRttiPropertyValue(AComponent,'BreakpointTextColor',AColorMap.SelectedFontColor);
+      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+
+      {
+         property BreakpointColor: TColor;
+         property BreakpointTextColor: TColor;
+         property Color: TColor;
+         property Constraints: TSizeConstraints;
+         property Ctl3D: Boolean;
+         property Enabled: Boolean;
+         property Font: TFont;
+      }
     end
     else
     if SameText(AComponent.ClassName, 'TTDStringGrid') then
@@ -630,8 +649,8 @@ begin
     else
     if SameText(AComponent.ClassName, 'TBetterHintWindowVirtualDrawTree') then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
     if (SameText(AComponent.ClassName, 'TVirtualStringTree') or SameText(AComponent.ClassName, 'TRefactoringTree'))  then
@@ -859,12 +878,12 @@ begin
       lprofiler.Add(Format('%s End process component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
     {$ENDIF}
 
-    for I := 0 to AComponent.ComponentCount - 1 do
+    for Index := 0 to AComponent.ComponentCount - 1 do
     begin
      {$IFDEF DEBUG_MODE}
      //lcomp.Add(Format('     %s : %s',[AComponent.Components[I].Name,AComponent.Components[I].ClassName]));
      {$ENDIF}
-     ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[I]);
+     ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index]);
     end;
 end;
 
@@ -909,7 +928,7 @@ initialization
   TColorizerLocalSettings.Settings:=nil;
   TColorizerLocalSettings.ImagesGutterChanged:=False;
   TColorizerLocalSettings.HookedWindows:=TStringList.Create;
-  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GeModuleLocation))+'HookedWindows.dat');
+  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
 {$IFDEF DELPHI2010_UP}
   ctx:=TRttiContext.Create;
 {$ENDIF}

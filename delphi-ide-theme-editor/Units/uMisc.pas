@@ -45,7 +45,7 @@ procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
 function  CurrentUserIsAdmin: Boolean;
 function  RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=False) : Boolean;
 function  MakeValidTagName(const s: string): string;
-function  GeModuleLocation : string;
+function  GetModuleLocation : string;
 
 implementation
 
@@ -76,7 +76,7 @@ Const
 
 function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
 
-function  GeModuleLocation : string;
+function  GetModuleLocation : string;
 begin
   SetLength(Result, MAX_PATH);
   GetModuleFileName(HInstance, PChar(Result), MAX_PATH);

@@ -29,6 +29,14 @@
   * TClosableTabScroller background
   * TRefactoringTree
 
+
+                      TDisassemblerView - colors?
+    TStackViewFrame - TDumpView
+    TRegisterView
+    TFlagsView
+
+    TFPUWindow
+
   * restore support for Delphi 2007
 
   * Docked forms title (active/inactive). done
@@ -233,7 +241,7 @@ begin
     SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption, SplashBmp.Handle);
 
   if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) then
-   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [uMisc.GetFileVersion(GeModuleLocation)]), AboutBmp.Handle, False, 'Freeware');
+   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [uMisc.GetFileVersion(GetModuleLocation)]), AboutBmp.Handle, False, 'Freeware');
 end;
 
 procedure UnRegisterPlugIn;
