@@ -439,6 +439,8 @@ begin
 {$ENDIF}
 end;
 
+
+
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
 var
   I, Index       : Integer;
@@ -448,6 +450,9 @@ var
   LCategoryButtons : TCategoryButtons;
   LImages        : TImageList;
   LForm          : TForm;
+//  LVirtualTreeState : TVirtualTreeStates;
+//  LVirtualTreeStatei : Int64;
+//  LVirtual : TVirtualStringTree;
 begin
 
  if not Assigned(AComponent) then  exit;
@@ -653,10 +658,30 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
-    if (SameText(AComponent.ClassName, 'TVirtualStringTree') or SameText(AComponent.ClassName, 'TRefactoringTree'))  then
+    if  SameText(AComponent.ClassName, 'TRefactoringTree') then
     begin
         SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
         SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+    end
+    else
+    if SameText(AComponent.ClassName, 'TVirtualStringTree') then
+    begin
+        SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+        SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+
+
+        //LVirtualTreeState:=GetRttiPropertyValue(AComponent,'Columns.Header.Treeview.States').AsType<TVirtualTreeStates>;
+        //LVirtualTreeState:=GetRttiPropertyValue(AComponent,'TreeStates').AsType<TVirtualTreeStates>;
+//        GetRttiPropertyValue(AComponent,'TreeStates').ExtractRawData(@LVirtualTreeState);
+        //LVirtualTreeState:=Colorizer.Utils.TVirtualTreeStates(LVirtualTreeStatei);
+
+
+        //SetRttiPropertyValue(AComponent,'Columns.Header.Columns.Background', AColorMap.MenuColor);
+//        if tsUseThemes in LVirtualTreeState then
+//         LVirtualTreeState:=LVirtualTreeState - [tsUseThemes];
+//
+//
+//        SetRttiPropertyValue(AComponent,'TreeStates', TValue.From(LVirtualTreeState));
 
       //SetRttiPropertyValue(AComponent,'TreeLineColor',AColorMap.FontColor);
         //  TVTColors

@@ -90,6 +90,7 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Debugger_HostApplication>C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\bin\bds.exe</Debugger_HostApplication>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <DCC_BplOutput>.\</DCC_BplOutput>
         <VerInfo_MinorVer>0</VerInfo_MinorVer>
@@ -171,7 +172,7 @@
                     <VersionInfo Name="MajorVer">0</VersionInfo>
                     <VersionInfo Name="MinorVer">1</VersionInfo>
                     <VersionInfo Name="Release">2</VersionInfo>
-                    <VersionInfo Name="Build">270</VersionInfo>
+                    <VersionInfo Name="Build">272</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -183,7 +184,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName"/>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">0.1.2.270</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">0.1.2.272</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright"/>
                     <VersionInfoKeys Name="LegalTrademarks"/>

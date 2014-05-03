@@ -58,7 +58,7 @@ type
  TCustomPanelClass       = class(TCustomPanel);
  TCustomStatusBarClass   = class(TCustomStatusBar);
  TDockCaptionDrawerClass = class(TDockCaptionDrawer);
-
+ TUxThemeStyleClass      = class(TUxThemeStyle);
 var
   TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
@@ -67,6 +67,7 @@ var
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
+  Trampoline_TUxThemeStyle_DoDrawElement  : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
   FGutterBkColor : TColor = clNone;
 
 type
@@ -262,6 +263,40 @@ end;
 //   end;
 //    Trampoline_TCanvas_LineTo(Self, X, Y);
 //end;
+
+
+function CustomDrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
+const
+  HP_HEADERITEMRIGHT = 3;
+var
+  sCaller : string;
+  LCanvas : TCanvas;
+  SaveIndex: Integer;
+begin
+   if Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
+   begin
+    sCaller := ProcByLevel(2);
+    if SameText(sCaller, 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader') then
+    begin
+       SaveIndex := SaveDC(DC);
+       LCanvas:=TCanvas.Create;
+       try
+         LCanvas.Handle:=DC;
+         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+         LCanvas.FillRect(R);
+         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;//TColorizerLocalSettings.ColorMap.MenuColor;
+         LCanvas.Rectangle(R);
+       finally
+          LCanvas.Handle:=0;
+          LCanvas.Free;
+          RestoreDC(DC, SaveIndex);
+       end;
+
+       exit(True);
+    end;
+   end;
+   Result:=Trampoline_TUxThemeStyle_DoDrawElement(Self, DC, Details, R, ClipRect);
+end;
 
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
@@ -734,6 +769,7 @@ begin
   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
+  Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @CustomDrawElement);
 end;
 
 procedure RemoveColorizerHooks;
@@ -752,6 +788,8 @@ begin
     InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
   if Assigned(Trampoline_TDockCaptionDrawer_DrawDockCaption) then
     InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);
+  if Assigned(Trampoline_TUxThemeStyle_DoDrawElement) then
+    InterceptRemove(@Trampoline_TUxThemeStyle_DoDrawElement);
 end;
 
 {
