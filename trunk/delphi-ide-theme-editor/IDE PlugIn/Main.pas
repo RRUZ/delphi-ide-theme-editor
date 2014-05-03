@@ -31,7 +31,7 @@
 
 
                       TDisassemblerView - colors?
-    TStackViewFrame - TDumpView
+    TStackViewFrame - TDumpVie0w
     TRegisterView
     TFlagsView
 
