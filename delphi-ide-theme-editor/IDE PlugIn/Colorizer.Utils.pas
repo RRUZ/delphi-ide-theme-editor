@@ -39,11 +39,11 @@ uses
  ColorXPStyleActnCtrls,
  Classes;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle); overload;
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False); overload;
 procedure RefreshIDETheme; overload;
 
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
+procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False);
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
@@ -225,7 +225,7 @@ begin
    RefreshIDETheme(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle);
 end;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle);
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False);
 var
   index     : Integer;
 begin
@@ -237,7 +237,7 @@ begin
   if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)<>-1 then
   begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
-     ProcessComponent(AColorMap, AStyle, Screen.Forms[Index]);
+     ProcessComponent(AColorMap, AStyle, Screen.Forms[Index], Restore);
   end
 //  {$IFDEF DELPHIXE2_UP}
 //  else
@@ -307,19 +307,19 @@ begin
 end;
 {$ENDIF}
 
-//check these windows when an app is debuged
-function ProcessDebuggerWindows(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
+function ProcessDebuggerWindows(AColorMap:TCustomActionBarColorMap; AComponent: TComponent) : Boolean;
 const
-  NumWin  = 4;
-  CompList : array  [0..NumWin-1] of string = ('TDisassemblerView','TRegisterView','TFlagsView','TDumpView');
+  FormsCount  = 7;
+  DebuggerForms : array  [0..FormsCount-1] of string = ('TDisassemblerView', 'TRegisterView', 'TFlagsView', 'TDumpView', 'TFPURegisterView', 'TXMMRegisterView', 'TCPUStackView');
 var
-  Index : Integer;
+  LIndex : Integer;
 begin
    Result:=False;
-  for Index := 0 to NumWin-1 do
-    if CompareText(AComponent.ClassName,CompList[Index])=0 then
+  for LIndex := 0 to FormsCount-1 do
+    if SameText(AComponent.ClassName, DebuggerForms[LIndex]) then
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
       Result:=True;
       Break;
     end
@@ -441,7 +441,7 @@ end;
 
 
 
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent);
+procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False);
 var
   I, Index       : Integer;
   LPanel         : TPanel;
@@ -488,25 +488,31 @@ begin
       LCategoryButtons.Font.Color:=AColorMap.FontColor;
     end
     else
-    if SameText(AComponent.ClassName, 'TDisassemblerView') then
-    begin
-       //DumpComponent(AComponent);
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'BreakpointColor',AColorMap.SelectedColor);
-      SetRttiPropertyValue(AComponent,'BreakpointTextColor',AColorMap.SelectedFontColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-
-      {
-         property BreakpointColor: TColor;
-         property BreakpointTextColor: TColor;
-         property Color: TColor;
-         property Constraints: TSizeConstraints;
-         property Ctl3D: Boolean;
-         property Enabled: Boolean;
-         property Font: TFont;
-      }
-    end
-    else
+//    if SameText(AComponent.ClassName, 'TFPURegisterView') then
+//    begin
+//      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
+//      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+//    end
+//    else
+//    if SameText(AComponent.ClassName, 'TDisassemblerView') then
+//    begin
+//       //DumpComponent(AComponent);
+//      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
+//      SetRttiPropertyValue(AComponent,'BreakpointColor',AColorMap.SelectedColor);
+//      SetRttiPropertyValue(AComponent,'BreakpointTextColor',AColorMap.SelectedFontColor);
+//      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+//
+//      {
+//         property BreakpointColor: TColor;
+//         property BreakpointTextColor: TColor;
+//         property Color: TColor;
+//         property Constraints: TSizeConstraints;
+//         property Ctl3D: Boolean;
+//         property Enabled: Boolean;
+//         property Font: TFont;
+//      }
+//    end
+//    else
     if SameText(AComponent.ClassName, 'TTDStringGrid') then
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
@@ -605,13 +611,13 @@ begin
       LPanel.Invalidate;
     end
     else
-    if ProcessStdVclControls(AColorMap,AComponent) then
+    if ProcessStdVclControls(AColorMap, AComponent) then
     else
-    if ProcessVclControls(AColorMap,AComponent) then
+    if ProcessVclControls(AColorMap, AComponent) then
     else
-    if ProcessDebuggerWindows(AColorMap,AComponent) then
+    if ProcessDebuggerWindows(AColorMap, AComponent) then
     else
-    if ProcessVclGroupControls(AColorMap,AComponent) then
+    if ProcessVclGroupControls(AColorMap, AComponent) then
     else
     if SameText(AComponent.ClassName, 'TInspListBox') then
     begin
@@ -801,7 +807,10 @@ begin
       with TToolBar(AComponent) do
       begin
         Color              := AColorMap.Color;
-        DrawingStyle       := TTBDrawingStyle(dsGradient);
+        if Restore then
+          DrawingStyle       := TTBDrawingStyle(dsNormal)
+        else
+          DrawingStyle       := TTBDrawingStyle(dsGradient);
         GradientStartColor := AColorMap.MenuColor;
         GradientEndColor   := AColorMap.Color;//$00D1B499;
         HotTrackColor      := AColorMap.SelectedColor;
@@ -908,7 +917,7 @@ begin
      {$IFDEF DEBUG_MODE}
      //lcomp.Add(Format('     %s : %s',[AComponent.Components[I].Name,AComponent.Components[I].ClassName]));
      {$ENDIF}
-     ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index]);
+     ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index], Restore);
     end;
 end;
 
@@ -984,9 +993,9 @@ finalization
 
   try
   {$IFDEF DELPHIXE_UP}
-    RefreshIDETheme(NativeColorMap, PlatformDefaultStyle);
+    RefreshIDETheme(NativeColorMap, PlatformDefaultStyle, True);
   {$ELSE}
-    RefreshIDETheme(NativeColorMap, XPStyle);
+    RefreshIDETheme(NativeColorMap, XPStyle, True);
   {$ENDIF}
   finally
     NativeColorMap.Free;

@@ -27,6 +27,7 @@ implementation
 uses
  {$IF CompilerVersion >= 23}
  Vcl.Styles.Ext,
+ IOUTILs,
  {$IFEND}
  Classes,
  Forms,
@@ -64,6 +65,7 @@ begin
             {.$WARN SYMBOL_PLATFORM ON}
              Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
             //if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
+             //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CBT_FUNC.txt', Format('%s %s',[ClassNameBuffer, SLineBreak]));
             for i := 0 to Screen.FormCount-1 do
              if Screen.Forms[i].Handle=LHWND then
                if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)<>-1) and not (csDesigning in Screen.Forms[i].ComponentState) then
