@@ -27,14 +27,16 @@
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * TClosableTabScroller background
-  * TRefactoringTree
+  * TRefactoringTree   (Background, toolbar, font)
+  * Refactoring - find references (Background, toolbar, font)
+  * Threads (Tlistview) columns headers
+  * Event og backgroung color  , fonts?
 
 
                       TDisassemblerView - colors?
     TStackViewFrame - TDumpVie0w
     TRegisterView
     TFlagsView
-
     TFPUWindow
 
   * restore support for Delphi 2007

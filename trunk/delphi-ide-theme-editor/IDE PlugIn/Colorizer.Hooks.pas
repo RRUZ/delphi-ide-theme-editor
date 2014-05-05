@@ -30,6 +30,7 @@ uses
   Messages,
   Controls,
 {$IFEND}
+  Forms,
   System.IOUtils,
   ExtCtrls,
   Dialogs,
@@ -64,6 +65,8 @@ var
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
   //Trampoline_TCanvas_PolyLine          : procedure(Self: TCanvas;const Points: array of TPoint) = nil;
   //Trampoline_TCanvas_LineTo            : procedure(Self: TCanvas;X, Y: Integer) = nil;
+  //Trampoline_TCanvas_Polygon             : procedure(Self: TCanvas;const Points: array of TPoint) = nil;
+  //Trampoline_TCanvas_Draw             :  procedure(Self: TCanvas;X, Y: Integer; Graphic: TGraphic) = nil;
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
@@ -213,7 +216,10 @@ begin
       try
         Result:=StringToColor(sColor);
       except
-        Result:=clBtnFace;
+        if Assigned(TColorizerLocalSettings.ColorMap) then
+         Result:=TColorizerLocalSettings.ColorMap.Color
+        else
+         Result:=clBtnFace;
       end;
       FGutterBkColor:=Result;
     end
@@ -233,6 +239,7 @@ begin
    if Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
    begin
      sCaller := ProcByLevel(1);
+     //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomFillRect.txt', Format('%s %s',[sCaller, SLineBreak]));
      if SameText(sCaller, 'EditorControl.TCustomEditControl.EVFillGutter') then
         Self.Brush.Color:=GetGutterBkColor
      else
@@ -251,6 +258,15 @@ end;
 //   Trampoline_TCanvas_PolyLine(Self, Points);
 //end;
 
+//procedure CustomPolygon(Self: TCanvas;const Points: array of TPoint);
+//var
+//  sCaller : string;
+//begin
+//   sCaller := ProcByLevel(2);
+//   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomPolygon.txt', Format('%s %s',[sCaller, SLineBreak]));
+//   Trampoline_TCanvas_Polygon(Self, Points);
+//end;
+
 //procedure CustomLineTo(Self: TCanvas;X, Y: Integer);
 //var
 //  sCaller : string;
@@ -264,6 +280,17 @@ end;
 //    Trampoline_TCanvas_LineTo(Self, X, Y);
 //end;
 
+//procedure CustomDraw(Self: TCanvas;X, Y: Integer; Graphic: TGraphic);
+//var
+//  sCaller : string;
+//begin
+//
+//    sCaller := ProcByLevel(2);
+//    if sCaller<>'' then
+//     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\TCanvas_Draw.txt', Format('%s %s',[sCaller, SLineBreak]));
+//
+//  Trampoline_TCanvas_Draw(Self, X, Y, Graphic);
+//end;
 
 function CustomDrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
 const
@@ -765,6 +792,8 @@ begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
   //Trampoline_TCanvas_PolyLine     :=InterceptCreate(@TCanvas.PolyLine, @CustomPolyLine);
+  //Trampoline_TCanvas_Polygon      :=InterceptCreate(@TCanvas.Polygon, @CustomPolygon);
+  //Trampoline_TCanvas_Draw           :=InterceptCreate(@TCanvas.Draw, @CustomDraw);
   //Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @CustomLineTo);
   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
@@ -780,8 +809,12 @@ begin
     InterceptRemove(@Trampoline_TCanvas_FillRect);
 //  if Assigned(Trampoline_TCanvas_PolyLine) then
 //    InterceptRemove(@Trampoline_TCanvas_PolyLine);
+//  if Assigned(Trampoline_TCanvas_Polygon) then
+//    InterceptRemove(@Trampoline_TCanvas_Polygon);
 //  if Assigned(Trampoline_TCanvas_LineTo) then
 //    InterceptRemove(@Trampoline_TCanvas_LineTo);
+//  if Assigned(Trampoline_TCanvas_Draw) then
+//    InterceptRemove(@Trampoline_TCanvas_Draw);
   if Assigned(Trampoline_TStyleEngine_HandleMessage) then
     InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
   if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then

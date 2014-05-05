@@ -23,3 +23,5 @@ TCPUMemoryView3
 TCPUMemoryView4
 TFPUWindow
 TDisassemblyView
+TDisViewFrame
+TDumpViewFrame
