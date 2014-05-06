@@ -57,7 +57,7 @@ type
     DelphiXE6
 );
 
-  TDelphiVersionData=Class
+  TDelphiVersionData = Class
   private
     FVersion: TDelphiVersions;
     FName: string;
@@ -70,7 +70,8 @@ type
     property Name    : string read FName write FName;
     property Icon    : TIcon read FIcon write FIcon;
     property IDEType : TSupportedIDEs read FIDEType write FIDEType;
-    //property SupportsColorizer : Boolean read FSupportsColorizer write FSupportsColorizer;
+    constructor Create;
+    destructor Destroy; override;
   end;
 
 
@@ -106,16 +107,7 @@ Color15=$FFFFFF
     $800000,$800080,$808000,$C0C0C0,
     $808080,$0000FF,$00FF00,$00FFFF,
     $FF0000,$FF00FF,$FFFF00,$FFFFFF
-  )
-     {
-  (
-    $000000,$800000,$008000,$808000,
-    $000080,$800080,$008080,$C0C0C0,
-    $808080,$FF0000,$00FF00,$FFFF00,
-    $0000FF,$FF00FF,$00FFFF,$FFFFFF
-  )
-   }
-  ;
+  );
   {$ENDIF}
 
   DelphiVersionsNames: array[TDelphiVersions] of string = (
@@ -298,11 +290,11 @@ end;
 
 function  GetVCLStylesFolder(DelphiVersion:TDelphiVersions) : string;
 var
-  List :TList<TDelphiVersionData>;
+  List :TObjectList<TDelphiVersionData>;
   LData : TDelphiVersionData;
 begin
   result:='';
-  List:= TList<TDelphiVersionData>.Create;
+  List:= TObjectList<TDelphiVersionData>.Create;
   try
     FillListDelphiVersions(List);
     for LData in List do
@@ -320,12 +312,12 @@ end;
 
 procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
 var
-  List :TList<TDelphiVersionData>;
+  List :TObjectList<TDelphiVersionData>;
   LData : TDelphiVersionData;
   s : string;
 begin
   s:=ParamStr(0);
-  List:= TList<TDelphiVersionData>.Create;
+  List:= TObjectList<TDelphiVersionData>.Create;
   try
     FillListDelphiVersions(List);
     for LData in List do
@@ -334,7 +326,8 @@ begin
       Data.FVersion :=LData.Version;
       Data.Path    :=LData.Path;
       Data.Name    :=LData.Name;
-      Data.Icon    :=LData.Icon;
+      if Data.Icon=nil then Data.Icon:=TIcon.Create;
+      Data.Icon.Assign(LData.Icon);
       Data.IDEType :=LData.IDEType;
       break;
     end;
@@ -379,6 +372,19 @@ begin
 end;
 
 
+
+{ TDelphiVersionData }
+
+constructor TDelphiVersionData.Create;
+begin
+  FIcon:=nil;
+end;
+
+destructor TDelphiVersionData.Destroy;
+begin
+  FreeAndNil(FIcon);
+  inherited;
+end;
 
 end.
 
