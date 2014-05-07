@@ -34,12 +34,12 @@ uses
   System.IOUtils,
   ExtCtrls,
   Dialogs,
+  ComCtrls,
   Windows,
   Classes,
   uDelphiVersions,
   uDelphiIDEHighlight,
   SysUtils,
-  ComCtrls,
   Graphics,
   ImgList,
   CommCtrl,
@@ -60,6 +60,9 @@ type
  TCustomStatusBarClass   = class(TCustomStatusBar);
  TDockCaptionDrawerClass = class(TDockCaptionDrawer);
  TUxThemeStyleClass      = class(TUxThemeStyle);
+ TCustomFormClass        = class(TCustomForm);
+ TBrushClass             = class(TBrush);
+ TCustomListViewClass    = class(TCustomListView);
 var
   TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
@@ -67,10 +70,14 @@ var
   //Trampoline_TCanvas_LineTo            : procedure(Self: TCanvas;X, Y: Integer) = nil;
   //Trampoline_TCanvas_Polygon             : procedure(Self: TCanvas;const Points: array of TPoint) = nil;
   //Trampoline_TCanvas_Draw             :  procedure(Self: TCanvas;X, Y: Integer; Graphic: TGraphic) = nil;
+  //Trampoline_TForm_Show                : procedure(Self: TForm;Value: Boolean) = nil;
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
   Trampoline_TUxThemeStyle_DoDrawElement  : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
+  //Trampoline_TBrush_SetColor              : procedure (Self:TBrush; Value: TColor) = nil;
+  Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
+
   FGutterBkColor : TColor = clNone;
 
 type
@@ -84,7 +91,16 @@ type
     property  CanvasRW : TCanvas read GetCanvasRW Write SetCanvasRW;
    end;
 
+  TCustomFormHelper = class helper for TCustomForm
+  public
+    function  SetVisibleAddress: Pointer;
+   end;
 
+  TCustomListViewHelper = class helper for TCustomListView
+  public
+    function  HeaderWndProcAddress: Pointer;
+    function  GetHeaderHandle: HWND;
+   end;
 
 { TCustomStatusBarHelper }
 
@@ -111,6 +127,32 @@ begin
   MethodAddr := Self.WMPaint;
   Result     := TMethod(MethodAddr).Code;
 end;
+
+{ TCustomFormHelper }
+
+function TCustomFormHelper.SetVisibleAddress: Pointer;
+var
+  MethodAddr: procedure(Value: Boolean) of object;
+begin
+  MethodAddr := Self.SetVisible;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
+{ TCustomListViewHelper }
+
+function TCustomListViewHelper.GetHeaderHandle: HWND;
+begin
+  Result:=Self.FHeaderHandle;
+end;
+
+function TCustomListViewHelper.HeaderWndProcAddress: Pointer;
+var
+  MethodAddr: procedure(var Message: TMessage) of object;
+begin
+  MethodAddr := Self.HeaderWndProc;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
 
  //@Editorcontrol@TCustomEditControl@EVFillGutter$qqrrx18
  //002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
@@ -200,6 +242,7 @@ begin
   end;
 end;
 
+//Retuns the current Gutter color , using the background of the current syntax highlighter
 function GetGutterBkColor : TColor;
 var
   ATheme : TIDETheme;
@@ -231,7 +274,7 @@ begin
   end;
 end;
 
-
+//Hook for paint the gutter of the TEditControl and the bacgrounf of the TGradientTabSet component
 procedure  CustomFillRect(Self: TCanvas;const Rect: TRect);
 var
   sCaller : string;
@@ -292,6 +335,32 @@ end;
 //  Trampoline_TCanvas_Draw(Self, X, Y, Graphic);
 //end;
 
+//procedure CustomShow(Self: TForm;Value: Boolean);
+//begin
+//  Trampoline_TForm_Show(Self, Value);
+//  TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Visible.txt', Format('%s %s',[Self.ClassName, SLineBreak]));
+//   if Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)<>-1) and not (csDesigning in Self.ComponentState) then
+//   if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.ActionBarStyle) then
+//      Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
+//end;
+
+//procedure CustomBrushSetColor(Self:TBrush; Value: TColor);
+//var
+//  sCaller : string;
+//begin
+////  sCaller := ProcByLevel(1);
+////    if sCaller<>'' then
+////     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomBrushSetColor.txt', Format('%s %s',[sCaller, SLineBreak]));
+//
+// // if Value=clBtnFace then
+// //  Value:=clRed;
+//
+//  Trampoline_TBrush_SetColor(Self, Value);
+//end;
+
+
+
+//Hook for paint the header of the TVisrtualString component
 function CustomDrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
 const
   HP_HEADERITEMRIGHT = 3;
@@ -311,7 +380,7 @@ begin
          LCanvas.Handle:=DC;
          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
          LCanvas.FillRect(R);
-         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;//TColorizerLocalSettings.ColorMap.MenuColor;
+         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
          LCanvas.Rectangle(R);
        finally
           LCanvas.Handle:=0;
@@ -325,6 +394,8 @@ begin
    Result:=Trampoline_TUxThemeStyle_DoDrawElement(Self, DC, Details, R, ClipRect);
 end;
 
+
+//Hook, for avoid apply a VCL Style to a TWinControl in desing time
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
@@ -336,6 +407,8 @@ begin
   Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
 end;
 
+
+//Hook for paint IDE TStatusBar
 procedure CustomStatusBarWMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
 var
   DC: HDC;
@@ -477,7 +550,7 @@ var
       end;
 
 begin
-    if (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+    if (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
     begin
      Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
      exit;
@@ -519,7 +592,7 @@ begin
 end;
 
 
-
+//Hook for the docked IDE windows.
 function CustomDrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
 var
   LColor: TColor;
@@ -785,6 +858,134 @@ begin
   end;
 end;
 
+//Hook for the TCustomListView component
+procedure CustomHeaderWndProc(Self:TCustomListView;var Message: TMessage);
+
+    procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+      const S: string; var R: TRect; Flags: Cardinal);
+    var
+      ThemeTextColor: TColor;
+      TextFormat: TTextFormatFlags;
+    begin
+      Canvas.Font := TWinControlClass(Self).Font;
+      TextFormat := TTextFormatFlags(Flags);
+      if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
+      begin
+        if not Self.Enabled or (seFont in Self.StyleElements) then
+          Canvas.Font.Color := ThemeTextColor;
+        StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+      end
+      else
+      begin
+        Canvas.Refresh;
+        StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
+      end;
+    end;
+
+    procedure DrawHeaderSection(Canvas: TCanvas; R: TRect; Index: Integer;
+      const Text: string; IsPressed, IsBackground: Boolean);
+    var
+      Item: THDItem;
+      ImageList: HIMAGELIST;
+      DrawState: TThemedHeader;
+      IconWidth, IconHeight: Integer;
+      Details: TThemedElementDetails;
+    begin
+      FillChar(Item, SizeOf(Item), 0);
+      Item.Mask := HDI_FORMAT;
+      Header_GetItem(Self.Handle, Index, Item);
+      if IsBackground then
+        DrawState := thHeaderItemNormal
+      else if IsPressed then
+        DrawState := thHeaderItemPressed
+      else
+        DrawState := thHeaderItemNormal;
+
+      Details := StyleServices.GetElementDetails(DrawState);
+      //StyleServices.DrawElement(Canvas.Handle, Details, R);
+      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+      Canvas.FillRect(R);
+      Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+      Canvas.Rectangle(R);
+
+
+      ImageList := SendMessage(Self.Handle, HDM_GETIMAGELIST, 0, 0);
+      Item.Mask := HDI_FORMAT or HDI_IMAGE;
+      InflateRect(R, -2, -2);
+      if (ImageList <> 0) and Header_GetItem(Self.Handle, Index, Item) then
+      begin
+        if Item.fmt and HDF_IMAGE = HDF_IMAGE then
+          ImageList_Draw(ImageList, Item.iImage, Canvas.Handle, R.Left, R.Top, ILD_TRANSPARENT);
+        ImageList_GetIconSize(ImageList, IconWidth, IconHeight);
+        Inc(R.Left, IconWidth + 5);
+      end;
+
+      DrawControlText(Canvas, Details, Text, R, DT_VCENTER or DT_LEFT or  DT_SINGLELINE or DT_END_ELLIPSIS);
+    end;
+
+
+var
+  Canvas: TCanvas;
+  R, HeaderR: TRect;
+  PS: TPaintStruct;
+  HeaderDC: HDC;
+  I, ColumnIndex, RightOffset: Integer;
+  SectionOrder: array of Integer;
+  Item: THDItem;
+  Buffer: array [0..255] of Char;
+  LParentForm : TCustomForm;
+begin
+
+  if Message.Msg=WM_PAINT then
+  if not (csDesigning in Self.ComponentState) then
+  begin
+    LParentForm:= GetParentForm(Self);
+    if Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0) then
+    begin
+        HeaderDC := BeginPaint(Self.GetHeaderHandle, PS);
+      try
+        Canvas := TCanvas.Create;
+        try
+          Canvas.Handle := HeaderDC;
+          RightOffset := 0;
+
+          for I := 0 to Header_GetItemCount(Self.GetHeaderHandle) - 1 do
+          begin
+            SetLength(SectionOrder, Header_GetItemCount(Self.GetHeaderHandle));
+            Header_GetOrderArray(Self.GetHeaderHandle, Header_GetItemCount(Self.GetHeaderHandle),
+              Pointer(SectionOrder));
+            ColumnIndex := SectionOrder[I];
+            Header_GETITEMRECT(Self.GetHeaderHandle, ColumnIndex, @R);
+            FillChar(Item, SizeOf(Item), 0);
+            Item.Mask := HDI_TEXT;
+            Item.pszText := @Buffer;
+            Item.cchTextMax := Length(Buffer);
+            Header_GetItem(Self.GetHeaderHandle, ColumnIndex, Item);
+            DrawHeaderSection(Canvas, R, ColumnIndex, Item.pszText,
+              Self.GetHeaderHandle = ColumnIndex, False);
+
+            if RightOffset < R.Right then
+              RightOffset := R.Right;
+          end;
+
+          GetWindowRect(Self.GetHeaderHandle, HeaderR);
+          R := Rect(RightOffset, 0, HeaderR.Width + 2, HeaderR.Height);
+          if not IsRectEmpty(R) then
+            DrawHeaderSection(Canvas, R, -1, '', False, True);
+
+        finally
+          Canvas.Handle := 0;
+          Canvas.Free;
+        end;
+      finally
+          EndPaint(Self.GetHeaderHandle, PS)
+      end;
+      exit;
+    end;
+  end;
+  Trampoline_TCustomListView_HeaderWndProc(Self, Message);
+end;
+
 //const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
 procedure InstallColorizerHooks;
@@ -799,6 +1000,8 @@ begin
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
   Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @CustomDrawElement);
+//  Trampoline_TForm_Show                     := InterceptCreate(TCustomFormClass(nil).SetVisibleAddress,   @CustomShow);
+  Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @CustomHeaderWndProc);
 end;
 
 procedure RemoveColorizerHooks;
@@ -807,14 +1010,6 @@ begin
     InterceptRemove(@TrampolineCustomImageList_DoDraw);
   if Assigned(Trampoline_TCanvas_FillRect) then
     InterceptRemove(@Trampoline_TCanvas_FillRect);
-//  if Assigned(Trampoline_TCanvas_PolyLine) then
-//    InterceptRemove(@Trampoline_TCanvas_PolyLine);
-//  if Assigned(Trampoline_TCanvas_Polygon) then
-//    InterceptRemove(@Trampoline_TCanvas_Polygon);
-//  if Assigned(Trampoline_TCanvas_LineTo) then
-//    InterceptRemove(@Trampoline_TCanvas_LineTo);
-//  if Assigned(Trampoline_TCanvas_Draw) then
-//    InterceptRemove(@Trampoline_TCanvas_Draw);
   if Assigned(Trampoline_TStyleEngine_HandleMessage) then
     InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
   if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then
@@ -823,6 +1018,8 @@ begin
     InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);
   if Assigned(Trampoline_TUxThemeStyle_DoDrawElement) then
     InterceptRemove(@Trampoline_TUxThemeStyle_DoDrawElement);
+  if Assigned(Trampoline_TCustomListView_HeaderWndProc) then
+    InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
 end;
 
 {
@@ -850,6 +1047,9 @@ end;
 
     002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
 }
+
+
+
 
 initialization
   InstallColorizerHooks;

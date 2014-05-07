@@ -26,10 +26,9 @@ interface
 Uses
   uDelphiVersions;
 
-
-function ExpertInstalled(const Name:String;DelphiVersion : TDelphiVersions):boolean;
-function InstallExpert(const Path,Description:String;DelphiVersion : TDelphiVersions):boolean;
-function UnInstallExpert(const Path:String;DelphiVersion : TDelphiVersions):boolean;
+function ExpertInstalled(const Name : String; DelphiVersion : TDelphiVersions):boolean;
+function InstallExpert(const Path,Description : String; DelphiVersion : TDelphiVersions):boolean;
+function UnInstallExpert(const Path : String; DelphiVersion : TDelphiVersions):boolean;
 
 implementation
 
@@ -43,7 +42,7 @@ Const
   //IDEPackgesKey='Known IDE Packages';
   IDEPackgesKey='Known Packages';
 
-function ExpertInstalled(const Name:String;DelphiVersion : TDelphiVersions):boolean;
+function ExpertInstalled(const Name : String; DelphiVersion : TDelphiVersions):boolean;
 Var
   Reg       : TRegistry;
   KeyNames  : TStringList;
@@ -70,7 +69,7 @@ begin
   end;
 end;
 
-function InstallExpert(const Path,Description:String;DelphiVersion : TDelphiVersions):boolean;
+function InstallExpert(const Path, Description : String; DelphiVersion : TDelphiVersions):boolean;
 Var
   Reg       : TRegistry;
 begin
@@ -89,7 +88,7 @@ begin
 end;
 
 
-function UnInstallExpert(const Path:String;DelphiVersion : TDelphiVersions):boolean;
+function UnInstallExpert(const Path : String; DelphiVersion : TDelphiVersions):boolean;
 Var
   Reg       : TRegistry;
 begin

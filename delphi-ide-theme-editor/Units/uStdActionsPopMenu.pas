@@ -39,7 +39,7 @@ uses
  Vcl.StdActns;
 
 type
-  TCustomEditH=class (TCustomEdit);
+  TCustomEditClass=class (TCustomEdit);
 
 procedure FillPopupActionBar(PopupActionBar: TPopupActionBar);
 var
@@ -108,8 +108,8 @@ var
  i : integer;
 begin
  for i:=0 to ParentComponent.ComponentCount-1 do
-   if (ParentComponent.Components[i] is TCustomEdit) and (TCustomEditH(ParentComponent.Components[i]).PopupMenu=nil) then
-    TCustomEditH(ParentComponent.Components[i]).PopupMenu:=PopupMenu
+   if (ParentComponent.Components[i] is TCustomEdit) and (TCustomEditClass(ParentComponent.Components[i]).PopupMenu=nil) then
+    TCustomEditClass(ParentComponent.Components[i]).PopupMenu:=PopupMenu
    else
     AssignStdActionsPopUpMenu(ParentComponent.Components[i], PopupMenu);
 end;

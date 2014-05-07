@@ -1,7 +1,10 @@
+// JCL_DEBUG_EXPERT_INSERTJDBG OFF
 program DITE;
 {$WARN SYMBOL_PLATFORM OFF}
 
 uses
+  {$IFDEF DEBUG}
+  {$ENDIF}
   uStackTrace in 'Units\uStackTrace.pas',
   Generics.Defaults,
   Generics.Collections,
@@ -66,7 +69,7 @@ end;
 Var
   IDEsList:TList<TDelphiVersionData>;
 begin
-  IDEsList:=TList<TDelphiVersionData>.Create;
+  IDEsList:=TObjectList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);
 
   if (not IsSMSInstalled) and (not IsLazarusInstalled) and (IDEsList.Count = 0) then
@@ -77,7 +80,7 @@ begin
   end;
   IDEsList.Free;
 
-  //ReportMemoryLeaksOnShutdown := DebugHook <> 0;
+  ReportMemoryLeaksOnShutdown := DebugHook <> 0;
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);

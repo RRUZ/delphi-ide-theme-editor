@@ -25,3 +25,8 @@ TFPUWindow
 TDisassemblyView
 TDisViewFrame
 TDumpViewFrame
+TRefactoringForm
+TFindReferencesForm
+TToDoListWindow
+TFormContainerForm
+TModulesView

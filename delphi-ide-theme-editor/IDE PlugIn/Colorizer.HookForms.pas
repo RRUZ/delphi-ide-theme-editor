@@ -27,18 +27,19 @@ implementation
 uses
  {$IF CompilerVersion >= 23}
  Vcl.Styles.Ext,
- IOUTILs,
  {$IFEND}
  Classes,
  Forms,
  Windows,
  SysUtils,
  Dialogs,
+ IOUtils,
+ Controls,
  ColorXPStyleActnCtrls,
  Colorizer.Utils;
 
 var
- hhk: HHOOK;
+ hhk: HHOOK = 0;
 
 function CBT_FUNC(nCode: Integer; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 const
@@ -48,9 +49,31 @@ var
  i      : Integer;
  RetVal : Integer;
  ClassNameBuffer: Array[0..ClassNameBufferSize-1] of Char;
+ LWinControl : TWinControl;
 begin
    if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.HookedWindows) then
    case nCode of
+
+     HCBT_SETFOCUS:
+     begin
+       LHWND := HWND(wParam);
+       if (Screen<>nil) and (LHWND>0) then
+       begin
+          RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
+          if RetVal>0 then
+          begin
+            Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
+            //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\HCBT_SETFOCUS.txt', Format('%s %s',[ClassNameBuffer, SLineBreak]));
+            if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
+            begin
+              LWinControl:=FindControl(LHWND);   //use FondControl because some formas are not registered in Screen.Forms
+              if LWinControl<>nil then
+                Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, LWinControl);
+            end;
+          end;
+       end;
+     end;
+
      HCBT_ACTIVATE:
      begin
        LHWND := HWND(wParam);
@@ -60,27 +83,15 @@ begin
           RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
           if RetVal>0 then
           begin
-            {.$WARN SYMBOL_PLATFORM OFF}
-            //Win32Check(RetVal <> 0);
-            {.$WARN SYMBOL_PLATFORM ON}
              Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-            //if HookedWindows.IndexOf(ClassNameBuffer)<>-1 then//(StrIComp(@ClassNameBuffer, 'TDefaultEnvironmentDialog') <> 0) then //StrLIComp(ClassNameBuffer, 'TDefaultEnvironmentDialog', ClassNameBufferSize) <>0 then
-             //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CBT_FUNC.txt', Format('%s %s',[ClassNameBuffer, SLineBreak]));
+             //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\HCBT_ACTIVATE.txt', Format('%s %s',[ClassNameBuffer, SLineBreak]));
+            if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
             for i := 0 to Screen.FormCount-1 do
-             if Screen.Forms[i].Handle=LHWND then
-               if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)<>-1) and not (csDesigning in Screen.Forms[i].ComponentState) then
+             if (Screen.Forms[i].Handle=LHWND) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
-                  Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, Screen.Forms[i]);
-                  Break;
+                 Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, Screen.Forms[i]);
+                 Break;
                end;
-//               {$IF CompilerVersion >= 23}
-//               else
-//               if (csDesigning in Screen.Forms[i].ComponentState) then
-//               begin
-//                 //ShowMessage('ApplyEmptyVCLStyleHook '+Screen.Forms[i].ClassName);
-//                 ApplyEmptyVCLStyleHook(Screen.Forms[i].ClassType);
-//               end;
-//              {$IFEND}
           end;
        end;
      end;
@@ -88,21 +99,21 @@ begin
   Result := CallNextHookEx(hhk, nCode, wParam, lParam);
 end;
 
-Procedure InitHook();
+Procedure InstallHook();
 begin
   hhk := SetWindowsHookEx(WH_CBT, @CBT_FUNC, hInstance, 0);
 end;
 
-Procedure KillHook();
+Procedure RemoveHook();
 begin
   if (hhk <> 0) then
     UnhookWindowsHookEx(hhk);
 end;
 
 initialization
-  InitHook();
+  InstallHook();
 
 finalization
-  KillHook();
+  RemoveHook();
 
 end.
