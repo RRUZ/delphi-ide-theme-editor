@@ -38,7 +38,7 @@ function  GetSpecialFolderLocation(nFolder: Integer): string;
 function  GetTempDirectory: string;
 procedure MsgBox(const Msg: string);
 function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
-procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var Bitmap : TBitmap);
 function  GetSpecialFolder(const CSIDL: integer) : string;
 function  IsUACEnabled: Boolean;
 procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
@@ -349,24 +349,24 @@ begin
 end;
 
 
-procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var Bitmap : TBitmap);
 Var
  i : integer;
  w : integer;
 begin
-  bmp.PixelFormat:=pf24bit;
-  bmp.Width:=Width;
-  bmp.Height:=Height;
-  bmp.Canvas.Brush.Color := clBlack;
-  bmp.Canvas.FillRect(Rect(0,0, Width, Height));
+  Bitmap.PixelFormat:=pf24bit;
+  Bitmap.Width:=Width;
+  Bitmap.Height:=Height;
+  Bitmap.Canvas.Brush.Color := clBlack;
+  Bitmap.Canvas.FillRect(Rect(0,0, Width, Height));
 
 
   w :=(Width-2) div (High(Colors)+1);
   for i:=0 to High(Colors) do
   begin
-   bmp.Canvas.Brush.Color := Colors[i];
+   Bitmap.Canvas.Brush.Color := Colors[i];
    //bmp.Canvas.FillRect(Rect((w*i),0, w*(i+1), Height));
-   bmp.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
+   Bitmap.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
   end;
 end;
 

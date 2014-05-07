@@ -60,11 +60,7 @@ procedure RegisterVClStylesFiles;
       class var VCLStylesPath  : string;
       class var Settings       : TSettings;
       class var ImagesGutterChanged : Boolean;
-//      class var ColorXPStyle   : TColorXPStyleActionBars;
       class var IDEData        : TDelphiVersionData;
-//      class var TwilightColorMap: TTwilightColorMap;
-//      class var StandardColorMap: TStandardColorMap;
-//      class var XPColorMap: TXPColorMap;
     end;
 
 implementation
@@ -160,18 +156,6 @@ end;
 
 
 {$IFDEF DEBUG_PROFILER}
-procedure DumpParentClass(AObject: TObject);
-var
-l2 : TStrings;
-begin
-  l2 := TStringList.Create;
-  try
-   l2.Text:=DumpTypeDefinition(AObject.ClassParent.ClassInfo);
-   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+AObject.ClassParent.ClassName+'.pas');
-  finally
-   l2.Free;
-  end;
-end;
 //DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
 procedure DumpType(const QualifiedName:string);
 var
@@ -202,22 +186,19 @@ begin
   end;
 end;
 
-procedure DumpComponent(AComponent: TComponent);
+procedure DumpObject(AObject: TObject);
 var
-l2 : TStrings;
+ LDumpInfo : TStrings;
 begin
-  l2 := TStringList.Create;
+   LDumpInfo := TStringList.Create;
   try
-   l2.Text:=DumpTypeDefinition(AComponent.ClassInfo);
-   l2.SaveToFile(ExtractFilePath(GetModuleLocation())+'Galileo\'+AComponent.ClassName+'.pas');
+   LDumpInfo.Text:=DumpTypeDefinition(AObject.ClassInfo);
+   LDumpInfo.SaveToFile(ExtractFilePath(GetModuleLocation())+'Galileo\'+AObject.ClassName+'.pas');
   finally
-   l2.Free;
+   LDumpInfo.Free;
   end;
 end;
-
-
 {$ENDIF}
-
 
 
 procedure RefreshIDETheme;
@@ -515,12 +496,12 @@ begin
 //    else
     if SameText(AComponent.ClassName, 'TTDStringGrid') then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Ctl3D',False);
-      SetRttiPropertyValue(AComponent,'FixedColor',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-      SetRttiPropertyValue(AComponent,'GradientStartColor',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'GradientEndColor',AColorMap.Color);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'Ctl3D', False);
+      SetRttiPropertyValue(AComponent,'FixedColor', AColorMap.Color);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'GradientStartColor', AColorMap.Color);
+      SetRttiPropertyValue(AComponent,'GradientEndColor', AColorMap.Color);
     end
     else
     if SameText(AComponent.ClassName, 'THintListView') then
@@ -571,30 +552,30 @@ begin
     else
     if SameText(AComponent.ClassName, 'TEdit') then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
     if SameText(AComponent.ClassName, 'TPropCheckBox') then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
     if SameText(AComponent.ClassName ,'TDesktopComboBox') or  SameText(AComponent.ClassName ,'THistoryPropComboBox') then
     begin
       if not TColorizerLocalSettings.Settings.UseVCLStyles then
       SetWindowTheme(TWinControl(AComponent).Handle,'','');
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
       SetRttiPropertyValue(AComponent,'BevelKind', Integer(bkFlat));
       SetRttiPropertyValue(AComponent,'BevelInner', Integer(bvNone));
     end
     else
     if SameText(AComponent.ClassName, 'TComboBox') then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
     if AComponent is TForm then
@@ -608,7 +589,7 @@ begin
     begin
       LPanel        := TPanel(AComponent);
       LPanel.Color  := AColorMap.Color;
-      LPanel.Invalidate;
+      //LPanel.Invalidate;
     end
     else
     if ProcessStdVclControls(AColorMap, AComponent) then
@@ -637,25 +618,19 @@ begin
        property HighlightColor: TColor;
        property HighlightFontColor: TColor;
       }
-      SetRttiPropertyValue(AComponent,'EditBackgroundColor',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'HighlightColor',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'BackgroundColor',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'GutterColor',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'HighlightFontColor',AColorMap.FontColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TRefactoringTree') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.Color);
+      SetRttiPropertyValue(AComponent,'GutterColor', AColorMap.Color);
+      SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
     if SameText(AComponent.ClassName, 'TStringGrid') then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'FixedColor',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'FixedColor', AColorMap.Color);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
     if SameText(AComponent.ClassName, 'TBetterHintWindowVirtualDrawTree') then
@@ -668,12 +643,14 @@ begin
     begin
         SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
         SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+        SetRttiPropertyValue(AComponent,'Ctl3D', False);
     end
     else
     if SameText(AComponent.ClassName, 'TVirtualStringTree') then
     begin
         SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
         SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+        SetRttiPropertyValue(AComponent,'Ctl3D', False);
 
 
         //LVirtualTreeState:=GetRttiPropertyValue(AComponent,'Columns.Header.Treeview.States').AsType<TVirtualTreeStates>;
@@ -745,26 +722,22 @@ begin
     else
     if SameText(AComponent.ClassName, 'TClosableTabScroller') then
     begin
-       //SetRttiPropertyValue(AComponent,'BorderWidth', 0);
-
        SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor',AColorMap.MenuColor);
        SetRttiPropertyValue(AComponent,'CloseButton.Transparent',False);
-       //SetRttiPropertyValue(AComponent,'CloseButton.Flat',True);
-
        SetRttiPropertyValue(AComponent,'DropDownButton.BackgroundColor',AColorMap.MenuColor);
        SetRttiPropertyValue(AComponent,'DropDownButton.Transparent',False);
-       //SetRttiPropertyValue(AComponent,'DropDownButton.Flat',True);
 
-       SetRttiPropertyValue(AComponent,'Brush.Color',AColorMap.Color);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TTabScroller') then
-    begin
+       SetRttiPropertyValue(AComponent,'LeftButton.BackgroundColor',AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'LeftButton.Transparent',False);
+       SetRttiPropertyValue(AComponent,'RightButton.BackgroundColor',AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'RightButton.Transparent',False);
 
+       SetRttiPropertyValue(AComponent,'FBrush.Color', AColorMap.MenuColor);
     end
     else
     if SameText(AComponent.ClassName, 'TEditControl') then   //TODO
     begin
+       //SetRttiPropertyValue(AComponent, 'BorderStyle',  Ord(bsNone));
        {$IFDEF DELPHIXE2_UP}
         if TColorizerLocalSettings.Settings.UseVCLStyles then
         begin
@@ -772,7 +745,7 @@ begin
            TStyleEngine.RegisterStyleHook(AComponent.ClassType, TMemoStyleHook);
         end;
        {$ENDIF}
-       // Set these properties and Fields has not effect in the gutter color.
+       // Setting these properties and Fields has not effect in the gutter color.
        //SetRttiFieldValue(AComponent,'GutterBrush.Color',  clYellow);
        //SetRttiPropertyValue(AComponent,'Brush.Color',  clRed);
        //SetRttiFieldValue(AComponent,'FParentColor',  False);
@@ -780,7 +753,6 @@ begin
        //SetRttiFieldValue(AComponent,'CurForeColor',  clYellow);
        //SetRttiFieldValue(AComponent,'CurBackColor',  clRed);
        //ExecMethodRtti(AComponent, 'Invalidate');
-
        //DumpParentClass(AComponent);
     end
     else
@@ -800,6 +772,12 @@ begin
       DrawingStyle := dsGradient;
       GradientStartColor :=  AColorMap.Color;
       GradientEndColor   :=  AColorMap.Color;
+    end
+    else
+    if SameText(AComponent.ClassName, 'TToolBar') then
+    begin
+      with TToolBar(AComponent) do
+        Color := AColorMap.Color;
     end
     else
     if SameText(AComponent.ClassName, 'TDockToolBar') then
@@ -850,17 +828,17 @@ begin
       SelectedColor  :=AColorMap.Color;
       UnselectedColor:=AColorMap.MenuColor;
       Font.Color    := AColorMap.FontColor;
-      Style :=tsModernTabs; //necessary for allow paint backround color
+      Style :=tsModernTabs; //necessary for allow paint background color
     end
     else
     if SameText(AComponent.ClassName, 'TIDEGradientTabSet') or SameText(AComponent.ClassName, 'TGradientTabSet') then
     begin
-         SetRttiPropertyValue(AComponent,'TabColors.ActiveStart',AColorMap.Color);
-         SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd',AColorMap.Color);
-         SetRttiPropertyValue(AComponent,'TabColors.InActiveStart',AColorMap.MenuColor);
-         SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd',AColorMap.MenuColor);
-         SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-         SetRttiPropertyValue(AComponent,'ParentBackground',False);
+         SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);
+         SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
+         SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
+         SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
+         SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+         SetRttiPropertyValue(AComponent,'ParentBackground', False);
        {$IFDEF DELPHIXE2_UP}
         {
         if GlobalSettings.UseVCLStyles then
@@ -869,7 +847,16 @@ begin
            TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTabControlStyleHook);
         end;
         }
+
        {$ENDIF}
+        if SameText(AComponent.ClassName, 'TGradientTabSet') then
+        begin
+            //DumpObject(GetRttiFieldValue(AComponent, 'FScroller').AsObject);
+         SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.BackgroundColor', AColorMap.MenuColor);
+         SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.Transparent', False);
+         SetRttiPropertyValue(AComponent,'FScroller.FRightButton.BackgroundColor', AColorMap.MenuColor);
+         SetRttiPropertyValue(AComponent,'FScroller.FRightButton.Transparent', False);
+        end;
     end
     else
     if SameText(AComponent.ClassName, 'TTabSheet')  then
@@ -1002,10 +989,7 @@ finalization
   end;
 
   RestoreActnManagerStyles();
-
   FreeAndNil(TColorizerLocalSettings.Settings);
-  if Assigned(TColorizerLocalSettings.IDEData.Icon) then
-      TColorizerLocalSettings.IDEData.Icon.Free;
   TColorizerLocalSettings.IDEData.Free;
 
 //  TColorizerLocalSettings.XPColorMap.Free;

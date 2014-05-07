@@ -208,7 +208,7 @@ type
     FrmColorPanel      : TColorPanel;
 
 
-    ActionImages : TObjectDictionary<string,TCompPngImages>;
+    ActionImages : TObjectDictionary<string, TCompPngImages>;
     procedure LoadActionImages;
     procedure LoadThemes;
     procedure LoadFixedWidthFonts;
@@ -1029,7 +1029,7 @@ begin
 
   for Index := 0 to IDEsList.Count-1 do
   begin
-    IDEsList[Index].Icon.Free;
+    //IDEsList[Index].Icon.Free;
     IDEsList[Index].Free;
   end;
 

@@ -17,8 +17,6 @@
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//
-//
 //**************************************************************************************************
 
 //TODO
@@ -27,20 +25,19 @@
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * TClosableTabScroller background
-  * TRefactoringTree   (Background, toolbar, font)
-  * Refactoring - find references (Background, toolbar, font)
-  * Threads (Tlistview) columns headers
-  * Event og backgroung color  , fonts?
+  * Event log backgroung color  , fonts?
 
-
-                      TDisassemblerView - colors?
-    TStackViewFrame - TDumpVie0w
-    TRegisterView
-    TFlagsView
-    TFPUWindow
 
   * restore support for Delphi 2007
 
+  *                    TDisassemblerView   done
+  *  TStackViewFrame - TDumpVie0w    done
+  *  TRegisterView    done
+  *  TFlagsView       done
+  *  TFPUWindow       done
+  * Refactoring - find references (Background, toolbar, font)  done
+  * TRefactoringTree   (Background, toolbar, font) done
+  * Threads (Tlistview) columns headers  done
   * Docked forms title (active/inactive). done
   * TStatusBar separators   done
   * TTabSet background - done
@@ -66,8 +63,6 @@
   * Looad feel select (standard, XP)
   * choose the colors automatic way
   * activate glass colorization vista and windows 7?
-
-  flat (ctrl3d) global or by control ?
 
     background color for windows (tlistview and treeview)
     skin by contorls (by xml) ->>then use ClassName ;)
@@ -135,6 +130,22 @@ uses
 
 
 type
+  TEditorNotifier = class(TNotifierObject, IOTAEditorNotifier, IOTANotifier)
+  private
+    FNotifier: Integer;
+    FOTAEditor: IOTAEditor;
+  public
+    constructor Create(const Editor: IOTAEditor);
+    destructor Destroy; override;
+    procedure Modified;
+    procedure AfterSave;
+    procedure ViewNotification(const View: IOTAEditView; Operation: TOperation);
+    procedure ViewActivated(const View: IOTAEditView);
+    procedure Destroyed;
+    procedure RemoveNotifier;
+  end;
+
+
   TIDEWizard = class(TInterfacedObject, IOTAWizard, IOTANotifier)
   private
     FDICConfMenuItem: TMenuItem;
@@ -160,6 +171,8 @@ type
     procedure Destroyed;
     procedure Modified;
   end;
+
+
 const
   InvalidIndex = -1;
 
@@ -212,6 +225,7 @@ begin
 end;
 {$ENDIF}
 
+
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
 begin
   Result := (Instance <> nil) and Supports(Instance, Intf, Inst);
@@ -258,7 +272,7 @@ end;
 
 procedure TIDEWizard.InitColorizer;
 var
-  LServices : INTAServices;
+  LINTAServices : INTAServices;
 {$IF CompilerVersion >= 23}
   found : Boolean;
   s : string;
@@ -267,8 +281,8 @@ begin
   try
     if BorlandIDEServices <> nil then
     begin
-        LServices := (BorlandIDEServices as INTAServices);
-        if LServices <> nil then
+        LINTAServices := (BorlandIDEServices as INTAServices);
+        if LINTAServices <> nil then
         begin
           RegisterColorizerAddinOptions;
           TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
@@ -308,7 +322,7 @@ end;
 procedure TIDEWizard.FinalizeColorizer;
 begin
   FreeAndNil(TColorizerLocalSettings.ColorMap);
-  UnRegisterColorizerAddinOptions
+  UnRegisterColorizerAddinOptions;
 end;
 
 { TIDEWizard }
@@ -318,9 +332,8 @@ begin
   {$WARN SYMBOL_PLATFORM OFF}
   ReportMemoryLeaksOnShutdown:=DebugHook<>0;
   {$WARN SYMBOL_PLATFORM ON}
-  //AColorMap:=nil;
+  //SourceEditorNotifiers := TList.Create;
   TColorizerLocalSettings.Settings:=TSettings.Create;
-  //ColorizerForm := nil;
   RegisterPlugIn;
   AddMenuItems;
   InitColorizer();
@@ -346,14 +359,14 @@ begin
 
       IDEMenuItem := NTAServices.MainMenu.Items;
       if not Assigned(IDEMenuItem) then
-        raise Exception.Create('Was not possible found IDE Menu Item');
+        raise Exception.Create('Was not possible found the IDE Menu Item');
 
       ToolsMenuItem := nil;
       for Index := 0 to IDEMenuItem.Count - 1 do
         if CompareText(IDEMenuItem.Items[Index].Name, 'ToolsMenu') = 0 then
           ToolsMenuItem := IDEMenuItem.Items[Index];
       if not Assigned(ToolsMenuItem) then
-        raise Exception.Create('Was not possible found IDE Tools Menu Item');
+        raise Exception.Create('Was not possible found the IDE Tools Menu Item');
 
       FDICConfMenuItem := TMenuItem.Create(nil);
       FDICConfMenuItem.Name := sMenuItemName;
@@ -391,7 +404,6 @@ begin
   end;
 end;
 
-
 procedure TIDEWizard.AfterSave;
 begin
 end;
@@ -399,7 +411,6 @@ end;
 procedure TIDEWizard.BeforeSave;
 begin
 end;
-
 
 destructor TIDEWizard.Destroy;
 begin
@@ -420,7 +431,6 @@ end;
 procedure TIDEWizard.Execute;
 begin
 end;
-
 
 function TIDEWizard.GetIDString: string;
 begin
@@ -450,13 +460,10 @@ begin
  end;
 end;
 
-
-
 procedure TIDEWizard.RemoveMenuItems;
 begin
   FreeAndNil(FDICConfMenuItem);
 end;
-
 
 //function GetActiveFormEditor: IOTAFormEditor;
 //var
@@ -476,6 +483,55 @@ end;
 //    end;
 //  end;
 //end;
+
+{ TEditorNotifier }
+
+procedure TEditorNotifier.AfterSave;
+begin
+end;
+
+constructor TEditorNotifier.Create(const Editor: IOTAEditor);
+begin
+ inherited Create;
+ FOTAEditor := Editor;
+ FNotifier  := FOTAEditor.AddNotifier(Self as IOTAEditorNotifier);
+end;
+
+destructor TEditorNotifier.Destroy;
+begin
+  RemoveNotifier;
+  inherited;
+end;
+
+procedure TEditorNotifier.Destroyed;
+begin
+  RemoveNotifier;
+  inherited;
+end;
+
+procedure TEditorNotifier.Modified;
+begin
+end;
+
+procedure TEditorNotifier.RemoveNotifier;
+begin
+  if FNotifier<>InvalidIndex then
+  begin
+   FOTAEditor.RemoveNotifier(FNotifier);
+   FNotifier:=InvalidIndex;
+  end;
+end;
+
+procedure TEditorNotifier.ViewActivated(const View: IOTAEditView);
+begin
+end;
+
+procedure TEditorNotifier.ViewNotification(const View: IOTAEditView;
+  Operation: TOperation);
+begin
+  if Operation=opInsert then
+   ShowMessage(View.GetEditWindow.Form.ClassName);
+end;
 
 end.
 

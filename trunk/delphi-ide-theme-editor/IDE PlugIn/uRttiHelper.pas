@@ -38,6 +38,8 @@ uses
 function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
 procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
 function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
+function   GetRttiMemberValue(const Obj:  TObject;const MemberName:String; IsProp : Boolean) : TValue;
 function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
 procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
 procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
@@ -197,78 +199,158 @@ end;
 {$IFEND}
 
 {$IF CompilerVersion > 20}
-procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
+
+procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
 var
-  RttiProperty : TRttiProperty;
-  Instance     : Pointer;
-  Props        : TStringList;
-  i            : integer;
+  LProperty, RootProp    : TRttiProperty;
+  LField       : TRttiField;
+  LInstance    : Pointer;
+  MemberList      : TStringList;
+  i            : Integer;
 begin
-  RttiProperty:=nil;
-  Props:=TStringList.Create;
+  LProperty:=nil;
+  LField   :=nil;
+  MemberList:=TStringList.Create;
   try
-    Props.Delimiter:='.';
-    Props.DelimitedText:=PropName;
-    Instance:=Obj;
+    MemberList.Delimiter:='.';
+    MemberList.DelimitedText:=MemberName;
+    LInstance:=Obj;
 
-    if Props.Count>0 then
-     RttiProperty := ctx.GetType(Obj.ClassInfo).GetProperty(Props[0]);
+    //search the first member in the properties list
+    if MemberList.Count>0 then
+     LProperty := ctx.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
 
-    for i:=1 to Props.Count-1 do
+    //search the first member in the field list
+    if not Assigned(LProperty) then
+     LField := ctx.GetType(Obj.ClassInfo).GetField(MemberList[0]);
+
+    for i:=1 to MemberList.Count-1 do
      begin
-        if Assigned(RttiProperty) and (RttiProperty.PropertyType.TypeKind=tkClass) then
-         Instance          := RttiProperty.GetValue(Instance).AsObject
+        //Get the instance to the property
+        if Assigned(LProperty) and (LProperty.PropertyType.TypeKind=tkClass) then
+         LInstance          := LProperty.GetValue(LInstance).AsObject
         else
-        raise Exception.Create(Format('The property %s is not a class',[Props[i]]));
+        //Get the instance to the field
+        if Assigned(LField) and (LField.FieldType.TypeKind=tkClass) then
+         LInstance          := LField.GetValue(LInstance).AsObject
+        else
+        raise Exception.Create(Format('The member %s is not a class',[MemberList[i]]));
 
-        RttiProperty := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(Props[i]);
+        if Assigned(LProperty) then
+        begin
+          RootProp  := LProperty;
+          //search the current member in the properties list
+          LProperty := ctx.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
+           //search the current member in the field list
+           if not Assigned(LProperty)  then
+             LField := ctx.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
+        end
+        else
+        if Assigned(LField) then
+        begin
+          //search the current member in the properties list
+          LProperty  := ctx.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
+           //search the current member in the field list
+           if not Assigned(LProperty)  then
+              LField := ctx.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
+        end;
      end;
 
-    if Assigned(RttiProperty) then
-      RttiProperty.SetValue(Instance, AValue);
+    if IsProp and Assigned(LProperty) and Assigned(LInstance) then
+      LProperty.SetValue(LInstance, AValue)
+    else
+    if (not IsProp) and Assigned(LField) and Assigned(LInstance) then
+      LField.SetValue(LInstance, AValue);
+
   finally
-    Props.Free;
+    MemberList.Free;
   end;
 end;
 
-procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
+function  GetRttiMemberValue(const Obj:  TObject;const MemberName:String; IsProp : Boolean) : TValue;
 var
-  RttiField : TRttiField;
-  RttiProperty  : TRttiProperty;
-  Instance  : Pointer;
-  Fields    : TStringList;
-  i         : integer;
+  LProperty, RootProp    : TRttiProperty;
+  LField       : TRttiField;
+  LInstance    : Pointer;
+  MemberList      : TStringList;
+  i            : Integer;
 begin
-  RttiField:=nil;
-  RttiProperty:=nil;
-  Fields:=TStringList.Create;
+  LProperty:=nil;
+  LField   :=nil;
+  MemberList:=TStringList.Create;
   try
-    Fields.Delimiter:='.';
-    Fields.DelimitedText:=FieldName;
-    Instance:=Obj;
+    MemberList.Delimiter:='.';
+    MemberList.DelimitedText:=MemberName;
+    LInstance:=Obj;
 
-    if Fields.Count>0 then
-     RttiField := ctx.GetType(Obj.ClassInfo).GetField(Fields[0]);
+    //search the first member in the properties list
+    if MemberList.Count>0 then
+     LProperty := ctx.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
 
-    for i:=1 to Fields.Count-1 do
+    //search the first member in the field list
+    if not Assigned(LProperty) then
+     LField := ctx.GetType(Obj.ClassInfo).GetField(MemberList[0]);
+
+    for i:=1 to MemberList.Count-1 do
      begin
-        if Assigned(RttiField) and (RttiField.FieldType.TypeKind=tkClass) then
-         Instance          := RttiField.GetValue(Instance).AsObject
+        //Get the instance to the property
+        if Assigned(LProperty) and (LProperty.PropertyType.TypeKind=tkClass) then
+         LInstance          := LProperty.GetValue(LInstance).AsObject
         else
-        raise Exception.Create(Format('The field %s is not a class',[Fields[i]]));
+        //Get the instance to the field
+        if Assigned(LField) and (LField.FieldType.TypeKind=tkClass) then
+         LInstance          := LField.GetValue(LInstance).AsObject
+        else
+        raise Exception.Create(Format('The member %s is not a class',[MemberList[i]]));
 
-        //RttiField := ctx.GetType(RttiField.FieldType.Handle).GetField(Fields[i]);
-        RttiProperty:= ctx.GetType(RttiField.FieldType.Handle).GetProperty(Fields[i]);
+        if Assigned(LProperty) then
+        begin
+          RootProp  := LProperty;
+          //search the current member in the properties list
+          LProperty := ctx.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
+           //search the current member in the field list
+           if not Assigned(LProperty)  then
+             LField := ctx.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
+        end
+        else
+        if Assigned(LField) then
+        begin
+          //search the current member in the properties list
+          LProperty  := ctx.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
+           //search the current member in the field list
+           if not Assigned(LProperty)  then
+              LField := ctx.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
+        end;
      end;
 
-    if Assigned(RttiProperty) then
-       RttiProperty.SetValue(Instance, AValue)
+    if IsProp and Assigned(LProperty) and Assigned(LInstance) then
+      Result:= LProperty.GetValue(LInstance)
     else
-    if Assigned(RttiField) then
-      RttiField.SetValue(Instance, AValue);
+    if (not IsProp) and Assigned(LField) and Assigned(LInstance) then
+      Result:= LField.GetValue(LInstance);
   finally
-    Fields.Free;
+    MemberList.Free;
   end;
+end;
+
+procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
+begin
+  SetRttiMemberValue(Obj, PropName, AValue, True);
+end;
+
+procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
+begin
+  SetRttiMemberValue(Obj, FieldName, AValue, False);
+end;
+
+function  GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+begin
+  Result:=GetRttiMemberValue(Obj, PropName, True);
+end;
+
+function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
+begin
+  Result:=GetRttiMemberValue(Obj, FieldName, False);
 end;
 
 procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
@@ -278,72 +360,6 @@ begin
   m:=ctx.GetType(Obj.ClassInfo).GetMethod(Method);
   if m<>nil then
     m.Invoke(Obj, []);
-end;
-
-function  GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
-var
-  RttiProperty     : TRttiProperty;
-  Instance         : Pointer;
-  Props            : TStringList;
-  i                : integer;
-begin
-  RttiProperty:=nil;
-  Props:=TStringList.Create;
-  try
-    Props.Delimiter:='.';
-    Props.DelimitedText:=PropName;
-    Instance:=Obj;
-
-    if Props.Count>0 then
-     RttiProperty := ctx.GetType(Obj.ClassInfo).GetProperty(Props[0]);
-
-    for i:=1 to Props.Count-1 do
-     begin
-        if Assigned(RttiProperty) and (RttiProperty.PropertyType.TypeKind=tkClass) then
-         Instance          := RttiProperty.GetValue(Instance).AsObject
-        else
-        raise Exception.Create(Format('The property %s is not a class',[Props[i]]));
-          RttiProperty := ctx.GetType(RttiProperty.PropertyType.Handle).GetProperty(Props[i]);
-     end;
-
-    if Assigned(RttiProperty) then
-      Result:= RttiProperty.GetValue(Instance);
-  finally
-    Props.Free;
-  end;
-end;
-
-function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
-var
-  RttiField    : TRttiField;
-  Instance     : Pointer;
-  Fields       : TStringList;
-  i            : integer;
-begin
-  RttiField:=nil;
-  Fields:=TStringList.Create;
-  try
-    Fields.Delimiter:='.';
-    Fields.DelimitedText:=FieldName;
-    Instance:=Obj;
-
-    if Fields.Count>0 then
-     RttiField := ctx.GetType(Obj.ClassInfo).GetField(Fields[0]);
-
-    for i:=1 to Fields.Count-1 do
-     begin
-        if Assigned(RttiField) and (RttiField.FieldType.TypeKind=tkClass) then
-         Instance          := RttiField.GetValue(Instance).AsObject
-        else
-        raise Exception.Create(Format('The field %s is not a class',[Fields[i]]));
-          RttiField := ctx.GetType(RttiField.FieldType.Handle).GetField(Fields[i]);
-     end;
-
-    if Assigned(RttiField) then
-      Result:= RttiField.GetValue(Instance);
-  finally
-    fields.Free;
-  end;
 end;
 
 {$ELSE}
