@@ -82,7 +82,7 @@ var
   //Trampoline_SetDCBrushColor              : function (DC: HDC; Color: COLORREF): COLORREF; stdcall = nil;
   //Trampoline_CreateSolidBrush             : function (p1: COLORREF): HBRUSH; stdcall = nil;
   Trampoline_ProjectTree2PaintText         : procedure(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
-
+  Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
   FGutterBkColor : TColor = clNone;
 
 type
@@ -1022,6 +1022,26 @@ begin
   Trampoline_ProjectTree2PaintText(Self, Sender, TargetCanvas, Node, Column, TextType);
 end;
 
+//Hook for allow change font color in TProjectManagerForm.TVirtualStringTree ,
+//because this component is not using the colors set via RTTI
+//Note  : This is a temporal workaround.
+function CustomDrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
+var
+  sCaller : string;
+begin
+ if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+ begin
+  if GetTextColor(hDC) = GetSysColor(COLOR_WINDOWTEXT) then
+  begin
+    sCaller := ProcByLevel(2);
+    if SameText(sCaller, 'IDEVirtualTrees.TCustomVirtualStringTree.PaintNormalText') then
+      SetTextColor(hDC, TColorizerLocalSettings.ColorMap.FontColor);
+  end;
+ end;
+
+  Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
+end;
+
 const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
   sProjectTree2PaintText ='@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
@@ -1045,7 +1065,7 @@ begin
   //Trampoline_TBrush_SetColor                := InterceptCreate(@TBrushClass.SetColor,  @CustomBrushSetColor);
   //Trampoline_CreateSolidBrush                 := InterceptCreate(@Windows.CreateSolidBrush,  @CustomCreateSolidBrush);
   Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @CustomHeaderWndProc);
-
+  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @CustomDrawText);
 
 //  CorIdeModule := LoadLibrary('coreide180.bpl');
 //  if CorIdeModule<>0 then
@@ -1074,6 +1094,8 @@ begin
     InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
   if Assigned(Trampoline_ProjectTree2PaintText) then
     InterceptRemove(@Trampoline_ProjectTree2PaintText);
+  if Assigned(Trampoline_DrawText) then
+    InterceptRemove(@Trampoline_DrawText);
 end;
 
 {

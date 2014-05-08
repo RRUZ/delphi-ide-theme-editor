@@ -394,6 +394,7 @@ begin
     cbColorElementsChange(nil);
     DrawPalette;
     EditThemeName.Text:=cbThemeName.Text;
+    ColorBoxBase.Selected:=XPColorMap.Color;
   end;
 end;
 

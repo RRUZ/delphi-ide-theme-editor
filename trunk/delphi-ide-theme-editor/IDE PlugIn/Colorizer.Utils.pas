@@ -629,12 +629,12 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
     end
     else
-    if SameText(AComponent.ClassName, 'TBetterHintWindowVirtualDrawTree') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-    end
-    else
+//    if SameText(AComponent.ClassName, 'TBetterHintWindowVirtualDrawTree') then
+//    begin
+//      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+//      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+//    end
+//    else
     if  SameText(AComponent.ClassName, 'TRefactoringTree') then
     begin
         SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
@@ -642,7 +642,7 @@ begin
         SetRttiPropertyValue(AComponent,'Ctl3D', False);
     end
     else
-    if SameText(AComponent.ClassName, 'TVirtualStringTree') then
+    if SameText(AComponent.ClassName, 'TVirtualStringTree') or SameText(AComponent.ClassName, 'TBetterHintWindowVirtualDrawTree') then
     begin
         SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
         SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
