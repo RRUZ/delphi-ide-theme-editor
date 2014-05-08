@@ -48,14 +48,14 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object Label7: TLabel
           Left = 154
-          Top = 221
+          Top = 157
           Width = 25
           Height = 13
           Caption = 'Color'
         end
         object Label6: TLabel
           Left = 3
-          Top = 221
+          Top = 157
           Width = 38
           Height = 13
           Caption = 'Element'
@@ -67,22 +67,22 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 13
           Caption = 'LabelSetting'
         end
-        object Image1: TImage
-          Left = 3
-          Top = 95
+        object ImagePalette: TImage
+          Left = 5
+          Top = 93
           Width = 262
-          Height = 25
+          Height = 6
         end
         object Bevel1: TBevel
           Left = 3
-          Top = 296
+          Top = 320
           Width = 310
           Height = 5
           Shape = bsTopLine
         end
         object Label2: TLabel
           Left = 3
-          Top = 277
+          Top = 301
           Width = 37
           Height = 13
           Caption = 'Options'
@@ -194,14 +194,14 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object Label3: TLabel
           Left = 154
-          Top = 135
+          Top = 111
           Width = 51
           Height = 13
           Caption = 'Base Color'
         end
         object Label10: TLabel
           Left = 3
-          Top = 135
+          Top = 111
           Width = 27
           Height = 13
           Caption = 'Name'
@@ -214,7 +214,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Caption = 'Enabled'
           DoubleBuffered = True
           ParentDoubleBuffered = False
-          TabOrder = 6
+          TabOrder = 5
         end
         object cbThemeName: TComboBox
           Left = 3
@@ -228,7 +228,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object Button3: TButton
           Left = 354
-          Top = 152
+          Top = 128
           Width = 75
           Height = 25
           Caption = 'Save'
@@ -237,37 +237,28 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object CbClrElement: TColorBox
           Left = 154
-          Top = 240
+          Top = 176
           Width = 166
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 4
+          TabOrder = 3
           OnChange = CbClrElementChange
           OnGetColors = ColorBoxBaseGetColors
         end
         object BtnSelForColor: TButton
           Left = 326
-          Top = 240
+          Top = 176
           Width = 22
           Height = 22
           ImageIndex = 2
           Images = ImageList1
-          TabOrder = 5
+          TabOrder = 4
           OnClick = BtnSelForColorClick
         end
-        object cbColorElements: TComboBox
-          Left = 3
-          Top = 240
-          Width = 145
-          Height = 21
-          Style = csDropDownList
-          TabOrder = 3
-          OnChange = cbColorElementsChange
-        end
         object CheckBoxAutoColor: TCheckBox
-          Left = 3
-          Top = 182
+          Left = 273
+          Top = 105
           Width = 156
           Height = 17
           Caption = 'Auto Generate Color Values'
@@ -279,7 +270,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 254
           Height = 17
           Caption = 'Fix disabled icons draw in IDE Menus and toolbars'
-          TabOrder = 7
+          TabOrder = 6
         end
         object CheckBoxActivateDWM: TCheckBox
           Left = 326
@@ -289,7 +280,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Caption = 'Activate Glass colorization'
           DoubleBuffered = True
           ParentDoubleBuffered = False
-          TabOrder = 8
+          TabOrder = 7
           Visible = False
         end
         object CheckBoxGutterIcons: TCheckBox
@@ -298,7 +289,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 110
           Height = 17
           Caption = 'Modify Gutter Icons'
-          TabOrder = 9
+          TabOrder = 8
         end
         object ColorMapCombo: TComboBox
           Left = 3
@@ -306,7 +297,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 157
           Height = 21
           Style = csDropDownList
-          TabOrder = 10
+          TabOrder = 9
           Visible = False
         end
         object StyleCombo: TComboBox
@@ -315,36 +306,46 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 145
           Height = 21
           Style = csDropDownList
-          TabOrder = 11
+          TabOrder = 10
           Visible = False
         end
         object ColorBoxBase: TColorBox
           Left = 154
-          Top = 154
+          Top = 130
           Width = 166
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 12
+          TabOrder = 11
           OnChange = ColorBoxBaseChange
           OnGetColors = ColorBoxBaseGetColors
         end
         object Button1: TButton
           Left = 326
-          Top = 154
+          Top = 130
           Width = 22
           Height = 22
           ImageIndex = 2
           Images = ImageList1
-          TabOrder = 13
+          TabOrder = 12
           OnClick = Button1Click
         end
         object EditThemeName: TEdit
           Left = 3
-          Top = 154
+          Top = 130
           Width = 145
           Height = 21
+          TabOrder = 13
+        end
+        object ColorListBox1: TColorListBox
+          Left = 3
+          Top = 176
+          Width = 145
+          Height = 119
+          Selected = clScrollBar
+          Style = [cbCustomColors]
           TabOrder = 14
+          OnGetColors = ColorListBox1GetColors
         end
       end
       object TabSheet2: TTabSheet
@@ -379,7 +380,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
               Caption = 'Component'
               Width = 220
             end>
-          Items.ItemData = {}
           ReadOnly = True
           RowSelect = True
           TabOrder = 1
@@ -397,7 +397,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
               Caption = 'Name'
               Width = 200
             end>
-          Items.ItemData = {}
           ReadOnly = True
           RowSelect = True
           TabOrder = 0
@@ -497,9 +496,9 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object BtnApply: TButton
         Left = 4
         Top = 6
-        Width = 75
+        Width = 97
         Height = 25
-        Caption = 'Apply'
+        Caption = 'Apply Changes'
         TabOrder = 0
         OnClick = BtnApplyClick
       end
@@ -510,7 +509,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 280
     Top = 344
     Bitmap = {
-      494C010107000800700210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800A00210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -814,5 +813,9 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     UnusedColor = clWhite
     Left = 329
     Top = 5
+  end
+  object ImageList2: TImageList
+    Left = 340
+    Top = 344
   end
 end

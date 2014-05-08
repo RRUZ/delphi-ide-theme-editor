@@ -3,11 +3,6 @@ library DelphiIDEColorizer_XE4;
 
 uses
   {$IFDEF DEBUG}
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   {$ENDIF}
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
@@ -33,6 +28,6 @@ uses
   Vcl.Styles.Utils.Menus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas';
 
 {$R *.res}
-
+{$R VersionInfo.res}
 begin
 end.

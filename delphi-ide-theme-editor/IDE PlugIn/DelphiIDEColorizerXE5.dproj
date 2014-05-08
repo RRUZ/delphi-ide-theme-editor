@@ -69,7 +69,7 @@
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;Jcl;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <Icon_MainIcon>DelphiIDEColorizerXE_Icon.ico</Icon_MainIcon>
@@ -105,19 +105,14 @@
         <DCCReference Include="rtl.dcp"/>
         <DCCReference Include="vcl.dcp"/>
         <DCCReference Include="vclimg.dcp"/>
+        <DCCReference Include="Jcl.dcp"/>
         <DCCReference Include="Main.pas"/>
         <DCCReference Include="Colorizer.Utils.pas"/>
         <DCCReference Include="Colorizer.Settings.pas"/>
         <DCCReference Include="Colorizer.HookForms.pas"/>
         <DCCReference Include="Colorizer.Hooks.pas"/>
         <DCCReference Include="Colorizer.StoreColorMap.pas"/>
-        <DCCReference Include="..\Units\Vcl.Styles.Ext.pas"/>
         <DCCReference Include="ColorXPStyleActnCtrls.pas"/>
-        <DCCReference Include="Vcl.Styles.Utils.Menus.pas"/>
-        <DCCReference Include="Vcl.Styles.Utils.SysControls.pas"/>
-        <DCCReference Include="Vcl.Styles.Utils.SysStyleHook.pas"/>
-        <DCCReference Include="delphi-detours-library\DDetours.pas"/>
-        <DCCReference Include="delphi-detours-library\InstDecode.pas"/>
         <DCCReference Include="Colorizer.OptionsDlg.pas">
             <Form>FrameColorizer</Form>
             <DesignClass>TFrame</DesignClass>
@@ -131,6 +126,14 @@
         <DCCReference Include="..\Units\uRegistry.pas"/>
         <DCCReference Include="uRttiHelper.pas"/>
         <DCCReference Include="uIDEExpertUtils.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
+        <DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
+        <DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas"/>
+        <DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
+        <DCCReference Include="..\Units\uStackTrace.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -156,7 +159,7 @@
                     <VersionInfo Name="MajorVer">0</VersionInfo>
                     <VersionInfo Name="MinorVer">1</VersionInfo>
                     <VersionInfo Name="Release">2</VersionInfo>
-                    <VersionInfo Name="Build">185</VersionInfo>
+                    <VersionInfo Name="Build">187</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -168,7 +171,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName"/>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">0.1.2.185</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">0.1.2.187</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright"/>
                     <VersionInfoKeys Name="LegalTrademarks"/>

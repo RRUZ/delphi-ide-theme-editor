@@ -1,43 +1,9 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG OFF
-package DelphiIDEColorizerXE2;
+library DelphiIDEColorizer_XE6;
 
-{$R *.res}
-{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
-{$ALIGN 8}
-{$ASSERTIONS ON}
-{$BOOLEVAL OFF}
-{$DEBUGINFO ON}
-{$EXTENDEDSYNTAX ON}
-{$IMPORTEDDATA ON}
-{$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
-{$LONGSTRINGS ON}
-{$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
-{$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
-{$TYPEDADDRESS OFF}
-{$VARSTRINGCHECKS ON}
-{$WRITEABLECONST OFF}
-{$MINENUMSIZE 1}
-{$IMAGEBASE $400000}
-{$DEFINE DEBUG}
-{$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Delphi IDE Colorizer'}
-{$DESIGNONLY}
-{$IMPLICITBUILD ON}
-
-requires
-  DesignIDE,
-  rtl,
-  vcl,
-  vclimg,
-  Jcl;
-
-contains
+uses
+  {$IFDEF DEBUG}
+  {$ENDIF}
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
@@ -53,13 +19,15 @@ contains
   uRegistry in '..\Units\uRegistry.pas',
   uRttiHelper in 'uRttiHelper.pas',
   uIDEExpertUtils in 'uIDEExpertUtils.pas',
+  uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   Vcl.Styles.Ext in '..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas',
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
-  Vcl.Styles.Utils.Menus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas',
-  uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
-  uStackTrace in '..\Units\uStackTrace.pas';
+  Vcl.Styles.Utils.Menus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas';
 
+{$R *.res}
+{$R VersionInfo.res}
+begin
 end.

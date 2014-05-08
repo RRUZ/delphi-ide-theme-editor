@@ -66,23 +66,15 @@ type
 var
   TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
-  //Trampoline_TCanvas_PolyLine          : procedure(Self: TCanvas;const Points: array of TPoint) = nil;
-  //Trampoline_TCanvas_LineTo            : procedure(Self: TCanvas;X, Y: Integer) = nil;
-  //Trampoline_TCanvas_Polygon             : procedure(Self: TCanvas;const Points: array of TPoint) = nil;
-  //Trampoline_TCanvas_Draw             :  procedure(Self: TCanvas;X, Y: Integer; Graphic: TGraphic) = nil;
-  //Trampoline_TForm_Show                : procedure(Self: TForm;Value: Boolean) = nil;
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
-  Trampoline_TUxThemeStyle_DoDrawElement     : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
-  //Trampoline_TUxThemeStyle_DoGetElementColor : function (Self : TUxThemeStyle;Details: TThemedElementDetails; ElementColor: TElementColor; out Color: TColor): Boolean = nil;
-
-  //Trampoline_TBrush_SetColor              : procedure (Self:TBrush; Value: TColor) = nil;
-  Trampoline_TCustomListView_HeaderWndProc: procedure (Self:TCustomListView;var Message: TMessage) = nil;
-  //Trampoline_SetDCBrushColor              : function (DC: HDC; Color: COLORREF): COLORREF; stdcall = nil;
-  //Trampoline_CreateSolidBrush             : function (p1: COLORREF): HBRUSH; stdcall = nil;
+  Trampoline_TUxThemeStyle_DoDrawElement        : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
+  Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
   Trampoline_ProjectTree2PaintText         : procedure(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
+  Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
+
   FGutterBkColor : TColor = clNone;
 
 type
@@ -301,73 +293,6 @@ begin
    Trampoline_TCanvas_FillRect(Self, Rect);
 end;
 
-//procedure CustomPolyLine(Self: TCanvas;const Points: array of TPoint);
-//var
-//  sCaller : string;
-//begin
-//   sCaller := ProcByLevel(1);
-//   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\PolyLine.txt', Format('%s %s',[sCaller, SLineBreak]));
-//   Trampoline_TCanvas_PolyLine(Self, Points);
-//end;
-
-//procedure CustomPolygon(Self: TCanvas;const Points: array of TPoint);
-//var
-//  sCaller : string;
-//begin
-//   sCaller := ProcByLevel(2);
-//   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomPolygon.txt', Format('%s %s',[sCaller, SLineBreak]));
-//   Trampoline_TCanvas_Polygon(Self, Points);
-//end;
-
-//procedure CustomLineTo(Self: TCanvas;X, Y: Integer);
-//var
-//  sCaller : string;
-//begin
-//   //if Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Pen.Color=clBtnFace) then
-//   begin
-//    sCaller := ProcByLevel(1);
-//    if sCaller<>'' then
-//     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\LineTo.txt', Format('%s %s %s',[sCaller, IntToHex(Self.Pen.Color, 8), SLineBreak]));
-//   end;
-//    Trampoline_TCanvas_LineTo(Self, X, Y);
-//end;
-
-//procedure CustomDraw(Self: TCanvas;X, Y: Integer; Graphic: TGraphic);
-//var
-//  sCaller : string;
-//begin
-//
-//    sCaller := ProcByLevel(2);
-//    if sCaller<>'' then
-//     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\TCanvas_Draw.txt', Format('%s %s',[sCaller, SLineBreak]));
-//
-//  Trampoline_TCanvas_Draw(Self, X, Y, Graphic);
-//end;
-
-//procedure CustomShow(Self: TForm;Value: Boolean);
-//begin
-//  Trampoline_TForm_Show(Self, Value);
-//  TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Visible.txt', Format('%s %s',[Self.ClassName, SLineBreak]));
-//   if Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)<>-1) and not (csDesigning in Self.ComponentState) then
-//   if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.ActionBarStyle) then
-//      Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
-//end;
-
-//procedure CustomBrushSetColor(Self:TBrush; Value: TColor);
-////var
-////  sCaller : string;
-//begin
-////  sCaller := ProcByLevel(1);
-////    if sCaller<>'' then
-////     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomBrushSetColor.txt', Format('%s %s',[sCaller, SLineBreak]));
-//
-// // if Value=clBtnFace then
-//  // Value:=clRed;
-//
-//  Trampoline_TBrush_SetColor(Self, Value);
-//end;
-
-
 
 //Hook for paint the header of the TVirtualStringTree component
 function CustomDrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
@@ -437,16 +362,6 @@ begin
   end;
   Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
 end;
-
-//function  CustomSetDCBrushColor (DC: HDC; Color: COLORREF): COLORREF; stdcall;
-//begin
-//  Trampoline_SetDCBrushColor(DC, clRed);
-//end;
-
-//function  CustomCreateSolidBrush(p1: COLORREF): HBRUSH; stdcall;
-//begin
-//   Result:=Trampoline_CreateSolidBrush(clRed);
-//end;
 
 //Hook for paint IDE TStatusBar
 procedure CustomStatusBarWMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
@@ -992,7 +907,7 @@ begin
             Item.cchTextMax := Length(Buffer);
             Header_GetItem(Self.GetHeaderHandle, ColumnIndex, Item);
             DrawHeaderSection(Canvas, R, ColumnIndex, Item.pszText,
-              Self.GetHeaderHandle = ColumnIndex, False);
+              {FPressedSection = ColumnIndex} False, False);
 
             if RightOffset < R.Right then
               RightOffset := R.Right;
@@ -1039,34 +954,62 @@ begin
   end;
  end;
 
-  Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
+  Result:=Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
 end;
+
+//Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background
+function CustomGetSysColor(nIndex: Integer): DWORD; stdcall;
+var
+  sCaller : string;
+//  i  : Integer;
+begin
+   if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) and  (nIndex=COLOR_BTNFACE) then
+   begin
+    //Vcl.Controls.TWinControl.PaintHandler
+    //Vcl.Controls.TWinControl.WMPaint
+    //Vcl.Controls.TWinControl.WMPrintClient
+    //
+    //       ok  x2,x4,x6
+     sCaller := ProcByLevel(2);
+     if SameText(sCaller, '') then
+     begin
+       Result:=TColorizerLocalSettings.ColorMap.Color;
+       exit;
+     end;
+
+//    for i := 2 to 30 do
+//    begin
+//       sCaller := ProcByLevel(i);
+//       TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomGetSysColor.txt', Format('%d %s %s',[i, sCaller, SLineBreak]));
+//    end;
+//       TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomGetSysColor.txt', Format('%s %s',['---------------', SLineBreak]));
+
+   end;
+
+   Result:= Trampoline_GetSysColor(nIndex);
+end;
+
 
 const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
   sProjectTree2PaintText ='@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
 
 procedure InstallColorizerHooks;
-//var
-//  CorIdeModule : HMODULE;
-//  pProjectTree2PaintText : Pointer;
+var
+  GetSysColorOrgPointer : Pointer;
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
-  //Trampoline_TCanvas_PolyLine     :=InterceptCreate(@TCanvas.PolyLine, @CustomPolyLine);
-  //Trampoline_TCanvas_Polygon      :=InterceptCreate(@TCanvas.Polygon, @CustomPolygon);
-  //Trampoline_TCanvas_Draw           :=InterceptCreate(@TCanvas.Draw, @CustomDraw);
-  //Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @CustomLineTo);
   Trampoline_TStyleEngine_HandleMessage := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
   Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @CustomDrawElement);
-  //Trampoline_TUxThemeStyle_DoGetElementColor:= InterceptCreate(@TUxThemeStyleClass.DoGetElementColor,   @CustomGetElementColor);
-  //Trampoline_TBrush_SetColor                := InterceptCreate(@TBrushClass.SetColor,  @CustomBrushSetColor);
-  //Trampoline_CreateSolidBrush                 := InterceptCreate(@Windows.CreateSolidBrush,  @CustomCreateSolidBrush);
   Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @CustomHeaderWndProc);
   Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @CustomDrawText);
 
+   GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
+   if Assigned(GetSysColorOrgPointer) then
+     Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @CustomGetSysColor);
 //  CorIdeModule := LoadLibrary('coreide180.bpl');
 //  if CorIdeModule<>0 then
 //  begin
@@ -1096,6 +1039,8 @@ begin
     InterceptRemove(@Trampoline_ProjectTree2PaintText);
   if Assigned(Trampoline_DrawText) then
     InterceptRemove(@Trampoline_DrawText);
+  if Assigned(Trampoline_GetSysColor) then
+    InterceptRemove(@Trampoline_GetSysColor);
 end;
 
 {
@@ -1123,9 +1068,6 @@ end;
 
     002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
 }
-
-
-
 
 initialization
   InstallColorizerHooks;
