@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Controls>
+    <Control>
+        <Name>TIDEGradientTabSet</Name>
+		<ColorProperty Name="TabColors.ActiveStart" MapColor="Color" />
+		<ColorProperty Name="TabColors.ActiveEnd" MapColor="Color" />
+		<ColorProperty Name="TabColors.InActiveStart" MapColor="MenuColor" />
+		<ColorProperty Name="TabColors.InActiveEnd" MapColor="MenuColor" />
+		<ColorProperty Name="Font.Color" MapColor="FontColor" />
+    </Control>
+</Controls>

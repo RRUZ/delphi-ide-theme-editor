@@ -193,11 +193,18 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             00000049454E44AE426082}
         end
         object Label3: TLabel
-          Left = 3
+          Left = 154
           Top = 135
           Width = 51
           Height = 13
           Caption = 'Base Color'
+        end
+        object Label10: TLabel
+          Left = 3
+          Top = 135
+          Width = 27
+          Height = 13
+          Caption = 'Name'
         end
         object CheckBoxEnabled: TCheckBox
           Left = 379
@@ -214,12 +221,14 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Top = 64
           Width = 264
           Height = 21
+          Style = csDropDownList
+          Color = clBtnFace
           TabOrder = 1
           OnChange = cbThemeNameChange
         end
         object Button3: TButton
-          Left = 273
-          Top = 62
+          Left = 354
+          Top = 152
           Width = 75
           Height = 25
           Caption = 'Save'
@@ -310,7 +319,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Visible = False
         end
         object ColorBoxBase: TColorBox
-          Left = 3
+          Left = 154
           Top = 154
           Width = 166
           Height = 22
@@ -321,7 +330,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           OnGetColors = ColorBoxBaseGetColors
         end
         object Button1: TButton
-          Left = 175
+          Left = 326
           Top = 154
           Width = 22
           Height = 22
@@ -329,6 +338,13 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Images = ImageList1
           TabOrder = 13
           OnClick = Button1Click
+        end
+        object EditThemeName: TEdit
+          Left = 3
+          Top = 154
+          Width = 145
+          Height = 21
+          TabOrder = 14
         end
       end
       object TabSheet2: TTabSheet
@@ -489,10 +505,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 392
-    Top = 208
+    Left = 280
+    Top = 344
     Bitmap = {
-      494C0101070008005C0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101070008006C0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -767,8 +783,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     HighlightColor = clWhite
     BtnSelectedColor = clBtnFace
     UnusedColor = clWhite
-    Left = 289
-    Top = 149
+    Left = 313
+    Top = 21
   end
   object ColorDialog1: TColorDialog
     Left = 396
@@ -779,22 +795,22 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     FrameBottomRightOuter = clBlack
     BtnFrameColor = clBlack
     DisabledColor = cl3DDkShadow
-    Left = 336
-    Top = 147
+    Left = 384
+    Top = 3
   end
   object StandardColorMap: TStandardColorMap
     HighlightColor = clBtnHighlight
     UnusedColor = 15988985
     MenuColor = clMenu
     SelectedColor = clHighlight
-    Left = 384
-    Top = 156
+    Left = 424
+    Top = 20
   end
   object XPColorMap1: TXPColorMap
     HighlightColor = clWhite
     BtnSelectedColor = clBtnFace
     UnusedColor = clWhite
-    Left = 385
-    Top = 117
+    Left = 329
+    Top = 5
   end
 end

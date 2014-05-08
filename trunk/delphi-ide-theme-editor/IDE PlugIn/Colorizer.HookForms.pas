@@ -51,7 +51,7 @@ var
  ClassNameBuffer: Array[0..ClassNameBufferSize-1] of Char;
  LWinControl : TWinControl;
 begin
-   if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.HookedWindows) then
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.HookedWindows) then
    case nCode of
 
      HCBT_SETFOCUS:

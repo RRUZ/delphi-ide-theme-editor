@@ -186,6 +186,9 @@ begin
   end;
 end;
 
+
+{$ENDIF}
+
 procedure DumpObject(AObject: TObject);
 var
  LDumpInfo : TStrings;
@@ -198,8 +201,6 @@ begin
    LDumpInfo.Free;
   end;
 end;
-{$ENDIF}
-
 
 procedure RefreshIDETheme;
 begin
@@ -290,8 +291,8 @@ end;
 
 function ProcessDebuggerWindows(AColorMap:TCustomActionBarColorMap; AComponent: TComponent) : Boolean;
 const
-  FormsCount  = 7;
-  DebuggerForms : array  [0..FormsCount-1] of string = ('TDisassemblerView', 'TRegisterView', 'TFlagsView', 'TDumpView', 'TFPURegisterView', 'TXMMRegisterView', 'TCPUStackView');
+  FormsCount  = 6;
+  DebuggerForms : array  [0..FormsCount-1] of string = ({'TDisassemblerView',} 'TRegisterView', 'TFlagsView', 'TDumpView', 'TFPURegisterView', 'TXMMRegisterView', 'TCPUStackView');
 var
   LIndex : Integer;
 begin
@@ -309,7 +310,7 @@ end;
 function ProcessVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
 const
   NumWin  = 7;
-  CompList : array  [0..NumWin-1] of string = ('TMemo','TListView','TTreeView','TListBox','TCheckListBox','TExplorerCheckListBox','THintListView');
+  CompList : array  [0..NumWin-1] of string = ('TMemo', 'TListView', 'TTreeView', 'TListBox', 'TCheckListBox', 'TExplorerCheckListBox', 'THintListView');
 var
   Index : Integer;
 begin
@@ -317,9 +318,9 @@ begin
   for Index := 0 to NumWin-1 do
     if CompareText(AComponent.ClassName,CompList[Index])=0 then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Ctl3D',False);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'Ctl3D', False);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
       Result:=True;
       Break;
     end
@@ -354,10 +355,10 @@ begin
   for Index := 0 to NumWin-1 do
     if CompareText(AComponent.ClassName,CompList[Index])=0 then
     begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Ctl3D',False);
-      SetRttiPropertyValue(AComponent,'ParentBackGround',True);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+      SetRttiPropertyValue(AComponent,'Ctl3D', False);
+      SetRttiPropertyValue(AComponent,'ParentBackGround', True);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
       Result:=True;
       Break;
     end
@@ -458,13 +459,17 @@ begin
    //todo fix colors
     if AComponent is TCategoryButtons then //Name='TIDECategoryButtons' then
     begin
-      LCategoryButtons:=TCategoryButtons(AComponent);
-      LCategoryButtons.Color:=AColorMap.MenuColor;
-      LCategoryButtons.BackgroundGradientColor:=AColorMap.MenuColor;
-      LCategoryButtons.ButtonOptions:=LCategoryButtons.ButtonOptions+[boGradientFill];
-
+      LCategoryButtons:= TCategoryButtons(AComponent);
+      LCategoryButtons.Color:= AColorMap.MenuColor;
+      LCategoryButtons.BackgroundGradientColor:= AColorMap.MenuColor;
+      LCategoryButtons.ButtonOptions:= LCategoryButtons.ButtonOptions + [boGradientFill];
+      LCategoryButtons.HotButtonColor:= AColorMap.HighlightColor;
+      LCategoryButtons.SelectedButtonColor:= AColorMap.SelectedColor;
       for i := 0 to LCategoryButtons.Categories.Count-1 do
-         LCategoryButtons.Categories[i].Color:=AColorMap.Color;
+       begin
+        LCategoryButtons.Categories[i].Color := AColorMap.Color;
+        LCategoryButtons.Categories[i].TextColor := AColorMap.FontColor;
+       end;
 
       LCategoryButtons.Font.Color:=AColorMap.FontColor;
     end
@@ -475,25 +480,25 @@ begin
 //      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
 //    end
 //    else
-//    if SameText(AComponent.ClassName, 'TDisassemblerView') then
-//    begin
-//       //DumpComponent(AComponent);
-//      SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
-//      SetRttiPropertyValue(AComponent,'BreakpointColor',AColorMap.SelectedColor);
-//      SetRttiPropertyValue(AComponent,'BreakpointTextColor',AColorMap.SelectedFontColor);
-//      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-//
-//      {
-//         property BreakpointColor: TColor;
-//         property BreakpointTextColor: TColor;
-//         property Color: TColor;
-//         property Constraints: TSizeConstraints;
-//         property Ctl3D: Boolean;
-//         property Enabled: Boolean;
-//         property Font: TFont;
-//      }
-//    end
-//    else
+    if SameText(AComponent.ClassName, 'TDisassemblerView') then
+    begin
+       //DumpComponent(AComponent);
+      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+      SetRttiPropertyValue(AComponent,'BreakpointColor', AColorMap.SelectedColor);
+      SetRttiPropertyValue(AComponent,'BreakpointTextColor', AColorMap.SelectedFontColor);
+      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+
+      {
+         property BreakpointColor: TColor;
+         property BreakpointTextColor: TColor;
+         property Color: TColor;
+         property Constraints: TSizeConstraints;
+         property Ctl3D: Boolean;
+         property Enabled: Boolean;
+         property Font: TFont;
+      }
+    end
+    else
     if SameText(AComponent.ClassName, 'TTDStringGrid') then
     begin
       SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
@@ -502,16 +507,6 @@ begin
       SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
       SetRttiPropertyValue(AComponent,'GradientStartColor', AColorMap.Color);
       SetRttiPropertyValue(AComponent,'GradientEndColor', AColorMap.Color);
-    end
-    else
-    if SameText(AComponent.ClassName, 'THintListView') then
-    begin
-
-    end
-    else
-    if SameText(AComponent.ClassName, 'TPropertySheetControl') then
-    begin
-
     end
     else
     if AComponent is TPopupActionBar then
@@ -564,8 +559,8 @@ begin
     else
     if SameText(AComponent.ClassName ,'TDesktopComboBox') or  SameText(AComponent.ClassName ,'THistoryPropComboBox') then
     begin
-      if not TColorizerLocalSettings.Settings.UseVCLStyles then
-      SetWindowTheme(TWinControl(AComponent).Handle,'','');
+//      if not TColorizerLocalSettings.Settings.UseVCLStyles then
+//      SetWindowTheme(TWinControl(AComponent).Handle,'','');
       SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
       SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
       SetRttiPropertyValue(AComponent,'BevelKind', Integer(bkFlat));
@@ -583,6 +578,7 @@ begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
+      //DumpObject(AComponent);
     end
     else
     if SameText(AComponent.ClassName, 'TPanel') then
@@ -648,25 +644,22 @@ begin
     else
     if SameText(AComponent.ClassName, 'TVirtualStringTree') then
     begin
-        SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-        SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-        SetRttiPropertyValue(AComponent,'Ctl3D', False);
+        SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
+        SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
+        SetRttiPropertyValue(AComponent,'Header.Font.Color', AColorMap.FontColor); //ok
+        SetRttiPropertyValue(AComponent,'Ctl3D', False); //ok
 
+        SetRttiPropertyValue(AComponent,'Colors.TreeLineColor', AColorMap.FontColor); //ok
 
-        //LVirtualTreeState:=GetRttiPropertyValue(AComponent,'Columns.Header.Treeview.States').AsType<TVirtualTreeStates>;
-        //LVirtualTreeState:=GetRttiPropertyValue(AComponent,'TreeStates').AsType<TVirtualTreeStates>;
-//        GetRttiPropertyValue(AComponent,'TreeStates').ExtractRawData(@LVirtualTreeState);
-        //LVirtualTreeState:=Colorizer.Utils.TVirtualTreeStates(LVirtualTreeStatei);
+        SetRttiPropertyValue(AComponent,'Colors.SelectionRectangleBlendColor', AColorMap.SelectedColor);
+        SetRttiPropertyValue(AComponent,'Colors.SelectionRectangleBorderColor', AColorMap.FrameTopLeftInner);
 
+        SetRttiPropertyValue(AComponent,'Colors.FocusedSelectionColor', AColorMap.SelectedColor);   //ok
+        SetRttiPropertyValue(AComponent,'Colors.FocusedSelectionBorderColor', AColorMap.FrameTopLeftInner);  //ok
 
-        //SetRttiPropertyValue(AComponent,'Columns.Header.Columns.Background', AColorMap.MenuColor);
-//        if tsUseThemes in LVirtualTreeState then
-//         LVirtualTreeState:=LVirtualTreeState - [tsUseThemes];
-//
-//
-//        SetRttiPropertyValue(AComponent,'TreeStates', TValue.From(LVirtualTreeState));
+        SetRttiPropertyValue(AComponent,'Colors.UnfocusedSelectionColor', AColorMap.DisabledColor);   //ok
+        SetRttiPropertyValue(AComponent,'Colors.UnfocusedSelectionBorderColor', AColorMap.FrameTopLeftInner);  //ok
 
-      //SetRttiPropertyValue(AComponent,'TreeLineColor',AColorMap.FontColor);
         //  TVTColors
         //	__fastcall TVTColors(TBaseVirtualTree* AOwner);
         //	virtual void __fastcall Assign(Classes::TPersistent* Source);
@@ -687,6 +680,42 @@ begin
         //	__property Graphics::TColor TreeLineColor = {read=GetColor, write=SetColor, index=5, default=-16777200};
         //	__property Graphics::TColor UnfocusedSelectionColor = {read=GetColor, write=SetColor, index=6, default=-16777201};
         //	__property Graphics::TColor UnfocusedSelectionBorderColor = {read=GetColor, write=SetColor, index=10, default=-16777201};
+
+//  TVTColors = class(TPersistent)
+//  private
+//    FOwner: TBaseVirtualTree;
+//    FColors: array[0..15] of TColor;
+//    function GetColor(const Index: Integer): TColor;
+//    procedure SetColor(const Index: Integer; const Value: TColor);
+//    function GetBackgroundColor: TColor;
+//    function GetHeaderFontColor: TColor;
+//    function GetNodeFontColor: TColor;
+//  public
+//    constructor Create(AOwner: TBaseVirtualTree);
+//
+//    procedure Assign(Source: TPersistent); override;
+//    property BackGroundColor: TColor read GetBackgroundColor;
+//    property HeaderFontColor: TColor read  GetHeaderFontColor;
+//    property NodeFontColor: TColor read GetNodeFontColor;
+//  published
+//    property BorderColor: TColor index 7 read GetColor write SetColor default clBtnFace;
+//    property DisabledColor: TColor index 0 read GetColor write SetColor default clBtnShadow;
+//    property DropMarkColor: TColor index 1 read GetColor write SetColor default clHighlight;
+//    property DropTargetColor: TColor index 2 read GetColor write SetColor default clHighLight;
+//    property DropTargetBorderColor: TColor index 11 read GetColor write SetColor default clHighLight;
+//    property FocusedSelectionColor: TColor index 3 read GetColor write SetColor default clHighLight;
+//    property FocusedSelectionBorderColor: TColor index 9 read GetColor write SetColor default clHighLight;
+//    property GridLineColor: TColor index 4 read GetColor write SetColor default clBtnFace;
+//    property HeaderHotColor: TColor index 14 read GetColor write SetColor default clBtnShadow;
+//    property HotColor: TColor index 8 read GetColor write SetColor default clWindowText;
+//    property SelectionRectangleBlendColor: TColor index 12 read GetColor write SetColor default clHighlight;
+//    property SelectionRectangleBorderColor: TColor index 13 read GetColor write SetColor default clHighlight;
+//    property SelectionTextColor: TColor index 15 read GetColor write SetColor default clHighlightText;
+//    property TreeLineColor: TColor index 5 read GetColor write SetColor default clBtnShadow;
+//    property UnfocusedSelectionColor: TColor index 6 read GetColor write SetColor default clBtnFace;
+//    property UnfocusedSelectionBorderColor: TColor index 10 read GetColor write SetColor default clBtnFace;
+//  end;
+
        {$IFDEF DELPHIXE2_UP}
         if TColorizerLocalSettings.Settings.UseVCLStyles then
         begin
@@ -708,31 +737,6 @@ begin
     begin
       SetRttiPropertyValue(AComponent,'Color',AColorMap.Color);
       SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TGradientButton') then
-    begin
-       SetRttiPropertyValue(AComponent, 'Color', AColorMap.Color);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TScrollerButton') then
-    begin
-
-    end
-    else
-    if SameText(AComponent.ClassName, 'TClosableTabScroller') then
-    begin
-       SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor',AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'CloseButton.Transparent',False);
-       SetRttiPropertyValue(AComponent,'DropDownButton.BackgroundColor',AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'DropDownButton.Transparent',False);
-
-       SetRttiPropertyValue(AComponent,'LeftButton.BackgroundColor',AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'LeftButton.Transparent',False);
-       SetRttiPropertyValue(AComponent,'RightButton.BackgroundColor',AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'RightButton.Transparent',False);
-
-       SetRttiPropertyValue(AComponent,'FBrush.Color', AColorMap.MenuColor);
     end
     else
     if SameText(AComponent.ClassName, 'TEditControl') then   //TODO
@@ -831,24 +835,35 @@ begin
       Style :=tsModernTabs; //necessary for allow paint background color
     end
     else
+    if SameText(AComponent.ClassName, 'TClosableTabScroller') then
+    begin
+
+      //SetBkColor
+      //Canvas.Fillrect
+      //SetDCBrushColor
+      //CreateSolidBrush
+       SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor', AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'CloseButton.Transparent', False);
+       SetRttiPropertyValue(AComponent,'DropDownButton.BackgroundColor', AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'DropDownButton.Transparent', False);
+
+       SetRttiPropertyValue(AComponent,'LeftButton.BackgroundColor', AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'LeftButton.Transparent', False);
+       SetRttiPropertyValue(AComponent,'RightButton.BackgroundColor', AColorMap.MenuColor);
+       SetRttiPropertyValue(AComponent,'RightButton.Transparent', False);
+
+       SetRttiPropertyValue(AComponent,'Brush.Color', AColorMap.MenuColor);
+    end
+    else
     if SameText(AComponent.ClassName, 'TIDEGradientTabSet') or SameText(AComponent.ClassName, 'TGradientTabSet') then
     begin
-         SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);
+         SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
          SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
          SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
          SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-         SetRttiPropertyValue(AComponent,'ParentBackground', False);
-       {$IFDEF DELPHIXE2_UP}
-        {
-        if GlobalSettings.UseVCLStyles then
-        begin
-          if not IsStyleHookRegistered(AComponent.ClassType, TTabControlStyleHook) then
-           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTabControlStyleHook);
-        end;
-        }
+         //SetRttiFieldValue(AComponent,'FColor', AColorMap.Color);
 
-       {$ENDIF}
         if SameText(AComponent.ClassName, 'TGradientTabSet') then
         begin
             //DumpObject(GetRttiFieldValue(AComponent, 'FScroller').AsObject);
@@ -898,6 +913,10 @@ begin
     {$IFDEF DEBUG_PROFILER}
       lprofiler.Add(Format('%s End process component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
     {$ENDIF}
+
+
+    //if SameText(AComponent.Name, 'TDebugLogView') then
+    // DumpObject(AComponent);
 
     for Index := 0 to AComponent.ComponentCount - 1 do
     begin
