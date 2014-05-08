@@ -81,6 +81,8 @@ type
     Label8: TLabel;
     ButtonAddFormClass: TButton;
     ButtonRemoveFormClass: TButton;
+    EditThemeName: TEdit;
+    Label10: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -314,14 +316,14 @@ procedure TFormIDEColorizerSettings.Button3Click(Sender: TObject);
 Var
   ThemeName, FileName : string;
 begin
-   ThemeName:= Trim(cbThemeName.Text);
+   ThemeName:= Trim(EditThemeName.Text);
    if ThemeName='' then
    begin
      MsgBox('The theme name is empty');
      exit;
    end;
 
-   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+Trim(cbThemeName.Text)+'.idetheme';
+   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+ThemeName+'.idetheme';
    if FileExists(FileName) then
       if Application.MessageBox(PChar(Format('The theme %s already exists, Do you want overwritte the theme ?',[ThemeName])), 'Comfirmation',
         MB_YESNO + MB_ICONQUESTION) = idNo then
@@ -333,7 +335,7 @@ begin
    begin
     MsgBox(Format('The theme %s was saved',[ThemeName]));
     LoadThemes;
-    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(ThemeName);
+    cbThemeName.ItemIndex:=cbThemeName.Items.IndexOf(ThemeName);
    end;
 end;
 
@@ -391,6 +393,7 @@ begin
     LoadColorMapFromXmlFile(XPColorMap, FileName);
     cbColorElementsChange(nil);
     DrawPalette;
+    EditThemeName.Text:=cbThemeName.Text;
   end;
 end;
 
@@ -404,7 +407,7 @@ begin
  if CheckBoxAutoColor.Checked then
  begin
    GenerateColorMap(XPColorMap, ColorBoxBase.Selected, GetTextColor(ColorBoxBase.Selected));
-   cbColorElementsChange(nil);
+   //cbColorElementsChange(nil);
    DrawPalette;
  end;
 end;
@@ -634,7 +637,8 @@ begin
   CheckBoxGutterIcons.Checked:=FSettings.ChangeIconsGutter;
 //  StyleCombo.ItemIndex:=StyleCombo.Items.IndexOf(FSettings.StyleBarName);
 //  ColorMapCombo.ItemIndex:=ColorMapCombo.Items.IndexOf(FSettings.ColorMapName);
-  cbThemeName.Text:=FSettings.ThemeName;
+  EditThemeName.Text:=FSettings.ThemeName;
+  cbThemeName.ItemIndex:=cbThemeName.Items.IndexOf(EditThemeName.Text);
   cbThemeNameChange(nil);
 
   CheckBoxUseVClStyles.Checked:=FSettings.UseVCLStyles;

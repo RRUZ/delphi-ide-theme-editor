@@ -74,9 +74,14 @@ var
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
-  Trampoline_TUxThemeStyle_DoDrawElement  : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
+  Trampoline_TUxThemeStyle_DoDrawElement     : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
+  //Trampoline_TUxThemeStyle_DoGetElementColor : function (Self : TUxThemeStyle;Details: TThemedElementDetails; ElementColor: TElementColor; out Color: TColor): Boolean = nil;
+
   //Trampoline_TBrush_SetColor              : procedure (Self:TBrush; Value: TColor) = nil;
-  Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
+  Trampoline_TCustomListView_HeaderWndProc: procedure (Self:TCustomListView;var Message: TMessage) = nil;
+  //Trampoline_SetDCBrushColor              : function (DC: HDC; Color: COLORREF): COLORREF; stdcall = nil;
+  //Trampoline_CreateSolidBrush             : function (p1: COLORREF): HBRUSH; stdcall = nil;
+  Trampoline_ProjectTree2PaintText         : procedure(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
 
   FGutterBkColor : TColor = clNone;
 
@@ -163,21 +168,21 @@ end;
   //FooMethod='@Editcolorpage@TEditorColor@ColorSpeedSettingClick$qqrp14System@TObject';
 
 
-//function GetBplMethodAddress(Method: Pointer): Pointer;
-//type
-//  PJmpCode = ^TJmpCode;
-//  TJmpCode = packed record
-//    Code: Word;
-//    Addr: ^Pointer;
-//  end;
-//const
-//  csJmp32Code = $25FF;
-//begin
-//  if PJmpCode(Method)^.Code = csJmp32Code then
-//    Result := PJmpCode(Method)^.Addr^
-//  else
-//    Result := Method;
-//end;
+function GetBplMethodAddress(Method: Pointer): Pointer;
+type
+  PJmpCode = ^TJmpCode;
+  TJmpCode = packed record
+    Code: Word;
+    Addr: ^Pointer;
+  end;
+const
+  csJmp32Code = $25FF;
+begin
+  if PJmpCode(Method)^.Code = csJmp32Code then
+    Result := PJmpCode(Method)^.Addr^
+  else
+    Result := Method;
+end;
 
 procedure Bitmap2GrayScale(const BitMap: TBitmap);
 type
@@ -217,29 +222,33 @@ procedure CustomImageListHack_DoDraw(Self: TObject; Index: Integer; Canvas: TCan
 var
   MaskBitMap : TBitmap;
   GrayBitMap : TBitmap;
+  LImageList : TCustomImageListClass;
 begin
-  with TCustomImageListClass(Self) do
-  begin
-    if not HandleAllocated then Exit;
-    if Enabled then
-      ImageList_DrawEx(Handle, Index, Canvas.Handle, X, Y, 0, 0, GetRGBColor(BkColor), GetRGBColor(BlendColor), Style)
-    else
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
     begin
-      GrayBitMap := TBitmap.Create;
-      MaskBitMap := TBitmap.Create;
-      try
-        GrayBitMap.SetSize(Width, Height);
-        MaskBitMap.SetSize(Width, Height);
-        GetImages(Index, GrayBitMap, MaskBitMap);
-        Bitmap2GrayScale(GrayBitMap);
-        BitBlt(Canvas.Handle, X, Y, Width, Height, MaskBitMap.Canvas.Handle, 0, 0, SRCERASE);
-        BitBlt(Canvas.Handle, X, Y, Width, Height, GrayBitMap.Canvas.Handle, 0, 0, SRCINVERT);
-      finally
-        GrayBitMap.Free;
-        MaskBitMap.Free;
+      LImageList:=TCustomImageListClass(Self);
+      if not LImageList.HandleAllocated then Exit;
+      if Enabled then
+        ImageList_DrawEx(LImageList.Handle, Index, Canvas.Handle, X, Y, 0, 0, GetRGBColor(LImageList.BkColor), GetRGBColor(LImageList.BlendColor), Style)
+      else
+      begin
+        GrayBitMap := TBitmap.Create;
+        MaskBitMap := TBitmap.Create;
+        try
+          GrayBitMap.SetSize(LImageList.Width, LImageList.Height);
+          MaskBitMap.SetSize(LImageList.Width, LImageList.Height);
+          LImageList.GetImages(Index, GrayBitMap, MaskBitMap);
+          Bitmap2GrayScale(GrayBitMap);
+          BitBlt(Canvas.Handle, X, Y, LImageList.Width, LImageList.Height, MaskBitMap.Canvas.Handle, 0, 0, SRCERASE);
+          BitBlt(Canvas.Handle, X, Y, LImageList.Width, LImageList.Height, GrayBitMap.Canvas.Handle, 0, 0, SRCINVERT);
+        finally
+          GrayBitMap.Free;
+          MaskBitMap.Free;
+        end;
       end;
-    end;
-  end;
+    end
+  else
+    TrampolineCustomImageList_DoDraw(Self, Index, Canvas, X, Y, Style, Enabled);
 end;
 
 //Retuns the current Gutter color , using the background of the current syntax highlighter
@@ -279,7 +288,7 @@ procedure  CustomFillRect(Self: TCanvas;const Rect: TRect);
 var
   sCaller : string;
 begin
-   if Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
    begin
      sCaller := ProcByLevel(1);
      //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomFillRect.txt', Format('%s %s',[sCaller, SLineBreak]));
@@ -345,22 +354,22 @@ end;
 //end;
 
 //procedure CustomBrushSetColor(Self:TBrush; Value: TColor);
-//var
-//  sCaller : string;
+////var
+////  sCaller : string;
 //begin
 ////  sCaller := ProcByLevel(1);
 ////    if sCaller<>'' then
 ////     TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomBrushSetColor.txt', Format('%s %s',[sCaller, SLineBreak]));
 //
 // // if Value=clBtnFace then
-// //  Value:=clRed;
+//  // Value:=clRed;
 //
 //  Trampoline_TBrush_SetColor(Self, Value);
 //end;
 
 
 
-//Hook for paint the header of the TVisrtualString component
+//Hook for paint the header of the TVirtualStringTree component
 function CustomDrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
 const
   HP_HEADERITEMRIGHT = 3;
@@ -369,7 +378,8 @@ var
   LCanvas : TCanvas;
   SaveIndex: Integer;
 begin
-   if Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
+
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
    begin
     sCaller := ProcByLevel(2);
     if SameText(sCaller, 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader') then
@@ -378,10 +388,12 @@ begin
        LCanvas:=TCanvas.Create;
        try
          LCanvas.Handle:=DC;
-         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-         LCanvas.FillRect(R);
-         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(R);
+//         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+//         LCanvas.FillRect(R);
+          GradientFillCanvas(LCanvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, R, gdVertical);
+          LCanvas.Brush.Style:=TBrushStyle.bsClear;
+          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+          LCanvas.Rectangle(R);
        finally
           LCanvas.Handle:=0;
           LCanvas.Free;
@@ -394,11 +406,30 @@ begin
    Result:=Trampoline_TUxThemeStyle_DoDrawElement(Self, DC, Details, R, ClipRect);
 end;
 
+//function CustomGetElementColor(Self : TUxThemeStyle;Details: TThemedElementDetails; ElementColor: TElementColor; out Color: TColor): Boolean;
+//var
+//  sCaller : string;
+//begin
+//    sCaller := ProcByLevel(2);
+//
+// TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomGetElementColor.txt', Format('%s %s',[sCaller, SLineBreak]));
+//
+//   if (ElementColor=ecTextColor) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) { and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
+//   begin
+//    //sCaller := ProcByLevel(2);
+//    //if SameText(sCaller, 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader') then
+//    begin
+//       Color:=TColorizerLocalSettings.ColorMap.FontColor;
+//       exit(True);
+//    end;
+//   end;
+//   Result:=Trampoline_TUxThemeStyle_DoGetElementColor(Self, Details, ElementColor, Color);
+//end;
 
 //Hook, for avoid apply a VCL Style to a TWinControl in desing time
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
   begin
     Result:=False;
     if not Assigned(Control) then exit;
@@ -407,6 +438,15 @@ begin
   Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
 end;
 
+//function  CustomSetDCBrushColor (DC: HDC; Color: COLORREF): COLORREF; stdcall;
+//begin
+//  Trampoline_SetDCBrushColor(DC, clRed);
+//end;
+
+//function  CustomCreateSolidBrush(p1: COLORREF): HBRUSH; stdcall;
+//begin
+//   Result:=Trampoline_CreateSolidBrush(clRed);
+//end;
 
 //Hook for paint IDE TStatusBar
 procedure CustomStatusBarWMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
@@ -419,22 +459,12 @@ var
       procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
         const S: string; var R: TRect; Flags: Cardinal);
       var
-        ThemeTextColor: TColor;
         TextFormat: TTextFormatFlags;
       begin
         Canvas.Font := TWinControlClass(Self).Font;
         TextFormat := TTextFormatFlags(Flags);
-        if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
-        begin
-          if not Self.Enabled or (seFont in Self.StyleElements) then
-            Canvas.Font.Color := ThemeTextColor;
-          StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-        end
-        else
-        begin
-          Canvas.Refresh;
-          StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
-        end;
+        Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
       end;
 
       procedure Paint(Canvas : TCanvas);
@@ -550,7 +580,7 @@ var
       end;
 
 begin
-    if (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
     begin
      Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
      exit;
@@ -713,19 +743,21 @@ var
   LPngImage : TPngImage;
 begin
 
-  if  (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
   begin
     Result:=Trampoline_TDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State);
     exit;
   end;
 
   LStyle := StyleServices;
-  LDetails := LStyle.GetElementDetails(CHorzStates[State.Focused]);
 
   Canvas.Font.Color :=  TColorizerLocalSettings.ColorMap.FontColor;
   if Self.DockCaptionOrientation = dcoHorizontal then
   begin
+//      LDetails:= LStyle.GetElementDetails(twSmallCaptionActive);
+//      LStyle.DrawElement(Canvas.Handle, LDetails, CaptionRect);
 
+    LDetails := LStyle.GetElementDetails(CHorzStates[State.Focused]);
     Canvas.Pen.Width := 1;
     Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
 
@@ -738,7 +770,8 @@ begin
 
     Canvas.Brush.Color := LColor;
 
-    Canvas.FillRect(Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom));
+    //Canvas.FillRect(Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom));
+    GradientFillCanvas(Canvas, LColor, TColorizerLocalSettings.ColorMap.MenuColor, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
 
     Canvas.Pen.Color := GetShadowColor(Canvas.Pen.Color, -20);
     with CaptionRect do
@@ -864,22 +897,12 @@ procedure CustomHeaderWndProc(Self:TCustomListView;var Message: TMessage);
     procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
       const S: string; var R: TRect; Flags: Cardinal);
     var
-      ThemeTextColor: TColor;
       TextFormat: TTextFormatFlags;
     begin
       Canvas.Font := TWinControlClass(Self).Font;
       TextFormat := TTextFormatFlags(Flags);
-      if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
-      begin
-        if not Self.Enabled or (seFont in Self.StyleElements) then
-          Canvas.Font.Color := ThemeTextColor;
-        StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-      end
-      else
-      begin
-        Canvas.Refresh;
-        StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
-      end;
+      Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
     end;
 
     procedure DrawHeaderSection(Canvas: TCanvas; R: TRect; Index: Integer;
@@ -889,25 +912,23 @@ procedure CustomHeaderWndProc(Self:TCustomListView;var Message: TMessage);
       ImageList: HIMAGELIST;
       DrawState: TThemedHeader;
       IconWidth, IconHeight: Integer;
-      Details: TThemedElementDetails;
+      LDetails: TThemedElementDetails;
+      LBuffer : TBitmap;
     begin
       FillChar(Item, SizeOf(Item), 0);
       Item.Mask := HDI_FORMAT;
       Header_GetItem(Self.Handle, Index, Item);
-      if IsBackground then
-        DrawState := thHeaderItemNormal
-      else if IsPressed then
-        DrawState := thHeaderItemPressed
-      else
-        DrawState := thHeaderItemNormal;
 
-      Details := StyleServices.GetElementDetails(DrawState);
-      //StyleServices.DrawElement(Canvas.Handle, Details, R);
-      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-      Canvas.FillRect(R);
-      Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-      Canvas.Rectangle(R);
-
+      LBuffer:=TBitmap.Create;
+      try
+       LBuffer.SetSize(R.Width, R.Height);
+       LBuffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+       LBuffer.Canvas.Rectangle(Rect(0, 0, R.Right, R.Bottom));
+       GradientFillCanvas(LBuffer.Canvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, Rect(1, 1, R.Right-1, R.Bottom-1), gdVertical);
+       Canvas.Draw(R.Left, R.Top, LBuffer);
+      finally
+       LBuffer.Free;
+      end;
 
       ImageList := SendMessage(Self.Handle, HDM_GETIMAGELIST, 0, 0);
       Item.Mask := HDI_FORMAT or HDI_IMAGE;
@@ -920,7 +941,16 @@ procedure CustomHeaderWndProc(Self:TCustomListView;var Message: TMessage);
         Inc(R.Left, IconWidth + 5);
       end;
 
-      DrawControlText(Canvas, Details, Text, R, DT_VCENTER or DT_LEFT or  DT_SINGLELINE or DT_END_ELLIPSIS);
+      if IsBackground then
+        DrawState := thHeaderItemNormal
+      else
+      if IsPressed then
+        DrawState := thHeaderItemPressed
+      else
+        DrawState := thHeaderItemNormal;
+
+      LDetails := StyleServices.GetElementDetails(DrawState);
+      DrawControlText(Canvas, LDetails, Text, R, DT_VCENTER or DT_LEFT or  DT_SINGLELINE or DT_END_ELLIPSIS);
     end;
 
 
@@ -936,7 +966,7 @@ var
   LParentForm : TCustomForm;
 begin
 
-  if Message.Msg=WM_PAINT then
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and  (Message.Msg=WM_PAINT) then
   if not (csDesigning in Self.ComponentState) then
   begin
     LParentForm:= GetParentForm(Self);
@@ -986,9 +1016,20 @@ begin
   Trampoline_TCustomListView_HeaderWndProc(Self, Message);
 end;
 
-//const
+procedure CustomProjectTree2PaintText(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType});
+begin
+  //TargetCanvas.Font.Color:=clRed;
+  Trampoline_ProjectTree2PaintText(Self, Sender, TargetCanvas, Node, Column, TextType);
+end;
+
+const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
+  sProjectTree2PaintText ='@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
+
 procedure InstallColorizerHooks;
+//var
+//  CorIdeModule : HMODULE;
+//  pProjectTree2PaintText : Pointer;
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
@@ -1000,8 +1041,19 @@ begin
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
   Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @CustomDrawElement);
-//  Trampoline_TForm_Show                     := InterceptCreate(TCustomFormClass(nil).SetVisibleAddress,   @CustomShow);
+  //Trampoline_TUxThemeStyle_DoGetElementColor:= InterceptCreate(@TUxThemeStyleClass.DoGetElementColor,   @CustomGetElementColor);
+  //Trampoline_TBrush_SetColor                := InterceptCreate(@TBrushClass.SetColor,  @CustomBrushSetColor);
+  //Trampoline_CreateSolidBrush                 := InterceptCreate(@Windows.CreateSolidBrush,  @CustomCreateSolidBrush);
   Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @CustomHeaderWndProc);
+
+
+//  CorIdeModule := LoadLibrary('coreide180.bpl');
+//  if CorIdeModule<>0 then
+//  begin
+//   pProjectTree2PaintText := GetBplMethodAddress(GetProcAddress(CorIdeModule, sProjectTree2PaintText));
+//   if Assigned(pProjectTree2PaintText) then
+//    Trampoline_ProjectTree2PaintText:= InterceptCreate(pProjectTree2PaintText, @CustomProjectTree2PaintText);
+//  end;
 end;
 
 procedure RemoveColorizerHooks;
@@ -1020,6 +1072,8 @@ begin
     InterceptRemove(@Trampoline_TUxThemeStyle_DoDrawElement);
   if Assigned(Trampoline_TCustomListView_HeaderWndProc) then
     InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
+  if Assigned(Trampoline_ProjectTree2PaintText) then
+    InterceptRemove(@Trampoline_ProjectTree2PaintText);
 end;
 
 {

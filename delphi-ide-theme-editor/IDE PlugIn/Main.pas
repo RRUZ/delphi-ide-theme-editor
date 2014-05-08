@@ -25,11 +25,12 @@
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * TClosableTabScroller background
-  * Event log backgroung color  , fonts?
-
+  * TProjectManagerForm -> TVirtualStringTree font color
+  * Enable/Disable
 
   * restore support for Delphi 2007
 
+  * Event log background color done  - Via Delphi IDE
   *                    TDisassemblerView   done
   *  TStackViewFrame - TDumpVie0w    done
   *  TRegisterView    done
@@ -130,7 +131,7 @@ uses
 
 
 type
-  TEditorNotifier = class(TNotifierObject, IOTAEditorNotifier, IOTANotifier)
+  TSourceEditorNotifier = class(TNotifierObject, IOTAEditorNotifier, IOTANotifier)
   private
     FNotifier: Integer;
     FOTAEditor: IOTAEditor;
@@ -308,7 +309,8 @@ begin
               MessageDlg(Format('The VCL Style %s was not found',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);
           end;
           {$IFEND}
-          RefreshIDETheme();
+          if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
+            RefreshIDETheme();
         end;
     end;
   except
@@ -486,34 +488,34 @@ end;
 
 { TEditorNotifier }
 
-procedure TEditorNotifier.AfterSave;
+procedure TSourceEditorNotifier.AfterSave;
 begin
 end;
 
-constructor TEditorNotifier.Create(const Editor: IOTAEditor);
+constructor TSourceEditorNotifier.Create(const Editor: IOTAEditor);
 begin
  inherited Create;
  FOTAEditor := Editor;
  FNotifier  := FOTAEditor.AddNotifier(Self as IOTAEditorNotifier);
 end;
 
-destructor TEditorNotifier.Destroy;
+destructor TSourceEditorNotifier.Destroy;
 begin
   RemoveNotifier;
   inherited;
 end;
 
-procedure TEditorNotifier.Destroyed;
+procedure TSourceEditorNotifier.Destroyed;
 begin
   RemoveNotifier;
   inherited;
 end;
 
-procedure TEditorNotifier.Modified;
+procedure TSourceEditorNotifier.Modified;
 begin
 end;
 
-procedure TEditorNotifier.RemoveNotifier;
+procedure TSourceEditorNotifier.RemoveNotifier;
 begin
   if FNotifier<>InvalidIndex then
   begin
@@ -522,15 +524,13 @@ begin
   end;
 end;
 
-procedure TEditorNotifier.ViewActivated(const View: IOTAEditView);
+procedure TSourceEditorNotifier.ViewActivated(const View: IOTAEditView);
 begin
 end;
 
-procedure TEditorNotifier.ViewNotification(const View: IOTAEditView;
+procedure TSourceEditorNotifier.ViewNotification(const View: IOTAEditView;
   Operation: TOperation);
 begin
-  if Operation=opInsert then
-   ShowMessage(View.GetEditWindow.Form.ClassName);
 end;
 
 end.

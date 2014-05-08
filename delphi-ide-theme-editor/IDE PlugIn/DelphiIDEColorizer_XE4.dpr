@@ -24,6 +24,7 @@ uses
   uRegistry in '..\Units\uRegistry.pas',
   uRttiHelper in 'uRttiHelper.pas',
   uIDEExpertUtils in 'uIDEExpertUtils.pas',
+  uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   Vcl.Styles.Ext in '..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas',
