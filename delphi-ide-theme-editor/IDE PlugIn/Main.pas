@@ -25,11 +25,14 @@
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * TClosableTabScroller background
-  * TProjectManagerForm -> TVirtualStringTree font color
   * Enable/Disable
 
   * restore support for Delphi 2007
+}
 
+// DONE
+{
+  * TProjectManagerForm -> TVirtualStringTree font color
   * Event log background color done  - Via Delphi IDE
   *                    TDisassemblerView   done
   *  TStackViewFrame - TDumpVie0w    done

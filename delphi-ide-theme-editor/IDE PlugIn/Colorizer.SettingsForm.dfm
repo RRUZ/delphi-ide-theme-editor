@@ -379,6 +379,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
               Caption = 'Component'
               Width = 220
             end>
+          Items.ItemData = {}
           ReadOnly = True
           RowSelect = True
           TabOrder = 1
@@ -396,6 +397,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
               Caption = 'Name'
               Width = 200
             end>
+          Items.ItemData = {}
           ReadOnly = True
           RowSelect = True
           TabOrder = 0
@@ -508,7 +510,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 280
     Top = 344
     Bitmap = {
-      494C0101070008006C0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800700210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
