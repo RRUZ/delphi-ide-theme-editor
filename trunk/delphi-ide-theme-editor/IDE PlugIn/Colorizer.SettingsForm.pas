@@ -28,6 +28,18 @@ uses
   ActnMan, ActnColorMaps, Colorizer.Settings, uDelphiVersions{$IF CompilerVersion >= 23}, Vcl.Styles.Ext{$IFEND};
 
 type
+  TColorListBox = class(ExtCtrls.TColorListBox)
+  private
+    FItemIndex: Integer;
+    FOnChange: TNotifyEvent;
+    procedure CNCommand(var AMessage: TWMCommand); message CN_COMMAND;
+  protected
+    procedure Change; virtual;
+    procedure SetItemIndex(const Value: Integer); override;
+  published
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+  end;
+
   TFormIDEColorizerSettings = class(TForm)
     CheckBoxEnabled: TCheckBox;
     cbThemeName: TComboBox;
@@ -47,7 +59,6 @@ type
     BtnSelForColor: TButton;
     Label7: TLabel;
     Label6: TLabel;
-    cbColorElements: TComboBox;
     CheckBoxAutoColor: TCheckBox;
     LabelSetting: TLabel;
     TabSheetVCLStyles: TTabSheet;
@@ -57,7 +68,7 @@ type
     Panel1: TPanel;
     BtnApply: TButton;
     CheckBoxFixIDEDrawIcon: TCheckBox;
-    Image1: TImage;
+    ImagePalette: TImage;
     CheckBoxActivateDWM: TCheckBox;
     ColorDialog1: TColorDialog;
     Bevel1: TBevel;
@@ -83,13 +94,14 @@ type
     ButtonRemoveFormClass: TButton;
     EditThemeName: TEdit;
     Label10: TLabel;
+    ImageList2: TImageList;
+    ColorListBox1: TColorListBox;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
     procedure FormDestroy(Sender: TObject);
     procedure BtnSelForColorClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
-    procedure cbColorElementsChange(Sender: TObject);
     procedure CbClrElementChange(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure cbThemeNameChange(Sender: TObject);
@@ -103,11 +115,13 @@ type
     procedure ColorBoxBaseGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure ButtonAddFormClassClick(Sender: TObject);
     procedure ButtonRemoveFormClassClick(Sender: TObject);
+    procedure ColorListBox1GetColors(Sender: TCustomColorListBox;
+      Items: TStrings);
   private
     { Private declarations }
     FPreview:TVclStylesPreview;
     FSettings: TSettings;
-    procedure LoadColorElements;
+    procedure ColorListChange(Sender: TObject);
     procedure LoadThemes;
     //procedure LoadProperties(lType: TRttiType);
     procedure LoadSettings;
@@ -190,6 +204,8 @@ Uses
 TODO
   Enable / disable
 }
+
+
 
 function GetTextColor(const BackgroundColor: TColor): TColor;
 begin
@@ -362,21 +378,33 @@ procedure TFormIDEColorizerSettings.CbClrElementChange(Sender: TObject);
 Var
  PropName : string;
  AColor   : TColor;
+ OldIndex : Integer;
 begin
- PropName:=cbColorElements.Text;
- AColor:=CbClrElement.Selected;
- SetOrdProp(XPColorMap, PropName, AColor);
+ if ColorListBox1.ItemIndex>=0 then
+ begin
+   PropName:=ColorListBox1.Items[ColorListBox1.ItemIndex];
+   AColor:=CbClrElement.Selected;
+   SetOrdProp(XPColorMap, PropName, AColor);
+    OldIndex:=ColorListBox1.ItemIndex;
+    ColorListBox1.PopulateList;
+    if OldIndex>=0 then
+      ColorListBox1.ItemIndex:=OldIndex;
+ end;
 end;
 
-procedure TFormIDEColorizerSettings.cbColorElementsChange(Sender: TObject);
+procedure TFormIDEColorizerSettings.ColorListChange(Sender: TObject);
 Var
  PropName : string;
  AColor   : TColor;
 begin
- PropName:=cbColorElements.Text;
- AColor:= GetOrdProp(XPColorMap, PropName);
- CbClrElement.Selected:=AColor;
+ if ColorListBox1.ItemIndex>=0 then
+ begin
+   PropName:= ColorListBox1.Items[ColorListBox1.ItemIndex];
+   AColor  := GetOrdProp(XPColorMap, PropName);
+   CbClrElement.Selected:=AColor;
+ end;
 end;
+
 
 procedure TFormIDEColorizerSettings.CbStylesChange(Sender: TObject);
 begin
@@ -386,12 +414,17 @@ end;
 procedure TFormIDEColorizerSettings.cbThemeNameChange(Sender: TObject);
 Var
   FileName : string;
+  OldIndex : Integer;
 begin
   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+cbThemeName.Text+'.idetheme';
   if FileExists(FileName)  then
   begin
     LoadColorMapFromXmlFile(XPColorMap, FileName);
-    cbColorElementsChange(nil);
+    OldIndex:=ColorListBox1.ItemIndex;
+    ColorListBox1.PopulateList;
+    if OldIndex>=0 then
+      ColorListBox1.ItemIndex:=OldIndex;
+
     DrawPalette;
     EditThemeName.Text:=cbThemeName.Text;
     ColorBoxBase.Selected:=XPColorMap.Color;
@@ -408,7 +441,6 @@ begin
  if CheckBoxAutoColor.Checked then
  begin
    GenerateColorMap(XPColorMap, ColorBoxBase.Selected, GetTextColor(ColorBoxBase.Selected));
-   //cbColorElementsChange(nil);
    DrawPalette;
  end;
 end;
@@ -420,6 +452,25 @@ Var
 begin
   for Item in WebNamedColors do
    Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]),TObject(Item.Value));
+end;
+
+procedure TFormIDEColorizerSettings.ColorListBox1GetColors(
+  Sender: TCustomColorListBox; Items: TStrings);
+var
+  Count, Index: Integer;
+  Properties  : TPropList;
+  PropName : string;
+begin
+  Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
+    for Index := 0 to Pred(Count) do
+     if SameText(string(Properties[Index]^.PropType^.Name),'TColor') then
+     begin
+      PropName:=string(Properties[Index]^.Name);
+      if Items.IndexOf(PropName)>=0 then
+        Items.Objects[Items.IndexOf(PropName)]:=TObject(Integer(GetPropValue(XPColorMap, PropName)))
+      else
+       Items.AddObject( PropName, TObject(Integer(GetPropValue(XPColorMap, PropName))));
+     end;
 end;
 
 procedure TFormIDEColorizerSettings.FormClose(Sender: TObject;
@@ -437,6 +488,8 @@ begin
   for I := 0 to ComponentCount - 1 do
     if Components[I] is TCustomActionBarColorMap then
       ColorMapCombo.Items.AddObject(Components[I].Name, Components[I]);
+
+  ColorListBox1.OnChange:=ColorListChange;
 
   StyleCombo.Items.Assign(ActionBarStyles);
   FPreview:=TVclStylesPreview.Create(Self);
@@ -461,7 +514,7 @@ var
 begin
     LBitMap:=TBitmap.Create;
     try
-     CreateArrayBitmap(275,25,[
+     CreateArrayBitmap(ImagePalette.ClientWidth, ImagePalette.ClientHeight,[
       XPColorMap.ShadowColor,
       XPColorMap.Color,
       XPColorMap.DisabledColor,
@@ -483,7 +536,7 @@ begin
       XPColorMap.SelectedFontColor,
       XPColorMap.UnusedColor
       ], LBitMap);
-     Image1.Picture.Assign(LBitMap);
+     ImagePalette.Picture.Assign(LBitMap);
     finally
       LBitMap.Free;
     end;
@@ -567,7 +620,7 @@ end;
 
 procedure TFormIDEColorizerSettings.Init;
 begin
-  LoadColorElements;
+  //LoadColorElements;
   LoadThemes;
   LoadSettings;
 end;
@@ -579,22 +632,7 @@ begin
   //LoadProperties(TRttiType(ListViewTypes.Selected.Data));
 end;
 
-procedure TFormIDEColorizerSettings.LoadColorElements;
-var
-  Count, Index: Integer;
-  Properties  : TPropList;
-begin
-  Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
-  cbColorElements.Items.BeginUpdate;
-  try
-    for Index := 0 to Pred(Count) do
-     if SameText(string(Properties[Index]^.PropType^.Name),'TColor') then
-      cbColorElements.Items.Add(string(Properties[Index]^.Name));
-  finally
-    cbColorElements.Items.EndUpdate;
-  end;
-  cbColorElements.ItemIndex:=cbColorElements.Items.IndexOf('Color');
-end;
+
             {
 procedure TFrmIDEColorizerSettings.LoadProperties(lType: TRttiType);
 var
@@ -683,6 +721,34 @@ begin
 
    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
  end;
+end;
+
+{ TColorListBox }
+
+procedure TColorListBox.Change;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
+
+procedure TColorListBox.CNCommand(var AMessage: TWMCommand);
+begin
+  inherited;
+  if (AMessage.NotifyCode = LBN_SELCHANGE) and (FItemIndex <> ItemIndex) then
+  begin
+    FItemIndex := ItemIndex;
+    Change;
+  end;
+end;
+
+procedure TColorListBox.SetItemIndex(const Value: Integer);
+begin
+  inherited;
+  if FItemIndex <> ItemIndex then
+  begin
+    FItemIndex := ItemIndex;
+    Change;
+  end;
 end;
 
 end.

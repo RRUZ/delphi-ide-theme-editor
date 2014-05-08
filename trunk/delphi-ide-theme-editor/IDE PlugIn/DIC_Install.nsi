@@ -1,0 +1,425 @@
+
+!include "Sections.nsh"
+!include "MUI.nsh"
+!include "LogicLib.nsh"
+!include "WordFunc.nsh"
+
+
+SetOverwrite on
+SetCompress auto
+SetCompressor /SOLID lzma
+SetCompressorDictSize 32
+SetDatablockOptimize on
+SetDateSave on
+RequestExecutionLevel admin
+
+;!define DEBUG "1"
+!define SUPPORTS_BDS "1"
+!ifndef VER_MAJOR
+  !define VER_MAJOR "0"
+!endif
+
+!ifndef VER_MINOR
+  !define VER_MINOR "1.57.0"
+!endif
+
+!ifndef IDE_VERSION_D16
+!ifndef IDE_VERSION_D17
+!ifndef IDE_VERSION_DXE4
+!ifndef IDE_VERSION_DXE5
+!ifndef IDE_VERSION_DXE6
+
+  !define FULL_VERSION    "1"  
+  !define IDE_VERSION_D16 "1"
+  ;!define IDE_VERSION_D17 "1"
+  !define IDE_VERSION_DXE4 "1"
+  !define IDE_VERSION_DXE5 "1"
+  !define IDE_VERSION_DXE6 "1"
+
+!endif
+!endif
+!endif
+!endif
+!endif
+
+!ifndef FULL_VERSION
+!ifndef LITE_VERSION
+  !define IDE_VERSION
+
+  !ifdef IDE_VERSION_D16
+    !define IDE_SHORT_NAME "D2012"
+    !define IDE_LONG_NAME "RAD Studio XE2"
+  !endif
+  !ifdef IDE_VERSION_D17
+    !define IDE_SHORT_NAME "D2013"
+    !define IDE_LONG_NAME "RAD Studio XE3"
+  !endif
+  !ifdef IDE_VERSION_DXE4
+    !define IDE_SHORT_NAME "DXE4"
+    !define IDE_LONG_NAME "RAD Studio XE4"
+  !endif
+  !ifdef IDE_VERSION_DXE5
+    !define IDE_SHORT_NAME "DXE5"
+    !define IDE_LONG_NAME "RAD Studio XE5"
+  !endif
+  !ifdef IDE_VERSION_DXE6
+    !define IDE_SHORT_NAME "DXE6"
+    !define IDE_LONG_NAME "RAD Studio XE6"
+  !endif
+!endif
+!endif
+
+!ifdef IDE_VERSION
+  !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}"
+!else
+  !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}"
+!endif
+
+!ifndef INSTALLER_NAME
+  !define INSTALLER_NAME "Setup_DIC.exe"
+!endif
+
+
+!ifdef IDE_VERSION
+  Name "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
+!else
+  Name "$(APPNAME) ${VER_MAJOR}.${VER_MINOR}"
+!endif
+
+
+!ifdef IDE_VERSION
+Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
+!else
+Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR}"
+!endif
+
+
+BrandingText "$(APPNAME) Build ${__DATE__}"
+OutFile "Output\${INSTALLER_NAME}"
+
+VIProductVersion "${VER_MAJOR}.${VER_MINOR}"
+VIAddVersionKey ProductName "Delphi IDE Colorizer"
+VIAddVersionKey Comments "RRUZ"
+VIAddVersionKey CompanyName "The Road To Delphi"
+VIAddVersionKey LegalCopyright "The Road To Delphi"
+VIAddVersionKey FileDescription "Delphi Wizard"
+VIAddVersionKey FileVersion "${VER_MAJOR}.${VER_MINOR}"
+VIAddVersionKey ProductVersion "${VER_MAJOR}.${VER_MINOR}"
+VIAddVersionKey InternalName "Delphi IDE Colorizer"
+VIAddVersionKey LegalTrademarks "The Road To Delphi"
+VIAddVersionKey OriginalFilename ${INSTALLER_NAME}
+
+!verbose 3
+
+!define MUI_ICON "Images\DIC.ico"
+!define MUI_UNICON "Images\DIC.ico"
+
+!define MUI_ABORTWARNING
+
+!define MUI_WELCOMEPAGE_TITLE_3LINES
+!define MUI_FINISHPAGE_TITLE_3LINES
+
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "logoinstall.bmp"
+
+!insertmacro MUI_PAGE_WELCOME
+;!insertmacro MUI_PAGE_LICENSE $(SLICENSEFILE)
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\Help\$(SHELPCHM)"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION ShowReleaseNotes
+
+!define MUI_FINISHPAGE_NOREBOOTSUPPORT
+
+!insertmacro MUI_PAGE_FINISH
+
+!define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
+!define MUI_LANGDLL_REGISTRY_KEY "Software\The Road To Delphi\DIC"
+!define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+
+
+!include "Lang\DIC_en.nsh"
+!verbose 4
+
+
+XPstyle on
+WindowIcon on
+BGGradient off
+CRCCheck on
+AutoCloseWindow true
+ShowInstDetails show
+ShowUninstDetails show
+AllowRootDirInstall false
+
+
+;InstallDir "$PROGRAMFILES\The Road To Delphi\DIC"
+InstallDir "$LOCALAPPDATA\The Road To Delphi\DIC"
+InstallDirRegKey HKLM \
+                "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" \
+                "UninstallString"
+
+
+InstType "$(TYPICALINST)"
+InstType "$(MINIINST)"
+InstType /CUSTOMSTRING=$(CUSTINST)
+
+Section "$(PROGRAMDATA)" SecData
+  SectionIn 1 2 RO
+  ClearErrors
+
+FileLoop:
+
+!ifdef SUPPORTS_BDS
+!ifdef IDE_VERSION_D16
+  IfFileExists "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_D17
+  IfFileExists "$INSTDIR\XE3\DelphiIDEColorizer_XE3.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE3\DelphiIDEColorizer_XE3.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_DXE4
+  IfFileExists "$INSTDIR\XE4\DelphiIDEColorizer_XE4.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE4\DelphiIDEColorizer_XE4.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_DXE5
+  IfFileExists "$INSTDIR\XE5\DelphiIDEColorizer_XE5.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE5\DelphiIDEColorizer_XE5.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_DXE6
+  IfFileExists "$INSTDIR\XE6\DelphiIDEColorizer_XE6.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE6\DelphiIDEColorizer_XE6.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!endif
+
+  Goto InitOk
+
+FileInUse:
+  FileClose $0
+  MessageBox MB_OKCANCEL|MB_ICONQUESTION "$(SQUERYIDE)" IDOK FileLoop
+  Quit
+
+InitOk:
+  SetOutPath $INSTDIR
+  ;File "DIC.xml"
+  ;File "HookedWindows.dat"
+  ;File "Settings.ini"
+  ;File "..\..\License.*.txt"
+  ;SetOutPath $INSTDIR\Themes
+  ;File "Themes\*.idetheme"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayIcon" '"$INSTDIR\uninst.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayName" "${APPNAMEDIR}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayVersion" "${VERSION_STRING}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "HelpLink" "http://code.google.com/p/delphi-ide-theme-editor/"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "Publisher" "Rodrigo Ruz"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "URLInfoAbout" "http://code.google.com/p/delphi-ide-theme-editor/"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "URLUpdateInfo" "http://code.google.com/p/delphi-ide-theme-editor/"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "UninstallString" '"$INSTDIR\uninst.exe"'
+  WriteRegDWORD HKCU "Software\The Road To Delphi\DIC\Option" "CurrentLangID" $LANGUAGE
+  WriteUninstaller "$INSTDIR\uninst.exe"
+SectionEnd
+
+
+!ifdef IDE_VERSION_D16
+Section "RAD Studio XE2" SecD16
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE2
+  File "DIC.xml"
+  File "HookedWindows.dat"
+  File "Settings.ini"  
+  File "DelphiIDEColorizer_XE2.dll"
+  SetOutPath $INSTDIR\XE2\Themes
+  File "Themes\*.idetheme"  
+  WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "DelphiIDEColorizer_XE2" "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll"
+SectionEnd
+!endif
+
+!ifdef IDE_VERSION_D17
+Section "RAD Studio XE3" SecD17
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE3
+  File "DIC.xml"
+  File "HookedWindows.dat"
+  File "Settings.ini"  
+  File "DelphiIDEColorizer_XE3.dll"
+  SetOutPath $INSTDIR\XE3\Themes
+  File "Themes\*.idetheme" 
+  WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "DelphiIDEColorizer_XE3" "$INSTDIR\XE3\DelphiIDEColorizer_XE3.dll"
+SectionEnd
+!endif
+
+!ifdef IDE_VERSION_DXE4
+Section "RAD Studio XE4" SecDXE4
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE4
+  File "DIC.xml"
+  File "HookedWindows.dat"
+  File "Settings.ini"  
+  File "DelphiIDEColorizer_XE4.dll"
+  SetOutPath $INSTDIR\XE4\Themes
+  File "Themes\*.idetheme" 
+  WriteRegStr HKCU "Software\Embarcadero\BDS\11.0\Experts" "DelphiIDEColorizer_XE4" "$INSTDIR\XE4\DelphiIDEColorizer_XE4.dll"
+SectionEnd
+!endif
+
+!ifdef IDE_VERSION_DXE5
+Section "RAD Studio XE5" SecDXE5
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE5
+  File "DIC.xml"
+  File "HookedWindows.dat"
+  File "Settings.ini"  
+  File "DelphiIDEColorizer_XE5.dll"
+  SetOutPath $INSTDIR\XE5\Themes
+  File "Themes\*.idetheme" 
+  WriteRegStr HKCU "Software\Embarcadero\BDS\12.0\Experts" "DelphiIDEColorizer_XE5" "$INSTDIR\XE5\DelphiIDEColorizer_XE5.dll"
+SectionEnd
+!endif
+
+!ifdef IDE_VERSION_DXE6
+Section "RAD Studio XE6" SecDXE6
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE6
+  File "DIC.xml"
+  File "HookedWindows.dat"
+  File "Settings.ini"  
+  File "DelphiIDEColorizer_XE6.dll"
+  SetOutPath $INSTDIR\XE6\Themes
+  File "Themes\*.idetheme" 
+  WriteRegStr HKCU "Software\Embarcadero\BDS\14.0\Experts" "DelphiIDEColorizer_XE6" "$INSTDIR\XE6\DelphiIDEColorizer_XE6.dll"
+SectionEnd
+!endif
+
+!define SF_SELBOLD    9
+
+Function .onInit
+
+  !insertmacro MUI_LANGDLL_DISPLAY
+
+  Call SetCheckBoxes
+
+FunctionEnd
+
+
+!macro SET_COMPILER_CHECKBOX REGROOT REGKEY REGVALUE SECNAME
+
+  Push $0
+  Push $R0
+
+  SectionGetFlags "${SECNAME}" $0
+  ReadRegStr $R0 "${REGROOT}" "${REGKEY}" "${REGVALUE}"
+  StrCmp $R0 "" +3
+  IntOp $0 $0 | ${SF_SELBOLD}
+
+  goto +2
+  IntOp $0 $0 & ${SECTION_OFF}
+
+  SectionSetFlags "${SECNAME}" $0
+
+  Pop $R0
+  Pop $0
+
+!macroend
+
+
+Function SetCheckBoxes
+
+  StrCpy $1 ${SecData}
+
+!ifdef IDE_VERSION_D16
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecD16}
+!endif
+!ifdef IDE_VERSION_D17
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\10.0" "App" ${SecD17}
+!endif
+!ifdef IDE_VERSION_DXE4
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\11.0" "App" ${SecDXE4}
+!endif
+!ifdef IDE_VERSION_DXE5
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\12.0" "App" ${SecDXE5}
+!endif
+!ifdef IDE_VERSION_DXE6
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\14.0" "App" ${SecDXE6}
+!endif
+
+FunctionEnd
+
+
+Section "Uninstall"
+  Delete "$INSTDIR\*.*"
+  Delete "$INSTDIR\XE2\*.*"
+  Delete "$INSTDIR\XE3\*.*"
+  Delete "$INSTDIR\XE4\*.*"
+  Delete "$INSTDIR\XE5\*.*"
+  Delete "$INSTDIR\XE6\*.*"
+  Delete "$INSTDIR\XE2\Themes\*.*"
+  Delete "$INSTDIR\XE3\Themes\*.*"
+  Delete "$INSTDIR\XE4\Themes\*.*"
+  Delete "$INSTDIR\XE5\Themes\*.*"
+  Delete "$INSTDIR\XE6\Themes\*.*"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC"
+
+
+!ifdef IDE_VERSION_D16
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "DelphiIDEColorizer_XE2"
+!endif
+!ifdef IDE_VERSION_D17
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "DelphiIDEColorizer_XE3"
+!endif
+!ifdef IDE_VERSION_DXE4
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\11.0\Experts" "DelphiIDEColorizer_XE4"
+!endif
+!ifdef IDE_VERSION_DXE5
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "DelphiIDEColorizer_XE5"
+!endif
+!ifdef IDE_VERSION_DXE6
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "DelphiIDEColorizer_XE6"
+!endif
+
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(SQUERYDELETE)" IDNO NoDelete
+  DeleteRegKey HKCU "Software\The Road To Delphi\DIC"
+  RMDir /r $INSTDIR
+
+NODelete:
+SectionEnd
+
+Function un.onInit
+
+  !insertmacro MUI_UNGETLANGUAGE
+
+FunctionEnd
+
+
+Function ShowReleaseNotes
+!ifndef NO_HELP
+  IfFileExists "$INSTDIR\Help\$(SHELPCHM)" 0 OpenWeb
+    ExecShell "open" "$INSTDIR\Help\$(SHELPCHM)"
+    Goto FuncEnd
+
+  OpenWeb:
+!endif
+    ExecShell "open" "http://code.google.com/p/delphi-ide-theme-editor/"
+!ifndef NO_HELP
+  FuncEnd:
+!endif
+FunctionEnd

@@ -61,5 +61,4 @@ contains
   Vcl.Styles.Utils.Menus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas',
   uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   uStackTrace in '..\Units\uStackTrace.pas';
-
 end.
