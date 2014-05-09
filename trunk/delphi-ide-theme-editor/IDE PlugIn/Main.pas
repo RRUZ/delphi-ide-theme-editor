@@ -259,18 +259,20 @@ const
   'http://theroadtodelphi.wordpress.com/'+sLineBreak;
 var
   LAboutBoxServices: IOTAAboutBoxServices;
+  sVersion         : string;
 begin
   SplashBmp:=Graphics.TBitmap.Create;
   SplashBmp.Handle := LoadBitmap(hInstance, sLogoBitmap);
 
   AboutBmp:=Graphics.TBitmap.Create;
   AboutBmp.Handle := LoadBitmap(hInstance, sAboutBitnap);
+  sVersion:=uMisc.GetFileVersion(GetModuleLocation);
 
   if Assigned(SplashScreenServices) then
-    SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption, SplashBmp.Handle);
+    SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption+' '+sVersion, SplashBmp.Handle);
 
   if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) then
-   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [uMisc.GetFileVersion(GetModuleLocation)]), AboutBmp.Handle, False, 'Freeware');
+   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [sVersion]), AboutBmp.Handle, False, 'Freeware');
 end;
 
 procedure UnRegisterPlugIn;

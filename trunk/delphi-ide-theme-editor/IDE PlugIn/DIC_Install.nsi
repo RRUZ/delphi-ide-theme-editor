@@ -23,15 +23,15 @@ RequestExecutionLevel admin
   !define VER_MINOR "1.57.0"
 !endif
 
-!ifndef IDE_VERSION_D16
-!ifndef IDE_VERSION_D17
+!ifndef IDE_VERSION_DXE2
+!ifndef IDE_VERSION_DXE3
 !ifndef IDE_VERSION_DXE4
 !ifndef IDE_VERSION_DXE5
 !ifndef IDE_VERSION_DXE6
 
   !define FULL_VERSION    "1"  
-  !define IDE_VERSION_D16 "1"
-  ;!define IDE_VERSION_D17 "1"
+  !define IDE_VERSION_DXE2 "1"
+  ;!define IDE_VERSION_DXE3 "1"
   !define IDE_VERSION_DXE4 "1"
   !define IDE_VERSION_DXE5 "1"
   !define IDE_VERSION_DXE6 "1"
@@ -43,14 +43,13 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef FULL_VERSION
-!ifndef LITE_VERSION
   !define IDE_VERSION
 
-  !ifdef IDE_VERSION_D16
+  !ifdef IDE_VERSION_DXE2
     !define IDE_SHORT_NAME "D2012"
     !define IDE_LONG_NAME "RAD Studio XE2"
   !endif
-  !ifdef IDE_VERSION_D17
+  !ifdef IDE_VERSION_DXE3
     !define IDE_SHORT_NAME "D2013"
     !define IDE_LONG_NAME "RAD Studio XE3"
   !endif
@@ -67,7 +66,6 @@ RequestExecutionLevel admin
     !define IDE_LONG_NAME "RAD Studio XE6"
   !endif
 !endif
-!endif
 
 !ifdef IDE_VERSION
   !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}"
@@ -79,13 +77,11 @@ RequestExecutionLevel admin
   !define INSTALLER_NAME "Setup_DIC.exe"
 !endif
 
-
 !ifdef IDE_VERSION
   Name "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
 !else
   Name "$(APPNAME) ${VER_MAJOR}.${VER_MINOR}"
 !endif
-
 
 !ifdef IDE_VERSION
 Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
@@ -93,21 +89,12 @@ Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
 Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR}"
 !endif
 
-
 BrandingText "$(APPNAME) Build ${__DATE__}"
 OutFile "Output\${INSTALLER_NAME}"
 
-VIProductVersion "${VER_MAJOR}.${VER_MINOR}"
-VIAddVersionKey ProductName "Delphi IDE Colorizer"
-VIAddVersionKey Comments "RRUZ"
-VIAddVersionKey CompanyName "The Road To Delphi"
-VIAddVersionKey LegalCopyright "The Road To Delphi"
-VIAddVersionKey FileDescription "Delphi Wizard"
-VIAddVersionKey FileVersion "${VER_MAJOR}.${VER_MINOR}"
-VIAddVersionKey ProductVersion "${VER_MAJOR}.${VER_MINOR}"
-VIAddVersionKey InternalName "Delphi IDE Colorizer"
-VIAddVersionKey LegalTrademarks "The Road To Delphi"
-VIAddVersionKey OriginalFilename ${INSTALLER_NAME}
+Function InitVersion
+  !packhdr tmp.dat '"C:\Program Files (x86)\Resource Hacker\ResHacker.exe" -addoverwrite tmp.dat, tmp.dat, VersionInfo.RES, versioninfo,1,'
+FunctionEnd
 
 !verbose 3
 
@@ -131,8 +118,8 @@ VIAddVersionKey OriginalFilename ${INSTALLER_NAME}
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\Help\$(SHELPCHM)"
-!define MUI_FINISHPAGE_SHOWREADME_FUNCTION ShowReleaseNotes
+;!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\Help\$(SHELPCHM)"
+;!define MUI_FINISHPAGE_SHOWREADME_FUNCTION ShowReleaseNotes
 
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 
@@ -175,14 +162,14 @@ Section "$(PROGRAMDATA)" SecData
 FileLoop:
 
 !ifdef SUPPORTS_BDS
-!ifdef IDE_VERSION_D16
+!ifdef IDE_VERSION_DXE2
   IfFileExists "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll" 0 +4
   FileOpen $0 "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D17
+!ifdef IDE_VERSION_DXE3
   IfFileExists "$INSTDIR\XE3\DelphiIDEColorizer_XE3.dll" 0 +4
   FileOpen $0 "$INSTDIR\XE3\DelphiIDEColorizer_XE3.dll" a
   IfErrors FileInUse
@@ -240,8 +227,11 @@ InitOk:
 SectionEnd
 
 
-!ifdef IDE_VERSION_D16
-Section "RAD Studio XE2" SecD16
+
+  
+
+!ifdef IDE_VERSION_DXE2
+Section "RAD Studio XE2" SecDXE2
   SectionIn 1 2
   SetOutPath $INSTDIR\XE2
   File "DIC.xml"
@@ -254,8 +244,8 @@ Section "RAD Studio XE2" SecD16
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D17
-Section "RAD Studio XE3" SecD17
+!ifdef IDE_VERSION_DXE3
+Section "RAD Studio XE3" SecDXE3
   SectionIn 1 2
   SetOutPath $INSTDIR\XE3
   File "DIC.xml"
@@ -313,11 +303,9 @@ SectionEnd
 !define SF_SELBOLD    9
 
 Function .onInit
-
-  !insertmacro MUI_LANGDLL_DISPLAY
-
+  ;!insertmacro MUI_LANGDLL_DISPLAY
+  Call InitVersion
   Call SetCheckBoxes
-
 FunctionEnd
 
 
@@ -342,15 +330,34 @@ FunctionEnd
 !macroend
 
 
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!ifdef IDE_VERSION_DXE2
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE2} "Delphi IDE Colorizer for Delphi XE2"
+!endif
+!ifdef IDE_VERSION_DXE3
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE3} "Delphi IDE Colorizer for Delphi XE3"
+!endif
+!ifdef IDE_VERSION_DXE4
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE4} "Delphi IDE Colorizer for Delphi XE4"
+!endif
+!ifdef IDE_VERSION_DXE5
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE5} "Delphi IDE Colorizer for Delphi XE5"
+!endif
+!ifdef IDE_VERSION_DXE6
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE6} "Delphi IDE Colorizer for Delphi XE6"
+!endif
+	
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
 Function SetCheckBoxes
 
   StrCpy $1 ${SecData}
 
-!ifdef IDE_VERSION_D16
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecD16}
+!ifdef IDE_VERSION_DXE2
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecDXE2}
 !endif
-!ifdef IDE_VERSION_D17
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\10.0" "App" ${SecD17}
+!ifdef IDE_VERSION_DXE3
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\10.0" "App" ${SecDXE3}
 !endif
 !ifdef IDE_VERSION_DXE4
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\11.0" "App" ${SecDXE4}
@@ -380,10 +387,10 @@ Section "Uninstall"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC"
 
 
-!ifdef IDE_VERSION_D16
+!ifdef IDE_VERSION_DXE2
   DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "DelphiIDEColorizer_XE2"
 !endif
-!ifdef IDE_VERSION_D17
+!ifdef IDE_VERSION_DXE3
   DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "DelphiIDEColorizer_XE3"
 !endif
 !ifdef IDE_VERSION_DXE4
@@ -403,23 +410,21 @@ Section "Uninstall"
 NODelete:
 SectionEnd
 
-Function un.onInit
-
-  !insertmacro MUI_UNGETLANGUAGE
-
-FunctionEnd
+;Function un.onInit
+;  !insertmacro MUI_UNGETLANGUAGE
+;FunctionEnd
 
 
-Function ShowReleaseNotes
-!ifndef NO_HELP
-  IfFileExists "$INSTDIR\Help\$(SHELPCHM)" 0 OpenWeb
-    ExecShell "open" "$INSTDIR\Help\$(SHELPCHM)"
-    Goto FuncEnd
+;Function ShowReleaseNotes
+;!ifndef NO_HELP
+;  IfFileExists "$INSTDIR\Help\$(SHELPCHM)" 0 OpenWeb
+    ;ExecShell "open" "$INSTDIR\Help\$(SHELPCHM)"
+;   Goto FuncEnd
 
-  OpenWeb:
-!endif
-    ExecShell "open" "http://code.google.com/p/delphi-ide-theme-editor/"
-!ifndef NO_HELP
-  FuncEnd:
-!endif
-FunctionEnd
+; OpenWeb:
+;endif
+;   ExecShell "open" "http://code.google.com/p/delphi-ide-theme-editor/"
+;ifndef NO_HELP
+; FuncEnd:
+;endif
+;FunctionEnd
