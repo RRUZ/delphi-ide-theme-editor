@@ -352,6 +352,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           460
           430)
@@ -406,6 +410,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 26
@@ -443,6 +451,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheet1: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -509,7 +521,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 280
     Top = 344
     Bitmap = {
-      494C010107000800A00210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800A40210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F

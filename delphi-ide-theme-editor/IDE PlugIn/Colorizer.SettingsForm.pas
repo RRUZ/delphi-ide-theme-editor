@@ -498,8 +498,8 @@ begin
   FSettings:=TSettings.Create;
   //CheckBoxActivateDWM.Enabled:=DwmIsEnabled;
   {$IF CompilerVersion >= 23}
-  TabSheetVCLStyles.TabVisible:=True;
-  {$ELSE}
+  TabSheetVCLStyles.TabVisible:={$IFDEF DLLWIZARD}False{$ELSE}True{$ENDIF};
+  {$ELSE CompilerVersion}
   TabSheetVCLStyles.TabVisible:=False;
   {$IFEND}
   ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
