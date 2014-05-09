@@ -23,6 +23,12 @@ unit Colorizer.Hooks;
 
 interface
 
+ procedure InstallColorizerHooks;
+ procedure RemoveColorizerHooks;
+
+
+implementation
+
 uses
 {$IF CompilerVersion >= 23}
   Vcl.Styles,
@@ -49,10 +55,6 @@ uses
   CaptionedDockTree,
   GraphUtil,
   DDetours;
-
-
-
-implementation
 
 type
  TWinControlClass        = class(TWinControl);
@@ -1069,10 +1071,10 @@ end;
     002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
 }
 
-initialization
-  InstallColorizerHooks;
-
-finalization
-  RemoveColorizerHooks;
+//initialization
+//  InstallColorizerHooks;
+//
+//finalization
+//  RemoveColorizerHooks;
 end.
 

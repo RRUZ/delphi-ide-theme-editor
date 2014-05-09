@@ -30,17 +30,25 @@ uses
  VCL.Themes,
  VCL.Styles,
  {$ENDIF}
+ Classes,
+ {$IFDEF DELPHI2009_UP}
+ System.Generics.Collections,
+ {$ENDIF}
  ActnMan,
  uDelphiVersions,
  ActnColorMaps,
  Windows,
  Graphics,
  Colorizer.Settings,
- ColorXPStyleActnCtrls,
- Classes;
+ ColorXPStyleActnCtrls;
+
+{.$DEFINE ENABLELOG}
+
+procedure AddLog(const msg : string);
 
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False); overload;
 procedure RefreshIDETheme; overload;
+procedure RestoreIDESettings();
 
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False);
@@ -54,6 +62,9 @@ procedure RegisterVClStylesFiles;
  type
    TColorizerLocalSettings = class
    public
+      {$IFDEF DELPHI2009_UP}
+      class var ActnStyleList : TList<TActionManager>;
+      {$ENDIF}
       class var ColorMap       : TCustomActionBarColorMap;
       class var ActionBarStyle : TActionBarStyle;
       class var HookedWindows  : TStringList;
@@ -79,7 +90,6 @@ uses
  {$ENDIF}
  {$IFDEF DELPHI2009_UP}
  PngImage,
- System.Generics.Collections,
  {$ENDIF}
  {$IFDEF DELPHI2010_UP}
  IOUtils,
@@ -123,16 +133,6 @@ var
   lDumped       : TStringList;
 {$ENDIF}
 
-{$IFDEF DELPHI2010_UP}
-var
-  ctx           : TRttiContext;
-{$ENDIF}
-
-{$IFDEF DELPHI2009_UP}
-var
-  //ActnStyleList : TDictionary<TActionManager, TActionBarStyle>;
-  ActnStyleList : TList<TActionManager>;
-{$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
 procedure RegisterVClStylesFiles;
@@ -153,7 +153,12 @@ begin
 end;
 {$ENDIF}
 
-
+procedure AddLog(const msg : string);
+begin
+{$IFDEF ENABLELOG}
+   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+{$ENDIF}
+end;
 
 {$IFDEF DEBUG_PROFILER}
 //DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
@@ -819,8 +824,8 @@ begin
       {$IFDEF DELPHI2009_UP}
 //      if not ActnStyleList.ContainsKey(LActionManager) then
 //          ActnStyleList.Add(LActionManager, LActionManager.Style);
-      if ActnStyleList.IndexOf(LActionManager)=-1 then
-          ActnStyleList.Add(LActionManager);
+      if TColorizerLocalSettings.ActnStyleList.IndexOf(LActionManager)=-1 then
+          TColorizerLocalSettings.ActnStyleList.Add(LActionManager);
       {$ENDIF}
       LActionManager.Style := AStyle;
     end
@@ -927,64 +932,104 @@ begin
     end;
 end;
 
+//
+//type
+//  TCustomActionBarClass = class(TCustomActionBar);
+//  TCustomActionManagerHelper = class helper for TCustomActionManager
+//  private
+//    procedure SetFStyleRW(const Value: TActionBarStyle);
+//    function GetFOnStyleChangedRW: TStyleChanged;
+//    function GetFStyleRW: TActionBarStyle;
+//  public
+//   property FStyleRW : TActionBarStyle read GetFStyleRW write SetFStyleRW;
+//   property FOnStyleChangedRW: TStyleChanged read GetFOnStyleChangedRW;
+//  end;
+//
+//
+//{ TCustomActionManagerHelper }
+//
+//function TCustomActionManagerHelper.GetFOnStyleChangedRW: TStyleChanged;
+//begin
+//  Result:=Self.FOnStyleChanged;
+//end;
+//
+//function TCustomActionManagerHelper.GetFStyleRW: TActionBarStyle;
+//begin
+//  Result:=Self.FStyle;
+//end;
+//
+//procedure TCustomActionManagerHelper.SetFStyleRW(const Value: TActionBarStyle);
+//begin
+//  Self.FStyle:=Value;
+//end;
+
 
 procedure RestoreActnManagerStyles;
+
+
+//  procedure SetStyle(ActionManager : TCustomActionManager; const Value: TActionBarStyle);
+//  var
+//    I: Integer;
+//  begin
+//    if ActionManager.Style <> Value then
+//    begin
+//      ActionManager.FStyleRW := Value;
+//      if Assigned(ActionManager.ActionBars) then
+//      for I := 0 to ActionManager.ActionBars.Count - 1 do
+//      begin
+//        if Assigned(ActionManager.ActionBars[I].ActionBar) then
+//        begin
+//          ActionManager.ActionBars[I].ActionBar.RecreateControls;
+//          if ActionManager.ActionBars[I].ActionBar.ColorMap = TCustomActionBarClass(ActionManager.ActionBars[I].ActionBar).FDefaultColorMap then
+//            ActionManager.ActionBars[I].ActionBar.ColorMap := nil;
+//          ActionManager.ActionBars[I].ActionBar.Invalidate;
+//        end;
+//      end;
+//      if Assigned(ActionManager.FOnStyleChangedRW) then
+//        ActionManager.FOnStyleChangedRW(ActionManager);
+////      if (csDesigning in ActionManager.ComponentState) and not (csLoading in ActionManager.ComponentState) then
+////        NotifyDesigner(nil);
+//    end;
+//  end;
+
+{$IFNDEF DLLWIZARD}
 var
   LActionManager : TActionManager;
+{$ENDIF}
 begin
-{$IFDEF DELPHI2009_UP}
-  if (ActnStyleList.Count>0)  and Assigned(ActionBarStyles) then
-    for LActionManager in ActnStyleList{.Keys} do
-       //LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
-      if ActionBarStyles.IndexOf(DefaultActnBarStyle)>=0 then
-      try
-       LActionManager.Style:= ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
-      except  //sometimes the references to the objects contained in ActionBarStyles are lost when the IDE is closed,
-              //So this is necesary to avoid access violations.
-      end
-{$ELSE}
+{$IFNDEF DLLWIZARD}
+ {$IFDEF DELPHI2009_UP}
+  try
+    if (TColorizerLocalSettings.ActnStyleList.Count>0)  and Assigned(ActionBarStyles) then
+    begin
+      for LActionManager in TColorizerLocalSettings.ActnStyleList{.Keys} do
+      begin
+         //LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+        if ActionBarStyles.IndexOf(DefaultActnBarStyle)>=0 then
+        begin
+         if Assigned(LActionManager.Style) and Assigned(ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)]) then
+         begin
+           //AddLog('ActionBarStyles '+ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)].GetStyleName);
+           LActionManager.Style:= ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+           //SetStyle(LActionManager, ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)]);
+         end;
+        end;
+      end;
+    end;
+  except on e: exception do //sometimes the references to the objects contained in ActionBarStyles are lost when the IDE is closed.
+    AddLog(Format(' LActionManager.Style exception RestoreActnManagerStyles Message %s Trace %s ',[e.Message, e.StackTrace]));
+  end;
+ {$ELSE DELPHI2009_UP}
    //TODO
+ {$ENDIF}
 
 {$ENDIF}
 end;
 
+procedure RestoreIDESettings();
 var
  NativeColorMap : TCustomActionBarColorMap;
-
-initialization
-  //LObjectList:=TObjectList<THelperClass>.Create;
-{$IFDEF DELPHI2009_UP}
-  //ActnStyleList := TDictionary<TActionManager, TActionBarStyle>.Create;
-  ActnStyleList := TList<TActionManager>.Create;
-{$ENDIF}
-{$IFDEF DEBUG_PROFILER}
-  DumpAllTypes;
-{$ENDIF}
-//  TColorizerLocalSettings.XPColorMap      :=TXPColorMap.Create(nil);
-//  TColorizerLocalSettings.TwilightColorMap:=TTwilightColorMap.Create(nil);
-//  TColorizerLocalSettings.StandardColorMap:=TStandardColorMap.Create(nil);
-
-  TColorizerLocalSettings.ColorMap:=nil;
-  TColorizerLocalSettings.Settings:=nil;
-  TColorizerLocalSettings.ImagesGutterChanged:=False;
-  TColorizerLocalSettings.HookedWindows:=TStringList.Create;
-  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
-{$IFDEF DELPHI2010_UP}
-  ctx:=TRttiContext.Create;
-{$ENDIF}
-
-{$IFDEF DEBUG_PROFILER}
-  ShowMessage('warning DEBUG_PROFILER mode Activated');
-  lprofiler:=TStringList.Create;
-  lpignored:=TStringList.Create;
-  lDumped  :=TStringList.Create;
-{$ENDIF}
-
-  TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
-  FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
-
-  TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
-finalization
+begin
 {$IFDEF DELPHIXE2_UP}
   if TColorizerLocalSettings.Settings.UseVCLStyles then
     if not TStyleManager.ActiveStyle.IsSystemStyle  then
@@ -1006,23 +1051,22 @@ finalization
   finally
     NativeColorMap.Free;
   end;
-
   RestoreActnManagerStyles();
-  FreeAndNil(TColorizerLocalSettings.Settings);
-  TColorizerLocalSettings.IDEData.Free;
+end;
 
-//  TColorizerLocalSettings.XPColorMap.Free;
-//  TColorizerLocalSettings.StandardColorMap.Free;
-//  TColorizerLocalSettings.TwilightColorMap.Free;
+initialization
+{$IFDEF DEBUG_PROFILER}
+  DumpAllTypes;
+{$ENDIF}
 
-{$IFDEF DELPHI2009_UP}
-  ActnStyleList.Free;
+{$IFDEF DEBUG_PROFILER}
+  ShowMessage('warning DEBUG_PROFILER mode Activated');
+  lprofiler:=TStringList.Create;
+  lpignored:=TStringList.Create;
+  lDumped  :=TStringList.Create;
 {$ENDIF}
-  TColorizerLocalSettings.HookedWindows.Free;
-  TColorizerLocalSettings.HookedWindows:=nil;
-{$IFDEF DELPHI2010_UP}
-  ctx.Free;
-{$ENDIF}
+
+finalization
 
 {$IFDEF DEBUG_PROFILER}
   lprofiler.SaveToFile(ExtractFilePath(GetBplLocation())+'Profiler\profiler.txt');

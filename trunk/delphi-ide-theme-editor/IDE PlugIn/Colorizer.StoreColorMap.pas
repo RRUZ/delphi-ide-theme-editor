@@ -27,8 +27,8 @@ uses
   ActnMan,
   ActnColorMaps;
 
-procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
-procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
+procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
+procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
 
 
 implementation
@@ -46,7 +46,7 @@ uses
 const
   Msxml2_DOMDocument='Msxml2.DOMDocument.6.0';
 
-procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
+procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
 var
   PropName  : string;
   XmlDocIDETheme : OleVariant;
@@ -75,12 +75,12 @@ begin
            SetOrdProp(AColorMap,PropName,StringToColor(Node.text));
         end;
   finally
-   XmlDocIDETheme    :=Unassigned;
+   XmlDocIDETheme  :=Unassigned;
   end;
 end;
 
 
-procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap;const FileName:string);
+procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
 var
   PropName  : string;
   AColor    : TColor;
