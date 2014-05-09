@@ -400,7 +400,7 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "DelphiIDEColorizer_XE5"
 !endif
 !ifdef IDE_VERSION_DXE6
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "DelphiIDEColorizer_XE6"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "DelphiIDEColorizer_XE6"
 !endif
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(SQUERYDELETE)" IDNO NoDelete

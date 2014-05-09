@@ -22,6 +22,7 @@
 unit Colorizer.Hooks;
 
 interface
+{$I ..\Common\Jedi.inc}
 
  procedure InstallColorizerHooks;
  procedure RemoveColorizerHooks;
@@ -30,12 +31,12 @@ interface
 implementation
 
 uses
-{$IF CompilerVersion >= 23}
+{$IFDEF DELPHIXE2_UP}
   Vcl.Styles,
   Vcl.Themes,
   Messages,
   Controls,
-{$IFEND}
+{$ENDIF}
   Forms,
   System.IOUtils,
   ExtCtrls,
@@ -70,7 +71,10 @@ var
   Trampoline_TCanvas_FillRect          : procedure(Self: TCanvas;const Rect: TRect) = nil;
   Trampoline_TStyleEngine_HandleMessage: function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure(Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
-  Trampoline_TDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
+  Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
+  {$IFDEF DELPHIXE6_UP}
+  Trampoline_ModernDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
+  {$ENDIF}
   Trampoline_TUxThemeStyle_DoDrawElement        : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
   Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
   Trampoline_ProjectTree2PaintText         : procedure(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
@@ -332,26 +336,6 @@ begin
    end;
    Result:=Trampoline_TUxThemeStyle_DoDrawElement(Self, DC, Details, R, ClipRect);
 end;
-
-//function CustomGetElementColor(Self : TUxThemeStyle;Details: TThemedElementDetails; ElementColor: TElementColor; out Color: TColor): Boolean;
-//var
-//  sCaller : string;
-//begin
-//    sCaller := ProcByLevel(2);
-//
-// TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomGetElementColor.txt', Format('%s %s',[sCaller, SLineBreak]));
-//
-//   if (ElementColor=ecTextColor) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) { and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
-//   begin
-//    //sCaller := ProcByLevel(2);
-//    //if SameText(sCaller, 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader') then
-//    begin
-//       Color:=TColorizerLocalSettings.ColorMap.FontColor;
-//       exit(True);
-//    end;
-//   end;
-//   Result:=Trampoline_TUxThemeStyle_DoGetElementColor(Self, Details, ElementColor, Color);
-//end;
 
 //Hook, for avoid apply a VCL Style to a TWinControl in desing time
 function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
@@ -806,6 +790,8 @@ begin
       LPngImage.free;
     end;
   end;
+
+  Exit(0);
 end;
 
 //Hook for the TCustomListView component
@@ -994,11 +980,18 @@ end;
 
 const
 // sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
-  sProjectTree2PaintText ='@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
+  sProjectTree2PaintText      = '@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
+{$IFDEF DELPHIXE6_UP}
+  sModernThemeDrawDockCaption = '@Moderntheme@TModernDockCaptionDrawer@DrawDockCaption$qqrxp20Vcl@Graphics@TCanvasrx18System@Types@TRectrx38Vcl@Captioneddocktree@TParentFormState';
+{$ENDIF}
 
 procedure InstallColorizerHooks;
 var
   GetSysColorOrgPointer : Pointer;
+{$IFDEF DELPHIXE6_UP}
+  ModernThemeModule           : HMODULE;
+  pModernThemeDrawDockCaption : Pointer;
+{$ENDIF}
 begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
@@ -1019,6 +1012,17 @@ begin
 //   if Assigned(pProjectTree2PaintText) then
 //    Trampoline_ProjectTree2PaintText:= InterceptCreate(pProjectTree2PaintText, @CustomProjectTree2PaintText);
 //  end;
+
+{$IFDEF DELPHIXE6_UP}
+  ModernThemeModule := LoadLibrary('ModernTheme200.bpl');
+  if ModernThemeModule<>0 then
+  begin
+   pModernThemeDrawDockCaption := GetBplMethodAddress(GetProcAddress(ModernThemeModule, sModernThemeDrawDockCaption));
+   if Assigned(pModernThemeDrawDockCaption) then
+     Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(pModernThemeDrawDockCaption, @CustomDrawDockCaption);
+  end;
+{$ENDIF}
+
 end;
 
 procedure RemoveColorizerHooks;
@@ -1043,6 +1047,10 @@ begin
     InterceptRemove(@Trampoline_DrawText);
   if Assigned(Trampoline_GetSysColor) then
     InterceptRemove(@Trampoline_GetSysColor);
+{$IFDEF DELPHIXE6_UP}
+  if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
+    InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
+{$ENDIF}
 end;
 
 {

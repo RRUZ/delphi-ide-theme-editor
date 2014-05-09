@@ -1066,6 +1066,11 @@ initialization
   lDumped  :=TStringList.Create;
 {$ENDIF}
 
+{$IFDEF ENABLELOG}
+  ShowMessage('Log enabled');
+{$ENDIF}
+
+
 finalization
 
 {$IFDEF DEBUG_PROFILER}

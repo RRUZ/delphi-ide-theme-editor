@@ -1,0 +1,1403 @@
+Turbo Dump  Version 6.5.2.0 Copyright (c) 1988-2013 Embarcadero Technologies, Inc.
+         Display of File c:\program files (x86)\embarcadero\studio\14.0\bin\moderntheme200.bpl
+
+Old Executable Header
+
+DOS File Size                                      95378h  (611192. )
+Load Image Size                                      210h  (   528. )
+Relocation Table entry count                          0000h  (     0. )
+Relocation Table address                              0040h  (    64. )
+Size of header record      (in paragraphs)            0004h  (     4. )
+Minimum Memory Requirement (in paragraphs)            000Fh  (    15. )
+Maximum Memory Requirement (in paragraphs)            FFFFh  ( 65535. )
+File load checksum                                    0000h  (     0. )
+Overlay Number                                        001Ah  (    26. )
+
+Initial Stack Segment  (SS:SP)			  0000:00B8
+Program Entry Point    (CS:IP)			  0000:0000
+
+
+Portable Executable (PE) File
+
+Header base: 00000100
+
+CPU type                 80386
+Flags                    A18E [ executable 32bit library ]
+DLL flags                0000 [ ]
+Linker Version           2.19
+Time stamp               53460AD0 : Thu Apr 10 04:06:56 2014
+O/S Version              5.0
+User Version             0.0
+Subsystem Version        5.0
+Subsystem                0002 [ Windows GUI ]
+Object count             00000009
+Symbols offset           00000000
+Symbols count            00000000
+Optional header size     00E0
+Magic #                  10B
+Code size                00006600
+Init Data size           0008D000
+Uninit Data size         00000000
+Entry RVA                00007958
+Image base               00400000
+Code base                00001000
+Data base                00008000
+Object/File align        00001000/00000200
+Reserved                 00000000
+Image size               00098000
+Header size              00000400
+Checksum                 000A2BC5
+Stack reserve/commit     00000000/00000000
+Heap reserve/commit      00100000/00001000
+Number interesting RVAs  00000010
+Name                   RVA       Size  
+------------------  --------  --------
+Exports             00015000  00000D14
+Imports             0000A000  0000AEE0
+Resources           00018000  00080000
+Exceptions          00000000  00000000
+Security            00093A00  00001978
+Fixups              00017000  00000DE4
+Debug               00000000  00000000
+Description         00016000  00000025
+Global Ptr          00000000  00000000
+TLS                 00000000  00000000
+Callbacks           00000000  00000000
+Bound Imports       00000000  00000000
+Import Addr Table   0000BFA0  00000E98
+Delayed Imports     00000000  00000000
+COM Runtime         00000000  00000000
+reserved            00000000  00000000
+
+Object table:
+#   Name              VirtSize    RVA     PhysSize  Phys off  Flags   
+--  --------          --------  --------  --------  --------  --------
+01  .text             00005A6C  00001000  00005C00  00000400  60000020 [CER]
+02  .itext            00000960  00007000  00000A00  00006000  60000020 [CER]
+03  .data             000000AC  00008000  00000200  00006A00  C0000040 [IRW]
+04  .bss              0000002C  00009000  00000000  00000000  C0000000 [RW]
+05  .idata            0000AEE0  0000A000  0000B000  00006C00  C0000040 [IRW]
+06  .edata            00000D14  00015000  00000E00  00011C00  40000040 [IR]
+07  .rdata            00000025  00016000  00000200  00012A00  40000040 [IR]
+08  .reloc            00000DE4  00017000  00000E00  00012C00  42000040 [DIR]
+09  .rsrc             00080000  00018000  00080000  00013A00  40000040 [IR]
+
+Key to section flags:
+  C - contains code
+  D - discardable
+  E - executable
+  I - contains initialized data
+  R - readable
+  W - writeable
+
+Description: Embarcadero Unit Testing IDE Package
+
+******************************************************************************
+Section:             Import
+File Offset:         00006C00 (27648)
+  ImportLookUpTblRVA:0000B108
+  Time Stamp:        00000000
+  Forwarder Chain:   00000000 (index of first forwarder reference)
+
+Imports from rtl200.bpl
+                  __fastcall System::initialization()
+                  __fastcall System::Finalization()
+                  __stdcall System::TInterfacedObject::_Release()
+                  __stdcall System::TInterfacedObject::_AddRef()
+                  __stdcall System::TInterfacedObject::QueryInterface(_GUID&, void *)
+                  __fastcall System::TInterfacedObject::NewInstance()
+                  __fastcall System::TInterfacedObject::BeforeDestruction()
+                  __fastcall System::TInterfacedObject::AfterConstruction()
+                  System::__linkproc__ __fastcall IntfCopy(System::DelphiInterface<System::IInterface>&, const System::DelphiInterface<System::IInterface>)
+                  System::__linkproc__ __fastcall IntfClear(System::DelphiInterface<System::IInterface>&)
+                  __fastcall System::UnregisterModule(System::TLibModule *)
+                  __fastcall System::RegisterModule(System::TLibModule *)
+                  System::__linkproc__ __fastcall AddRefRecord(void *, void *)
+                  System::__linkproc__ __fastcall FinalizeRecord(void *, void *)
+                  System::__linkproc__ __fastcall UStrCat3(System::UnicodeString&, const System::UnicodeString, const System::UnicodeString)
+                  System::__linkproc__ __fastcall UStrLAsg(System::UnicodeString&, const System::UnicodeString)
+                  System::__linkproc__ __fastcall UStrArrayClr(void *, int)
+                  System::__linkproc__ __fastcall UStrClr(void *)
+                  System::__linkproc__ __fastcall RunError(unsigned char)
+                  System::__linkproc__ __fastcall PackageUnload(const System::PackageInfoTable * const, System::TLibModule *)
+                  System::__linkproc__ __fastcall PackageLoad(const System::PackageInfoTable * const, System::TLibModule *)
+                  System::__linkproc__ __fastcall HandleFinally()
+                  System::__linkproc__ __fastcall BeforeDestruction(const System::TObject * const, signed char)
+                  System::__linkproc__ __fastcall AfterConstruction(const System::TObject * const)
+                  System::__linkproc__ __fastcall ClassDestroy(const System::TObject * const)
+                  System::__linkproc__ __fastcall ClassCreate(void *, signed char)
+                  __fastcall System::TObject::Dispatch(void *)
+                  __fastcall System::TObject::BeforeDestruction()
+                  __fastcall System::TObject::AfterConstruction()
+                  __fastcall System::TObject::DefaultHandler(void *)
+                  __fastcall System::TObject::ToString()
+                  __fastcall System::TObject::SafeCallException(System::TObject *, void *)
+                  System::__linkproc__ __fastcall AsClass(const System::TObject * const, System::TMetaClass *)
+                  System::__linkproc__ __fastcall IsClass(const System::TObject * const, System::TMetaClass *)
+                  __fastcall System::TObject::GetHashCode()
+                  __fastcall System::TObject::Equals(System::TObject *)
+                  __fastcall System::TObject::Free()
+                  __fastcall System::TObject::~TObject()
+                  __fastcall System::TObject::TObject()
+                  __fastcall System::TObject::FreeInstance()
+                  __fastcall System::TObject::NewInstance()
+                  __tpdsc__ System::TInterfacedObject
+                  System::TInterfacedObject::
+                  __tpdsc__ System::string
+                  __tpdsc__ Integer
+                  __tpdsc__ Boolean
+
+Imports from kernel32.dll
+                  GetProcAddress
+                  RaiseException
+                  LoadLibraryA
+                  GetLastError
+                  TlsSetValue
+                  TlsGetValue
+                  TlsFree
+                  TlsAlloc
+                  LocalFree
+                  LocalAlloc
+                  FreeLibrary
+
+Imports from rtl200.bpl
+                  __fastcall System::Types::Point(int, int)
+                  __fastcall System::Types::Rect(int, int, int, int)
+                  __tpdsc__ System::Types::TRect
+
+Imports from rtl200.bpl
+                  __tpdsc__ System::Uitypes::TColor
+
+Imports from kernel32.dll
+                  GetVersionExW
+                  FreeLibrary
+
+Imports from rtl200.bpl
+                  __fastcall System::Internal::Excutils::initialization()
+                  __fastcall System::Internal::Excutils::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Sysutils::initialization()
+                  __fastcall System::Sysutils::Finalization()
+                  System::Sysutils::TOSVersion::operator ...
+                  System::Sysutils::TEncoding::operator ...
+                  System::Sysutils::TLanguages::operator ...
+                  System::Sysutils::Exception::operator ...
+                  System::Sysutils::Exception::operator ...
+                  __fastcall System::Sysutils::IntToStr(int)
+                  __fastcall System::Sysutils::Trim(const System::UnicodeString)
+                  System::Sysutils::TOSVersion::operator ...
+                  System::Sysutils::TEncoding::operator ...
+                  System::Sysutils::TLanguages::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall System::Varutils::initialization()
+                  __fastcall System::Varutils::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Variants::initialization()
+                  __fastcall System::Variants::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Ansistrings::initialization()
+                  __fastcall System::Ansistrings::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Math::initialization()
+                  __fastcall System::Math::Finalization()
+
+Imports from rtl200.bpl
+                  System::Timespan::TTimeSpan::operator ...
+                  System::Timespan::TTimeSpan::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall System::Syncobjs::initialization()
+                  __fastcall System::Syncobjs::Finalization()
+
+Imports from rtl200.bpl
+                  System::Generics::Defaults::TIStringComparer::operator ...
+                  System::Generics::Defaults::TStringComparer::operator ...
+                  System::Generics::Defaults::TIStringComparer::operator ...
+                  System::Generics::Defaults::TStringComparer::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall System::Rtti::initialization()
+                  __fastcall System::Rtti::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Typinfo::initialization()
+                  __fastcall System::Typinfo::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Classes::initialization()
+                  __fastcall System::Classes::Finalization()
+                  System::Classes::TObserverMapping::operator ...
+                  System::Classes::TLoginCredentialService::operator ...
+                  System::Classes::TLoginCredentialService::operator ...
+                  System::Classes::TBinaryWriter::operator ...
+                  __fastcall System::Classes::TDataModule::ReadState(System::Classes::TReader *)
+                  __fastcall System::Classes::TDataModule::DefineProperties(System::Classes::TFiler *)
+                  __fastcall System::Classes::TDataModule::DoDestroy()
+                  __fastcall System::Classes::TDataModule::DoCreate()
+                  __fastcall System::Classes::TDataModule::~TDataModule()
+                  __fastcall System::Classes::TDataModule::BeforeDestruction()
+                  __fastcall System::Classes::TDataModule::TDataModule(System::Classes::TComponent *, int)
+                  __fastcall System::Classes::TDataModule::AfterConstruction()
+                  __fastcall System::Classes::TDataModule::TDataModule(System::Classes::TComponent *)
+                  __stdcall System::Classes::TComponent::QueryInterface(_GUID&, void *)
+                  __fastcall System::Classes::TComponent::UpdateRegistry(bool, const System::UnicodeString, const System::UnicodeString)
+                  __fastcall System::Classes::TComponent::SafeCallException(System::TObject *, void *)
+                  __fastcall System::Classes::TComponent::ObserverAdded(const const int, const System::DelphiInterface<System::Classes::IObserver>)
+                  __fastcall System::Classes::TComponent::CanObserve(const const int)
+                  __fastcall System::Classes::TComponent::UpdateAction(System::Classes::TBasicAction *)
+                  __fastcall System::Classes::TComponent::GetObservers()
+                  __fastcall System::Classes::TComponent::SetName(const System::UnicodeString)
+                  __fastcall System::Classes::TComponent::FindComponent(const System::UnicodeString)
+                  System::Classes::TComponent::operator ...
+                  __fastcall System::Classes::TComponent::ValidateRename(System::Classes::TComponent *, const System::UnicodeString, const System::UnicodeString)
+                  __fastcall System::Classes::TComponent::WriteState(System::Classes::TWriter *)
+                  __fastcall System::Classes::TComponent::Loaded()
+                  __fastcall System::Classes::TComponent::Notification(System::Classes::TComponent *, System::Classes::TOperation)
+                  System::Classes::TThread::operator ...
+                  System::Classes::TThread::operator ...
+                  __fastcall System::Classes::TPersistent::AssignTo(System::Classes::TPersistent *)
+                  __fastcall System::Classes::TPersistent::Assign(System::Classes::TPersistent *)
+                  System::Classes::TBinaryWriter::operator ...
+                  __tpdsc__ System::Classes::TDataModule
+                  System::Classes::TDataModule::
+                  System::Classes::TComponent::operator ...
+                  System::Classes::TObserverMapping::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall System::Actions::initialization()
+                  __fastcall System::Actions::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Dateutils::initialization()
+                  __fastcall System::Dateutils::Finalization()
+                  System::Dateutils::TTimeZone::operator ...
+                  System::Dateutils::TTimeZone::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall System::Ioutils::initialization()
+                  __fastcall System::Ioutils::Finalization()
+                  System::Ioutils::TPath::operator ...
+                  System::Ioutils::TPath::operator ...
+
+Imports from rtl200.bpl
+                  System::Win::Registry::TRegistry::operator ...
+                  System::Win::Registry::TRegistry::operator ...
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Graphics::initialization()
+                  __fastcall Vcl::Graphics::Finalization()
+                  __fastcall Vcl::Graphics::TCustomCanvas::TextWidth(const System::UnicodeString)
+                  __fastcall Vcl::Graphics::TBrush::SetStyle(Vcl::Graphics::TBrushStyle)
+                  __fastcall Vcl::Graphics::TBrush::SetColor(System::Uitypes::TColor)
+                  __fastcall Vcl::Graphics::TPen::SetWidth(int)
+                  __fastcall Vcl::Graphics::TPen::SetStyle(Vcl::Graphics::TPenStyle)
+                  __fastcall Vcl::Graphics::TPen::SetColor(System::Uitypes::TColor)
+                  __fastcall Vcl::Graphics::TPen::GetColor()
+                  __fastcall Vcl::Graphics::TFont::SetOrientation(const const int)
+                  __fastcall Vcl::Graphics::TFont::SetStyle(const System::Set<System::Uitypes::TFontStyle, 0, 3>)
+                  __fastcall Vcl::Graphics::TFont::GetStyle()
+                  __fastcall Vcl::Graphics::TFont::SetSize(const const int)
+                  __fastcall Vcl::Graphics::TFont::SetName(const System::UnicodeString)
+                  __fastcall Vcl::Graphics::TFont::SetColor(const System::Uitypes::TColor)
+                  __fastcall Vcl::Graphics::TFont::TFont()
+                  __tpdsc__ Vcl::Graphics::TCanvas
+                  __tpdsc__ Vcl::Graphics::TFont
+                  Vcl::Graphics::TFont::
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Actnlist::initialization()
+                  __fastcall Vcl::Actnlist::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Helpintfs::initialization()
+                  __fastcall System::Helpintfs::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall Winapi::Uxtheme::initialization()
+                  __fastcall Winapi::Uxtheme::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Graphutil::initialization()
+                  __fastcall Vcl::Graphutil::Finalization()
+                  __fastcall Vcl::Graphutil::GetShadowColor(const System::Uitypes::TColor, int)
+                  __fastcall Vcl::Graphutil::GetHighLightColor(const System::Uitypes::TColor, int)
+
+Imports from vcl200.bpl
+                  Vcl::Stdctrls::TStaticText::operator ...
+                  Vcl::Stdctrls::TStaticText::operator ...
+                  Vcl::Stdctrls::TListBox::operator ...
+                  Vcl::Stdctrls::TListBox::operator ...
+                  Vcl::Stdctrls::TCheckBox::operator ...
+                  Vcl::Stdctrls::TCheckBox::operator ...
+                  Vcl::Stdctrls::TButton::operator ...
+                  Vcl::Stdctrls::TButton::operator ...
+                  Vcl::Stdctrls::TComboBox::operator ...
+                  Vcl::Stdctrls::TComboBox::operator ...
+                  Vcl::Stdctrls::TMemo::operator ...
+                  Vcl::Stdctrls::TMemo::operator ...
+                  Vcl::Stdctrls::TEdit::operator ...
+                  Vcl::Stdctrls::TEdit::operator ...
+                  Vcl::Stdctrls::TGroupBox::operator ...
+                  Vcl::Stdctrls::TGroupBox::operator ...
+                  Vcl::Stdctrls::TCustomStaticText::operator ...
+                  Vcl::Stdctrls::TCustomStaticText::operator ...
+                  Vcl::Stdctrls::TScrollBar::operator ...
+                  Vcl::Stdctrls::TScrollBar::operator ...
+                  Vcl::Stdctrls::TCustomListBox::operator ...
+                  Vcl::Stdctrls::TCustomListBox::operator ...
+                  Vcl::Stdctrls::TRadioButton::operator ...
+                  Vcl::Stdctrls::TRadioButton::operator ...
+                  Vcl::Stdctrls::TCustomCheckBox::operator ...
+                  Vcl::Stdctrls::TCustomCheckBox::operator ...
+                  Vcl::Stdctrls::TCustomButton::operator ...
+                  Vcl::Stdctrls::TCustomButton::operator ...
+                  Vcl::Stdctrls::TCustomComboBox::operator ...
+                  Vcl::Stdctrls::TCustomComboBox::operator ...
+                  Vcl::Stdctrls::TCustomMemo::operator ...
+                  Vcl::Stdctrls::TCustomMemo::operator ...
+                  Vcl::Stdctrls::TCustomEdit::operator ...
+                  Vcl::Stdctrls::TCustomEdit::operator ...
+                  Vcl::Stdctrls::TCustomGroupBox::operator ...
+                  Vcl::Stdctrls::TCustomGroupBox::operator ...
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Printers::initialization()
+                  __fastcall Vcl::Printers::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Clipbrd::initialization()
+                  __fastcall Vcl::Clipbrd::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Comctrls::initialization()
+                  __fastcall Vcl::Comctrls::Finalization()
+                  Vcl::Comctrls::THeaderControl::operator ...
+                  Vcl::Comctrls::THeaderControl::operator ...
+                  Vcl::Comctrls::TStatusBar::operator ...
+                  Vcl::Comctrls::TStatusBar::operator ...
+                  Vcl::Comctrls::TComboBoxEx::operator ...
+                  Vcl::Comctrls::TComboBoxEx::operator ...
+                  Vcl::Comctrls::TCustomComboBoxEx::operator ...
+                  Vcl::Comctrls::TCustomComboBoxEx::operator ...
+                  Vcl::Comctrls::TPageScroller::operator ...
+                  Vcl::Comctrls::TPageScroller::operator ...
+                  Vcl::Comctrls::TDateTimePicker::operator ...
+                  Vcl::Comctrls::TDateTimePicker::operator ...
+                  Vcl::Comctrls::TCoolBar::operator ...
+                  Vcl::Comctrls::TCoolBar::operator ...
+                  Vcl::Comctrls::TToolBar::operator ...
+                  Vcl::Comctrls::TToolBar::operator ...
+                  Vcl::Comctrls::TListView::operator ...
+                  Vcl::Comctrls::TListView::operator ...
+                  Vcl::Comctrls::TCustomListView::operator ...
+                  Vcl::Comctrls::TCustomListView::operator ...
+                  Vcl::Comctrls::THotKey::operator ...
+                  Vcl::Comctrls::THotKey::operator ...
+                  Vcl::Comctrls::TCustomHotKey::operator ...
+                  Vcl::Comctrls::TCustomHotKey::operator ...
+                  Vcl::Comctrls::TUpDown::operator ...
+                  Vcl::Comctrls::TUpDown::operator ...
+                  Vcl::Comctrls::TCustomUpDown::operator ...
+                  Vcl::Comctrls::TCustomUpDown::operator ...
+                  Vcl::Comctrls::TRichEdit::operator ...
+                  Vcl::Comctrls::TRichEdit::operator ...
+                  Vcl::Comctrls::TCustomRichEdit::operator ...
+                  Vcl::Comctrls::TCustomRichEdit::operator ...
+                  Vcl::Comctrls::TProgressBar::operator ...
+                  Vcl::Comctrls::TProgressBar::operator ...
+                  Vcl::Comctrls::TTrackBar::operator ...
+                  Vcl::Comctrls::TTrackBar::operator ...
+                  Vcl::Comctrls::TTreeView::operator ...
+                  Vcl::Comctrls::TTreeView::operator ...
+                  Vcl::Comctrls::TCustomTreeView::operator ...
+                  Vcl::Comctrls::TCustomTreeView::operator ...
+                  Vcl::Comctrls::TCustomHeaderControl::operator ...
+                  Vcl::Comctrls::TCustomHeaderControl::operator ...
+                  Vcl::Comctrls::TCustomStatusBar::operator ...
+                  Vcl::Comctrls::TCustomStatusBar::operator ...
+                  Vcl::Comctrls::TTabControl::operator ...
+                  Vcl::Comctrls::TTabControl::operator ...
+                  Vcl::Comctrls::TCustomTabControl::operator ...
+                  Vcl::Comctrls::TCustomTabControl::operator ...
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Dialogs::initialization()
+                  __fastcall Vcl::Dialogs::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Extctrls::initialization()
+                  __fastcall Vcl::Extctrls::Finalization()
+                  Vcl::Extctrls::TLinkLabel::operator ...
+                  Vcl::Extctrls::TLinkLabel::operator ...
+                  Vcl::Extctrls::TCustomLinkLabel::operator ...
+                  Vcl::Extctrls::TCustomLinkLabel::operator ...
+                  Vcl::Extctrls::TCategoryPanelGroup::operator ...
+                  Vcl::Extctrls::TCategoryPanelGroup::operator ...
+                  Vcl::Extctrls::TCustomCategoryPanelGroup::operator ...
+                  Vcl::Extctrls::TCustomCategoryPanelGroup::operator ...
+
+Imports from vcl200.bpl
+                  Vcl::Themes::TCustomStyleEngine::operator ...
+                  Vcl::Themes::TCustomStyleEngine::operator ...
+                  Vcl::Themes::TStyleManager::operator ...
+                  __fastcall Vcl::Themes::TCustomStyleServices::GetElementColor(Vcl::Themes::TThemedElementDetails&, Vcl::Themes::TElementColor, System::Uitypes::TColor&)
+                  __fastcall Vcl::Themes::StyleServices()
+                  Vcl::Themes::TStyleManager::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall System::Win::Comobj::initialization()
+                  __fastcall System::Win::Comobj::Finalization()
+                  System::Win::Comobj::TComServerObject::operator ...
+                  System::Win::Comobj::TComServerObject::operator ...
+
+Imports from rtl200.bpl
+                  __fastcall Winapi::Flatsb::initialization()
+                  __fastcall Winapi::Flatsb::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Forms::initialization()
+                  __fastcall Vcl::Forms::Finalization()
+                  Vcl::Forms::TForm::operator ...
+                  Vcl::Forms::TForm::operator ...
+                  Vcl::Forms::TCustomForm::operator ...
+                  Vcl::Forms::TCustomForm::operator ...
+                  Vcl::Forms::TScrollBox::operator ...
+                  Vcl::Forms::TScrollBox::operator ...
+                  __tpdsc__ Vcl::Forms::TForm
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Imglist::TCustomImageList::AddImage(Vcl::Imglist::TCustomImageList *, int)
+                  __fastcall Vcl::Imglist::TCustomImageList::GetCount()
+                  __fastcall Vcl::Imglist::TCustomImageList::TCustomImageList(System::Classes::TComponent *)
+                  __tpdsc__ Vcl::Imglist::TCustomImageList
+                  Vcl::Imglist::TCustomImageList::
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Menus::initialization()
+                  __fastcall Vcl::Menus::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Controls::initialization()
+                  __fastcall Vcl::Controls::Finalization()
+                  __fastcall Vcl::Controls::TDockTree::ShowHint(System::Types::TPoint&, System::Types::TRect&, System::UnicodeString&)
+                  __fastcall Vcl::Controls::TDockTree::MouseMove(System::Set<System::Classes::System_Classes__1, 0, 10>, int, int, bool&)
+                  __fastcall Vcl::Controls::TDockTree::MouseDown(System::Uitypes::TMouseButton, System::Set<System::Classes::System_Classes__1, 0, 10>, int, int, bool&)
+                  __fastcall Vcl::Controls::TDockTree::AdjustFrameRect(Vcl::Controls::TControl *, System::Types::TRect&)
+                  __fastcall Vcl::Controls::TDockTree::ReferenceFromOrient(const Vcl::Controls::TDockOrientation)
+                  __fastcall Vcl::Controls::TDockTree::SaveToStream(System::Classes::TStream *)
+                  __fastcall Vcl::Controls::TDockTree::ResetBounds(bool)
+                  __fastcall Vcl::Controls::TDockTree::RemoveControl(Vcl::Controls::TControl *)
+                  __fastcall Vcl::Controls::TDockTree::PositionDockRect(Vcl::Controls::TControl *, Vcl::Controls::TControl *, Vcl::Controls::TAlign, System::Types::TRect&)
+                  __fastcall Vcl::Controls::TDockTree::PaintSite(HDC__ *)
+                  __fastcall Vcl::Controls::TDockTree::LoadFromStream(System::Classes::TStream *)
+                  __fastcall Vcl::Controls::TDockTree::InsertControl(Vcl::Controls::TControl *, Vcl::Controls::TAlign, Vcl::Controls::TControl *)
+                  __fastcall Vcl::Controls::TDockTree::HitTest(System::Types::TPoint&, int&)
+                  Vcl::Controls::DefaultDockTreeClass
+                  __tpdsc__ Vcl::Controls::TImageList
+                  Vcl::Controls::TImageList::
+
+Imports from designide200.bpl
+                  __fastcall Idemessages::initialization()
+                  __fastcall Idemessages::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Captioneddocktree::initialization()
+                  __fastcall Vcl::Captioneddocktree::Finalization()
+                  __fastcall Vcl::Captioneddocktree::TDockCaptionDrawer::DockCaptionHitTest(System::Types::TRect&, System::Types::TPoint&)
+                  __fastcall Vcl::Captioneddocktree::TDockCaptionDrawer::TDockCaptionDrawer(Vcl::Captioneddocktree::TDockCaptionOrientation)
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::~TCaptionedDockTree()
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::ZoneCaptionHitTest(const Vcl::Controls::TDockZone * const, System::Types::TPoint&, int&)
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::WndProc(Winapi::Messages::TMessage&)
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::PaintDockFrame(Vcl::Graphics::TCanvas *, Vcl::Controls::TControl *, System::Types::TRect&)
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::AdjustCaptionRect(System::Types::TRect&)
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::GetParentFormState(const Vcl::Controls::TControl * const)
+                  __fastcall Vcl::Captioneddocktree::TCaptionedDockTree::AdjustDockRect(Vcl::Controls::TControl *, System::Types::TRect&)
+                  __tpdsc__ Vcl::Captioneddocktree::TCaptionedDockTreeClass
+                  __tpdsc__ Vcl::Captioneddocktree::TDockCaptionDrawerClass
+                  __tpdsc__ Vcl::Captioneddocktree::TDockCaptionDrawer
+                  Vcl::Captioneddocktree::TDockCaptionDrawer::
+                  __tpdsc__ Vcl::Captioneddocktree::TParentFormState
+
+Imports from vcl200.bpl
+                  __tpdsc__ Vcl::Tabs::TTabSetTabStyle
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Docktabset::initialization()
+                  __fastcall Vcl::Docktabset::Finalization()
+                  __fastcall Vcl::Docktabset::TCaptionedTabDockTree::MouseUp(System::Uitypes::TMouseButton, System::Set<System::Classes::System_Classes__1, 0, 10>, int, int, bool&)
+
+Imports from designide200.bpl
+                  __fastcall Percentagedocktree::initialization()
+                  __fastcall Percentagedocktree::Finalization()
+                  __fastcall Percentagedocktree::TPercentageDockTree::TPercentageDockTree(Vcl::Controls::TWinControl *)
+                  __tpdsc__ Percentagedocktree::TPercentageDockTree
+                  Percentagedocktree::TPercentageDockTree::
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Buttons::initialization()
+                  __fastcall Vcl::Buttons::Finalization()
+                  Vcl::Buttons::TBitBtn::operator ...
+                  Vcl::Buttons::TBitBtn::operator ...
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Extdlgs::initialization()
+                  __fastcall Vcl::Extdlgs::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall Winapi::Mapi::initialization()
+                  __fastcall Winapi::Mapi::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Extactns::initialization()
+                  __fastcall Vcl::Extactns::Finalization()
+
+Imports from vclactnband200.bpl
+                  __fastcall Vcl::Actnmenus::initialization()
+                  __fastcall Vcl::Actnmenus::Finalization()
+
+Imports from vclactnband200.bpl
+                  __fastcall Vcl::Actnman::initialization()
+                  __fastcall Vcl::Actnman::Finalization()
+
+Imports from vclactnband200.bpl
+                  __fastcall Vcl::Platformdefaultstyleactnctrls::initialization()
+                  __fastcall Vcl::Platformdefaultstyleactnctrls::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Basedock::initialization()
+                  __fastcall Basedock::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Deskutil::initialization()
+                  __fastcall Deskutil::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Deskform::initialization()
+                  __fastcall Deskform::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Dockform::initialization()
+                  __fastcall Dockform::Finalization()
+
+Imports from xmlrtl200.bpl
+                  __fastcall Xml::Win::Msxmldom::initialization()
+                  __fastcall Xml::Win::Msxmldom::Finalization()
+                  Xml::Win::Msxmldom::TMSXMLDOMDocumentFactory::operator ...
+                  Xml::Win::Msxmldom::TMSXMLDOMDocumentFactory::operator ...
+
+Imports from xmlrtl200.bpl
+                  __fastcall Xml::Xmldom::initialization()
+                  __fastcall Xml::Xmldom::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Toolsapi::initialization()
+                  __fastcall Toolsapi::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Brandingapi::initialization()
+                  __fastcall Brandingapi::Finalization()
+                  __fastcall Brandingapi::GetThemeFont()
+                  Brandingapi::ThemeProperties
+                  Brandingapi::ImageReplacer
+                  __tpdsc__ Brandingapi::IOTAThemeProperties
+                  __tpdsc__ Brandingapi::TTabDrawingStyle
+                  __tpdsc__ Brandingapi::INTAImageReplacer
+
+Imports from vclimg200.bpl
+                  __fastcall Vcl::Imaging::Pngimage::initialization()
+                  __fastcall Vcl::Imaging::Pngimage::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Axctrls::initialization()
+                  __fastcall Vcl::Axctrls::Finalization()
+
+Imports from vcl200.bpl
+                  Vcl::Grids::TDrawGrid::operator ...
+                  Vcl::Grids::TDrawGrid::operator ...
+                  Vcl::Grids::TStringGrid::operator ...
+                  Vcl::Grids::TStringGrid::operator ...
+                  Vcl::Grids::TCustomDrawGrid::operator ...
+                  Vcl::Grids::TCustomDrawGrid::operator ...
+                  Vcl::Grids::TCustomGrid::operator ...
+                  Vcl::Grids::TCustomGrid::operator ...
+
+Imports from vclide200.bpl
+                  __fastcall Idepropset::initialization()
+                  __fastcall Idepropset::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Optintf::initialization()
+                  __fastcall Optintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Envvariableframe::initialization()
+                  __fastcall Envvariableframe::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Appstrs::initialization()
+                  __fastcall Appstrs::Finalization()
+
+Imports from vclimg200.bpl
+                  __fastcall Vcl::Imaging::Jpeg::initialization()
+                  __fastcall Vcl::Imaging::Jpeg::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Splash::initialization()
+                  __fastcall Splash::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Identityapi::initialization()
+                  __fastcall Identityapi::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Appconfig::initialization()
+                  __fastcall Appconfig::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Appconst::initialization()
+                  __fastcall Appconst::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Ideversioninfo::initialization()
+                  __fastcall Ideversioninfo::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Debugapi::initialization()
+                  __fastcall Debugapi::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Proxies::initialization()
+                  __fastcall Proxies::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Designeditors::initialization()
+                  __fastcall Designeditors::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Appevnts::initialization()
+                  __fastcall Vcl::Appevnts::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Treeintf::initialization()
+                  __fastcall Treeintf::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Toplevels::initialization()
+                  __fastcall Toplevels::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Stfilsys::initialization()
+                  __fastcall Stfilsys::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Idehelp::initialization()
+                  __fastcall Idehelp::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Componentdesigner::initialization()
+                  __fastcall Componentdesigner::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Compintf::initialization()
+                  __fastcall Compintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Licenseintf::initialization()
+                  __fastcall Licenseintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Perfmon::initialization()
+                  __fastcall Perfmon::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Idetimerservices::initialization()
+                  __fastcall Idetimerservices::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Baseoptionsfrm::initialization()
+                  __fastcall Baseoptionsfrm::Finalization()
+
+Imports from vclactnband200.bpl
+                  __fastcall Vcl::Xpstyleactnctrls::initialization()
+                  __fastcall Vcl::Xpstyleactnctrls::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Editorviewsupport::initialization()
+                  __fastcall Editorviewsupport::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevtaccessibilityfactory::initialization()
+                  __fastcall Idevtaccessibilityfactory::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualtrees::initialization()
+                  __fastcall Idevirtualtrees::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Processutil::initialization()
+                  __fastcall Processutil::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Agecache::initialization()
+                  __fastcall Agecache::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Containerintf::initialization()
+                  __fastcall Containerintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectitemsort::initialization()
+                  __fastcall Projectitemsort::Finalization()
+
+Imports from vclx200.bpl
+                  Vcl::Checklst::TCheckListBox::operator ...
+                  Vcl::Checklst::TCheckListBox::operator ...
+
+Imports from coreide200.bpl
+                  __fastcall Buildeventintf::initialization()
+                  __fastcall Buildeventintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Containermgr::initialization()
+                  __fastcall Containermgr::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Filters::initialization()
+                  __fastcall Filters::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Olectrls::initialization()
+                  __fastcall Vcl::Olectrls::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Oleserver::initialization()
+                  __fastcall Vcl::Oleserver::Finalization()
+
+Imports from vclie200.bpl
+                  __fastcall Shdocvw::initialization()
+                  __fastcall Shdocvw::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall System::Win::Comobjwrapper::initialization()
+                  __fastcall System::Win::Comobjwrapper::Finalization()
+
+Imports from vclie200.bpl
+                  __fastcall Webbrowserex::initialization()
+                  __fastcall Webbrowserex::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Ideasyncprotocol::initialization()
+                  __fastcall Ideasyncprotocol::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Parserthread::initialization()
+                  __fastcall Parserthread::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Helpinsight::initialization()
+                  __fastcall Helpinsight::Finalization()
+
+Imports from xmlrtl200.bpl
+                  __fastcall Xml::Xmlschema::initialization()
+                  __fastcall Xml::Xmlschema::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Galtemplatelibs::initialization()
+                  __fastcall Galtemplatelibs::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Objectrepos::initialization()
+                  __fastcall Objectrepos::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Filehist::initialization()
+                  __fastcall Filehist::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Transactions::initialization()
+                  __fastcall Transactions::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Moduledirectoryservices::initialization()
+                  __fastcall Moduledirectoryservices::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Node::initialization()
+                  __fastcall Node::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Saxreader::initialization()
+                  __fastcall Saxreader::Finalization()
+
+Imports from coreide200.bpl
+                  Projectreadwrite::TXmlReader::operator ...
+                  Projectreadwrite::TXmlReader::operator ...
+
+Imports from coreide200.bpl
+                  __fastcall Msbnodes::initialization()
+                  __fastcall Msbnodes::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Msbprojectwrapper::initialization()
+                  __fastcall Msbprojectwrapper::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Buildhost::initialization()
+                  __fastcall Buildhost::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Msbuild::initialization()
+                  __fastcall Msbuild::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectgroupbuilder::initialization()
+                  __fastcall Projectgroupbuilder::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Buildgroups::initialization()
+                  __fastcall Buildgroups::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Palmgr::initialization()
+                  __fastcall Palmgr::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectgroup::initialization()
+                  __fastcall Projectgroup::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Macroutils::initialization()
+                  __fastcall Macroutils::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Msbpropertygroup::initialization()
+                  __fastcall Msbpropertygroup::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Optioninfo::initialization()
+                  __fastcall Optioninfo::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Configurationimages::initialization()
+                  __fastcall Configurationimages::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Vcleditors::initialization()
+                  __fastcall Vcleditors::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Propertycategories::initialization()
+                  __fastcall Propertycategories::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Optioneditors::initialization()
+                  __fastcall Optioneditors::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Platformawarepropertysheet::initialization()
+                  __fastcall Platformawarepropertysheet::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Taskoptionspage::initialization()
+                  __fastcall Taskoptionspage::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Platformcmds::initialization()
+                  __fastcall Platformcmds::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Namedoptionset::initialization()
+                  __fastcall Namedoptionset::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Buildevents::initialization()
+                  __fastcall Buildevents::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectupgradepage::initialization()
+                  __fastcall Projectupgradepage::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectupgradeenvoptions::initialization()
+                  __fastcall Projectupgradeenvoptions::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectmodule::initialization()
+                  __fastcall Projectmodule::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectfileutils::initialization()
+                  __fastcall Projectfileutils::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Versioncontrol::initialization()
+                  __fastcall Versioncontrol::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Editoractions::initialization()
+                  __fastcall Editoractions::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualsystemimagelists::initialization()
+                  __fastcall Idevirtualsystemimagelists::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Sourcetemplate::initialization()
+                  __fastcall Sourcetemplate::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Template::initialization()
+                  __fastcall Template::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Galbrow::initialization()
+                  __fastcall Galbrow::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Gallery::initialization()
+                  __fastcall Gallery::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Idetoolbarform::initialization()
+                  __fastcall Idetoolbarform::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Ideinsightcmds::initialization()
+                  __fastcall Ideinsightcmds::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Coreviewcmds::initialization()
+                  __fastcall Coreviewcmds::Finalization()
+
+Imports from rtl200.bpl
+                  __fastcall Winapi::Gdipobj::initialization()
+                  __fastcall Winapi::Gdipobj::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectfrm::initialization()
+                  __fastcall Projectfrm::Finalization()
+
+Imports from vcl200.bpl
+                  __fastcall Vcl::Categorybuttons::initialization()
+                  __fastcall Vcl::Categorybuttons::Finalization()
+                  Vcl::Categorybuttons::TCategoryButtons::operator ...
+                  Vcl::Categorybuttons::TCategoryButtons::operator ...
+
+Imports from vcl200.bpl
+                  Vcl::Buttongroup::TButtonGroup::operator ...
+                  Vcl::Buttongroup::TButtonGroup::operator ...
+
+Imports from vclide200.bpl
+                  __fastcall Idemuistringsupport::initialization()
+                  __fastcall Idemuistringsupport::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Idecustomcursors::initialization()
+                  __fastcall Idecustomcursors::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projnewmenu::initialization()
+                  __fastcall Projnewmenu::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectmanagermenus::initialization()
+                  __fastcall Projectmanagermenus::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Configurationcontainer::initialization()
+                  __fastcall Configurationcontainer::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Containers::initialization()
+                  __fastcall Containers::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Pakutil::initialization()
+                  __fastcall Pakutil::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Appinit::initialization()
+                  __fastcall Appinit::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Pakmgr::initialization()
+                  __fastcall Pakmgr::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Frameworkapi::initialization()
+                  __fastcall Frameworkapi::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectintf::initialization()
+                  __fastcall Projectintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Projectmgr::initialization()
+                  __fastcall Projectmgr::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Cominout::initialization()
+                  __fastcall Cominout::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Filefind::initialization()
+                  __fastcall Filefind::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Msglines::initialization()
+                  __fastcall Msglines::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Msgviewform::initialization()
+                  __fastcall Msgviewform::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idedockform::initialization()
+                  __fastcall Idedockform::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Winlist::initialization()
+                  __fastcall Winlist::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Syncedit::initialization()
+                  __fastcall Syncedit::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Otaeditview::initialization()
+                  __fastcall Otaeditview::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Searchhighlighter::initialization()
+                  __fastcall Searchhighlighter::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Editorform::initialization()
+                  __fastcall Editorform::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Desktop::initialization()
+                  __fastcall Desktop::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Evalmod::initialization()
+                  __fastcall Evalmod::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Loadprocessdlg::initialization()
+                  __fastcall Loadprocessdlg::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Combrows::initialization()
+                  __fastcall Combrows::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Codcmpltide::initialization()
+                  __fastcall Codcmpltide::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Codcmplt::initialization()
+                  __fastcall Codcmplt::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Envoptions::initialization()
+                  __fastcall Envoptions::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Platforms::initialization()
+                  __fastcall Platforms::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Tasksintf::initialization()
+                  __fastcall Tasksintf::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Configurationintf::initialization()
+                  __fastcall Configurationintf::Finalization()
+
+Imports from designide200.bpl
+                  __fastcall Actioneditors::initialization()
+                  __fastcall Actioneditors::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Codemgr::initialization()
+                  __fastcall Codemgr::Finalization()
+                  Codemgr::TOrdinalStringComparer::operator ...
+                  Codemgr::TOrdinalStringComparer::operator ...
+
+Imports from coreide200.bpl
+                  __fastcall Aboutboxservices::initialization()
+                  __fastcall Aboutboxservices::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Expertreg::initialization()
+                  __fastcall Expertreg::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Otadockableform::initialization()
+                  __fastcall Otadockableform::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualresources::initialization()
+                  __fastcall Idevirtualresources::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualunicodedefines::initialization()
+                  __fastcall Idevirtualunicodedefines::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualwidestrings::initialization()
+                  __fastcall Idevirtualwidestrings::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualdataobject::initialization()
+                  __fastcall Idevirtualdataobject::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualshellnotifier::initialization()
+                  __fastcall Idevirtualshellnotifier::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualnamespace::initialization()
+                  __fastcall Idevirtualnamespace::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualpidltools::initialization()
+                  __fastcall Idevirtualpidltools::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualshellutilities::initialization()
+                  __fastcall Idevirtualshellutilities::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualiconthread::initialization()
+                  __fastcall Idevirtualiconthread::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualunicodecontrols::initialization()
+                  __fastcall Idevirtualunicodecontrols::Finalization()
+
+Imports from vclide200.bpl
+                  __fastcall Idevirtualexplorertree::initialization()
+                  __fastcall Idevirtualexplorertree::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Otaaddinoptions::initialization()
+                  __fastcall Otaaddinoptions::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Otaaddinoptionsideinsightitems::initialization()
+                  __fastcall Otaaddinoptionsideinsightitems::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Diffviewermanager::initialization()
+                  __fastcall Diffviewermanager::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Designerdevicemngr::initialization()
+                  __fastcall Designerdevicemngr::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Ideservices::initialization()
+                  __fastcall Ideservices::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Expandableevaltree::initialization()
+                  __fastcall Expandableevaltree::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Editorcontrol::initialization()
+                  __fastcall Editorcontrol::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Vclient::initialization()
+                  __fastcall Vclient::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Vedopts::initialization()
+                  __fastcall Vedopts::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Vedtypes::initialization()
+                  __fastcall Vedtypes::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Edprocs::initialization()
+                  __fastcall Edprocs::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Editorbuffer::initialization()
+                  __fastcall Editorbuffer::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Sourcemodule::initialization()
+                  __fastcall Sourcemodule::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Uiutils::initialization()
+                  __fastcall Uiutils::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Docmodul::initialization()
+                  __fastcall Docmodul::Finalization()
+
+Imports from coreide200.bpl
+                  __fastcall Ideintf::initialization()
+                  __fastcall Ideintf::Finalization()
+
+******************************************************************************
+Section:             Exports
+File Offset:         00011C00 (72704)
+  Flags:             00000000
+  Time Stamp:        00000000
+  Major Version:     0000
+  Minor Version:     0000
+
+Exports from moderntheme200.bpl
+  54 exported name(s), 54 export addresse(s).  Ordinal base is 1.
+  Sorted by Name:
+    RVA      Ord. Hint Name
+    -------- ---- ---- ----
+    00003D00   44 0000 __tpdsc__ Moderntheme::TModernTheme
+    00003368   46 0001 __tpdsc__ Moderntheme::TImageReplacer
+    00002C9C    4 0002 __tpdsc__ Themeresources::TDMThemeResources
+    00003E3C   42 0003 __tpdsc__ Moderntheme::TModernCaptionedDockTree
+    00003F68   40 0004 __tpdsc__ Moderntheme::TModernDockCaptionDrawer
+    00006A4C   54 0005 GetPackageInfoTable
+    00006A4C   51 0006 Moderntheme::__linkproc__ __fastcall GetPackageInfoTable()
+    00006A54   50 0007 Moderntheme::__linkproc__ __fastcall PackageLoad()
+    00006A60   49 0008 Moderntheme::__linkproc__ __fastcall PackageUnload()
+    00005658    7 0009 __fastcall Moderntheme::Finalization()
+    000032B4   47 000A Moderntheme::TImageReplacer::
+    000052D8   34 000B __fastcall Moderntheme::TImageReplacer::ReplaceIcon(Vcl::Forms::TForm *)
+    000052FC   33 000C __fastcall Moderntheme::TImageReplacer::ReplaceImageList(const System::UnicodeString, Vcl::Imglist::TCustomImageList *)
+    00003D84   43 000D Moderntheme::TModernCaptionedDockTree::
+    00003FA0   39 000E __fastcall Moderntheme::TModernCaptionedDockTree::GetDockCaptionDrawer()
+    00003ECC   41 000F Moderntheme::TModernDockCaptionDrawer::
+    000052BC   35 0010 __fastcall Moderntheme::TModernDockCaptionDrawer::CalcButtonSize(System::Types::TRect&)
+    00004B38   38 0011 __fastcall Moderntheme::TModernDockCaptionDrawer::DrawDockCaption(const Vcl::Graphics::TCanvas * const, System::Types::TRect&, Vcl::Captioneddocktree::TParentFormState&)
+    000051DC   37 0012 __fastcall Moderntheme::TModernDockCaptionDrawer::GetCloseRect(System::Types::TRect&)
+    00005244   36 0013 __fastcall Moderntheme::TModernDockCaptionDrawer::GetPinRect(System::Types::TRect&)
+    00003548   45 0014 Moderntheme::TModernTheme::
+    000053F8   32 0015 __fastcall Moderntheme::TModernTheme::TModernTheme()
+    000054B8   31 0016 __fastcall Moderntheme::TModernTheme::~TModernTheme()
+    000054E4   30 0017 __fastcall Moderntheme::TModernTheme::GetCaptionedDockTreeClass()
+    000054E8   29 0018 __fastcall Moderntheme::TModernTheme::GetDisabledSingleColor()
+    000054EC   28 0019 __fastcall Moderntheme::TModernTheme::GetFlat()
+    000054F4   27 001A __fastcall Moderntheme::TModernTheme::GetFont()
+    000054F8   26 001B __fastcall Moderntheme::TModernTheme::GetHotSingleColor()
+    000054FC   25 001C __fastcall Moderntheme::TModernTheme::GetOutlineTabsetButtons()
+    00005504   24 001D __fastcall Moderntheme::TModernTheme::GetTabColorActiveEnd()
+    00005508   23 001E __fastcall Moderntheme::TModernTheme::GetTabColorActiveStart()
+    0000550C   22 001F __fastcall Moderntheme::TModernTheme::GetTabDrawingStyle()
+    00005514   21 0020 __fastcall Moderntheme::TModernTheme::GetViewBarDelta()
+    00005518   20 0021 __fastcall Moderntheme::TModernTheme::GetViewBarTabStyle()
+    00005520   19 0022 __fastcall Moderntheme::TModernTheme::ImageListReplace(Vcl::Imglist::TCustomImageList *)
+    00005624   18 0023 __fastcall Moderntheme::TModernTheme::SetCaptionedDockTreeClass(const System::TMetaClass * const)
+    00005628   17 0024 __fastcall Moderntheme::TModernTheme::SetDisabledSingleColor(const System::Uitypes::TColor)
+    0000562C   16 0025 __fastcall Moderntheme::TModernTheme::SetFlat(const const bool)
+    00005630   15 0026 __fastcall Moderntheme::TModernTheme::SetFont(const Vcl::Graphics::TFont * const)
+    0000563C   14 0027 __fastcall Moderntheme::TModernTheme::SetHotSingleColor(const System::Uitypes::TColor)
+    00005640   13 0028 __fastcall Moderntheme::TModernTheme::SetOutlineTabsetButtons(const const bool)
+    00005644   12 0029 __fastcall Moderntheme::TModernTheme::SetTabColorActiveEnd(const System::Uitypes::TColor)
+    00005648   11 002A __fastcall Moderntheme::TModernTheme::SetTabColorActiveStart(const System::Uitypes::TColor)
+    0000564C   10 002B __fastcall Moderntheme::TModernTheme::SetTabDrawingStyle(const Brandingapi::TTabDrawingStyle)
+    00005650    9 002C __fastcall Moderntheme::TModernTheme::SetViewBarDelta(const const int)
+    00005654    8 002D __fastcall Moderntheme::TModernTheme::SetViewBarTabStyle(const Vcl::Tabs::TTabSetTabStyle)
+    00007900    6 002E __fastcall Moderntheme::initialization()
+    00007958   48 002F __fastcall Moderntheme::initialization()
+    00008094    3 0030 Themeresources::DMThemeResources
+    00002CD0    2 0031 __fastcall Themeresources::Finalization()
+    00001FCC    5 0032 Themeresources::TDMThemeResources::
+    000073D0    1 0033 __fastcall Themeresources::initialization()
+    00006A60   52 0034 Finalize
+    00006A54   53 0035 Initialize
+
+******************************************************************************
+Section:             Resources
+File Offset:         00013A00 (80384)
+  Flags:             00000000
+  Time Stamp:        4489A0DD : Fri Jun  9 17:25:01 2006
+  Major Version:     0000
+  Minor Version:     0000
+
+Resources:
+Type          Name                   Lang Id
+--------------------------------------------
+[0 named entries, 2 ID entries]
+type: RCData (10)  (next directory @00000020)
+
+              [6 named entries, 0 ID entries]
+              BORLAND_SIG  (next directory @00000078)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (1033)  (data @00000120)
+                                         Offset:    0001823C
+                                         Size:      000000B2
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+              DESCRIPTION  (next directory @00000090)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (0)  (data @00000130)
+                                         Offset:    000182F0
+                                         Size:      0000004C
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+              PACKAGEINFO  (next directory @000000A8)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (0)  (data @00000140)
+                                         Offset:    0001833C
+                                         Size:      00000088
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+              PACKAGEOPTIONS  (next directory @000000C0)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (0)  (data @00000150)
+                                         Offset:    000183C4
+                                         Size:      00000108
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+              PLATFORMTARGETS  (next directory @000000D8)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (1033)  (data @00000160)
+                                         Offset:    000184CC
+                                         Size:      00000002
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+              TDMTHEMERESOURCES  (next directory @000000F0)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (0)  (data @00000170)
+                                         Offset:    000184D0
+                                         Size:      0007F694
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+type: Version (16)  (next directory @00000060)
+
+              [0 named entries, 1 ID entries]
+              type: Cursor (1)  (next directory @00000108)
+
+                                     [0 named entries, 1 ID entries]
+                                     type: Unknown (1033)  (data @00000180)
+                                         Offset:    00097B64
+                                         Size:      000003A4
+                                         Code Page: 00000000
+                                         Reserved:  00000000
+
+
+
