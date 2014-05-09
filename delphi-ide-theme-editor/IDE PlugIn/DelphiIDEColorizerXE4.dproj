@@ -70,7 +70,6 @@
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_BplOutput>.\</DCC_BplOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <Icon_MainIcon>DelphiIDEColorizerXE_Icon.ico</Icon_MainIcon>
         <DCC_Namespace>Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -78,7 +77,6 @@
         <DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;Jcl;JclVcl;JclDeveloperTools;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
-        <Icon_MainIcon>DelphiIDEColorizerXE_Icon.ico</Icon_MainIcon>
         <DCC_UsePackage>vcl;vclimg;$(DCC_UsePackage)</DCC_UsePackage>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
@@ -138,7 +136,6 @@
         <DCCReference Include="..\Units\uMisc.pas"/>
         <DCCReference Include="..\Units\uRegistry.pas"/>
         <DCCReference Include="uRttiHelper.pas"/>
-        <DCCReference Include="uIDEExpertUtils.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
@@ -172,7 +169,7 @@
                     <VersionInfo Name="MajorVer">0</VersionInfo>
                     <VersionInfo Name="MinorVer">1</VersionInfo>
                     <VersionInfo Name="Release">2</VersionInfo>
-                    <VersionInfo Name="Build">272</VersionInfo>
+                    <VersionInfo Name="Build">274</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -184,7 +181,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName"/>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">0.1.2.272</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">0.1.2.274</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright"/>
                     <VersionInfoKeys Name="LegalTrademarks"/>

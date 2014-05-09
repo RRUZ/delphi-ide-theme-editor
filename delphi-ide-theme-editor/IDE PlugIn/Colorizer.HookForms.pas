@@ -22,6 +22,9 @@ unit Colorizer.HookForms;
 
 interface
 
+  Procedure InstallFormsHook();
+  Procedure RemoveFormsHook();
+
 implementation
 
 uses
@@ -99,21 +102,25 @@ begin
   Result := CallNextHookEx(hhk, nCode, wParam, lParam);
 end;
 
-Procedure InstallHook();
+Procedure InstallFormsHook();
 begin
-  hhk := SetWindowsHookEx(WH_CBT, @CBT_FUNC, hInstance, 0);
+  if (hhk = 0) then
+   hhk := SetWindowsHookEx(WH_CBT, @CBT_FUNC, hInstance, 0);
 end;
 
-Procedure RemoveHook();
+Procedure RemoveFormsHook();
 begin
   if (hhk <> 0) then
+  begin
     UnhookWindowsHookEx(hhk);
+    hhk:=0;
+  end;
 end;
-
-initialization
-  InstallHook();
-
-finalization
-  RemoveHook();
+//
+//initialization
+//  InstallFormsHook();
+//
+//finalization
+//  RemoveFormsHook();
 
 end.

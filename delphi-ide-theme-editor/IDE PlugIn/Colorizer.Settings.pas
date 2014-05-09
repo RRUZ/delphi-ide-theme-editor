@@ -63,44 +63,44 @@ uses
 
 procedure ReadSettings(Settings: TSettings;Const Path:String);
 var
-  iniFile: TIniFile;
+  LIniFile: TIniFile;
 begin
   //C:\Users\Public\Documents\RAD Studio\Projects\XE2\delphi-ide-theme-editor\IDE PlugIn\
-  iniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
+  LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
-    Settings.EnableDWMColorization   := iniFile.ReadBool('Global', 'EnableDWMColorization', True);
-    Settings.Enabled                 := iniFile.ReadBool('Global', 'Enabled', True);
-    Settings.FixIDEDisabledIconsDraw := iniFile.ReadBool('Global', 'FixIDEDisabledIconsDraw', True);
-    Settings.AutogenerateColors      := iniFile.ReadBool('Global', 'AutogenerateColors', True);
-    Settings.ThemeName               := iniFile.ReadString('Global', 'ThemeName', '');
-    Settings.VCLStyleName            := iniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
-    Settings.UseVCLStyles            := iniFile.ReadBool('Global', 'UseVCLStyles', False);
-    Settings.ChangeIconsGutter       := iniFile.ReadBool('Global', 'ChangeIconsGutter', True);
+    Settings.EnableDWMColorization   := LIniFile.ReadBool('Global', 'EnableDWMColorization', True);
+    Settings.Enabled                 := LIniFile.ReadBool('Global', 'Enabled', True);
+    Settings.FixIDEDisabledIconsDraw := LIniFile.ReadBool('Global', 'FixIDEDisabledIconsDraw', True);
+    Settings.AutogenerateColors      := LIniFile.ReadBool('Global', 'AutogenerateColors', True);
+    Settings.ThemeName               := LIniFile.ReadString('Global', 'ThemeName', '');
+    Settings.VCLStyleName            := LIniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
+    Settings.UseVCLStyles            := LIniFile.ReadBool('Global', 'UseVCLStyles', False);
+    Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
 //    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
 //    Settings.StyleBarName            := iniFile.ReadString('Global', 'StyleBarName', 'XP Style');
   finally
-    iniFile.Free;
+    LIniFile.Free;
   end;
 end;
 
 procedure WriteSettings(Settings: TSettings;Const Path:String);
 var
-  iniFile: TIniFile;
+  LIniFile: TIniFile;
 begin
-  iniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
+  LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
-    iniFile.WriteBool('Global', 'EnableDWMColorization', Settings.EnableDWMColorization);
-    iniFile.WriteBool('Global', 'Enabled', Settings.Enabled);
-    iniFile.WriteBool('Global', 'FixIDEDisabledIconsDraw', Settings.FixIDEDisabledIconsDraw);
-    iniFile.WriteBool('Global', 'AutogenerateColors', Settings.AutogenerateColors);
-    iniFile.WriteString('Global', 'ThemeName', Settings.ThemeName);
-    iniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
-    iniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
-    iniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
+    LIniFile.WriteBool('Global', 'EnableDWMColorization', Settings.EnableDWMColorization);
+    LIniFile.WriteBool('Global', 'Enabled', Settings.Enabled);
+    LIniFile.WriteBool('Global', 'FixIDEDisabledIconsDraw', Settings.FixIDEDisabledIconsDraw);
+    LIniFile.WriteBool('Global', 'AutogenerateColors', Settings.AutogenerateColors);
+    LIniFile.WriteString('Global', 'ThemeName', Settings.ThemeName);
+    LIniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
+    LIniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
+    LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
 //    iniFile.WriteString('Global', 'ColorMapName', Settings.ColorMapName);
 //    iniFile.WriteString('Global', 'StyleBarName', Settings.StyleBarName);
   finally
-    iniFile.Free;
+    LIniFile.Free;
   end;
 end;
 

@@ -80,6 +80,8 @@ unit Main;
 
 interface
 
+{$I ..\Common\Jedi.inc}
+
 uses
  ToolsAPI;
 
@@ -90,6 +92,8 @@ Const
   sMenuItemCaption        = 'Delphi IDE Colorizer';
   sMenuItemName           = 'DelphiIDEClrItem';
   sActionItemIdeColorizer = 'DelphiIDEClrAction';
+
+
 
 {$IFDEF DLLWIZARD}
 function InitIDEColorizer(const BorlandIDEServices: IBorlandIDEServices; RegisterProc: TWizardRegisterProc; var Terminate: TWizardTerminateProc): Boolean; stdcall;
@@ -110,6 +114,9 @@ uses
  Vcl.Styles,
  Vcl.Themes,
  {$IFEND}
+ {$IFDEF DELPHI2009_UP}
+ System.Generics.Collections,
+ {$ENDIF}
  Classes,
  ActnMan,
  ActnList,
@@ -126,6 +133,8 @@ uses
  ComObj,
  ExtCtrls,
  uDelphiVersions,
+ Colorizer.Hooks,
+ Colorizer.HookForms,
  Colorizer.SettingsForm,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
@@ -338,15 +347,62 @@ begin
   ReportMemoryLeaksOnShutdown:=DebugHook<>0;
   {$WARN SYMBOL_PLATFORM ON}
   //SourceEditorNotifiers := TList.Create;
+
+  TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
+  FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
+  TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
+  TColorizerLocalSettings.ActnStyleList:= TList<TActionManager>.Create;
+
+  TColorizerLocalSettings.ColorMap:=nil;
+  TColorizerLocalSettings.Settings:=nil;
+  TColorizerLocalSettings.ImagesGutterChanged:=False;
+  TColorizerLocalSettings.HookedWindows:=TStringList.Create;
+  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
+
+
   TColorizerLocalSettings.Settings:=TSettings.Create;
   RegisterPlugIn;
   AddMenuItems;
-  InitColorizer();
 
+  InstallFormsHook();
+  InstallColorizerHooks();
+
+  InitColorizer();
   FTimerRefresher:=TTimer.Create(nil);
   FTimerRefresher.OnTimer :=OnRefreher;
   FTimerRefresher.Interval:=1500;
   FTimerRefresher.Enabled:=True;
+end;
+
+destructor TIDEWizard.Destroy;
+begin
+  AddLog('TIDEWizard.Destroy 0');
+  FTimerRefresher.Enabled:=False;
+  FTimerRefresher.Free;
+
+  RestoreIDESettings();
+
+  AddLog('TIDEWizard.Destroy 1');
+  RemoveFormsHook();
+  RemoveColorizerHooks();
+
+  UnRegisterPlugIn;
+  RemoveMenuItems;
+  AddLog('TIDEWizard.Destroy 2');
+  FreeAndNil(SplashBmp);
+  FreeAndNil(AboutBmp);
+
+  AddLog('TIDEWizard.Destroy 3');
+  FreeAndNil(TColorizerLocalSettings.ActnStyleList);
+  FreeAndNil(TColorizerLocalSettings.Settings);
+  TColorizerLocalSettings.IDEData.Free;
+  TColorizerLocalSettings.HookedWindows.Free;
+  TColorizerLocalSettings.HookedWindows:=nil;
+
+  FinalizeColorizer();
+
+  AddLog('TIDEWizard.Destroy 4');
+  inherited;
 end;
 
 procedure TIDEWizard.AddMenuItems;
@@ -357,7 +413,6 @@ var
   LIcon : TIcon;
 begin
   inherited;
-
    if BorlandIDEServices <> nil then
    begin
      NTAServices := (BorlandIDEServices as INTAServices);
@@ -386,7 +441,7 @@ begin
         LIcon.Free;
       end;
 
-      ToolsMenuItem.Insert(ToolsMenuItem.Count, FDICConfMenuItem);
+      ToolsMenuItem.Insert(0, FDICConfMenuItem);
    end;
 end;
 
@@ -417,17 +472,7 @@ procedure TIDEWizard.BeforeSave;
 begin
 end;
 
-destructor TIDEWizard.Destroy;
-begin
-  UnRegisterPlugIn;
-  RemoveMenuItems;
-  FreeAndNil(SplashBmp);
-  FreeAndNil(AboutBmp);
-  FinalizeColorizer();
-  FTimerRefresher.Enabled:=False;
-  FTimerRefresher.Free;
-  inherited;
-end;
+
 
 procedure TIDEWizard.Destroyed;
 begin

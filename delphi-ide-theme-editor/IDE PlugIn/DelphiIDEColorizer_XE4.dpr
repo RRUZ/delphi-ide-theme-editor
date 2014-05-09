@@ -2,8 +2,11 @@
 library DelphiIDEColorizer_XE4;
 
 uses
-  {$IFDEF DEBUG}
-  {$ENDIF}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
