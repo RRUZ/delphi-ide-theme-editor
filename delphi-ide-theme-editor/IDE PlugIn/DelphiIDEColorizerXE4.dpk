@@ -61,7 +61,8 @@ contains
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
   Vcl.Styles.Utils.Menus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas',
   uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
-  uStackTrace in '..\Units\uStackTrace.pas';
+  uStackTrace in '..\Units\uStackTrace.pas',
+  Colorizer.Wrappers in 'Colorizer.Wrappers.pas';
 
 end.
 
