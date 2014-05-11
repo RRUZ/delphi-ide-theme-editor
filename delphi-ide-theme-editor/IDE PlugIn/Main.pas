@@ -26,7 +26,10 @@
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * Enable/Disable
 
-  * restore support for Delphi 2007
+ features
+   mimic header omn TListView, TVirtualStringTree effect from  TTBDrawingStyle(dsNormal)
+
+
 }
 
 // DONE
