@@ -1,18 +1,58 @@
-#summary Delphi IDE Colorizer (DIC) Beta FAQ
+#summary Delphi IDE Colorizer (DIC) Beta Testing FAQ
 
+= Introduction =
+
+ If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE2, XE4, XE5 and XE6. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found until now. 
+
+  What I expect of this beta testing is found bugs, possible conflicts with third-party experts and components, add new suggested features and improve the overall performance of the Wizard.    
+ 
 = FAQ =
 
- These wiki describe the steps necessaries to use and test the Wizard.
+ This wiki describe the steps necessaries to use and test the Wizard.
 
 == What is DIC? ==
+
   Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the menus, popup menus, docked windows and components included in the workspace of the IDE.
 
-== DIC supports designtime components? == 
-  No, the aim of DIC is only change the appearance of the windows and components used by the IDE. a not interfere with the VCL or FMX components in design time. If any component in design time is modified in any way if the DIC is running must be reported as a bug. 
+== Which versions of Delphi(RAD Studio) supports DIC? ==
+ 
+ Currently DIC supports RAD Studio XE2, XE4, X5, X6. 
+ (I don't have XE3 installed on my test environment, I hope include this version ASAP) 
+
+== Which versions of Delphi(RAD Studio) will supports DIC in the final version? ==
+
+ I expect add support for Delphi 2010-XE6 in the final release. 
+
+== DIC supports modify the syntax highlight colors? == 
+
+ No, for this task you must use the Delphi IDE Theme Editor.
+
+== Why some components doesn't use the colors of the Theme used in DIC? == 
+ 
+  Some components like scrollbars, combobox and buttons uses the native Windows drawing even if the DIC wizard is running. I hope add support for such components in a future release, but I not consider this a mandatory feature to add.
+
+== DIC supports design-time components? == 
+
+ No, the aim of DIC is only change the appearance of the windows and components used by the IDE. a not interfere with the VCL or FMX components in design time. If any component in design time is modified in any way if the DIC is running must be reported as a bug. 
 
 == DIC supports modify the non client area of the floating IDE windows? == 
  No, DIC only can change the appearance of the docked windows. 
 
 == DIC supports VCL Styles? == 
 
-  DIC has a experimental support for the VCL Styles, but is not ready for test yet. The main reason is which some  components used by the RAD Studio IDE doesn't supports VCL Styles and that implies which many hooks must be written to add a proper support for such components.
+ DIC has a experimental support for the VCL Styles, but is not ready for test yet. The main reason is which some components used by the RAD Studio IDE doesn't supports VCL Styles and that implies which many hooks must be written to add a proper support for such components.
+
+== How I can change the settings (Themes) of DIC? ==
+
+== Where the DIC files are stored? ==
+
+ The files used by the DIC Wizard are stored in the %LOCALAPPDATA%\The Road To Delphi\DIC folder 
+
+== How I must report a bug? ==
+
+  All the bugs found must be reported using the issue page of the project located here https://code.google.com/p/delphi-ide-theme-editor/issues/list . exist a sample bug issue (https://code.google.com/p/delphi-ide-theme-editor/issues/detail?id=42) which you can use as a guide. please remember add the "DIC" prefix to the summary of the issue report.
+
+  
+== How I must suggest a new feature? ==
+
+ All the suggestions must be done using the issue page of the project located here https://code.google.com/p/delphi-ide-theme-editor/issues/list . exist a sample feature request (https://code.google.com/p/delphi-ide-theme-editor/issues/detail?id=43) which you can use as a guide. please remember add the "DIC" prefix to the summary of the feature report and modify the Labels of the report from *Type-Defect* to *Type-Enhancement*
