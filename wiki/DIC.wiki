@@ -14,12 +14,12 @@
 
   Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the menus, popup menus, docked windows and components included in the workspace of the IDE.
 
-== Which versions of Delphi(RAD Studio) supports DIC? ==
+== Which versions of Delphi (RAD Studio) supports DIC? ==
  
  Currently DIC supports RAD Studio XE2, XE4, X5, X6. 
  (I don't have XE3 installed on my test environment, I hope include this version ASAP) 
 
-== Which versions of Delphi(RAD Studio) will supports DIC in the final version? ==
+== Which versions of Delphi (RAD Studio) will supports DIC in the final version? ==
 
  I expect add support for Delphi 2010-XE6 in the final release. 
 
@@ -42,7 +42,9 @@
 
  DIC has a experimental support for the VCL Styles, but is not ready for test yet. The main reason is which some components used by the RAD Studio IDE doesn't supports VCL Styles and that implies which many hooks must be written to add a proper support for such components.
 
-== How I can change the settings (Themes) of DIC? ==
+== How I can change the options of the DIC? ==
+
+  The options of the Wizard can be modified using the settings form located in the Tools -> Delphi IDE Colorizer menu or Tools -> Options Third Party -> Delphi IDE Colorizer.
 
 == Where the DIC files are stored? ==
 
