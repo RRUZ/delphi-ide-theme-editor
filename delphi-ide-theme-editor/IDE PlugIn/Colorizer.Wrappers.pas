@@ -29,7 +29,6 @@ uses
   ActnMan,
   System.Classes;
 
-
    function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap) : Boolean;
 
 implementation
@@ -222,7 +221,6 @@ begin
   end;
 end;
 
-
 function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap) : Boolean;
 begin
   Result:=False;
@@ -233,7 +231,6 @@ begin
     Result:=True;
   end;
 end;
-
 
 { TWrapperVirtualStringTree }
 procedure TWrapperVirtualStringTree.SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap);
@@ -360,7 +357,6 @@ procedure TWrapperDisassemblerView.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-
   SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
   SetRttiPropertyValue(AComponent,'BreakpointColor', AColorMap.SelectedColor);
   SetRttiPropertyValue(AComponent,'BreakpointTextColor', AColorMap.SelectedFontColor);
@@ -370,7 +366,6 @@ begin
      property BreakpointColor: TColor;
      property BreakpointTextColor: TColor;
      property Color: TColor;
-     property Constraints: TSizeConstraints;
      property Ctl3D: Boolean;
      property Enabled: Boolean;
      property Font: TFont;
@@ -407,8 +402,6 @@ procedure TWrapperIDEComboBox.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-//      if not TColorizerLocalSettings.Settings.UseVCLStyles then
-//      SetWindowTheme(TWinControl(AComponent).Handle,'','');
   SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
   SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
   SetRttiPropertyValue(AComponent,'BevelKind', Integer(bkFlat));
@@ -460,10 +453,10 @@ begin
      property HighlightFontColor: TColor;
     }
     SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.MenuColor);
-    SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.MenuColor);
+    SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.SelectedColor);
     SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.Color);
     SetRttiPropertyValue(AComponent,'GutterColor', AColorMap.Color);
-    SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.FontColor);
+    SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.SelectedFontColor);
     SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
@@ -501,7 +494,7 @@ begin
   SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
 end;
 
-{ TWrapperEditControll }
+{ TWrapperEditControl }
 
 procedure TWrapperEditControl.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
@@ -537,6 +530,7 @@ begin
 //    if Restore then
 //      DrawingStyle     := TTBDrawingStyle(dsNormal)
 //    else
+    //don't change this value (dsNormal), because prevents which the toolbars of the IDE continue using the themes color even if the Wizard is not running
     DrawingStyle       := TTBDrawingStyle(dsNormal); //dsGradient
     GradientStartColor := AColorMap.MenuColor;
     GradientEndColor   := AColorMap.Color;
@@ -554,11 +548,11 @@ begin
   inherited;
   with TTabSet(AComponent) do
   begin
-    BackgroundColor:=AColorMap.MenuColor;
-    SelectedColor  :=AColorMap.Color;
-    UnselectedColor:=AColorMap.MenuColor;
-    Font.Color    := AColorMap.FontColor;
-    Style :=tsModernTabs; //necessary for allow paint background color
+    BackgroundColor:= AColorMap.MenuColor;
+    SelectedColor  := AColorMap.Color;
+    UnselectedColor:= AColorMap.MenuColor;
+    Font.Color     := AColorMap.FontColor;
+    Style          := tsModernTabs; //necessary for allow paint the background color
   end
 
 end;
@@ -592,16 +586,16 @@ procedure TWrapperGradientTabSet.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-   SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
-   SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
-   SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
-   SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
-   SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+  SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
+  SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
+  SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
+  SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
+  SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 
-   SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.BackgroundColor', AColorMap.MenuColor);
-   SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.Transparent', False);
-   SetRttiPropertyValue(AComponent,'FScroller.FRightButton.BackgroundColor', AColorMap.MenuColor);
-   SetRttiPropertyValue(AComponent,'FScroller.FRightButton.Transparent', False);
+  SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.BackgroundColor', AColorMap.MenuColor);
+  SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.Transparent', False);
+  SetRttiPropertyValue(AComponent,'FScroller.FRightButton.BackgroundColor', AColorMap.MenuColor);
+  SetRttiPropertyValue(AComponent,'FScroller.FRightButton.Transparent', False);
 end;
 
 { TWrapperIDEGradientTabSet }
@@ -610,11 +604,11 @@ procedure TWrapperIDEGradientTabSet.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-   SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
-   SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
-   SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
-   SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
-   SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+  SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
+  SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
+  SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
+  SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
+  SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
 { TWrapperTabSheet }

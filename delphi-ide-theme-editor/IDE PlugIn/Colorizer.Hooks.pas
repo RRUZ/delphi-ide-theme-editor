@@ -166,22 +166,6 @@ end;
   //FooMethod='@Editcolorpage@TEditorColor@ColorSpeedSettingClick$qqrp14System@TObject';
 
 
-function GetBplMethodAddress(Method: Pointer): Pointer;
-type
-  PJmpCode = ^TJmpCode;
-  TJmpCode = packed record
-    Code: Word;
-    Addr: ^Pointer;
-  end;
-const
-  csJmp32Code = $25FF;
-begin
-  if PJmpCode(Method)^.Code = csJmp32Code then
-    Result := PJmpCode(Method)^.Addr^
-  else
-    Result := Method;
-end;
-
 procedure Bitmap2GrayScale(const BitMap: TBitmap);
 type
   TRGBArray = array[0..32767] of TRGBTriple;
@@ -289,7 +273,6 @@ begin
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
    begin
      sCaller := ProcByLevel(1);
-     //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomFillRect.txt', Format('%s %s',[sCaller, SLineBreak]));
      if SameText(sCaller, 'EditorControl.TCustomEditControl.EVFillGutter') then
         Self.Brush.Color:=GetGutterBkColor
      else
@@ -319,8 +302,6 @@ begin
        LCanvas:=TCanvas.Create;
        try
          LCanvas.Handle:=DC;
-//         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-//         LCanvas.FillRect(R);
           GradientFillCanvas(LCanvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, R, gdVertical);
           LCanvas.Brush.Style:=TBrushStyle.bsClear;
           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
@@ -527,8 +508,8 @@ end;
 function CustomDrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
 var
   LColor: TColor;
-  LStyle: TCustomStyleServices;
-  LDetails: TThemedElementDetails;
+  //LStyle: TCustomStyleServices;
+  //LDetails: TThemedElementDetails;
 
   procedure DrawIcon;
   var
@@ -634,10 +615,6 @@ var
     Result.Bottom := Result.Top + PinSize;
   end;
 
-const
-  CHorzStates: array[Boolean] of TThemedPanel = (tpDockPanelHorzNormal, tpDockPanelHorzSelected);
-  CVertStates: array[Boolean] of TThemedPanel = (tpDockPanelVertNormal, tpDockPanelVertSelected);
-
 var
   ShouldDrawClose: Boolean;
   CloseRect, PinRect: TRect;
@@ -650,15 +627,11 @@ begin
     exit;
   end;
 
-  LStyle := StyleServices;
+  //LStyle := StyleServices;
 
   Canvas.Font.Color :=  TColorizerLocalSettings.ColorMap.FontColor;
   if Self.DockCaptionOrientation = dcoHorizontal then
   begin
-//      LDetails:= LStyle.GetElementDetails(twSmallCaptionActive);
-//      LStyle.DrawElement(Canvas.Handle, LDetails, CaptionRect);
-
-    LDetails := LStyle.GetElementDetails(CHorzStates[State.Focused]);
     Canvas.Pen.Width := 1;
     Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
 
@@ -671,7 +644,6 @@ begin
 
     Canvas.Brush.Color := LColor;
 
-    //Canvas.FillRect(Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom));
     GradientFillCanvas(Canvas, LColor, TColorizerLocalSettings.ColorMap.MenuColor, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
 
     Canvas.Pen.Color := GetShadowColor(Canvas.Pen.Color, -20);
@@ -719,7 +691,6 @@ begin
     Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Top + 1);
     Canvas.LineTo(CaptionRect.Right - 1, CaptionRect.Top + 1);
 
-    LDetails := LStyle.GetElementDetails(CVertStates[State.Focused]);
 
     if State.Focused then
       LColor := TColorizerLocalSettings.ColorMap.Color
@@ -1005,19 +976,12 @@ begin
    GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
    if Assigned(GetSysColorOrgPointer) then
      Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @CustomGetSysColor);
-//  CorIdeModule := LoadLibrary('coreide180.bpl');
-//  if CorIdeModule<>0 then
-//  begin
-//   pProjectTree2PaintText := GetBplMethodAddress(GetProcAddress(CorIdeModule, sProjectTree2PaintText));
-//   if Assigned(pProjectTree2PaintText) then
-//    Trampoline_ProjectTree2PaintText:= InterceptCreate(pProjectTree2PaintText, @CustomProjectTree2PaintText);
-//  end;
 
 {$IFDEF DELPHIXE6_UP}
   ModernThemeModule := LoadLibrary('ModernTheme200.bpl');
   if ModernThemeModule<>0 then
   begin
-   pModernThemeDrawDockCaption := GetBplMethodAddress(GetProcAddress(ModernThemeModule, sModernThemeDrawDockCaption));
+   pModernThemeDrawDockCaption := GetProcAddress(ModernThemeModule, sModernThemeDrawDockCaption);
    if Assigned(pModernThemeDrawDockCaption) then
      Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(pModernThemeDrawDockCaption, @CustomDrawDockCaption);
   end;
@@ -1079,10 +1043,5 @@ end;
     002F0A00 11656 219E __fastcall Editorcontrol::TCustomEditControl::EVFillGutter(System::Types::TRect&, unsigned short, int, bool, int)
 }
 
-//initialization
-//  InstallColorizerHooks;
-//
-//finalization
-//  RemoveColorizerHooks;
 end.
 
