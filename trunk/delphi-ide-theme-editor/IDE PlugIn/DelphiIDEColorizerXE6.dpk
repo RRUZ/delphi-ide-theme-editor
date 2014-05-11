@@ -62,3 +62,4 @@ contains
   uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   uStackTrace in '..\Units\uStackTrace.pas';
 end.
+

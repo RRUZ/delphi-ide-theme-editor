@@ -298,66 +298,7 @@ begin
      ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index], Restore);
 end;
 
-//
-//type
-//  TCustomActionBarClass = class(TCustomActionBar);
-//  TCustomActionManagerHelper = class helper for TCustomActionManager
-//  private
-//    procedure SetFStyleRW(const Value: TActionBarStyle);
-//    function GetFOnStyleChangedRW: TStyleChanged;
-//    function GetFStyleRW: TActionBarStyle;
-//  public
-//   property FStyleRW : TActionBarStyle read GetFStyleRW write SetFStyleRW;
-//   property FOnStyleChangedRW: TStyleChanged read GetFOnStyleChangedRW;
-//  end;
-//
-//
-//{ TCustomActionManagerHelper }
-//
-//function TCustomActionManagerHelper.GetFOnStyleChangedRW: TStyleChanged;
-//begin
-//  Result:=Self.FOnStyleChanged;
-//end;
-//
-//function TCustomActionManagerHelper.GetFStyleRW: TActionBarStyle;
-//begin
-//  Result:=Self.FStyle;
-//end;
-//
-//procedure TCustomActionManagerHelper.SetFStyleRW(const Value: TActionBarStyle);
-//begin
-//  Self.FStyle:=Value;
-//end;
-
-
 procedure RestoreActnManagerStyles;
-
-
-//  procedure SetStyle(ActionManager : TCustomActionManager; const Value: TActionBarStyle);
-//  var
-//    I: Integer;
-//  begin
-//    if ActionManager.Style <> Value then
-//    begin
-//      ActionManager.FStyleRW := Value;
-//      if Assigned(ActionManager.ActionBars) then
-//      for I := 0 to ActionManager.ActionBars.Count - 1 do
-//      begin
-//        if Assigned(ActionManager.ActionBars[I].ActionBar) then
-//        begin
-//          ActionManager.ActionBars[I].ActionBar.RecreateControls;
-//          if ActionManager.ActionBars[I].ActionBar.ColorMap = TCustomActionBarClass(ActionManager.ActionBars[I].ActionBar).FDefaultColorMap then
-//            ActionManager.ActionBars[I].ActionBar.ColorMap := nil;
-//          ActionManager.ActionBars[I].ActionBar.Invalidate;
-//        end;
-//      end;
-//      if Assigned(ActionManager.FOnStyleChangedRW) then
-//        ActionManager.FOnStyleChangedRW(ActionManager);
-////      if (csDesigning in ActionManager.ComponentState) and not (csLoading in ActionManager.ComponentState) then
-////        NotifyDesigner(nil);
-//    end;
-//  end;
-
 {$IFNDEF DLLWIZARD}
 var
   LActionManager : TActionManager;
@@ -377,7 +318,6 @@ begin
          begin
            //AddLog('ActionBarStyles '+ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)].GetStyleName);
            LActionManager.Style:= ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
-           //SetStyle(LActionManager, ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)]);
          end;
         end;
       end;

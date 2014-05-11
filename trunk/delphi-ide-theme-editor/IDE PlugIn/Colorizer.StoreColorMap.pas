@@ -43,10 +43,10 @@ uses
   SysUtils,
   Variants;
 
-const
-  Msxml2_DOMDocument='Msxml2.DOMDocument.6.0';
 
 procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
+const
+  Msxml2_DOMDocument='Msxml2.DOMDocument.6.0';
 var
   PropName  : string;
   XmlDocIDETheme : OleVariant;

@@ -28,8 +28,6 @@
 
  features
    mimic header omn TListView, TVirtualStringTree effect from  TTBDrawingStyle(dsNormal)
-
-
 }
 
 // DONE

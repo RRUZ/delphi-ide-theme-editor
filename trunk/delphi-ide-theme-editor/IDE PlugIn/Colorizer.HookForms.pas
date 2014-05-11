@@ -116,11 +116,5 @@ begin
     hhk:=0;
   end;
 end;
-//
-//initialization
-//  InstallFormsHook();
-//
-//finalization
-//  RemoveFormsHook();
 
 end.
