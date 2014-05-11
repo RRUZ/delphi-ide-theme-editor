@@ -77,7 +77,6 @@ procedure RegisterVClStylesFiles;
 implementation
 
 {.$DEFINE DEBUG_MODE}
-{.$DEFINE DEBUG_PROFILER}
 
 uses
  {$IFDEF DELPHIXE_UP}
@@ -85,53 +84,19 @@ uses
  {$ELSE}
  XPStyleActnCtrls,
  {$ENDIF}
- {$IFDEF DELPHIXE2_UP}
- Vcl.Styles.Ext,
- {$ENDIF}
- {$IFDEF DELPHI2009_UP}
- PngImage,
- {$ENDIF}
  {$IFDEF DELPHI2010_UP}
  IOUtils,
  Rtti,
- {$ELSE}
- Variants,
- TypInfo,
  {$ENDIF}
  Types,
  Forms,
- Menus,
- Tabs,
- ComCtrls,
- Controls,
- StdCtrls,
  SysUtils,
- ExtCtrls,
  GraphUtil,
- UxTheme,
- ImgList,
- ActnCtrls,
- ActnPopup,
- ActnMenus,
  Colorizer.StoreColorMap,
  Colorizer.Wrappers,
  Dialogs,
  uMisc,
  uRttiHelper;
-
-
-{$IFDEF DEBUG_MODE}
-var
-  lcomp         : TStringList;
-{$ENDIF}
-
-
-{$IFDEF DEBUG_PROFILER}
-var
-  lprofiler     : TStringList;
-  lpignored     : TStringList;
-  lDumped       : TStringList;
-{$ENDIF}
 
 
 {$IFDEF DELPHIXE2_UP}
@@ -177,8 +142,8 @@ end;
 
 procedure DumpAllTypes;
 var
-l2 : TStrings;
-t  : TRttiType;
+  l2 : TStrings;
+  t  : TRttiType;
 begin
   l2 := TStringList.Create;
   try
@@ -190,9 +155,6 @@ begin
    l2.Free;
   end;
 end;
-
-
-{$ENDIF}
 
 procedure DumpObject(AObject: TObject);
 var
@@ -206,6 +168,9 @@ begin
    LDumpInfo.Free;
   end;
 end;
+{$ENDIF}
+
+
 
 procedure RefreshIDETheme;
 begin
@@ -214,7 +179,7 @@ end;
 
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False);
 var
-  index     : Integer;
+  Index     : Integer;
 begin
  {
   if GlobalSettings.EnableDWMColorization and DwmIsEnabled then
@@ -294,369 +259,19 @@ begin
 end;
 {$ENDIF}
 
-
-function ProcessVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
-const
-  NumWin  = 7;
-  CompList : array  [0..NumWin-1] of string = ('TMemo', 'TListView', 'TTreeView', 'TListBox', 'TCheckListBox', 'TExplorerCheckListBox', 'THintListView');
-var
-  Index : Integer;
-begin
-   Result:=False;
-  for Index := 0 to NumWin-1 do
-    if CompareText(AComponent.ClassName,CompList[Index])=0 then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Ctl3D', False);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-      Result:=True;
-      Break;
-    end
-end;
-
-//todo color themed tcheckbox , tradiobutton
-function ProcessStdVclControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
-const
-  NumWin  = 2;
-  CompList : array  [0..NumWin-1] of string = ('TLabel','TCheckBox');
-var
-  Index : Integer;
-begin
-   Result:=False;
-  for Index := 0 to NumWin-1 do
-    if CompareText(AComponent.ClassName,CompList[Index])=0 then
-    begin
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-      Result:=True;
-      Break;
-    end
-end;
-
-function ProcessVclGroupControls(AColorMap:TCustomActionBarColorMap;AComponent: TComponent) : Boolean;
-const
-  NumWin  = 3;
-  CompList : array  [0..NumWin-1] of string = ('TGroupBox','TRadioGroup','TPropRadioGroup');
-var
-  Index : Integer;
-begin
-   Result:=False;
-  for Index := 0 to NumWin-1 do
-    if CompareText(AComponent.ClassName,CompList[Index])=0 then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Ctl3D', False);
-      SetRttiPropertyValue(AComponent,'ParentBackGround', True);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-      Result:=True;
-      Break;
-    end
-end;
-
-
-Procedure GenIntransparentBitmap(bmp, Intrans: TBitmap);
-begin
-  Intrans.Assign(bmp);
-  Intrans.PixelFormat := pf24bit;
-end;
-
-procedure ImageListReplace(LImages : TImageList;Index: Integer;const ResourceName: String);
-{$IFDEF DELPHI2009_UP}
-var
- LPngImage: TPngImage;
- LBitMap: TBitmap;
-{$ENDIF}
-begin
-{$IFDEF DELPHI2009_UP}
-  LPngImage:=TPNGImage.Create;
-  try
-    LPngImage.LoadFromResourceName(HInstance, ResourceName);
-    LBitMap:=TBitmap.Create;
-    try
-      LPngImage.AssignTo(LBitMap);
-      LBitMap.AlphaFormat:=afDefined;
-      LImages.Replace(Index, LBitMap, nil);
-    finally
-      LBitMap.Free;
-    end;
-  finally
-    LPngImage.free;
-  end;
-{$ENDIF}
-end;
-
-procedure ImageListAdd(LImages : TImageList;Index: Integer;const ResourceName: String);
-{$IFDEF DELPHI2009_UP}
-var
- LPngImage: TPngImage;
- LBitMap: TBitmap;
-{$ENDIF}
-begin
-{$IFDEF DELPHI2009_UP}
-  LPngImage:=TPNGImage.Create;
-  try
-    LPngImage.LoadFromResourceName(HInstance, ResourceName);
-    LBitMap:=TBitmap.Create;
-    try
-      LPngImage.AssignTo(LBitMap);
-      LBitMap.AlphaFormat:=afDefined;
-      LImages.Add(LBitMap, nil);
-    finally
-      LBitMap.Free;
-    end;
-  finally
-    LPngImage.free;
-  end;
-{$ENDIF}
-end;
-
-
-
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False);
 var
-  I, Index       : Integer;
-  LPanel         : TPanel;
-  LColorMap      : TCustomActionBarColorMap;
+  Index          : Integer;
   LActionManager : TActionManager;
-  LImages        : TImageList;
   LForm          : TForm;
 begin
+    if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
-     if not Assigned(AComponent) then  exit;
-     if not Assigned(AColorMap) then  exit;
-
-
-    {$IFDEF DEBUG_PROFILER}
-     lprofiler.Add(Format('%s Processing component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
-      if lDumped.IndexOf(AComponent.ClassName)=-1 then
-      begin
-        lDumped.Add(AComponent.ClassName);
-        DumpComponent(AComponent);
-      end;
-    {$ENDIF}
-
-
-    {$IFDEF DEBUG_MODE}
-     //lcomp.Add(Format('%s : %s',[AComponent.Name,AComponent.ClassName]));
-    {$ENDIF}
-
-
-    if AComponent is TPopupActionBar then
-    begin
-      {
-      if not Assigned(TPopupActionBar(AComponent).OnGetControlClass) then
-      begin
-        LObjectList.Add(THelperClass.Create);
-        LObjectList[LObjectList.Count-1].PopupMenu:=TPopupActionBar(AComponent).PopupMenu;
-        LObjectList[LObjectList.Count-1].ColorMap:=AColorMap;
-        TPopupActionBar(AComponent).OnGetControlClass:=LObjectList[LObjectList.Count-1].PopupActionBar1GetControlClass;
-        TPopupActionBar(AComponent).OnPopup          :=LObjectList[LObjectList.Count-1].PopupActionBar1Popup;
-      end;
-      }
-          if (TColorizerLocalSettings.Settings.ChangeIconsGutter) and not (TColorizerLocalSettings.ImagesGutterChanged) and SameText('ModuleMenu', AComponent.Name) then
-          begin
-            LImages:=TImageList(TPopupActionBar(AComponent).Images);
-            if (LImages<>nil) and (LImages.Count>=27) then
-             begin
-              //LImages:=TImageList.Create(nil);
-              LImages.Clear;
-              {$IF CompilerVersion > 20}
-              LImages.ColorDepth:=TColorDepth.cd32Bit;
-              {$IFEND}
-              LImages.DrawingStyle:=dsNormal;
-              LImages.Width:=15;
-              LImages.Height:=15;
-
-              for i:= 0 to 26 do
-              ImageListAdd(LImages, i, Format('p%.2d',[i]));
-                 //  ImageListReplace(LImages, i, Format('p%.2d',[i]));
-
-               TPopupActionBar(AComponent).Images:=LImages;
-               TColorizerLocalSettings.ImagesGutterChanged:=True;
-             end;
-          end;
-    end
-    else
-    if SameText(AComponent.ClassName, 'TEdit') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TPropCheckBox') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName ,'TDesktopComboBox') or  SameText(AComponent.ClassName ,'THistoryPropComboBox') then
-    begin
-//      if not TColorizerLocalSettings.Settings.UseVCLStyles then
-//      SetWindowTheme(TWinControl(AComponent).Handle,'','');
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-      SetRttiPropertyValue(AComponent,'BevelKind', Integer(bkFlat));
-      SetRttiPropertyValue(AComponent,'BevelInner', Integer(bvNone));
-    end
-    else
-    if SameText(AComponent.ClassName, 'TComboBox') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-    end
-    else
     if AComponent is TForm then
     begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
-      //DumpObject(AComponent);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TPanel') then
-    begin
-      LPanel        := TPanel(AComponent);
-      LPanel.Color  := AColorMap.Color;
-      //LPanel.Invalidate;
-    end
-    else
-    if ProcessStdVclControls(AColorMap, AComponent) then
-    else
-    if ProcessVclControls(AColorMap, AComponent) then
-    else
-    if ProcessVclGroupControls(AColorMap, AComponent) then
-    else
-    if SameText(AComponent.ClassName, 'TInspListBox') then
-    begin
-      {
-       property BackgroundColor: TColor;
-       property PropNameColor: TColor;
-       property PropValueColor: TColor;
-       property EditBackgroundColor: TColor;
-       property EditValueColor: TColor;
-       property CategoryColor: TColor;
-       property GutterColor: TColor;
-       property GutterEdgeColor: TColor;
-       property ReferenceColor: TColor;
-       property SubPropColor: TColor;
-       property ReadOnlyColor: TColor;
-       property NonDefaultColor: TColor;
-       property HighlightColor: TColor;
-       property HighlightFontColor: TColor;
-      }
-      SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'GutterColor', AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.FontColor);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TStringGrid') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'FixedColor', AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-    end
-    else
-//    if SameText(AComponent.ClassName, 'TBetterHintWindowVirtualDrawTree') then
-//    begin
-//      SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-//      SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-//    end
-//    else
-    if  SameText(AComponent.ClassName, 'TRefactoringTree') then
-    begin
-        SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-        SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-        SetRttiPropertyValue(AComponent,'Ctl3D', False);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TCodeEditorTabControl') then
-    begin
-      SetRttiPropertyValue(AComponent,'UnselectedColor',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'SelectedColor',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'BackgroundColor',AColorMap.MenuColor);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TEditorDockPanel') then
-    begin
-      SetRttiPropertyValue(AComponent,'Color',AColorMap.Color);
-      SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TEditControl') then   //TODO
-    begin
-       //SetRttiPropertyValue(AComponent, 'BorderStyle',  Ord(bsNone));
-       {$IFDEF DELPHIXE2_UP}
-        if TColorizerLocalSettings.Settings.UseVCLStyles then
-        begin
-          if not IsStyleHookRegistered(AComponent.ClassType, TMemoStyleHook) then
-           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TMemoStyleHook);
-        end;
-       {$ENDIF}
-       // Setting these properties and Fields has not effect in the gutter color.
-       //SetRttiFieldValue(AComponent,'GutterBrush.Color',  clYellow);
-       //SetRttiPropertyValue(AComponent,'Brush.Color',  clRed);
-       //SetRttiFieldValue(AComponent,'FParentColor',  False);
-       //SetRttiFieldValue(AComponent,'FColor',  clYellow);
-       //SetRttiFieldValue(AComponent,'CurForeColor',  clYellow);
-       //SetRttiFieldValue(AComponent,'CurBackColor',  clRed);
-       //ExecMethodRtti(AComponent, 'Invalidate');
-       //DumpParentClass(AComponent);
-    end
-    else
-    if AComponent is TActionToolBar then
-    with TActionToolBar(AComponent) do
-    begin
-      LColorMap:=TXPColorMap.Create(AComponent);
-      LColorMap.Assign(AColorMap);
-      LColorMap.OnColorChange:=nil;
-      ColorMap:=LColorMap;
-    end
-    else
-    if AComponent is TControlBar then
-    with TControlBar(AComponent) do
-    begin
-      Color := AColorMap.Color;
-      DrawingStyle := dsGradient;
-      GradientStartColor :=  AColorMap.Color;
-      GradientEndColor   :=  AColorMap.Color;
-    end
-    else
-    if SameText(AComponent.ClassName, 'TToolBar') then
-    begin
-      with TToolBar(AComponent) do
-        Color := AColorMap.Color;
-    end
-    else
-    if SameText(AComponent.ClassName, 'TDockToolBar') then
-    begin
-      with TToolBar(AComponent) do
-      begin
-        Color              := AColorMap.Color;
-        if Restore then
-          DrawingStyle       := TTBDrawingStyle(dsNormal)
-        else
-          DrawingStyle       := TTBDrawingStyle(dsGradient);
-        GradientStartColor := AColorMap.MenuColor;
-        GradientEndColor   := AColorMap.Color;//$00D1B499;
-        HotTrackColor      := AColorMap.SelectedColor;
-        Font.Color         := AColorMap.FontColor;
-      end;
-    end
-    else
-    if AComponent is TActionMainMenuBar then
-    with TActionMainMenuBar(AComponent) do
-    begin
-      LColorMap:=TXPColorMap.Create(AComponent);
-      LColorMap.Assign(AColorMap);
-      LColorMap.OnColorChange:=nil;
-      ColorMap:=LColorMap;
-      AnimationStyle  := asFade;
-      AnimateDuration := 1200;
-      Shadows         := True;
-      Font.Color      := AColorMap.FontColor;
     end
     else
     if AComponent is TActionManager then
@@ -671,108 +286,16 @@ begin
       LActionManager.Style := AStyle;
     end
     else
-    if SameText(AComponent.ClassName, 'TTabSet') then
-    with TTabSet(AComponent) do
-    begin
-      BackgroundColor:=AColorMap.MenuColor;
-      SelectedColor  :=AColorMap.Color;
-      UnselectedColor:=AColorMap.MenuColor;
-      Font.Color    := AColorMap.FontColor;
-      Style :=tsModernTabs; //necessary for allow paint background color
-    end
-    else
-    if SameText(AComponent.ClassName, 'TClosableTabScroller') then
-    begin
-
-      //SetBkColor
-      //Canvas.Fillrect
-      //SetDCBrushColor
-      //CreateSolidBrush
-       SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor', AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'CloseButton.Transparent', False);
-       SetRttiPropertyValue(AComponent,'DropDownButton.BackgroundColor', AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'DropDownButton.Transparent', False);
-
-       SetRttiPropertyValue(AComponent,'LeftButton.BackgroundColor', AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'LeftButton.Transparent', False);
-       SetRttiPropertyValue(AComponent,'RightButton.BackgroundColor', AColorMap.MenuColor);
-       SetRttiPropertyValue(AComponent,'RightButton.Transparent', False);
-
-       SetRttiPropertyValue(AComponent,'Brush.Color', AColorMap.MenuColor);
-    end
-    else
-    if SameText(AComponent.ClassName, 'TIDEGradientTabSet') or SameText(AComponent.ClassName, 'TGradientTabSet') then
-    begin
-         SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
-         SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
-         SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
-         SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
-         SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-         //SetRttiFieldValue(AComponent,'FColor', AColorMap.Color);
-
-        if SameText(AComponent.ClassName, 'TGradientTabSet') then
-        begin
-            //DumpObject(GetRttiFieldValue(AComponent, 'FScroller').AsObject);
-         SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.BackgroundColor', AColorMap.MenuColor);
-         SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.Transparent', False);
-         SetRttiPropertyValue(AComponent,'FScroller.FRightButton.BackgroundColor', AColorMap.MenuColor);
-         SetRttiPropertyValue(AComponent,'FScroller.FRightButton.Transparent', False);
-        end;
-    end
-    else
-    if SameText(AComponent.ClassName, 'TTabSheet')  then
-    with TTabSheet(AComponent) do
-    begin
-       //Color:=AColorMap.Color;
-       Font.Color:=AColorMap.FontColor;
-    end
-    else
-    if AComponent is TStatusBar then
-    with TStatusBar(AComponent) do
-    begin
-       //theme is removed to allow paint TStatusBar
-//        if not TColorizerLocalSettings.Settings.UseVCLStyles then
-//       SetWindowTheme(TStatusBar(AComponent).Handle,'','');
-       //SizeGrip is removed because can't be painted
-       SizeGrip:=False;
-       Color := AColorMap.Color;
-       //remove the bevels
-       for i := 0 to TStatusBar(AComponent).Panels.Count-1 do
-        TStatusBar(AComponent).Panels[i].Bevel:=pbNone;
-
-       Font.Color:=AColorMap.FontColor;
-    end
-    else
     if AComponent is TFrame then
     with TFrame(AComponent) do
     begin
       Color := AColorMap.Color;
       Font.Color:=AColorMap.FontColor;
-    end
-    else
-    begin
-      {$IFDEF DEBUG_PROFILER}
-        lpignored.Add(Format('%s component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
-      {$ENDIF}
     end;
-
-    {$IFDEF DEBUG_PROFILER}
-      lprofiler.Add(Format('%s End process component %s:%s',[formatdatetime('hh:nn:ss.zzz',Now) ,AComponent.Name,AComponent.ClassName]));
-    {$ENDIF}
-
-
-    //if SameText(AComponent.Name, 'TDebugLogView') then
-    // DumpObject(AComponent);
 
     RunWrapper(AComponent, AColorMap);
-
     for Index := 0 to AComponent.ComponentCount - 1 do
-    begin
-     {$IFDEF DEBUG_MODE}
-     //lcomp.Add(Format('     %s : %s',[AComponent.Components[I].Name,AComponent.Components[I].ClassName]));
-     {$ENDIF}
      ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index], Restore);
-    end;
 end;
 
 //
@@ -898,29 +421,10 @@ begin
 end;
 
 initialization
-{$IFDEF DEBUG_PROFILER}
-  DumpAllTypes;
-{$ENDIF}
-
-{$IFDEF DEBUG_PROFILER}
-  ShowMessage('warning DEBUG_PROFILER mode Activated');
-  lprofiler:=TStringList.Create;
-  lpignored:=TStringList.Create;
-  lDumped  :=TStringList.Create;
-{$ENDIF}
 
 {$IFDEF ENABLELOG}
   ShowMessage('Log enabled');
 {$ENDIF}
 
 
-finalization
-
-{$IFDEF DEBUG_PROFILER}
-  lprofiler.SaveToFile(ExtractFilePath(GetBplLocation())+'Profiler\profiler.txt');
-  lprofiler.Free;
-  lpignored.SaveToFile(ExtractFilePath(GetBplLocation())+'Profiler\ignored.txt');
-  lpignored.Free;
-  lDumped.Free;
-{$ENDIF}
 end.

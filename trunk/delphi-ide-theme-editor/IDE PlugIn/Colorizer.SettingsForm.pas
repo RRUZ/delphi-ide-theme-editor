@@ -194,18 +194,11 @@ Uses
  System.UITypes,
  Colorizer.StoreColorMap,
  GraphUtil,
- uIDEExpertUtils,
+ //uIDEExpertUtils,
  Colorizer.Utils,
  TypInfo;
 
 {$R *.dfm}
-
-{
-TODO
-  Enable / disable
-}
-
-
 
 function GetTextColor(const BackgroundColor: TColor): TColor;
 begin
