@@ -39,10 +39,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Main Settings'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label1: TLabel
           Left = 3
           Top = 46
@@ -356,10 +352,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
           460
           430)
@@ -411,13 +403,55 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           ViewStyle = vsReport
         end
       end
+      object TabSheet3: TTabSheet
+        Caption = 'Dock Windows'
+        ImageIndex = 4
+        object Label11: TLabel
+          Left = 16
+          Top = 8
+          Width = 52
+          Height = 13
+          Caption = 'Dock Icons'
+        end
+        object Label12: TLabel
+          Left = 16
+          Top = 173
+          Width = 86
+          Height = 13
+          Caption = 'Gradient Direction'
+        end
+        object ListBoxDockImages: TListBox
+          Left = 16
+          Top = 27
+          Width = 161
+          Height = 134
+          Style = lbOwnerDrawVariable
+          TabOrder = 0
+          OnDrawItem = ListBoxDockImagesDrawItem
+          OnMeasureItem = ListBoxDockImagesMeasureItem
+        end
+        object RbtnDockGradientHorz: TRadioButton
+          Left = 16
+          Top = 192
+          Width = 81
+          Height = 17
+          Caption = 'Horizontal'
+          Checked = True
+          TabOrder = 1
+          TabStop = True
+        end
+        object RbtnDockGradientVert: TRadioButton
+          Left = 120
+          Top = 192
+          Width = 57
+          Height = 17
+          Caption = 'Vertical'
+          TabOrder = 2
+        end
+      end
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 26
@@ -455,10 +489,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheet1: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -525,7 +555,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 280
     Top = 344
     Bitmap = {
-      494C010107000800A80210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800CC0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -830,7 +860,9 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 329
     Top = 5
   end
-  object ImageList2: TImageList
+  object ImageListDock: TImageList
+    ColorDepth = cd32Bit
+    Width = 48
     Left = 340
     Top = 344
   end

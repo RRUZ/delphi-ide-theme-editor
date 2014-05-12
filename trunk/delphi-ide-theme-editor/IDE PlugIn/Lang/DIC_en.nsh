@@ -28,7 +28,7 @@ LangString SUNINSTALL     1033 "Uninstall"
 
 ; Dialog Message
 LangString SQUERYIDE      1033 "Setup has detected some wizard dlls are in using.$\n\
-                                Please close Delphi or C++Builder first.$\n$\n\
+                                Please close Delphi (RAD Studio) first.$\n$\n\
                                 Click [OK] to retry and continue.$\n\
                                 Click [Cancel] to exit Setup."
 LangString SQUERYDELETE   1033 "Delete user data files and wizards settings?$\n(If you want to keep them, please click [No].)"

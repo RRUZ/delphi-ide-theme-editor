@@ -503,13 +503,59 @@ begin
 
 end;
 
+procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
+
+  function ColorToTriple(Color: TColor): TRGBTriple;
+  begin
+    Color := ColorToRGB(Color);
+    Result.rgbtBlue := Color shr 16 and $FF;
+    Result.rgbtGreen := Color shr 8 and $FF;
+    Result.rgbtRed := Color and $FF;
+  end;
+
+var
+   X, Y: Integer;
+   LBitmap: TBitmap;
+   LRGBLine: PRGBLine;
+   AlphaLineA, AlphaLineB: PngImage.PByteArray;
+begin
+  if (Source.Width < (Left + Width)) or (Source.Height < (Top + Height)) then
+    raise Exception.Create('Invalid position/size');
+
+  LBitmap := TBitmap.Create;
+  try
+    LBitmap.Width := Width;
+    LBitmap.Height := Height;
+    LBitmap.PixelFormat := pf24bit;
+
+    for Y := 0 to LBitmap.Height - 1 do
+    begin
+      LRGBLine := LBitmap.Scanline[Y];
+      for X := 0 to LBitmap.Width - 1 do
+        LRGBLine^[X] := ColorToTriple(Source.Pixels[Left + X, Top + Y]);
+    end;
+
+    Target := TPngImage.Create;
+    Target.Assign(LBitmap);
+  finally
+    LBitmap.Free;
+  end;
+
+  if Source.Header.ColorType in [COLOR_GRAYSCALEALPHA, COLOR_RGBALPHA] then begin
+    Target.CreateAlpha;
+    for Y := 0 to Target.Height - 1 do begin
+      AlphaLineA := Source.AlphaScanline[Top + Y];
+      AlphaLineB := Target.AlphaScanline[Y];
+      for X := 0 to Target.Width - 1 do
+        AlphaLineB^[X] := AlphaLineA^[X + Left];
+    end;
+  end;
+end;
 
 //Hook for the docked IDE windows.
 function CustomDrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
 var
-  LColor: TColor;
-  //LStyle: TCustomStyleServices;
-  //LDetails: TThemedElementDetails;
+  LColorStart, LColorEnd : TColor;
 
   procedure DrawIcon;
   var
@@ -627,8 +673,6 @@ begin
     exit;
   end;
 
-  //LStyle := StyleServices;
-
   Canvas.Font.Color :=  TColorizerLocalSettings.ColorMap.FontColor;
   if Self.DockCaptionOrientation = dcoHorizontal then
   begin
@@ -638,13 +682,23 @@ begin
     CaptionRect.Top := CaptionRect.Top + 1;
 
     if State.Focused then
-      LColor := TColorizerLocalSettings.ColorMap.Color
+    begin
+      LColorStart := TColorizerLocalSettings.ColorMap.Color;
+      LColorEnd   := TColorizerLocalSettings.ColorMap.HighlightColor;
+    end
     else
-      LColor := TColorizerLocalSettings.ColorMap.MenuColor;
+    begin
+      LColorStart := TColorizerLocalSettings.ColorMap.DisabledColor;
+      LColorEnd   := GetHighLightColor(TColorizerLocalSettings.ColorMap.DisabledColor);
+    end;
 
-    Canvas.Brush.Color := LColor;
+    //Canvas.Brush.Color := LColor;
 
-    GradientFillCanvas(Canvas, LColor, TColorizerLocalSettings.ColorMap.MenuColor, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
+    if TColorizerLocalSettings.Settings.DockGradientHor then
+      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdHorizontal)
+    else
+      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
+
 
     Canvas.Pen.Color := GetShadowColor(Canvas.Pen.Color, -20);
     with CaptionRect do
@@ -664,17 +718,25 @@ begin
     begin
       PinRect := GetPinRect(CaptionRect);
 
-      LPngImage:=TPNGImage.Create;
-      try
         if Self.DockCaptionPinButton = dcpbUp then
-         LPngImage.LoadFromResourceName(HInstance, 'pin_dock_left')
+        begin
+          CropPNG(TColorizerLocalSettings.DockImages, 32, 0, 16, 16, LPngImage);
+          try
+            Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
+          finally
+            LPngImage.free;
+          end;
+        end
         else
-         LPngImage.LoadFromResourceName(HInstance, 'pin_dock');
+        begin
+            CropPNG(TColorizerLocalSettings.DockImages, 16, 0, 16, 16, LPngImage);
+            try
+              Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
+            finally
+              LPngImage.free;
+            end;
+        end;
 
-        Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
-      finally
-        LPngImage.free;
-      end;
 
       CaptionRect.Right := PinRect.Right - 2;
     end
@@ -693,14 +755,24 @@ begin
 
 
     if State.Focused then
-      LColor := TColorizerLocalSettings.ColorMap.Color
+    begin
+      LColorStart := TColorizerLocalSettings.ColorMap.Color;
+      LColorEnd   := TColorizerLocalSettings.ColorMap.HighlightColor;
+    end
     else
-      LColor := TColorizerLocalSettings.ColorMap.MenuColor;
+    begin
+      LColorStart := TColorizerLocalSettings.ColorMap.DisabledColor;
+      LColorEnd   := GetHighLightColor(TColorizerLocalSettings.ColorMap.DisabledColor);
+    end;
 
-    Canvas.Brush.Color := LColor;
+    //Canvas.Brush.Color := LColor;
 
-    Canvas.FillRect(Rect(CaptionRect.Left, CaptionRect.Top + 2,
-      CaptionRect.Right, CaptionRect.Bottom));
+    //Canvas.FillRect(Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom));
+    if TColorizerLocalSettings.Settings.DockGradientHor then
+      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom), gdHorizontal)
+    else
+      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
+
 
     Canvas.Pen.Color := State.EndColor;
     Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Bottom);
@@ -753,13 +825,12 @@ begin
 
   if ShouldDrawClose then
   begin
-    LPngImage:=TPNGImage.Create;
-    try
-      LPngImage.LoadFromResourceName(HInstance, 'close_dock');
-      Canvas.Draw(CloseRect.Left, CloseRect.Top, LPngImage);
-    finally
-      LPngImage.free;
-    end;
+      CropPNG(TColorizerLocalSettings.DockImages, 0, 0, 16, 16, LPngImage);
+      try
+        Canvas.Draw(CloseRect.Left, CloseRect.Top, LPngImage);
+      finally
+        LPngImage.free;
+      end;
   end;
 
   Exit(0);

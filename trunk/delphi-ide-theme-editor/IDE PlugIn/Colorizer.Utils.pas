@@ -38,6 +38,7 @@ uses
  uDelphiVersions,
  ActnColorMaps,
  Windows,
+ PngImage,
  Graphics,
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
@@ -46,12 +47,12 @@ uses
 
 procedure AddLog(const msg : string);
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False); overload;
-procedure RefreshIDETheme; overload;
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False;Invalidate : Boolean = False); overload;
+procedure RefreshIDETheme(Invalidate : Boolean = False); overload;
 procedure RestoreIDESettings();
 
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False);
+procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate : Boolean = False);
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
@@ -72,6 +73,7 @@ procedure RegisterVClStylesFiles;
       class var Settings       : TSettings;
       class var ImagesGutterChanged : Boolean;
       class var IDEData        : TDelphiVersionData;
+      class var DockImages     : TPngImage;
     end;
 
 implementation
@@ -91,6 +93,7 @@ uses
  Types,
  Forms,
  SysUtils,
+ Controls,
  GraphUtil,
  Colorizer.StoreColorMap,
  Colorizer.Wrappers,
@@ -172,12 +175,12 @@ end;
 
 
 
-procedure RefreshIDETheme;
+procedure RefreshIDETheme(Invalidate : Boolean = False);
 begin
-   RefreshIDETheme(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle);
+   RefreshIDETheme(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, False, Invalidate);
 end;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False);
+procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False; Invalidate : Boolean = False);
 var
   Index     : Integer;
 begin
@@ -189,7 +192,7 @@ begin
   if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)<>-1 then
   begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
-     ProcessComponent(AColorMap, AStyle, Screen.Forms[Index], Restore);
+     ProcessComponent(AColorMap, AStyle, Screen.Forms[Index], Restore, Invalidate);
   end
 //  {$IFDEF DELPHIXE2_UP}
 //  else
@@ -259,7 +262,7 @@ begin
 end;
 {$ENDIF}
 
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False);
+procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate: Boolean = False);
 var
   Index          : Integer;
   LActionManager : TActionManager;
@@ -272,6 +275,8 @@ begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
+      if Invalidate then
+        LForm.Invalidate;
     end
     else
     if AComponent is TActionManager then
@@ -293,9 +298,22 @@ begin
       Font.Color:=AColorMap.FontColor;
     end;
 
-    RunWrapper(AComponent, AColorMap);
+    RunWrapper(AComponent, AColorMap, Invalidate);
+
+    //process components
     for Index := 0 to AComponent.ComponentCount - 1 do
      ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index], Restore);
+
+    //process dock clients
+    if AComponent is TWinControl then
+     for Index := 0 to TWinControl(AComponent).DockClientCount - 1 do
+     if TWinControl(AComponent).DockClients[Index].Visible and (TColorizerLocalSettings.HookedWindows.IndexOf(TWinControl(AComponent).DockClients[Index].ClassName)>=0) then
+     begin
+       //AddLog('DockClients '+TWinControl(AComponent).DockClients[Index].ClassName);
+       ProcessComponent(AColorMap, ColorXPStyle, TWinControl(AComponent).DockClients[Index]);
+       if Invalidate and  (TWinControl(AComponent).DockClients[Index] is TForm) then
+        TWinControl(AComponent).DockClients[Index].Invalidate();
+     end;
 end;
 
 procedure RestoreActnManagerStyles;
@@ -363,7 +381,7 @@ end;
 initialization
 
 {$IFDEF ENABLELOG}
-  ShowMessage('Log enabled');
+ ShowMessage('Log enabled');
 {$ENDIF}
 
 

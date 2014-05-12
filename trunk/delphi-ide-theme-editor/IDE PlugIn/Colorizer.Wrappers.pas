@@ -29,12 +29,13 @@ uses
   ActnMan,
   System.Classes;
 
-   function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap) : Boolean;
+   function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False) : Boolean;
 
 implementation
 
 uses
   uRttiHelper,
+  Windows,
   StdCtrls,
   SysUtils,
   ExtCtrls,
@@ -48,6 +49,7 @@ uses
   ActnColorMaps,
   ActnPopup,
   ActnMenus,
+  UxTheme,
   ActnCtrls,
   {$IFDEF DELPHIXE2_UP}
   Vcl.Themes,
@@ -221,13 +223,15 @@ begin
   end;
 end;
 
-function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap) : Boolean;
+function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False) : Boolean;
 begin
   Result:=False;
   if TRegisteredWrappers.WrappersInstances.ContainsKey(AComponent.ClassName) then
   begin
-    AddLog('RunWrapper '+AComponent.ClassName);
+    //AddLog('RunWrapper '+AComponent.ClassName);
     TRegisteredWrappers.WrappersInstances.Items[AComponent.ClassName].SetColors(AComponent, AColorMap);
+//    if AComponent is TWinControl then
+//      TWinControl(AComponent).Invalidate();
     Result:=True;
   end;
 end;
@@ -236,7 +240,7 @@ end;
 procedure TWrapperVirtualStringTree.SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap);
 begin
   inherited;
-  AddLog(Self.ClassName+' SetColors '+AComponent.ClassName);
+  //AddLog(Self.ClassName+' SetColors '+AComponent.ClassName);
 
   SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
   SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
@@ -398,14 +402,25 @@ end;
 
 { TWrapperComboBox }
 
+type
+ TCustomComboBoxClass = class(TCustomComboBox);
+
 procedure TWrapperIDEComboBox.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
+var
+  LCustomComboBox : TCustomComboBoxClass;
 begin
   inherited;
-  SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
-  SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
-  SetRttiPropertyValue(AComponent,'BevelKind', Integer(bkFlat));
-  SetRttiPropertyValue(AComponent,'BevelInner', Integer(bvNone));
+
+  LCustomComboBox:=TCustomComboBoxClass(AComponent);
+  if LCustomComboBox.Handle<>0 then
+   SetWindowTheme(LCustomComboBox.Handle, '', '');
+
+  LCustomComboBox.Color      := AColorMap.MenuColor;
+  LCustomComboBox.Font.Color := AColorMap.FontColor;
+  LCustomComboBox.BevelKind  := bkFlat;
+  LCustomComboBox.BevelInner := bvNone;
+  LCustomComboBox.Ctl3D      := False;
 end;
 
 { TWrapperStandardControl }
@@ -834,6 +849,7 @@ initialization
 
   RegisterColorizerWrapper('TDesktopComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('THistoryPropComboBox',  TWrapperIDEComboBox);
+
   //RegisterColorizerWrapper('TComboBox',  TWrapperComboBox);  // TODO : Add own wrapper
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleControl);
   RegisterColorizerWrapper('TPropCheckBox',  TWrapperSimpleControl);

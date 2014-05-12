@@ -20,7 +20,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "1.59.0"
+  !define VER_MINOR "1.60.0"
 !endif
 
 !ifndef IDE_VERSION_DXE2
@@ -108,6 +108,7 @@ FunctionEnd
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "logoinstall.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "wizard_intaller.bmp"
 
 !insertmacro MUI_PAGE_WELCOME
 ;!insertmacro MUI_PAGE_LICENSE $(SLICENSEFILE)
@@ -234,12 +235,15 @@ SectionEnd
 Section "RAD Studio XE2" SecDXE2
   SectionIn 1 2
   SetOutPath $INSTDIR\XE2
-  File "DIC.xml"
   File "HookedWindows.dat"
-  File "Settings.ini"  
+  SetOverwrite off
+  File "Settings.ini"
+  SetOverwrite on 
   File "DelphiIDEColorizer_XE2.dll"
   SetOutPath $INSTDIR\XE2\Themes
   File "Themes\*.idetheme"  
+  SetOutPath $INSTDIR\XE2\Images\dock_images
+  File "Images\dock_images\*.png"  
   WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "DelphiIDEColorizer_XE2" "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll"
 SectionEnd
 !endif
@@ -248,12 +252,15 @@ SectionEnd
 Section "RAD Studio XE3" SecDXE3
   SectionIn 1 2
   SetOutPath $INSTDIR\XE3
-  File "DIC.xml"
   File "HookedWindows.dat"
-  File "Settings.ini"  
+  SetOverwrite off
+  File "Settings.ini"
+  SetOverwrite on
   File "DelphiIDEColorizer_XE3.dll"
   SetOutPath $INSTDIR\XE3\Themes
   File "Themes\*.idetheme" 
+  SetOutPath $INSTDIR\XE3\Images\dock_images
+  File "Images\dock_images\*.png"    
   WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "DelphiIDEColorizer_XE3" "$INSTDIR\XE3\DelphiIDEColorizer_XE3.dll"
 SectionEnd
 !endif
@@ -262,12 +269,15 @@ SectionEnd
 Section "RAD Studio XE4" SecDXE4
   SectionIn 1 2
   SetOutPath $INSTDIR\XE4
-  File "DIC.xml"
   File "HookedWindows.dat"
-  File "Settings.ini"  
+  SetOverwrite off
+  File "Settings.ini"
+  SetOverwrite on
   File "DelphiIDEColorizer_XE4.dll"
   SetOutPath $INSTDIR\XE4\Themes
   File "Themes\*.idetheme" 
+  SetOutPath $INSTDIR\XE4\Images\dock_images
+  File "Images\dock_images\*.png"    
   WriteRegStr HKCU "Software\Embarcadero\BDS\11.0\Experts" "DelphiIDEColorizer_XE4" "$INSTDIR\XE4\DelphiIDEColorizer_XE4.dll"
 SectionEnd
 !endif
@@ -276,12 +286,15 @@ SectionEnd
 Section "RAD Studio XE5" SecDXE5
   SectionIn 1 2
   SetOutPath $INSTDIR\XE5
-  File "DIC.xml"
   File "HookedWindows.dat"
-  File "Settings.ini"  
+  SetOverwrite off
+  File "Settings.ini"
+  SetOverwrite on
   File "DelphiIDEColorizer_XE5.dll"
   SetOutPath $INSTDIR\XE5\Themes
   File "Themes\*.idetheme" 
+  SetOutPath $INSTDIR\XE5\Images\dock_images
+  File "Images\dock_images\*.png"    
   WriteRegStr HKCU "Software\Embarcadero\BDS\12.0\Experts" "DelphiIDEColorizer_XE5" "$INSTDIR\XE5\DelphiIDEColorizer_XE5.dll"
 SectionEnd
 !endif
@@ -290,12 +303,15 @@ SectionEnd
 Section "RAD Studio XE6" SecDXE6
   SectionIn 1 2
   SetOutPath $INSTDIR\XE6
-  File "DIC.xml"
   File "HookedWindows.dat"
-  File "Settings.ini"  
+  SetOverwrite off
+  File "Settings.ini"
+  SetOverwrite on  
   File "DelphiIDEColorizer_XE6.dll"
   SetOutPath $INSTDIR\XE6\Themes
   File "Themes\*.idetheme" 
+  SetOutPath $INSTDIR\XE6\Images\dock_images
+  File "Images\dock_images\*.png"    
   WriteRegStr HKCU "Software\Embarcadero\BDS\14.0\Experts" "DelphiIDEColorizer_XE6" "$INSTDIR\XE6\DelphiIDEColorizer_XE6.dll"
 SectionEnd
 !endif
@@ -374,15 +390,25 @@ FunctionEnd
 
 Section "Uninstall"
   Delete "$INSTDIR\*.*"
-  Delete "$INSTDIR\XE2\*.*"
-  Delete "$INSTDIR\XE3\*.*"
-  Delete "$INSTDIR\XE4\*.*"
-  Delete "$INSTDIR\XE5\*.*"
-  Delete "$INSTDIR\XE6\*.*"
+  Delete "$INSTDIR\XE2\*.dll"
+  Delete "$INSTDIR\XE2\*.dat"
+  Delete "$INSTDIR\XE3\*.dll"
+  Delete "$INSTDIR\XE3\*.dat"
+  Delete "$INSTDIR\XE4\*.dll"
+  Delete "$INSTDIR\XE4\*.dat"
+  Delete "$INSTDIR\XE5\*.dll"
+  Delete "$INSTDIR\XE5\*.dat"
+  Delete "$INSTDIR\XE6\*.dll"
+  Delete "$INSTDIR\XE6\*.dat"
+  Delete "$INSTDIR\XE2\Images\dock_images\*.*"  
   Delete "$INSTDIR\XE2\Themes\*.*"
+  Delete "$INSTDIR\XE3\Images\dock_images\*.*"  
   Delete "$INSTDIR\XE3\Themes\*.*"
+  Delete "$INSTDIR\XE4\Images\dock_images\*.*"  
   Delete "$INSTDIR\XE4\Themes\*.*"
+  Delete "$INSTDIR\XE5\Images\dock_images\*.*"    
   Delete "$INSTDIR\XE5\Themes\*.*"
+  Delete "$INSTDIR\XE6\Images\dock_images\*.*"    
   Delete "$INSTDIR\XE6\Themes\*.*"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC"
 
@@ -403,9 +429,9 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "DelphiIDEColorizer_XE6"
 !endif
 
-  MessageBox MB_YESNO|MB_ICONQUESTION "$(SQUERYDELETE)" IDNO NoDelete
+  ;MessageBox MB_YESNO|MB_ICONQUESTION "$(SQUERYDELETE)" IDNO NoDelete
   DeleteRegKey HKCU "Software\The Road To Delphi\DIC"
-  RMDir /r $INSTDIR
+  ;RMDir /r $INSTDIR
 
 NODelete:
 SectionEnd
