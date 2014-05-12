@@ -34,6 +34,8 @@ type
     FVCLStyleName: string;
     FUseVCLStyles: boolean;
     FChangeIconsGutter: boolean;
+    FDockImages: string;
+    FDockGradientHor: boolean;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -45,6 +47,8 @@ type
 
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
+    property DockImages    : string read FDockImages write FDockImages;
+    property DockGradientHor    : boolean read FDockGradientHor write FDockGradientHor;
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
 //    property ColorMapName  : string read FColorMapName write FColorMapName;
 //    property StyleBarName  : string read FStyleBarName write FStyleBarName;
@@ -76,6 +80,8 @@ begin
     Settings.VCLStyleName            := LIniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
     Settings.UseVCLStyles            := LIniFile.ReadBool('Global', 'UseVCLStyles', False);
     Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
+    Settings.DockImages              := LIniFile.ReadString('Global', 'DockImages', 'red');
+    Settings.DockGradientHor         := LIniFile.ReadBool('Global', 'DockGradientHor', True);
 //    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
 //    Settings.StyleBarName            := iniFile.ReadString('Global', 'StyleBarName', 'XP Style');
   finally
@@ -97,6 +103,8 @@ begin
     LIniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
     LIniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
     LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
+    LIniFile.WriteString('Global', 'DockImages', Settings.DockImages);
+    LIniFile.WriteBool('Global', 'DockGradientHor', Settings.DockGradientHor);
 //    iniFile.WriteString('Global', 'ColorMapName', Settings.ColorMapName);
 //    iniFile.WriteString('Global', 'StyleBarName', Settings.StyleBarName);
   finally

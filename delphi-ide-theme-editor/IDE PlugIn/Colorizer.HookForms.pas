@@ -87,12 +87,12 @@ begin
           if RetVal>0 then
           begin
              Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-             //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\HCBT_ACTIVATE.txt', Format('%s %s',[ClassNameBuffer, SLineBreak]));
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
             for i := 0 to Screen.FormCount-1 do
              if (Screen.Forms[i].Handle=LHWND) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
                  Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, Screen.Forms[i]);
+                 AddLog('HCBT_ACTIVATE '+ClassNameBuffer);
                  Break;
                end;
           end;

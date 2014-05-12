@@ -94,8 +94,14 @@ type
     ButtonRemoveFormClass: TButton;
     EditThemeName: TEdit;
     Label10: TLabel;
-    ImageList2: TImageList;
+    ImageListDock: TImageList;
     ColorListBox1: TColorListBox;
+    TabSheet3: TTabSheet;
+    Label11: TLabel;
+    ListBoxDockImages: TListBox;
+    RbtnDockGradientHorz: TRadioButton;
+    RbtnDockGradientVert: TRadioButton;
+    Label12: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -117,6 +123,10 @@ type
     procedure ButtonRemoveFormClassClick(Sender: TObject);
     procedure ColorListBox1GetColors(Sender: TCustomColorListBox;
       Items: TStrings);
+    procedure ListBoxDockImagesMeasureItem(Control: TWinControl; Index: Integer;
+      var Height: Integer);
+    procedure ListBoxDockImagesDrawItem(Control: TWinControl; Index: Integer;
+      Rect: TRect; State: TOwnerDrawState);
   private
     { Private declarations }
     FPreview:TVclStylesPreview;
@@ -131,6 +141,7 @@ type
     procedure GenerateIDEThemes(const Path : string);
     procedure DrawSeletedVCLStyle;
     procedure DrawPalette;
+    procedure LoadDockIcons;
   public
     procedure Init;
   end;
@@ -194,13 +205,13 @@ Uses
  System.UITypes,
  Colorizer.StoreColorMap,
  GraphUtil,
- //uIDEExpertUtils,
+ CommCtrl,
  Colorizer.Utils,
  TypInfo;
 
 {$R *.dfm}
 
-function GetTextColor(const BackgroundColor: TColor): TColor;
+function CalculateTextColor(const BackgroundColor: TColor): TColor;
 begin
   if (GetRValue(BackgroundColor) + GetGValue(BackgroundColor) + GetBValue(BackgroundColor)) > 384 then
     result := clBlack
@@ -241,7 +252,7 @@ end;
 
 procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
-   sMessage, StyleFile : string;
+   s, ImagesPath, sMessage, StyleFile : string;
    FShowWarning : Boolean;
 begin
   FShowWarning:=(CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter);
@@ -264,8 +275,16 @@ begin
     FSettings.ChangeIconsGutter :=CheckBoxGutterIcons.Checked;
 //    FSettings.ColorMapName      :=ColorMapCombo.Text;
 //    FSettings.StyleBarName      :=StyleCombo.Text;
-    FSettings.VCLStyleName :=CbStyles.Text;
+    FSettings.VCLStyleName := CbStyles.Text;
+    FSettings.DockImages   := ListBoxDockImages.Items[ListBoxDockImages.ItemIndex];
+    FSettings.DockGradientHor:= RbtnDockGradientHorz.Checked;
     WriteSettings(FSettings, GetSettingsFolder);
+
+    ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
+    s:=IncludeTrailingPathDelimiter(ImagesPath)+FSettings.DockImages+'.png';
+    if FileExists(s) then
+      TColorizerLocalSettings.DockImages.LoadFromFile(s);
+
 
     ListBoxFormsHooked.Items.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
     Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
@@ -284,7 +303,7 @@ begin
     end;
     {$IFEND}
 
-    RefreshIDETheme();
+    RefreshIDETheme(True);
   end;
 end;
 
@@ -433,7 +452,7 @@ procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
 begin
  if CheckBoxAutoColor.Checked then
  begin
-   GenerateColorMap(XPColorMap, ColorBoxBase.Selected, GetTextColor(ColorBoxBase.Selected));
+   GenerateColorMap(XPColorMap, ColorBoxBase.Selected, CalculateTextColor(ColorBoxBase.Selected));
    DrawPalette;
  end;
 end;
@@ -476,6 +495,8 @@ procedure TFormIDEColorizerSettings.FormCreate(Sender: TObject);
 var
   I: Integer;
 begin
+  LoadDockIcons;
+
   ColorMapCombo.Items.AddObject('(Default)', nil);
   ColorMapCombo.ItemIndex := 0;
   for I := 0 to ComponentCount - 1 do
@@ -583,7 +604,7 @@ begin
 
    for i:=0 to WebNamedColorsCount-1 do
    begin
-     GenerateColorMap(XPColorMap, WebNamedColors[i].Value, GetTextColor(WebNamedColors[i].Value));
+     GenerateColorMap(XPColorMap, WebNamedColors[i].Value, CalculateTextColor(WebNamedColors[i].Value));
      FileName:=StringReplace(WebNamedColors[i].Name,'clWeb','',[rfReplaceAll]);
      FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'.idetheme';
      SaveColorMapToXmlFile(XPColorMap, FileName);
@@ -616,6 +637,25 @@ begin
   //LoadColorElements;
   LoadThemes;
   LoadSettings;
+end;
+
+procedure TFormIDEColorizerSettings.ListBoxDockImagesDrawItem(
+  Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+var
+  CenterText : integer;
+begin
+  ListBoxDockImages.Canvas.FillRect(Rect);
+  ImageListDock.Draw(ListBoxDockImages.Canvas, Rect.Left + 4, Rect.Top + 3, Index);
+  CenterText := ( Rect.Bottom - Rect.Top - ListBoxDockImages.Canvas.TextHeight(Text)) div 2 ;
+  ListBoxDockImages.Canvas.TextOut (Rect.left + ImageListDock.Width + 8 , Rect.Top + CenterText,
+  ListBoxDockImages.Items.Strings[index]);
+end;
+
+
+procedure TFormIDEColorizerSettings.ListBoxDockImagesMeasureItem(
+  Control: TWinControl; Index: Integer; var Height: Integer);
+begin
+  Height := ImageListDock.Height + 6;
 end;
 
 procedure TFormIDEColorizerSettings.ListViewTypesChange(Sender: TObject;
@@ -659,9 +699,43 @@ begin
   end;
 end;
          }
+procedure TFormIDEColorizerSettings.LoadDockIcons;
+var
+  s, ImagesPath : string;
+  LBitMap   : TBitmap;
+  LPngImage : TPngImage;
+begin
+  ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
+
+  for s in TDirectory.GetFiles(ImagesPath, '*.png') do
+  begin
+    LBitMap:=TBitmap.Create;
+    try
+      LPngImage:=TPngImage.Create;
+      try
+        LPngImage.LoadFromFile(s);
+        LPngImage.AssignTo(LBitMap);
+        LBitMap.AlphaFormat:=afIgnored;
+        ImageList_Add(ImageListDock.Handle, LBitMap.Handle, 0);
+      finally
+        LPngImage.Free;
+      end;
+    finally
+      LBitMap.Free;
+    end;
+
+    ListBoxDockImages.Items.Add(ChangeFileExt(ExtractFileName(s),''));
+  end;
+
+end;
+
 procedure TFormIDEColorizerSettings.LoadSettings;
 begin
   ReadSettings(FSettings, GetSettingsFolder);
+  RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
+  RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
+
+
   CheckBoxEnabled.Checked:=FSettings.Enabled;
   CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;
   CheckBoxFixIDEDrawIcon.Checked:=FSettings.FixIDEDisabledIconsDraw;
@@ -677,6 +751,7 @@ begin
   LoadVClStylesList;
   //EditVCLStylesPath.Text:=FSettings.VCLStylesPath;
   CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
+  ListBoxDockImages.ItemIndex:=ListBoxDockImages.Items.IndexOf(FSettings.DockImages);
   DrawSeletedVCLStyle;
 end;
 

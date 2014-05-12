@@ -133,6 +133,8 @@ uses
  Menus,
  ComObj,
  ExtCtrls,
+ IOUtils,
+ PngImage,
  uDelphiVersions,
  Colorizer.Hooks,
  Colorizer.HookForms,
@@ -301,8 +303,6 @@ begin
         if LINTAServices <> nil then
         begin
           RegisterColorizerAddinOptions;
-          TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
-          LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
           {$IF CompilerVersion >= 23}
           if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
           begin
@@ -344,37 +344,53 @@ end;
 
 { TIDEWizard }
 constructor TIDEWizard.Create;
+var
+  ImagesPath, s : string;
 begin
   inherited;
-  {$WARN SYMBOL_PLATFORM OFF}
-  ReportMemoryLeaksOnShutdown:=DebugHook<>0;
-  {$WARN SYMBOL_PLATFORM ON}
-  //SourceEditorNotifiers := TList.Create;
+  try
+    {$WARN SYMBOL_PLATFORM OFF}
+    ReportMemoryLeaksOnShutdown:=DebugHook<>0;
+    {$WARN SYMBOL_PLATFORM ON}
+    //SourceEditorNotifiers := TList.Create;
 
-  TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
-  FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
-  TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
-  TColorizerLocalSettings.ActnStyleList:= TList<TActionManager>.Create;
+    TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
+    FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
+    TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
+    TColorizerLocalSettings.ActnStyleList:= TList<TActionManager>.Create;
 
-  TColorizerLocalSettings.ColorMap:=nil;
-  TColorizerLocalSettings.Settings:=nil;
-  TColorizerLocalSettings.ImagesGutterChanged:=False;
-  TColorizerLocalSettings.HookedWindows:=TStringList.Create;
-  TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
+    TColorizerLocalSettings.ColorMap:=nil;
+    TColorizerLocalSettings.Settings:=TSettings.Create;
+    TColorizerLocalSettings.ImagesGutterChanged:=False;
+    TColorizerLocalSettings.DockImages:= TPngImage.Create;
+    TColorizerLocalSettings.HookedWindows:=TStringList.Create;
+    TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
 
+    TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
+    LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
+    ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
+    s:=IncludeTrailingPathDelimiter(ImagesPath)+TColorizerLocalSettings.Settings.DockImages+'.png';
+    if FileExists(s) then
+      TColorizerLocalSettings.DockImages.LoadFromFile(s);
 
-  TColorizerLocalSettings.Settings:=TSettings.Create;
-  RegisterPlugIn;
-  AddMenuItems;
+    RegisterPlugIn;
+    AddMenuItems;
 
-  InstallFormsHook();
-  InstallColorizerHooks();
+    InstallFormsHook();
+    InstallColorizerHooks();
 
-  InitColorizer();
-  FTimerRefresher:=TTimer.Create(nil);
-  FTimerRefresher.OnTimer :=OnRefreher;
-  FTimerRefresher.Interval:=1500;
-  FTimerRefresher.Enabled:=True;
+    InitColorizer();
+    FTimerRefresher:=TTimer.Create(nil);
+    FTimerRefresher.OnTimer :=OnRefreher;
+    FTimerRefresher.Interval:=1500;
+    FTimerRefresher.Enabled:=True;
+  except
+    on E: exception do
+    begin
+      ShowMessage(Format('%s : Error on TIDEWizard.Create %s %s Trace %s', [sMenuItemCaption, E.message, sLineBreak, E.StackTrace]));
+    end;
+  end;
+
 end;
 
 destructor TIDEWizard.Destroy;
@@ -399,6 +415,7 @@ begin
   FreeAndNil(TColorizerLocalSettings.ActnStyleList);
   FreeAndNil(TColorizerLocalSettings.Settings);
   TColorizerLocalSettings.IDEData.Free;
+  TColorizerLocalSettings.DockImages.Free;
   TColorizerLocalSettings.HookedWindows.Free;
   TColorizerLocalSettings.HookedWindows:=nil;
 
