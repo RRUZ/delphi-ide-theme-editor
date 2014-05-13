@@ -2,7 +2,7 @@
 
 = Introduction =
 
- If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE2, XE4, XE5 and XE6. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found until now. 
+ If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE-XE6. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found until now. 
 
   What I expect of this beta testing is found bugs, possible conflicts with third-party experts and components, add new suggested features and improve the overall performance of the Wizard.    
  
@@ -12,16 +12,11 @@
 
 == What is DIC? ==
 
-  Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the menus, popup menus, docked windows and components included in the workspace of the IDE.
+  Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the menus, popup menus, docked windows and components included in the *workspace* of the IDE.
 
 == Which versions of Delphi (RAD Studio) supports DIC? ==
  
- Currently DIC supports RAD Studio XE2, XE4, X5, X6. 
- (I don't have XE3 installed on my test environment, I hope include this version ASAP) 
-
-== Which versions of Delphi (RAD Studio) will supports DIC in the final version? ==
-
- I expect add support for Delphi 2010-XE6 in the final release. 
+ Currently DIC supports RAD Studio XE, XE2, XE3, XE4, XE5, X6. 
 
 == DIC supports modify the syntax highlight colors? == 
 
@@ -33,7 +28,7 @@
 
 == DIC supports design-time components? == 
 
- No, the aim of DIC is only change the appearance of the windows and components used by the IDE. a not interfere with the VCL or FMX components in design time. If any component in design time is modified in any way if the DIC is running must be reported as a bug. 
+ No, the aim of DIC is only change the appearance of the windows and components used by the IDE. a not interfere with the VCL or FMX components in design time. If any component in design time is modified in any way by the DIC Wizard this situation must be reported as a bug. 
 
 == DIC supports modify the non client area of the floating IDE windows? == 
  No, DIC only can change the appearance of the docked windows. 
