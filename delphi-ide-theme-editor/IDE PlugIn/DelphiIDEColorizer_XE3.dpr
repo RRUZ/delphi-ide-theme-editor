@@ -1,5 +1,5 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG OFF
-library DelphiIDEColorizer_XE2;
+library DelphiIDEColorizer_XE3;
 
 uses
   Main in 'Main.pas',

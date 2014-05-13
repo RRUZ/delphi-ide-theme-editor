@@ -27,7 +27,7 @@ interface
 
 uses
   ActnMan,
-  System.Classes;
+  Classes;
 
    function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False) : Boolean;
 
@@ -45,7 +45,7 @@ uses
   ImgList,
   Tabs,
   CategoryButtons,
-  System.Generics.Collections,
+  Generics.Collections,
   ActnColorMaps,
   ActnPopup,
   ActnMenus,
@@ -445,7 +445,7 @@ begin
   LPanel.Color  := AColorMap.Color;
 end;
 
-{ TWraspperInspListBox }
+{ TWrapperInspListBox }
 
 procedure TWrapperInspListBox.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
@@ -467,10 +467,22 @@ begin
      property HighlightColor: TColor;
      property HighlightFontColor: TColor;
     }
-    SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.MenuColor);
-    SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.SelectedColor);
     SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.Color);
+    SetRttiPropertyValue(AComponent,'PropNameColor', AColorMap.FontColor);   //*
+    SetRttiPropertyValue(AComponent,'PropValueColor', AColorMap.FontColor);  //*
+    SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.MenuColor);
+    SetRttiPropertyValue(AComponent,'EditValueColor', AColorMap.FontColor); //*
+    SetRttiPropertyValue(AComponent,'CategoryColor', AColorMap.FontColor); //*
     SetRttiPropertyValue(AComponent,'GutterColor', AColorMap.Color);
+    SetRttiPropertyValue(AComponent,'GutterEdgeColor', AColorMap.FrameTopLeftInner); //*
+    SetRttiPropertyValue(AComponent,'ReferenceColor', AColorMap.FontColor);//*
+
+    SetRttiPropertyValue(AComponent,'SubPropColor', AColorMap.FontColor);//*
+    SetRttiPropertyValue(AComponent,'ReadOnlyColor', AColorMap.FontColor);//*
+    SetRttiPropertyValue(AComponent,'NonDefaultColor', AColorMap.FontColor);//*
+
+
+    SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.SelectedColor);
     SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.SelectedFontColor);
     SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
@@ -862,7 +874,11 @@ initialization
   RegisterColorizerWrapper('TEditControl',  TWrapperEditControl);
   RegisterColorizerWrapper('TToolBar',  TWrapperToolBar);
   RegisterColorizerWrapper('TDockToolBar',  TWrapperToolBar);
+
   RegisterColorizerWrapper('TTabSet',  TWrapperTabSet);
+  RegisterColorizerWrapper('TIDEDockTabSet',  TWrapperTabSet); //TIDEDockTabSet->TDockTabSet->TTabSet
+
+
   RegisterColorizerWrapper('TClosableTabScroller',  TWrapperClosableTabScroller);
   RegisterColorizerWrapper('TGradientTabSet',  TWrapperGradientTabSet);
   RegisterColorizerWrapper('TIDEGradientTabSet',  TWrapperIDEGradientTabSet);

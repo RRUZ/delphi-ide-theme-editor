@@ -32,7 +32,7 @@ uses
  {$ENDIF}
  Classes,
  {$IFDEF DELPHI2009_UP}
- System.Generics.Collections,
+ Generics.Collections,
  {$ENDIF}
  ActnMan,
  uDelphiVersions,

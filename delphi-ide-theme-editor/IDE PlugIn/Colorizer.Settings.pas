@@ -36,6 +36,12 @@ type
     FChangeIconsGutter: boolean;
     FDockImages: string;
     FDockGradientHor: boolean;
+    FDockCustom: boolean;
+    FDockCustomColors: boolean;
+    FDockStartGradActive: string;
+    FDockStartGradInActive: string;
+    FDockEndGradActive: string;
+    FDockEndGradInActive: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -47,8 +53,17 @@ type
 
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
+
     property DockImages    : string read FDockImages write FDockImages;
     property DockGradientHor    : boolean read FDockGradientHor write FDockGradientHor;
+    property DockCustom         : boolean read FDockCustom write FDockCustom;
+    property DockCustomColors   : boolean read FDockCustomColors write FDockCustomColors;
+    property DockStartGradActive  : string read FDockStartGradActive write FDockStartGradActive;
+    property DockEndGradActive    : string read FDockEndGradActive write FDockEndGradActive;
+    property DockStartGradInActive  : string read FDockStartGradInActive write FDockStartGradInActive;
+    property DockEndGradInActive  : string read FDockEndGradInActive write FDockEndGradInActive;
+
+
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
 //    property ColorMapName  : string read FColorMapName write FColorMapName;
 //    property StyleBarName  : string read FStyleBarName write FStyleBarName;
@@ -82,7 +97,13 @@ begin
     Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
     Settings.DockImages              := LIniFile.ReadString('Global', 'DockImages', 'red');
     Settings.DockGradientHor         := LIniFile.ReadBool('Global', 'DockGradientHor', True);
-//    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
+    Settings.DockCustom              := LIniFile.ReadBool('Global', 'DockCustom', True);
+    Settings.DockCustomColors        := LIniFile.ReadBool('Global', 'DockCustomColors', False);
+    Settings.DockStartGradActive     := LIniFile.ReadString('Global', 'DockStartGradActive', 'clBlack');
+    Settings.DockEndGradActive       := LIniFile.ReadString('Global', 'DockEndGradActive', 'clBlack');
+    Settings.DockStartGradInActive   := LIniFile.ReadString('Global', 'DockStartGradInActive', 'clBlack');
+    Settings.DockEndGradInActive     := LIniFile.ReadString('Global', 'DockEndGradInActive', 'clBlack');
+    //    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
 //    Settings.StyleBarName            := iniFile.ReadString('Global', 'StyleBarName', 'XP Style');
   finally
     LIniFile.Free;
@@ -105,6 +126,12 @@ begin
     LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
     LIniFile.WriteString('Global', 'DockImages', Settings.DockImages);
     LIniFile.WriteBool('Global', 'DockGradientHor', Settings.DockGradientHor);
+    LIniFile.WriteBool('Global', 'DockCustom', Settings.DockCustom);
+    LIniFile.WriteBool('Global', 'DockCustomColors', Settings.DockCustomColors);
+    LIniFile.WriteString('Global', 'DockStartGradActive', Settings.DockStartGradActive);
+    LIniFile.WriteString('Global', 'DockEndGradActive', Settings.DockEndGradActive);
+    LIniFile.WriteString('Global', 'DockStartGradInActive', Settings.DockStartGradInActive);
+    LIniFile.WriteString('Global', 'DockEndGradInActive', Settings.DockEndGradInActive);
 //    iniFile.WriteString('Global', 'ColorMapName', Settings.ColorMapName);
 //    iniFile.WriteString('Global', 'StyleBarName', Settings.StyleBarName);
   finally

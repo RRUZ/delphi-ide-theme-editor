@@ -24,7 +24,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ToolsAPI, Vcl.StdCtrls;
+  Graphics, Controls, Forms, Dialogs, ToolsAPI, StdCtrls;
 
 type
   TFrameColorizer = class(TFrame)

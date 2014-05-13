@@ -20,9 +20,10 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "1.60.0"
+  !define VER_MINOR "1.61.0"
 !endif
 
+!ifndef IDE_VERSION_DXE
 !ifndef IDE_VERSION_DXE2
 !ifndef IDE_VERSION_DXE3
 !ifndef IDE_VERSION_DXE4
@@ -30,8 +31,9 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_DXE6
 
   !define FULL_VERSION    "1"  
+  !define IDE_VERSION_DXE  "1"  
   !define IDE_VERSION_DXE2 "1"
-  ;!define IDE_VERSION_DXE3 "1"
+  !define IDE_VERSION_DXE3 "1"
   !define IDE_VERSION_DXE4 "1"
   !define IDE_VERSION_DXE5 "1"
   !define IDE_VERSION_DXE6 "1"
@@ -41,16 +43,21 @@ RequestExecutionLevel admin
 !endif
 !endif
 !endif
+!endif
 
 !ifndef FULL_VERSION
   !define IDE_VERSION
 
+  !ifdef IDE_VERSION_DXE
+    !define IDE_SHORT_NAME "DXE"
+    !define IDE_LONG_NAME "RAD Studio XE"
+  !endif  
   !ifdef IDE_VERSION_DXE2
-    !define IDE_SHORT_NAME "D2012"
+    !define IDE_SHORT_NAME "DXE2"
     !define IDE_LONG_NAME "RAD Studio XE2"
   !endif
   !ifdef IDE_VERSION_DXE3
-    !define IDE_SHORT_NAME "D2013"
+    !define IDE_SHORT_NAME "DXE3"
     !define IDE_LONG_NAME "RAD Studio XE3"
   !endif
   !ifdef IDE_VERSION_DXE4
@@ -163,6 +170,14 @@ Section "$(PROGRAMDATA)" SecData
 FileLoop:
 
 !ifdef SUPPORTS_BDS
+
+!ifdef IDE_VERSION_DXE
+  IfFileExists "$INSTDIR\XE\DelphiIDEColorizer_XE.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE\DelphiIDEColorizer_XE.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
 !ifdef IDE_VERSION_DXE2
   IfFileExists "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll" 0 +4
   FileOpen $0 "$INSTDIR\XE2\DelphiIDEColorizer_XE2.dll" a
@@ -228,7 +243,22 @@ InitOk:
 SectionEnd
 
 
-
+!ifdef IDE_VERSION_DXE
+Section "RAD Studio XE" SecDXE
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE
+  File "HookedWindows.dat"
+  SetOverwrite off
+  File "Settings.ini"
+  SetOverwrite on 
+  File "DelphiIDEColorizer_XE.dll"
+  SetOutPath $INSTDIR\XE\Themes
+  File "Themes\*.idetheme"  
+  SetOutPath $INSTDIR\XE\Images\dock_images
+  File "Images\dock_images\*.png"  
+  WriteRegStr HKCU "Software\Embarcadero\BDS\8.0\Experts" "DelphiIDEColorizer_XE" "$INSTDIR\XE\DelphiIDEColorizer_XE.dll"
+SectionEnd
+!endif
   
 
 !ifdef IDE_VERSION_DXE2
@@ -347,6 +377,9 @@ FunctionEnd
 
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!ifdef IDE_VERSION_DXE
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE} "Delphi IDE Colorizer for Delphi XE"
+!endif
 !ifdef IDE_VERSION_DXE2
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE2} "Delphi IDE Colorizer for Delphi XE2"
 !endif
@@ -369,6 +402,9 @@ Function SetCheckBoxes
 
   StrCpy $1 ${SecData}
 
+!ifdef IDE_VERSION_DXE
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\8.0" "App" ${SecDXE}
+!endif  
 !ifdef IDE_VERSION_DXE2
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecDXE2}
 !endif
@@ -390,8 +426,10 @@ FunctionEnd
 
 Section "Uninstall"
   Delete "$INSTDIR\*.*"
+  Delete "$INSTDIR\XE\*.dll"
+  Delete "$INSTDIR\XE\*.dat"
   Delete "$INSTDIR\XE2\*.dll"
-  Delete "$INSTDIR\XE2\*.dat"
+  Delete "$INSTDIR\XE2\*.dat"  
   Delete "$INSTDIR\XE3\*.dll"
   Delete "$INSTDIR\XE3\*.dat"
   Delete "$INSTDIR\XE4\*.dll"
@@ -400,6 +438,8 @@ Section "Uninstall"
   Delete "$INSTDIR\XE5\*.dat"
   Delete "$INSTDIR\XE6\*.dll"
   Delete "$INSTDIR\XE6\*.dat"
+  Delete "$INSTDIR\XE\Images\dock_images\*.*"  
+  Delete "$INSTDIR\XE\Themes\*.*"  
   Delete "$INSTDIR\XE2\Images\dock_images\*.*"  
   Delete "$INSTDIR\XE2\Themes\*.*"
   Delete "$INSTDIR\XE3\Images\dock_images\*.*"  
@@ -412,7 +452,9 @@ Section "Uninstall"
   Delete "$INSTDIR\XE6\Themes\*.*"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC"
 
-
+!ifdef IDE_VERSION_DXE
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "DelphiIDEColorizer_XE"
+!endif
 !ifdef IDE_VERSION_DXE2
   DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "DelphiIDEColorizer_XE2"
 !endif

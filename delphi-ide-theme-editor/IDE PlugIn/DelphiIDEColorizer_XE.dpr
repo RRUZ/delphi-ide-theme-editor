@@ -1,7 +1,9 @@
 // JCL_DEBUG_EXPERT_INSERTJDBG OFF
-library DelphiIDEColorizer_XE2;
+library DelphiIDEColorizer_XE;
 
 uses
+  {$IFDEF DEBUG}
+  {$ENDIF}
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
@@ -17,9 +19,6 @@ uses
   uRegistry in '..\Units\uRegistry.pas',
   uRttiHelper in 'uRttiHelper.pas',
   uIDEExpertUtils in 'uIDEExpertUtils.pas',
-  Vcl.Styles.Ext in '..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas',
-  Vcl.Styles.Utils.SysControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas',
-  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas',
   uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas';
