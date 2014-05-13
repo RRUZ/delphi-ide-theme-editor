@@ -38,7 +38,11 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       Align = alClient
       TabOrder = 0
       object TabSheetMain: TTabSheet
-        Caption = 'Main Settings'
+        Caption = 'Theme Settings'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label1: TLabel
           Left = 3
           Top = 46
@@ -311,7 +315,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object ColorBoxBase: TColorBox
           Left = 154
-          Top = 130
+          Top = 129
           Width = 166
           Height = 22
           NoneColorColor = 16729138
@@ -352,6 +356,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         Caption = 'Addtional controls'
         ImageIndex = 1
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           460
           430)
@@ -406,23 +414,55 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheet3: TTabSheet
         Caption = 'Dock Windows'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label11: TLabel
           Left = 16
-          Top = 8
+          Top = 40
           Width = 52
           Height = 13
           Caption = 'Dock Icons'
         end
         object Label12: TLabel
           Left = 16
-          Top = 173
+          Top = 205
           Width = 86
           Height = 13
           Caption = 'Gradient Direction'
         end
+        object Label13: TLabel
+          Left = 16
+          Top = 284
+          Width = 127
+          Height = 13
+          Caption = 'Start Color gradient active'
+        end
+        object Label14: TLabel
+          Left = 16
+          Top = 312
+          Width = 121
+          Height = 13
+          Caption = 'End Color gradient active'
+        end
+        object Label15: TLabel
+          Left = 16
+          Top = 340
+          Width = 135
+          Height = 13
+          Caption = 'Start Color gradient inactive'
+        end
+        object Label16: TLabel
+          Left = 16
+          Top = 368
+          Width = 129
+          Height = 13
+          Caption = 'End Color gradient inactive'
+        end
         object ListBoxDockImages: TListBox
           Left = 16
-          Top = 27
+          Top = 59
           Width = 161
           Height = 134
           Style = lbOwnerDrawVariable
@@ -432,7 +472,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object RbtnDockGradientHorz: TRadioButton
           Left = 16
-          Top = 192
+          Top = 224
           Width = 81
           Height = 17
           Caption = 'Horizontal'
@@ -442,16 +482,116 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object RbtnDockGradientVert: TRadioButton
           Left = 120
-          Top = 192
+          Top = 224
           Width = 57
           Height = 17
           Caption = 'Vertical'
           TabOrder = 2
         end
+        object CheckBoxCustomDockBars: TCheckBox
+          Left = 16
+          Top = 17
+          Width = 209
+          Height = 17
+          Caption = 'Enable custom docked windows title bar'
+          TabOrder = 3
+        end
+        object CheckBoxUseCustomColorsDock: TCheckBox
+          Left = 16
+          Top = 247
+          Width = 161
+          Height = 17
+          Caption = 'Use custom colors the title bar'
+          TabOrder = 4
+        end
+        object ColorBoxDockStartGradientActive: TColorBox
+          Left = 162
+          Top = 275
+          Width = 166
+          Height = 22
+          NoneColorColor = 16729138
+          Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+          TabOrder = 5
+          OnGetColors = ColorBoxBaseGetColors
+        end
+        object ColorBoxDockEndGradientActive: TColorBox
+          Left = 162
+          Top = 303
+          Width = 166
+          Height = 22
+          NoneColorColor = 16729138
+          Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+          TabOrder = 6
+          OnGetColors = ColorBoxBaseGetColors
+        end
+        object ColorBoxDockStartGradientInActive: TColorBox
+          Left = 162
+          Top = 331
+          Width = 166
+          Height = 22
+          NoneColorColor = 16729138
+          Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+          TabOrder = 7
+          OnGetColors = ColorBoxBaseGetColors
+        end
+        object ColorBoxDockEndGradientInActive: TColorBox
+          Left = 162
+          Top = 359
+          Width = 166
+          Height = 22
+          NoneColorColor = 16729138
+          Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+          TabOrder = 8
+          OnGetColors = ColorBoxBaseGetColors
+        end
+        object Button2: TButton
+          Left = 334
+          Top = 275
+          Width = 22
+          Height = 22
+          ImageIndex = 2
+          Images = ImageList1
+          TabOrder = 9
+          OnClick = Button2Click
+        end
+        object Button4: TButton
+          Left = 334
+          Top = 303
+          Width = 22
+          Height = 22
+          ImageIndex = 2
+          Images = ImageList1
+          TabOrder = 10
+          OnClick = Button4Click
+        end
+        object Button5: TButton
+          Left = 334
+          Top = 331
+          Width = 22
+          Height = 22
+          ImageIndex = 2
+          Images = ImageList1
+          TabOrder = 11
+          OnClick = Button5Click
+        end
+        object Button6: TButton
+          Left = 334
+          Top = 359
+          Width = 22
+          Height = 22
+          ImageIndex = 2
+          Images = ImageList1
+          TabOrder = 12
+          OnClick = Button6Click
+        end
       end
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 26
@@ -489,6 +629,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheet1: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -552,10 +696,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 280
-    Top = 344
+    Left = 344
+    Top = 96
     Bitmap = {
-      494C010107000800CC0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800E40210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -834,8 +978,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Top = 21
   end
   object ColorDialog1: TColorDialog
-    Left = 396
-    Top = 264
+    Left = 380
+    Top = 96
   end
   object TwilightColorMap: TTwilightColorMap
     HighlightColor = clBlack
@@ -863,7 +1007,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   object ImageListDock: TImageList
     ColorDepth = cd32Bit
     Width = 48
-    Left = 340
-    Top = 344
+    Left = 420
+    Top = 96
   end
 end

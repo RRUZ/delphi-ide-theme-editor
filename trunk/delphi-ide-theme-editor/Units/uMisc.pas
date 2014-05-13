@@ -21,6 +21,7 @@
 unit uMisc;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 uses
  Windows,
@@ -61,8 +62,10 @@ uses
   ShellAPI,
   Classes,
   Dialogs,
+ {$IFDEF DELPHIXE2_UP}
   System.UITypes,
-  WinApi.SHFolder,
+ {$ENDIF}
+  SHFolder,
   Registry,
   SysUtils;
 

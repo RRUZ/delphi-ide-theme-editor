@@ -1,4 +1,5 @@
-// JCL_DEBUG_EXPERT_INSERTJDBG OFF
+// JCL_DEBUG_EXPERT_INSERTJDBG ON
+// JCL_DEBUG_EXPERT_DELETEMAPFILE ON
 package DelphiIDEColorizerXE6;
 
 {$R *.res}
@@ -40,6 +41,7 @@ requires
 contains
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
+  Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
   Colorizer.HookForms in 'Colorizer.HookForms.pas',
   Colorizer.Hooks in 'Colorizer.Hooks.pas',

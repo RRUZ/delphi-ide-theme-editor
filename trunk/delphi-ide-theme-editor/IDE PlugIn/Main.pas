@@ -25,6 +25,8 @@
   * popup menu tool bars (ex :recent files) -> create hook using colormap
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
   * Enable/Disable
+  * toolbar disabled buttons
+  * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
 
  features
    mimic header omn TListView, TVirtualStringTree effect from  TTBDrawingStyle(dsNormal)
@@ -116,7 +118,7 @@ uses
  Vcl.Themes,
  {$IFEND}
  {$IFDEF DELPHI2009_UP}
- System.Generics.Collections,
+ Generics.Collections,
  {$ENDIF}
  Classes,
  ActnMan,
@@ -252,14 +254,12 @@ const
   SColorizerPluginCaption    ='Delphi IDE Colorizer';
   SColorizerPluginDescription=
   'Delphi IDE Colorizer'+sLineBreak+
-  ''+sLineBreak+
+  'http://theroadtodelphi.wordpress.com/'+sLineBreak+
   'Version %s'+sLineBreak+
   'Copyright: 2011-2014 Rodrigo Ruz V.'+sLineBreak+
   'All rights reserved.'+sLineBreak+
   ''+sLineBreak+
-  'This is a freeware, you can use it freely without any fee.'+sLineBreak+
-  ''+sLineBreak+
-  'http://theroadtodelphi.wordpress.com/'+sLineBreak;
+  'This is a freeware, you can use it freely without any fee.';
 var
   LAboutBoxServices: IOTAAboutBoxServices;
   sVersion         : string;
@@ -291,10 +291,10 @@ end;
 procedure TIDEWizard.InitColorizer;
 var
   LINTAServices : INTAServices;
-{$IF CompilerVersion >= 23}
+ {$IFDEF DELPHIXE2_UP}
   found : Boolean;
   s : string;
-{$IFEND}
+ {$ENDIF}
 begin
   try
     if BorlandIDEServices <> nil then
@@ -303,7 +303,7 @@ begin
         if LINTAServices <> nil then
         begin
           RegisterColorizerAddinOptions;
-          {$IF CompilerVersion >= 23}
+          {$IFDEF DELPHIXE2_UP}
           if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
           begin
             RegisterVClStylesFiles();
@@ -323,7 +323,7 @@ begin
             else
               MessageDlg(Format('The VCL Style %s was not found',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);
           end;
-          {$IFEND}
+          {$ENDIF}
           if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
             RefreshIDETheme();
         end;

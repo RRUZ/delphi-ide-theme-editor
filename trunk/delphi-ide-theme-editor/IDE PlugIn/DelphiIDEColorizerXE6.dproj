@@ -107,6 +107,7 @@
         <DCCReference Include="Jcl.dcp"/>
         <DCCReference Include="Main.pas"/>
         <DCCReference Include="Colorizer.Utils.pas"/>
+        <DCCReference Include="Colorizer.Wrappers.pas"/>
         <DCCReference Include="Colorizer.Settings.pas"/>
         <DCCReference Include="Colorizer.HookForms.pas"/>
         <DCCReference Include="Colorizer.Hooks.pas"/>

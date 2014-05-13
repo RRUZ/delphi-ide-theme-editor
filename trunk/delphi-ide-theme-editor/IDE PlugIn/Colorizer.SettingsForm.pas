@@ -21,6 +21,7 @@
 unit Colorizer.SettingsForm;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
@@ -102,6 +103,20 @@ type
     RbtnDockGradientHorz: TRadioButton;
     RbtnDockGradientVert: TRadioButton;
     Label12: TLabel;
+    CheckBoxCustomDockBars: TCheckBox;
+    CheckBoxUseCustomColorsDock: TCheckBox;
+    Label13: TLabel;
+    Label14: TLabel;
+    Label15: TLabel;
+    Label16: TLabel;
+    ColorBoxDockStartGradientActive: TColorBox;
+    ColorBoxDockEndGradientActive: TColorBox;
+    ColorBoxDockStartGradientInActive: TColorBox;
+    ColorBoxDockEndGradientInActive: TColorBox;
+    Button2: TButton;
+    Button4: TButton;
+    Button5: TButton;
+    Button6: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -127,9 +142,15 @@ type
       var Height: Integer);
     procedure ListBoxDockImagesDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
+    procedure Button2Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
   private
     { Private declarations }
+{$IFDEF DELPHIXE2_UP}
     FPreview:TVclStylesPreview;
+{$ENDIF}
     FSettings: TSettings;
     procedure ColorListChange(Sender: TObject);
     procedure LoadThemes;
@@ -137,9 +158,11 @@ type
     procedure LoadSettings;
     function  GetIDEThemesFolder : String;
     function  GetSettingsFolder : String;
-    procedure LoadVClStylesList;
     procedure GenerateIDEThemes(const Path : string);
+{$IFDEF DELPHIXE2_UP}
     procedure DrawSeletedVCLStyle;
+    procedure LoadVClStylesList;
+{$ENDIF}
     procedure DrawPalette;
     procedure LoadDockIcons;
   public
@@ -195,14 +218,14 @@ Uses
  {$IF CompilerVersion >= 23}
  VCL.Themes,
  VCL.Styles,
+ System.UITypes,
  {$IFEND}
  {$WARN UNIT_PLATFORM OFF}
- Vcl.FileCtrl,
+ FileCtrl,
  {$WARN UNIT_PLATFORM ON}
- System.Types,
+ Types,
  uMisc,
  IOUtils,
- System.UITypes,
  Colorizer.StoreColorMap,
  GraphUtil,
  CommCtrl,
@@ -252,7 +275,7 @@ end;
 
 procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
-   s, ImagesPath, sMessage, StyleFile : string;
+   s, ImagesPath, sMessage{$IFDEF DELPHIXE2_UP}, StyleFile {$ENDIF} : string;
    FShowWarning : Boolean;
 begin
   FShowWarning:=(CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter);
@@ -278,6 +301,14 @@ begin
     FSettings.VCLStyleName := CbStyles.Text;
     FSettings.DockImages   := ListBoxDockImages.Items[ListBoxDockImages.ItemIndex];
     FSettings.DockGradientHor:= RbtnDockGradientHorz.Checked;
+    FSettings.DockCustom       := CheckBoxCustomDockBars.Checked;
+    FSettings.DockCustomColors := CheckBoxUseCustomColorsDock.Checked;
+
+    FSettings.DockStartGradActive   := ColorToString(ColorBoxDockStartGradientActive.Selected);
+    FSettings.DockEndGradActive     := ColorToString(ColorBoxDockEndGradientActive.Selected);
+    FSettings.DockStartGradInActive := ColorToString(ColorBoxDockStartGradientInActive.Selected);
+    FSettings.DockEndGradInActive   := ColorToString(ColorBoxDockEndGradientInActive.Selected);
+
     WriteSettings(FSettings, GetSettingsFolder);
 
     ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
@@ -289,7 +320,7 @@ begin
     ListBoxFormsHooked.Items.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
     Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
 
-    {$IF CompilerVersion >= 23}
+    {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles then
     begin
       StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
@@ -301,7 +332,7 @@ begin
       else
         MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
     end;
-    {$IFEND}
+    {$ENDIF}
 
     RefreshIDETheme(True);
   end;
@@ -340,6 +371,18 @@ begin
  end;
 end;
 
+procedure TFormIDEColorizerSettings.Button2Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ if ColorDialog1.Execute(Handle) then
+ begin
+   LColor:=ColorDialog1.Color;
+   if LColor<>clNone then
+    ColorBoxDockStartGradientActive.Selected:=LColor;
+ end;
+end;
+
 procedure TFormIDEColorizerSettings.Button3Click(Sender: TObject);
 Var
   ThemeName, FileName : string;
@@ -365,6 +408,44 @@ begin
     LoadThemes;
     cbThemeName.ItemIndex:=cbThemeName.Items.IndexOf(ThemeName);
    end;
+end;
+
+
+procedure TFormIDEColorizerSettings.Button4Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ if ColorDialog1.Execute(Handle) then
+ begin
+   LColor:=ColorDialog1.Color;
+   if LColor<>clNone then
+    ColorBoxDockEndGradientActive.Selected:=LColor;
+ end;
+end;
+
+
+procedure TFormIDEColorizerSettings.Button5Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ if ColorDialog1.Execute(Handle) then
+ begin
+   LColor:=ColorDialog1.Color;
+   if LColor<>clNone then
+    ColorBoxDockStartGradientInActive.Selected:=LColor;
+ end;
+end;
+
+procedure TFormIDEColorizerSettings.Button6Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ if ColorDialog1.Execute(Handle) then
+ begin
+   LColor:=ColorDialog1.Color;
+   if LColor<>clNone then
+    ColorBoxDockEndGradientInActive.Selected:=LColor;
+ end;
 end;
 
 
@@ -420,7 +501,9 @@ end;
 
 procedure TFormIDEColorizerSettings.CbStylesChange(Sender: TObject);
 begin
-   DrawSeletedVCLStyle;
+{$IFDEF DELPHIXE2_UP}
+ DrawSeletedVCLStyle;
+{$ENDIF}
 end;
 
 procedure TFormIDEColorizerSettings.cbThemeNameChange(Sender: TObject);
@@ -445,7 +528,9 @@ end;
 
 procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
 begin
- LoadVClStylesList;
+{$IFDEF DELPHIXE2_UP}
+  LoadVClStylesList;
+{$ENDIF}
 end;
 
 procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
@@ -506,9 +591,11 @@ begin
   ColorListBox1.OnChange:=ColorListChange;
 
   StyleCombo.Items.Assign(ActionBarStyles);
+  {$IFDEF DELPHIXE2_UP}
   FPreview:=TVclStylesPreview.Create(Self);
   FPreview.Parent:=PanelPreview;
   FPreview.BoundsRect := PanelPreview.ClientRect;
+  {$ENDIF}
   FSettings:=TSettings.Create;
   //CheckBoxActivateDWM.Enabled:=DwmIsEnabled;
   {$IF CompilerVersion >= 23}
@@ -519,8 +606,6 @@ begin
   ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
 end;
 
-type
-  TVclStylesPreviewClass = class(TVclStylesPreview);
 
 procedure TFormIDEColorizerSettings.DrawPalette;
 var
@@ -556,6 +641,10 @@ begin
     end;
 end;
 
+{$IFDEF DELPHIXE2_UP}
+type
+  TVclStylesPreviewClass = class(TVclStylesPreview);
+
 procedure TFormIDEColorizerSettings.DrawSeletedVCLStyle;
 var
   StyleName : string;
@@ -571,10 +660,12 @@ begin
      TVclStylesPreviewClass(FPreview).Paint;
    end;
 end;
-
+{$ENDIF}
 procedure TFormIDEColorizerSettings.FormDestroy(Sender: TObject);
 begin
+{$IFDEF DELPHIXE2_UP}
   FPreview.Free;
+{$ENDIF}
   FSettings.Free;
 end;
 
@@ -735,6 +826,13 @@ begin
   RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
   RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
 
+  CheckBoxCustomDockBars.Checked := FSettings.DockCustom;
+  CheckBoxUseCustomColorsDock.Checked := FSettings.DockCustomColors;
+
+  try ColorBoxDockStartGradientActive.Selected   := StringToColor(FSettings.DockStartGradActive); except end;
+  try ColorBoxDockEndGradientActive.Selected     := StringToColor(FSettings.DockEndGradActive);  except end;
+  try ColorBoxDockStartGradientInActive.Selected := StringToColor(FSettings.DockStartGradInActive); except end;
+  try ColorBoxDockEndGradientInActive.Selected   := StringToColor(FSettings.DockEndGradInActive); except end;
 
   CheckBoxEnabled.Checked:=FSettings.Enabled;
   CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;
@@ -748,11 +846,15 @@ begin
   cbThemeNameChange(nil);
 
   CheckBoxUseVClStyles.Checked:=FSettings.UseVCLStyles;
+{$IFDEF DELPHIXE2_UP}
   LoadVClStylesList;
+{$ENDIF}
   //EditVCLStylesPath.Text:=FSettings.VCLStylesPath;
   CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
   ListBoxDockImages.ItemIndex:=ListBoxDockImages.Items.IndexOf(FSettings.DockImages);
+{$IFDEF DELPHIXE2_UP}
   DrawSeletedVCLStyle;
+{$ENDIF}
 end;
 
 procedure TFormIDEColorizerSettings.LoadThemes;
@@ -775,7 +877,7 @@ begin
   end;
 end;
 
-
+{$IFDEF DELPHIXE2_UP}
 procedure TFormIDEColorizerSettings.LoadVClStylesList;
 var
  s : string;
@@ -790,7 +892,7 @@ begin
    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
  end;
 end;
-
+{$ENDIF}
 { TColorListBox }
 
 procedure TColorListBox.Change;
