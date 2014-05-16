@@ -527,6 +527,7 @@ procedure TWrapperEditControl.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
+   SetRttiPropertyValue(AComponent,'Ctl3D', False);
    //SetRttiPropertyValue(AComponent, 'BorderStyle',  Ord(bsNone));
    {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles then

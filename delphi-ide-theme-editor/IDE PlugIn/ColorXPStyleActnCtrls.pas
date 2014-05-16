@@ -160,12 +160,13 @@ end;
 procedure TColorXPColorMap.UpdateColors;
 begin
   inherited;
-  LoadSettings(Self, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
+  LoadSettings(Self, TColorizerLocalSettings.Settings);
 end;
 
 initialization
   ColorXPStyle := TColorXPStyleActionBars.Create;
   RegisterActnBarStyle(ColorXPStyle);
+  TColorizerLocalSettings.ActionBarStyle:=ColorXPStyle;
 finalization
   UnregisterActnBarStyle(ColorXPStyle);
   ColorXPStyle.Free;

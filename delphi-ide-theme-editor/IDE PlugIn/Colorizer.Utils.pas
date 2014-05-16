@@ -43,15 +43,16 @@ uses
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
 
-{.$DEFINE ENABLELOG}
+{$DEFINE ENABLELOG}
 
-procedure AddLog(const msg : string);
+procedure AddLog(const Message : string); overload;
+procedure AddLog(const Category, Message : string); overload;
 
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False;Invalidate : Boolean = False); overload;
 procedure RefreshIDETheme(Invalidate : Boolean = False); overload;
 procedure RestoreIDESettings();
 
-procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
+procedure LoadSettings(AColorMap:TCustomActionBarColorMap; Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate : Boolean = False);
 procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
@@ -68,7 +69,10 @@ procedure RegisterVClStylesFiles;
       {$ENDIF}
       class var ColorMap       : TCustomActionBarColorMap;
       class var ActionBarStyle : TActionBarStyle;
-      class var HookedWindows  : TStringList;
+      class var HookedWindows     : TStringList;
+      class var HookedScrollBars  : TStringList;
+      class var HookedWindowsText    : string;
+      class var HookedScrollBarsText  : string;
       class var VCLStylesPath  : string;
       class var Settings       : TSettings;
       class var ImagesGutterChanged : Boolean;
@@ -77,6 +81,8 @@ procedure RegisterVClStylesFiles;
     end;
 
 implementation
+
+
 
 {.$DEFINE DEBUG_MODE}
 
@@ -87,10 +93,12 @@ uses
  XPStyleActnCtrls,
  {$ENDIF}
  {$IFDEF DELPHI2010_UP}
- IOUtils,
  Rtti,
  {$ENDIF}
  Types,
+{$IFDEF ENABLELOG}
+ IOUtils,
+{$ENDIF}
  Forms,
  SysUtils,
  Controls,
@@ -101,6 +109,12 @@ uses
  uMisc,
  uRttiHelper;
 
+
+
+{$IFDEF ENABLELOG}
+var
+  LogFile : TStrings = nil;
+{$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
 procedure RegisterVClStylesFiles;
@@ -121,11 +135,23 @@ begin
 end;
 {$ENDIF}
 
-procedure AddLog(const msg : string);
+
+procedure AddLog(const Category, Message : string);
 begin
 {$IFDEF ENABLELOG}
-   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+   //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+   if not Assigned(LogFile) then exit;
+
+   if Category<>'' then
+    LogFile.Add(Format('%s : %s', [Category, Message]))
+   else
+    LogFile.Add(Format('%s', [Message]));
 {$ENDIF}
+end;
+
+procedure AddLog(const Message : string);
+begin
+  AddLog('', Message);
 end;
 
 {$IFDEF DEBUG_PROFILER}
@@ -202,7 +228,7 @@ begin
 end;
 
 
-procedure LoadSettings(AColorMap:TCustomActionBarColorMap;ActionBarStyle : TActionBarStyle;Settings : TSettings);
+procedure LoadSettings(AColorMap:TCustomActionBarColorMap; Settings : TSettings);
 Var
  ThemeFileName : string;
 begin
@@ -302,7 +328,7 @@ begin
 
     //process components
     for Index := 0 to AComponent.ComponentCount - 1 do
-     ProcessComponent(AColorMap, ColorXPStyle, AComponent.Components[Index], Restore);
+     ProcessComponent(AColorMap, AStyle, AComponent.Components[Index], Restore);
 
     //process dock clients
     if AComponent is TWinControl then
@@ -310,7 +336,7 @@ begin
      if TWinControl(AComponent).DockClients[Index].Visible and (TColorizerLocalSettings.HookedWindows.IndexOf(TWinControl(AComponent).DockClients[Index].ClassName)>=0) then
      begin
        //AddLog('DockClients '+TWinControl(AComponent).DockClients[Index].ClassName);
-       ProcessComponent(AColorMap, ColorXPStyle, TWinControl(AComponent).DockClients[Index]);
+       ProcessComponent(AColorMap, AStyle, TWinControl(AComponent).DockClients[Index]);
        if Invalidate and  (TWinControl(AComponent).DockClients[Index] is TForm) then
         TWinControl(AComponent).DockClients[Index].Invalidate();
      end;
@@ -381,8 +407,13 @@ end;
 initialization
 
 {$IFDEF ENABLELOG}
+ LogFile:=TStringList.Create;
  ShowMessage('Log enabled');
 {$ENDIF}
 
-
+finalization
+{$IFDEF ENABLELOG}
+  LogFile.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt');
+  LogFile.Free;;
+{$ENDIF}
 end.

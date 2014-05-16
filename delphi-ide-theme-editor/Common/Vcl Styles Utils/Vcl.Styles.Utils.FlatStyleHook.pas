@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit Vcl.Styles.SysStyleHook
+// Unit Vcl.Styles.Utils.FlatStyleHook
 // unit for the VCL Styles Utils
 // http://code.google.com/p/vcl-styles-utils/
 //
@@ -12,29 +12,28 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is uSysStyleHook.pas.
-//
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
-unit Vcl.Styles.Utils.SysStyleHook;
+unit Vcl.Styles.Utils.FlatStyleHook;
 
 interface
 
 uses
+  {$IF CompilerVersion >= 23}
   Vcl.Styles,
-  Vcl.Themes,
-  Vcl.ExtCtrls,
-  System.Types,
-  Winapi.Windows,
-  Winapi.Messages,
-  System.Classes,
-  UxTheme,
-  Vcl.Graphics,
-  System.SysUtils,
-  Vcl.Controls,
+  {$IFEND}
+  Themes,
+  ExtCtrls,
+  Types,
+  Windows,
+  Messages,
+  Classes,
+  Graphics,
+  SysUtils,
+  Controls,
   CommCtrl;
 
 const
@@ -54,7 +53,10 @@ const
 
 type
   TBidiModeDirection = (bmLeftToRight, bmRightToLeft);
-
+  {$IF CompilerVersion >= 23}
+  {$ELSE}
+  TTextFormatFlags = Cardinal;
+  {$IFEND}
 type
   TSysStyleHook = class;
   TMouseTrackSysControlStyleHook = class;
@@ -188,7 +190,9 @@ type
     function StyleServicesEnabled: Boolean;
     procedure WndProc(var Message: TMessage); virtual;
     function InternalPaint(DC: HDC): Boolean; virtual;
+    {$IF CompilerVersion >= 23}
     procedure UpdateColors; virtual;
+    {$IFEND}
     function PaintControls(AControl: HWND; DC: HDC): Boolean;
     property HookedDirectly: Boolean read FHookedDirectly write FHookedDirectly;
 
@@ -198,16 +202,19 @@ type
     procedure Invalidate; virtual;
     procedure InvalidateNC; virtual;
     procedure Refresh; virtual;
+    {$IF CompilerVersion >= 23}
     procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; const Flags: Cardinal);
+    function DrawText(DC: HDC; Details: TThemedElementDetails; S: String; var R: TRect; Const Flags: TTextFormat = []): Integer; overload;
     function DrawTextCentered(DC: HDC; Details: TThemedElementDetails; const R: TRect; S: String; Const Flags: DWORD = 0): Integer;
-    function DrawText(DC: HDC; Details: TThemedElementDetails; S: String; var R: TRect; Const Flags: TTextFormat = []): Integer;
+    {$IFEND}
+    function DrawText(DC: HDC; Color: TColor; S: String; var R: TRect; const Flags: TTextFormat): Integer;  overload;
     property Handle: THandle read FHandle;
     property ParentHandle: HWND read GetParentHandle;
     property Handled: Boolean read FHandled write FHandled;
     property SysControl: TSysControl read FSysControl write FSysControl;
-{$IF CompilerVersion > 23}
+    {$IF CompilerVersion > 23}
     property StyleElements: TStyleElements read FStyleElements write SetStyleElements;
-{$IFEND}
+    {$IFEND}
     property DoubleBuffered: Boolean read FDoubleBuffered write FDoubleBuffered;
     property OverridePaint: Boolean read FOverridePaint write SetOverridePaint;
     property OverridePaintNC: Boolean read FOverridePaintNC write FOverridePaintNC;
@@ -260,8 +267,10 @@ function IsControlHooked(Handle: HWND): Boolean;
 implementation
 
 uses
+  {$IF CompilerVersion >= 23}
   System.UITypes,
-  Vcl.Styles.Utils.SysControls;
+  {$IFEND}
+  Vcl.Styles.Utils.FlatControls;
 
 // ------------------------------------------------------------------------------
 
@@ -352,7 +361,7 @@ end;
 function TSysControl.GetClientRect: TRect;
 begin
   Result := Rect(0, 0, 0, 0);
-  Winapi.Windows.GetClientRect(Handle, Result);
+  Windows.GetClientRect(Handle, Result);
 end;
 
 function TSysControl.GetClientWidth: Integer;
@@ -379,7 +388,7 @@ end;
 
 function TSysControl.GetHeight: Integer;
 begin
-  Result := WindowRect.Height;
+  Result := WindowRect.Bottom-WindowRect.Top;
 end;
 
 function TSysControl.GetLeft: Integer;
@@ -401,7 +410,7 @@ end;
 
 function TSysControl.GetParentHandle: THandle;
 begin
-  Result := Winapi.Windows.GetParent(Handle);
+  Result := Windows.GetParent(Handle);
 end;
 
 function TSysControl.GetStyle: NativeInt;
@@ -448,7 +457,7 @@ function TSysControl.GetText: String;
 var
   Buffer: array [0 .. 1023] of Char;
 begin
-  SetString(Result, Buffer, Winapi.Windows.GetWindowText(Handle, Buffer, Length(Buffer)));
+  SetString(Result, Buffer, Windows.GetWindowText(Handle, Buffer, Length(Buffer)));
 end;
 
 function TSysControl.GetTop: Integer;
@@ -463,7 +472,7 @@ end;
 
 function TSysControl.GetWidth: Integer;
 begin
-  Result := WindowRect.Width;
+  Result := WindowRect.Right - WindowRect.Left;
 end;
 
 function TSysControl.GetWinRect: TRect;
@@ -541,7 +550,9 @@ begin
     begin
       FSysControl.WndProc := LONG_PTR(FProcInstance);
       FBrush := TBrush.Create;
+     {$IF CompilerVersion >= 23}
       UpdateColors;
+     {$IFEND}
     end;
   end;
 end;
@@ -584,6 +595,7 @@ begin
       PaintBorder(SysControl, True);
 end;
 
+{$IF CompilerVersion >= 23}
 procedure TSysStyleHook.DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; const Flags: Cardinal);
 var
   ThemeTextColor: TColor;
@@ -602,6 +614,7 @@ begin
     StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
   end;
 end;
+{$IFEND}
 
 procedure TSysStyleHook.DrawParentBackground(DC: HDC; const ARect: PRect);
 var
@@ -619,7 +632,7 @@ begin
     ClientToScreen(Handle, P);
     ScreenToClient(ParentHandle, P);
     if ARect <> nil then
-      BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, Bmp.Canvas.Handle, P.X, P.Y, SRCCOPY)
+      BitBlt(DC, ARect.Left, ARect.Top, (ARect.Right - ARect.Left) , (ARect.Bottom - ARect.Top), Bmp.Canvas.Handle, P.X, P.Y, SRCCOPY)
     else
       BitBlt(DC, 0, 0, SysControl.Width, SysControl.Height, Bmp.Canvas.Handle, P.X, P.Y, SRCCOPY);
   finally
@@ -628,6 +641,27 @@ begin
 
 end;
 
+function TSysStyleHook.DrawText(DC: HDC; Color: TColor; S: String; var R: TRect; const Flags: TTextFormat): Integer;
+var
+  DrawFlags: Cardinal;
+  SaveIndex: Integer;
+  sColor: TColor;
+begin
+  SaveIndex := SaveDC(DC);
+  try
+    SetBkMode(DC, TRANSPARENT);
+      sColor := Color;
+    if not OverrideFont then
+      sColor := FontColor;
+    SetTextColor(DC, ColorToRGB(sColor));
+    DrawFlags := TTextFormatFlags(Flags);
+    Result := Windows.DrawText(DC, S, -1, R, DrawFlags);
+  finally
+    RestoreDC(DC, SaveIndex);
+  end;
+end;
+
+{$IF CompilerVersion >= 23}
 function TSysStyleHook.DrawText(DC: HDC; Details: TThemedElementDetails; S: String; var R: TRect; const Flags: TTextFormat): Integer;
 var
   DrawFlags: Cardinal;
@@ -643,7 +677,7 @@ begin
       sColor := FontColor;
     SetTextColor(DC, sColor);
     DrawFlags := TTextFormatFlags(Flags);
-    Result := Winapi.Windows.DrawText(DC, S, -1, R, DrawFlags);
+    Result := Windows.DrawText(DC, S, -1, R, DrawFlags);
   finally
     RestoreDC(DC, SaveIndex);
   end;
@@ -670,7 +704,7 @@ begin
     if DrawFlags <> 0 then
       DrawFlags := DrawFlags or Flags;
 
-    Winapi.Windows.DrawText(DC, PChar(S), -1, DrawRect, DrawFlags or DT_CALCRECT);
+    Windows.DrawText(DC, PChar(S), -1, DrawRect, DrawFlags or DT_CALCRECT);
     DrawRect.Right := R.Right;
     if DrawRect.Bottom < R.Bottom then
       OffsetRect(DrawRect, 0, (R.Bottom - DrawRect.Bottom) div 2)
@@ -684,6 +718,7 @@ begin
     RestoreDC(DC, SaveIndex);
   end;
 end;
+{$IFEND}
 
 function TSysStyleHook.GetFocused: Boolean;
 begin
@@ -721,7 +756,7 @@ var
   Buffer: array [0 .. 255] of Char;
 begin
   if (Handle <> 0) then
-    SetString(Result, Buffer, Winapi.Windows.GetWindowText(Handle, Buffer, Length(Buffer)));
+    SetString(Result, Buffer, Windows.GetWindowText(Handle, Buffer, Length(Buffer)));
   FText := Result;
 end;
 
@@ -780,12 +815,13 @@ end;
 
 function TSysStyleHook.StyleServicesEnabled: Boolean;
 begin
-  Result := (StyleServices.Available) and not(StyleServices.IsSystemStyle);
+  Result := {$IF CompilerVersion >= 23}(StyleServices.Available) and (StyleServices.IsSystemStyle) {$ELSE} ThemeServices.ThemesAvailable {$IFEND};
   if Result then
     if not TSysStyleManager.HookVclControls then
       Result := not(IsVCLControl(Handle));
 end;
 
+{$IF CompilerVersion >= 23}
 procedure TSysStyleHook.UpdateColors;
 begin
   if (OverrideEraseBkgnd) or (OverridePaint) then
@@ -797,6 +833,7 @@ begin
   else
     FontColor := clBlack;
 end;
+{$IFEND}
 
 function TSysStyleHook.UseLeftScrollBar: Boolean;
 begin
@@ -864,8 +901,8 @@ begin
         end;
         with DrawRect do
           ExcludeClipRect(DC, Left + BorderSize.Left, Top + BorderSize.Top, Right - BorderSize.Right, Bottom - BorderSize.Bottom);
-        Details := StyleServices.GetElementDetails(teEditTextNormal);
-        StyleServices.DrawElement(DC, Details, DrawRect);
+        Details := {$IF CompilerVersion >= 23}StyleServices.{$ELSE}ThemeServices.{$IFEND}GetElementDetails(teEditTextNormal);
+        {$IF CompilerVersion >= 23}StyleServices.{$ELSE}ThemeServices.{$IFEND}DrawElement(DC, Details, DrawRect);
       finally
         ReleaseDC(Handle, DC);
       end;
@@ -901,10 +938,10 @@ begin
         begin
           // SendMessage(Child, WM_NCPAINT, 0, 0);
           FrameBrush := CreateSolidBrush(ColorToRGB(clBtnShadow));
-          FrameRect(DC, System.Types.Rect(0, 0, Width, Height), FrameBrush);
+          FrameRect(DC, {$IF CompilerVersion >= 23}System.{$IFEND}Types.Rect(0, 0, Width, Height), FrameBrush);
           DeleteObject(FrameBrush);
           FrameBrush := CreateSolidBrush(ColorToRGB(clBtnHighlight));
-          FrameRect(DC, System.Types.Rect(0, 0, Width + 1, Height + 1), FrameBrush);
+          FrameRect(DC, {$IF CompilerVersion >= 23}System.{$IFEND}Types.Rect(0, 0, Width + 1, Height + 1), FrameBrush);
           DeleteObject(FrameBrush);
         end;
       end;
@@ -941,9 +978,9 @@ begin
 
   if not StyleServicesEnabled then
     Exit;
-
+  {$IF CompilerVersion >= 23}
   UpdateColors;
-
+  {$IFEND}
   if FOverrideEraseBkgnd then
   begin
     if not FDoubleBuffered then

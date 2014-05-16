@@ -1,4 +1,6 @@
-// JCL_DEBUG_EXPERT_INSERTJDBG OFF
+// JCL_DEBUG_EXPERT_INSERTJDBG ON
+// JCL_DEBUG_EXPERT_DELETEMAPFILE ON
+// JCL_DEBUG_EXPERT_GENERATEJDBG ON
 package DelphiIDEColorizerXE;
 
 {$R *.res}
@@ -34,10 +36,11 @@ requires
   vclimg,
   Jcl;
 
+{$I ..\Common\Jedi.inc}
+
 contains
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
-  Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
   Colorizer.HookForms in 'Colorizer.HookForms.pas',
   Colorizer.Hooks in 'Colorizer.Hooks.pas',
@@ -50,10 +53,18 @@ contains
   uMisc in '..\Units\uMisc.pas',
   uRegistry in '..\Units\uRegistry.pas',
   uRttiHelper in 'uRttiHelper.pas',
-  uIDEExpertUtils in 'uIDEExpertUtils.pas',
+  {$IFDEF DELPHIXE2_UP}
+  Vcl.Styles.Ext in '..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas',
+  {$ENDIF}
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
   uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
-  uStackTrace in '..\Units\uStackTrace.pas';
+  uStackTrace in '..\Units\uStackTrace.pas',
+  Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
+  Colorizer.HookScrollBars in 'Colorizer.HookScrollBars.pas';
+//  Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
+//  Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
+//  Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas';
+
 
 end.

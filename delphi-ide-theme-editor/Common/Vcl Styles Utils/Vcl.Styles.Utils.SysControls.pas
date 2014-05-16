@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-{ .$DEFINE EventLog }
+{.$DEFINE EventLog}
 
 interface
 
@@ -495,7 +495,7 @@ begin
     $046A: Result := 'UDM_GETBUDDY';
     $102C: Result := 'LVM_GETITEMSTATE';
     $8000: Result := 'WM_APP';
-  else Result := 'Unknown(' + IntToStr(WM_Message) + ')';
+  else Result := 'Unknown(' + IntToHex(WM_Message, 4) + ')';
   end; { Case }
 end;
 

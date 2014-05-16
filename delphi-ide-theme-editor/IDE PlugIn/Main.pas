@@ -28,8 +28,11 @@
   * toolbar disabled buttons
   * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
 
- features
-   mimic header omn TListView, TVirtualStringTree effect from  TTBDrawingStyle(dsNormal)
+     sysmenus
+        popup arrow color
+     toolbutton
+        popup arrow color
+        icons disabled
 }
 
 // DONE
@@ -304,6 +307,7 @@ begin
         begin
           RegisterColorizerAddinOptions;
           {$IFDEF DELPHIXE2_UP}
+          //RegisterVClStylesFiles();
           if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
           begin
             RegisterVClStylesFiles();
@@ -363,11 +367,16 @@ begin
     TColorizerLocalSettings.Settings:=TSettings.Create;
     TColorizerLocalSettings.ImagesGutterChanged:=False;
     TColorizerLocalSettings.DockImages:= TPngImage.Create;
+
     TColorizerLocalSettings.HookedWindows:=TStringList.Create;
     TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
+    TColorizerLocalSettings.HookedWindowsText:=TColorizerLocalSettings.HookedWindows.Text;
+    TColorizerLocalSettings.HookedScrollBars:=TStringList.Create;
+    TColorizerLocalSettings.HookedScrollBars.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedScrollBars.dat');
+    TColorizerLocalSettings.HookedScrollBarsText:=TColorizerLocalSettings.HookedScrollBars.Text;
 
     TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
-    LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, TColorizerLocalSettings.Settings);
+    LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
     ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
     s:=IncludeTrailingPathDelimiter(ImagesPath)+TColorizerLocalSettings.Settings.DockImages+'.png';
     if FileExists(s) then
@@ -416,8 +425,8 @@ begin
   FreeAndNil(TColorizerLocalSettings.Settings);
   TColorizerLocalSettings.IDEData.Free;
   TColorizerLocalSettings.DockImages.Free;
-  TColorizerLocalSettings.HookedWindows.Free;
-  TColorizerLocalSettings.HookedWindows:=nil;
+  FreeAndNil(TColorizerLocalSettings.HookedWindows);
+  FreeAndNil(TColorizerLocalSettings.HookedScrollBars);
 
   FinalizeColorizer();
 

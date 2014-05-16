@@ -64,7 +64,6 @@
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_BplOutput>.\</DCC_BplOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <Icon_MainIcon>DelphiIDEColorizerXE_Icon.ico</Icon_MainIcon>
         <DCC_Namespace>Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -72,7 +71,6 @@
         <DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;Jcl;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
-        <Icon_MainIcon>DelphiIDEColorizerXE_Icon.ico</Icon_MainIcon>
         <DCC_UsePackage>vcl;vclimg;$(DCC_UsePackage)</DCC_UsePackage>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
@@ -125,15 +123,16 @@
         <DCCReference Include="..\Units\uMisc.pas"/>
         <DCCReference Include="..\Units\uRegistry.pas"/>
         <DCCReference Include="uRttiHelper.pas"/>
-        <DCCReference Include="uIDEExpertUtils.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
-        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
-        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
         <DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
         <DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
-        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas"/>
         <DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
         <DCCReference Include="..\Units\uStackTrace.pas"/>
+        <DCCReference Include="Colorizer.Wrappers.pas"/>
+        <DCCReference Include="Colorizer.HookScrollBars.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
