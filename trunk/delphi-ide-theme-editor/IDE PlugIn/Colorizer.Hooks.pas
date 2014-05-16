@@ -1117,7 +1117,7 @@ end;
 function CustomGetSysColor(nIndex: Integer): DWORD; stdcall;
 var
   sCaller : string;
-//  i  : Integer;
+  //i  : Integer;
 begin
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) and  (nIndex=COLOR_BTNFACE) then
    begin
@@ -1126,24 +1126,23 @@ begin
     //Vcl.Controls.TWinControl.WMPrintClient
     //
     //       ok  x2,x4,x6
+
+
+//      for i := 2 to 5 do
+//      begin
+//         sCaller := ProcByLevel(i);
+//         AddLog('CustomGetSysColor', Format('%d nIndex %d %s',[i, nIndex, sCaller]));
+//      end;
+//      AddLog('CustomGetSysColor', Format('%s',['---------------']));
+
+
      sCaller := ProcByLevel(2);
      if SameText(sCaller, '') then
-     begin
-       Result:=TColorizerLocalSettings.ColorMap.Color;
-       exit;
-     end;
-
-//    for i := 2 to 30 do
-//    begin
-//       sCaller := ProcByLevel(i);
-//       TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomGetSysColor.txt', Format('%d %s %s',[i, sCaller, SLineBreak]));
-//    end;
-//       TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomGetSysColor.txt', Format('%s %s',['---------------', SLineBreak]));
-
+       Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
    end;
 
 
-   Result:= Trampoline_GetSysColor(nIndex);
+   Exit(Trampoline_GetSysColor(nIndex));
 end;
 
 

@@ -1,9 +1,10 @@
-//**************************************************************************************************
+// ***************************************************************************************************
 //
-// Unit uMisc
-// unit uMisc  for the Delphi IDE Theme Editor
+// Unit Vcl.Styles.Utils.FlatControls
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
 //
-// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License")
 // you may not use this file except in compliance with the License. You may obtain a copy of the
 // License at http://www.mozilla.org/MPL/
 //
@@ -11,74 +12,158 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is uMisc.pas.
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
-unit uMisc;
+// **************************************************************************************************
+unit Vcl.Styles.Utils.FlatControls;
+{.$DEFINE EventLog}
 
 interface
-{$I ..\Common\Jedi.inc}
 
 uses
- Windows,
- Graphics,
- ImgList;
+  Windows,
+  Messages,
+  Classes,
+  Controls,
+  Graphics,
+  {$IF CompilerVersion >= 23}
+  Vcl.Styles,
+  {$IFEND}
+  Themes,
+  Types,
+  SysUtils,
+  Vcl.Styles.Utils.FlatStyleHook,
+  Generics.Collections;
 
+type
+  PChildControlInfo = ^TChildControlInfo;
 
-procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
-procedure ExtractIconFile(Icon: TIcon; const Filename: string;IconType : Cardinal);
-function  GetFileVersion(const FileName: string): string;
-function  IsAppRunning(const FileName: string): boolean;
-function  GetLocalAppDataFolder: string;
-function  GetAppDataFolder: string;
-function  GetSpecialFolderLocation(nFolder: Integer): string;
-function  GetTempDirectory: string;
-procedure MsgBox(const Msg: string);
-function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
-procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var Bitmap : TBitmap);
-function  GetSpecialFolder(const CSIDL: integer) : string;
-function  IsUACEnabled: Boolean;
-procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
-function  CurrentUserIsAdmin: Boolean;
-function  RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=False) : Boolean;
-function  MakeValidTagName(const s: string): string;
-function  GetModuleLocation : string;
-function  WM_To_String(const WM_Message: Integer): string;
+  TChildControlInfo = record
+    Parent: HWND;
+    ParentStyle: NativeInt;
+    StyleHookClass: TSysStyleHookClass;
+  end;
+
+  PControlInfo = ^TControlInfo;
+
+  TControlInfo = record
+    Handle: HWND;
+    Parent: HWND;
+    Style: NativeInt;
+    ParentStyle: NativeInt;
+    ExStyle: NativeInt;
+    ParentExStyle: NativeInt;
+    ClassName: PChar;
+    ParentClassName: PChar;
+  end;
+
+type
+  TSysHookAction = (cAdded, cRemoved);
+  TBeforeHookingControl = function(Info: PControlInfo): Boolean;
+  TSysHookNotification = procedure(Action: TSysHookAction; Info: PControlInfo);
+
+  TSysStyleManager = class(TComponent)
+  private
+  class var
+    FEnabled: Boolean;
+    FHook: HHook;
+    FBeforeHookingControlProc: TBeforeHookingControl;
+    FSysHookNotificationProc: TSysHookNotification;
+    FRegSysStylesList: TObjectDictionary<String, TSysStyleHookClass>;
+    FSysStyleHookList: TObjectDictionary<HWND, TSysStyleHook>;
+    FChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo>;
+    FHookVclControls: Boolean;
+    FUseStyleColorsChildControls: Boolean;
+  protected
+    /// <summary>
+    /// Install the Hook
+    /// </summary>
+    class procedure InstallHook;
+    /// <summary>
+    /// Remove the Hook
+    /// </summary>
+    class procedure RemoveHook;
+    /// <summary>
+    /// Hook Callback
+    /// </summary>
+    class function HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT; stdcall; static;
+  public
+    /// <summary>
+    /// Register a Sys Style Hook for an specified class.
+    /// </summary>
+    class procedure RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+    /// <summary>
+    /// UnRegister a Sys Style Hook for an specified class.
+    /// </summary>
+    class procedure UnRegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+    class constructor Create;
+    class destructor Destroy;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    /// <summary>
+    /// Event to preventvor allow hook a control.
+    /// </summary>
+    class Property OnBeforeHookingControl: TBeforeHookingControl read FBeforeHookingControlProc write FBeforeHookingControlProc;
+    /// <summary>
+    /// Notify when a hook foir control is added or removed
+    /// </summary>
+    class Property OnHookNotification: TSysHookNotification read FSysHookNotificationProc write FSysHookNotificationProc;
+    /// <summary>
+    /// Enable or disable the style of the controls
+    /// </summary>
+    class property Enabled: Boolean read FEnabled write FEnabled;
+    /// <summary>
+    /// Allow set the current VCL Style font and background color in  child
+    /// controls.
+    /// </summary>
+    class property UseStyleColorsChildControls: Boolean read FUseStyleColorsChildControls write FUseStyleColorsChildControls;
+    /// <summary>
+    /// Allow disable or enable the hook of VCL Controls
+    /// </summary>
+    class property HookVclControls: Boolean read FHookVclControls write FHookVclControls;
+    /// <summary>
+    /// Collection of Styled (Hooked) Controls
+    /// </summary>
+    class property SysStyleHookList: TObjectDictionary<HWND, TSysStyleHook> read FSysStyleHookList;
+    /// <summary>
+    /// Collection of Styled Child Controls
+    /// </summary>
+    class property ChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo> read FChildRegSysStylesList;
+  end;
+
+function GetWindowClassName(Window: HWND): String;
+function RectVCenter(var R: TRect; const Bounds: TRect): TRect;
+procedure MoveWindowOrg(DC: HDC; const DX, DY: Integer);
+{$IFDEF EventLog}
+procedure AddToLog(const Msg: TMessage); overload;
+procedure AddToLog(const S: string; const Value: Integer); overload;
+procedure AddToLog(const Msg: string); overload;
+function WM_To_String(const WM_Message: Integer): string;
+{$ENDIF}
 
 implementation
 
-uses
-  Forms,
-  ActiveX,
-  ShlObj,
-  PsAPI,
-  tlhelp32,
-  ComObj,
-  CommCtrl,
-  StrUtils,
-  ShellAPI,
-  Classes,
-  Dialogs,
- {$IFDEF DELPHIXE2_UP}
-  System.UITypes,
- {$ENDIF}
-  SHFolder,
-  Registry,
-  SysUtils;
+{$IFDEF EventLog}
 
-Const
- SECURITY_NT_AUTHORITY: TSIDIdentifierAuthority = (Value: (0, 0, 0, 0, 0, 5));
- SECURITY_BUILTIN_DOMAIN_RID = $00000020;
- DOMAIN_ALIAS_RID_ADMINS     = $00000220;
- DOMAIN_ALIAS_RID_USERS      = $00000221;
- DOMAIN_ALIAS_RID_GUESTS     = $00000222;
- DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
+{ Useful functions when debugging }
+procedure AddToLog(const Msg: TMessage);
+begin
+  with Msg do
+    OutputDebugString(PChar('Msg = ' + WM_To_String(Msg) + ' wParam = ' + IntToStr(wParam) + ' LParam = ' + IntToStr(lParam)));
+end;
 
-function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+procedure AddToLog(const S: string; const Value: Integer);
+begin
+  OutputDebugString(PChar((S) + ' = ' + IntToStr(Value)));
+end;
+
+procedure AddToLog(const Msg: string);
+begin
+  OutputDebugString(PChar(Msg));
+end;
 
 function WM_To_String(const WM_Message: Integer): string;
 begin
@@ -416,300 +501,278 @@ begin
   end; { Case }
 end;
 
+{$ENDIF}
 
-function  GetModuleLocation : string;
-begin
-  SetLength(Result, MAX_PATH);
-  GetModuleFileName(HInstance, PChar(Result), MAX_PATH);
-  Result:=PChar(Result);
-end;
-
-function MakeValidTagName(const s: string): string;
+function GetWindowClassName(Window: HWND): String;
 var
-  c: Char;
-  i: Integer;
+  sClassName: PChar;
 begin
-  SetLength(Result, Length(s));
-  i:=0;
-  for c in s do
-  begin
-   Inc(i);
-    if CharInSet(c,['A'..'Z', 'a'..'z', '0'..'9']) then
-      Result[i] := c
-    else
-      Result[i] := '_';
-  end;
-end;
-
-
-function IsUACEnabled: Boolean;
-var
-  LRegistry: TRegistry;
-begin
-  Result := False;
-  if CheckWin32Version(6, 0) then
-  begin
-    LRegistry := TRegistry.Create;
-    try
-      LRegistry.RootKey := HKEY_LOCAL_MACHINE;
-      if LRegistry.OpenKeyReadOnly('SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System') then
-        Exit(LRegistry.ValueExists('EnableLUA') and LRegistry.ReadBool('EnableLUA'));
-    finally
-      LRegistry.Free;
-    end;
-  end;
-end;
-
-
-function  UserInGroup(Group :DWORD) : Boolean;
- var
-  pIdentifierAuthority :TSIDIdentifierAuthority;
-  pSid : Windows.PSID;
-  IsMember    : BOOL;
- begin
-  pIdentifierAuthority := SECURITY_NT_AUTHORITY;
-  Result := AllocateAndInitializeSid(pIdentifierAuthority,2, SECURITY_BUILTIN_DOMAIN_RID, Group, 0, 0, 0, 0, 0, 0, pSid);
+  GetMem(sClassName, 256);
   try
-    if Result then
-      if not CheckTokenMembership(0, pSid, IsMember) then //passing 0 means which the function will be use the token of the calling thread.
-         Result:= False
-      else
-         Result:=IsMember;
+    GetClassName(Window, sClassName, 256);
+    Result := String(sClassName);
   finally
-     FreeSid(pSid);
+    FreeMem(sClassName, 256);
   end;
- end;
-
-function  CurrentUserIsAdmin: Boolean;
-begin
- Result:=UserInGroup(DOMAIN_ALIAS_RID_ADMINS);
 end;
 
-procedure RunAsAdmin(const FileName, Params: string; hWnd: HWND = 0);
-var
-  sei: TShellExecuteInfo;
+function RectVCenter(var R: TRect; const Bounds: TRect): TRect;
 begin
-  ZeroMemory(@sei, SizeOf(sei));
-  sei.cbSize := SizeOf(sei);
-  sei.Wnd := hWnd;
-  sei.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI;
-  sei.lpVerb := 'runas';
-  sei.lpFile := PChar(FileName);
-  sei.lpParameters := PChar(Params);
-  sei.nShow := SW_SHOWNORMAL;
-  if not ShellExecuteEx(@sei) then
-    RaiseLastOSError;
+  OffsetRect(R, -R.Left, -R.Top);
+  {$IF CompilerVersion >= 23}
+  OffsetRect(R, 0, (Bounds.Height - R.Height) div 2);
+  {$ELSE}
+  OffsetRect(R, 0, ((Bounds.Bottom-Bounds.Top) - (R.Bottom- R.Top)) div 2);
+  {$IFEND}
+  OffsetRect(R, Bounds.Left, Bounds.Top);
+  Result := R;
 end;
 
-function RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=False):Boolean;
+procedure MoveWindowOrg(DC: HDC; const DX, DY: Integer);
 var
-  sei: TShellExecuteInfo;
-  lpExitCode: DWORD;
+  P: TPoint;
 begin
-  Result:=False;
-  FillChar(sei, SizeOf(sei), 0);
-  sei.cbSize := SizeOf(sei);
-  sei.Wnd := hWnd;
-  sei.fMask := SEE_MASK_FLAG_NO_UI or SEE_MASK_NOCLOSEPROCESS;
-  if RunAs then
-    sei.lpVerb := 'runas';
-  sei.lpFile := PChar(FileName);
-  sei.lpParameters := PChar(Params);
-  sei.nShow := SW_SHOWNORMAL;
+  GetWindowOrgEx(DC, P);
+  SetWindowOrgEx(DC, P.X - DX, P.Y - DY, nil);
+end;
 
-  if not ShellExecuteEx(@sei) then
-    RaiseLastOSError;
-
-  if sei.hProcess <> 0 then
+function FindWinFromRoot(Root: HWND; ClassName: PChar): HWND;
+var
+  Next, Child: HWND;
+  S: String;
+begin
+  Result := 0;
+  Next := GetWindow(Root, GW_CHILD or GW_HWNDFIRST);
+  while (Next > 0) do
   begin
-    while WaitForSingleObject(sei.hProcess, 50) = WAIT_TIMEOUT do
-      Application.ProcessMessages;
-    GetExitCodeProcess(sei.hProcess, lpExitCode);
-    Result:=lpExitCode=0;
-    CloseHandle(sei.hProcess);
+    S := GetWindowClassName(Next);
+    if S = String(ClassName) then
+      Exit(Next);
+    Next := GetWindow(Next, GW_HWNDNEXT);
+    Child := GetWindow(Next, GW_CHILD or GW_HWNDFIRST);
+    if Child > 0 then
+      Result := FindWinFromRoot(Next, ClassName);
+    if Result > 0 then
+      Exit;
   end;
 end;
 
-function GetSpecialFolder(const CSIDL: integer) : string;
+{ -------------------------------------------------------------------------------------- }
+{ TSysStyleManager }
+
+function BeforeHookingControl(Info: PControlInfo): Boolean;
 var
-  lpszPath : PWideChar;
+  LInfo: TControlInfo;
+  Root, C: HWND;
 begin
-  lpszPath := StrAlloc(MAX_PATH);
-  try
-     ZeroMemory(lpszPath, MAX_PATH);
-    if SHGetSpecialFolderPath(0, lpszPath, CSIDL, False)  then
-      Result := lpszPath
-    else
-      Result := '';
-  finally
-    StrDispose(lpszPath);
+  {
+    Return true to allow control hooking !
+    Return false to prevent control hooking !
+  }
+  { NB: The ClassName is always in lowercase . }
+  LInfo := Info^;
+  Result := True;
+  Root := GetAncestor(LInfo.Parent, GA_ROOT);
+  if FindWinFromRoot(Root, 'DirectUIHWND') > 0 then
+  begin
+    Result := False;
+    Exit;
   end;
-end;
 
-function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
-  FontType: integer; Data: Pointer): integer; stdcall;
-var
-  List : TStrings;
-begin
-  //  if ((FontType and TrueType_FontType) <> 0) and  ((LogFont.lfPitchAndFamily and VARIABLE_PITCH) = 0) then
-   List := TStrings(Data);
-  if ((LogFont.lfPitchAndFamily and FIXED_PITCH) <> 0) then
-    if not StartsText('@', LogFont.lfFaceName) and
-      (List.IndexOf(LogFont.lfFaceName) < 0) then
-      List.Add(LogFont.lfFaceName);
-
-  Result := 1;
-end;
-
-procedure MsgBox(const Msg: string);
-begin
-  MessageDlg(Msg, mtInformation, [mbOK], 0);
-end;
-
-function GetTempDirectory: string;
-var
-  lpBuffer: array[0..MAX_PATH] of Char;
-begin
-  GetTempPath(MAX_PATH, @lpBuffer);
-  Result := StrPas(lpBuffer);
-end;
-
-function  GetSpecialFolderLocation(nFolder: Integer): string;
-var
-  ppMalloc: IMalloc;
-  ppidl:    PItemIdList;
-begin
-  ppidl := nil;
-  try
-    if SHGetMalloc(ppMalloc) = S_OK then
+  if SameText(LInfo.ClassName, 'ToolBarWindow32') then
+  begin
+    if Root > 0 then
     begin
-      SHGetSpecialFolderLocation(0, nFolder, ppidl);
-      SetLength(Result, MAX_PATH);
-      if not SHGetPathFromIDList(ppidl, PChar(Result)) then
-        RaiseLastOSError;
-      SetLength(Result, lStrLen(PChar(Result)));
+      C := FindWinFromRoot(Root, 'ReBarWindow32');
+      Result := not(C > 0);
     end;
-  finally
-    if ppidl <> nil then
-      ppMalloc.Free(ppidl);
   end;
 end;
 
-function GetLocalAppDataFolder: string;
+procedure HookNotification(Action: TSysHookAction; Info: PControlInfo);
 begin
-  Result:=GetSpecialFolderLocation(CSIDL_LOCAL_APPDATA);
+
 end;
 
-function GetAppDataFolder: string;
+class constructor TSysStyleManager.Create;
 begin
-  Result:=GetSpecialFolderLocation(CSIDL_APPDATA);
+  FBeforeHookingControlProc := @BeforeHookingControl;
+  FSysHookNotificationProc := @HookNotification;
+  FUseStyleColorsChildControls := True;
+  FEnabled := True;
+  FHookVclControls := False;
+  FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
+  FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
+  FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
+  InstallHook;
 end;
 
-function ProcessFileName(dwProcessId: DWORD): string;
+class destructor TSysStyleManager.Destroy;
+begin
+  RemoveHook;
+  FRegSysStylesList.Free;
+  FSysStyleHookList.Free; // remove the childs too because doOwnsValues
+  FChildRegSysStylesList.Free;
+  inherited;
+end;
+
+constructor TSysStyleManager.Create(AOwner: TComponent);
+begin
+  inherited;
+end;
+
+destructor TSysStyleManager.Destroy;
+begin
+
+end;
+
+class function TSysStyleManager.HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
 var
-  hModule: Cardinal;
-begin
-  Result := '';
-  hModule := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, dwProcessId);
-  if hModule <> 0 then
-    try
-      SetLength(Result, MAX_PATH);
-      if GetModuleFileNameEx(hModule, 0, PChar(Result), MAX_PATH) > 0 then
-        SetLength(Result, StrLen(PChar(Result)))
-      else
-        Result := '';
-    finally
-      CloseHandle(hModule);
-    end;
-end;
+  CBTSturct: TCBTCreateWnd;
+  sClassName, Tmp: string;
+  Parent: HWND;
+  Style, ParentStyle, ExStyle, ParentExStyle: NativeInt;
+  Info: TControlInfo;
 
-function IsAppRunning(const FileName: string): boolean;
-var
-  hSnapshot      : Cardinal;
-  EntryParentProc: TProcessEntry32;
-begin
-  Result := False;
-  hSnapshot := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if hSnapshot = INVALID_HANDLE_VALUE then
-    exit;
-  try
-    EntryParentProc.dwSize := SizeOf(EntryParentProc);
-    if Process32First(hSnapshot, EntryParentProc) then
-      repeat
-        if CompareText(ExtractFileName(FileName), EntryParentProc.szExeFile) = 0 then
-          if CompareText(ProcessFileName(EntryParentProc.th32ProcessID),  FileName) = 0 then
-          begin
-            Result := True;
-            break;
-          end;
-      until not Process32Next(hSnapshot, EntryParentProc);
-  finally
-    CloseHandle(hSnapshot);
-  end;
-end;
-
-
-
-function GetFileVersion(const FileName: string): string;
-var
-  FSO  : OleVariant;
-begin
-  FSO    := CreateOleObject('Scripting.FileSystemObject');
-  Result := FSO.GetFileVersion(FileName);
-end;
-
-procedure ExtractIconFile(Icon: TIcon; const Filename: string;IconType : Cardinal);
-var
-  FileInfo: TShFileInfo;
-begin
-  if FileExists(Filename) then
+  procedure AddChildControl(Handle: HWND);
+  var
+    Info: TChildControlInfo;
   begin
-    FillChar(FileInfo, SizeOf(FileInfo), 0);
-    if SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
-      SHGFI_ICON or IconType)=0 then RaiseLastOSError;
-    if FileInfo.hIcon <> 0 then
-      Icon.Handle:=FileInfo.hIcon;
+    { The child control will be hooked inside it's parent control. }
+    ZeroMemory(@Info, sizeof(TChildControlInfo));
+    Info.Parent := Parent;
+    Info.ParentStyle := ParentStyle;
+    Info.StyleHookClass := FRegSysStylesList[sClassName];
+    if FChildRegSysStylesList.ContainsKey(Handle) then
+      FChildRegSysStylesList.Remove(Handle);
+    FChildRegSysStylesList.Add(Handle, Info);
+    if Assigned(FSysHookNotificationProc) then
+      FSysHookNotificationProc(cAdded, @Info);
   end;
-end;
 
-procedure ExtractIconFileToImageList(ImageList: TCustomImageList; const Filename: string);
-var
-  FileInfo: TShFileInfo;
-begin
-  if FileExists(Filename) then
+  procedure AddControl(Handle: HWND);
   begin
-    FillChar(FileInfo, SizeOf(FileInfo), 0);
-    SHGetFileInfo(PChar(Filename), 0, FileInfo, SizeOf(FileInfo),
-      SHGFI_ICON or SHGFI_SMALLICON);
-    if FileInfo.hIcon <> 0 then
+    { Hook the control directly ! }
+    if FSysStyleHookList.ContainsKey(Handle) then
+      FSysStyleHookList.Remove(Handle);
+    FSysStyleHookList.Add(Handle, FRegSysStylesList[sClassName].Create(Handle));
+    SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
+    if Assigned(FSysHookNotificationProc) then
+      FSysHookNotificationProc(cAdded, @Info);
+  end;
+
+begin
+  Result := CallNextHookEx(FHook, nCode, wParam, lParam);
+  if not FEnabled then
+    Exit;
+  if (nCode = HCBT_CREATEWND) {$IF CompilerVersion >= 23} and (StyleServices.IsSystemStyle) {$IFEND} then
+  begin
+
+    CBTSturct := PCBTCreateWnd(lParam)^;
+    sClassName := GetWindowClassName(wParam);
+    sClassName := LowerCase(sClassName);
+    Parent := CBTSturct.lpcs.hwndParent;
+    Style := CBTSturct.lpcs.Style;
+    ExStyle := CBTSturct.lpcs.dwExStyle;
+    ParentExStyle := 0;
+    ParentStyle := 0;
+
+    if Parent > 0 then
     begin
-      ImageList_AddIcon(ImageList.Handle, FileInfo.hIcon);
-      DestroyIcon(FileInfo.hIcon);
+      ParentStyle := GetWindowLongPtr(Parent, GWL_STYLE);
+      ParentExStyle := GetWindowLongPtr(Parent, GWL_EXSTYLE);
+    end;
+
+    if FRegSysStylesList.ContainsKey(sClassName) then
+    begin
+      Info.Handle := wParam;
+      Info.Parent := Parent;
+      Info.Style := Style;
+      Info.ParentStyle := ParentStyle;
+      Info.ExStyle := ExStyle;
+      Info.ParentExStyle := ParentExStyle;
+      Tmp := sClassName;
+      Info.ClassName := PChar(Tmp);
+      Tmp := LowerCase(GetWindowClassName(Parent));
+      Info.ParentClassName := PChar(Tmp);
+
+      if not HookVclControls then
+        if IsVCLControl(wParam) then
+          Exit;
+
+      if Assigned(FBeforeHookingControlProc) then
+        if not FBeforeHookingControlProc(@Info) then
+          Exit;
+
+      if (Style and DS_CONTROL = DS_CONTROL) then
+      begin
+        { TabSheet ! }
+        AddControl(wParam);
+        PostMessage(wParam, CM_INITCHILDS, 0, 0);
+      end
+      else if (Style and WS_POPUP = WS_POPUP) then
+      begin
+        { Parent Control ! }
+        AddControl(wParam);
+      end
+      else if (Style and WS_CHILD = WS_CHILD) then
+      begin
+        { Child Control ! }
+        if FSysStyleHookList.ContainsKey(Parent) then
+        begin
+          { Parent is already hooked . }
+          if IsVCLControl(Parent) then
+            { Parent is a VCL control . }
+            AddControl(wParam)
+          else
+            AddChildControl(wParam)
+        end
+        else
+          { Parent not registered (not hooked). }
+          AddControl(wParam);
+      end
+      else
+        { Not (WS_CHILD or WS_POPUP) !! }
+        AddControl(wParam);
+    end;
+  end;
+
+  if nCode = HCBT_DESTROYWND then
+  begin
+    // OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
+    if FSysStyleHookList.ContainsKey(wParam) then
+    begin
+      ZeroMemory(@Info, sizeof(TControlInfo));
+      Info.Handle := wParam;
+      if Assigned(FSysHookNotificationProc) then
+        OnHookNotification(cRemoved, @Info);
+      // FSysStyleHookList.Remove(wParam); -> removed in WM_DESTROY
     end;
   end;
 end;
 
-
-procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var Bitmap : TBitmap);
-Var
- i : integer;
- w : integer;
+class procedure TSysStyleManager.InstallHook;
 begin
-  Bitmap.PixelFormat:=pf24bit;
-  Bitmap.Width:=Width;
-  Bitmap.Height:=Height;
-  Bitmap.Canvas.Brush.Color := clBlack;
-  Bitmap.Canvas.FillRect(Rect(0,0, Width, Height));
-
-
-  w :=(Width-2) div (High(Colors)+1);
-  for i:=0 to High(Colors) do
-  begin
-   Bitmap.Canvas.Brush.Color := Colors[i];
-   //bmp.Canvas.FillRect(Rect((w*i),0, w*(i+1), Height));
-   Bitmap.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
-  end;
+  FHook := SetWindowsHookEx(WH_CBT, @HookCBProc, 0, GetCurrentThreadId);
 end;
 
+class procedure TSysStyleManager.RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+begin
+  if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
+    FRegSysStylesList.Remove(LowerCase(SysControlClass));
+  FRegSysStylesList.Add(LowerCase(SysControlClass), SysStyleHookClass);
+end;
+
+class procedure TSysStyleManager.RemoveHook;
+begin
+  if FHook <> 0 then
+    UnhookWindowsHookEx(FHook);
+end;
+
+class procedure TSysStyleManager.UnRegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+begin
+  if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
+    FRegSysStylesList.Remove(LowerCase(SysControlClass));
+end;
 
 end.

@@ -28,17 +28,11 @@ interface
 implementation
 
 uses
- {$IF CompilerVersion >= 23}
- Vcl.Styles.Ext,
- {$IFEND}
  Classes,
  Forms,
  Windows,
  SysUtils,
- Dialogs,
- IOUtils,
  Controls,
- ColorXPStyleActnCtrls,
  Colorizer.Utils;
 
 var
@@ -66,12 +60,11 @@ begin
           if RetVal>0 then
           begin
             Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-            //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\HCBT_SETFOCUS.txt', Format('%s %s',[ClassNameBuffer, SLineBreak]));
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
             begin
-              LWinControl:=FindControl(LHWND);   //use FondControl because some formas are not registered in Screen.Forms
+              LWinControl:=FindControl(LHWND);   //use FindControl because some forms are not registered in the Screen.Forms list
               if LWinControl<>nil then
-                Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, LWinControl);
+                Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, LWinControl);
             end;
           end;
        end;
@@ -91,7 +84,7 @@ begin
             for i := 0 to Screen.FormCount-1 do
              if (Screen.Forms[i].Handle=LHWND) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
-                 Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, ColorXPStyle, Screen.Forms[i]);
+                 Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Screen.Forms[i]);
                  AddLog('HCBT_ACTIVATE '+ClassNameBuffer);
                  Break;
                end;
@@ -105,7 +98,7 @@ end;
 Procedure InstallFormsHook();
 begin
   if (hhk = 0) then
-   hhk := SetWindowsHookEx(WH_CBT, @CBT_FUNC, hInstance, 0);
+   hhk := SetWindowsHookEx(WH_CBT, @CBT_FUNC, hInstance, GetCurrentThreadId());
 end;
 
 Procedure RemoveFormsHook();
