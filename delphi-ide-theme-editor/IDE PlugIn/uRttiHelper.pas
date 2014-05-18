@@ -33,20 +33,25 @@ uses
   Classes,
   SysUtils;
 
-
-{$IF CompilerVersion > 20}
-function   DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
-procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
-function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
-procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
-function   GetRttiMemberValue(const Obj:  TObject;const MemberName:String; IsProp : Boolean) : TValue;
-function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
-procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
-procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
-
-{$ELSE}
-procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
-{$IFEND}
+ type
+  TRttiUtils = class
+   public
+      {$IF CompilerVersion > 20}
+      class function DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+      class procedure DumpTypeToFile(const QualifiedName, FileName:string);
+      class procedure DumpAllTypes(const FileName:string);
+      class procedure DumpObject(AObject: TObject; const FileName: string);
+      class procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
+      class function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+      class procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
+      class function   GetRttiMemberValue(const Obj:  TObject;const MemberName:String; IsProp : Boolean) : TValue;
+      class function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
+      class procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
+      class procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
+      {$ELSE}
+      class procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
+      {$IFEND}
+  end;
 
 
 
@@ -59,7 +64,51 @@ var
 
 
 {$IF CompilerVersion > 20}
-function  DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+
+class procedure TRttiUtils.DumpTypeToFile(const QualifiedName, FileName:string);
+var
+  LTypeDump : TStrings;
+begin
+  LTypeDump := TStringList.Create;
+  try
+    LTypeDump.Text:=DumpTypeDefinition(TRttiContext.Create.FindType(QualifiedName).Handle);
+    LTypeDump.SaveToFile(FileName);
+  finally
+   LTypeDump.Free;
+  end;
+end;
+
+class procedure TRttiUtils.DumpAllTypes(const FileName:string);
+var
+  LTypes : TStrings;
+  LRttiType  : TRttiType;
+begin
+  LTypes := TStringList.Create;
+  try
+    for LRttiType in TRttiContext.Create.GetTypes do
+    if LRttiType.IsInstance then
+     LTypes.Add(LRttiType.AsInstance.DeclaringUnitName +' '+LRttiType.Name);
+   LTypes.SaveToFile(FileName);
+  finally
+   LTypes.Free;
+  end;
+end;
+
+class procedure TRttiUtils.DumpObject(AObject: TObject; const FileName: string);
+var
+ LDumpInfo : TStrings;
+begin
+   LDumpInfo := TStringList.Create;
+  try
+   LDumpInfo.Text:=DumpTypeDefinition(AObject.ClassInfo);
+   LDumpInfo.SaveToFile(FileName);
+  finally
+   LDumpInfo.Free;
+  end;
+end;
+
+
+class function TRttiUtils.DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
 
   //add and format a field
   procedure AddField(List:TStrings;lField : TRttiField);
@@ -200,7 +249,7 @@ end;
 
 {$IF CompilerVersion > 20}
 
-procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
+class procedure TRttiUtils.SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
 var
   LProperty, RootProp    : TRttiProperty;
   LField       : TRttiField;
@@ -267,7 +316,7 @@ begin
   end;
 end;
 
-function  GetRttiMemberValue(const Obj:  TObject;const MemberName:String; IsProp : Boolean) : TValue;
+class function TRttiUtils.GetRttiMemberValue(const Obj:  TObject;const MemberName:String; IsProp : Boolean) : TValue;
 var
   LProperty, RootProp    : TRttiProperty;
   LField       : TRttiField;
@@ -333,27 +382,27 @@ begin
   end;
 end;
 
-procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
+class procedure TRttiUtils.SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
 begin
   SetRttiMemberValue(Obj, PropName, AValue, True);
 end;
 
-procedure  SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
+class procedure TRttiUtils.SetRttiFieldValue(const Obj:  TObject;const FieldName:String; AValue:TValue);
 begin
   SetRttiMemberValue(Obj, FieldName, AValue, False);
 end;
 
-function  GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
+class function TRttiUtils.GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
 begin
   Result:=GetRttiMemberValue(Obj, PropName, True);
 end;
 
-function   GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
+class function TRttiUtils.GetRttiFieldValue(const Obj:  TObject;const FieldName:String): TValue;
 begin
   Result:=GetRttiMemberValue(Obj, FieldName, False);
 end;
 
-procedure  ExecMethodRtti(const Obj:  TObject;const Method:String);
+class procedure TRttiUtils.ExecMethodRtti(const Obj:  TObject;const Method:String);
 var
   m : TRttiMethod;
 begin
@@ -363,7 +412,7 @@ begin
 end;
 
 {$ELSE}
-procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
+class procedure TRttiUtils.SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 var
   RttiProperty     : PPropInfo;
   LObject          : TObject;

@@ -39,10 +39,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label1: TLabel
           Left = 3
           Top = 46
@@ -230,14 +226,14 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           TabOrder = 1
           OnChange = cbThemeNameChange
         end
-        object Button3: TButton
-          Left = 354
-          Top = 128
+        object ButtonSaveTheme: TButton
+          Left = 273
+          Top = 62
           Width = 75
           Height = 25
           Caption = 'Save'
           TabOrder = 0
-          OnClick = Button3Click
+          OnClick = ButtonSaveThemeClick
         end
         object CbClrElement: TColorBox
           Left = 154
@@ -351,73 +347,19 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           TabOrder = 14
           OnGetColors = ColorListBox1GetColors
         end
-      end
-      object TabSheet2: TTabSheet
-        Caption = 'Addtional controls'
-        ImageIndex = 1
-        TabVisible = False
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
-        DesignSize = (
-          460
-          430)
-        object Label4: TLabel
-          Left = 3
-          Top = 3
-          Width = 29
-          Height = 13
-          Caption = 'Types'
-        end
-        object Label5: TLabel
-          Left = 267
-          Top = 3
-          Width = 49
-          Height = 13
-          Caption = 'Properties'
-        end
-        object ListViewTypes: TListView
-          Left = 3
-          Top = 23
-          Width = 250
-          Height = 404
-          Anchors = [akLeft, akTop, akBottom]
-          Columns = <
-            item
-              Caption = 'Component'
-              Width = 220
-            end>
-          ReadOnly = True
-          RowSelect = True
-          TabOrder = 1
-          ViewStyle = vsReport
-          OnChange = ListViewTypesChange
-        end
-        object ListViewProps: TListView
-          Left = 267
-          Top = 22
-          Width = 250
-          Height = 404
-          Anchors = [akLeft, akTop, akBottom]
-          Columns = <
-            item
-              Caption = 'Name'
-              Width = 200
-            end>
-          ReadOnly = True
-          RowSelect = True
-          TabOrder = 0
-          ViewStyle = vsReport
+        object ButtonDeleteTheme: TButton
+          Left = 354
+          Top = 62
+          Width = 75
+          Height = 25
+          Caption = 'Delete'
+          TabOrder = 15
+          OnClick = ButtonDeleteThemeClick
         end
       end
-      object TabSheet3: TTabSheet
+      object TabSheetDockOptions: TTabSheet
         Caption = 'Dock Windows'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label11: TLabel
           Left = 16
           Top = 40
@@ -588,10 +530,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 26
@@ -626,13 +564,9 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           TabOrder = 2
         end
       end
-      object TabSheet1: TTabSheet
+      object TabSheetHookedForms: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -674,6 +608,46 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           OnClick = ButtonRemoveFormClassClick
         end
       end
+      object TabSheetAbout: TTabSheet
+        Caption = 'About'
+        ImageIndex = 5
+        object MemoAbout: TMemo
+          Left = 3
+          Top = 3
+          Width = 454
+          Height = 374
+          ReadOnly = True
+          ScrollBars = ssBoth
+          TabOrder = 0
+        end
+        object ButtonReportIssues: TButton
+          Left = 3
+          Top = 392
+          Width = 100
+          Height = 25
+          Caption = 'Report Issues'
+          TabOrder = 1
+          OnClick = ButtonReportIssuesClick
+        end
+        object ButtonProjectPage: TButton
+          Left = 109
+          Top = 392
+          Width = 100
+          Height = 25
+          Caption = 'Project Page'
+          TabOrder = 2
+          OnClick = ButtonProjectPageClick
+        end
+        object ButtonCheckUpdates: TButton
+          Left = 215
+          Top = 392
+          Width = 100
+          Height = 25
+          Caption = 'Check for updates'
+          Enabled = False
+          TabOrder = 3
+        end
+      end
     end
     object Panel1: TPanel
       Left = 0
@@ -699,7 +673,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 344
     Top = 96
     Bitmap = {
-      494C010107000800E40210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800F80210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
@@ -974,12 +948,12 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     HighlightColor = clWhite
     BtnSelectedColor = clBtnFace
     UnusedColor = clWhite
-    Left = 313
-    Top = 21
+    Left = 393
+    Top = 173
   end
   object ColorDialog1: TColorDialog
-    Left = 380
-    Top = 96
+    Left = 356
+    Top = 200
   end
   object TwilightColorMap: TTwilightColorMap
     HighlightColor = clBlack
@@ -1001,8 +975,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     HighlightColor = clWhite
     BtnSelectedColor = clBtnFace
     UnusedColor = clWhite
-    Left = 329
-    Top = 5
+    Left = 321
+    Top = 189
   end
   object ImageListDock: TImageList
     ColorDepth = cd32Bit

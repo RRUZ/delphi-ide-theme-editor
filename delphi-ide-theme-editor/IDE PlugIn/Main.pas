@@ -22,21 +22,29 @@
 //TODO
 
 {
-  * popup menu tool bars (ex :recent files) -> create hook using colormap
-  * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline? ?
+  * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline?  hook tbitmap ?
   * Enable/Disable
   * toolbar disabled buttons
   * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
 
-     sysmenus
-        popup arrow color
      toolbutton
         popup arrow color
-        icons disabled
+  improve themes -> pro
+
+  hook tbitmap for closable buttons background because is a tbitmap   Windowfromdc
+  scroll fails on XE in preview of source highligter
+
+  hook comboxbox
+  TVirtualMethodInterceptor for hooks
+  TVirtualMethodInterceptorExt - > DDetours
 }
 
 // DONE
 {
+  * XE change active page of source editor  redraw TIDECategoryButtons
+  * DumpAllTypes and related to rtti helper
+  * rtti helper must be class
+  * popup menu tool bars (ex :recent files) -> create hook using colormap
   * TClosableTabScroller background done
   * TProjectManagerForm -> TVirtualStringTree font color
   * Event log background color done  - Via Delphi IDE
@@ -98,7 +106,15 @@ Const
   sMenuItemCaption        = 'Delphi IDE Colorizer';
   sMenuItemName           = 'DelphiIDEClrItem';
   sActionItemIdeColorizer = 'DelphiIDEClrAction';
-
+  sColorizerPluginDescription=
+  'Delphi IDE Colorizer'+sLineBreak+
+  'https://code.google.com/p/delphi-ide-theme-editor'+sLineBreak+
+  'Version %s'+sLineBreak+
+  'Copyright: 2011-2014 Rodrigo Ruz V.'+sLineBreak+
+  'http://theroadtodelphi.wordpress.com/'+sLineBreak+
+  'All rights reserved.'+sLineBreak+
+  ''+sLineBreak+
+  'This is a freeware, you can use it freely without any fee.';
 
 
 {$IFDEF DLLWIZARD}
@@ -151,21 +167,6 @@ uses
 
 
 type
-  TSourceEditorNotifier = class(TNotifierObject, IOTAEditorNotifier, IOTANotifier)
-  private
-    FNotifier: Integer;
-    FOTAEditor: IOTAEditor;
-  public
-    constructor Create(const Editor: IOTAEditor);
-    destructor Destroy; override;
-    procedure Modified;
-    procedure AfterSave;
-    procedure ViewNotification(const View: IOTAEditView; Operation: TOperation);
-    procedure ViewActivated(const View: IOTAEditView);
-    procedure Destroyed;
-    procedure RemoveNotifier;
-  end;
-
 
   TIDEWizard = class(TInterfacedObject, IOTAWizard, IOTANotifier)
   private
@@ -255,14 +256,6 @@ end;
 procedure RegisterPlugIn;
 const
   SColorizerPluginCaption    ='Delphi IDE Colorizer';
-  SColorizerPluginDescription=
-  'Delphi IDE Colorizer'+sLineBreak+
-  'http://theroadtodelphi.wordpress.com/'+sLineBreak+
-  'Version %s'+sLineBreak+
-  'Copyright: 2011-2014 Rodrigo Ruz V.'+sLineBreak+
-  'All rights reserved.'+sLineBreak+
-  ''+sLineBreak+
-  'This is a freeware, you can use it freely without any fee.';
 var
   LAboutBoxServices: IOTAAboutBoxServices;
   sVersion         : string;
@@ -357,7 +350,6 @@ begin
     ReportMemoryLeaksOnShutdown:=DebugHook<>0;
     {$WARN SYMBOL_PLATFORM ON}
     //SourceEditorNotifiers := TList.Create;
-
     TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
     FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
     TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
@@ -413,7 +405,6 @@ begin
   AddLog('TIDEWizard.Destroy 1');
   RemoveFormsHook();
   RemoveColorizerHooks();
-
   UnRegisterPlugIn;
   RemoveMenuItems;
   AddLog('TIDEWizard.Destroy 2');
@@ -539,10 +530,12 @@ begin
  end;
 end;
 
+
 procedure TIDEWizard.RemoveMenuItems;
 begin
   FreeAndNil(FDICConfMenuItem);
 end;
+
 
 //function GetActiveFormEditor: IOTAFormEditor;
 //var
@@ -563,52 +556,6 @@ end;
 //  end;
 //end;
 
-{ TEditorNotifier }
-
-procedure TSourceEditorNotifier.AfterSave;
-begin
-end;
-
-constructor TSourceEditorNotifier.Create(const Editor: IOTAEditor);
-begin
- inherited Create;
- FOTAEditor := Editor;
- FNotifier  := FOTAEditor.AddNotifier(Self as IOTAEditorNotifier);
-end;
-
-destructor TSourceEditorNotifier.Destroy;
-begin
-  RemoveNotifier;
-  inherited;
-end;
-
-procedure TSourceEditorNotifier.Destroyed;
-begin
-  RemoveNotifier;
-  inherited;
-end;
-
-procedure TSourceEditorNotifier.Modified;
-begin
-end;
-
-procedure TSourceEditorNotifier.RemoveNotifier;
-begin
-  if FNotifier<>InvalidIndex then
-  begin
-   FOTAEditor.RemoveNotifier(FNotifier);
-   FNotifier:=InvalidIndex;
-  end;
-end;
-
-procedure TSourceEditorNotifier.ViewActivated(const View: IOTAEditView);
-begin
-end;
-
-procedure TSourceEditorNotifier.ViewNotification(const View: IOTAEditView;
-  Operation: TOperation);
-begin
-end;
 
 end.
 

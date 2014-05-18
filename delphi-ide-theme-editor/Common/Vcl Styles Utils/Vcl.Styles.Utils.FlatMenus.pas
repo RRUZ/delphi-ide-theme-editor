@@ -138,9 +138,7 @@ type
     procedure DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState; const Style: TSysPopupItemStyle); Virtual;
     procedure PaintBackground(Canvas: TCanvas); override;
     procedure WndProc(var Message: TMessage); override;
-    {$IF CompilerVersion >= 23}
     procedure UpdateColors; override;
-    {$IFEND}
   public
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
@@ -345,11 +343,26 @@ begin
   end;
 end;
 
+
+{$IF CompilerVersion >= 23}
+
+{$ELSE}
+function RectCenter(var R: TRect; const Bounds: TRect): TRect;
+begin
+  OffsetRect(R, -R.Left, -R.Top);
+  OffsetRect(R, (RectWidth(Bounds) - RectWidth(R)) div 2, (RectHeight(Bounds) - RectHeight(R)) div 2);
+  OffsetRect(R, Bounds.Left, Bounds.Top);
+  Result := R;
+end;
+{$IFEND}
+
+
 procedure TSysPopupStyleHook.DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState; const Style: TSysPopupItemStyle);
+type
+  tmPopupType = (tmPopupItemNormal, tmPopupItemHot, tmPopupItemDisabled, tmPopupSeparator);
 var
-  Detail: TThemedMenu;
-  LDetails: TThemedElementDetails;
   LTextFormat: TTextFormat;
+  LPopupType : tmPopupType;
   DC: HDC;
   LSize: TSize;
   MI: TMenuItem;
@@ -443,22 +456,20 @@ begin
   SysItem := Items[Index]; // Do not destroy !!
   DC := Canvas.Handle;
   R := ItemRect;
-  Detail := tmPopupItemNormal;
+
+  LPopupType := tmPopupItemNormal;
   if isHot in State then
-    Detail := tmPopupItemHot;
+    LPopupType := tmPopupItemHot;
   if isDisabled in State then
-    Detail := tmPopupItemDisabled;
+    LPopupType := tmPopupItemDisabled;
   if Style = isSep then
   begin
-    Detail := tmPopupSeparator;
+    LPopupType := tmPopupSeparator;
     inc(R.Left, 25);
   end;
 
-  LDetails := StyleServices.GetElementDetails(Detail);
-
-  if (Detail <> tmPopupItemNormal) and (Detail <> tmPopupItemDisabled) then
+  if (LPopupType <> tmPopupItemNormal) and (LPopupType <> tmPopupItemDisabled) then
   begin
-     //StyleServices.DrawElement(DC, LDetails, R);
      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
      Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
      Canvas.Rectangle(R);
@@ -588,18 +599,21 @@ begin
 
   if (SysItem.Checked) and (DisplayCheckedGlyph) then
   begin
-    Detail := TThemedMenu(integer(tmPopupCheckNormal) + integer(SysItem.Disabled));
-    if SysItem.RadioCheck then
-      Detail := TThemedMenu(integer(tmPopupBulletNormal) + integer(SysItem.Disabled));
-    LDetails := StyleServices.GetElementDetails(Detail);
-    StyleServices.GetElementSize(DC, LDetails, esActual, LSize);
-    LImageRect := Rect(0, 0, LSize.Width, LSize.Height);
+//    Detail := TThemedMenu(integer(tmPopupCheckNormal) + integer(SysItem.Disabled));
+//    if SysItem.RadioCheck then
+//      Detail := TThemedMenu(integer(tmPopupBulletNormal) + integer(SysItem.Disabled));
+//    LDetails := StyleServices.GetElementDetails(Detail);
+//    StyleServices.GetElementSize(DC, LDetails, esActual, LSize);
+
+    LSize.cx:=2;
+    LSize.cy:=2;
+    LImageRect := Rect(0, 0, LSize.cx, LSize.cy);
     RectVCenter(LImageRect, ItemRect);
     if not RightToLeft then
       OffsetRect(LImageRect, 4, 0)
     else
     begin
-      LImageRect.Left := ItemRect.Right - LSize.Width - 4;
+      LImageRect.Left := ItemRect.Right - LSize.cx - 4;
       LImageRect.Right := ItemRect.Right;
     end;
     //StyleServices.DrawElement(DC, LDetails, LImageRect);
@@ -609,7 +623,7 @@ begin
     Canvas.Rectangle(Rect(ItemRect.Left, ItemRect.Top+1, ItemRect.Left+20, ItemRect.Bottom-1));
     LColor   := TColorizerLocalSettings.ColorMap.FontColor;
     Canvas.Pen.Color:=LColor;
-    DrawCheck(Canvas, Point(LImageRect.Left+2, LImageRect.Top + 8), 2, False);
+    DrawCheck(Canvas, Point(LImageRect.Left+2, LImageRect.Top), 2, False);
   end;
 
   { Draw Text }
@@ -679,7 +693,7 @@ begin
   try
     Bmp.SetSize(SysControl.Width, SysControl.Height);
     PaintBackground(Bmp.Canvas);
-    BitBlt(Canvas.Handle, ItemRect.Left, ItemRect.Top, ItemRect.Width, ItemRect.Height, Bmp.Canvas.Handle, ItemRect.Left, ItemRect.Top, SRCCOPY);
+    BitBlt(Canvas.Handle, ItemRect.Left, ItemRect.Top, (ItemRect.Right - ItemRect.Left), (ItemRect.Bottom - ItemRect.Top), Bmp.Canvas.Handle, ItemRect.Left, ItemRect.Top, SRCCOPY);
   finally
     Bmp.Free;
   end;

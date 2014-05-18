@@ -47,6 +47,7 @@ uses
   StrUtils,
   SysUtils,
   GraphUtil,
+  Dialogs,
   DDetours;
 
   var
@@ -61,6 +62,8 @@ uses
   TrampolineDrawThemeBackground       : function(HTHEME: HTHEME; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall = nil;
   TrampolineTWinControl_DefaultHandler: procedure (Self : TWinControl;var Message) = nil;
   TrampolineTWinControl_WMNCPaint     : procedure (Self : TWinControl;var Message: TWMNCPaint) = nil;
+  TrampolineBaseVirtualTreeOriginalWMNCPaint : procedure (Self : TCustomControl;DC: HDC) = nil;
+
 
 procedure CustomDefaultHandler(Self : TWinControl;var Message);
 begin
@@ -71,7 +74,9 @@ end;
 
 type
   TWinControlClass = class(TWinControl);
-procedure CustomWMNCPaint(Self : TWinControlClass;var Message: TWMNCPaint);
+
+
+procedure DrawNCBorder(Self : TWinControlClass);
 var
   EmptyRect, DrawRect: TRect;
   DC: HDC;
@@ -79,18 +84,17 @@ var
   AStyle, ExStyle: Integer;
   LCanvas : TCanvas;
 begin
-  TrampolineTWinControl_WMNCPaint(Self, Message);
 
-    AddLog('CustomWMNCPaint (1)', Self.ClassName);
+    //AddLog('CustomWMNCPaint (1)', Self.ClassName);
   if Assigned(TColorizerLocalSettings.ColorMap) and
-     (Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0)) or
+     //(Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0)) or
      (Assigned(TColorizerLocalSettings.HookedScrollBars) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(Self.ClassName)>=0)) then
   begin
-    AddLog('CustomWMNCPaint', Self.ClassName);
+    //AddLog('CustomWMNCPaint', Self.ClassName);
     ExStyle := GetWindowLong(Self.Handle, GWL_EXSTYLE);
 
-    if (ExStyle and WS_EX_CLIENTEDGE) <> 0 then
-    AddLog('CustomWMNCPaint', 'WS_EX_CLIENTEDGE');
+//    if (ExStyle and WS_EX_CLIENTEDGE) <> 0 then
+//    AddLog('CustomWMNCPaint', 'WS_EX_CLIENTEDGE');
 
     begin
       GetWindowRect(Self.Handle, DrawRect);
@@ -98,45 +102,44 @@ begin
       DC := GetWindowDC(Self.Handle);
       try
         EmptyRect := DrawRect;
-        //if EraseLRCorner then
-        //begin
-          AStyle := GetWindowLong(Self.Handle, GWL_STYLE);
-          if ((AStyle and WS_HSCROLL) <> 0) and ((AStyle and WS_VSCROLL) <> 0) then
-          begin
-            AddLog('CustomWMNCPaint EmptyRect', Self.ClassName);
-            W := GetSystemMetrics(SM_CXVSCROLL);
-            H := GetSystemMetrics(SM_CYHSCROLL);
-            //InflateRect(EmptyRect, -2, -2);
-            with EmptyRect do
-              if Self.UseRightToLeftScrollBar then
-                EmptyRect := Rect(Left, Bottom - H, Left + W, Bottom)
-              else
-                EmptyRect := Rect(Right - W, Bottom - H, Right, Bottom);
-            //FillRect(DC, EmptyRect, GetSysColorBrush(COLOR_WINDOW));
-            LCanvas:=TCanvas.Create;
-            try
-              LCanvas.Handle:=DC;
-              LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-              LCanvas.FillRect(EmptyRect);
-            finally
-              LCanvas.Handle:=0;
-              LCanvas.Free;
-            end;
+
+        AStyle := GetWindowLong(Self.Handle, GWL_STYLE);
+        if ((AStyle and WS_HSCROLL) <> 0) and ((AStyle and WS_VSCROLL) <> 0) then
+        begin
+          //AddLog('CustomWMNCPaint EmptyRect', Self.ClassName);
+          W := GetSystemMetrics(SM_CXVSCROLL);
+          H := GetSystemMetrics(SM_CYHSCROLL);
+          InflateRect(EmptyRect, -1, -1);
+          with EmptyRect do
+            if Self.UseRightToLeftScrollBar then
+              EmptyRect := Rect(Left, Bottom - H, Left + W, Bottom)
+            else
+              EmptyRect := Rect(Right - W, Bottom - H, Right, Bottom);
+          //FillRect(DC, EmptyRect, GetSysColorBrush(COLOR_WINDOW));
+          LCanvas:=TCanvas.Create;
+          try
+            LCanvas.Handle:=DC;
+            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+            LCanvas.FillRect(EmptyRect);
+          finally
+            LCanvas.Handle:=0;
+            LCanvas.Free;
           end;
-        //end;
+        end;
+
         with DrawRect do
           ExcludeClipRect(DC, Left + 2, Top + 2, Right - 2, Bottom - 2);
         AddLog('CustomWMNCPaint DrawRect', Self.ClassName);
         //Draw border
-//        LCanvas:=TCanvas.Create;
-//        try
-//          LCanvas.Handle:=DC;
-//          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-//          LCanvas.FillRect(DrawRect);
-//        finally
-//          LCanvas.Handle:=0;
-//          LCanvas.Free;
-//        end;
+        LCanvas:=TCanvas.Create;
+        try
+          LCanvas.Handle:=DC;
+          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+          LCanvas.FillRect(DrawRect);
+        finally
+          LCanvas.Handle:=0;
+          LCanvas.Free;
+        end;
 
       finally
         ReleaseDC(Self.Handle, DC);
@@ -145,7 +148,20 @@ begin
 
 
   end;
+end;
 
+procedure CustomWMNCPaint(Self : TWinControlClass;var Message: TWMNCPaint);
+begin
+  TrampolineTWinControl_WMNCPaint(Self, Message);
+  if csDesigning in Self.ComponentState then  exit;
+  DrawNCBorder(Self);
+end;
+
+procedure  CustomBaseVirtualTreeOriginalWMNCPaint(Self : TCustomControl;DC: HDC);
+begin
+ TrampolineBaseVirtualTreeOriginalWMNCPaint(Self, DC);
+  if csDesigning in Self.ComponentState then  exit;
+ DrawNCBorder(TWinControlClass(Self));
 end;
 
 function CustomOpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
@@ -153,6 +169,8 @@ begin
   Result := TrampolineOpenThemeData(hwnd, pszClassList);
   if SameText(pszClassList, VSCLASS_SCROLLBAR) then
   begin
+    //AddLog('OpenThemeData ProcByLevel 2', ProcByLevel(2));
+
     if not ScrollBarList.ContainsKey(Result) then
     ScrollBarList.Add(Result, pszClassList);
   end;
@@ -329,9 +347,17 @@ var
   VCLClassName : string;
   ApplyHook  : Boolean;
   i : integer;
+  LHWND : HWND;
+  LFoundControl : TWinControl;
 begin
   if not (ScrollBarList.ContainsKey(THEME) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+
+
+  ApplyHook:=False;
+  sCaller :='';
+  sCaller2:='';
+  VCLClassName:='';
 
   try
     if Assigned(LastWinControl) then
@@ -340,19 +366,31 @@ begin
     VCLClassName := '';
   end;
 
-  sCaller := ProcByLevel(1);
-  if sCaller<>'' then
-    sCaller2 := ProcByLevel(2);
+  LHWND:=WindowFromDC(dc);
+  if LHWND<>0 then
+   begin
+    LFoundControl := FindControl(LHWND);
+    if LFoundControl<>nil then
+      VCLClassName:= LFoundControl.ClassName;
+   end;
 
-  ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-   //or  AnsiContainsText(TColorizerLocalSettings.HookedWindowsText, sCaller)  or AnsiContainsText(TColorizerLocalSettings.HookedScrollBarsText, sCaller)
-   //or  ((sCaller2<>'') and AnsiContainsText(TColorizerLocalSettings.HookedWindowsText, sCaller2))  or ((sCaller2<>'') and AnsiContainsText(TColorizerLocalSettings.HookedScrollBarsText, sCaller2));
+  if LFoundControl<>nil then
+   try ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);  except ApplyHook:=False end;
+//
+  if not ApplyHook then
+  begin
+    sCaller := ProcByLevel(1);
+    if sCaller<>'' then
+      sCaller2 := ProcByLevel(2);
+
+    ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
+  end;
 
   //look for hooked controls in the caller level 1
   if not ApplyHook and (sCaller<>'') then
      for s in SplitString(sCaller,'.') do
      begin
-       ApplyHook:= StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
+       ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
        if ApplyHook then break;
      end;
 
@@ -360,7 +398,7 @@ begin
   if not ApplyHook and (sCaller2<>'') then
      for s in SplitString(sCaller2,'.') do
      begin
-       ApplyHook:= StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
+       ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
        if ApplyHook then break;
      end;
 
@@ -616,6 +654,38 @@ begin
   MethodAddr := Self.WMNCPaint;
   Result     := TMethod(MethodAddr).Code;
 end;
+
+
+function GetBplMethodAddress(Method: Pointer): Pointer;
+type
+  PJmpCode = ^TJmpCode;
+  TJmpCode = packed record
+    Code: Word;
+    Addr: ^Pointer;
+  end;
+const
+  csJmpCode = $E9;
+  csJmp32Code = $25FF;
+begin
+  if PJmpCode(Method)^.Code = csJmp32Code then
+    Result := PJmpCode(Method)^.Addr^
+  else
+    Result := Method;
+end;
+
+const
+  sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
+
+{$IFDEF DELPHIXE}  sVclIDEModule =  'vclide150.bpl';{$ENDIF}
+{$IFDEF DELPHIXE2} sVclIDEModule =  'vclide160.bpl';{$ENDIF}
+{$IFDEF DELPHIXE3} sVclIDEModule =  'vclide170.bpl';{$ENDIF}
+{$IFDEF DELPHIXE4} sVclIDEModule =  'vclide180.bpl';{$ENDIF}
+{$IFDEF DELPHIXE5} sVclIDEModule =  'vclide190.bpl';{$ENDIF}
+{$IFDEF DELPHIXE6} sVclIDEModule =  'vclide200.bpl';{$ENDIF}
+var
+  psBaseVirtualTreeOriginalWMNCPaint : Pointer;
+  VclIDEModule : HMODULE;
+
 initialization
 
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
@@ -637,6 +707,14 @@ begin
   if Assigned (DrawThemeBackgroundOrgPointer) then
    TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @CustomDrawThemeBackground);
 
+  VclIDEModule := LoadLibrary(sVclIDEModule);
+  if VclIDEModule<>0 then
+  begin
+   psBaseVirtualTreeOriginalWMNCPaint := GetBplMethodAddress(GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint));
+   if Assigned(psBaseVirtualTreeOriginalWMNCPaint) then
+    TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @CustomBaseVirtualTreeOriginalWMNCPaint);
+
+  end;
 
 end;
 
@@ -650,9 +728,9 @@ if Assigned (TrampolineTWinControl_WMNCPaint) then
 if Assigned (TrampolineOpenThemeData) then
   InterceptRemove(@TrampolineOpenThemeData);
 
-//if Assigned (TrampolineCloseThemeData) then
-//  InterceptRemove(@TrampolineCloseThemeData);
-//
+if Assigned (TrampolineBaseVirtualTreeOriginalWMNCPaint) then
+  InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
+
 
 if Assigned (TrampolineDrawThemeBackground) then
   InterceptRemove(@TrampolineDrawThemeBackground);

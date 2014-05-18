@@ -58,6 +58,7 @@ uses
   Colorizer.Utils,
   CaptionedDockTree,
   GraphUtil,
+  CategoryButtons,
   DDetours;
 
 type
@@ -82,16 +83,18 @@ var
   Trampoline_ModernDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
   {$ENDIF}
   {$IFDEF DELPHIXE2_UP}
-  Trampoline_TStyleEngine_HandleMessage : function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
-  Trampoline_TUxThemeStyle_DoDrawElement: function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
+  Trampoline_TStyleEngine_HandleMessage    : function(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
+  Trampoline_TUxThemeStyle_DoDrawElement   : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
   {$ELSE}
-  Trampoline_TUxTheme_DrawElement        : procedure (Self : TThemeServices;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: TRect);
-  Trampoline_DrawThemeBackground         : function(hTheme: UxTheme.HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall = nil;
+  Trampoline_TUxTheme_DrawElement          : procedure (Self : TThemeServices;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: TRect);
+  Trampoline_DrawThemeBackground           : function(hTheme: UxTheme.HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall = nil;
   {$ENDIF}
   Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
   Trampoline_ProjectTree2PaintText         : procedure(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
   Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
+
+  Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
 
   FGutterBkColor : TColor = clNone;
 
@@ -115,6 +118,17 @@ type
   public
     function  HeaderWndProcAddress: Pointer;
     function  GetHeaderHandle: HWND;
+   end;
+
+  TCategoryButtonsHelper = class helper for TCategoryButtons
+  public
+    function  DrawCategoryAddress: Pointer;
+    procedure GetCategoryBoundsHelper(const Category: TButtonCategory; const StartingPos: Integer; var CategoryBounds, ButtonBounds: TRect);
+    procedure AdjustCategoryBoundsHelper(const Category: TButtonCategory; var CategoryBounds: TRect; IgnoreButtonFlow: Boolean = False);
+    function  GetChevronBoundsHelper(const CategoryBounds: TRect): TRect;
+    function  FSideBufferSizeHelper : Integer;
+    function  FHotButtonHelper: TButtonItem;
+    function  FDownButtonHelper: TButtonItem;
    end;
 
 { TCustomStatusBarHelper }
@@ -166,6 +180,303 @@ var
 begin
   MethodAddr := Self.HeaderWndProc;
   Result     := TMethod(MethodAddr).Code;
+end;
+
+{ TCategoryButtonsHelper }
+
+function TCategoryButtonsHelper.DrawCategoryAddress: Pointer;
+var
+  MethodAddr: procedure(const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) of object;
+begin
+  MethodAddr := Self.DrawCategory;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
+procedure TCategoryButtonsHelper.GetCategoryBoundsHelper(
+  const Category: TButtonCategory; const StartingPos: Integer;
+  var CategoryBounds, ButtonBounds: TRect);
+begin
+ Self.GetCategoryBounds(Category, StartingPos, CategoryBounds, ButtonBounds);
+end;
+
+procedure TCategoryButtonsHelper.AdjustCategoryBoundsHelper(const Category: TButtonCategory; var CategoryBounds: TRect; IgnoreButtonFlow: Boolean = False);
+begin
+ Self.AdjustCategoryBounds(Category, CategoryBounds, IgnoreButtonFlow);
+end;
+
+function  TCategoryButtonsHelper.GetChevronBoundsHelper(const CategoryBounds: TRect): TRect;
+begin
+ Result := Self.GetChevronBounds(CategoryBounds);
+end;
+
+function  TCategoryButtonsHelper.FSideBufferSizeHelper : Integer;
+begin
+ Result:= Self.FSideBufferSize;
+end;
+
+function  TCategoryButtonsHelper.FHotButtonHelper: TButtonItem;
+begin
+ Result:= Self.FHotButton;
+end;
+
+function  TCategoryButtonsHelper.FDownButtonHelper: TButtonItem;
+begin
+ Result:= Self.FDownButton;
+end;
+
+type
+ TCategoryButtonsClass = class(TCategoryButtons);
+procedure CustomDrawCategory(Self :TCategoryButtonsClass; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer);
+const
+  cDropDownSize = 13;
+var
+  LPoint: TPoint;
+  LColor: TColor;
+
+  procedure DrawDropDownButton(X, Y: Integer; Collapsed: Boolean);
+  const
+    ChevronDirection: array[Boolean] of TScrollDirection = (sdDown, sdRight);
+    ChevronXPosAdjust: array[Boolean] of Integer = (2, 0);
+    ChevronYPosAdjust: array[Boolean] of Integer = (1, 3);
+
+    procedure DrawPlusMinus;
+    var
+      Width, Height: Integer;
+    begin
+      Width := 9;
+      Height := Width;
+      Inc(X, 2);
+      Inc(Y, 2);
+
+      Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
+      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+      Canvas.Rectangle(X, Y, X + Width, Y + Height);
+      Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
+
+      Canvas.MoveTo(X + 2, Y + Width div 2);
+      Canvas.LineTo(X + Width - 2, Y + Width div 2);
+
+      if Collapsed then
+      begin
+        Canvas.MoveTo(X + Width div 2, Y + 2);
+        Canvas.LineTo(X + Width div 2, Y + Width - 2);
+      end;
+    end;
+
+  begin
+      DrawPlusMinus;
+  end;
+var
+  I: Integer;
+  ButtonTop, ButtonLeft, ButtonRight: Integer;
+  ButtonRect: TRect;
+  ActualWidth: Integer;
+  ButtonStart: Integer;
+  ButtonBottom: Integer;
+  CapWidth: Integer;
+  VerticalCaption: Boolean;
+  CapLeft: Integer;
+  DrawState: TButtonDrawState;
+  Button: TButtonItem;
+  CatHeight: Integer;
+  CategoryBounds, CategoryFrameBounds,
+  ButtonBounds, ChevronBounds: TRect;
+  GradientColor, SourceColor, TempColor: TColor;
+  Caption: string;
+  CaptionRect: TRect;
+  CategoryRealBounds: TRect;
+
+begin
+  if SameText(Self.ClassName, 'TIDECategoryButtons') and Assigned(TColorizerLocalSettings.ColorMap) then
+  begin
+    Self.GetCategoryBoundsHelper(Category, StartingPos, CategoryBounds, ButtonBounds);
+
+    if (Self.SelectedItem = Category) and (Self.SelectedButtonColor <> clNone) then
+      SourceColor := TColorizerLocalSettings.ColorMap.SelectedColor//Self.SelectedButtonColor
+    else if Category.Color <> clNone then
+      SourceColor := TColorizerLocalSettings.ColorMap.Color//Category.Color
+    else
+      SourceColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
+
+    CategoryFrameBounds := CategoryBounds;
+    Self.AdjustCategoryBoundsHelper(Category, CategoryFrameBounds);
+    if boCaptionOnlyBorder in Self.ButtonOptions then
+      CategoryRealBounds := CategoryFrameBounds
+    else
+      CategoryRealBounds := CategoryBounds;
+
+    if (Self.SelectedItem <> Category) and (boGradientFill in Self.ButtonOptions) then
+    begin
+      if Category.GradientColor <> clNone then
+        GradientColor := TColorizerLocalSettings.ColorMap.MenuColor//Category.GradientColor
+      else
+        GradientColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
+
+      GradientFillCanvas(Canvas, SourceColor, GradientColor, CategoryRealBounds, Self.GradientDirection);
+    end
+    else
+    begin
+      Canvas.Brush.Color := SourceColor;
+      Canvas.FillRect(CategoryRealBounds)
+    end;
+
+    with CategoryRealBounds do
+    begin
+      Right := Right - 1;
+      TempColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
+
+      Canvas.Pixels[Left, Top] := TempColor;
+      Canvas.Pixels[Left+1, Top] := TempColor;
+      Canvas.Pixels[Left, Top+1] := TempColor;
+
+      Canvas.Pixels[Left, Bottom] := TempColor;
+      Canvas.Pixels[Left+1, Bottom] := TempColor;
+      Canvas.Pixels[Left, Bottom-1] := TempColor;
+
+      if Self.BackgroundGradientColor <> clNone then
+        TempColor := Self.BackgroundGradientColor;
+
+      Canvas.Pixels[Right, Top] := TempColor;
+      Canvas.Pixels[Right-1, Top] := TempColor;
+      Canvas.Pixels[Right, Top+1] := TempColor;
+
+      Canvas.Pixels[Right, Bottom] := TempColor;
+      Canvas.Pixels[Right-1, Bottom] := TempColor;
+      Canvas.Pixels[Right, Bottom-1] := TempColor;
+
+      Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;//GetShadowColor(SourceColor, -10);
+
+      Canvas.Polyline([Point(Left + 2, Top),
+        Point(Right - 2, Top), { Top line }
+        Point(Right, Top + 2), { Top right curve }
+        Point(Right, Bottom - 2), { Right side line }
+        Point(Right - 2, Bottom), { Bottom right curve }
+        Point(Left + 2, Bottom), { Bottom line }
+        Point(Left, Bottom - 2), { Bottom left curve }
+        Point(Left, Top + 2), { Left side line }
+        Point(Left + 2, Top)]); { Top left curve }
+    end;
+
+    if ((Category.Collapsed) and (Self.SelectedItem <> nil) and
+       (Self.CurrentCategory = Category)) or (Self.SelectedItem = Category) then
+    begin
+      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;//GetShadowColor(SourceColor, -75);
+      with CategoryFrameBounds do
+        Canvas.FrameRect(Rect(Left + 1, Top + 1, Right, Bottom));
+    end;
+
+    ChevronBounds := Self.GetChevronBoundsHelper(CategoryRealBounds);
+
+    if (Category.Items <> nil) and (Category.Items.Count > 0) then
+      DrawDropDownButton(ChevronBounds.Left, ChevronBounds.Top,
+        Category.Collapsed);
+
+    VerticalCaption := Self.HasVerticalCaption(Category);
+
+    { Draw the category caption. Truncating and vertical as needed. }
+    Caption := Category.Caption;
+
+    if (boBoldCaptions in Self.ButtonOptions) then
+      Canvas.Font.Style := Canvas.Font.Style + [fsBold];
+
+    CapWidth := Canvas.TextWidth(Caption);
+    if VerticalCaption then
+      CatHeight := CategoryBounds.Bottom - CategoryBounds.Top - 3 - cDropDownSize
+    else
+      CatHeight := CategoryBounds.Right - CategoryBounds.Left - 2 - cDropDownSize;
+
+    CapLeft := (CatHeight - CapWidth) div 2;
+    if CapLeft < 2 then
+      CapLeft := 2;
+
+
+    Canvas.Brush.Style := bsClear;
+    Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;//Category.TextColor;
+
+    if not VerticalCaption then
+    begin
+      CaptionRect.Left := CategoryBounds.Left + 4 + cDropDownSize;
+      CaptionRect.Top := CategoryBounds.Top + 1;
+    end
+    else
+    begin
+      CaptionRect.Left := CategoryBounds.Left + 1;
+      CaptionRect.Top := CategoryBounds.Bottom - CapLeft;
+      Canvas.Font.Orientation := 900;
+    end;
+
+    CaptionRect.Right := CaptionRect.Left + CatHeight;
+    CaptionRect.Bottom := CaptionRect.Top + Canvas.TextHeight(Caption);
+    Canvas.TextRect(CaptionRect, Caption, [tfNoClip, tfEndEllipsis]);
+
+    if (boBoldCaptions in Self.ButtonOptions) then
+      Canvas.Font.Style := Canvas.Font.Style - [fsBold];
+
+    Canvas.Brush.Style := bsSolid;
+    Canvas.Font.Orientation := 0;
+
+    if not Category.Collapsed and (Category.Items <> nil) then
+    begin
+      { Draw the buttons }
+      if (Self.ButtonFlow = cbfVertical) and (boFullSize in Self.ButtonOptions) then
+        ActualWidth := Self.ClientWidth - Self.FSideBufferSizeHelper
+      else
+        ActualWidth := Self.ButtonWidth;
+
+      ButtonStart := ButtonBounds.Left;
+      ButtonTop := ButtonBounds.Top;
+      ButtonLeft := ButtonStart;
+      for I := 0 to Category.Items.Count - 1 do
+      begin
+        { Don't waste time painting clipped things }
+        if (Self.ButtonFlow = cbfVertical) and (ButtonTop > Self.ClientHeight) then
+          Break;
+
+        ButtonBottom := ButtonTop + Self.ButtonHeight;
+        ButtonRight := ButtonLeft + ActualWidth;
+        if VerticalCaption and not (boCaptionOnlyBorder in Self.ButtonOptions) then
+          Dec(ButtonRight, 3);
+        if (ButtonBottom >= 0) and (ButtonRight >= 0) then
+        begin
+          ButtonRect := Rect(ButtonLeft, ButtonTop, ButtonRight, ButtonBottom);
+
+          Button := Category.Items[I];
+          DrawState := [];
+          if Button = Self.FHotButtonHelper then
+          begin
+            Include(DrawState, bdsHot);
+            if Button = Self.FDownButtonHelper then
+              Include(DrawState, bdsDown);
+          end;
+          if Button = Self.SelectedItem then
+            Include(DrawState, bdsSelected)
+          else if (Button = Self.FocusedItem) and Self.Focused and (Self.FDownButtonHelper = nil) then
+            Include(DrawState, bdsFocused);
+
+//          if Button = FInsertTop then
+//            Include(DrawState, bdsInsertTop)
+//          else if Button = FInsertBottom then
+//            Include(DrawState, bdsInsertBottom)
+//          else if Button = FInsertRight then
+//            Include(DrawState, bdsInsertRight)
+//          else if Button = FInsertLeft then
+//            Include(DrawState, bdsInsertLeft);
+
+          Self.DrawButton(Button, Canvas, ButtonRect, DrawState);
+        end;
+        Inc(ButtonLeft, ActualWidth);
+
+        if (ButtonLeft + ActualWidth) > ButtonBounds.Right then
+        begin
+          ButtonLeft := ButtonStart;
+          Inc(ButtonTop, Self.ButtonHeight);
+        end;
+      end;
+    end;
+
+  end
+  else
+  Trampoline_TCategoryButtons_DrawCategory(Self, Category, Canvas, StartingPos);
 end;
 
 
@@ -1194,6 +1505,7 @@ begin
    if Assigned(GetSysColorOrgPointer) then
      Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @CustomGetSysColor);
 
+   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @CustomDrawCategory);
 {$IFDEF DELPHIXE6_UP}
   ModernThemeModule := LoadLibrary('ModernTheme200.bpl');
   if ModernThemeModule<>0 then
@@ -1237,11 +1549,18 @@ begin
     InterceptRemove(@Trampoline_DrawText);
   if Assigned(Trampoline_GetSysColor) then
     InterceptRemove(@Trampoline_GetSysColor);
+  if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
+    InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
+
 {$IFDEF DELPHIXE6_UP}
   if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
     InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
 {$ENDIF}
 end;
+
+
+
+
 
 end.
 

@@ -45,15 +45,10 @@ type
     CheckBoxEnabled: TCheckBox;
     cbThemeName: TComboBox;
     Label1: TLabel;
-    Button3: TButton;
-    ListViewTypes: TListView;
+    ButtonSaveTheme: TButton;
     PageControlSettings: TPageControl;
     TabSheetMain: TTabSheet;
-    TabSheet2: TTabSheet;
     PanelMain: TPanel;
-    Label4: TLabel;
-    ListViewProps: TListView;
-    Label5: TLabel;
     ImageList1: TImageList;
     XPColorMap: TXPColorMap;
     CbClrElement: TColorBox;
@@ -87,7 +82,7 @@ type
     Button1: TButton;
     ColorBoxBase: TColorBox;
     Label3: TLabel;
-    TabSheet1: TTabSheet;
+    TabSheetHookedForms: TTabSheet;
     ListBoxFormsHooked: TListBox;
     EditFormClass: TEdit;
     Label8: TLabel;
@@ -97,7 +92,7 @@ type
     Label10: TLabel;
     ImageListDock: TImageList;
     ColorListBox1: TColorListBox;
-    TabSheet3: TTabSheet;
+    TabSheetDockOptions: TTabSheet;
     Label11: TLabel;
     ListBoxDockImages: TListBox;
     RbtnDockGradientHorz: TRadioButton;
@@ -117,6 +112,12 @@ type
     Button4: TButton;
     Button5: TButton;
     Button6: TButton;
+    TabSheetAbout: TTabSheet;
+    MemoAbout: TMemo;
+    ButtonReportIssues: TButton;
+    ButtonProjectPage: TButton;
+    ButtonCheckUpdates: TButton;
+    ButtonDeleteTheme: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -124,7 +125,7 @@ type
     procedure BtnSelForColorClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure CbClrElementChange(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure ButtonSaveThemeClick(Sender: TObject);
     procedure cbThemeNameChange(Sender: TObject);
     procedure BtnApplyClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -146,6 +147,9 @@ type
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
+    procedure ButtonReportIssuesClick(Sender: TObject);
+    procedure ButtonProjectPageClick(Sender: TObject);
+    procedure ButtonDeleteThemeClick(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -224,7 +228,9 @@ Uses
  FileCtrl,
  {$WARN UNIT_PLATFORM ON}
  Types,
+ Main,
  uMisc,
+ ShellApi,
  IOUtils,
  Colorizer.StoreColorMap,
  GraphUtil,
@@ -383,7 +389,7 @@ begin
  end;
 end;
 
-procedure TFormIDEColorizerSettings.Button3Click(Sender: TObject);
+procedure TFormIDEColorizerSettings.ButtonSaveThemeClick(Sender: TObject);
 Var
   ThemeName, FileName : string;
 begin
@@ -449,6 +455,16 @@ begin
 end;
 
 
+procedure TFormIDEColorizerSettings.ButtonReportIssuesClick(Sender: TObject);
+begin
+  ShellExecute(0, 'open', 'https://code.google.com/p/delphi-ide-theme-editor/issues/list', '', '', SW_SHOWNORMAL);
+end;
+
+procedure TFormIDEColorizerSettings.ButtonProjectPageClick(Sender: TObject);
+begin
+  ShellExecute(0, 'open', 'https://code.google.com/p/delphi-ide-theme-editor/', '', '', SW_SHOWNORMAL);
+end;
+
 procedure TFormIDEColorizerSettings.ButtonAddFormClassClick(Sender: TObject);
 var
  sFormClass : string;
@@ -459,6 +475,21 @@ begin
      ShowMessage(Format('The %s form is already included in the list', [sFormClass]))
    else
      ListBoxFormsHooked.Items.Add(sFormClass);
+end;
+
+procedure TFormIDEColorizerSettings.ButtonDeleteThemeClick(Sender: TObject);
+var
+ sThemeName, sFileName : string;
+begin
+  sThemeName:=cbThemeName.Text;
+  sFileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+sThemeName+'.idetheme';
+  if FileExists(sFileName) and (MessageDlg(Format('Do you want delete the %s theme?', [sThemeName]),  mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+  begin
+    DeleteFile(sFileName);
+    LoadThemes;
+    if cbThemeName.Items.Count>0 then
+     cbThemeName.ItemIndex:=0;
+  end;
 end;
 
 procedure TFormIDEColorizerSettings.ButtonRemoveFormClassClick(Sender: TObject);
@@ -578,9 +609,22 @@ end;
 
 procedure TFormIDEColorizerSettings.FormCreate(Sender: TObject);
 var
+  sVersion : string;
   I: Integer;
 begin
   LoadDockIcons;
+  sVersion:=uMisc.GetFileVersion(GetModuleLocation);
+  MemoAbout.Text:=Format(SColorizerPluginDescription, [sVersion]);
+
+  MemoAbout.Lines.Add('');
+  MemoAbout.Lines.Add('Third Party');
+  MemoAbout.Lines.Add('VCL Styles Utils');
+  MemoAbout.Lines.Add('https://code.google.com/p/vcl-styles-utils/');
+  MemoAbout.Lines.Add('Delphi Detours Library');
+  MemoAbout.Lines.Add('https://code.google.com/p/delphi-detours-library/');
+  MemoAbout.Lines.Add('JCL Debug');
+  MemoAbout.Lines.Add('http://sourceforge.net/projects/jcl/');
+  MemoAbout.Lines.Add('');
 
   ColorMapCombo.Items.AddObject('(Default)', nil);
   ColorMapCombo.ItemIndex := 0;
