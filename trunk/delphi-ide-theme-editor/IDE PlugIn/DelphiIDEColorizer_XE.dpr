@@ -2,8 +2,11 @@
 library DelphiIDEColorizer_XE;
 
 uses
-  {$IFDEF DEBUG}
-  {$ENDIF}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
@@ -18,10 +21,15 @@ uses
   uMisc in '..\Units\uMisc.pas',
   uRegistry in '..\Units\uRegistry.pas',
   uRttiHelper in 'uRttiHelper.pas',
-  uIDEExpertUtils in 'uIDEExpertUtils.pas',
-  uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
-  InstDecode in '..\Common\delphi-detours-library\InstDecode.pas';
+  InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
+  uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
+  uStackTrace in '..\Units\uStackTrace.pas',
+  Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
+  Colorizer.HookScrollBars in 'Colorizer.HookScrollBars.pas',
+  Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
+  Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
+  Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas';
 
 {$R *.res}
 {$R VersionInfo.res}

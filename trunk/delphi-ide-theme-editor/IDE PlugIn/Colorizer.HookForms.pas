@@ -48,7 +48,8 @@ var
  ClassNameBuffer: Array[0..ClassNameBufferSize-1] of Char;
  LWinControl : TWinControl;
 begin
-   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.HookedWindows) then
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap)
+   and Assigned(TColorizerLocalSettings.HookedWindows) and Assigned(TColorizerLocalSettings.HookedScrollBars) then
    case nCode of
 
      HCBT_SETFOCUS:
@@ -60,11 +61,15 @@ begin
           if RetVal>0 then
           begin
             Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-            if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
+            AddLog('Before HCBT_SETFOCUS '+ClassNameBuffer);
+            if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(ClassNameBuffer)>=0) then
             begin
               LWinControl:=FindControl(LHWND);   //use FindControl because some forms are not registered in the Screen.Forms list
               if LWinControl<>nil then
+              begin
                 Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, LWinControl);
+                AddLog('HCBT_SETFOCUS '+ClassNameBuffer);
+              end;
             end;
           end;
        end;
@@ -80,6 +85,7 @@ begin
           if RetVal>0 then
           begin
              Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
+             AddLog('Before HCBT_ACTIVATE '+ClassNameBuffer);
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
             for i := 0 to Screen.FormCount-1 do
              if (Screen.Forms[i].Handle=LHWND) and not (csDesigning in Screen.Forms[i].ComponentState) then

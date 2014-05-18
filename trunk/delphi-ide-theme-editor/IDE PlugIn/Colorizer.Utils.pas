@@ -43,7 +43,7 @@ uses
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
 
-{$DEFINE ENABLELOG}
+{.$DEFINE ENABLELOG}
 
 procedure AddLog(const Message : string); overload;
 procedure AddLog(const Category, Message : string); overload;
@@ -96,8 +96,8 @@ uses
  Rtti,
  {$ENDIF}
  Types,
-{$IFDEF ENABLELOG}
  IOUtils,
+{$IFDEF ENABLELOG}
 {$ENDIF}
  Forms,
  SysUtils,
@@ -139,13 +139,13 @@ end;
 procedure AddLog(const Category, Message : string);
 begin
 {$IFDEF ENABLELOG}
-   //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-   if not Assigned(LogFile) then exit;
-
-   if Category<>'' then
-    LogFile.Add(Format('%s : %s', [Category, Message]))
-   else
-    LogFile.Add(Format('%s', [Message]));
+   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt',Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
+//   if not Assigned(LogFile) then exit;
+//
+//   if Category<>'' then
+//    LogFile.Add(Format('%s : %s', [Category, Message]))
+//   else
+//    LogFile.Add(Format('%s', [Message]));
 {$ENDIF}
 end;
 
@@ -153,52 +153,6 @@ procedure AddLog(const Message : string);
 begin
   AddLog('', Message);
 end;
-
-{$IFDEF DEBUG_PROFILER}
-//DumpType('GDIPlus.GradientDrawer.TGradientTabDrawer');
-procedure DumpType(const QualifiedName:string);
-var
-  l2 : TStrings;
-begin
-  l2 := TStringList.Create;
-  try
-    l2.Text:=DumpTypeDefinition(TRttiContext.Create.FindType(QualifiedName).Handle);
-    l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\'+QualifiedName+'.pas');
-  finally
-   l2.Free;
-  end;
-end;
-
-procedure DumpAllTypes;
-var
-  l2 : TStrings;
-  t  : TRttiType;
-begin
-  l2 := TStringList.Create;
-  try
-    for t in TRttiContext.Create.GetTypes do
-    if t.IsInstance then
-     l2.Add(t.AsInstance.DeclaringUnitName +' '+t.Name);
-   l2.SaveToFile(ExtractFilePath(GetBplLocation())+'Galileo\Types.txt');
-  finally
-   l2.Free;
-  end;
-end;
-
-procedure DumpObject(AObject: TObject);
-var
- LDumpInfo : TStrings;
-begin
-   LDumpInfo := TStringList.Create;
-  try
-   LDumpInfo.Text:=DumpTypeDefinition(AObject.ClassInfo);
-   LDumpInfo.SaveToFile(ExtractFilePath(GetModuleLocation())+'Galileo\'+AObject.ClassName+'.pas');
-  finally
-   LDumpInfo.Free;
-  end;
-end;
-{$ENDIF}
-
 
 
 procedure RefreshIDETheme(Invalidate : Boolean = False);
