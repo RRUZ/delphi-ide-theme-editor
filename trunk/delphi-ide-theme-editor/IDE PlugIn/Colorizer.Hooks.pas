@@ -95,6 +95,7 @@ var
   Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
 
   Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
+  //Trampoline_TBitmap_SetSize : procedure(Self : TBitmap;AWidth, AHeight: Integer) = nil;
 
   FGutterBkColor : TColor = clNone;
 
@@ -130,6 +131,25 @@ type
     function  FHotButtonHelper: TButtonItem;
     function  FDownButtonHelper: TButtonItem;
    end;
+
+//procedure CustomSetSize(Self : TBitmap;AWidth, AHeight: Integer);
+//var
+//  sCaller : string;
+//  i : integer;
+//begin
+//   //if (nIndex=COLOR_WINDOWTEXT) then
+//   begin
+//      for i := 2 to 5 do
+//      begin
+//         sCaller := ProcByLevel(i);
+//         AddLog('CustomSetSize', Format('%d AWidth %d AHeight %d %s',[i, AWidth, AHeight, sCaller]));
+//      end;
+//      AddLog('CustomSetSize', Format('%s',['---------------']));
+//   end;
+//
+// Trampoline_TBitmap_SetSize(Self, AWidth, AHeight);
+//end;
+
 
 { TCustomStatusBarHelper }
 
@@ -229,9 +249,6 @@ type
 procedure CustomDrawCategory(Self :TCategoryButtonsClass; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer);
 const
   cDropDownSize = 13;
-var
-  LPoint: TPoint;
-  LColor: TColor;
 
   procedure DrawDropDownButton(X, Y: Integer; Collapsed: Boolean);
   const
@@ -1430,35 +1447,33 @@ var
   sCaller : string;
   //i  : Integer;
 begin
-   if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) and  (nIndex=COLOR_BTNFACE) then
-   begin
-    //Vcl.Controls.TWinControl.PaintHandler
-    //Vcl.Controls.TWinControl.WMPaint
-    //Vcl.Controls.TWinControl.WMPrintClient
-    //
-    //       ok  x2,x4,x6
 
-
+//   if (nIndex=COLOR_WINDOWTEXT) then
+//   begin
 //      for i := 2 to 5 do
 //      begin
 //         sCaller := ProcByLevel(i);
 //         AddLog('CustomGetSysColor', Format('%d nIndex %d %s',[i, nIndex, sCaller]));
 //      end;
 //      AddLog('CustomGetSysColor', Format('%s',['---------------']));
+//   end;
 
+   if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) and  (nIndex=COLOR_BTNFACE) then
+   begin
+    //Vcl.Controls.TWinControl.PaintHandler
+    //Vcl.Controls.TWinControl.WMPaint
+    //Vcl.Controls.TWinControl.WMPrintClient
 
      sCaller := ProcByLevel(2);
      if SameText(sCaller, '') then
        Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
    end;
 
-
    Exit(Trampoline_GetSysColor(nIndex));
 end;
 
 
 const
-// sEVFillGutter ='@Editorcontrol@TCustomEditControl@EVFillGutter$qqrr';
   sProjectTree2PaintText      = '@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
 {$IFDEF DELPHIXE6_UP}
   sModernThemeDrawDockCaption = '@Moderntheme@TModernDockCaptionDrawer@DrawDockCaption$qqrxp20Vcl@Graphics@TCanvasrx18System@Types@TRectrx38Vcl@Captioneddocktree@TParentFormState';
@@ -1488,6 +1503,8 @@ begin
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
+
+  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
 
 {$IFDEF DELPHIXE2_UP}
   Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
@@ -1551,6 +1568,10 @@ begin
     InterceptRemove(@Trampoline_GetSysColor);
   if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
     InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
+
+//  if Assigned(Trampoline_TBitmap_SetSize) then
+//    InterceptRemove(@Trampoline_TBitmap_SetSize);
+
 
 {$IFDEF DELPHIXE6_UP}
   if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then

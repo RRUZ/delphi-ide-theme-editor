@@ -24,19 +24,22 @@
 {
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline?  hook tbitmap ?
   * Enable/Disable
-  * toolbar disabled buttons
   * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
 
-     toolbutton
+  * toolbar disabled buttons
+  toolbutton
         popup arrow color
+  toolbar multiline
+
   improve themes -> pro
 
-  hook tbitmap for closable buttons background because is a tbitmap   Windowfromdc
+  hook tbitmap for closable buttons background because is a tbitmap Windowfromdc
   scroll fails on XE in preview of source highligter
-
   hook comboxbox
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
+  hook highlight color
+  frame in buttons of TIDECategoryButtons
 }
 
 // DONE
@@ -535,27 +538,6 @@ procedure TIDEWizard.RemoveMenuItems;
 begin
   FreeAndNil(FDICConfMenuItem);
 end;
-
-
-//function GetActiveFormEditor: IOTAFormEditor;
-//var
-//  Module: IOTAModule;
-//  Editor: IOTAEditor;
-//  i: Integer;
-//begin
-//  Result := nil;
-//  Module := (BorlandIDEServices as IOTAModuleServices).CurrentModule;
-//  if Module<>nil then
-//  begin
-//    for i := 0 to Module.GetModuleFileCount - 1 do
-//    begin
-//      Editor := Module.GetModuleFileEditor(i);
-//      if Supports(Editor, IOTAFormEditor, Result) then
-//        Break;
-//    end;
-//  end;
-//end;
-
 
 end.
 
