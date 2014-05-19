@@ -212,6 +212,12 @@ type
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
 
+   TWrapperHotCommands= class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
+
    TWrapperGradientButton= class(TBaseWrapper)
    protected
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
@@ -906,16 +912,27 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'DescriptionFont.Color', AColorMap.FontColor);
 
-     TPanel(AComponent).BevelInner  := TBevelCut.bvNone;
-     TPanel(AComponent).BevelOuter  := TBevelCut.bvNone;
+//     TPanel(AComponent).BevelInner  := TBevelCut.bvNone;
+//     TPanel(AComponent).BevelOuter  := TBevelCut.bvNone;
      TPanel(AComponent).Color       := TColorizerLocalSettings.ColorMap.Color;
      TPanel(AComponent).Ctl3D       := False;
-     TPanel(AComponent).BevelKind   := TBevelKind.bkNone;
-     TPanel(AComponent).BorderStyle := bsNone;
+//     TPanel(AComponent).BevelKind   := TBevelKind.bkNone;
+//     TPanel(AComponent).BorderStyle := bsNone;
 
   //TRttiUtils.SetRttiPropertyValue(AComponent,'BevelKind', TValue.From(TBevelKind.bkNone));
   //TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
 
+end;
+
+{ TWrapperHotCommands }
+
+procedure TWrapperHotCommands.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+begin
+  inherited;
+  //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\THotCommands.pas');
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
 { TWrapperGradientButton }
@@ -965,6 +982,8 @@ begin
 
 end;
 
+
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
@@ -984,6 +1003,7 @@ initialization
   RegisterColorizerWrapper('TCPUStackView',  TWrapperDeguggerWindows);
 
   RegisterColorizerWrapper('TDescriptionPane',  TWrapperDescriptionPane);
+  RegisterColorizerWrapper('THotCommands',  TWrapperHotCommands);
 
   RegisterColorizerWrapper('TDesktopComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('THistoryPropComboBox',  TWrapperIDEComboBox);
