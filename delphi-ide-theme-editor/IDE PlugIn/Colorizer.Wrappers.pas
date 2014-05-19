@@ -41,6 +41,7 @@ uses
   StdCtrls,
   SysUtils,
   ExtCtrls,
+  Buttons,
   Controls,
   ComCtrls,
   Graphics,
@@ -202,6 +203,16 @@ type
    end;
 
    TWrapperFontComponents  = class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
+   TWrapperDescriptionPane= class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
+   TWrapperGradientButton= class(TBaseWrapper)
    protected
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
@@ -476,6 +487,7 @@ begin
   inherited;
   LPanel        := TPanel(AComponent);
   LPanel.Color  := AColorMap.Color;
+  LPanel.Font.Color   := AColorMap.FontColor;
 end;
 
 { TWrapperInspListBox }
@@ -598,6 +610,7 @@ begin
     GradientEndColor   := AColorMap.Color;
     HotTrackColor      := AColorMap.SelectedColor;
     Font.Color         := AColorMap.FontColor;
+    EdgeBorders        := [];
     Ctl3D:=False;
   end;
 
@@ -630,6 +643,9 @@ begin
    //Canvas.Fillrect
    //SetDCBrushColor
    //CreateSolidBrush
+
+   //TRttiUtils.DumpObject(TRttiUtils.GetRttiPropertyValue(AComponent,'CloseButton').AsObject, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\TGradientButton.pas');
+
    TRttiUtils.SetRttiPropertyValue(AComponent,'CloseButton.BackgroundColor', AColorMap.MenuColor);
    TRttiUtils.SetRttiPropertyValue(AComponent,'CloseButton.Transparent', False);
    TRttiUtils.SetRttiPropertyValue(AComponent,'DropDownButton.BackgroundColor', AColorMap.MenuColor);
@@ -877,6 +893,78 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
+{ TWrapperDescriptionPane }
+
+procedure TWrapperDescriptionPane.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+begin
+  inherited;
+  //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\TDescriptionPane.pas');
+
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'DescriptionFont.Color', AColorMap.FontColor);
+
+     TPanel(AComponent).BevelInner  := TBevelCut.bvNone;
+     TPanel(AComponent).BevelOuter  := TBevelCut.bvNone;
+     TPanel(AComponent).Color       := TColorizerLocalSettings.ColorMap.Color;
+     TPanel(AComponent).Ctl3D       := False;
+     TPanel(AComponent).BevelKind   := TBevelKind.bkNone;
+     TPanel(AComponent).BorderStyle := bsNone;
+
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'BevelKind', TValue.From(TBevelKind.bkNone));
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
+
+end;
+
+{ TWrapperGradientButton }
+
+procedure TWrapperGradientButton.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+//var
+// lBitMap : TBitmap;
+begin
+{
+    00106EF0 5272 07C3 __fastcall Gdiplus::Gradienttabs::TGradientButton::TGradientButton(System::Classes::TComponent *)
+    00106FFC 5268 07C4 __fastcall Gdiplus::Gradienttabs::TGradientButton::PaintOutline()
+    00106F50 5271 07C5 __fastcall Gdiplus::Gradienttabs::TGradientButton::SetBackgroundColor(System::Uitypes::TColor)
+    00106F58 5270 07C6 __fastcall Gdiplus::Gradienttabs::TGradientButton::SetFillColor()
+    00106FAC 5269 07C7 __fastcall Gdiplus::Gradienttabs::TGradientButton::SetPenColor()
+
+
+    001B23C8 5292 09E3 Idegradientspeedbuttons::SpeedButtonData
+    00108FCC 5300 09E4 Idegradientspeedbuttons::TCloseButton::
+    00109514 5291 09E5 __fastcall Idegradientspeedbuttons::TCloseButton::PaintSymbol()
+    00108E58 5302 09E6 Idegradientspeedbuttons::TCustomGradientButton::
+    00109A64 5288 09E7 __fastcall Idegradientspeedbuttons::TCustomGradientButton::Paint()
+    001093E8 5294 09E8 Idegradientspeedbuttons::TCycleButton::
+    00109A7C 5287 09E9 __fastcall Idegradientspeedbuttons::TCycleButton::PaintSymbol()
+    0010912C 5298 09EA Idegradientspeedbuttons::TDownButton::
+    0010973C 5290 09EB __fastcall Idegradientspeedbuttons::TDownButton::PaintSymbol()
+    00108D18 5304 09EC Idegradientspeedbuttons::TSpeedButtonData::
+    0010928C 5296 09ED Idegradientspeedbuttons::TUpButton::
+    001098BC 5289 09EE __fastcall Idegradientspeedbuttons::TUpButton::PaintSymbol()
+    001AEA00 5285 09EF __fastcall Idegradientspeedbuttons::initialization()
+    00084DE0 2596 09F0 __fastcall Idegraphimpl::Finalization()
+}
+  inherited;
+  TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Transparent', False);
+
+  //AddLog('FGlyph',TRttiUtils.GetRttiFieldValue(AComponent,'FGlyph').AsObject.ClassName);  //TButtonGlyph
+
+
+//  lBitMap := TBitmap(TRttiUtils.GetRttiPropertyValue(AComponent,'Glyph').AsObject);
+//  if lBitMap<>nil then
+//   lBitMap.LoadFromFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Test.bmp');
+//
+//  TRttiUtils.SetRttiPropertyValue(AComponent,'NumGlyphs', 1);
+
+   //lBitMap.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Glyph'+AComponent.Name+'.bmp');
+
+end;
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
@@ -895,8 +983,13 @@ initialization
   RegisterColorizerWrapper('TXMMRegisterView',  TWrapperDeguggerWindows);
   RegisterColorizerWrapper('TCPUStackView',  TWrapperDeguggerWindows);
 
+  RegisterColorizerWrapper('TDescriptionPane',  TWrapperDescriptionPane);
+
   RegisterColorizerWrapper('TDesktopComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('THistoryPropComboBox',  TWrapperIDEComboBox);
+
+  RegisterColorizerWrapper('TCloseButton',  TWrapperGradientButton);
+  RegisterColorizerWrapper('TGradientButton',  TWrapperGradientButton);
 
   //RegisterColorizerWrapper('TComboBox',  TWrapperComboBox);  // TODO : Add own wrapper
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleControl);
@@ -912,6 +1005,7 @@ initialization
   RegisterColorizerWrapper('TToolBar',  TWrapperToolBar);
   RegisterColorizerWrapper('TDockToolBar',  TWrapperToolBar);
   RegisterColorizerWrapper('TCnSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
+  RegisterColorizerWrapper('TCnExternalSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
 
   RegisterColorizerWrapper('TTabSet',  TWrapperTabSet);
   RegisterColorizerWrapper('TIDEDockTabSet',  TWrapperTabSet); //TIDEDockTabSet->TDockTabSet->TTabSet

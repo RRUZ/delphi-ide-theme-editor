@@ -17,3 +17,4 @@ TEditWindow
 TPopupListBox
 TSyncButton
 THintWindow
+TButtonedEdit
