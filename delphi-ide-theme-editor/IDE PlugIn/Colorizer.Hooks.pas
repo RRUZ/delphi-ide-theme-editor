@@ -59,6 +59,8 @@ uses
   CaptionedDockTree,
   GraphUtil,
   CategoryButtons,
+  ActnPopup,
+  ActnMan,
   DDetours;
 
 type
@@ -72,6 +74,7 @@ type
  TCustomFormClass        = class(TCustomForm);
  TBrushClass             = class(TBrush);
  TCustomListViewClass    = class(TCustomListView);
+ TSplitterClass          = class(TSplitter);
 var
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
@@ -96,10 +99,18 @@ var
 
   Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
   //Trampoline_TBitmap_SetSize : procedure(Self : TBitmap;AWidth, AHeight: Integer) = nil;
+  Trampoline_TCustomPanel_Paint            : procedure (Self : TCustomPanelClass) = nil;
+  Trampoline_TPopupActionBar_GetStyle      : function(Self: TPopupActionBar) : TActionBarStyle = nil;
+  Trampoline_TSplitter_Paint              : procedure (Self : TSplitterClass) = nil;
 
   FGutterBkColor : TColor = clNone;
 
 type
+  TPopupActionBarHelper = class helper for TPopupActionBar
+  public
+    function GetStyleAddress: Pointer;
+  end;
+
   TCustomStatusBarHelper = class helper for TCustomStatusBar
   private
     function GetCanvasRW: TCanvas;
@@ -150,6 +161,135 @@ type
 // Trampoline_TBitmap_SetSize(Self, AWidth, AHeight);
 //end;
 
+
+function CustomGetStyle(Self: TPopupActionBar) : TActionBarStyle;
+begin
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and  Assigned(TColorizerLocalSettings.ActionBarStyle) then
+    Exit(TColorizerLocalSettings.ActionBarStyle)
+  else
+   Exit(Trampoline_TPopupActionBar_GetStyle(Self));
+end;
+
+
+procedure CustomSplitterPaint(Self : TSplitterClass);
+const
+  XorColor = $00FFD8CE;
+var
+  FrameBrush: HBRUSH;
+  R: TRect;
+  LParentForm : TCustomForm;
+begin
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
+  begin
+
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+      Trampoline_TSplitter_Paint(Self);
+      exit;
+    end;
+
+    R := Self.ClientRect;
+    Self.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+    Self.Canvas.FillRect(Self.ClientRect);
+
+    if Assigned(Self.OnPaint) then Self.OnPaint(Self);
+  end
+  else
+    Trampoline_TSplitter_Paint(Self);
+end;
+
+//Hook for TPanel, draw flat border.
+procedure CustomPanelPaint(Self : TCustomPanelClass);
+const
+  Alignments: array[TAlignment] of Longint = (DT_LEFT, DT_RIGHT, DT_CENTER);
+  VerticalAlignments: array[TVerticalAlignment] of Longint = (DT_TOP, DT_BOTTOM, DT_VCENTER);
+var
+  Rect: TRect;
+  TopColor, BottomColor: TColor;
+  BaseColor, BaseTopColor, BaseBottomColor: TColor;
+  Flags: Longint;
+  LParentForm : TCustomForm;
+
+  procedure AdjustColors(Bevel: TPanelBevel);
+  begin
+    TopColor := BaseTopColor;
+    if Bevel = bvLowered then
+      TopColor := BaseBottomColor;
+    BottomColor := BaseBottomColor;
+    if Bevel = bvLowered then
+      BottomColor := BaseTopColor;
+  end;
+
+begin
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
+  begin
+
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+      Trampoline_TCustomPanel_Paint(Self);
+      exit;
+    end;
+
+    Rect := Self.GetClientRect;
+
+    BaseColor       := TColorizerLocalSettings.ColorMap.Color;
+    BaseTopColor    := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+    BaseBottomColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+
+    if Self.BevelOuter <> bvNone then
+    begin
+      AdjustColors(Self.BevelOuter);
+      Frame3D(Self.Canvas, Rect, TopColor, BottomColor, Self.BevelWidth);
+    end;
+
+    if (csParentBackground in Self.ControlStyle) then
+      Frame3D(Self.Canvas, Rect, BaseColor, BaseColor, Self.BorderWidth)
+    else
+      InflateRect(Rect, -Integer(Self.BorderWidth), -Integer(Self.BorderWidth));
+
+    if Self.BevelInner <> bvNone then
+    begin
+      AdjustColors(Self.BevelInner);
+      Frame3D(Self.Canvas, Rect, TopColor, BottomColor, Self.BevelWidth);
+    end;
+
+    with Self.Canvas do
+    begin
+      if not Self.ParentBackground then
+      begin
+        Brush.Color := BaseColor;
+        FillRect(Rect);
+      end;
+
+      if Self.ShowCaption and (Self.Caption <> '') then
+      begin
+        Brush.Style := bsClear;
+        Font := Self.Font;
+        Flags := DT_EXPANDTABS or DT_SINGLELINE or
+          VerticalAlignments[Self.VerticalAlignment] or Alignments[Self.Alignment];
+        Flags := Self.DrawTextBiDiModeFlags(Flags);
+        DrawText(Handle, Self.Caption, -1, Rect, Flags);
+      end;
+    end;
+
+  end
+  else
+   Trampoline_TCustomPanel_Paint(Self);
+end;
+
+
+
+{ TPopupActionBarHelper }
+
+function TPopupActionBarHelper.GetStyleAddress: Pointer;
+var
+  MethodAddr: function : TActionBarStyle  of object;
+begin
+  MethodAddr := Self.GetStyle;
+  Result     := TMethod(MethodAddr).Code;
+end;
 
 { TCustomStatusBarHelper }
 
@@ -1485,6 +1625,9 @@ type
  TThemeServicesDrawElement2 =  procedure (DC: HDC; Details: TThemedElementDetails;  const R: TRect; ClipRect: TRect) of object;
 {$ENDIF}
 
+
+
+
 procedure InstallColorizerHooks;
 var
   GetSysColorOrgPointer : Pointer;
@@ -1522,7 +1665,13 @@ begin
    if Assigned(GetSysColorOrgPointer) then
      Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @CustomGetSysColor);
 
-   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @CustomDrawCategory);
+  Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @CustomDrawCategory);
+  Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @CustomPanelPaint);
+
+  Trampoline_TPopupActionBar_GetStyle      := InterceptCreate(TPopupActionBar(nil).GetStyleAddress, @CustomGetStyle);
+
+  Trampoline_TSplitter_Paint               := InterceptCreate(@TSplitterClass.Paint, @CustomSplitterPaint);
+
 {$IFDEF DELPHIXE6_UP}
   ModernThemeModule := LoadLibrary('ModernTheme200.bpl');
   if ModernThemeModule<>0 then
@@ -1569,8 +1718,14 @@ begin
   if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
     InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
 
-//  if Assigned(Trampoline_TBitmap_SetSize) then
-//    InterceptRemove(@Trampoline_TBitmap_SetSize);
+  if Assigned(Trampoline_TCustomPanel_Paint) then
+    InterceptRemove(@Trampoline_TCustomPanel_Paint);
+
+  if Assigned(Trampoline_TPopupActionBar_GetStyle) then
+    InterceptRemove(@Trampoline_TPopupActionBar_GetStyle);
+
+  if Assigned(Trampoline_TSplitter_Paint) then
+    InterceptRemove(@Trampoline_TSplitter_Paint);
 
 
 {$IFDEF DELPHIXE6_UP}
