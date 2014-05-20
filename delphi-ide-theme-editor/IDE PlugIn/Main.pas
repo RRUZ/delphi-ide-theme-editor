@@ -33,9 +33,9 @@
 
   improve themes -> pro
 
+  hook DrawFrameControl
   hook tbitmap for closable buttons background because is a tbitmap Windowfromdc
   scroll fails on XE in preview of source highligter
-  hook comboxbox
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
   hook highlight color
@@ -44,6 +44,7 @@
 
 // DONE
 {
+  * hook comboxbox
   * XE change active page of source editor  redraw TIDECategoryButtons
   * DumpAllTypes and related to rtti helper
   * rtti helper must be class

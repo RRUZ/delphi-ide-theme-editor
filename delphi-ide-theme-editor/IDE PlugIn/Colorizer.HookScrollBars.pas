@@ -652,15 +652,15 @@ begin
   end
   else
   begin
-    if ScrollBarList.ContainsKey(THEME) then
-    begin
-       for i :=1 to 5 do
-       begin
-         sCaller := ProcByLevel(i);
-         AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
-       end;
-         AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
-    end;
+//    if ScrollBarList.ContainsKey(THEME) then
+//    begin
+//       for i :=1 to 5 do
+//       begin
+//         sCaller := ProcByLevel(i);
+//         AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
+//       end;
+//         AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
+//    end;
 
     Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
   end;

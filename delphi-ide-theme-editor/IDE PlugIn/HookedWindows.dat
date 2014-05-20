@@ -31,3 +31,5 @@ TToDoListWindow
 TFormContainerForm
 TModulesView
 TConfigMgrDlg
+TTemplateView
+TClassBrowser
