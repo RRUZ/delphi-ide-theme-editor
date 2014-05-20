@@ -27,10 +27,25 @@ interface
 
 uses
   ActnMan,
+  Generics.Collections,
   Classes;
 
    function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False) : Boolean;
 
+type
+   TBaseWrapper = class (TComponent)
+   private
+    procedure SetFlatParent(AComponent: TComponent);
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); virtual;
+   end;
+
+  TBaseWrapperClass = class of TBaseWrapper;
+  TRegisteredWrappers = class
+  public
+    class var Wrappers          : TDictionary<string, TBaseWrapperClass>;
+    class var WrappersInstances : TObjectDictionary<string, TBaseWrapper>;
+  end;
 implementation
 
 uses
@@ -48,7 +63,6 @@ uses
   ImgList,
   Tabs,
   CategoryButtons,
-  Generics.Collections,
   ActnColorMaps,
   ActnPopup,
   ActnMenus,
@@ -65,12 +79,6 @@ uses
   Colorizer.Utils;
 
 type
-   TBaseWrapper = class (TComponent)
-   private
-    procedure SetFlatParent(AComponent: TComponent);
-   protected
-    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); virtual;
-   end;
 
    TWrapperVirtualStringTree = class(TBaseWrapper)
    protected
@@ -207,29 +215,31 @@ type
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
 
-   TWrapperDescriptionPane= class(TBaseWrapper)
+   TWrapperDescriptionPane = class(TBaseWrapper)
    protected
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
 
-   TWrapperHotCommands= class(TBaseWrapper)
-   protected
-    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
-   end;
-
-
-   TWrapperGradientButton= class(TBaseWrapper)
+   TWrapperHotCommands = class(TBaseWrapper)
    protected
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
 
 
-  TBaseWrapperClass = class of TBaseWrapper;
-  TRegisteredWrappers = class
-  public
-    class var Wrappers          : TDictionary<string, TBaseWrapperClass>;
-    class var WrappersInstances : TObjectDictionary<string, TBaseWrapper>;
-  end;
+   TWrapperGradientButton = class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
+   TWrapperCategoriesPopUp = class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
+   TWrapperPropCheckBox = class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
 
 procedure RegisterColorizerWrapper(const ComponentClass : string; ClassWrapper : TBaseWrapperClass);
 var
@@ -261,10 +271,6 @@ end;
 procedure TWrapperVirtualStringTree.SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap);
 begin
   inherited;
-  //AddLog(Self.ClassName+' SetColors '+AComponent.ClassName);
-
-  //BorderStyle
-
 
   TRttiUtils.SetRttiPropertyValue(AComponent,'BevelKind', TValue.From(TBevelKind.bkFlat));
   TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
@@ -463,14 +469,14 @@ begin
   inherited;
 
   LCustomComboBox:=TCustomComboBoxClass(AComponent);
-  if LCustomComboBox.Handle<>0 then
-   SetWindowTheme(LCustomComboBox.Handle, '', '');
+//  if LCustomComboBox.Handle<>0 then
+//   SetWindowTheme(LCustomComboBox.Handle, '', '');
 
   LCustomComboBox.Color      := AColorMap.MenuColor;
   LCustomComboBox.Font.Color := AColorMap.FontColor;
-  LCustomComboBox.BevelKind  := bkFlat;
-  LCustomComboBox.BevelInner := bvNone;
-  LCustomComboBox.Ctl3D      := False;
+  //LCustomComboBox.BevelKind  := bkFlat;
+  //LCustomComboBox.BevelInner := bvNone;
+  //LCustomComboBox.Ctl3D      := False;
 end;
 
 { TWrapperStandardControl }
@@ -984,6 +990,35 @@ end;
 
 
 
+{ TWrapperCategoriesPopUp }
+
+procedure TWrapperCategoriesPopUp.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+var
+ LComponent : TComponent;
+begin
+  inherited;
+  LComponent:=TComponent(TRttiUtils.GetRttiPropertyValue(AComponent, 'CategoryButtons').AsObject);
+  if (LComponent<>nil) then
+    TRegisteredWrappers.WrappersInstances['TIDECategoryButtons'].SetColors(LComponent, AColorMap);
+
+  //CategoryButtons
+  //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\TCategoriesPopup.pas');
+end;
+
+{ TWrapperPropCheckBox }
+
+procedure TWrapperPropCheckBox.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+begin
+  inherited;
+  if GetWindowTheme(TWinControl(AComponent).Handle) <>0 then
+    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
+
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+end;
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
@@ -994,6 +1029,8 @@ initialization
   RegisterColorizerWrapper('TIDECategoryButtons',  TWrapperIDECategoryButtons);
   RegisterColorizerWrapper('TDisassemblerView',  TWrapperDisassemblerView);
   RegisterColorizerWrapper('TTDStringGrid',  TWrapperTDStringGrid);
+
+  RegisterColorizerWrapper('TCategoriesPopup',  TWrapperCategoriesPopUp);
 
   RegisterColorizerWrapper('TRegisterView',  TWrapperDeguggerWindows);
   RegisterColorizerWrapper('TFlagsView',  TWrapperDeguggerWindows);
@@ -1007,13 +1044,16 @@ initialization
 
   RegisterColorizerWrapper('TDesktopComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('THistoryPropComboBox',  TWrapperIDEComboBox);
+  RegisterColorizerWrapper('TCnToolBarComboBox',  TWrapperIDEComboBox);//cnwizards combobox
+  //RegisterColorizerWrapper('TCnProcListComboBox',  TWrapperIDEComboBox);//cnwizards combobox
 
   RegisterColorizerWrapper('TCloseButton',  TWrapperGradientButton);
   RegisterColorizerWrapper('TGradientButton',  TWrapperGradientButton);
 
+  RegisterColorizerWrapper('TPropCheckBox',  TWrapperPropCheckBox);
+
   //RegisterColorizerWrapper('TComboBox',  TWrapperComboBox);  // TODO : Add own wrapper
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleControl);
-  RegisterColorizerWrapper('TPropCheckBox',  TWrapperSimpleControl);
   RegisterColorizerWrapper('TEditorDockPanel',  TWrapperSimpleControl);
   RegisterColorizerWrapper('TPanel',  TWrapperPanel);
   RegisterColorizerWrapper('TInspListBox',  TWrapperInspListBox);
@@ -1026,6 +1066,8 @@ initialization
   RegisterColorizerWrapper('TDockToolBar',  TWrapperToolBar);
   RegisterColorizerWrapper('TCnSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
   RegisterColorizerWrapper('TCnExternalSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
+  RegisterColorizerWrapper('TGXToolBar',  TWrapperToolBar);//gexperts toolbar
+
 
   RegisterColorizerWrapper('TTabSet',  TWrapperTabSet);
   RegisterColorizerWrapper('TIDEDockTabSet',  TWrapperTabSet); //TIDEDockTabSet->TDockTabSet->TTabSet

@@ -43,7 +43,7 @@ uses
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
 
-{.$DEFINE ENABLELOG}
+{$DEFINE ENABLELOG}
 
 procedure AddLog(const Message : string); overload;
 procedure AddLog(const Category, Message : string); overload;
@@ -115,6 +115,10 @@ uses
 var
   LogFile : TStrings = nil;
 {$ENDIF}
+
+var
+  LFieldsComponents : TObjectDictionary<string,TStringList>;
+
 
 {$IFDEF DELPHIXE2_UP}
 procedure RegisterVClStylesFiles;
@@ -246,7 +250,12 @@ procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBar
 var
   Index          : Integer;
   LActionManager : TActionManager;
+  LStrings       : TStringList;
   LForm          : TForm;
+//  s              : string;
+//  ctx            : TRttiContext;
+//  LField         : TRttiField;
+//  found          : Boolean;
 begin
     if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
@@ -255,6 +264,55 @@ begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
+
+      //process field TComponent no registered in the components list
+//      ctx:=TRttiContext.Create;
+//      try
+//        if LFieldsComponents.ContainsKey(LForm.ClassName) then
+//        begin
+//          for s in LFieldsComponents.Items[LForm.ClassName] do
+//          begin
+//            LField:=ctx.GetType(LForm.ClassInfo).GetField(s);
+//            if (LField.GetValue(LForm).AsObject<>nil) then
+//             RunWrapper(TComponent(LField.GetValue(LForm).AsObject), AColorMap, Invalidate);
+//          end;
+//        end
+//        else
+//        begin
+//
+//          LStrings:= TStringList.Create;
+//          LFieldsComponents.Add(LForm.ClassName, LStrings);
+//          for LField in ctx.GetType(LForm.ClassInfo).GetFields() do
+//             if LField.FieldType.IsInstance and (LField.GetValue(LForm).AsObject<>nil) and (LField.GetValue(LForm).AsObject is TComponent) and (TRegisteredWrappers.Wrappers.ContainsKey(LField.GetValue(LForm).AsObject.ClassName)) then
+//             begin
+//               found:=false;
+//               for Index := 0 to LForm.ComponentCount - 1 do
+//                 if SameText(LForm.Components[Index].Name, LField.Name) then
+//                 begin
+//                   found:=True;
+//                   break;
+//                 end;
+//
+//               if not found then
+//                 LStrings.Add(LField.Name);
+//             end;
+//
+//          for s in LStrings do
+//            RunWrapper(TComponent(TRttiUtils.GetRttiFieldValue(LForm, s).AsObject), AColorMap, Invalidate);
+//
+////           if LStrings.Count>0 then
+////            ShowMessage(LStrings.Text);
+//        end;
+//      finally
+//        ctx.Free;
+//      end;
+
+
+      {
+      if SameText(LForm.ClassName, 'TToolForm') then
+        TRttiUtils.DumpObject(TRttiUtils.GetRttiFieldValue(LForm, 'FCategoriesPopup').AsObject,'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\TCategoriesPopup.pas');
+      }
+
       if Invalidate then
         LForm.Invalidate;
     end
@@ -364,10 +422,11 @@ initialization
  LogFile:=TStringList.Create;
  ShowMessage('Log enabled');
 {$ENDIF}
-
+ LFieldsComponents := TObjectDictionary<string,TStringList>.Create([doOwnsValues]);
 finalization
 {$IFDEF ENABLELOG}
   LogFile.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt');
   LogFile.Free;;
 {$ENDIF}
+ LFieldsComponents.Free;
 end.
