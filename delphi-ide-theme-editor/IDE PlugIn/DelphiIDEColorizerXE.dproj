@@ -83,6 +83,7 @@
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>
+			<DCCReference Include="Colorizer.uxThemeHelper.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

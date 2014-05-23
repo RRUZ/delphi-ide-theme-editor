@@ -28,10 +28,14 @@ uses
   SysUtils,
   Windows,
   Messages,
-  UxTheme,
-  {$IF CompilerVersion >= 23}Vcl.Styles,{$IFEND}
-  Themes,
   Graphics,
+  UxTheme,
+  {$IF CompilerVersion >= 23}
+  Vcl.Styles,
+  {$ELSE}
+  Colorizer.uxThemeHelper,
+  {$IFEND}
+  Themes,
   Forms,
   ImgList,
   GraphUtil,

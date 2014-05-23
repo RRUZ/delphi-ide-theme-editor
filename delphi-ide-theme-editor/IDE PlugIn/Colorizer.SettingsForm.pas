@@ -118,6 +118,7 @@ type
     ButtonProjectPage: TButton;
     ButtonCheckUpdates: TButton;
     ButtonDeleteTheme: TButton;
+    CheckBoxHookSystemColors: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -314,6 +315,7 @@ begin
     FSettings.DockEndGradActive     := ColorToString(ColorBoxDockEndGradientActive.Selected);
     FSettings.DockStartGradInActive := ColorToString(ColorBoxDockStartGradientInActive.Selected);
     FSettings.DockEndGradInActive   := ColorToString(ColorBoxDockEndGradientInActive.Selected);
+    FSettings.HookSystemColors      := CheckBoxHookSystemColors.Checked;
 
     WriteSettings(FSettings, GetSettingsFolder);
 
@@ -870,6 +872,7 @@ begin
   RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
   RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
 
+  CheckBoxHookSystemColors.Checked  := FSettings.HookSystemColors;
   CheckBoxCustomDockBars.Checked := FSettings.DockCustom;
   CheckBoxUseCustomColorsDock.Checked := FSettings.DockCustomColors;
 

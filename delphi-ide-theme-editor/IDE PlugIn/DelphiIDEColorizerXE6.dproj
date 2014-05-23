@@ -4,7 +4,7 @@
         <MainSource>DelphiIDEColorizerXE6.dpk</MainSource>
         <ProjectVersion>15.4</ProjectVersion>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <AppType>Package</AppType>
         <FrameworkType>VCL</FrameworkType>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -38,6 +38,12 @@
     <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
         <Cfg_2>true</Cfg_2>
         <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
@@ -96,6 +102,9 @@
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <DCC_MapFile>3</DCC_MapFile>
+    </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
@@ -107,7 +116,6 @@
         <DCCReference Include="Jcl.dcp"/>
         <DCCReference Include="Main.pas"/>
         <DCCReference Include="Colorizer.Utils.pas"/>
-        <DCCReference Include="Colorizer.Wrappers.pas"/>
         <DCCReference Include="Colorizer.Settings.pas"/>
         <DCCReference Include="Colorizer.HookForms.pas"/>
         <DCCReference Include="Colorizer.Hooks.pas"/>
@@ -125,15 +133,16 @@
         <DCCReference Include="..\Units\uMisc.pas"/>
         <DCCReference Include="..\Units\uRegistry.pas"/>
         <DCCReference Include="uRttiHelper.pas"/>
-        <DCCReference Include="uIDEExpertUtils.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
-        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
-        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
         <DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
         <DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
-        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas"/>
         <DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
         <DCCReference Include="..\Units\uStackTrace.pas"/>
+        <DCCReference Include="Colorizer.Wrappers.pas"/>
+        <DCCReference Include="Colorizer.HookScrollBars.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
+        <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

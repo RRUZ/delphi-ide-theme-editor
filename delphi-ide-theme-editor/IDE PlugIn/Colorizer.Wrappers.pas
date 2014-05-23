@@ -241,6 +241,12 @@ type
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
 
+   TWrapperListButton = class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
+
 procedure RegisterColorizerWrapper(const ComponentClass : string; ClassWrapper : TBaseWrapperClass);
 var
    LInstance : TBaseWrapperClass;
@@ -264,7 +270,11 @@ begin
 //    if AComponent is TWinControl then
 //      TWinControl(AComponent).Invalidate();
     Result:=True;
-  end;
+  end
+  else
+   ;// AddLog('RunWrapper Igonored', AComponent.ClassName);
+//  if SameText(AComponent.ClassName, 'TListButton') then
+//     TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
 end;
 
 { TWrapperVirtualStringTree }
@@ -373,12 +383,12 @@ begin
     LParent:=LParent.GetParentComponent;
     if (LParent<>nil) and (LParent is TPanel) then
     begin
-     TPanel(LParent).BevelInner  :=TBevelCut.bvNone;
-     TPanel(LParent).BevelOuter  :=TBevelCut.bvNone;
+     //TPanel(LParent).BevelInner  :=TBevelCut.bvNone;
+     //TPanel(LParent).BevelOuter  :=TBevelCut.bvNone;
      TPanel(LParent).Color       := TColorizerLocalSettings.ColorMap.Color;
-     TPanel(LParent).Ctl3D       := False;
-     TPanel(LParent).BevelKind   := TBevelKind.bkNone;
-     TPanel(LParent).BorderStyle := bsNone;
+     //TPanel(LParent).Ctl3D       := False;
+     //TPanel(LParent).BevelKind   := TBevelKind.bkNone; //works for TEditControl
+     //TPanel(LParent).BorderStyle := bsNone;   //works for tookbar
     end;
   until (LParent=nil) or not (LParent Is TPanel);
 end;
@@ -439,7 +449,7 @@ procedure TWrapperTDStringGrid.SetColors(AComponent: TComponent;
 begin
   inherited;
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
   TRttiUtils.SetRttiPropertyValue(AComponent,'FixedColor', AColorMap.Color);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'GradientStartColor', AColorMap.Color);
@@ -452,6 +462,7 @@ procedure TWrapperDeguggerWindows.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
+  //SetFlatParent(AComponent);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
 end;
@@ -467,13 +478,13 @@ var
   LCustomComboBox : TCustomComboBoxClass;
 begin
   inherited;
-
   LCustomComboBox:=TCustomComboBoxClass(AComponent);
-//  if LCustomComboBox.Handle<>0 then
-//   SetWindowTheme(LCustomComboBox.Handle, '', '');
+//  if GetWindowTheme(TWinControl(AComponent).Handle) <>0 then
+//    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
 
   LCustomComboBox.Color      := AColorMap.MenuColor;
   LCustomComboBox.Font.Color := AColorMap.FontColor;
+
   //LCustomComboBox.BevelKind  := bkFlat;
   //LCustomComboBox.BevelInner := bvNone;
   //LCustomComboBox.Ctl3D      := False;
@@ -485,7 +496,7 @@ procedure TWrapperSimpleControl.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
@@ -1012,6 +1023,8 @@ procedure TWrapperPropCheckBox.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
+
+  //necesary to allow use a hook with the DrawFrameControl
   if GetWindowTheme(TWinControl(AComponent).Handle) <>0 then
     SetWindowTheme(TWinControl(AComponent).Handle, '', '');
 
@@ -1019,9 +1032,24 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
+{ TWrapperListButton }
+
+procedure TWrapperListButton.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+begin
+  inherited;
+  TRttiUtils.SetRttiPropertyValue(AComponent,'PopupPanel.Color', AColorMap.Color);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'ListBox.Color', AColorMap.MenuColor);
+
+end;
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
+
+
+  //RegisterColorizerWrapper('TListButton',  TWrapperListButton);
+
 
   RegisterColorizerWrapper('TVirtualStringTree',  TWrapperVirtualStringTree);
   RegisterColorizerWrapper('TBetterHintWindowVirtualDrawTree',  TWrapperVirtualStringTree);
@@ -1042,6 +1070,7 @@ initialization
   RegisterColorizerWrapper('TDescriptionPane',  TWrapperDescriptionPane);
   RegisterColorizerWrapper('THotCommands',  TWrapperHotCommands);
 
+  RegisterColorizerWrapper('TComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('TDesktopComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('THistoryPropComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('TCnToolBarComboBox',  TWrapperIDEComboBox);//cnwizards combobox
@@ -1052,9 +1081,11 @@ initialization
 
   RegisterColorizerWrapper('TPropCheckBox',  TWrapperPropCheckBox);
 
-  //RegisterColorizerWrapper('TComboBox',  TWrapperComboBox);  // TODO : Add own wrapper
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleControl);
+  RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleControl);
   RegisterColorizerWrapper('TEditorDockPanel',  TWrapperSimpleControl);
+  RegisterColorizerWrapper('TPopupListBox',  TWrapperSimpleControl);
+
   RegisterColorizerWrapper('TPanel',  TWrapperPanel);
   RegisterColorizerWrapper('TInspListBox',  TWrapperInspListBox);
   RegisterColorizerWrapper('TStringGrid',  TWrapperStringGrid);

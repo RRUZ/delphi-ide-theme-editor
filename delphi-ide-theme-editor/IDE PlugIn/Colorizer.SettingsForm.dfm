@@ -344,6 +344,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 119
           Selected = clScrollBar
           Style = [cbCustomColors]
+          BevelInner = bvSpace
           TabOrder = 14
           OnGetColors = ColorListBox1GetColors
         end
@@ -599,13 +600,24 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           OnClick = ButtonAddFormClassClick
         end
         object ButtonRemoveFormClass: TButton
-          Left = 3
-          Top = 98
+          Left = 98
+          Top = 59
           Width = 75
           Height = 25
           Caption = 'Remove'
           TabOrder = 3
           OnClick = ButtonRemoveFormClassClick
+        end
+        object CheckBoxHookSystemColors: TCheckBox
+          Left = 3
+          Top = 113
+          Width = 118
+          Height = 17
+          Hint = 'Hook system colors (COLOR_HIGHLIGHT, COLOR_HIGHLIGHTTEXT)'
+          Caption = 'Hook System Colors'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 4
         end
       end
       object TabSheetAbout: TTabSheet
@@ -673,7 +685,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 344
     Top = 96
     Bitmap = {
-      494C010107000800F80210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000900040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000003A20108F5D341AB59F5A2DEEB666
       33FFB46633FFB36532FFB16432FFAF6331FFAD6231FFAB6130FFA96030FFA85F
