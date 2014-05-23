@@ -22,16 +22,18 @@ unit Vcl.Styles.Utils.FlatStyleHook;
 interface
 
 uses
+  Windows,
+  Graphics,
   {$IF CompilerVersion >= 23}
   Vcl.Styles,
+  {$ELSE}
+  Colorizer.uxThemeHelper,
   {$IFEND}
   Themes,
   ExtCtrls,
   Types,
-  Windows,
   Messages,
   Classes,
-  Graphics,
   SysUtils,
   Controls,
   CommCtrl;
@@ -52,35 +54,10 @@ const
   CM_CONTROLHOOKEDDIRECTLY = CM_BASE + 363;
 
 type
-  {$IF CompilerVersion >= 23}
-  {$ELSE}
-  TTextFormats = (tfBottom, tfCalcRect, tfCenter, tfEditControl, tfEndEllipsis,
-    tfPathEllipsis, tfExpandTabs, tfExternalLeading, tfLeft, tfModifyString,
-    tfNoClip, tfNoPrefix, tfRight, tfRtlReading, tfSingleLine, tfTop,
-    tfVerticalCenter, tfWordBreak, tfHidePrefix, tfNoFullWidthCharBreak,
-    tfPrefixOnly, tfTabStop, tfWordEllipsis, tfComposited);
 
-   TTextFormat = set of TTextFormats;
-
-   TDrawTextFlags = Cardinal;
-   TTextFormatFlags = record
-   private
-     FValue: TTextFormat;
-   public
-     class operator Implicit(Value: TTextFormat): TTextFormatFlags;
-     class operator Implicit(Value: TTextFormatFlags): TTextFormat;
-     class operator Implicit(Value: TDrawTextFlags): TTextFormatFlags;
-     class operator Implicit(Value: TTextFormatFlags): TDrawTextFlags;
-   end;
-
-   {$IFEND}
 
   TBidiModeDirection = (bmLeftToRight, bmRightToLeft);
-  {$IF CompilerVersion >= 23}
-  {$ELSE}
 
-
-  {$IFEND}
 type
   TSysStyleHook = class;
   TMouseTrackSysControlStyleHook = class;
@@ -297,94 +274,7 @@ uses
 {$IF CompilerVersion >= 23}
 
 {$ELSE}
-const
-  DT_NOFULLWIDTHCHARBREAK = $0080000;
-  MASK_TF_COMPOSITED      = $00800000;
 
-{ TTextFormatFlags }
-
-class operator TTextFormatFlags.Implicit(Value: TTextFormatFlags): TTextFormat;
-begin
-  Result := Value.FValue;
-end;
-
-class operator TTextFormatFlags.Implicit(Value: TTextFormat): TTextFormatFlags;
-begin
-  Result.FValue := Value;
-end;
-
-class operator TTextFormatFlags.Implicit(
-  Value: TTextFormatFlags): TDrawTextFlags;
-const
-  CFlags: array[TTextFormats] of Cardinal = (
-    DT_BOTTOM, DT_CALCRECT, DT_CENTER, DT_EDITCONTROL, DT_END_ELLIPSIS,
-    DT_PATH_ELLIPSIS, DT_EXPANDTABS, DT_EXTERNALLEADING, DT_LEFT,
-    DT_MODIFYSTRING, DT_NOCLIP, DT_NOPREFIX, DT_RIGHT, DT_RTLREADING,
-    DT_SINGLELINE, DT_TOP, DT_VCENTER, DT_WORDBREAK, DT_HIDEPREFIX,
-    DT_NOFULLWIDTHCHARBREAK, DT_PREFIXONLY, DT_TABSTOP, DT_WORD_ELLIPSIS,
-    MASK_TF_COMPOSITED {tfComposited});
-var
-  LDrawTextFlag: TTextFormats;
-begin
-  Result := 0;
-  for LDrawTextFlag := Low(TTextFormats) to High(TTextFormats) do
-    if (LDrawTextFlag in Value.FValue) then
-      Result := Result or CFlags[LDrawTextFlag];
-end;
-
-class operator TTextFormatFlags.Implicit(
-  Value: TDrawTextFlags): TTextFormatFlags;
-begin
-  Result.FValue := [];
-  if (Value and DT_BOTTOM) = DT_BOTTOM then
-    Include(Result.FValue, tfBottom);
-  if (Value and DT_CALCRECT) = DT_CALCRECT then
-    Include(Result.FValue, tfCalcRect);
-  if (Value and DT_CENTER) = DT_CENTER then
-    Include(Result.FValue, tfCenter);
-  if (Value and DT_EDITCONTROL) = DT_EDITCONTROL then
-    Include(Result.FValue, tfEditControl);
-  if (Value and DT_END_ELLIPSIS) = DT_END_ELLIPSIS then
-    Include(Result.FValue, tfEndEllipsis);
-  if (Value and DT_PATH_ELLIPSIS) = DT_PATH_ELLIPSIS then
-    Include(Result.FValue, tfPathEllipsis);
-  if (Value and DT_EXPANDTABS) = DT_EXPANDTABS then
-    Include(Result.FValue, tfExpandTabs);
-  if (Value and DT_EXTERNALLEADING) = DT_EXTERNALLEADING then
-    Include(Result.FValue, tfExternalLeading);
-  if (Value and DT_LEFT) = DT_LEFT then
-    Include(Result.FValue, tfLeft);
-  if (Value and DT_MODIFYSTRING) = DT_MODIFYSTRING then
-    Include(Result.FValue, tfModifyString);
-  if (Value and DT_NOCLIP) = DT_NOCLIP then
-    Include(Result.FValue, tfNoClip);
-  if (Value and DT_NOPREFIX) = DT_NOPREFIX then
-    Include(Result.FValue, tfNoPrefix);
-  if (Value and DT_RIGHT) = DT_RIGHT then
-    Include(Result.FValue, tfRight);
-  if (Value and DT_RTLREADING) = DT_RTLREADING then
-    Include(Result.FValue, tfRtlReading);
-  if (Value and DT_SINGLELINE) = DT_SINGLELINE then
-    Include(Result.FValue, tfSingleLine);
-  if (Value and DT_TOP) = DT_TOP then
-    Include(Result.FValue, tfTop);
-  if (Value and DT_VCENTER) = DT_VCENTER then
-    Include(Result.FValue, tfVerticalCenter);
-  if (Value and DT_WORDBREAK) = DT_WORDBREAK then
-    Include(Result.FValue, tfWordBreak);
-  if (Value and DT_HIDEPREFIX) = DT_HIDEPREFIX then
-    Include(Result.FValue, tfHidePrefix);
-  if (Value and DT_NOFULLWIDTHCHARBREAK) = DT_NOFULLWIDTHCHARBREAK then
-    Include(Result.FValue, tfNoFullWidthCharBreak);
-  if (Value and DT_PREFIXONLY) = DT_PREFIXONLY then
-    Include(Result.FValue, tfPrefixOnly);
-  if (Value and DT_TABSTOP) = DT_TABSTOP then
-    Include(Result.FValue, tfTabStop);
-  if (Value and DT_WORD_ELLIPSIS) = DT_WORD_ELLIPSIS then
-    Include(Result.FValue, tfWordEllipsis);
-  if (Value and MASK_TF_COMPOSITED) = MASK_TF_COMPOSITED then
-    Include(Result.FValue, tfComposited);
-end;
 {$IFEND}
 
 // ------------------------------------------------------------------------------

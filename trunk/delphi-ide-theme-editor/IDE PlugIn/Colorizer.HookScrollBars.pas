@@ -47,10 +47,15 @@ uses
   StrUtils,
   SysUtils,
   GraphUtil,
+
+  Forms,
+  StdCtrls,
+  Colorizer.Hooks,
   Dialogs,
   DDetours;
 
   var
+  ListBrush : TObjectDictionary<TObject, TBrush>;
   ScrollBarList: TDictionary<HTHEME, String>;
   DrawThemeBackgroundOrgPointer : Pointer = nil;
   OpenThemeDataOrgPointer       : Pointer = nil;
@@ -96,99 +101,104 @@ begin
 end;
 
 procedure CustomDefaultHandler(Self : TWinControl;var Message);
+//var
+//  LParentForm : TCustomForm;
+//  LBrush      : TBrush;
 begin
   LastWinControl:=Self;
+//  LParentForm:=GetParentForm(Self);
+
+
+//  if not (csDesigning in Self.ComponentState) and Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows)
+//     and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)
+//     and Assigned(TColorizerLocalSettings.ColorMap)  then
+//    begin
+//         case TMessage(Message).Msg of
+//            WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC,
+//            CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+//            begin
+//              //AddLog('CustomDefaultHandler ', Self.ClassName + ' ' + WM_To_String(TMessage(Message).Msg));
+//              //AddLog('CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
+//              if not ListBrush.ContainsKey(Self) then
+//                 ListBrush.Add(Self, TBrush.Create);
+//
+//              SetTextColor(TMessage(Message).wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+//
+//              LBrush:=ListBrush.Items[Self];
+//              LBrush.Color:= clRed; //TColorizerLocalSettings.ColorMap.Color;
+//
+//              SetBkColor(TMessage(Message).wParam, ColorToRGB(LBrush.Color));
+//              TMessage(Message).Result := LRESULT(LBrush.Handle);
+//              Exit;
+//            end;
+//         end;
+//    end;
+
+//
+//  if not (csDesigning in Self.ComponentState) and Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows)
+//     and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)
+//     and (Self is TCustomComboBox) and Assigned(TColorizerLocalSettings.ColorMap)  then
+//    case TMessage(Message).Msg of
+//
+//            WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC,
+//            CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+//            begin
+//              AddLog('CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
+////              if not ListBrush.ContainsKey(Self) then
+////                 ListBrush.Add(Self, TBrush.Create);
+//
+//              SetTextColor(TMessage(Message).wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+//
+//              //LBrush:=ListBrush.Items[Self];
+//              LBrush:=TCustomComboBox(Self).Canvas.Brush;
+//              LBrush.Color:=TColorizerLocalSettings.ColorMap.Color;
+//
+//              SetBkColor(TMessage(Message).wParam, ColorToRGB(LBrush.Color));
+//              TMessage(Message).Result := LRESULT(LBrush.Handle);
+//              Exit;
+//            end;
+//
+////            WM_ERASEBKGND :
+////            begin
+////              TCustomComboBox(Self).Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+////              TCustomComboBox(Self).Canvas.FillRect(Self.ClientRect);
+////
+////              TMessage(Message).Result :=1;
+////            end;
+//            CM_FOCUSCHANGED:
+//            begin
+//              InvalidateRect(Self.Handle, nil, False);
+//              TrampolineTWinControl_DefaultHandler(Self, Message);
+//            end;
+//
+//    else
+//            begin
+//              AddLog('Skipped CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
+//              TrampolineTWinControl_DefaultHandler(Self, Message);
+//            end;
+//    end
+//  else
   TrampolineTWinControl_DefaultHandler(Self, Message);
 end;
 
 type
   TWinControlClass = class(TWinControl);
 
-
-procedure DrawNCBorder(Self : TWinControlClass);
-var
-  EmptyRect, DrawRect: TRect;
-  DC: HDC;
-  H, W: Integer;
-  Style{, ExStyle}: Integer;
-  LCanvas : TCanvas;
-begin
-
-    //AddLog('CustomWMNCPaint (1)', Self.ClassName);
-  if Assigned(TColorizerLocalSettings.ColorMap) and
-     //(Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0)) or
-     (Assigned(TColorizerLocalSettings.HookedScrollBars) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(Self.ClassName)>=0)) then
-  begin
-    //AddLog('CustomWMNCPaint', Self.ClassName);
-    //ExStyle := GetWindowLong(Self.Handle, GWL_EXSTYLE);
-
-//    if (ExStyle and WS_EX_CLIENTEDGE) <> 0 then
-//    AddLog('CustomWMNCPaint', 'WS_EX_CLIENTEDGE');
-
-      GetWindowRect(Self.Handle, DrawRect);
-      OffsetRect(DrawRect, -DrawRect.Left, -DrawRect.Top);
-      DC := GetWindowDC(Self.Handle);
-      try
-        EmptyRect := DrawRect;
-
-        Style := GetWindowLong(Self.Handle, GWL_STYLE);
-        if ((Style and WS_HSCROLL) <> 0) and ((Style and WS_VSCROLL) <> 0) then
-        begin
-          //AddLog('CustomWMNCPaint EmptyRect', Self.ClassName);
-          W := GetSystemMetrics(SM_CXVSCROLL);
-          H := GetSystemMetrics(SM_CYHSCROLL);
-          InflateRect(EmptyRect, -1, -1);
-          with EmptyRect do
-            if Self.UseRightToLeftScrollBar then
-              EmptyRect := Rect(Left, Bottom - H, Left + W, Bottom)
-            else
-              EmptyRect := Rect(Right - W, Bottom - H, Right, Bottom);
-          //FillRect(DC, EmptyRect, GetSysColorBrush(COLOR_WINDOW));
-          LCanvas:=TCanvas.Create;
-          try
-            LCanvas.Handle:=DC;
-            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-            LCanvas.FillRect(EmptyRect);
-          finally
-            LCanvas.Handle:=0;
-            LCanvas.Free;
-          end;
-        end;
-
-        with DrawRect do
-          ExcludeClipRect(DC, Left + 2, Top + 2, Right - 2, Bottom - 2);
-        //AddLog('CustomWMNCPaint DrawRect', Self.ClassName);
-        LCanvas:=TCanvas.Create;
-        try
-          LCanvas.Handle:=DC;
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-          LCanvas.FillRect(DrawRect);
-        finally
-          LCanvas.Handle:=0;
-          LCanvas.Free;
-        end;
-
-      finally
-        ReleaseDC(Self.Handle, DC);
-      end;
-
-
-
-  end;
-end;
-
 procedure CustomWMNCPaint(Self : TWinControlClass;var Message: TWMNCPaint);
 begin
   TrampolineTWinControl_WMNCPaint(Self, Message);
   if csDesigning in Self.ComponentState then  exit;
-  DrawNCBorder(Self);
+  if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
+    DrawNCBorder(Self, True);
 end;
 
 procedure  CustomBaseVirtualTreeOriginalWMNCPaint(Self : TCustomControl;DC: HDC);
 begin
  TrampolineBaseVirtualTreeOriginalWMNCPaint(Self, DC);
-  if csDesigning in Self.ComponentState then  exit;
- DrawNCBorder(TWinControlClass(Self));
+ if csDesigning in Self.ComponentState then  exit;
+//Draw the bottom right corner when both scrollbars are active in the TBaseVirtualTree
+ if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
+   DrawNCBorder(TWinControlClass(Self), True);
 end;
 
 function CustomOpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
@@ -196,12 +206,11 @@ begin
   Result := TrampolineOpenThemeData(hwnd, pszClassList);
   if SameText(pszClassList, VSCLASS_SCROLLBAR) then
   begin
-    //AddLog('OpenThemeData ProcByLevel 2', ProcByLevel(2));
-
     if not ScrollBarList.ContainsKey(Result) then
-    ScrollBarList.Add(Result, pszClassList);
+      ScrollBarList.Add(Result, pszClassList);
   end;
 end;
+
 
 //function CustomCloseThemeData(hTheme: HTHEME): HRESULT; stdcall;
 //begin
@@ -373,13 +382,12 @@ var
   LCanvas : TCanvas;
   VCLClassName : string;
   ApplyHook  : Boolean;
-  i : integer;
+//  i : integer;
   LHWND : HWND;
   LFoundControl : TWinControl;
 begin
   if not (ScrollBarList.ContainsKey(THEME) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-
 
   ApplyHook:=False;
   sCaller :='';
@@ -407,6 +415,7 @@ begin
 
   if not ApplyHook then
   begin
+
     sCaller := ProcByLevel(1);
     if sCaller<>'' then
       sCaller2 := ProcByLevel(2);
@@ -715,6 +724,7 @@ var
   VclIDEModule : HMODULE;
 
 initialization
+ ListBrush := TObjectDictionary<TObject, TBrush>.Create([doOwnsValues]);
 
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
 begin
@@ -727,10 +737,6 @@ begin
   OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
   if Assigned (OpenThemeDataOrgPointer) then
    TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @CustomOpenThemeData);
-
-//  CloseThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'CloseThemeData');
-//  if Assigned (CloseThemeDataOrgPointer) then
-//   TrampolineCloseThemeData := InterceptCreate(CloseThemeDataOrgPointer, @CustomCloseThemeData);
 
   DrawThemeBackgroundOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'), 'DrawThemeBackground');
   if Assigned (DrawThemeBackgroundOrgPointer) then
@@ -775,8 +781,7 @@ if Assigned (TrampolineSetScrollPos) then
 if Assigned (TrampolineSetScrollInfo) then
   InterceptRemove(@TrampolineSetScrollInfo);
 
-
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   ScrollBarList.Free;
-
+  ListBrush.Free;
 end.

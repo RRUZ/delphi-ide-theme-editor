@@ -62,6 +62,7 @@ uses
   StrUtils,
   ShellAPI,
   Classes,
+  Controls,
   Dialogs,
  {$IFDEF DELPHIXE2_UP}
   System.UITypes,
@@ -412,6 +413,32 @@ begin
     $046A: Result := 'UDM_GETBUDDY';
     $102C: Result := 'LVM_GETITEMSTATE';
     $8000: Result := 'WM_APP';
+
+    //VCL control notifications
+    CN_CHARTOITEM        : Result := 'CN_CHARTOITEM';
+    CN_COMMAND           : Result := 'CN_COMMAND';
+    CN_COMPAREITEM       : Result := 'CN_COMPAREITEM';
+    CN_CTLCOLORBTN       : Result := 'CN_CTLCOLORBTN';
+    CN_CTLCOLORDLG       : Result := 'CN_CTLCOLORDLG';
+    CN_CTLCOLOREDIT      : Result := 'CN_CTLCOLOREDIT';
+    CN_CTLCOLORLISTBOX   : Result := 'CN_CTLCOLORLISTBOX';
+    CN_CTLCOLORMSGBOX    : Result := 'CN_CTLCOLORMSGBOX';
+    CN_CTLCOLORSCROLLBAR : Result := 'CN_CTLCOLORSCROLLBAR';
+    CN_CTLCOLORSTATIC    : Result := 'CN_CTLCOLORSTATIC';
+    CN_DELETEITEM        : Result := 'CN_DELETEITEM';
+    CN_DRAWITEM          : Result := 'CN_DRAWITEM';
+    CN_HSCROLL           : Result := 'CN_HSCROLL';
+    CN_MEASUREITEM       : Result := 'CN_MEASUREITEM';
+    CN_PARENTNOTIFY      : Result := 'CN_PARENTNOTIFY';
+    CN_VKEYTOITEM        : Result := 'CN_VKEYTOITEM';
+    CN_VSCROLL           : Result := 'CN_VSCROLL';
+    CN_KEYDOWN           : Result := 'CN_KEYDOWN';
+    CN_KEYUP             : Result := 'CN_KEYUP';
+    CN_CHAR              : Result := 'CN_CHAR';
+    CN_SYSKEYDOWN        : Result := 'CN_SYSKEYDOWN';
+    CN_SYSCHAR           : Result := 'CN_SYSCHAR';
+    CN_NOTIFY            : Result := 'CN_NOTIFY';
+
   else Result := 'Unknown(' + IntToHex(WM_Message, 4) + ')';
   end; { Case }
 end;

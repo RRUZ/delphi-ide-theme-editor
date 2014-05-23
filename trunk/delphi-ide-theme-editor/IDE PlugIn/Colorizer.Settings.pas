@@ -42,6 +42,7 @@ type
     FDockStartGradInActive: string;
     FDockEndGradActive: string;
     FDockEndGradInActive: string;
+    FHookSystemColors: boolean;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -53,6 +54,8 @@ type
 
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
+
+    property HookSystemColors : boolean read FHookSystemColors write FHookSystemColors;
 
     property DockImages    : string read FDockImages write FDockImages;
     property DockGradientHor    : boolean read FDockGradientHor write FDockGradientHor;
@@ -95,6 +98,7 @@ begin
     Settings.VCLStyleName            := LIniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
     Settings.UseVCLStyles            := LIniFile.ReadBool('Global', 'UseVCLStyles', False);
     Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
+    Settings.HookSystemColors        := LIniFile.ReadBool('Global', 'HookSystemColors', True);
     Settings.DockImages              := LIniFile.ReadString('Global', 'DockImages', 'red');
     Settings.DockGradientHor         := LIniFile.ReadBool('Global', 'DockGradientHor', True);
     Settings.DockCustom              := LIniFile.ReadBool('Global', 'DockCustom', True);
@@ -124,6 +128,7 @@ begin
     LIniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
     LIniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
     LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
+    LIniFile.WriteBool('Global', 'HookSystemColors', Settings.HookSystemColors);
     LIniFile.WriteString('Global', 'DockImages', Settings.DockImages);
     LIniFile.WriteBool('Global', 'DockGradientHor', Settings.DockGradientHor);
     LIniFile.WriteBool('Global', 'DockCustom', Settings.DockCustom);

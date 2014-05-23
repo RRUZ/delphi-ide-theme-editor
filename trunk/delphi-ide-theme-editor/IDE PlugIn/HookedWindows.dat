@@ -33,3 +33,6 @@ TModulesView
 TConfigMgrDlg
 TTemplateView
 TClassBrowser
+TIDEInsightForm
+TRegisteredTypeLibraryWindow
+TRegisteredTypeLibraryTabFrame
