@@ -243,12 +243,27 @@ end;
 {$ENDIF}
 
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate: Boolean = False);
+
+  procedure HideSeparators(LForm : TForm; const AClassName, AToolBarName: string);
+  var
+    I        : Integer;
+    LToolbar : TToolBar;
+  begin
+      if SameText(LForm.ClassName, AClassName) then
+      begin
+        LToolbar := TToolBar(LForm.FindComponent(AToolBarName));
+        if LToolbar<>nil then
+         for  I :=0 to LToolbar.ButtonCount-1 do
+          if (LToolbar.Buttons[I].Style = TToolButtonStyle.tbsSeparator) and (LToolbar.Buttons[I].Visible) then
+            LToolbar.Buttons[I].Visible:=False;
+      end;
+  end;
+
 var
   Index          : Integer;
   LActionManager : TActionManager;
 //  LStrings       : TStringList;
   LForm          : TForm;
-//  LToolbar       : TToolBar;
 //  s              : string;
 //  ctx            : TRttiContext;
 //  LField         : TRttiField;
@@ -262,64 +277,7 @@ begin
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
 
-//      if SameText(LForm.ClassName, 'TProjectManagerForm') then
-//      begin
-//
-//        LToolbar := TToolBar(LForm.FindComponent('ToolBar'));
-//        if LToolbar<>nil then
-//          LToolbar.
-////          for Index := 0 to AComponent.ComponentCount - 1 do
-////            if AComponent.Components[Index].GetParentComponent = LToolbar   then
-////               AddLog('Toolbar ', AComponent.Components[Index].Name);
-//      end;
-
-      {
-18:54:57.552 Toolbar  : tbProjectList
-18:54:57.554 Toolbar  : ToolButton1
-18:54:57.559 Toolbar  : ToolButton9
-18:54:57.561 Toolbar  : ToolButton2
-18:54:57.563 Toolbar  : ToolButton3
-18:54:57.565 Toolbar  : tbs1
-18:54:57.567 Toolbar  : tbSync
-18:54:57.569 Toolbar  : tbExpandAll
-18:54:57.572 Toolbar  : tbCollapseAll
-18:54:57.574 Toolbar  : ToolButton5
-18:54:57.576 Toolbar  : ToolButton4
-18:54:57.578 Toolbar  : ToolButton6
-18:54:57.579 Toolbar  : ToolButton7
-18:54:57.582 Toolbar  : bConfiguration
-18:54:57.584 Toolbar  : bPlatform
-18:54:57.824 Toolbar  : tbProjectList
-18:54:57.827 Toolbar  : ToolButton1
-18:54:57.829 Toolbar  : ToolButton9
-18:54:57.832 Toolbar  : ToolButton2
-18:54:57.836 Toolbar  : ToolButton3
-18:54:57.839 Toolbar  : tbs1
-18:54:57.841 Toolbar  : tbSync
-18:54:57.842 Toolbar  : tbExpandAll
-18:54:57.844 Toolbar  : tbCollapseAll
-18:54:57.846 Toolbar  : ToolButton5
-18:54:57.849 Toolbar  : ToolButton4
-18:54:57.851 Toolbar  : ToolButton6
-18:54:57.852 Toolbar  : ToolButton7
-18:54:57.854 Toolbar  : bConfiguration
-18:54:57.856 Toolbar  : bPlatform
-18:54:57.917 Toolbar  : tbProjectList
-18:54:57.920 Toolbar  : ToolButton1
-18:54:57.925 Toolbar  : ToolButton9
-18:54:57.928 Toolbar  : ToolButton2
-18:54:57.930 Toolbar  : ToolButton3
-18:54:57.933 Toolbar  : tbs1
-18:54:57.935 Toolbar  : tbSync
-18:54:57.937 Toolbar  : tbExpandAll
-18:54:57.939 Toolbar  : tbCollapseAll
-18:54:57.940 Toolbar  : ToolButton5
-18:54:57.943 Toolbar  : ToolButton4
-18:54:57.944 Toolbar  : ToolButton6
-18:54:57.946 Toolbar  : ToolButton7
-18:54:57.948 Toolbar  : bConfiguration
-18:54:57.950 Toolbar  : bPlatform
-      }
+      HideSeparators(LForm, 'TProjectManagerForm', 'ToolBar');
 
       //process field TComponent no registered in the components list
 //      ctx:=TRttiContext.Create;

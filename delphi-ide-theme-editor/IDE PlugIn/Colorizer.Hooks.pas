@@ -69,6 +69,8 @@ uses
   ActnPopup,
   ActnMan,
   StdCtrls,
+  Tabs,
+  Types,
   DDetours;
 
 type
@@ -92,6 +94,9 @@ var
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   {$IFEND}
   Trampoline_TCanvas_FillRect          : procedure (Self: TCanvas;const Rect: TRect) = nil;
+  Trampoline_TCanvas_LineTo            : procedure (Self: TCanvas; X, Y: Integer) = nil;
+  Trampoline_TCanvas_Rectangle         : procedure (Self: TCanvas; X1, Y1, X2, Y2: Integer) = nil;
+
   Trampoline_TCustomStatusBar_WMPAINT  : procedure (Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
   {$IFDEF DELPHIXE6_UP}
@@ -118,6 +123,7 @@ var
   Trampoline_CustomComboBox_WMPaint        : procedure (Self: TCustomComboBox;var Message: TWMPaint) = nil;
   Trampoline_TButtonControl_WndProc        : procedure (Self:TButtonControlClass;var Message: TMessage) = nil;
   Trampoline_DrawFrameControl              : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
+  Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
 
   FGutterBkColor : TColor = clNone;
 
@@ -136,6 +142,15 @@ type
   public
     function  SetVisibleAddress: Pointer;
    end;
+
+  TTabSetHelper = class helper for TTabSet
+  public
+    function  DoModernPaintingAddress: Pointer;
+    function  GetMemBitmap: TBitmap;
+    function  GetEdgeWidth: Integer;
+    function  GetTabPositions: TList;
+  end;
+
 
   TCustomListViewHelper = class helper for TCustomListView
   public
@@ -164,13 +179,244 @@ type
     function WMNCPaintAddress : Pointer;
   end;
 
-{$IFDEF DELPHIXE2_UP}
-
-{$ELSE}
-{$ENDIF}
 
 var
    ListBrush : TObjectDictionary<TObject, TBrush>;
+
+type
+  TTabSetClass = class(TTabSet);
+
+{$IFDEF DELPHIXE2_UP}
+
+{$ELSE}
+  TDWordFiller = record
+  {$IFDEF CPUX64}
+    Filler: array[1..4] of Byte;
+  {$ENDIF}
+  end;
+{$ENDIF}
+
+procedure CustomDoModernPainting(Self : TTabSet);
+type
+  TTabPos = record
+    Size, StartPos: Word;
+    StartPosFiller: TDWordFiller;
+  end;
+
+  procedure DrawLine(Canvas: TCanvas; FromX, FromY, ToX, ToY: Integer);
+  var
+    T: Integer;
+  begin
+    if Self.TabPosition in [tpLeft, tpRight] then
+    begin
+      T := FromX;
+      FromX := FromY;
+      FromY := T;
+      T := ToX;
+      ToX := ToY;
+      ToY := T;
+    end;
+    Canvas.MoveTo(FromX, FromY);
+    Canvas.LineTo(ToX, ToY);
+  end;
+
+var
+  LRect, LMemBitmapRect: TRect;
+  sText: string;
+  Tab, YStart, TabOffset, MinRect, TotalSize, TabTop, ImageIndex: Integer;
+  TabPos: TTabPos;
+  DrawImage: Boolean;
+  TabSelected, TabNextSelected: Boolean;
+  LBackgroundColor: TColor;
+  LParentForm : TCustomForm;
+begin
+    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+    begin
+     Trampoline_DoModernPainting(Self);
+     exit;
+    end;
+
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+     Trampoline_DoModernPainting(Self);
+      exit;
+    end;
+
+  if Self.TabPosition in [tpBottom, tpRight] then
+  begin
+    TabTop := 2;
+    YStart := 1;
+  end
+  else if Self.TabPosition = tpTop then
+  begin
+    TabTop := Self.ClientHeight - Self.TabHeight - 2;
+    YStart := Self.ClientHeight - 2;
+  end
+  else
+  begin
+    TabTop := Self.ClientWidth - Self.TabHeight - 2;
+    YStart := Self.ClientWidth - 2;
+  end;
+
+  if Self.TabPosition in [tpTop, tpBottom] then
+    TotalSize := Self.GetMemBitmap.Width
+  else
+    TotalSize := Self.GetMemBitmap.Height;
+
+  //background
+  with Self.GetMemBitmap.Canvas do
+  begin
+    LBackgroundColor := TColorizerLocalSettings.ColorMap.Color;
+    Brush.Color := LBackgroundColor;
+    Pen.Width := 1;
+    Pen.Color := LBackgroundColor;
+    LMemBitmapRect := Types.Rect(0, 0, Self.GetMemBitmap.Width, Self.GetMemBitmap.Height);
+    Rectangle(LMemBitmapRect);
+    DrawLine(Self.GetMemBitmap.Canvas, 0, YStart, TotalSize, YStart);
+    if Self.TabPosition in [tpBottom, tpRight] then
+      Inc(YStart)
+    else
+      Dec(YStart);
+
+    Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+    DrawLine(Self.GetMemBitmap.Canvas, 0, YStart, TotalSize, YStart);
+
+    MinRect := TextWidth('X...');
+  end;
+
+  TabOffset := Self.GetEdgeWidth div 2;
+
+  for Tab := 0 to Self.GetTabPositions.Count - 1 do
+  begin
+    TabPos := TTabPos(Self.GetTabPositions[Tab]);
+    TabSelected := Tab + Self.FirstIndex = Self.TabIndex;
+    TabNextSelected := (Tab + Self.FirstIndex) + 1 = Self.TabIndex;
+
+    if TabSelected then
+    begin
+      Self.GetMemBitmap.Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+      DrawLine( Self.GetMemBitmap.Canvas, TabPos.StartPos - TabOffset + 1, TabTop, TabPos.StartPos - TabOffset + 1, TabTop + Self.TabHeight);
+
+      Self.GetMemBitmap.Canvas.Pen.Color := GetHighlightColor(Self.SelectedColor);
+
+      DrawLine(Self.GetMemBitmap.Canvas, TabPos.StartPos - TabOffset + 2, TabTop, TabPos.StartPos - TabOffset + 2, TabTop + Self.TabHeight);
+      Self.GetMemBitmap.Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+
+      if Self.TabPosition in [tpBottom, tpRight] then
+        DrawLine(Self.GetMemBitmap.Canvas,
+          TabPos.StartPos + 1 - TabOffset, TabTop + Self.TabHeight - 1, TabPos.StartPos + TabPos.Size + 1 + TabOffset, TabTop + Self.TabHeight - 1)
+      else
+        DrawLine(Self.GetMemBitmap.Canvas, TabPos.StartPos + 1 - TabOffset + 1, TabTop, TabPos.StartPos + TabPos.Size + 1 + TabOffset, TabTop);
+
+      DrawLine(Self.GetMemBitmap.Canvas, TabPos.StartPos + TabPos.Size + TabOffset, TabTop, TabPos.StartPos + TabPos.Size + TabOffset, TabTop + Self.TabHeight - 1);
+      Self.GetMemBitmap.Canvas.Brush.Color := Self.SelectedColor;
+
+      if Self.TabPosition in [tpTop, tpBottom] then
+        LRect := Types.Rect(TabPos.StartPos + 2 - TabOffset, TabTop, TabPos.StartPos + TabPos.Size + TabOffset, TabTop + Self.TabHeight - 1)
+      else
+        LRect := Types.Rect(TabTop, TabPos.StartPos + 2 - TabOffset, TabTop + Self.TabHeight - 1, TabPos.StartPos + TabPos.Size + TabOffset);
+
+      if Self.TabPosition = tpTop then
+      begin
+        Inc(LRect.Left);
+        Inc(LRect.Top);
+        Inc(LRect.Bottom);
+      end
+      else if Self.TabPosition = tpLeft then
+      begin
+        Inc(LRect.Left);
+        Inc(LRect.Top);
+        Inc(LRect.Right);
+      end
+      else if Self.TabPosition = tpRight then
+        Inc(LRect.Top)
+      else
+        Inc(LRect.Left);
+      Self.GetMemBitmap.Canvas.FillRect(LRect);
+    end
+    else if not TabNextSelected then
+    begin
+      Self.GetMemBitmap.Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+      DrawLine(Self.GetMemBitmap.Canvas, TabPos.StartPos + TabPos.Size + TabOffset, TabTop + 3, TabPos.StartPos + TabPos.Size + TabOffset, TabTop + Self.TabHeight - 1 - 2);
+    end;
+
+    if Self.TabPosition in [tpTop, tpBottom] then
+      LRect := Types.Rect(TabPos.StartPos, TabTop, TabPos.StartPos + TabPos.Size, TabTop + Self.TabHeight)
+    else
+      LRect := Types.Rect(TabTop, TabPos.StartPos, TabTop + Self.TabHeight, TabPos.StartPos + TabPos.Size);
+
+    with Self.GetMemBitmap.Canvas do
+    begin
+      Brush.Style := bsClear;
+      if Self.TabPosition in [tpTop, tpBottom] then
+      begin
+        Inc(LRect.Top, 2);
+        Inc(LRect.Left, 1);
+        Inc(LRect.Right, 1);
+      end
+      else
+      begin
+        if Self.TabPosition = tpRight then
+          Inc(LRect.Left, 1 + TextHeight('X'))
+        else
+        begin
+          Inc(LRect.Left, 2);
+          LRect.Top := LRect.Top + TabPos.Size;
+        end;
+        LRect.Right := LRect.Left + TabPos.Size + 2;
+        LRect.Bottom := LRect.Top + Self.TabHeight;
+      end;
+
+      //Draw Image
+      if (Self.Images <> nil) then
+      begin
+        ImageIndex := TTabSetClass(Self).GetImageIndex(Tab + Self.FirstIndex);
+        DrawImage := (ImageIndex > -1) and (ImageIndex < Self.Images.Count);
+        if Self.TabPosition in [tpTop, tpBottom] then
+        begin
+          if DrawImage and (LRect.Left + 2 + Self.Images.Width < LRect.Right) then
+          begin
+            Self.Images.Draw(Self.GetMemBitmap.Canvas, LRect.Left, LRect.Top, ImageIndex);
+            Inc(LRect.Left, 2 + Self.Images.Width);
+          end;
+          Inc(LRect.Top, 2);
+        end
+        else if Self.TabPosition = tpRight then
+        begin
+          if DrawImage then
+          begin
+            Self.Images.Draw(Self.GetMemBitmap.Canvas, LRect.Left - TextHeight('X') + 2,
+              LRect.Top, ImageIndex);
+            Inc(LRect.Top, 2 + Self.Images.Height);
+            Dec(LRect.Right, Self.Images.Height);
+          end;
+          Inc(LRect.Left, 2);
+        end
+        else
+        begin
+          if DrawImage then
+          begin
+            Self.Images.Draw(Self.GetMemBitmap.Canvas, LRect.Left, LRect.Top - Self.Images.Height, ImageIndex);
+            Dec(LRect.Top, 2 + Self.Images.Height);
+            Dec(LRect.Right, Self.Images.Height);
+          end;
+          Inc(LRect.Left, 2);
+        end;
+      end;
+
+      //draw text
+      sText := Self.Tabs[Tab + Self.FirstIndex];
+      if (LRect.Right - LRect.Left >= MinRect) or
+          (TextWidth(sText) <= (LRect.Right - LRect.Left)) then
+      begin
+        Self.GetMemBitmap.Canvas.Font.Color := Self.Font.Color;
+        TextRect(LRect, sText, [tfEndEllipsis, tfNoClip]);
+      end;
+    end;
+  end;
+end;
+
 
 //hook for unthemed TCheckbox
 function CustomDrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
@@ -834,6 +1080,31 @@ begin
   Result     := TMethod(MethodAddr).Code;
 end;
 
+{ TTabSetHelper }
+
+function TTabSetHelper.DoModernPaintingAddress: Pointer;
+var
+  MethodAddr: procedure of object;
+begin
+  MethodAddr := Self.DoModernPainting;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
+function TTabSetHelper.GetEdgeWidth: Integer;
+begin
+ Result:=Self.FEdgeWidth;
+end;
+
+function TTabSetHelper.GetMemBitmap: TBitmap;
+begin
+ Result:=Self.FMemBitmap;
+end;
+
+function TTabSetHelper.GetTabPositions: TList;
+begin
+  Result:=Self.FTabPositions;
+end;
+
 { TCustomListViewHelper }
 
 function TCustomListViewHelper.GetHeaderHandle: HWND;
@@ -1249,6 +1520,41 @@ begin
   end;
 end;
 
+procedure  CustomRectangle(Self: TCanvas; X1, Y1, X2, Y2: Integer);
+begin
+  //Self.Brush.Color:=clRed;
+  Trampoline_TCanvas_Rectangle(Self, X1, Y1, X2, Y2);
+end;
+
+
+//Hook for paint the border of the TClosableTabScroller control
+procedure  CustomLineTo(Self: TCanvas;X, Y: Integer);
+var
+  sCaller : string;
+  LHWND : HWND;
+  LWinControl : TWinControl;
+  ApplyHook : Boolean;
+begin
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Self.Pen.Color=clBtnFace) then
+   begin
+     sCaller  := ProcByLevel(1);
+     ApplyHook:= (sCaller='');
+     if not ApplyHook then
+     begin
+       LHWND :=  WindowFromDC(Self.Handle);
+       LWinControl:=nil;
+       if LHWND<>0 then
+         LWinControl:=FindControl(LHWND);
+       ApplyHook := (Assigned(LWinControl) and SameText(LWinControl.ClassName, 'TClosableTabScroller'));
+     end;
+
+     if ApplyHook then
+      Self.Pen.Color :=TColorizerLocalSettings.ColorMap.Color;
+   end;
+
+  Trampoline_TCanvas_LineTo(Self, X, Y);
+end;
+
 //Hook for paint the gutter of the TEditControl and the background of the TGradientTabSet component
 procedure  CustomFillRect(Self: TCanvas;const Rect: TRect);
 const
@@ -1256,6 +1562,8 @@ const
  sGradientTabsSignature  = 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
 var
   sCaller : string;
+//  LHWND : HWND;
+//  LWinControl : TWinControl;
 begin
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
    begin
@@ -1265,6 +1573,19 @@ begin
      else
       if SameText(sCaller, sGradientTabsSignature) then
         Self.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+//      else
+//      begin
+//         LHWND :=  WindowFromDC(Self.Handle);
+//         LWinControl:=nil;
+//         if LHWND<>0 then
+//           LWinControl:=FindControl(LHWND);
+//         AddLog('CustomFillRect', sCaller);
+//
+//         if LWinControl<>nil then
+//           AddLog('CustomFillRect', LWinControl.ClassName);
+//
+//         AddLog('CustomFillRect', '--------------');
+//      end;
    end;
    Trampoline_TCanvas_FillRect(Self, Rect);
 end;
@@ -2157,25 +2478,9 @@ end;
 function CustomGetSysColor(nIndex: Integer): DWORD; stdcall;
 var
   sCaller : string;
-  //i  : Integer;
 begin
-
-//   if (nIndex=COLOR_WINDOWTEXT) then
-//   begin
-//      for i := 2 to 5 do
-//      begin
-//         sCaller := ProcByLevel(i);
-//         AddLog('CustomGetSysColor', Format('%d nIndex %d %s',[i, nIndex, sCaller]));
-//      end;
-//      AddLog('CustomGetSysColor', Format('%s',['---------------']));
-//   end;
-
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
    begin
-    //Vcl.Controls.TWinControl.PaintHandler
-    //Vcl.Controls.TWinControl.WMPaint
-    //Vcl.Controls.TWinControl.WMPrintClient
-
      case nIndex of
 
        COLOR_INACTIVECAPTION :
@@ -2252,6 +2557,9 @@ begin
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
 {$IFEND}
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
+  Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @CustomLineTo);
+  Trampoline_TCanvas_Rectangle    :=InterceptCreate(@TCanvas.Rectangle, @CustomRectangle);
+
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @CustomWMPaintComboBox);
 
@@ -2285,6 +2593,8 @@ begin
 
   Trampoline_TWinControl_WMNCPaint      := InterceptCreate(TWinControl(nil).WMNCPaintAddress, @CustomWinControl_WMNCPaint);
 
+  Trampoline_DoModernPainting           := InterceptCreate(TTabSet(nil).DoModernPaintingAddress, @CustomDoModernPainting);
+
   Trampoline_TSplitter_Paint               := InterceptCreate(@TSplitterClass.Paint, @CustomSplitterPaint);
   Trampoline_TButtonControl_WndProc        := InterceptCreate(@TButtonControlClass.WndProc, @CustomButtonControlWndProc);
 {$IFDEF DELPHIXE6_UP}
@@ -2307,6 +2617,13 @@ begin
 {$IFEND}
   if Assigned(Trampoline_TCanvas_FillRect) then
     InterceptRemove(@Trampoline_TCanvas_FillRect);
+
+  if Assigned(Trampoline_TCanvas_LineTo) then
+    InterceptRemove(@Trampoline_TCanvas_LineTo);
+
+  if Assigned(Trampoline_TCanvas_Rectangle) then
+    InterceptRemove(@Trampoline_TCanvas_Rectangle);
+
 {$IFDEF DELPHIXE2_UP}
   if Assigned(Trampoline_TStyleEngine_HandleMessage) then
     InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
@@ -2326,6 +2643,9 @@ begin
     InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
   if Assigned(Trampoline_ProjectTree2PaintText) then
     InterceptRemove(@Trampoline_ProjectTree2PaintText);
+
+  if Assigned(Trampoline_DoModernPainting) then
+     InterceptRemove(@Trampoline_DoModernPainting);
 
   if Assigned(Trampoline_DrawText) then
     InterceptRemove(@Trampoline_DrawText);
@@ -2384,6 +2704,8 @@ end;
 //
 // Trampoline_TBitmap_SetSize(Self, AWidth, AHeight);
 //end;
+
+
 
 
 end.

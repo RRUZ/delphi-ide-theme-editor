@@ -33,8 +33,6 @@
 
   improve themes -> pro
 
-  hook tbitmap for closable buttons background because is a tbitmap Windowfromdc
-
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
 
@@ -43,6 +41,7 @@
 }
 // DONE
 {
+  * hook tbitmap for closable buttons background because is a tbitmap Windowfromdc
   * hook highlight color
   * hook comboxbox
   * hook DrawFrameControl
