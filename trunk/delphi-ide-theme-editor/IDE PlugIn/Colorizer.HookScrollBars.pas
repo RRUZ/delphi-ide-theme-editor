@@ -377,6 +377,14 @@ end;
 {$ENDIF}
 
 function CustomDrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
+
+  procedure DrawLine(Canvas: TCanvas; FromX, FromY, ToX, ToY: Integer);
+  begin
+    Canvas.MoveTo(FromX, FromY);
+    Canvas.LineTo(ToX, ToY);
+  end;
+
+
 var
   s, sCaller, sCaller2 : string;
   LCanvas : TCanvas;

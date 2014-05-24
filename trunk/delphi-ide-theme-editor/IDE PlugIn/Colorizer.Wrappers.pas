@@ -150,6 +150,11 @@ type
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
    end;
 
+   TWrapperComponentToolbarFrame = class(TBaseWrapper)
+   protected
+    procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+   end;
+
    TWrapperTabSet = class(TBaseWrapper)
    protected
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
@@ -628,7 +633,7 @@ begin
 //      DrawingStyle     := TTBDrawingStyle(dsNormal)
 //    else
     //don't change this value (dsNormal), because prevents which the toolbars of the IDE continue using the themes color even if the Wizard is not running
-    DrawingStyle       := TTBDrawingStyle(dsNormal); //dsGradient
+    DrawingStyle       := TTBDrawingStyle(dsGradient); //dsGradient
     GradientStartColor := AColorMap.MenuColor;
     GradientEndColor   := AColorMap.Color;
     HotTrackColor      := AColorMap.SelectedColor;
@@ -651,7 +656,7 @@ begin
     SelectedColor  := AColorMap.Color;
     UnselectedColor:= AColorMap.MenuColor;
     Font.Color     := AColorMap.FontColor;
-    Style          := tsModernTabs; //necessary for allow paint the background color
+    Style          := tsModernTabs; //necessary for allow use the TTabset hook
   end
 
 end;
@@ -686,6 +691,9 @@ end;
 
 procedure TWrapperGradientTabSet.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
+//var
+//  LCanvas : TCanvas;
+//  LRect   : TRect;
 begin
   inherited;
   TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
@@ -694,10 +702,43 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 
-  TRttiUtils.SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.BackgroundColor', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'FScroller.FLeftButton.Transparent', False);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'FScroller.FRightButton.BackgroundColor', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'FScroller.FRightButton.Transparent', False);
+{
+    00107A70 5253 0800 __fastcall Gdiplus::Gradienttabs::TTabInfo::TTabInfo(int, int, int, int)
+    00105898 5279 0801 Gdiplus::Gradienttabs::TTabScroller::
+    0010768C 5258 0802 __fastcall Gdiplus::Gradienttabs::TTabScroller::TTabScroller(System::Classes::TComponent *)
+    001078C4 5256 0803 __fastcall Gdiplus::Gradienttabs::TTabScroller::GetSuggestedWidth(bool)
+    001078E4 5255 0804 __fastcall Gdiplus::Gradienttabs::TTabScroller::HideWhenNoScrollbarsShown()
+    001078E8 5254 0805 __fastcall Gdiplus::Gradienttabs::TTabScroller::Paint()
+    00107878 5257 0806 __fastcall Gdiplus::Gradienttabs::TTabScroller::SetShowScrollers(const const bool)
+
+    @Gdiplus@Gradienttabs@TTabScroller@
+    @Gdiplus@Gradienttabs@TTabScroller@$bctr$qqrp25System@Classes@TComponent
+    @Gdiplus@Gradienttabs@TTabScroller@GetSuggestedWidth$qqro
+    @Gdiplus@Gradienttabs@TTabScroller@HideWhenNoScrollbarsShown$qqrv
+    @Gdiplus@Gradienttabs@TTabScroller@Paint$qqrv
+    @Gdiplus@Gradienttabs@TTabScroller@SetShowScrollers$qqrxo
+}
+  //TRttiUtils.SetRttiFieldValue(AComponent,'Scroller.FColor', AColorMap.Color);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.Color', AColorMap.Color);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.ParentBackground', True);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.LeftButton.BackgroundColor', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.LeftButton.Transparent', False);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.RightButton.BackgroundColor', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.RightButton.Transparent', False);
+
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.Brush.Color', AColorMap.Color);
+
+//  LCanvas:= TCanvas(TRttiUtils.GetRttiFieldValue(AComponent, 'Scroller.FCanvas').AsObject);
+//  if LCanvas<>nil then
+//  begin
+//     LRect:=TRttiUtils.GetRttiPropertyValue(AComponent, 'Scroller.ClientRect').AsType<TRect>;
+//     LCanvas.Brush.Color:=AColorMap.Color;
+//     AddLog('Foo', 'Foo');
+//     LCanvas.FillRect(LRect);
+//     AddLog('Bar', 'Bar');
+//  end;
+
+
 end;
 
 { TWrapperIDEGradientTabSet }
@@ -1043,12 +1084,22 @@ begin
 
 end;
 
+{ TWrapperComponentToolbarFrame }
+
+procedure TWrapperComponentToolbarFrame.SetColors(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+begin
+  inherited;
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'TabControl.Scroller.', AColorMap.Color);
+end;
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
 
 
-  //RegisterColorizerWrapper('TListButton',  TWrapperListButton);
+  RegisterColorizerWrapper('TComponentToolbarFrame',  TWrapperComponentToolbarFrame);
 
 
   RegisterColorizerWrapper('TVirtualStringTree',  TWrapperVirtualStringTree);
