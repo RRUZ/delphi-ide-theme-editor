@@ -22,9 +22,6 @@
 
  No, for this task you must use the Delphi IDE Theme Editor.
 
-== Why some components doesn't use the colors of the Theme used in DIC? == 
- 
-  Some components like scrollbars, combobox and buttons uses the native Windows drawing even if the DIC wizard is running. I hope add support for such components in a future release, but I not consider this a mandatory feature to add.
 
 == DIC supports design-time components? == 
 
