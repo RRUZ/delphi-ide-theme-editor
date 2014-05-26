@@ -55,7 +55,6 @@ uses
   DDetours;
 
   var
-  ListBrush : TObjectDictionary<TObject, TBrush>;
   ScrollBarList: TDictionary<HTHEME, String>;
   DrawThemeBackgroundOrgPointer : Pointer = nil;
   OpenThemeDataOrgPointer       : Pointer = nil;
@@ -101,83 +100,8 @@ begin
 end;
 
 procedure CustomDefaultHandler(Self : TWinControl;var Message);
-//var
-//  LParentForm : TCustomForm;
-//  LBrush      : TBrush;
 begin
   LastWinControl:=Self;
-//  LParentForm:=GetParentForm(Self);
-
-
-//  if not (csDesigning in Self.ComponentState) and Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows)
-//     and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)
-//     and Assigned(TColorizerLocalSettings.ColorMap)  then
-//    begin
-//         case TMessage(Message).Msg of
-//            WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC,
-//            CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
-//            begin
-//              //AddLog('CustomDefaultHandler ', Self.ClassName + ' ' + WM_To_String(TMessage(Message).Msg));
-//              //AddLog('CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
-//              if not ListBrush.ContainsKey(Self) then
-//                 ListBrush.Add(Self, TBrush.Create);
-//
-//              SetTextColor(TMessage(Message).wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-//
-//              LBrush:=ListBrush.Items[Self];
-//              LBrush.Color:= clRed; //TColorizerLocalSettings.ColorMap.Color;
-//
-//              SetBkColor(TMessage(Message).wParam, ColorToRGB(LBrush.Color));
-//              TMessage(Message).Result := LRESULT(LBrush.Handle);
-//              Exit;
-//            end;
-//         end;
-//    end;
-
-//
-//  if not (csDesigning in Self.ComponentState) and Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows)
-//     and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)
-//     and (Self is TCustomComboBox) and Assigned(TColorizerLocalSettings.ColorMap)  then
-//    case TMessage(Message).Msg of
-//
-//            WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC,
-//            CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
-//            begin
-//              AddLog('CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
-////              if not ListBrush.ContainsKey(Self) then
-////                 ListBrush.Add(Self, TBrush.Create);
-//
-//              SetTextColor(TMessage(Message).wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-//
-//              //LBrush:=ListBrush.Items[Self];
-//              LBrush:=TCustomComboBox(Self).Canvas.Brush;
-//              LBrush.Color:=TColorizerLocalSettings.ColorMap.Color;
-//
-//              SetBkColor(TMessage(Message).wParam, ColorToRGB(LBrush.Color));
-//              TMessage(Message).Result := LRESULT(LBrush.Handle);
-//              Exit;
-//            end;
-//
-////            WM_ERASEBKGND :
-////            begin
-////              TCustomComboBox(Self).Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-////              TCustomComboBox(Self).Canvas.FillRect(Self.ClientRect);
-////
-////              TMessage(Message).Result :=1;
-////            end;
-//            CM_FOCUSCHANGED:
-//            begin
-//              InvalidateRect(Self.Handle, nil, False);
-//              TrampolineTWinControl_DefaultHandler(Self, Message);
-//            end;
-//
-//    else
-//            begin
-//              AddLog('Skipped CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
-//              TrampolineTWinControl_DefaultHandler(Self, Message);
-//            end;
-//    end
-//  else
   TrampolineTWinControl_DefaultHandler(Self, Message);
 end;
 
@@ -732,7 +656,6 @@ var
   VclIDEModule : HMODULE;
 
 initialization
- ListBrush := TObjectDictionary<TObject, TBrush>.Create([doOwnsValues]);
 
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
 begin
@@ -791,5 +714,4 @@ if Assigned (TrampolineSetScrollInfo) then
 
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   ScrollBarList.Free;
-  ListBrush.Free;
 end.

@@ -47,6 +47,7 @@ var
  RetVal : Integer;
  ClassNameBuffer: Array[0..ClassNameBufferSize-1] of Char;
  LWinControl : TWinControl;
+ LParentForm : TCustomForm;
 begin
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap)
    and Assigned(TColorizerLocalSettings.HookedWindows) and Assigned(TColorizerLocalSettings.HookedScrollBars) then
@@ -65,7 +66,12 @@ begin
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(ClassNameBuffer)>=0) then
             begin
               LWinControl:=FindControl(LHWND);   //use FindControl because some forms are not registered in the Screen.Forms list
-              if LWinControl<>nil then
+
+              LParentForm:=nil;
+              if (LWinControl<>nil) then
+                LParentForm:=GetParentForm(LWinControl);
+
+              if (LWinControl<>nil) and ((LParentForm<>nil) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
               begin
                 Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, LWinControl);
                 AddLog('HCBT_SETFOCUS '+ClassNameBuffer);

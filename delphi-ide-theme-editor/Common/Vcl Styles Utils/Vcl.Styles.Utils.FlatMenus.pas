@@ -71,11 +71,11 @@ const
   MARLETT_MAXIMIZE_CHAR = Char(49);
 
 type
-  TSysPopupStyleHook = class;
+  TFlatPopupStyleHook = class;
   TSysPopupItemState = set of (isHot, isDisabled, isChecked, isDefault);
   TSysPopupItemStyle = (isNormal, isSep, isDropDown);
 
-  TSysPopupStyleHook = class(TSysStyleHook)
+  TFlatPopupStyleHook = class(TSysStyleHook)
   private type
 {$REGION 'TSysPopupItem'}
     TSysPopupItem = class
@@ -84,7 +84,7 @@ type
       FMenu: HMENU;
       FHandle: HWND;
       FSysParent: TSysControl;
-      FSysPopupStyleHook: TSysPopupStyleHook;
+      FSysPopupStyleHook: TFlatPopupStyleHook;
       function GetItemRect: TRect;
       function IsItemDisabled: Boolean;
       function IsItemContainsSubMenu: Boolean;
@@ -101,7 +101,7 @@ type
       function GetItemID: WORD;
       function GetVCLRealItem: TMenuItem;
     public
-      constructor Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU); virtual;
+      constructor Create(SysPopupStyleHook: TFlatPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU); virtual;
       Destructor Destroy; override;
       property ID: WORD read GetItemID;
       property ItemRect: TRect read GetItemRect;
@@ -151,6 +151,10 @@ type
     property Count: integer read FCount;
     property RightToLeft: Boolean read GetRightToLeft;
   end;
+
+  procedure RegisterFlatMenusHooks;
+  procedure UnregisterFlatMenusHooks;
+
 
 implementation
 
@@ -258,7 +262,7 @@ begin
 end;
 
 { TSysPopupStyleHook }
-constructor TSysPopupStyleHook.Create(AHandle: THandle);
+constructor TFlatPopupStyleHook.Create(AHandle: THandle);
 begin
   inherited;
 {$IF CompilerVersion > 23}
@@ -276,14 +280,14 @@ begin
   // Font := Screen.MenuFont;
 end;
 
-destructor TSysPopupStyleHook.Destroy;
+destructor TFlatPopupStyleHook.Destroy;
 begin
   if Assigned(FSysPopupItem) then
     FreeAndNil(FSysPopupItem);
   inherited;
 end;
 
-procedure TSysPopupStyleHook.DoDrawItem(Canvas: TCanvas; const Index: integer);
+procedure TFlatPopupStyleHook.DoDrawItem(Canvas: TCanvas; const Index: integer);
 var
   LItemRect: TRect;
   P: TPoint;
@@ -361,7 +365,7 @@ end;
 {$IFEND}
 
 
-procedure TSysPopupStyleHook.DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState; const Style: TSysPopupItemStyle);
+procedure TFlatPopupStyleHook.DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState; const Style: TSysPopupItemStyle);
 type
   tmPopupType = (tmPopupItemNormal, tmPopupItemHot, tmPopupItemDisabled, tmPopupSeparator);
 var
@@ -689,7 +693,7 @@ begin
   end;
 end;
 
-procedure TSysPopupStyleHook.EraseItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect);
+procedure TFlatPopupStyleHook.EraseItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect);
 var
   Bmp: TBitmap;
 begin
@@ -703,17 +707,17 @@ begin
   end;
 end;
 
-function TSysPopupStyleHook.GetItemsCount: integer;
+function TFlatPopupStyleHook.GetItemsCount: integer;
 begin
   Result := GetMenuItemCount(FMenu);
 end;
 
-function TSysPopupStyleHook.GetMenuFromHandle(AHandle: HWND): HMENU;
+function TFlatPopupStyleHook.GetMenuFromHandle(AHandle: HWND): HMENU;
 begin
   Result := SendMessage(AHandle, MN_GETHMENU, 0, 0);
 end;
 
-function TSysPopupStyleHook.GetRightToLeft: Boolean;
+function TFlatPopupStyleHook.GetRightToLeft: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -724,7 +728,7 @@ begin
   Result := ((info.fType and MFT_RIGHTORDER) = MFT_RIGHTORDER) or ((info.fType and MFT_RIGHTJUSTIFY) = MFT_RIGHTJUSTIFY);
 end;
 
-function TSysPopupStyleHook.GetSysPopupItem(Index: integer): TSysPopupItem;
+function TFlatPopupStyleHook.GetSysPopupItem(Index: integer): TSysPopupItem;
 begin
   Result := nil;
   if (Index > -1) and (index <= Count) then
@@ -736,7 +740,7 @@ begin
   end;
 end;
 
-procedure TSysPopupStyleHook.PaintBackground(Canvas: TCanvas);
+procedure TFlatPopupStyleHook.PaintBackground(Canvas: TCanvas);
 begin
   if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled then
   begin
@@ -751,7 +755,7 @@ begin
   end;
 end;
 
-procedure TSysPopupStyleHook.UpdateColors;
+procedure TFlatPopupStyleHook.UpdateColors;
 begin
   inherited;
   Font := Screen.MenuFont;
@@ -768,7 +772,7 @@ type
 var
   SubMenuItemInfoArray: array of TSubMenuItemInfo;
 
-procedure TSysPopupStyleHook.MNSELECTITEM(var Message: TMessage);
+procedure TFlatPopupStyleHook.MNSELECTITEM(var Message: TMessage);
 var
   DC: HDC;
   Canvas: TCanvas;
@@ -904,7 +908,7 @@ begin
   Handled := True;
 end;
 
-procedure TSysPopupStyleHook.WMPRINT(var Message: TMessage);
+procedure TFlatPopupStyleHook.WMPRINT(var Message: TMessage);
 var
   DC: HDC;
   i: integer;
@@ -954,7 +958,7 @@ begin
 end;
 // ------------------------------------------------------------------------------
 
-procedure TSysPopupStyleHook.WndProc(var Message: TMessage);
+procedure TFlatPopupStyleHook.WndProc(var Message: TMessage);
 var
   i: integer;
   TopWin: HWND;
@@ -1137,7 +1141,7 @@ end;
 
 { TSysPopupItem }
 
-constructor TSysPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU);
+constructor TFlatPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook: TFlatPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU);
 begin
   FSysPopupStyleHook := SysPopupStyleHook;
   FMenu := Menu;
@@ -1146,12 +1150,12 @@ begin
   FIndex := Index;
 end;
 
-destructor TSysPopupStyleHook.TSysPopupItem.Destroy;
+destructor TFlatPopupStyleHook.TSysPopupItem.Destroy;
 begin
   inherited;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetItemBitmap: HBITMAP;
+function TFlatPopupStyleHook.TSysPopupItem.GetItemBitmap: HBITMAP;
 var
   info: TMenuItemInfo;
 begin
@@ -1164,21 +1168,21 @@ begin
     Result := info.hbmpUnchecked;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetItemID: WORD;
+function TFlatPopupStyleHook.TSysPopupItem.GetItemID: WORD;
 begin
   Result := 0;
   if (FMenu > 0) and (FIndex > -1) then
     Result := GetMenuItemID(FMenu, FIndex);
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetItemRect: TRect;
+function TFlatPopupStyleHook.TSysPopupItem.GetItemRect: TRect;
 begin
   Result := Rect(0, 0, 0, 0);
   if (FMenu > 0) and (FIndex > -1) then
     GetMenuItemRect(0, FMenu, FIndex, Result);
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetItemText: String;
+function TFlatPopupStyleHook.TSysPopupItem.GetItemText: String;
 var
   Buffer: PChar;
   StrSize: integer;
@@ -1232,7 +1236,7 @@ begin
   end;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetVCLRealItem: TMenuItem;
+function TFlatPopupStyleHook.TSysPopupItem.GetVCLRealItem: TMenuItem;
 var
   i: integer;
   VisibleItems: TList;
@@ -1266,7 +1270,7 @@ begin
   end;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItems: TMenuItem;
+function TFlatPopupStyleHook.TSysPopupItem.GetVCLMenuItems: TMenuItem;
 var
   i, j: integer;
   PopupMenu: TPopupMenu;
@@ -1371,7 +1375,7 @@ begin
   end;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItemsFast: TMenuItem;
+function TFlatPopupStyleHook.TSysPopupItem.GetVCLMenuItemsFast: TMenuItem;
 begin
   if Assigned(FSysPopupStyleHook.FVCLMenuItems) then
     Result := FSysPopupStyleHook.FVCLMenuItems
@@ -1382,7 +1386,7 @@ begin
   end;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemDisabled: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemDisabled: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -1393,7 +1397,7 @@ begin
   Result := (info.fState and MFS_DISABLED = MFS_DISABLED) or (info.fState and MF_DISABLED = MF_DISABLED) or (info.fState and MF_GRAYED = MF_GRAYED);
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemOwnerDraw: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemOwnerDraw: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -1405,7 +1409,7 @@ begin
   Result := (info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW);
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemRadioCheck: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemRadioCheck: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -1416,7 +1420,7 @@ begin
   Result := (info.fType and MFT_RADIOCHECK) = MFT_RADIOCHECK;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemChecked: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemChecked: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -1427,12 +1431,12 @@ begin
   Result := (info.fState and MFS_CHECKED) = MFS_CHECKED;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemContainsSubMenu: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemContainsSubMenu: Boolean;
 begin
   Result := (GetSubMenu(FMenu, FIndex) > 0);
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemDefault: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemDefault: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -1443,7 +1447,7 @@ begin
   Result := (info.fState and MFS_DEFAULT) = MFS_DEFAULT;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.IsItemSeparator: Boolean;
+function TFlatPopupStyleHook.TSysPopupItem.IsItemSeparator: Boolean;
 var
   info: TMenuItemInfo;
 begin
@@ -1458,17 +1462,20 @@ begin
   end;
 end;
 
-initialization
 
+procedure RegisterFlatMenusHooks;
+begin
+ if{$IF CompilerVersion >= 23}(StyleServices.Available){$ELSE} ThemeServices.ThemesAvailable {$IFEND} then
+  TSysStyleManager.RegisterSysStyleHook('#32768', TFlatPopupStyleHook);
+end;
+
+procedure UnregisterFlatMenusHooks;
+begin
+  TSysStyleManager.UnRegisterSysStyleHook('#32768', TFlatPopupStyleHook);
+end;
+
+initialization
 SubMenuItemInfoArray := nil;
 
- if{$IF CompilerVersion >= 23}(StyleServices.Available){$ELSE} ThemeServices.ThemesAvailable {$IFEND} then
-  TSysStyleManager.RegisterSysStyleHook('#32768', TSysPopupStyleHook);
-
-finalization
-
-{$IFDEF UseVCLStyleUtilsMenu}
-  TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
-{$ENDIF}
 
 end.

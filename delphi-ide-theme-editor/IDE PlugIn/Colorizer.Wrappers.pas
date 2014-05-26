@@ -30,14 +30,18 @@ uses
   Generics.Collections,
   Classes;
 
-   function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False) : Boolean;
+   function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False; Restore : Boolean = False) : Boolean;
 
 type
    TBaseWrapper = class (TComponent)
    private
+    FRestore: Boolean;
     procedure SetFlatParent(AComponent: TComponent);
    protected
     procedure SetColors(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); virtual;
+    property  Restore : Boolean read FRestore Write FRestore;
+   public
+    constructor Create(AOwner: TComponent); override;
    end;
 
   TBaseWrapperClass = class of TBaseWrapper;
@@ -265,13 +269,17 @@ begin
   end;
 end;
 
-function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False) : Boolean;
+function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False; Restore : Boolean = False) : Boolean;
+var
+  LBaseWrapper : TBaseWrapper;
 begin
   Result:=False;
   if TRegisteredWrappers.WrappersInstances.ContainsKey(AComponent.ClassName) then
   begin
     //AddLog('RunWrapper '+AComponent.ClassName);
-    TRegisteredWrappers.WrappersInstances.Items[AComponent.ClassName].SetColors(AComponent, AColorMap);
+    LBaseWrapper:= TRegisteredWrappers.WrappersInstances.Items[AComponent.ClassName];
+    LBaseWrapper.Restore:=Restore;
+    LBaseWrapper.SetColors(AComponent, AColorMap);
 //    if AComponent is TWinControl then
 //      TWinControl(AComponent).Invalidate();
     Result:=True;
@@ -371,6 +379,12 @@ begin
 end;
 
 { TBaseWrapper }
+
+constructor TBaseWrapper.Create(AOwner: TComponent);
+begin
+  inherited;
+  FRestore:=False;
+end;
 
 procedure TBaseWrapper.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
@@ -479,16 +493,16 @@ type
 
 procedure TWrapperIDEComboBox.SetColors(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
-var
-  LCustomComboBox : TCustomComboBoxClass;
+//var
+//  LCustomComboBox : TCustomComboBoxClass;
 begin
   inherited;
-  LCustomComboBox:=TCustomComboBoxClass(AComponent);
+//  LCustomComboBox:=TCustomComboBoxClass(AComponent);
 //  if GetWindowTheme(TWinControl(AComponent).Handle) <>0 then
 //    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
 
-  LCustomComboBox.Color      := AColorMap.MenuColor;
-  LCustomComboBox.Font.Color := AColorMap.FontColor;
+//  LCustomComboBox.Color      := AColorMap.MenuColor;
+//  LCustomComboBox.Font.Color := AColorMap.FontColor;
 
   //LCustomComboBox.BevelKind  := bkFlat;
   //LCustomComboBox.BevelInner := bvNone;
@@ -540,6 +554,7 @@ begin
      property HighlightColor: TColor;
      property HighlightFontColor: TColor;
     }
+
     TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.Color);
     TRttiUtils.SetRttiPropertyValue(AComponent,'PropNameColor', AColorMap.FontColor);   //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'PropValueColor', AColorMap.FontColor);  //*
@@ -553,7 +568,6 @@ begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'SubPropColor', AColorMap.FontColor);//*
     TRttiUtils.SetRttiPropertyValue(AComponent,'ReadOnlyColor', AColorMap.FontColor);//*
     TRttiUtils.SetRttiPropertyValue(AComponent,'NonDefaultColor', AColorMap.FontColor);//*
-
 
     TRttiUtils.SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.SelectedColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.SelectedFontColor);
@@ -629,13 +643,22 @@ begin
   with TToolBar(AComponent) do
   begin
     Color              := AColorMap.Color;
-//    if Restore then
-//      DrawingStyle     := TTBDrawingStyle(dsNormal)
-//    else
-    //don't change this value (dsNormal), because prevents which the toolbars of the IDE continue using the themes color even if the Wizard is not running
-    DrawingStyle       := TTBDrawingStyle(dsGradient); //dsGradient
-    GradientStartColor := AColorMap.MenuColor;
-    GradientEndColor   := AColorMap.Color;
+{$IF CompilerVersion<27} //XE6
+    if Restore and (DrawingStyle<>TTBDrawingStyle.dsNormal) then
+    begin
+      DrawingStyle       := TTBDrawingStyle(dsNormal);
+      GradientStartColor := AColorMap.MenuColor;
+      GradientEndColor   := AColorMap.Color;
+    end
+    else
+    if (TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw) then
+    begin
+      DrawingStyle       := TTBDrawingStyle.dsGradient; //dsGradient
+      GradientStartColor := AColorMap.MenuColor;
+      GradientEndColor   := AColorMap.Color;
+    end;
+{$IFEND}
+
     HotTrackColor      := AColorMap.SelectedColor;
     Font.Color         := AColorMap.FontColor;
     EdgeBorders        := [];
@@ -854,7 +877,7 @@ procedure TWrapperPopupActionBar.SetColors(AComponent: TComponent;
           LBitMap.Free;
         end;
       finally
-        LPngImage.free;
+        LPngImage.Free;
       end;
     {$ENDIF}
     end;

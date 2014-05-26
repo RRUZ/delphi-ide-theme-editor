@@ -71,6 +71,7 @@ uses
   StdCtrls,
   Tabs,
   Types,
+  uMisc,
   DDetours;
 
 type
@@ -88,6 +89,7 @@ type
  TButtonControlClass     = class(TButtonControl);
  TCustomCheckBoxClass    = class(TCustomCheckBox);
  TRadioButtonClass       = class(TRadioButton);
+ TCustomComboClass       = class(TCustomCombo);
 
 var
   {$IF CompilerVersion<27} //XE6
@@ -121,6 +123,8 @@ var
   Trampoline_TWinControl_WMNCPaint         : procedure (Self: TWinControlClass; var Message: TWMNCPaint);
   Trampoline_TSplitter_Paint               : procedure (Self : TSplitterClass) = nil;
   Trampoline_CustomComboBox_WMPaint        : procedure (Self: TCustomComboBox;var Message: TWMPaint) = nil;
+  Trampoline_TCustomCombo_WndProc          : procedure (Self: TCustomCombo;var Message: TMessage) = nil;
+
   Trampoline_TButtonControl_WndProc        : procedure (Self:TButtonControlClass;var Message: TMessage) = nil;
   Trampoline_DrawFrameControl              : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
   Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
@@ -195,6 +199,39 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
+
+
+procedure CustomComboWndProc_Detour(Self: TCustomCombo;var Message: TMessage);
+var
+  LParentForm : TCustomForm;
+begin
+    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+    begin
+     Trampoline_TCustomCombo_WndProc(Self, Message);
+     exit;
+    end;
+
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+     Trampoline_TCustomCombo_WndProc(Self, Message);
+      exit;
+    end;
+
+    case Message.Msg of
+      WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC:
+        begin
+          SetTextColor(Message.WParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+          Self.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+          SetBkColor(Message.WParam, ColorToRGB(Self.Brush.Color));
+          Message.Result := Self.Brush.Handle;
+          Exit;
+        end;
+    end;
+
+    Trampoline_TCustomCombo_WndProc(Self, Message);
+end;
+
 
 procedure CustomDoModernPainting(Self : TTabSet);
 type
@@ -2562,7 +2599,7 @@ begin
 
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @CustomWMPaintComboBox);
-
+  Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @CustomComboWndProc_Detour);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
 
   //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
@@ -2672,6 +2709,9 @@ begin
 
   if Assigned(Trampoline_CustomComboBox_WMPaint) then
     InterceptRemove(@Trampoline_CustomComboBox_WMPaint);
+
+  if Assigned(Trampoline_TCustomCombo_WndProc) then
+    InterceptRemove(@Trampoline_TCustomCombo_WndProc);
 
   if Assigned(Trampoline_DrawFrameControl) then
     InterceptRemove(@Trampoline_DrawFrameControl);
