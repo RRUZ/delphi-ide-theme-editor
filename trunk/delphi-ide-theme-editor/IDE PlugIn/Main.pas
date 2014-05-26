@@ -26,13 +26,7 @@
   * Enable/Disable
   * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
 
-  * toolbar disabled buttons
-  toolbutton
-        popup arrow color
-  toolbar multiline
-
   improve themes -> pro
-
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
 
@@ -41,6 +35,10 @@
 }
 // DONE
 {
+  * toolbar disabled buttons
+  * toolbutton
+  *      popup arrow color
+  * toolbar multiline
   * hook tbitmap for closable buttons background because is a tbitmap Windowfromdc
   * hook highlight color
   * hook comboxbox
@@ -166,6 +164,7 @@ uses
  Colorizer.SettingsForm,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
+ Vcl.Styles.Utils.FlatMenus,
  ColorXPStyleActnCtrls,
  uMisc;
 
@@ -381,6 +380,9 @@ begin
     RegisterPlugIn;
     AddMenuItems;
 
+    if TColorizerLocalSettings.Settings.Enabled then
+      RegisterFlatMenusHooks();
+
     InstallFormsHook();
     InstallColorizerHooks();
 
@@ -409,6 +411,8 @@ begin
   AddLog('TIDEWizard.Destroy 1');
   RemoveFormsHook();
   RemoveColorizerHooks();
+  UnregisterFlatMenusHooks();
+
   UnRegisterPlugIn;
   RemoveMenuItems;
   AddLog('TIDEWizard.Destroy 2');

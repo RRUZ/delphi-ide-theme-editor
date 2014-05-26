@@ -20,7 +20,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "1.75.0"
+  !define VER_MINOR "2.14.0"
 !endif
 
 !ifndef IDE_VERSION_DXE
@@ -113,8 +113,8 @@ FunctionEnd
 !define MUI_WELCOMEPAGE_TITLE_3LINES
 !define MUI_FINISHPAGE_TITLE_3LINES
 
-!define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "logoinstall.bmp"
+;!define MUI_HEADERIMAGE
+;!define MUI_HEADERIMAGE_BITMAP "logoinstall.bmp"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "wizard_intaller.bmp"
 
 !insertmacro MUI_PAGE_WELCOME
@@ -355,6 +355,13 @@ SectionEnd
 !define SF_SELBOLD    9
 
 Function .onInit
+
+  InitPluginsDir
+  ;Get the skin file to use
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;Load the skin using the LoadVCLStyle function 
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  
   ;!insertmacro MUI_LANGDLL_DISPLAY
   Call InitVersion
   Call SetCheckBoxes
@@ -484,9 +491,12 @@ Section "Uninstall"
 NODelete:
 SectionEnd
 
-;Function un.onInit
-;  !insertmacro MUI_UNGETLANGUAGE
-;FunctionEnd
+Function un.onInit
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;Load the skin using the LoadVCLStyle function 
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+FunctionEnd
 
 
 ;Function ShowReleaseNotes

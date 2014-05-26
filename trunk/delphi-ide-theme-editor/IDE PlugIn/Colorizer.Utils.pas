@@ -44,7 +44,7 @@ uses
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
 
-{$DEFINE ENABLELOG}
+{.$DEFINE ENABLELOG}
 
 procedure AddLog(const Message : string); overload;
 procedure AddLog(const Category, Message : string); overload;
@@ -169,7 +169,7 @@ begin
    SetCompositionColor(AColorMap.Color);
  }
   for Index := 0 to Screen.FormCount-1 do
-  if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)<>-1 then
+  if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)>=0 then
   begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
      ProcessComponent(AColorMap, AStyle, Screen.Forms[Index], Restore, Invalidate);
@@ -350,7 +350,7 @@ begin
       Font.Color:=AColorMap.FontColor;
     end;
 
-    RunWrapper(AComponent, AColorMap, Invalidate);
+    RunWrapper(AComponent, AColorMap, Invalidate,Restore);
 
     //process components
     for Index := 0 to AComponent.ComponentCount - 1 do
