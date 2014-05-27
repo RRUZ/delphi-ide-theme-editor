@@ -414,7 +414,7 @@ var
   end;
 
 
-  procedure DrawSpecialChar(DC: HDC; const Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False);
+  procedure DrawSpecialChar(DC: HDC; const Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False; Hot : Boolean = False);
   var
     LogFont: TLogFont;
     pOldFont: HGDIOBJ;
@@ -443,6 +443,9 @@ var
     AFont := CreateFontIndirect(LogFont);
 
     oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
+    if hot then
+      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.HotFontColor);
+
     if Disabled then
       oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor);
 
@@ -576,7 +579,7 @@ begin
           LImageRect.Left := ItemRect.Right - 8 - 4;
           LImageRect.Right := ItemRect.Right;
         end;
-        DrawSpecialChar(DC, Sign, LImageRect, False, (isDisabled in State));
+        DrawSpecialChar(DC, Sign, LImageRect, False, (isDisabled in State), (isHot in State));
 
       end;
     end

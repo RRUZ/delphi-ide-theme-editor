@@ -44,7 +44,7 @@ uses
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
 
-{.$DEFINE ENABLELOG}
+{$DEFINE ENABLELOG}
 
 procedure AddLog(const Message : string); overload;
 procedure AddLog(const Category, Message : string); overload;
@@ -271,6 +271,9 @@ var
 begin
     if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
+//    if SameText(AComponent.ClassName, 'TMessageHintWindow') then
+//     TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
+
     if AComponent is TForm then
     begin
       LForm:=TForm(AComponent);
@@ -278,6 +281,8 @@ begin
       LForm.Font.Color:=AColorMap.FontColor;
 
       HideSeparators(LForm, 'TProjectManagerForm', 'ToolBar');
+
+
 
       //process field TComponent no registered in the components list
 //      ctx:=TRttiContext.Create;
