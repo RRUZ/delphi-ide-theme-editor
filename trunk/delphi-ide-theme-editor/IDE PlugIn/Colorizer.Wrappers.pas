@@ -295,6 +295,7 @@ procedure TWrapperVirtualStringTree.SetColors(AComponent : TComponent; AColorMap
 begin
   inherited;
 
+  //AddLog('TWrapperVirtualStringTree', AComponent.ClassName);
   TRttiUtils.SetRttiPropertyValue(AComponent,'BevelKind', TValue.From(TBevelKind.bkFlat));
   TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
@@ -647,14 +648,14 @@ begin
     if Restore and (DrawingStyle<>TTBDrawingStyle.dsNormal) then
     begin
       DrawingStyle       := TTBDrawingStyle(dsNormal);
-      GradientStartColor := AColorMap.MenuColor;
+      GradientStartColor := AColorMap.Color;
       GradientEndColor   := AColorMap.Color;
     end
     else
     if (TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw) then
     begin
       DrawingStyle       := TTBDrawingStyle.dsGradient; //dsGradient
-      GradientStartColor := AColorMap.MenuColor;
+      GradientStartColor := AColorMap.Color;
       GradientEndColor   := AColorMap.Color;
     end;
 {$IFEND}

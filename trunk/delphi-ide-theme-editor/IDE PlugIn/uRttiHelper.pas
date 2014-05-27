@@ -35,6 +35,10 @@ uses
 
  type
   TRttiUtils = class
+   private
+     class var LocalContext: TRttiContext;
+     class constructor Create;
+     class destructor Destroy;
    public
       {$IF CompilerVersion > 20}
       class function DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
@@ -58,12 +62,17 @@ uses
 implementation
 
 {$IF CompilerVersion > 20}
-var
-  ctx: TRttiContext;
-{$IFEND}
+
+class constructor TRttiUtils.Create;
+begin
+  LocalContext := TRttiContext.Create;
+end;
 
 
-{$IF CompilerVersion > 20}
+class destructor TRttiUtils.Destroy;
+begin
+  LocalContext.Free;
+end;
 
 class procedure TRttiUtils.DumpTypeToFile(const QualifiedName, FileName:string);
 var
@@ -136,7 +145,6 @@ const
  sIndent        = '  ';
  ArrVisibility  : Array[TMemberVisibility] of string = ('private','protected','public','published');//Helper array for Visibility
 var
-  ctx       : TRttiContext;
   lType     : TRttiType;
   lMethod   : TRttiMethod;
   lProperty : TRttiProperty;
@@ -146,12 +154,11 @@ var
 begin
 
    Result:='No Rtti Information';
-   ctx       := TRttiContext.Create;
    Definition:= TObjectDictionary<string, TStringList>.Create([doOwnsValues]);
    try
 
      if not Assigned(ATypeInfo) then exit;
-     lType:=ctx.GetType(ATypeInfo);
+     lType:=LocalContext.GetType(ATypeInfo);
      if not Assigned(lType) then exit;
 
      Definition.Add(sType,TStringList.Create);
@@ -242,7 +249,6 @@ begin
      Result:=Definition.Items[sType].Text;
    finally
     Definition.free;
-    ctx.free;
    end;
 end;
 {$IFEND}
@@ -254,7 +260,7 @@ var
   LProperty, RootProp    : TRttiProperty;
   LField       : TRttiField;
   LInstance    : Pointer;
-  MemberList      : TStringList;
+  MemberList   : TStringList;
   i            : Integer;
 begin
   LProperty:=nil;
@@ -267,11 +273,11 @@ begin
 
     //search the first member in the properties list
     if MemberList.Count>0 then
-     LProperty := ctx.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
+     LProperty := LocalContext.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
 
     //search the first member in the field list
     if not Assigned(LProperty) then
-     LField := ctx.GetType(Obj.ClassInfo).GetField(MemberList[0]);
+     LField := LocalContext.GetType(Obj.ClassInfo).GetField(MemberList[0]);
 
     for i:=1 to MemberList.Count-1 do
      begin
@@ -289,19 +295,19 @@ begin
         begin
           RootProp  := LProperty;
           //search the current member in the properties list
-          LProperty := ctx.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
+          LProperty := LocalContext.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-             LField := ctx.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
+             LField := LocalContext.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
         end
         else
         if Assigned(LField) then
         begin
           //search the current member in the properties list
-          LProperty  := ctx.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
+          LProperty  := LocalContext.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-              LField := ctx.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
+              LField := LocalContext.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
         end;
      end;
 
@@ -334,11 +340,11 @@ begin
 
     //search the first member in the properties list
     if MemberList.Count>0 then
-     LProperty := ctx.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
+     LProperty := LocalContext.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
 
     //search the first member in the field list
     if not Assigned(LProperty) then
-     LField := ctx.GetType(Obj.ClassInfo).GetField(MemberList[0]);
+     LField := LocalContext.GetType(Obj.ClassInfo).GetField(MemberList[0]);
 
     for i:=1 to MemberList.Count-1 do
      begin
@@ -356,19 +362,19 @@ begin
         begin
           RootProp  := LProperty;
           //search the current member in the properties list
-          LProperty := ctx.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
+          LProperty := LocalContext.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-             LField := ctx.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
+             LField := LocalContext.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
         end
         else
         if Assigned(LField) then
         begin
           //search the current member in the properties list
-          LProperty  := ctx.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
+          LProperty  := LocalContext.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-              LField := ctx.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
+              LField := LocalContext.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
         end;
      end;
 
@@ -406,12 +412,22 @@ class procedure TRttiUtils.ExecMethodRtti(const Obj:  TObject;const Method:Strin
 var
   m : TRttiMethod;
 begin
-  m:=ctx.GetType(Obj.ClassInfo).GetMethod(Method);
+  m:=LocalContext.GetType(Obj.ClassInfo).GetMethod(Method);
   if m<>nil then
     m.Invoke(Obj, []);
 end;
 
 {$ELSE}
+class constructor TRttiUtils.Create;
+begin
+
+end;
+
+class destructor TRttiUtils.Destroy;
+begin
+
+end;
+
 class procedure TRttiUtils.SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);
 var
   RttiProperty     : PPropInfo;
@@ -483,12 +499,11 @@ end;
 initialization
 
 {$IF CompilerVersion > 20}
-  ctx:=TRttiContext.Create;
 {$IFEND}
 
 finalization
 {$IF CompilerVersion > 20}
-  ctx.Free;
+
 {$IFEND}
 
 end.

@@ -645,12 +645,6 @@ end;
 const
   sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
 
-{$IFDEF DELPHIXE}  sVclIDEModule =  'vclide150.bpl';{$ENDIF}
-{$IFDEF DELPHIXE2} sVclIDEModule =  'vclide160.bpl';{$ENDIF}
-{$IFDEF DELPHIXE3} sVclIDEModule =  'vclide170.bpl';{$ENDIF}
-{$IFDEF DELPHIXE4} sVclIDEModule =  'vclide180.bpl';{$ENDIF}
-{$IFDEF DELPHIXE5} sVclIDEModule =  'vclide190.bpl';{$ENDIF}
-{$IFDEF DELPHIXE6} sVclIDEModule =  'vclide200.bpl';{$ENDIF}
 var
   pHook, psBaseVirtualTreeOriginalWMNCPaint : Pointer;
   VclIDEModule : HMODULE;

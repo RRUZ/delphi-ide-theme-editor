@@ -24,7 +24,6 @@
 {
   * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline?  hook tbitmap ?
   * Enable/Disable
-  * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
 
   improve themes -> pro
   TVirtualMethodInterceptor for hooks
@@ -35,6 +34,7 @@
 }
 // DONE
 {
+  * TMessageViewForm -> TBetterHintWindowVirtualDrawTree fix font color
   * toolbar disabled buttons
   * toolbutton
   *      popup arrow color
