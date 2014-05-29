@@ -59,12 +59,10 @@ uses
   DrawThemeBackgroundOrgPointer : Pointer = nil;
   OpenThemeDataOrgPointer       : Pointer = nil;
   //CloseThemeDataOrgPointer      : Pointer = nil;
-  LastWinControl  : TWinControl = nil;
 
   TrampolineOpenThemeData             : function(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall = nil;
   //TrampolineCloseThemeData            : function(hTheme: HTHEME): HRESULT; stdcall = nil;
   TrampolineDrawThemeBackground       : function(HTHEME: HTHEME; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall = nil;
-  TrampolineTWinControl_DefaultHandler: procedure (Self : TWinControl;var Message) = nil;
   TrampolineTWinControl_WMNCPaint     : procedure (Self : TWinControl;var Message: TWMNCPaint) = nil;
   TrampolineBaseVirtualTreeOriginalWMNCPaint : procedure (Self : TCustomControl;DC: HDC) = nil;
   //Scroll Bar Functions http://msdn.microsoft.com/en-us/library/windows/desktop/ff486021%28v=vs.85%29.aspx
@@ -89,21 +87,17 @@ uses
 
 function CustomSetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
 begin
-  LastWinControl:=FindControl(hWnd);
+  LastScrollWinControl:=FindControl(hWnd);
   Exit(TrampolineSetScrollPos(hWnd, nBar, nPos, bRedraw));
 end;
 
 function CustomSetScrollInfo(hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall;
 begin
-  LastWinControl:=FindControl(hWnd);
+  LastScrollWinControl:=FindControl(hWnd);
   Exit(TrampolineSetScrollInfo(hWnd, BarFlag, ScrollInfo, Redraw));
 end;
 
-procedure CustomDefaultHandler(Self : TWinControl;var Message);
-begin
-  LastWinControl:=Self;
-  TrampolineTWinControl_DefaultHandler(Self, Message);
-end;
+
 
 type
   TWinControlClass = class(TWinControl);
@@ -328,11 +322,12 @@ begin
   LFoundControl:=nil;
 
   try
-    if Assigned(LastWinControl) then
-      VCLClassName:=LastWinControl.ClassName;
+    if Assigned(LastScrollWinControl) then
+      VCLClassName:=LastScrollWinControl.ClassName;
   except
     VCLClassName := '';
   end;
+  //LastScrollWinControl:=nil;
 
   LHWND:=WindowFromDC(dc);
   if LHWND<>0 then
@@ -656,7 +651,6 @@ begin
   ScrollBarList := TDictionary<HTHEME, String>.Create();
   ScrollBarList.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
 
-  TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @CustomDefaultHandler);
   TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @CustomWMNCPaint);
 
   OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
@@ -685,8 +679,6 @@ begin
 end;
 
 finalization
-if Assigned (TrampolineTWinControl_DefaultHandler) then
-  InterceptRemove(@TrampolineTWinControl_DefaultHandler);
 
 if Assigned (TrampolineTWinControl_WMNCPaint) then
   InterceptRemove(@TrampolineTWinControl_WMNCPaint);
