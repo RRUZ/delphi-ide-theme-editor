@@ -45,6 +45,8 @@ const
  procedure RemoveColorizerHooks;
  procedure DrawNCBorder(Self : TWinControl; EraseLRCorner: Boolean);
 
+var
+  LastScrollWinControl  : TWinControl = nil;
 
 implementation
 
@@ -77,6 +79,7 @@ uses
   JclDebug,
   PngImage,
   Colorizer.Utils,
+  Colorizer.Wrappers,
   CaptionedDockTree,
   GraphUtil,
   CategoryButtons,
@@ -114,6 +117,8 @@ var
   Trampoline_TCanvas_LineTo            : procedure (Self: TCanvas; X, Y: Integer) = nil;
   Trampoline_TCanvas_Rectangle         : procedure (Self: TCanvas; X1, Y1, X2, Y2: Integer) = nil;
 
+  TrampolineTWinControl_DefaultHandler: procedure (Self : TWinControl;var Message) = nil;
+
   Trampoline_TCustomStatusBar_WMPAINT  : procedure (Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
   Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
   {$IFDEF DELPHIXE6_UP}
@@ -141,7 +146,10 @@ var
   Trampoline_TCustomCombo_WndProc          : procedure (Self: TCustomCombo;var Message: TMessage) = nil;
 
   Trampoline_TButtonControl_WndProc        : procedure (Self:TButtonControlClass;var Message: TMessage) = nil;
+
   Trampoline_DrawFrameControl              : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
+  Trampoline_DrawEdge                      : function (hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall = nil;
+
   Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
 
   //002B7ADC 10611 2EDD __fastcall Msglines::TCompilerMsgLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
@@ -150,6 +158,9 @@ var
   TrampolineTitleLineDraw                  : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
   Trampoline_HintWindow_Paint              : procedure (Self : THintWindow) = nil;
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
+
+  //000E6D74 4639 1D48 __fastcall Idevirtualtrees::TBaseVirtualTree::PrepareBitmaps(bool, bool)
+  Trampoline_TBaseVirtualTree_PrepareBitmaps : procedure (Self : TCustomControl;NeedButtons, NeedLines: Boolean) = nil;
 
   FGutterBkColor : TColor = clNone;
 
@@ -208,7 +219,7 @@ type
 
 var
    ListBrush : TObjectDictionary<TObject, TBrush>;
-
+   ListBaseVirtualTree  : TObjectDictionary<TCustomControl, TRttiBaseVirtualTree>;
 type
   TTabSetClass = class(TTabSet);
 
@@ -221,6 +232,133 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
+
+procedure CustomPrepareBitmaps(Self : TCustomControl;NeedButtons, NeedLines: Boolean);
+const
+  LineBitsDotted: array [0..8] of Word = ($55, $AA, $55, $AA, $55, $AA, $55, $AA, $55);
+  LineBitsSolid : array [0..7] of Word = (0, 0, 0, 0, 0, 0, 0, 0);
+
+var
+  PatternBitmap: HBITMAP;
+  Bits: Pointer;
+  Size: TSize;
+
+  procedure FillBitmap(ABitmap: TBitmap);
+  begin
+    with ABitmap, Canvas do
+    begin
+      Width := Size.cx;
+      Height := Size.cy;
+      Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
+      FillRect(Rect(0, 0, Width, Height));
+    end;
+  end;
+
+var
+  LRttiBaseVirtualTree : TRttiBaseVirtualTree;
+  LParentForm          : TCustomForm;
+begin
+
+  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+  begin
+    Trampoline_TBaseVirtualTree_PrepareBitmaps(Self, NeedButtons, NeedLines);
+    exit;
+  end;
+
+  LParentForm:= GetParentForm(Self);
+  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+  begin
+    Trampoline_TBaseVirtualTree_PrepareBitmaps(Self, NeedButtons, NeedLines);
+    exit;
+  end;
+
+  if not ListBaseVirtualTree.ContainsKey(Self) then
+   ListBaseVirtualTree.Add(Self, TRttiBaseVirtualTree.Create(Self));
+  LRttiBaseVirtualTree := ListBaseVirtualTree.Items[Self];
+
+  Size.cx := 9;
+  Size.cy := 9;
+
+  if NeedButtons then
+  begin
+     with LRttiBaseVirtualTree.MinusBM, Canvas do
+     begin
+      FillBitmap(LRttiBaseVirtualTree.MinusBM);
+      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      Rectangle(0, 0, Width, Height);
+      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      MoveTo(2, Width div 2);
+      LineTo(Width - 2, Width div 2);
+     end;
+
+    with LRttiBaseVirtualTree.PlusBM, Canvas do
+    begin
+      FillBitmap(LRttiBaseVirtualTree.PlusBM);
+      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      Rectangle(0, 0, Width, Height);
+      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      MoveTo(2, Width div 2);
+      LineTo(Width - 2, Width div 2);
+      MoveTo(Width div 2, 2);
+      LineTo(Width div 2, Width - 2);
+    end;
+  end;
+
+  if NeedLines then
+  begin
+    if LRttiBaseVirtualTree.DottedBrush <> 0 then
+      DeleteObject(LRttiBaseVirtualTree.DottedBrush);
+
+     Bits := @LineBitsDotted;
+     //Bits := @LineBitsSolid;
+    PatternBitmap := CreateBitmap(8, 8, 1, 1, Bits);
+    LRttiBaseVirtualTree.DottedBrush := CreatePatternBrush(PatternBitmap);
+    DeleteObject(PatternBitmap);
+  end;
+end;
+
+
+procedure CustomDefaultHandler(Self : TWinControl;var Message);
+var
+  LParentForm : TCustomForm;
+begin
+  LastScrollWinControl:=Self;
+
+//  if SameText('TPopupListBox', Self.ClassName) then   //TInspListBox
+//     AddLog('CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
+
+    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+    begin
+     TrampolineTWinControl_DefaultHandler(Self, Message);
+     exit;
+    end;
+
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+     TrampolineTWinControl_DefaultHandler(Self, Message);
+      exit;
+    end;
+
+    case TMessage(Message).Msg of
+        //CN_CTLCOLOREDIT,
+        //CN_CTLCOLORLISTBOX,
+        CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+        begin
+          //if (GetTextColor(TMessage(Message).WParam)<>ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor)) or (Self.Brush.Color<>TColorizerLocalSettings.ColorMap.MenuColor) then
+          begin
+            //AddLog('CustomDefaultHandler', Self.ClassName);
+            SetTextColor(TMessage(Message).WParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+            Self.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+            SetBkColor(TMessage(Message).WParam, ColorToRGB(Self.Brush.Color));
+            TMessage(Message).Result := Self.Brush.Handle;
+            Exit;
+          end;
+        end;
+    end;
+
+  TrampolineTWinControl_DefaultHandler(Self, Message);
+end;
 
 procedure CustomBevel_Paint(Self : TBevelClass);
 var
@@ -329,7 +467,7 @@ begin
   DrawText(Self.Canvas.Handle, Self.Caption, -1, R, DT_LEFT or DT_NOPREFIX or  DT_WORDBREAK or Self.DrawTextBiDiModeFlagsReadingOnly);
 end;
 
-
+//Hook for combobox fg and bg colors
 procedure CustomComboWndProc_Detour(Self: TCustomCombo;var Message: TMessage);
 var
   LParentForm : TCustomForm;
@@ -583,6 +721,53 @@ begin
   end;
 end;
 
+function CustomDrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
+var
+ LCanvas : TCanvas;
+ OrgHWND : HWND;
+ LWinControl : TWinControl;
+ LParentForm : TCustomForm;
+begin
+   //DrawEdge(DC, R, EDGE_RAISED, BF_RECT or BF_MIDDLE or Flags);
+  LWinControl:=nil;
+  OrgHWND :=WindowFromDC(hdc);
+  if OrgHWND<>0 then
+     LWinControl :=FindControl(OrgHWND);
+
+  if LWinControl<>nil then
+  begin
+    LParentForm:= GetParentForm(LWinControl);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+      Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
+  end;
+
+   case  edge of
+      EDGE_SUNKEN,
+      EDGE_ETCHED,
+      EDGE_BUMP,
+      EDGE_RAISED :
+                    begin
+                        LCanvas:=TCanvas.Create;
+                        try
+                          LCanvas.Handle:=hdc;
+                           if (BF_RECT and grfFlags = BF_RECT) then
+                           begin
+                            LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
+                            LCanvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+                            LCanvas.Rectangle(qrc);
+                           end;
+                        finally
+                          LCanvas.Handle:=0;
+                          LCanvas.Free;
+                        end;
+                        Exit(True);
+                    end;
+
+   end;
+
+
+   Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
+end;
 
 //hook for unthemed TCheckbox
 function CustomDrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
@@ -2727,7 +2912,7 @@ const
 {$IFDEF DELPHIXE6_UP}
   sModernThemeDrawDockCaption = '@Moderntheme@TModernDockCaptionDrawer@DrawDockCaption$qqrxp20Vcl@Graphics@TCanvasrx18System@Types@TRectrx38Vcl@Captioneddocktree@TParentFormState';
 {$ENDIF}
-
+  sBaseVirtualTreePrepareBitmaps = '@Idevirtualtrees@TBaseVirtualTree@PrepareBitmaps$qqroo';
 
 type
   THintWindowClass = class(THintWindow);
@@ -2748,9 +2933,10 @@ var
 {$IFNDEF DELPHIXE2_UP}
  LThemeServicesDrawElement2   : TThemeServicesDrawElement2;
 {$ENDIF}
- CoreIDEModule : HMODULE;
+ CoreIDEModule, VclIDEModule : HMODULE;
 begin
  ListBrush := TObjectDictionary<TObject, TBrush>.Create([doOwnsValues]);
+ ListBaseVirtualTree := TObjectDictionary<TCustomControl, TRttiBaseVirtualTree>.Create([doOwnsValues]);
 
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
@@ -2763,6 +2949,16 @@ begin
    if Assigned(pOrgAddress) then
      TrampolineTitleLineDraw   := InterceptCreate(pOrgAddress, @CustomTitleLineDraw);
   end;
+
+  VclIDEModule := LoadLibrary(sVclIDEModule);
+  if VclIDEModule<>0 then
+  begin
+   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
+   if Assigned(pOrgAddress) then
+    Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @CustomPrepareBitmaps);
+  end;
+
+  TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @CustomDefaultHandler);
 
   Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @CustomHintWindow_Paint);
   Trampoline_Bevel_Paint      := InterceptCreate(@TBevelClass.Paint, @CustomBevel_Paint);
@@ -2802,6 +2998,12 @@ begin
    if Assigned(pOrgAddress) then
      Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @CustomDrawFrameControl);
 
+   pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
+   if Assigned(pOrgAddress) then
+     Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @CustomDrawEdge);
+
+
+
   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @CustomDrawCategory);
   Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @CustomPanelPaint);
 
@@ -2834,9 +3036,14 @@ begin
   if Assigned(Trampoline_HintWindow_Paint) then
     InterceptRemove(@Trampoline_HintWindow_Paint);
 
+  if Assigned (TrampolineTWinControl_DefaultHandler) then
+    InterceptRemove(@TrampolineTWinControl_DefaultHandler);
+
   if Assigned(Trampoline_Bevel_Paint) then
     InterceptRemove(@Trampoline_Bevel_Paint);
 
+  if Assigned(Trampoline_TBaseVirtualTree_PrepareBitmaps) then
+    InterceptRemove(@Trampoline_TBaseVirtualTree_PrepareBitmaps);
 
 {$IF CompilerVersion<27} //XE6
   if Assigned(TrampolineCustomImageList_DoDraw) then
@@ -2882,6 +3089,7 @@ begin
 
   if Assigned(Trampoline_GetSysColor) then
     InterceptRemove(@Trampoline_GetSysColor);
+
   if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
     InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
 
@@ -2906,11 +3114,15 @@ begin
   if Assigned(Trampoline_DrawFrameControl) then
     InterceptRemove(@Trampoline_DrawFrameControl);
 
+  if Assigned(Trampoline_DrawEdge) then
+    InterceptRemove(@Trampoline_DrawEdge);
+
 {$IFDEF DELPHIXE6_UP}
   if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
     InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
 {$ENDIF}
 
+   ListBaseVirtualTree.Free;
    ListBrush.Free;
 end;
 
