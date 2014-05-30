@@ -154,7 +154,6 @@ end;
 function TThemeServicesHelper.DrawText(DC: HDC; Details: TThemedElementDetails;
   const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean;
 var
-  LColor: TColor;
   LOptions: TStyleTextOptions;
 begin
   if Color <> clNone then

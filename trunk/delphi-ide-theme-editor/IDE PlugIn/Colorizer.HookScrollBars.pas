@@ -382,7 +382,7 @@ begin
                                  try
                                    LCanvas.Handle:=dc;
                                    if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
                                    else
                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
                                     LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
@@ -406,7 +406,7 @@ begin
                                  try
                                    LCanvas.Handle:=dc;
                                    if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
                                    else
                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
                                    LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
@@ -431,7 +431,7 @@ begin
                                  try
                                    LCanvas.Handle:=dc;
                                    if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
                                    else
                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
                                    LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
@@ -456,7 +456,7 @@ begin
                                  try
                                    LCanvas.Handle:=dc;
                                    if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
                                    else
                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
                                    LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
@@ -480,7 +480,7 @@ begin
        try
          LCanvas.Handle:=dc;
          if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
          else
           LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
 
@@ -499,7 +499,7 @@ begin
        try
          LCanvas.Handle:=dc;
          if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
          else
           LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
