@@ -27,8 +27,10 @@ interface
 
 uses
   Rtti,
+  Forms,
   ActnMan,
   Generics.Collections,
+  StdCtrls,
   Controls,
   Windows,
   Graphics,
@@ -79,12 +81,24 @@ type
     property DottedBrush : HBRUSH read GetDottedBrush write SetDottedBrush;
   end;
 
+  TRttiListButton  = class(TRttiWrapper)
+   private
+    FListButton  : TCustomControl;
+    FPopupPanel: TCustomForm;
+    FItems: TStrings;
+    FListBox: TListBox;
+   public
+    constructor Create(ListButton : TCustomControl); reintroduce;
+    property ListButton : TCustomControl read FListButton;
+    property ListBox : TListBox read FListBox;
+    property PopupPanel: TCustomForm read FPopupPanel;
+    property Items: TStrings read FItems;
+  end;
+
 implementation
 
 uses
   uRttiHelper,
-  Forms,
-  StdCtrls,
   SysUtils,
   ExtCtrls,
   Buttons,
@@ -1128,11 +1142,25 @@ end;
 
 procedure TWrapperListButton.SetProperties(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
+//var
+//  ListBox: TListBox;
+//  PopupPanel: TCustomForm;
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'PopupPanel.Color', AColorMap.Color);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'ListBox.Color', AColorMap.MenuColor);
-
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'PopupPanel.Color', AColorMap.Color);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'ListBox.Color', AColorMap.MenuColor);
+{
+   property ListBox: TListBox;
+   property PopupPanel: TCustomForm;
+   property Items: TStrings;
+}
+//   ListBox:=TRttiUtils.GetRttiPropertyValue(AComponent,'ListBox').AsType<TListBox>;
+//   PopupPanel:=TRttiUtils.GetRttiPropertyValue(AComponent,'PopupPanel').AsType<TCustomForm>;
+//   AddLog('TWrapperListButton', 'PopupPanel nil = '+BoolToStr(PopupPanel=nil, True));
+//   AddLog('TWrapperListButton', 'ListBox    nil = '+BoolToStr(ListBox=nil, True));
+//
+//   AddLog('TWrapperListButton', IntToHex(TCustomControl(AComponent).Handle, 8));
+//   AddLog('TWrapperListButton', TRttiUtils.GetRttiFieldValue(AComponent,'FSelectString').AsString);       //FSelectString
 end;
 
 { TWrapperComponentToolbarFrame }
@@ -1180,6 +1208,17 @@ end;
 procedure TRttiBaseVirtualTree.SetDottedBrush(const Value: HBRUSH);
 begin
  RootType.GetField('FDottedBrush').SetValue(FVirtualTree, TValue.From<HBRUSH>(Value));
+end;
+
+{ TRttiListButton }
+
+constructor TRttiListButton.Create(ListButton: TCustomControl);
+begin
+  inherited Create(ListButton);
+  FListButton := ListButton;
+  FPopupPanel := RootType.GetProperty('PopupPanel').GetValue(FListButton).AsType<TCustomForm>;
+  FItems      := RootType.GetProperty('Items').GetValue(FListButton).AsType<TStrings>;
+  FListBox    := RootType.GetProperty('ListBox').GetValue(FListButton).AsType<TListBox>;
 end;
 
 initialization
@@ -1266,6 +1305,7 @@ initialization
 
   RegisterColorizerWrapper('TLabel',  TWrapperFontComponents);
   RegisterColorizerWrapper('TCheckBox',  TWrapperFontComponents);
+  RegisterColorizerWrapper('TListButton',  TWrapperListButton);
 
 finalization
   TRegisteredWrappers.Wrappers.Free;

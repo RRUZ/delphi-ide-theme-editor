@@ -108,7 +108,7 @@ type
  TRadioButtonClass       = class(TRadioButton);
  TCustomComboClass       = class(TCustomCombo);
  TBevelClass             = class(TBevel);
-
+ TCustomControlClass     = class(TCustomControl);
 var
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
@@ -161,6 +161,10 @@ var
 
   //000E6D74 4639 1D48 __fastcall Idevirtualtrees::TBaseVirtualTree::PrepareBitmaps(bool, bool)
   Trampoline_TBaseVirtualTree_PrepareBitmaps : procedure (Self : TCustomControl;NeedButtons, NeedLines: Boolean) = nil;
+
+  //0005B7F4 1682 0BCA __fastcall Idelistbtns::TListButton::Paint()
+  Trampoline_TListButton_Paint : procedure (Self : TCustomControl) = nil;
+
 
   FGutterBkColor : TColor = clNone;
 
@@ -219,7 +223,7 @@ type
 
 var
    ListBrush : TObjectDictionary<TObject, TBrush>;
-   ListBaseVirtualTree  : TObjectDictionary<TCustomControl, TRttiBaseVirtualTree>;
+   ListControlWrappers  : TObjectDictionary<TCustomControl, TRttiWrapper>;
 type
   TTabSetClass = class(TTabSet);
 
@@ -232,6 +236,61 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
+
+
+procedure CustomListButtonPaint(Self : TCustomControlClass);
+var
+  ArrowSize, i  : integer;
+  LPoint     : TPoint;
+  ListButton : TRttiListButton;
+  LRect      : TRect;
+  LParentForm : TCustomForm;
+begin
+  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+  begin
+    Trampoline_TListButton_Paint(Self);
+    exit;
+  end;
+
+  LParentForm:= GetParentForm(Self);
+  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+  begin
+    Trampoline_TListButton_Paint(Self);
+    exit;
+  end;
+
+  if not ListControlWrappers.ContainsKey(Self) then
+   ListControlWrappers.Add(Self, TRttiListButton.Create(Self));
+  ListButton := TRttiListButton(ListControlWrappers.Items[Self]);
+
+  //ListButton.ListBox.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+  ArrowSize := 3;
+  if Self.Width>16 then ArrowSize := 4;
+  LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
+
+  Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+  Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+  Self.Canvas.Rectangle(Self.ClientRect);
+
+  if (ListButton.Items.Count>0) or (ListButton.PopupPanel<>nil) then
+  begin
+    Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+    Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+    DrawArrow(Self.Canvas, TScrollDirection.sdDown, LPoint, ArrowSize);
+  end
+  else
+  begin
+    LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
+    for i := 0 to 2 do
+    begin
+     LRect := Rect(LPoint.X, LPoint.Y, LPoint.X+2, LPoint.Y+2);
+     Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+     Self.Canvas.FillRect(LRect);
+     LPoint.X:=LPoint.X+3;
+    end;
+  end;
+end;
+
 
 procedure CustomPrepareBitmaps(Self : TCustomControl;NeedButtons, NeedLines: Boolean);
 const
@@ -272,9 +331,9 @@ begin
     exit;
   end;
 
-  if not ListBaseVirtualTree.ContainsKey(Self) then
-   ListBaseVirtualTree.Add(Self, TRttiBaseVirtualTree.Create(Self));
-  LRttiBaseVirtualTree := ListBaseVirtualTree.Items[Self];
+  if not ListControlWrappers.ContainsKey(Self) then
+   ListControlWrappers.Add(Self, TRttiBaseVirtualTree.Create(Self));
+  LRttiBaseVirtualTree := TRttiBaseVirtualTree(ListControlWrappers.Items[Self]);
 
   Size.cx := 9;
   Size.cy := 9;
@@ -738,7 +797,10 @@ begin
   begin
     LParentForm:= GetParentForm(LWinControl);
     if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+      //AddLog('CustomDrawEdge Ignored', IntToHex(OrgHWND,8));
       Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
+    end;
   end;
 
    case  edge of
@@ -2913,6 +2975,7 @@ const
   sModernThemeDrawDockCaption = '@Moderntheme@TModernDockCaptionDrawer@DrawDockCaption$qqrxp20Vcl@Graphics@TCanvasrx18System@Types@TRectrx38Vcl@Captioneddocktree@TParentFormState';
 {$ENDIF}
   sBaseVirtualTreePrepareBitmaps = '@Idevirtualtrees@TBaseVirtualTree@PrepareBitmaps$qqroo';
+  sListButtonPaint               = '@Idelistbtns@TListButton@Paint$qqrv';
 
 type
   THintWindowClass = class(THintWindow);
@@ -2936,7 +2999,7 @@ var
  CoreIDEModule, VclIDEModule : HMODULE;
 begin
  ListBrush := TObjectDictionary<TObject, TBrush>.Create([doOwnsValues]);
- ListBaseVirtualTree := TObjectDictionary<TCustomControl, TRttiBaseVirtualTree>.Create([doOwnsValues]);
+ ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
 
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
@@ -2956,6 +3019,12 @@ begin
    pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
    if Assigned(pOrgAddress) then
     Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @CustomPrepareBitmaps);
+
+   pOrgAddress := GetProcAddress(VclIDEModule, sListButtonPaint);
+   if Assigned(pOrgAddress) then
+    Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @CustomListButtonPaint);
+
+
   end;
 
   TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @CustomDefaultHandler);
@@ -3045,6 +3114,9 @@ begin
   if Assigned(Trampoline_TBaseVirtualTree_PrepareBitmaps) then
     InterceptRemove(@Trampoline_TBaseVirtualTree_PrepareBitmaps);
 
+  if Assigned(Trampoline_TListButton_Paint) then
+    InterceptRemove(@Trampoline_TListButton_Paint);
+
 {$IF CompilerVersion<27} //XE6
   if Assigned(TrampolineCustomImageList_DoDraw) then
     InterceptRemove(@TrampolineCustomImageList_DoDraw);
@@ -3122,7 +3194,7 @@ begin
     InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
 {$ENDIF}
 
-   ListBaseVirtualTree.Free;
+   ListControlWrappers.Free;
    ListBrush.Free;
 end;
 

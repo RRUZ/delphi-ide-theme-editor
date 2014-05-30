@@ -136,19 +136,6 @@ end;
 {$ENDIF}
 
 
-procedure AddLog(const Category, Message : string);
-begin
-{$IFDEF ENABLELOG}
-   TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt',Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
-//   if not Assigned(LogFile) then exit;
-//
-//   if Category<>'' then
-//    LogFile.Add(Format('%s : %s', [Category, Message]))
-//   else
-//    LogFile.Add(Format('%s', [Message]));
-{$ENDIF}
-end;
-
 procedure AddLog(const Message : string);
 begin
   AddLog('', Message);
@@ -435,17 +422,35 @@ begin
   RestoreActnManagerStyles();
 end;
 
+var
+  sLogFileName : string;
+
+
+procedure AddLog(const Category, Message : string);
+begin
+{$IFDEF ENABLELOG}
+   TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
+//   if not Assigned(LogFile) then exit;
+//
+//   if Category<>'' then
+//    LogFile.Add(Format('%s : %s', [Category, Message]))
+//   else
+//    LogFile.Add(Format('%s', [Message]));
+{$ENDIF}
+end;
+
 initialization
 
 {$IFDEF ENABLELOG}
+ sLogFileName:=ExtractFilePath(GetModuleLocation())+'log.txt';
  LogFile:=TStringList.Create;
  ShowMessage('Log enabled');
 {$ENDIF}
  //LFieldsComponents := TObjectDictionary<string,TStringList>.Create([doOwnsValues]);
 finalization
 {$IFDEF ENABLELOG}
-  LogFile.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\log.txt');
-  LogFile.Free;;
+  LogFile.SaveToFile(sLogFileName);
+  LogFile.Free;
 {$ENDIF}
  //LFieldsComponents.Free;
 end.

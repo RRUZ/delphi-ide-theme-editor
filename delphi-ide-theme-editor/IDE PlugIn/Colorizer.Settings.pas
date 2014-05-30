@@ -66,7 +66,6 @@ type
     property DockStartGradInActive  : string read FDockStartGradInActive write FDockStartGradInActive;
     property DockEndGradInActive  : string read FDockEndGradInActive write FDockEndGradInActive;
 
-
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
 //    property ColorMapName  : string read FColorMapName write FColorMapName;
 //    property StyleBarName  : string read FStyleBarName write FStyleBarName;
@@ -87,7 +86,6 @@ procedure ReadSettings(Settings: TSettings;Const Path:String);
 var
   LIniFile: TIniFile;
 begin
-  //C:\Users\Public\Documents\RAD Studio\Projects\XE2\delphi-ide-theme-editor\IDE PlugIn\
   LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
     Settings.EnableDWMColorization   := LIniFile.ReadBool('Global', 'EnableDWMColorization', True);
