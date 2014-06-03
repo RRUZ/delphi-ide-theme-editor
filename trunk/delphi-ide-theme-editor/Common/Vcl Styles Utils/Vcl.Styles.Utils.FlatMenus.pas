@@ -444,7 +444,7 @@ var
 
     oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
     if hot then
-      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.HotFontColor);
+      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.BtnSelectedFont);
 
     if Disabled then
       oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor);
@@ -481,7 +481,7 @@ begin
 
   if (LPopupType <> tmPopupItemNormal) and (LPopupType <> tmPopupItemDisabled) then
   begin
-     Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+     Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.BtnSelectedColor;
      Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
      Canvas.Rectangle(R);
   end;
@@ -663,7 +663,7 @@ begin
 
   LColor   := TColorizerLocalSettings.ColorMap.FontColor;
   if isHot in State then
-    LColor   := TColorizerLocalSettings.ColorMap.HotFontColor;
+    LColor   := TColorizerLocalSettings.ColorMap.BtnSelectedFont;
 
   if isDisabled in State then
     LColor   := TColorizerLocalSettings.ColorMap.DisabledFontColor;
