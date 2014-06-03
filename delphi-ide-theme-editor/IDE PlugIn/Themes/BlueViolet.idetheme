@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiColorizerTheme modified="2014-05-08 18:54:34" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
+<DelphiColorizerTheme modified="2014-06-03 05:22:22" author="Delphi IDE Theme Colorizer" versionapp="1.0.0.0">
   <ColorMap>
     <BtnFrameColor>$00911456</BtnFrameColor>
     <BtnSelectedColor>$00EB74B3</BtnSelectedColor>
@@ -8,7 +8,7 @@
     <DisabledColor>clSilver</DisabledColor>
     <DisabledFontColor>clGrayText</DisabledFontColor>
     <DisabledFontShadow>clBtnHighlight</DisabledFontShadow>
-    <FontColor>clBlack</FontColor>
+    <FontColor>$00E1E1E1</FontColor>
     <FrameBottomRightInner>$00911456</FrameBottomRightInner>
     <FrameBottomRightOuter>$00911456</FrameBottomRightOuter>
     <FrameTopLeftInner>$00911456</FrameTopLeftInner>
