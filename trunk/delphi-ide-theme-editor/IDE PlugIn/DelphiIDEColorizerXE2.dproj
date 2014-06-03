@@ -70,7 +70,7 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-			<DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;acntDelphiXE2_R;Jcl;$(DCC_UsePackage)</DCC_UsePackage>
+			<DCC_UsePackage>vcl;vclimg;DelphiIDEColorizerXE2;acntDelphiXE2_R;Jcl;mbColorLibDXE2;$(DCC_UsePackage)</DCC_UsePackage>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_BplOutput>.\</DCC_BplOutput>
@@ -96,6 +96,7 @@
 			<DCCReference Include="rtl.dcp"/>
 			<DCCReference Include="vcl.dcp"/>
 			<DCCReference Include="vclimg.dcp"/>
+			<DCCReference Include="mbColorLibDXE2.dcp"/>
 			<DCCReference Include="Jcl.dcp"/>
 			<DCCReference Include="Main.pas"/>
 			<DCCReference Include="Colorizer.Utils.pas"/>
@@ -123,6 +124,7 @@
 			<DCCReference Include="..\Units\uStackTrace.pas"/>
 			<DCCReference Include="Colorizer.Wrappers.pas"/>
 			<DCCReference Include="Colorizer.HookScrollBars.pas"/>
+			<DCCReference Include="..\Units\uColorSelector.pas"/>
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>

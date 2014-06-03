@@ -3361,21 +3361,6 @@ object DialogColorSelector: TDialogColorSelector
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object mbColorPreview2: TmbColorPreview
-    Left = 55
-    Top = 141
-    Width = 55
-    Height = 55
-    Color = clLime
-    Opacity = 50
-  end
-  object mbColorPreview1: TmbColorPreview
-    Left = 11
-    Top = 117
-    Width = 55
-    Height = 55
-    Color = clLime
-  end
   object PageControl1: TPageControl
     Left = 10
     Top = 105
@@ -3385,6 +3370,10 @@ object DialogColorSelector: TDialogColorSelector
     TabOrder = 0
     object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HexaColorPicker1: THexaColorPicker
         Left = 0
         Top = 0
@@ -3402,10 +3391,14 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheetWEB: TTabSheet
       Caption = 'Web Palette'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mbColorPalette1: TmbColorPalette
         Left = 0
         Top = 0
-        Width = 210
+        Width = 154
         Height = 184
         Align = alClient
         Colors.Strings = (
@@ -3676,6 +3669,10 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheetHSL: TTabSheet
       Caption = 'HSL'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HSLColorPicker1: THSLColorPicker
         Left = 0
         Top = 0
@@ -3696,12 +3693,16 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheetHSV: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HSVColorPicker1: THSVColorPicker
-        Left = 3
+        Left = 35
         Top = 17
         Width = 167
         Height = 142
-        SelectedColor = clYellow
+        SelectedColor = 1048575
         HintFormat = 
           'Hex #%hex'#10#13'RGB[%r, %g, %b]'#10#13'HSL[%hslH, %hslS, %hslL]'#10#13'HSV[%hsvH,' +
           ' %hsvS, %hsvV]'#10#13'CMYK[%c, %m, %y, %k]'#10#13'L*a*b*[%cieL, %cieA, %cieB' +
@@ -3710,21 +3711,8 @@ object DialogColorSelector: TDialogColorSelector
         ParentShowHint = False
         TabOrder = 0
         Hue = 60
-        Saturation = 255
+        Saturation = 240
         OnChange = HSVColorPicker1Change
-      end
-      object VColorPicker1: TVColorPicker
-        Left = 176
-        Top = 17
-        Width = 22
-        Height = 148
-        HintFormat = 'Value: %value'
-        ShowHint = True
-        ParentShowHint = False
-        TabOrder = 1
-        OnChange = VColorPicker1Change
-        Saturation = 44
-        SelectedColor = 13882367
       end
     end
   end
@@ -3761,7 +3749,7 @@ object DialogColorSelector: TDialogColorSelector
     Top = 8
     Width = 233
     Height = 89
-    TabOrder = 6
+    TabOrder = 4
     object Label1: TLabel
       Left = 12
       Top = 1
@@ -3821,6 +3809,7 @@ object DialogColorSelector: TDialogColorSelector
       NumbersOnly = True
       ParentCtl3D = False
       TabOrder = 0
+      Text = '0'
       OnExit = RedExit
     end
     object Green: TEdit
@@ -3833,6 +3822,7 @@ object DialogColorSelector: TDialogColorSelector
       NumbersOnly = True
       ParentCtl3D = False
       TabOrder = 1
+      Text = '0'
       OnExit = RedExit
     end
     object Hex: TEdit
@@ -3859,7 +3849,7 @@ object DialogColorSelector: TDialogColorSelector
       NumbersOnly = True
       ParentCtl3D = False
       TabOrder = 3
-      Text = '255'
+      Text = '240'
       OnExit = HueExit
     end
     object Lum: TEdit
@@ -3872,6 +3862,7 @@ object DialogColorSelector: TDialogColorSelector
       NumbersOnly = True
       ParentCtl3D = False
       TabOrder = 4
+      Text = '0'
       OnExit = HueExit
     end
     object mbDeskPickerButton1: TmbDeskPickerButton
@@ -3911,7 +3902,23 @@ object DialogColorSelector: TDialogColorSelector
       NumbersOnly = True
       ParentCtl3D = False
       TabOrder = 7
+      Text = '0'
       OnExit = HueExit
+    end
+    object mbColorPreview1: TmbColorPreview
+      Left = 165
+      Top = 47
+      Width = 29
+      Height = 32
+      Color = clLime
+    end
+    object mbColorPreview2: TmbColorPreview
+      Left = 200
+      Top = 47
+      Width = 29
+      Height = 32
+      Color = clLime
+      Opacity = 50
     end
   end
   object ImageList1: TImageList
@@ -3922,7 +3929,7 @@ object DialogColorSelector: TDialogColorSelector
     Left = 184
     Top = 191
     Bitmap = {
-      494C010101002000600018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010020009C0018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000

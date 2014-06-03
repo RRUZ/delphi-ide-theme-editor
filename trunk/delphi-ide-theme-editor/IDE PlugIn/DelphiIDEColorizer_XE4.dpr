@@ -2,11 +2,6 @@
 library DelphiIDEColorizer_XE4;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
@@ -28,6 +23,7 @@ uses
   uStackTrace in '..\Units\uStackTrace.pas',
   Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
   Colorizer.HookScrollBars in 'Colorizer.HookScrollBars.pas',
+  uColorSelector in '..\Units\uColorSelector.pas',
   Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas';

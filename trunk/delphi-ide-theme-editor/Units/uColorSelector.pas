@@ -54,7 +54,6 @@ type
     HSLColorPicker1: THSLColorPicker;
     TabSheetHSV: TTabSheet;
     HSVColorPicker1: THSVColorPicker;
-    VColorPicker1: TVColorPicker;
     BtnApply: TButton;
     ButtonCancel: TButton;
     Label4: TLabel;
@@ -85,7 +84,7 @@ type
     FInitializating: Boolean;
     FSelectedColor: TColor;
     FStatus       : Boolean;
-    FRefreshHSVColorPicker : Boolean;
+    //FRefreshHSVColorPicker : Boolean;
     FOnChange: TNotifyEvent;
     { Private declarations }
     procedure RefreshColors(Acolor: TColor);
@@ -200,10 +199,11 @@ end;
 procedure TDialogColorSelector.HSVColorPicker1Change(Sender: TObject);
 begin
   if not FInitializating then
-  if FRefreshHSVColorPicker then
+  //if FRefreshHSVColorPicker then
   begin
-   VColorPicker1.SelectedColor:=HSVColorPicker1.SelectedColor;
-   RefreshColors(VColorPicker1.SelectedColor);
+   //VColorPicker1.SelectedColor:=HSVColorPicker1.SelectedColor;
+   //RefreshColors(VColorPicker1.SelectedColor);
+   RefreshColors(HSVColorPicker1.SelectedColor);
   end;
 end;
 
@@ -211,16 +211,16 @@ end;
 
 procedure TDialogColorSelector.VColorPicker1Change(Sender: TObject);
 begin
-  if not FInitializating then
-  begin
-   FRefreshHSVColorPicker:=False;
-   try
-     HSVColorPicker1.SelectedColor:=VColorPicker1.SelectedColor;
-     RefreshColors(HSVColorPicker1.SelectedColor);
-   finally
-     FRefreshHSVColorPicker:=True;
-   end;
-  end;
+//  if not FInitializating then
+//  begin
+//   FRefreshHSVColorPicker:=False;
+//   try
+//     HSVColorPicker1.SelectedColor:=VColorPicker1.SelectedColor;
+//     RefreshColors(HSVColorPicker1.SelectedColor);
+//   finally
+//     FRefreshHSVColorPicker:=True;
+//   end;
+//  end;
 end;
 
 

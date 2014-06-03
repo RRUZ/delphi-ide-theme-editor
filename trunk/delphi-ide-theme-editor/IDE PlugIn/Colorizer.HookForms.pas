@@ -62,7 +62,7 @@ begin
           if RetVal>0 then
           begin
             Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-            AddLog('Before HCBT_SETFOCUS '+ClassNameBuffer);
+            //AddLog('Before HCBT_SETFOCUS '+ClassNameBuffer);
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(ClassNameBuffer)>=0) then
             begin
               LWinControl:=FindControl(LHWND);   //use FindControl because some forms are not registered in the Screen.Forms list
@@ -74,7 +74,7 @@ begin
               if (LWinControl<>nil) and ((LParentForm<>nil) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
               begin
                 Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, LWinControl);
-                AddLog('HCBT_SETFOCUS '+ClassNameBuffer);
+                //AddLog('HCBT_SETFOCUS '+ClassNameBuffer);
               end;
             end;
           end;
@@ -91,13 +91,13 @@ begin
           if RetVal>0 then
           begin
              Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
-             AddLog('Before HCBT_ACTIVATE '+ClassNameBuffer);
+             //AddLog('Before HCBT_ACTIVATE '+ClassNameBuffer);
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
             for i := 0 to Screen.FormCount-1 do
              if (Screen.Forms[i].Handle=LHWND) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
                  Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Screen.Forms[i]);
-                 AddLog('HCBT_ACTIVATE '+ClassNameBuffer);
+                 //AddLog('HCBT_ACTIVATE '+ClassNameBuffer);
                  Break;
                end;
           end;

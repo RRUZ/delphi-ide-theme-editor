@@ -695,7 +695,7 @@ begin
     else
     if (TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw) then
     begin
-      DrawingStyle       := TTBDrawingStyle.dsGradient; //dsGradient
+      DrawingStyle       := TTBDrawingStyle.dsGradient;
       GradientStartColor := AColorMap.Color;
       GradientEndColor   := AColorMap.Color;
     end;
