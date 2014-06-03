@@ -220,10 +220,9 @@ type
     function WMNCPaintAddress : Pointer;
   end;
 
-
 var
-   ListBrush : TObjectDictionary<TObject, TBrush>;
    ListControlWrappers  : TObjectDictionary<TCustomControl, TRttiWrapper>;
+
 type
   TTabSetClass = class(TTabSet);
 
@@ -237,8 +236,8 @@ type
   end;
 {$ENDIF}
 
-
-procedure CustomListButtonPaint(Self : TCustomControlClass);
+//Detour for TListButton.Paint
+procedure Detour_TListButton_Paint(Self : TCustomControlClass);
 var
   ArrowSize, i  : integer;
   LPoint     : TPoint;
@@ -291,12 +290,10 @@ begin
   end;
 end;
 
-
-procedure CustomPrepareBitmaps(Self : TCustomControl;NeedButtons, NeedLines: Boolean);
+//Detour for TBaseVirtualTree.PrepareBitmaps
+procedure Detour_TBaseVirtualTree_PrepareBitmaps(Self : TCustomControl;NeedButtons, NeedLines: Boolean);
 const
   LineBitsDotted: array [0..8] of Word = ($55, $AA, $55, $AA, $55, $AA, $55, $AA, $55);
-  LineBitsSolid : array [0..7] of Word = (0, 0, 0, 0, 0, 0, 0, 0);
-
 var
   PatternBitmap: HBITMAP;
   Bits: Pointer;
@@ -368,16 +365,15 @@ begin
     if LRttiBaseVirtualTree.DottedBrush <> 0 then
       DeleteObject(LRttiBaseVirtualTree.DottedBrush);
 
-     Bits := @LineBitsDotted;
-     //Bits := @LineBitsSolid;
+    Bits := @LineBitsDotted;
     PatternBitmap := CreateBitmap(8, 8, 1, 1, Bits);
     LRttiBaseVirtualTree.DottedBrush := CreatePatternBrush(PatternBitmap);
     DeleteObject(PatternBitmap);
   end;
 end;
 
-
-procedure CustomDefaultHandler(Self : TWinControl;var Message);
+//Detour for TWinControl.DefaultHandler
+procedure Detour_TWinControl_DefaultHandler(Self : TWinControl;var Message);
 var
   LParentForm : TCustomForm;
 begin
@@ -419,7 +415,8 @@ begin
   TrampolineTWinControl_DefaultHandler(Self, Message);
 end;
 
-procedure CustomBevel_Paint(Self : TBevelClass);
+//Detour for TBevel.Paint
+procedure Detour_TBevel_Paint(Self : TBevelClass);
 var
   LParentForm : TCustomForm;
 
@@ -493,7 +490,8 @@ begin
   end;
 end;
 
-procedure CustomHintWindow_Paint(Self : THintWindow);
+//Detour for THintWindow.Paint
+procedure Detour_THintWindow_Paint(Self : THintWindow);
 var
   R, ClipRect: TRect;
   LTextColor: TColor;
@@ -527,7 +525,7 @@ begin
 end;
 
 //Hook for combobox fg and bg colors
-procedure CustomComboWndProc_Detour(Self: TCustomCombo;var Message: TMessage);
+procedure Detour_TCustomCombo_WndProc(Self: TCustomCombo;var Message: TMessage);
 var
   LParentForm : TCustomForm;
 begin
@@ -559,7 +557,7 @@ begin
 end;
 
 
-procedure CustomDoModernPainting(Self : TTabSet);
+procedure Detour_TTabSet_DoModernPainting(Self : TTabSet);
 type
   TTabPos = record
     Size, StartPos: Word;
@@ -780,7 +778,8 @@ begin
   end;
 end;
 
-function CustomDrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
+//Hook DrawEdge WinApi function
+function Detour_WinApi_DrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
 var
  LCanvas : TCanvas;
  OrgHWND : HWND;
@@ -832,7 +831,7 @@ begin
 end;
 
 //hook for unthemed TCheckbox
-function CustomDrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
+function Detour_WinApi_DrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
 var
  LCanvas : TCanvas;
  OrgHWND : HWND;
@@ -898,7 +897,7 @@ begin
 end;
 
 //Hook for change color of TCustomCheckBox
-procedure CustomButtonControlWndProc(Self : TButtonControlClass;var Message: TMessage);
+procedure Detour_TButtonControlClass_WndProc(Self : TButtonControlClass;var Message: TMessage);
 var
   LBrush : TBrush;
   LParentForm : TCustomForm;
@@ -915,10 +914,7 @@ begin
     case Message.Msg of
         CN_CTLCOLORSTATIC:
         begin
-          if not ListBrush.ContainsKey(Self) then
-             ListBrush.Add(Self, TBrush.Create);
-
-          LBrush:=ListBrush.Items[Self];
+          LBrush := Self.Brush;
           LBrush.Color:=TColorizerLocalSettings.ColorMap.Color;
 
           SetTextColor(Message.wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
@@ -938,7 +934,7 @@ end;
 type
   TCustomComboBoxClass = class(TCustomComboBox);
 //Hook for combobox
-procedure CustomWMPaintComboBox(Self: TCustomComboBoxClass;var Message: TWMPaint);
+procedure Detour_TCustomComboBox_WMPaint(Self: TCustomComboBoxClass;var Message: TWMPaint);
 var
    FListHandle : HWND;
    FEditHandle : HWND;
@@ -1148,7 +1144,7 @@ end;
 
 
 //hook for TSplitter
-procedure CustomSplitterPaint(Self : TSplitterClass);
+procedure Detour_TSplitter_Paint(Self : TSplitterClass);
 var
   R: TRect;
   LParentForm : TCustomForm;
@@ -1237,7 +1233,7 @@ begin
 end;
 
 //hook for NCPaint of TCustomPanel
-procedure CustomWinControl_WMNCPaint(Self: TWinControlClass; var Message: TWMNCPaint);
+procedure Detour_TWinControl_WMNCPaint(Self: TWinControlClass; var Message: TWMNCPaint);
 const
   InnerStyles: array[TBevelCut] of Integer = (0, BDR_SUNKENINNER, BDR_RAISEDINNER, 0);
   OuterStyles: array[TBevelCut] of Integer = (0, BDR_SUNKENOUTER, BDR_RAISEDOUTER, 0);
@@ -1357,7 +1353,7 @@ end;
 
 
 //Hook for TCustomPanel, draw flat border.
-procedure CustomPanelPaint(Self : TCustomPanelClass);
+procedure Detour_TCustomPanel_Paint(Self : TCustomPanelClass);
 const
   Alignments: array[TAlignment] of Longint = (DT_LEFT, DT_RIGHT, DT_CENTER);
   VerticalAlignments: array[TVerticalAlignment] of Longint = (DT_TOP, DT_BOTTOM, DT_VCENTER);
@@ -1463,7 +1459,6 @@ begin
   MethodAddr := Self.WMPaint;
   Result     := TMethod(MethodAddr).Code;
 end;
-
 
 { TCustomComboBoxBarHelper }
 
@@ -1577,7 +1572,8 @@ end;
 
 type
  TCategoryButtonsClass = class(TCategoryButtons);
-procedure CustomDrawCategory(Self :TCategoryButtonsClass; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer);
+
+procedure Detour_TCategoryButtons_DrawCategory(Self :TCategoryButtonsClass; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer);
 const
   cDropDownSize = 13;
 
@@ -1867,7 +1863,7 @@ end;
 type
   TCustomImageListClass = class(TCustomImageList);
 
-procedure CustomImageListHack_DoDraw(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
+procedure Detour_TCustomImageList_DoDraw(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
 var
   MaskBitMap : TBitmap;
   GrayBitMap : TBitmap;
@@ -1933,7 +1929,7 @@ begin
   end;
 end;
 
-procedure  CustomRectangle(Self: TCanvas; X1, Y1, X2, Y2: Integer);
+procedure  Detour_TCanvas_Rectangle(Self: TCanvas; X1, Y1, X2, Y2: Integer);
 begin
   //Self.Brush.Color:=clRed;
   Trampoline_TCanvas_Rectangle(Self, X1, Y1, X2, Y2);
@@ -1941,7 +1937,7 @@ end;
 
 
 //Hook for paint the border of the TClosableTabScroller control
-procedure  CustomLineTo(Self: TCanvas;X, Y: Integer);
+procedure  Detour_TCanvas_LineTo(Self: TCanvas;X, Y: Integer);
 var
   sCaller : string;
   LHWND : HWND;
@@ -1969,7 +1965,7 @@ begin
 end;
 
 //Hook for paint the gutter of the TEditControl and the background of the TGradientTabSet component
-procedure  CustomFillRect(Self: TCanvas;const Rect: TRect);
+procedure  Detour_TCanvas_FillRect(Self: TCanvas;const Rect: TRect);
 const
  sEditorControlSignature = 'EditorControl.TCustomEditControl.EVFillGutter';
  sGradientTabsSignature  = 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
@@ -2005,7 +2001,7 @@ end;
 
 //Hook for paint the header of the TVirtualStringTree component
 {$IFDEF DELPHIXE2_UP}
-function CustomDrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect:PRect = nil): Boolean;
+function Detour_TUxThemeStyle_DrawElement(Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect:PRect = nil): Boolean;
 const
   sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
   HP_HEADERITEMRIGHT = 3;
@@ -2057,7 +2053,7 @@ begin
    Result:=Trampoline_TUxThemeStyle_DoDrawElement(Self, DC, Details, R, ClipRect);
 end;
 {$ELSE}
-procedure CustomDrawElement(Self : TThemeServices;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: TRect);
+procedure Detour_TThemeServices_DrawElement(Self : TThemeServices;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: TRect);
 const
   sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
   HP_HEADERITEMRIGHT = 3;
@@ -2091,7 +2087,7 @@ begin
    Trampoline_TUxTheme_DrawElement(Self, DC, Details, R, ClipRect);
 end;
 
-function CustomDrawBackground(hTheme: UxTheme.HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall;
+function Detour_UxTheme_DrawBackground(hTheme: UxTheme.HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall;
 const
   sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
 var
@@ -2122,12 +2118,11 @@ begin
   end;
   Result:=Trampoline_DrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 end;
-
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
 //Hook, for avoid apply a VCL Style to a TWinControl in desing time
-function CustomHandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
+function Detour_TStyleEngine_HandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
 begin
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
   begin
@@ -2140,7 +2135,7 @@ end;
 {$ENDIF}
 
 //Hook for paint IDE TStatusBar
-procedure CustomStatusBarWMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
+procedure Detour_TStatusBar_WMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
 var
   DC: HDC;
   LBuffer: TBitmap;
@@ -2371,7 +2366,7 @@ begin
 end;
 
 //Hook for the docked IDE windows.
-function CustomDrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
+function Detour_TDockCaptionDrawer_DrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
 var
   LColorStart, LColorEnd : TColor;
 
@@ -2487,8 +2482,12 @@ begin
 
   if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (not TColorizerLocalSettings.Settings.DockCustom) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
   begin
-    Result:=Trampoline_TDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State);
-    exit;
+    {$IFDEF DELPHIXE6_UP}
+      if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
+       Exit(Trampoline_ModernDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State))
+      else
+    {$ENDIF}
+    Exit(Trampoline_TDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State));
   end;
 
   Canvas.Font.Color :=  TColorizerLocalSettings.ColorMap.FontColor;
@@ -2672,7 +2671,7 @@ begin
 end;
 
 //Hook for the TCustomListView component
-procedure CustomHeaderWndProc(Self:TCustomListView;var Message: TMessage);
+procedure Detour_TCustomListView_WndProc(Self:TCustomListView;var Message: TMessage);
 var
   LStyleServices : {$IFDEF DELPHIXE2_UP} TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
 
@@ -2821,7 +2820,7 @@ end;
 //Hook for allow change font color in TProjectManagerForm.TVirtualStringTree ,
 //because this component is not using the colors set via RTTI
 //Note  : This is a temporal workaround.
-function CustomDrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
+function Detour_WinApi_DrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
 const
  sTCustomVirtualStringTreeSignature = 'IDEVirtualTrees.TCustomVirtualStringTree.PaintNormalText';
 var
@@ -2850,7 +2849,7 @@ begin
     SetTextColor(hDC, OldColor);
 end;
 
-function CustomDrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
+function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
 begin
   Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
 end;
@@ -2867,7 +2866,7 @@ end;
 @Msglines@TCompilerMsgLine@GetLineText$qqrv
 
 }
-procedure CustomCompilerMsgLineDraw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
+procedure Detour_TCompilerMsgLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
 var
  OldFontColor : TColor;
 begin
@@ -2896,7 +2895,7 @@ end;
 @Msglines@TTitleLine@GetLineText$qqrv
 }
 
-procedure CustomTitleLineDraw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
+procedure Detour_TTitleLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
 var
  OldFontColor : TColor;
 begin
@@ -2908,7 +2907,7 @@ begin
 end;
 
 //Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background
-function CustomGetSysColor(nIndex: Integer): DWORD; stdcall;
+function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
 var
   sCaller : string;
 begin
@@ -2998,7 +2997,6 @@ var
 {$ENDIF}
  CoreIDEModule, VclIDEModule : HMODULE;
 begin
- ListBrush := TObjectDictionary<TObject, TBrush>.Create([doOwnsValues]);
  ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
 
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
@@ -3006,11 +3004,11 @@ begin
   begin
    pOrgAddress := GetProcAddress(CoreIDEModule, sCompilerMsgLineDraw);
    if Assigned(pOrgAddress) then
-    TrampolineCompilerMsgLineDraw := InterceptCreate(pOrgAddress, @CustomCompilerMsgLineDraw);
+    TrampolineCompilerMsgLineDraw := InterceptCreate(pOrgAddress, @Detour_TCompilerMsgLine_Draw);
 
    pOrgAddress := GetProcAddress(CoreIDEModule, sTitleLineDraw);
    if Assigned(pOrgAddress) then
-     TrampolineTitleLineDraw   := InterceptCreate(pOrgAddress, @CustomTitleLineDraw);
+     TrampolineTitleLineDraw   := InterceptCreate(pOrgAddress, @Detour_TTitleLine_Draw);
   end;
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
@@ -3018,80 +3016,77 @@ begin
   begin
    pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
    if Assigned(pOrgAddress) then
-    Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @CustomPrepareBitmaps);
+    Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
 
    pOrgAddress := GetProcAddress(VclIDEModule, sListButtonPaint);
    if Assigned(pOrgAddress) then
-    Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @CustomListButtonPaint);
+    Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @Detour_TListButton_Paint);
 
 
   end;
 
-  TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @CustomDefaultHandler);
+  TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
 
-  Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @CustomHintWindow_Paint);
-  Trampoline_Bevel_Paint      := InterceptCreate(@TBevelClass.Paint, @CustomBevel_Paint);
+  Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @Detour_THintWindow_Paint);
+  Trampoline_Bevel_Paint      := InterceptCreate(@TBevelClass.Paint, @Detour_TBevel_Paint);
 
 {$IF CompilerVersion<27} //XE6
-  TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @CustomImageListHack_DoDraw);
+  TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @Detour_TCustomImageList_DoDraw);
 {$IFEND}
-  Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @CustomFillRect);
-  Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @CustomLineTo);
-  Trampoline_TCanvas_Rectangle    :=InterceptCreate(@TCanvas.Rectangle, @CustomRectangle);
+  Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @Detour_TCanvas_FillRect);
+  Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @Detour_TCanvas_LineTo);
+  Trampoline_TCanvas_Rectangle    :=InterceptCreate(@TCanvas.Rectangle, @Detour_TCanvas_Rectangle);
 
-  Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @CustomStatusBarWMPaint);
-  Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @CustomWMPaintComboBox);
-  Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @CustomComboWndProc_Detour);
-  Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @CustomDrawDockCaption);
+  Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
+  Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
+  Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
+  Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
 
   //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
 
 {$IFDEF DELPHIXE2_UP}
-  Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @CustomHandleMessage);
-  Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @CustomDrawElement);
+  Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @Detour_TStyleEngine_HandleMessage);
+  Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @Detour_TUxThemeStyle_DrawElement);
 {$ELSE}
   LThemeServicesDrawElement2                := ThemeServices.DrawElement;
-  Trampoline_TUxTheme_DrawElement           := InterceptCreate(@LThemeServicesDrawElement2,   @CustomDrawElement);
+  Trampoline_TUxTheme_DrawElement           := InterceptCreate(@LThemeServicesDrawElement2,   @Detour_TThemeServices_DrawElement);
   if Assigned(DrawThemeBackground) then
-    Trampoline_DrawThemeBackground            := InterceptCreate(@DrawThemeBackground,   @CustomDrawBackground);
+    Trampoline_DrawThemeBackground            := InterceptCreate(@DrawThemeBackground,   @Detour_UxTheme_DrawBackground);
 {$ENDIF}
-  Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @CustomHeaderWndProc);
-  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @CustomDrawText);
-  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @CustomDrawTextEx);
+  Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @Detour_TCustomListView_WndProc);
+  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
+  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
 
    GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
    if Assigned(GetSysColorOrgPointer) then
-     Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @CustomGetSysColor);
+     Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @Detour_WinApi_GetSysColor);
 
    pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawFrameControl');
    if Assigned(pOrgAddress) then
-     Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @CustomDrawFrameControl);
+     Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawFrameControl);
 
    pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
    if Assigned(pOrgAddress) then
-     Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @CustomDrawEdge);
+     Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
 
+  Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @Detour_TCategoryButtons_DrawCategory);
+  Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @Detour_TCustomPanel_Paint);
 
+  Trampoline_TWinControl_WMNCPaint      := InterceptCreate(TWinControl(nil).WMNCPaintAddress, @Detour_TWinControl_WMNCPaint);
 
-  Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @CustomDrawCategory);
-  Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @CustomPanelPaint);
+  Trampoline_DoModernPainting           := InterceptCreate(TTabSet(nil).DoModernPaintingAddress, @Detour_TTabSet_DoModernPainting);
 
-  Trampoline_TWinControl_WMNCPaint      := InterceptCreate(TWinControl(nil).WMNCPaintAddress, @CustomWinControl_WMNCPaint);
-
-  Trampoline_DoModernPainting           := InterceptCreate(TTabSet(nil).DoModernPaintingAddress, @CustomDoModernPainting);
-
-  Trampoline_TSplitter_Paint               := InterceptCreate(@TSplitterClass.Paint, @CustomSplitterPaint);
-  Trampoline_TButtonControl_WndProc        := InterceptCreate(@TButtonControlClass.WndProc, @CustomButtonControlWndProc);
+  Trampoline_TSplitter_Paint               := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
+  Trampoline_TButtonControl_WndProc        := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
 {$IFDEF DELPHIXE6_UP}
   ModernThemeModule := LoadLibrary('ModernTheme200.bpl');
   if ModernThemeModule<>0 then
   begin
    pModernThemeDrawDockCaption := GetProcAddress(ModernThemeModule, sModernThemeDrawDockCaption);
    if Assigned(pModernThemeDrawDockCaption) then
-     Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(pModernThemeDrawDockCaption, @CustomDrawDockCaption);
+     Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(pModernThemeDrawDockCaption, @Detour_TDockCaptionDrawer_DrawDockCaption);
   end;
 {$ENDIF}
-
 end;
 
 procedure RemoveColorizerHooks;
@@ -3195,32 +3190,7 @@ begin
 {$ENDIF}
 
    ListControlWrappers.Free;
-   ListBrush.Free;
 end;
-
-
-
-
-//procedure CustomSetSize(Self : TBitmap;AWidth, AHeight: Integer);
-//var
-//  sCaller : string;
-//  i : integer;
-//begin
-//   //if (nIndex=COLOR_WINDOWTEXT) then
-//   begin
-//      for i := 2 to 5 do
-//      begin
-//         sCaller := ProcByLevel(i);
-//         AddLog('CustomSetSize', Format('%d AWidth %d AHeight %d %s',[i, AWidth, AHeight, sCaller]));
-//      end;
-//      AddLog('CustomSetSize', Format('%s',['---------------']));
-//   end;
-//
-// Trampoline_TBitmap_SetSize(Self, AWidth, AHeight);
-//end;
-
-
-
 
 end.
 

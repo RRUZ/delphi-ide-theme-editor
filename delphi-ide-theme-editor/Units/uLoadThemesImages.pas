@@ -68,6 +68,7 @@ var
   ImpTheme: TIDETheme;
   Bmp     : TBitmap;
   i       : Integer;
+  CreateArr : Boolean;
 begin
   inherited;
   if not TDirectory.Exists(FPath) then
@@ -85,10 +86,16 @@ begin
 
         Bmp:=TBitmap.Create;
         try
-
+         CreateArr:=True;
          if FileExists(ImageName) then
-          Bmp.LoadFromFile(ImageName)
-         else
+         begin
+          Bmp.LoadFromFile(ImageName);
+          if (Bmp.Width=FImageList.Width) and (Bmp.Height=FImageList.Height) then
+            CreateArr:=False;
+         end;
+
+
+         if CreateArr then
          begin
            FileName :=IncludeTrailingPathDelimiter(FPath)+ Item.Caption + '.theme.xml';
            LoadThemeFromXMLFile(ImpTheme, FileName);

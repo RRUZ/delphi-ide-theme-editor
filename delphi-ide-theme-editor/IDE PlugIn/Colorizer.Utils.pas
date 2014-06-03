@@ -44,7 +44,7 @@ uses
  Colorizer.Settings,
  ColorXPStyleActnCtrls;
 
-{$DEFINE ENABLELOG}
+{.$DEFINE ENABLELOG}
 
 procedure AddLog(const Message : string); overload;
 procedure AddLog(const Category, Message : string); overload;
@@ -422,8 +422,10 @@ begin
   RestoreActnManagerStyles();
 end;
 
+{$IFDEF ENABLELOG}
 var
   sLogFileName : string;
+{$ENDIF}
 
 
 procedure AddLog(const Category, Message : string);

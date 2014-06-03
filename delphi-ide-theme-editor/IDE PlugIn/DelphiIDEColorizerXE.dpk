@@ -34,7 +34,8 @@ requires
   rtl,
   vcl,
   vclimg,
-  Jcl;
+  Jcl,
+  mbColorLibDXE;
 
 contains
   Main in 'Main.pas',
@@ -60,6 +61,7 @@ contains
   Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
+  uColorSelector in '..\Units\uColorSelector.pas',
   Colorizer.uxThemeHelper in 'Colorizer.uxThemeHelper.pas';
 
 end.

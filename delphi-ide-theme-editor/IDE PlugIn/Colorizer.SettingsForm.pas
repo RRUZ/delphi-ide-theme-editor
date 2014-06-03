@@ -66,7 +66,6 @@ type
     CheckBoxFixIDEDrawIcon: TCheckBox;
     ImagePalette: TImage;
     CheckBoxActivateDWM: TCheckBox;
-    ColorDialog1: TColorDialog;
     Bevel1: TBevel;
     Label2: TLabel;
     CheckBoxGutterIcons: TCheckBox;
@@ -237,6 +236,7 @@ Uses
  GraphUtil,
  CommCtrl,
  Colorizer.Utils,
+ uColorSelector,
  TypInfo;
 
 {$R *.dfm}
@@ -253,14 +253,11 @@ procedure TFormIDEColorizerSettings.BtnSelForColorClick(Sender: TObject);
 Var
  LColor : TColor;
 begin
- if ColorDialog1.Execute(Handle) then
+ LColor := DialogSelectColor(CbClrElement.Selected);
+ if LColor<>clNone then
  begin
-   LColor:=ColorDialog1.Color;
-   if LColor<>clNone then
-   begin
     CbClrElement.Selected:=LColor;
     CbClrElementChange(nil);
-   end;
  end;
 end;
 
@@ -371,24 +368,18 @@ procedure TFormIDEColorizerSettings.Button1Click(Sender: TObject);
 Var
  LColor : TColor;
 begin
- if ColorDialog1.Execute(Handle) then
- begin
-   LColor:=ColorDialog1.Color;
-   if LColor<>clNone then
+ LColor := DialogSelectColor(ColorBoxBase.Selected);
+ if LColor<>clNone then
     ColorBoxBase.Selected:=LColor;
- end;
 end;
 
 procedure TFormIDEColorizerSettings.Button2Click(Sender: TObject);
 Var
  LColor : TColor;
 begin
- if ColorDialog1.Execute(Handle) then
- begin
-   LColor:=ColorDialog1.Color;
-   if LColor<>clNone then
+ LColor := DialogSelectColor(ColorBoxDockStartGradientActive.Selected);
+ if LColor<>clNone then
     ColorBoxDockStartGradientActive.Selected:=LColor;
- end;
 end;
 
 procedure TFormIDEColorizerSettings.ButtonSaveThemeClick(Sender: TObject);
@@ -423,12 +414,9 @@ procedure TFormIDEColorizerSettings.Button4Click(Sender: TObject);
 Var
  LColor : TColor;
 begin
- if ColorDialog1.Execute(Handle) then
- begin
-   LColor:=ColorDialog1.Color;
-   if LColor<>clNone then
+ LColor := DialogSelectColor(ColorBoxDockEndGradientActive.Selected);
+ if LColor<>clNone then
     ColorBoxDockEndGradientActive.Selected:=LColor;
- end;
 end;
 
 
@@ -436,24 +424,18 @@ procedure TFormIDEColorizerSettings.Button5Click(Sender: TObject);
 Var
  LColor : TColor;
 begin
- if ColorDialog1.Execute(Handle) then
- begin
-   LColor:=ColorDialog1.Color;
-   if LColor<>clNone then
+ LColor := DialogSelectColor(ColorBoxDockStartGradientInActive.Selected);
+ if LColor<>clNone then
     ColorBoxDockStartGradientInActive.Selected:=LColor;
- end;
 end;
 
 procedure TFormIDEColorizerSettings.Button6Click(Sender: TObject);
 Var
  LColor : TColor;
 begin
- if ColorDialog1.Execute(Handle) then
- begin
-   LColor:=ColorDialog1.Color;
-   if LColor<>clNone then
+ LColor := DialogSelectColor(ColorBoxDockEndGradientInActive.Selected);
+ if LColor<>clNone then
     ColorBoxDockEndGradientInActive.Selected:=LColor;
- end;
 end;
 
 

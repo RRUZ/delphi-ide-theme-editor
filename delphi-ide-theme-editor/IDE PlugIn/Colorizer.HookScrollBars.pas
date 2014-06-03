@@ -85,24 +85,22 @@ uses
   TrampolineSetScrollInfo             : function (hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall = nil;
 
 
-function CustomSetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
+function Detour_WinApi_SetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
 begin
   LastScrollWinControl:=FindControl(hWnd);
   Exit(TrampolineSetScrollPos(hWnd, nBar, nPos, bRedraw));
 end;
 
-function CustomSetScrollInfo(hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall;
+function Detour_WinApi_SetScrollInfo(hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall;
 begin
   LastScrollWinControl:=FindControl(hWnd);
   Exit(TrampolineSetScrollInfo(hWnd, BarFlag, ScrollInfo, Redraw));
 end;
 
-
-
 type
   TWinControlClass = class(TWinControl);
 
-procedure CustomWMNCPaint(Self : TWinControlClass;var Message: TWMNCPaint);
+procedure Detour_TWinControl_WMNCPaint(Self : TWinControlClass;var Message: TWMNCPaint);
 begin
   TrampolineTWinControl_WMNCPaint(Self, Message);
   if csDesigning in Self.ComponentState then  exit;
@@ -110,7 +108,7 @@ begin
     DrawNCBorder(Self, True);
 end;
 
-procedure  CustomBaseVirtualTreeOriginalWMNCPaint(Self : TCustomControl;DC: HDC);
+procedure  Detour_TBaseVirtualTree_OriginalWMNCPaint(Self : TCustomControl;DC: HDC);
 begin
  TrampolineBaseVirtualTreeOriginalWMNCPaint(Self, DC);
  if csDesigning in Self.ComponentState then  exit;
@@ -119,7 +117,7 @@ begin
    DrawNCBorder(TWinControlClass(Self), True);
 end;
 
-function CustomOpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
+function Detour_UxTheme_OpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
 begin
   Result := TrampolineOpenThemeData(hwnd, pszClassList);
   if SameText(pszClassList, VSCLASS_SCROLLBAR) then
@@ -294,7 +292,7 @@ begin
 end;
 {$ENDIF}
 
-function CustomDrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
+function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
 
   procedure DrawLine(Canvas: TCanvas; FromX, FromY, ToX, ToY: Integer);
   begin
@@ -651,31 +649,31 @@ begin
   ScrollBarList := TDictionary<HTHEME, String>.Create();
   ScrollBarList.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
 
-  TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @CustomWMNCPaint);
+  TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
 
   OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
   if Assigned (OpenThemeDataOrgPointer) then
-   TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @CustomOpenThemeData);
+   TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @Detour_UxTheme_OpenThemeData);
 
   DrawThemeBackgroundOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'), 'DrawThemeBackground');
   if Assigned (DrawThemeBackgroundOrgPointer) then
-   TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @CustomDrawThemeBackground);
+   TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @Detour_UxTheme_DrawThemeBackground);
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
   if VclIDEModule<>0 then
   begin
    psBaseVirtualTreeOriginalWMNCPaint := GetBplMethodAddress(GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint));
    if Assigned(psBaseVirtualTreeOriginalWMNCPaint) then
-    TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @CustomBaseVirtualTreeOriginalWMNCPaint);
+    TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
   end;
 
   pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollPos');
   if Assigned (pHook) then
-   TrampolineSetScrollPos := InterceptCreate(pHook, @CustomSetScrollPos);
+   TrampolineSetScrollPos := InterceptCreate(pHook, @Detour_WinApi_SetScrollPos);
 
   pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollInfo');
   if Assigned (pHook) then
-   TrampolineSetScrollInfo := InterceptCreate(pHook, @CustomSetScrollInfo);
+   TrampolineSetScrollInfo := InterceptCreate(pHook, @Detour_WinApi_SetScrollInfo);
 end;
 
 finalization

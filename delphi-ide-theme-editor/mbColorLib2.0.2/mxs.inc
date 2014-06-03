@@ -1,3 +1,30 @@
+    {$ifdef VER270}
+     {$define DELPHI_5_UP}
+     {$define DELPHI_6_UP}
+     {$define DELPHI_7_UP}
+     {$define DELPHI_8_UP}
+     {$define DELPHI_9_UP}
+     {$define DELPHI_10_UP}
+     {$define DELPHI_XE2_UP}
+     {$define DELPHI_XE3_UP}
+     {$define DELPHI_XE4_UP}	 	 
+     {$define DELPHI_XE5_UP}	
+     {$define DELPHI_XE6_UP}	 
+	{$endif}   
+	
+    {$ifdef VER260}
+     {$define DELPHI_5_UP}
+     {$define DELPHI_6_UP}
+     {$define DELPHI_7_UP}
+     {$define DELPHI_8_UP}
+     {$define DELPHI_9_UP}
+     {$define DELPHI_10_UP}
+     {$define DELPHI_XE2_UP}
+     {$define DELPHI_XE3_UP}
+     {$define DELPHI_XE4_UP}	 
+     {$define DELPHI_XE5_UP}	
+	{$endif}   
+	
     {$ifdef VER250}
      {$define DELPHI_5_UP}
      {$define DELPHI_6_UP}
