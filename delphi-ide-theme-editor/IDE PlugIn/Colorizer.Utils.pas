@@ -191,11 +191,13 @@ begin
   AColorMap.FontColor             :=FontColor;
   AColorMap.MenuColor             :=GetHighLightColor(Color);
   AColorMap.HighlightColor        :=GetHighLightColor(AColorMap.MenuColor);
-  AColorMap.BtnSelectedColor      :=GetHighLightColor(AColorMap.MenuColor);
+  AColorMap.HotColor              :=GetHighLightColor(AColorMap.MenuColor);
+  AColorMap.BtnSelectedColor      :=AColorMap.HotColor;
   AColorMap.BtnSelectedFont       :=AColorMap.FontColor;
 
   AColorMap.SelectedColor         :=GetHighLightColor(Color, 50);
   AColorMap.SelectedFontColor     :=AColorMap.FontColor;
+  AColorMap.HotFontColor          :=AColorMap.FontColor;
 
   AColorMap.BtnFrameColor         :=GetShadowColor(Color);
   AColorMap.FrameTopLeftInner     :=GetShadowColor(Color);

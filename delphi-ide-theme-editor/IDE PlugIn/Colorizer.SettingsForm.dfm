@@ -31,8 +31,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 468
-    ExplicitHeight = 499
     object PageControlSettings: TPageControl
       Left = 0
       Top = 0
@@ -41,12 +39,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 468
-      ExplicitHeight = 458
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
-        ExplicitWidth = 460
-        ExplicitHeight = 430
         object Label1: TLabel
           Left = 3
           Top = 46
@@ -675,8 +669,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 100
           Height = 25
           Caption = 'Check for updates'
-          Enabled = False
           TabOrder = 3
+          OnClick = ButtonCheckUpdatesClick
         end
       end
     end
@@ -688,8 +682,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitTop = 458
-      ExplicitWidth = 468
       object BtnApply: TButton
         Left = 4
         Top = 6
@@ -706,7 +698,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 344
     Top = 96
     Bitmap = {
-      494C0101080009002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

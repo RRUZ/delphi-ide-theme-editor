@@ -150,6 +150,7 @@ type
     procedure ButtonReportIssuesClick(Sender: TObject);
     procedure ButtonProjectPageClick(Sender: TObject);
     procedure ButtonDeleteThemeClick(Sender: TObject);
+    procedure ButtonCheckUpdatesClick(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -169,6 +170,7 @@ type
 {$ENDIF}
     procedure DrawPalette;
     procedure LoadDockIcons;
+    procedure LoadColorsTheme;
   public
     procedure Init;
   end;
@@ -370,7 +372,10 @@ Var
 begin
  LColor := DialogSelectColor(ColorBoxBase.Selected);
  if LColor<>clNone then
+ begin
     ColorBoxBase.Selected:=LColor;
+    ColorBoxBaseChange(nil);
+ end;
 end;
 
 procedure TFormIDEColorizerSettings.Button2Click(Sender: TObject);
@@ -406,6 +411,7 @@ begin
     MsgBox(Format('The theme %s was saved',[ThemeName]));
     LoadThemes;
     cbThemeName.ItemIndex:=cbThemeName.Items.IndexOf(ThemeName);
+    DrawPalette();
    end;
 end;
 
@@ -459,6 +465,11 @@ begin
      ShowMessage(Format('The %s form is already included in the list', [sFormClass]))
    else
      ListBoxFormsHooked.Items.Add(sFormClass);
+end;
+
+procedure TFormIDEColorizerSettings.ButtonCheckUpdatesClick(Sender: TObject);
+begin
+  ShellExecute(0, 'open', 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Updater.exe', PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
 end;
 
 procedure TFormIDEColorizerSettings.ButtonDeleteThemeClick(Sender: TObject);
@@ -524,18 +535,13 @@ end;
 procedure TFormIDEColorizerSettings.cbThemeNameChange(Sender: TObject);
 Var
   FileName : string;
-  OldIndex : Integer;
 begin
   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+cbThemeName.Text+'.idetheme';
   if FileExists(FileName)  then
   begin
     LoadColorMapFromXmlFile(XPColorMap, FileName);
-    OldIndex:=ColorListBox1.ItemIndex;
-    ColorListBox1.PopulateList;
-    if OldIndex>=0 then
-      ColorListBox1.ItemIndex:=OldIndex;
-
-    DrawPalette;
+    LoadColorsTheme();
+    DrawPalette();
     EditThemeName.Text:=cbThemeName.Text;
     ColorBoxBase.Selected:=XPColorMap.Color;
   end;
@@ -553,7 +559,8 @@ begin
  if CheckBoxAutoColor.Checked then
  begin
    GenerateColorMap(XPColorMap, ColorBoxBase.Selected, CalculateTextColor(ColorBoxBase.Selected));
-   DrawPalette;
+   LoadColorsTheme();
+   DrawPalette();
  end;
 end;
 
@@ -818,6 +825,16 @@ begin
   end;
 end;
          }
+procedure TFormIDEColorizerSettings.LoadColorsTheme;
+var
+  OldIndex : Integer;
+begin
+  OldIndex:=ColorListBox1.ItemIndex;
+  ColorListBox1.PopulateList;
+  if OldIndex>=0 then
+    ColorListBox1.ItemIndex:=OldIndex;
+end;
+
 procedure TFormIDEColorizerSettings.LoadDockIcons;
 var
   s, ImagesPath : string;
