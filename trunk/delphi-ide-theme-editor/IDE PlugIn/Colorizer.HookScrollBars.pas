@@ -306,7 +306,7 @@ var
   LCanvas : TCanvas;
   VCLClassName : string;
   ApplyHook  : Boolean;
-//  i : integer;
+  //LParentForm : TCustomForm;
   LHWND : HWND;
   LFoundControl : TWinControl;
 begin
@@ -336,7 +336,16 @@ begin
    end;
 
   if LFoundControl<>nil then
-   try ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);  except ApplyHook:=False end;
+  begin
+   try
+       ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
+//       LParentForm:=GetParentForm(LFoundControl);
+//       if (LParentForm<>nil) and ApplyHook then
+//         ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+     except
+      ApplyHook:=False
+     end;
+  end;
 
   if not ApplyHook then
   begin
