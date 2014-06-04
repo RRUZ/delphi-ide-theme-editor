@@ -43,6 +43,10 @@ type
     FDockEndGradActive: string;
     FDockEndGradInActive: string;
     FHookSystemColors: boolean;
+    FToolbarEndGrad: string;
+    FToolbarCustomColors: boolean;
+    FToolbarStartGrad: string;
+    FToolbarGradientHor: boolean;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -69,6 +73,10 @@ type
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
 //    property ColorMapName  : string read FColorMapName write FColorMapName;
 //    property StyleBarName  : string read FStyleBarName write FStyleBarName;
+    property ToolbarGradientHor    : boolean read FToolbarGradientHor write FToolbarGradientHor;
+    property ToolbarCustomColors   : boolean read FToolbarCustomColors write FToolbarCustomColors;
+    property ToolbarStartGrad  : string read FToolbarStartGrad write FToolbarStartGrad;
+    property ToolbarEndGrad    : string read FToolbarEndGrad write FToolbarEndGrad;
   end;
 
   procedure ReadSettings(Settings: TSettings;Const Path:String);
@@ -107,6 +115,10 @@ begin
     Settings.DockEndGradInActive     := LIniFile.ReadString('Global', 'DockEndGradInActive', 'clBlack');
     //    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
 //    Settings.StyleBarName            := iniFile.ReadString('Global', 'StyleBarName', 'XP Style');
+    Settings.ToolbarGradientHor   := LIniFile.ReadBool('Global', 'ToolbarGradientHor', True);
+    Settings.ToolbarCustomColors  := LIniFile.ReadBool('Global', 'ToolbarCustomColors', False);
+    Settings.ToolbarStartGrad     := LIniFile.ReadString('Global', 'ToolbarStartGrad', 'clGray');
+    Settings.ToolbarEndGrad       := LIniFile.ReadString('Global', 'ToolbarEndGrad', 'clSilver');
   finally
     LIniFile.Free;
   end;
@@ -137,6 +149,10 @@ begin
     LIniFile.WriteString('Global', 'DockEndGradInActive', Settings.DockEndGradInActive);
 //    iniFile.WriteString('Global', 'ColorMapName', Settings.ColorMapName);
 //    iniFile.WriteString('Global', 'StyleBarName', Settings.StyleBarName);
+    LIniFile.WriteBool('Global', 'ToolbarGradientHor', Settings.ToolbarGradientHor);
+    LIniFile.WriteBool('Global', 'ToolbarCustomColors', Settings.ToolbarCustomColors);
+    LIniFile.WriteString('Global', 'ToolbarStartGrad', Settings.ToolbarStartGrad);
+    LIniFile.WriteString('Global', 'ToolbarEndGrad', Settings.ToolbarEndGrad);
   finally
     LIniFile.Free;
   end;

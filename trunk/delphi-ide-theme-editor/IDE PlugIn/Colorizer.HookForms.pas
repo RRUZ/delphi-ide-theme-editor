@@ -53,6 +53,13 @@ begin
    and Assigned(TColorizerLocalSettings.HookedWindows) and Assigned(TColorizerLocalSettings.HookedScrollBars) then
    case nCode of
 
+//     HCBT_SYSCOMMAND :
+//     begin
+//          RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
+//          if RetVal>0 then
+//           AddLog('HCBT_SYSCOMMAND', ClassNameBuffer+' SC_COMMAND '+IntToHex(wParam, 8));
+//     end;
+
      HCBT_SETFOCUS:
      begin
        LHWND := HWND(wParam);

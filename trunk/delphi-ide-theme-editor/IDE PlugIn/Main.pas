@@ -212,25 +212,78 @@ var
   SplashBmp      : Graphics.TBitmap;
   AboutBmp       : Graphics.TBitmap;
   FPlugInInfo    : Integer = InvalidIndex;
-{$IFDEF DLLWIZARD}
   IDEWizard      : TIDEWizard;
+{$IFDEF DLLWIZARD}
 var
   FWizardIndex: Integer = InvalidIndex;
+{$ENDIF}
+
+function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
+begin
+  Result := (Instance <> nil) and Supports(Instance, Intf, Inst);
+end;
+
+procedure UnRegisterPlugIn;
+var
+  LAboutBoxServices : IOTAAboutBoxServices;
+begin
+  if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) and (FPlugInInfo<>InvalidIndex) then
+     LAboutBoxServices.RemovePluginInfo(FPlugInInfo);
+
+  FPlugInInfo:=InvalidIndex;
+end;
+
 
 procedure FinalizeIDEColorizer;
+{$IFDEF DLLWIZARD}
 var
   WizardServices: IOTAWizardServices;
+{$ENDIF}
 begin
+  AddLog('FinalizeIDEColorizer', '0');
+  IDEWizard.FTimerRefresher.Enabled:=False;
+  IDEWizard.FTimerRefresher.Free;
+
+{$IFNDEF DLLWIZARD}
+  RestoreIDESettings();
+{$ENDIF}
+
+  AddLog('FinalizeIDEColorizer', '1');
+  RemoveFormsHook();
+  RemoveColorizerHooks();
+  UnregisterFlatMenusHooks();
+
+  UnRegisterPlugIn;
+  IDEWizard.RemoveMenuItems;
+  AddLog('FinalizeIDEColorizer', '2');
+  FreeAndNil(SplashBmp);
+  FreeAndNil(AboutBmp);
+
+  AddLog('FinalizeIDEColorizer', '3');
+  FreeAndNil(TColorizerLocalSettings.ActnStyleList);
+  FreeAndNil(TColorizerLocalSettings.Settings);
+  TColorizerLocalSettings.IDEData.Free;
+  TColorizerLocalSettings.DockImages.Free;
+  FreeAndNil(TColorizerLocalSettings.HookedWindows);
+  FreeAndNil(TColorizerLocalSettings.HookedScrollBars);
+
+  IDEWizard.FinalizeColorizer();
+  AddLog('FinalizeIDEColorizer', '4');
+
+{$IFDEF DLLWIZARD}
   if FWizardIndex <> InvalidIndex then
   begin
+    AddLog('FinalizeIDEColorizer', '5');
     Assert(Assigned(BorlandIDEServices));
     WizardServices := BorlandIDEServices as IOTAWizardServices;
     Assert(Assigned(WizardServices));
     WizardServices.RemoveWizard(FWizardIndex);
     FWizardIndex := InvalidIndex;
   end;
+{$ENDIF}
 end;
 
+{$IFDEF DLLWIZARD}
 function InitIDEColorizer(const BorlandIDEServices: IBorlandIDEServices;
   RegisterProc: TWizardRegisterProc;
   var Terminate: TWizardTerminateProc): Boolean; stdcall;
@@ -253,15 +306,10 @@ end;
 {$ELSE}
 procedure Register;
 begin
-   RegisterPackageWizard(TIDEWizard.Create as IOTAWizard);
+   IDEWizard:=TIDEWizard.Create;
+   RegisterPackageWizard(IDEWizard as IOTAWizard);
 end;
 {$ENDIF}
-
-
-function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
-begin
-  Result := (Instance <> nil) and Supports(Instance, Intf, Inst);
-end;
 
 procedure RegisterPlugIn;
 const
@@ -284,15 +332,6 @@ begin
    FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [sVersion]), AboutBmp.Handle, False, 'Freeware');
 end;
 
-procedure UnRegisterPlugIn;
-var
-  LAboutBoxServices : IOTAAboutBoxServices;
-begin
-  if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) and (FPlugInInfo<>InvalidIndex) then
-     LAboutBoxServices.RemovePluginInfo(FPlugInInfo);
-
-  FPlugInInfo:=InvalidIndex;
-end;
 
 procedure TIDEWizard.InitColorizer;
 var
@@ -409,34 +448,9 @@ end;
 
 destructor TIDEWizard.Destroy;
 begin
-  AddLog('TIDEWizard.Destroy 0');
-  FTimerRefresher.Enabled:=False;
-  FTimerRefresher.Free;
-
-  RestoreIDESettings();
-
-  AddLog('TIDEWizard.Destroy 1');
-  RemoveFormsHook();
-  RemoveColorizerHooks();
-  UnregisterFlatMenusHooks();
-
-  UnRegisterPlugIn;
-  RemoveMenuItems;
-  AddLog('TIDEWizard.Destroy 2');
-  FreeAndNil(SplashBmp);
-  FreeAndNil(AboutBmp);
-
-  AddLog('TIDEWizard.Destroy 3');
-  FreeAndNil(TColorizerLocalSettings.ActnStyleList);
-  FreeAndNil(TColorizerLocalSettings.Settings);
-  TColorizerLocalSettings.IDEData.Free;
-  TColorizerLocalSettings.DockImages.Free;
-  FreeAndNil(TColorizerLocalSettings.HookedWindows);
-  FreeAndNil(TColorizerLocalSettings.HookedScrollBars);
-
-  FinalizeColorizer();
-
-  AddLog('TIDEWizard.Destroy 4');
+  {$IFNDEF DLLWIZARD}
+  FinalizeIDEColorizer();
+  {$ENDIF}
   inherited;
 end;
 

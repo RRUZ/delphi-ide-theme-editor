@@ -110,6 +110,7 @@ uses
   ActnPopup,
   ActnMenus,
   UxTheme,
+  GraphUtil,
   ActnCtrls,
   {$IFDEF DELPHIXE2_UP}
   Vcl.Themes,
@@ -315,7 +316,8 @@ begin
   Result:=False;
   if TRegisteredWrappers.WrappersInstances.ContainsKey(AComponent.ClassName) then
   begin
-    //AddLog('RunWrapper '+AComponent.ClassName);
+//    if Restore then
+//      AddLog('RunWrapper', AComponent.ClassName);
     LBaseWrapper:= TRegisteredWrappers.WrappersInstances.Items[AComponent.ClassName];
     LBaseWrapper.Restore:=Restore;
     LBaseWrapper.SetProperties(AComponent, AColorMap);
@@ -685,21 +687,26 @@ begin
   with TToolBar(AComponent) do
   begin
     Color              := AColorMap.Color;
-{$IF CompilerVersion<27} //XE6
-    if Restore and (DrawingStyle<>TTBDrawingStyle.dsNormal) then
-    begin
-      DrawingStyle       := TTBDrawingStyle(dsNormal);
-      GradientStartColor := AColorMap.Color;
-      GradientEndColor   := AColorMap.Color;
-    end
+    if Restore then
+      DrawingStyle       := TTBDrawingStyle(dsNormal)
     else
-    if (TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw) then
-    begin
-      DrawingStyle       := TTBDrawingStyle.dsGradient;
-      GradientStartColor := AColorMap.Color;
-      GradientEndColor   := AColorMap.Color;
-    end;
-{$IFEND}
+     DrawingStyle       := TTBDrawingStyle.dsGradient;
+
+    if TColorizerLocalSettings.Settings.ToolbarGradientHor then
+      GradientDirection:=TGradientDirection.gdHorizontal
+    else
+      GradientDirection:=TGradientDirection.gdVertical;
+
+      if TColorizerLocalSettings.Settings.ToolbarCustomColors and not Restore then
+      begin
+         try  GradientStartColor := StringToColor(TColorizerLocalSettings.Settings.ToolbarStartGrad) except GradientStartColor :=AColorMap.Color end;
+         try  GradientEndColor := StringToColor(TColorizerLocalSettings.Settings.ToolbarEndGrad) except GradientEndColor :=AColorMap.Color end;
+      end
+      else
+      begin
+        GradientStartColor := AColorMap.Color;
+        GradientEndColor   := AColorMap.Color;
+      end;
 
     HotTrackColor      := AColorMap.SelectedColor;
     Font.Color         := AColorMap.FontColor;

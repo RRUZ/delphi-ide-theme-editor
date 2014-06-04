@@ -165,6 +165,9 @@ var
   //0005B7F4 1682 0BCA __fastcall Idelistbtns::TListButton::Paint()
   Trampoline_TListButton_Paint : procedure (Self : TCustomControl) = nil;
 
+{$IFDEF DLLWIZARD}
+  Trampoline_TCustomForm_WndProc :  procedure (Self : TCustomForm;var Message: TMessage) = nil;
+{$ENDIF}
 
   FGutterBkColor : TColor = clNone;
 
@@ -234,6 +237,25 @@ type
     Filler: array[1..4] of Byte;
   {$ENDIF}
   end;
+{$ENDIF}
+
+{$IFDEF DLLWIZARD}
+procedure Detour_TCustomForm_WndProc(Self : TCustomForm;var Message: TMessage);
+begin
+ if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
+ case Message.Msg of
+  WM_CLOSE  :
+  //WM_DESTROY,
+  //WM_QUIT :
+     begin
+       AddLog('Detour_TCustomForm_WndProc', Self.ClassName+' ' +WM_To_String(Message.Msg));
+       //RestoreIDESettings();
+       RestoreIDESettingsFast();
+     end;
+ end;
+
+ Trampoline_TCustomForm_WndProc(Self, Message);
+end;
 {$ENDIF}
 
 //Detour for TListButton.Paint
@@ -3076,8 +3098,13 @@ begin
 
   Trampoline_DoModernPainting           := InterceptCreate(TTabSet(nil).DoModernPaintingAddress, @Detour_TTabSet_DoModernPainting);
 
-  Trampoline_TSplitter_Paint               := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
-  Trampoline_TButtonControl_WndProc        := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
+  Trampoline_TSplitter_Paint            := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
+  Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
+
+{$IFDEF DLLWIZARD}
+  Trampoline_TCustomForm_WndProc        := InterceptCreate(@TCustomFormClass.WndProc, @Detour_TCustomForm_WndProc);
+{$ENDIF}
+
 {$IFDEF DELPHIXE6_UP}
   ModernThemeModule := LoadLibrary('ModernTheme200.bpl');
   if ModernThemeModule<>0 then
@@ -3188,6 +3215,12 @@ begin
   if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
     InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
 {$ENDIF}
+
+{$IFDEF DLLWIZARD}
+  if Assigned(Trampoline_TCustomForm_WndProc) then
+    InterceptRemove(@Trampoline_TCustomForm_WndProc);
+{$ENDIF}
+
 
    ListControlWrappers.Free;
 end;
