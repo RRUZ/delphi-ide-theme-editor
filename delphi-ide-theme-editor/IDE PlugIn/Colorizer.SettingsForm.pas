@@ -118,6 +118,20 @@ type
     ButtonCheckUpdates: TButton;
     ButtonDeleteTheme: TButton;
     CheckBoxHookSystemColors: TCheckBox;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    Panel2: TPanel;
+    TabSheet2: TTabSheet;
+    RbtnToolBarGradientVert: TRadioButton;
+    RbtnToolBarGradientHorz: TRadioButton;
+    Label4: TLabel;
+    CheckBoxUseCustomColorsToolbar: TCheckBox;
+    Label5: TLabel;
+    ColorBoxToolBarStartGrad: TColorBox;
+    Button3: TButton;
+    Button7: TButton;
+    ColorBoxToolBarStartEnd: TColorBox;
+    Label17: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -151,6 +165,8 @@ type
     procedure ButtonProjectPageClick(Sender: TObject);
     procedure ButtonDeleteThemeClick(Sender: TObject);
     procedure ButtonCheckUpdatesClick(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -306,14 +322,21 @@ begin
 //    FSettings.StyleBarName      :=StyleCombo.Text;
     FSettings.VCLStyleName := CbStyles.Text;
     FSettings.DockImages   := ListBoxDockImages.Items[ListBoxDockImages.ItemIndex];
+
     FSettings.DockGradientHor:= RbtnDockGradientHorz.Checked;
     FSettings.DockCustom       := CheckBoxCustomDockBars.Checked;
     FSettings.DockCustomColors := CheckBoxUseCustomColorsDock.Checked;
-
     FSettings.DockStartGradActive   := ColorToString(ColorBoxDockStartGradientActive.Selected);
     FSettings.DockEndGradActive     := ColorToString(ColorBoxDockEndGradientActive.Selected);
     FSettings.DockStartGradInActive := ColorToString(ColorBoxDockStartGradientInActive.Selected);
     FSettings.DockEndGradInActive   := ColorToString(ColorBoxDockEndGradientInActive.Selected);
+
+
+    FSettings.ToolbarGradientHor    := RbtnToolBarGradientHorz.Checked;
+    FSettings.ToolbarCustomColors   := CheckBoxUseCustomColorsToolbar.Checked;
+    FSettings.ToolbarStartGrad      := ColorToString(ColorBoxToolBarStartGrad.Selected);
+    FSettings.ToolbarEndGrad        := ColorToString(ColorBoxToolBarStartEnd.Selected);
+
     FSettings.HookSystemColors      := CheckBoxHookSystemColors.Checked;
 
     WriteSettings(FSettings, GetSettingsFolder);
@@ -387,6 +410,15 @@ begin
     ColorBoxDockStartGradientActive.Selected:=LColor;
 end;
 
+procedure TFormIDEColorizerSettings.Button3Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxToolBarStartGrad.Selected);
+ if LColor<>clNone then
+    ColorBoxToolBarStartGrad.Selected:=LColor;
+end;
+
 procedure TFormIDEColorizerSettings.ButtonSaveThemeClick(Sender: TObject);
 Var
   ThemeName, FileName : string;
@@ -444,6 +476,15 @@ begin
     ColorBoxDockEndGradientInActive.Selected:=LColor;
 end;
 
+
+procedure TFormIDEColorizerSettings.Button7Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxToolBarStartEnd.Selected);
+ if LColor<>clNone then
+    ColorBoxToolBarStartEnd.Selected:=LColor;
+end;
 
 procedure TFormIDEColorizerSettings.ButtonReportIssuesClick(Sender: TObject);
 begin
@@ -868,17 +909,24 @@ end;
 procedure TFormIDEColorizerSettings.LoadSettings;
 begin
   ReadSettings(FSettings, GetSettingsFolder);
-  RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
-  RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
 
   CheckBoxHookSystemColors.Checked  := FSettings.HookSystemColors;
   CheckBoxCustomDockBars.Checked := FSettings.DockCustom;
-  CheckBoxUseCustomColorsDock.Checked := FSettings.DockCustomColors;
 
+  RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
+  RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
+  CheckBoxUseCustomColorsDock.Checked := FSettings.DockCustomColors;
   try ColorBoxDockStartGradientActive.Selected   := StringToColor(FSettings.DockStartGradActive); except end;
   try ColorBoxDockEndGradientActive.Selected     := StringToColor(FSettings.DockEndGradActive);  except end;
   try ColorBoxDockStartGradientInActive.Selected := StringToColor(FSettings.DockStartGradInActive); except end;
   try ColorBoxDockEndGradientInActive.Selected   := StringToColor(FSettings.DockEndGradInActive); except end;
+
+  RbtnToolBarGradientVert.Checked := FSettings.ToolbarGradientHor;
+  RbtnToolBarGradientHorz.Checked := not FSettings.ToolbarGradientHor;
+  CheckBoxUseCustomColorsToolbar.Checked := FSettings.ToolbarCustomColors;
+  try ColorBoxToolBarStartGrad.Selected   := StringToColor(FSettings.ToolbarStartGrad); except end;
+  try ColorBoxToolBarStartEnd.Selected    := StringToColor(FSettings.ToolbarEndGrad);  except end;
+
 
   CheckBoxEnabled.Checked:=FSettings.Enabled;
   CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;

@@ -52,6 +52,7 @@ procedure AddLog(const Category, Message : string); overload;
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False;Invalidate : Boolean = False); overload;
 procedure RefreshIDETheme(Invalidate : Boolean = False); overload;
 procedure RestoreIDESettings();
+procedure RestoreIDESettingsFast();
 
 procedure LoadSettings(AColorMap:TCustomActionBarColorMap; Settings : TSettings);
 procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate : Boolean = False);
@@ -147,6 +148,31 @@ begin
    RefreshIDETheme(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, False, Invalidate);
 end;
 
+procedure RestoreIDESettingsFast();
+var
+  i, j  : Integer;
+  LComponent : TComponent;
+  NativeColorMap : TCustomActionBarColorMap;
+begin
+{$IFDEF DELPHIXE_UP}
+  NativeColorMap:=TThemedColorMap.Create(nil);
+{$ELSE}
+  NativeColorMap:=TStandardColorMap.Create(nil);
+{$ENDIF}
+  try
+  for i := 0 to Screen.FormCount-1 do
+   if SameText(Screen.Forms[i].ClassName, 'TAppBuilder') then
+     for j := 0 to Screen.Forms[i].ComponentCount-1 do
+      begin
+       LComponent:= Screen.Forms[i].Components[j];
+       if LComponent is TToolBar then
+         RunWrapper(LComponent, NativeColorMap, False, True);
+      end;
+  finally
+    NativeColorMap.Free;
+  end;
+end;
+
 procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False; Invalidate : Boolean = False);
 var
   Index     : Integer;
@@ -157,10 +183,12 @@ begin
  }
   for Index := 0 to Screen.FormCount-1 do
   if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)>=0 then
-  begin
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
+   begin
+     AddLog('RefreshIDETheme', 'Restore = '+BoolToStr(Restore, True));
+     AddLog('RefreshIDETheme', Screen.Forms[Index].ClassName);
      ProcessComponent(AColorMap, AStyle, Screen.Forms[Index], Restore, Invalidate);
-  end
+   end;
 //  {$IFDEF DELPHIXE2_UP}
 //  else
 //  if (TColorizerLocalSettings.Settings<>nil) and (TColorizerLocalSettings.Settings.UseVCLStyles) and (csDesigning in Screen.Forms[index].ComponentState) then
@@ -344,7 +372,7 @@ begin
       Font.Color:=AColorMap.FontColor;
     end;
 
-    RunWrapper(AComponent, AColorMap, Invalidate,Restore);
+    RunWrapper(AComponent, AColorMap, Invalidate, Restore);
 
     //process components
     for Index := 0 to AComponent.ComponentCount - 1 do
@@ -414,9 +442,9 @@ begin
 
   try
   {$IFDEF DELPHIXE_UP}
-    RefreshIDETheme(NativeColorMap, PlatformDefaultStyle, True);
+    RefreshIDETheme(NativeColorMap, PlatformDefaultStyle, True, False);
   {$ELSE}
-    RefreshIDETheme(NativeColorMap, XPStyle, True);
+    RefreshIDETheme(NativeColorMap, XPStyle, True, False);
   {$ENDIF}
   finally
     NativeColorMap.Free;
@@ -453,7 +481,7 @@ initialization
  //LFieldsComponents := TObjectDictionary<string,TStringList>.Create([doOwnsValues]);
 finalization
 {$IFDEF ENABLELOG}
-  LogFile.SaveToFile(sLogFileName);
+  //LogFile.SaveToFile(sLogFileName);
   LogFile.Free;
 {$ENDIF}
  //LFieldsComponents.Free;
