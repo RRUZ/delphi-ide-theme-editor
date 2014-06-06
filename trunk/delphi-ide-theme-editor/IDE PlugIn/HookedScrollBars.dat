@@ -21,3 +21,5 @@ TButtonedEdit
 TFPURegisterView
 TFlagsView
 TXMMRegisterView
+THistoryPropComboBox
+TRefactoringTree

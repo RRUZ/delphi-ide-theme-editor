@@ -481,7 +481,7 @@ begin
 
   if (LPopupType <> tmPopupItemNormal) and (LPopupType <> tmPopupItemDisabled) then
   begin
-     Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.BtnSelectedColor;
+     Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
      Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
      Canvas.Rectangle(R);
   end;

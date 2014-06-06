@@ -712,6 +712,7 @@ begin
     Font.Color         := AColorMap.FontColor;
     EdgeBorders        := [];
     Ctl3D:=False;
+    //Flat:=True;
   end;
 
 end;

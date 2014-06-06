@@ -36,3 +36,5 @@ TClassBrowser
 TIDEInsightForm
 TRegisteredTypeLibraryWindow
 TRegisteredTypeLibraryTabFrame
+TExpanderForm
+TSearchProgressDlg

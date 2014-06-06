@@ -153,9 +153,13 @@ var
   Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
 
   //002B7ADC 10611 2EDD __fastcall Msglines::TCompilerMsgLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-  TrampolineCompilerMsgLineDraw            : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
+  Trampoline_CompilerMsgLine_Draw          : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
   //002B7360 10632 2F54 __fastcall Msglines::TTitleLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-  TrampolineTitleLineDraw                  : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
+  Trampoline_TitleLine_Draw                : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
+  Trampoline_TFileFindLine_Draw            : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
+  //002B7E78 10606 2F00 __fastcall Msglines::TFileFindLine::InternalCalcDraw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool, bool)
+  Trampoline_TFileFindLine_InternalCalcDraw: procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag, Flag2 : Boolean) = nil;
+
   Trampoline_HintWindow_Paint              : procedure (Self : THintWindow) = nil;
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
 
@@ -248,7 +252,7 @@ begin
   //WM_DESTROY,
   //WM_QUIT :
      begin
-       AddLog('Detour_TCustomForm_WndProc', Self.ClassName+' ' +WM_To_String(Message.Msg));
+       //AddLog('Detour_TCustomForm_WndProc', Self.ClassName+' ' +WM_To_String(Message.Msg));
        //RestoreIDESettings();
        RestoreIDESettingsFast();
      end;
@@ -323,6 +327,7 @@ var
 
   procedure FillBitmap(ABitmap: TBitmap);
   begin
+    if Assigned(ABitmap) then
     with ABitmap, Canvas do
     begin
       Width := Size.cx;
@@ -350,48 +355,50 @@ begin
     exit;
   end;
 
-  if not ListControlWrappers.ContainsKey(Self) then
-   ListControlWrappers.Add(Self, TRttiBaseVirtualTree.Create(Self));
-  LRttiBaseVirtualTree := TRttiBaseVirtualTree(ListControlWrappers.Items[Self]);
+    if not ListControlWrappers.ContainsKey(Self) then
+     ListControlWrappers.Add(Self, TRttiBaseVirtualTree.Create(Self));
+    LRttiBaseVirtualTree := TRttiBaseVirtualTree(ListControlWrappers.Items[Self]);
 
-  Size.cx := 9;
-  Size.cy := 9;
+    Size.cx := 9;
+    Size.cy := 9;
 
-  if NeedButtons then
-  begin
-     with LRttiBaseVirtualTree.MinusBM, Canvas do
-     begin
-      FillBitmap(LRttiBaseVirtualTree.MinusBM);
-      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-      Rectangle(0, 0, Width, Height);
-      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-      MoveTo(2, Width div 2);
-      LineTo(Width - 2, Width div 2);
-     end;
-
-    with LRttiBaseVirtualTree.PlusBM, Canvas do
+    if NeedButtons then
     begin
-      FillBitmap(LRttiBaseVirtualTree.PlusBM);
-      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-      Rectangle(0, 0, Width, Height);
-      Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-      MoveTo(2, Width div 2);
-      LineTo(Width - 2, Width div 2);
-      MoveTo(Width div 2, 2);
-      LineTo(Width div 2, Width - 2);
+       if Assigned(LRttiBaseVirtualTree.MinusBM) then
+       with LRttiBaseVirtualTree.MinusBM, Canvas do
+       begin
+        FillBitmap(LRttiBaseVirtualTree.MinusBM);
+        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        Rectangle(0, 0, Width, Height);
+        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        MoveTo(2, Width div 2);
+        LineTo(Width - 2, Width div 2);
+       end;
+
+      if Assigned(LRttiBaseVirtualTree.PlusBM) then
+      with LRttiBaseVirtualTree.PlusBM, Canvas do
+      begin
+        FillBitmap(LRttiBaseVirtualTree.PlusBM);
+        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        Rectangle(0, 0, Width, Height);
+        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        MoveTo(2, Width div 2);
+        LineTo(Width - 2, Width div 2);
+        MoveTo(Width div 2, 2);
+        LineTo(Width div 2, Width - 2);
+      end;
     end;
-  end;
 
-  if NeedLines then
-  begin
-    if LRttiBaseVirtualTree.DottedBrush <> 0 then
-      DeleteObject(LRttiBaseVirtualTree.DottedBrush);
+    if NeedLines then
+    begin
+      if LRttiBaseVirtualTree.DottedBrush <> 0 then
+        DeleteObject(LRttiBaseVirtualTree.DottedBrush);
 
-    Bits := @LineBitsDotted;
-    PatternBitmap := CreateBitmap(8, 8, 1, 1, Bits);
-    LRttiBaseVirtualTree.DottedBrush := CreatePatternBrush(PatternBitmap);
-    DeleteObject(PatternBitmap);
-  end;
+      Bits := @LineBitsDotted;
+      PatternBitmap := CreateBitmap(8, 8, 1, 1, Bits);
+      LRttiBaseVirtualTree.DottedBrush := CreatePatternBrush(PatternBitmap);
+      DeleteObject(PatternBitmap);
+    end;
 end;
 
 //Detour for TWinControl.DefaultHandler
@@ -2895,26 +2902,14 @@ begin
  OldFontColor := Canvas.Font.Color;
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
    Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-  TrampolineCompilerMsgLineDraw(Self, Canvas, Rect, Flag);
+  Trampoline_CompilerMsgLine_Draw(Self, Canvas, Rect, Flag);
  Canvas.Font.Color:=OldFontColor;
 end;
 
 
 {
-    002B40DC 10668 2F51 Msglines::TTitleLine::
-    002B7304 10633 2F52 __fastcall Msglines::TTitleLine::TTitleLine(const System::UnicodeString, bool, const System::DelphiInterface<Msglinesintf::IMessageGroup>)
-    002B7484 10631 2F53 __fastcall Msglines::TTitleLine::CalcRect(Vcl::Graphics::TCanvas *, int, bool)
     002B7360 10632 2F54 __fastcall Msglines::TTitleLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-    002B7514 10630 2F55 __fastcall Msglines::TTitleLine::GetLineText()
-    002B7300 10634 2F56 __fastcall Msglines::UpdateMsgViews()
-    004A9B38 10517 2F57 __fastcall Msglines::initialization()
-    002BA008 10670 2F58 __fastcall Msglinesintf::Finalization()
-
-@Msglines@TTitleLine@
-@Msglines@TTitleLine@$bctr$qqrx20System@UnicodeStringox54System@%DelphiInterface$t26Msglinesintf@IMessageGroup%
-@Msglines@TTitleLine@CalcRect$qqrp20Vcl@Graphics@TCanvasio
-@Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto
-@Msglines@TTitleLine@GetLineText$qqrv
+    @Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto
 }
 
 procedure Detour_TTitleLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
@@ -2924,9 +2919,46 @@ begin
  OldFontColor := Canvas.Font.Color;
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
    Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-  TrampolineTitleLineDraw(Self, Canvas, Rect, Flag);
+  Trampoline_TitleLine_Draw(Self, Canvas, Rect, Flag);
  Canvas.Font.Color:=OldFontColor;
 end;
+
+{
+    002B7E58 10607 2EFE __fastcall Msglines::TFileFindLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
+    @Msglines@TFileFindLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto
+}
+procedure Detour_TFileFindLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
+var
+ OldFontColor : TColor;
+begin
+ OldFontColor := Canvas.Font.Color;
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+  begin
+   Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+   Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor;
+  end;
+  Trampoline_TFileFindLine_Draw(Self, Canvas, Rect, Flag);
+ Canvas.Font.Color:=OldFontColor;
+end;
+
+{
+    002B7E78 10606 2F00 __fastcall Msglines::TFileFindLine::InternalCalcDraw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool, bool)
+    @Msglines@TFileFindLine@InternalCalcDraw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo
+}
+procedure Detour_TFileFindLine_InternalCalcDraw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag, Flag2 : Boolean);
+var
+ OldFontColor : TColor;
+begin
+ OldFontColor := Canvas.Font.Color;
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+  begin
+   Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+   Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+  end;
+  Trampoline_TFileFindLine_InternalCalcDraw(Self, Canvas, Rect, Flag, Flag2);
+ Canvas.Font.Color:=OldFontColor;
+end;
+
 
 //Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background
 function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
@@ -2986,9 +3018,12 @@ const
 {$IFDEF DELPHIXE}
   sCompilerMsgLineDraw        = '@Msglines@TCompilerMsgLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
   sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
+  sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
 {$ELSE}
   sCompilerMsgLineDraw        = '@Msglines@TCompilerMsgLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
   sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
+  sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
+  sFileFindLineInternalCalcDraw = '@Msglines@TFileFindLine@InternalCalcDraw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo';
 {$ENDIF}
 
   sProjectTree2PaintText      = '@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
@@ -3026,25 +3061,31 @@ begin
   begin
    pOrgAddress := GetProcAddress(CoreIDEModule, sCompilerMsgLineDraw);
    if Assigned(pOrgAddress) then
-    TrampolineCompilerMsgLineDraw := InterceptCreate(pOrgAddress, @Detour_TCompilerMsgLine_Draw);
+    Trampoline_CompilerMsgLine_Draw := InterceptCreate(pOrgAddress, @Detour_TCompilerMsgLine_Draw);
 
    pOrgAddress := GetProcAddress(CoreIDEModule, sTitleLineDraw);
    if Assigned(pOrgAddress) then
-     TrampolineTitleLineDraw   := InterceptCreate(pOrgAddress, @Detour_TTitleLine_Draw);
+     Trampoline_TitleLine_Draw   := InterceptCreate(pOrgAddress, @Detour_TTitleLine_Draw);
+
+   pOrgAddress := GetProcAddress(CoreIDEModule, sFileFindLineDraw);
+   if Assigned(pOrgAddress) then
+     Trampoline_TFileFindLine_Draw   := InterceptCreate(pOrgAddress, @Detour_TFileFindLine_Draw);
+
+//   pOrgAddress := GetProcAddress(CoreIDEModule, sFileFindLineInternalCalcDraw);
+//   if Assigned(pOrgAddress) then
+//     Trampoline_TFileFindLine_InternalCalcDraw   := InterceptCreate(pOrgAddress, @Detour_TFileFindLine_InternalCalcDraw);
   end;
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
   if VclIDEModule<>0 then
   begin
-   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
-   if Assigned(pOrgAddress) then
-    Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
+ //  pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
+//   if Assigned(pOrgAddress) then
+ //   Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
 
    pOrgAddress := GetProcAddress(VclIDEModule, sListButtonPaint);
    if Assigned(pOrgAddress) then
     Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @Detour_TListButton_Paint);
-
-
   end;
 
   TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
@@ -3118,11 +3159,17 @@ end;
 
 procedure RemoveColorizerHooks;
 begin
-  if Assigned(TrampolineCompilerMsgLineDraw) then
-    InterceptRemove(@TrampolineCompilerMsgLineDraw);
+  if Assigned(Trampoline_CompilerMsgLine_Draw) then
+    InterceptRemove(@Trampoline_CompilerMsgLine_Draw);
 
-  if Assigned(TrampolineTitleLineDraw) then
-    InterceptRemove(@TrampolineTitleLineDraw);
+  if Assigned(Trampoline_TitleLine_Draw) then
+    InterceptRemove(@Trampoline_TitleLine_Draw);
+
+  if Assigned(Trampoline_TFileFindLine_Draw) then
+    InterceptRemove(@Trampoline_TFileFindLine_Draw);
+
+  if Assigned(Trampoline_TFileFindLine_InternalCalcDraw) then
+    InterceptRemove(@Trampoline_TFileFindLine_InternalCalcDraw);
 
   if Assigned(Trampoline_HintWindow_Paint) then
     InterceptRemove(@Trampoline_HintWindow_Paint);

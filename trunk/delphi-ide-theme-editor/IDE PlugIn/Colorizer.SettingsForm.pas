@@ -510,7 +510,7 @@ end;
 
 procedure TFormIDEColorizerSettings.ButtonCheckUpdatesClick(Sender: TObject);
 begin
-  ShellExecute(0, 'open', 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Updater.exe', PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
+  ShellExecute(0, 'open', PChar(ExtractFilePath(GetModuleLocation())+'Updater.exe'), PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
 end;
 
 procedure TFormIDEColorizerSettings.ButtonDeleteThemeClick(Sender: TObject);
