@@ -29,9 +29,9 @@ implementation
 uses
   Colorizer.Utils,
   Generics.Collections,
+  Windows,
   Graphics,
   Classes,
-  Windows,
   UxTheme,
 {$IFDEF DELPHIXE2_UP}
   Vcl.Styles,
@@ -54,8 +54,15 @@ uses
   Dialogs,
   DDetours;
 
+  type
+    THThemesClasses = class
+    public
+     class var ScrollBars: TDictionary<HTHEME, String>;
+     class var TreeView  : TDictionary<HTHEME, String>;
+     class var Button    : TDictionary<HTHEME, String>;
+    end;
+
   var
-  ScrollBarList: TDictionary<HTHEME, String>;
   DrawThemeBackgroundOrgPointer : Pointer = nil;
   OpenThemeDataOrgPointer       : Pointer = nil;
   //CloseThemeDataOrgPointer      : Pointer = nil;
@@ -110,21 +117,36 @@ end;
 
 procedure  Detour_TBaseVirtualTree_OriginalWMNCPaint(Self : TCustomControl;DC: HDC);
 begin
- TrampolineBaseVirtualTreeOriginalWMNCPaint(Self, DC);
- if csDesigning in Self.ComponentState then  exit;
-//Draw the bottom right corner when both scrollbars are active in the TBaseVirtualTree
- if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
-   DrawNCBorder(TWinControlClass(Self), True);
+   TrampolineBaseVirtualTreeOriginalWMNCPaint(Self, DC);
+   if csDesigning in Self.ComponentState then  exit;
+  //Draw the bottom right corner when both scrollbars are active in the TBaseVirtualTree
+   if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
+     DrawNCBorder(TWinControlClass(Self), True);
 end;
 
 function Detour_UxTheme_OpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
 begin
   Result := TrampolineOpenThemeData(hwnd, pszClassList);
+  //AddLog('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
+
   if SameText(pszClassList, VSCLASS_SCROLLBAR) then
   begin
-    if not ScrollBarList.ContainsKey(Result) then
-      ScrollBarList.Add(Result, pszClassList);
-  end;
+    if not THThemesClasses.ScrollBars.ContainsKey(Result) then
+      THThemesClasses.ScrollBars.Add(Result, pszClassList);
+  end
+  else
+  if SameText(pszClassList, VSCLASS_TREEVIEW) then
+  begin
+    if not THThemesClasses.TreeView.ContainsKey(Result) then
+      THThemesClasses.TreeView.Add(Result, pszClassList);
+  end
+  else
+  if SameText(pszClassList, VSCLASS_BUTTON) then
+  begin
+    if not THThemesClasses.Button.ContainsKey(Result) then
+      THThemesClasses.Button.Add(Result, pszClassList);
+  end
+  ;
 end;
 
 
@@ -143,7 +165,7 @@ var
   LScrollDetails: TThemedScrollBar;
 begin
   LStyle := TStyleManager.Style['Jet'];
-  if ScrollBarList.ContainsKey(THEME) then
+  if THThemesClasses.ScrollBars.ContainsKey(THEME) then
   begin
     LScrollDetails := tsScrollBarRoot;
     LDetails.Element := TThemedElement.teScrollBar;
@@ -293,320 +315,431 @@ end;
 {$ENDIF}
 
 function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
-
-  procedure DrawLine(Canvas: TCanvas; FromX, FromY, ToX, ToY: Integer);
-  begin
-    Canvas.MoveTo(FromX, FromY);
-    Canvas.LineTo(ToX, ToY);
-  end;
-
-
+const
+  sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
 var
   s, sCaller, sCaller2 : string;
   LCanvas : TCanvas;
   VCLClassName : string;
   ApplyHook  : Boolean;
-  //LParentForm : TCustomForm;
+  LParentForm : TCustomForm;
   LHWND : HWND;
   LFoundControl : TWinControl;
+  LBuffer   : TBitmap;
+  LRect     : TRect;
+  //i, SavedIndex : Integer;
 begin
-  if not (ScrollBarList.ContainsKey(THEME) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
+  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME)) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 
-  ApplyHook:=False;
-  sCaller :='';
-  sCaller2:='';
-  VCLClassName:='';
-  LFoundControl:=nil;
+  if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+  begin
+    ApplyHook:=False;
+    sCaller :='';
+    sCaller2:='';
+    VCLClassName:='';
+    LFoundControl:=nil;
 
-  try
-    if Assigned(LastScrollWinControl) then
-      VCLClassName:=LastScrollWinControl.ClassName;
-  except
-    VCLClassName := '';
-  end;
-  //LastScrollWinControl:=nil;
+    try
+      if Assigned(LastScrollWinControl) then
+        VCLClassName:=LastScrollWinControl.ClassName;
+    except
+      VCLClassName := '';
+    end;
+    //LastScrollWinControl:=nil;
 
-  LHWND:=WindowFromDC(dc);
-  if LHWND<>0 then
-   begin
-    LFoundControl := FindControl(LHWND);
+    LHWND:=WindowFromDC(dc);
+    if LHWND<>0 then
+     begin
+      LFoundControl := FindControl(LHWND);
+      if LFoundControl<>nil then
+        VCLClassName:= LFoundControl.ClassName;
+     end;
+
     if LFoundControl<>nil then
-      VCLClassName:= LFoundControl.ClassName;
-   end;
+    begin
+       try
+         ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
+         LParentForm:=GetParentForm(LFoundControl);
+         if (LParentForm<>nil) and ApplyHook then
+           ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+       except
+        ApplyHook:=False
+       end;
+    end;
 
-  if LFoundControl<>nil then
-  begin
-   try
-       ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-//       LParentForm:=GetParentForm(LFoundControl);
-//       if (LParentForm<>nil) and ApplyHook then
-//         ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
-     except
-      ApplyHook:=False
-     end;
-  end;
+    if not ApplyHook then
+    begin
 
-  if not ApplyHook then
-  begin
+      sCaller := ProcByLevel(1);
+      if sCaller<>'' then
+        sCaller2 := ProcByLevel(2);
 
-    sCaller := ProcByLevel(1);
-    if sCaller<>'' then
-      sCaller2 := ProcByLevel(2);
+      ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
+    end;
 
-    ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-  end;
+    //look for hooked controls in the caller level 1
+    if not ApplyHook and (sCaller<>'') then
+       for s in SplitString(sCaller,'.') do
+       begin
+         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
+         if ApplyHook then break;
+       end;
 
-  //look for hooked controls in the caller level 1
-  if not ApplyHook and (sCaller<>'') then
-     for s in SplitString(sCaller,'.') do
-     begin
-       ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
-       if ApplyHook then break;
-     end;
+    //look for hooked controls in the caller level 2
+    if not ApplyHook and (sCaller2<>'') then
+       for s in SplitString(sCaller2,'.') do
+       begin
+         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
+         if ApplyHook then break;
+       end;
 
-  //look for hooked controls in the caller level 2
-  if not ApplyHook and (sCaller2<>'') then
-     for s in SplitString(sCaller2,'.') do
-     begin
-       ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
-       if ApplyHook then break;
-     end;
+    if ApplyHook then
+    begin
+      //Result:=0;
+      case iPartId  of
+        SBP_ARROWBTN :
+        begin
+          case iStateId of
+            ABS_UPNORMAL,
+            ABS_UPHOT,
+            ABS_UPPRESSED,
+            ABS_UPDISABLED,
+            ABS_UPHOVER       : begin
+                                   LCanvas:=TCanvas.Create;
+                                   try
+                                     LCanvas.Handle:=dc;
+                                     if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
+                                     else
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+                                      LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+                                      LCanvas.Rectangle(pRect);
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+                                      LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                      DrawArrow(LCanvas, TScrollDirection.sdUp, Point(pRect.Left+4, pRect.Top+6), 4);
+                                   finally
+                                     LCanvas.Handle:=0;
+                                     LCanvas.Free;
+                                   end;
+                                   Exit(0);
+                                end;
 
-  if ApplyHook then
-  begin
-    Result:=0;
-    case iPartId  of
-      SBP_ARROWBTN :
-      begin
-        case iStateId of
-          ABS_UPNORMAL,
-          ABS_UPHOT,
-          ABS_UPPRESSED,
-          ABS_UPDISABLED,
-          ABS_UPHOVER       : begin
-                                 LCanvas:=TCanvas.Create;
-                                 try
-                                   LCanvas.Handle:=dc;
-                                   if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
-                                   else
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-                                    LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-                                    LCanvas.Rectangle(pRect);
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-                                    LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-                                    DrawArrow(LCanvas, TScrollDirection.sdUp, Point(pRect.Left+4, pRect.Top+6), 4);
-                                 finally
-                                   LCanvas.Handle:=0;
-                                   LCanvas.Free;
-                                 end;
-                                 Exit(0);
-                              end;
+            ABS_DOWNNORMAL,
+            ABS_DOWNHOT,
+            ABS_DOWNPRESSED,
+            ABS_DOWNDISABLED,
+            ABS_DOWNHOVER     : begin
+                                   LCanvas:=TCanvas.Create;
+                                   try
+                                     LCanvas.Handle:=dc;
+                                     if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
+                                     else
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+                                     LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+                                     LCanvas.Rectangle(pRect);
 
-          ABS_DOWNNORMAL,
-          ABS_DOWNHOT,
-          ABS_DOWNPRESSED,
-          ABS_DOWNDISABLED,
-          ABS_DOWNHOVER     : begin
-                                 LCanvas:=TCanvas.Create;
-                                 try
-                                   LCanvas.Handle:=dc;
-                                   if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
-                                   else
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-                                   LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-                                   LCanvas.Rectangle(pRect);
+                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+                                     LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                     DrawArrow(LCanvas, TScrollDirection.sdDown, Point(pRect.Left+4, pRect.Top+6), 4);
+                                   finally
+                                     LCanvas.Handle:=0;
+                                     LCanvas.Free;
+                                   end;
+                                   Exit(0);
+                                end;
 
-                                   LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-                                   LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-                                   DrawArrow(LCanvas, TScrollDirection.sdDown, Point(pRect.Left+4, pRect.Top+6), 4);
-                                 finally
-                                   LCanvas.Handle:=0;
-                                   LCanvas.Free;
-                                 end;
-                                 Exit(0);
-                              end;
+            ABS_LEFTNORMAL,
+            ABS_LEFTHOT,
+            ABS_LEFTPRESSED,
+            ABS_LEFTDISABLED,
+            ABS_LEFTHOVER     : begin
+                                   LCanvas:=TCanvas.Create;
+                                   try
+                                     LCanvas.Handle:=dc;
+                                     if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
+                                     else
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+                                     LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+                                     LCanvas.Rectangle(pRect);
 
-          ABS_LEFTNORMAL,
-          ABS_LEFTHOT,
-          ABS_LEFTPRESSED,
-          ABS_LEFTDISABLED,
-          ABS_LEFTHOVER     : begin
-                                 LCanvas:=TCanvas.Create;
-                                 try
-                                   LCanvas.Handle:=dc;
-                                   if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
-                                   else
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-                                   LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-                                   LCanvas.Rectangle(pRect);
+                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+                                     LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                     DrawArrow(LCanvas, TScrollDirection.sdLeft, Point(pRect.Left+6, pRect.Top+4), 4);
+                                   finally
+                                     LCanvas.Handle:=0;
+                                     LCanvas.Free;
+                                   end;
+                                   Exit(0);
+                                end;
 
-                                   LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-                                   LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-                                   DrawArrow(LCanvas, TScrollDirection.sdLeft, Point(pRect.Left+6, pRect.Top+4), 4);
-                                 finally
-                                   LCanvas.Handle:=0;
-                                   LCanvas.Free;
-                                 end;
-                                 Exit(0);
-                              end;
+            ABS_RIGHTNORMAL,
+            ABS_RIGHTHOT,
+            ABS_RIGHTPRESSED,
+            ABS_RIGHTDISABLED,
+            ABS_RIGHTHOVER    : begin
+                                   LCanvas:=TCanvas.Create;
+                                   try
+                                     LCanvas.Handle:=dc;
+                                     if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
+                                     else
+                                      LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+                                     LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+                                     LCanvas.Rectangle(pRect);
 
-          ABS_RIGHTNORMAL,
-          ABS_RIGHTHOT,
-          ABS_RIGHTPRESSED,
-          ABS_RIGHTDISABLED,
-          ABS_RIGHTHOVER    : begin
-                                 LCanvas:=TCanvas.Create;
-                                 try
-                                   LCanvas.Handle:=dc;
-                                   if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
-                                   else
-                                    LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-                                   LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-                                   LCanvas.Rectangle(pRect);
-
-                                   LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-                                   LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-                                   DrawArrow(LCanvas, TScrollDirection.sdRight, Point(pRect.Left+6, pRect.Top+4), 4);
-                                 finally
-                                   LCanvas.Handle:=0;
-                                   LCanvas.Free;
-                                 end;
-                                 Exit(0);
-                              end;
+                                     LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+                                     LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                     DrawArrow(LCanvas, TScrollDirection.sdRight, Point(pRect.Left+6, pRect.Top+4), 4);
+                                   finally
+                                     LCanvas.Handle:=0;
+                                     LCanvas.Free;
+                                   end;
+                                   Exit(0);
+                                end;
+          end;
         end;
+
+        SBP_THUMBBTNHORZ:
+        begin
+         LCanvas:=TCanvas.Create;
+         try
+           LCanvas.Handle:=dc;
+           if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
+            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
+           else
+            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+
+           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+           LCanvas.Rectangle(pRect);
+         finally
+           LCanvas.Handle:=0;
+           LCanvas.Free;
+         end;
+         exit(0);
+        end;
+
+        SBP_THUMBBTNVERT:
+        begin
+         LCanvas:=TCanvas.Create;
+         try
+           LCanvas.Handle:=dc;
+           if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
+            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
+           else
+            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+           LCanvas.Rectangle(pRect);
+         finally
+           LCanvas.Handle:=0;
+           LCanvas.Free;
+         end;
+         exit(0);
+        end;
+
+        SBP_LOWERTRACKHORZ:
+        begin
+         LCanvas:=TCanvas.Create;
+         try
+           LCanvas.Handle:=dc;
+           LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LCanvas.FillRect(pRect);
+           LCanvas.Brush.Style := bsClear;
+           LCanvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+           LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Right, pRect.Top+1));
+           LCanvas.Rectangle(Rect(pRect.Left, pRect.Bottom-1, pRect.Right, pRect.Bottom));
+         finally
+           LCanvas.Handle:=0;
+           LCanvas.Free;
+         end;
+         exit(0);
+        end;
+
+        SBP_UPPERTRACKHORZ :
+        begin
+         LCanvas:=TCanvas.Create;
+         try
+           LCanvas.Handle:=dc;
+           LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LCanvas.FillRect(pRect);
+           LCanvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+           LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Right, pRect.Top+1));
+           LCanvas.Rectangle(Rect(pRect.Left, pRect.Bottom-1, pRect.Right, pRect.Bottom));
+         finally
+           LCanvas.Handle:=0;
+           LCanvas.Free;
+         end;
+         exit(0);
+
+        end;
+
+        SBP_LOWERTRACKVERT:
+        begin
+         LCanvas:=TCanvas.Create;
+         try
+           LCanvas.Handle:=dc;
+           LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LCanvas.FillRect(pRect);
+           LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+           LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Left+1, pRect.Bottom));
+           LCanvas.Rectangle(Rect(pRect.Right-1, pRect.Top, pRect.Right, pRect.Bottom));
+         finally
+           LCanvas.Handle:=0;
+           LCanvas.Free;
+         end;
+         exit(0);
+        end;
+
+        SBP_UPPERTRACKVERT:
+        begin
+         LCanvas:=TCanvas.Create;
+         try
+           LCanvas.Handle:=dc;
+           LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LCanvas.FillRect(pRect);
+           LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+           LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Left+1, pRect.Bottom));
+           LCanvas.Rectangle(Rect(pRect.Right-1, pRect.Top, pRect.Right, pRect.Bottom));
+         finally
+           LCanvas.Handle:=0;
+           LCanvas.Free;
+         end;
+         exit(0);
+        end;
+
+        SBP_SIZEBOX,
+        SBP_GRIPPERHORZ,
+        SBP_GRIPPERVERT : exit(0);
       end;
+    end
+    else
+    begin
+  //    if ScrollBarList.ContainsKey(THEME) then
+  //    begin
+  //       for i :=1 to 5 do
+  //       begin
+  //         sCaller := ProcByLevel(i);
+  //         AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
+  //       end;
+  //         AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
+  //    end;
 
-      SBP_THUMBBTNHORZ:
-      begin
-       LCanvas:=TCanvas.Create;
-       try
-         LCanvas.Handle:=dc;
-         if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
-         else
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-
-         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(pRect);
-       finally
-         LCanvas.Handle:=0;
-         LCanvas.Free;
-       end;
-       exit(0);
-      end;
-
-      SBP_THUMBBTNVERT:
-      begin
-       LCanvas:=TCanvas.Create;
-       try
-         LCanvas.Handle:=dc;
-         if (iStateId=SCRBS_HOT) or (iStateId=SCRBS_PRESSED) then
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.HighlightColor
-         else
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(pRect);
-       finally
-         LCanvas.Handle:=0;
-         LCanvas.Free;
-       end;
-       exit(0);
-      end;
-
-      SBP_LOWERTRACKHORZ:
-      begin
-       LCanvas:=TCanvas.Create;
-       try
-         LCanvas.Handle:=dc;
-         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-         LCanvas.FillRect(pRect);
-         LCanvas.Brush.Style := bsClear;
-         LCanvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Right, pRect.Top+1));
-         LCanvas.Rectangle(Rect(pRect.Left, pRect.Bottom-1, pRect.Right, pRect.Bottom));
-       finally
-         LCanvas.Handle:=0;
-         LCanvas.Free;
-       end;
-       exit(0);
-      end;
-
-      SBP_UPPERTRACKHORZ :
-      begin
-       LCanvas:=TCanvas.Create;
-       try
-         LCanvas.Handle:=dc;
-         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-         LCanvas.FillRect(pRect);
-         LCanvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Right, pRect.Top+1));
-         LCanvas.Rectangle(Rect(pRect.Left, pRect.Bottom-1, pRect.Right, pRect.Bottom));
-       finally
-         LCanvas.Handle:=0;
-         LCanvas.Free;
-       end;
-       exit(0);
-
-      end;
-
-      SBP_LOWERTRACKVERT:
-      begin
-       LCanvas:=TCanvas.Create;
-       try
-         LCanvas.Handle:=dc;
-         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-         LCanvas.FillRect(pRect);
-         LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Left+1, pRect.Bottom));
-         LCanvas.Rectangle(Rect(pRect.Right-1, pRect.Top, pRect.Right, pRect.Bottom));
-       finally
-         LCanvas.Handle:=0;
-         LCanvas.Free;
-       end;
-       exit(0);
-      end;
-
-      SBP_UPPERTRACKVERT:
-      begin
-       LCanvas:=TCanvas.Create;
-       try
-         LCanvas.Handle:=dc;
-         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-         LCanvas.FillRect(pRect);
-         LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-         LCanvas.Rectangle(Rect(pRect.Left, pRect.Top, pRect.Left+1, pRect.Bottom));
-         LCanvas.Rectangle(Rect(pRect.Right-1, pRect.Top, pRect.Right, pRect.Bottom));
-       finally
-         LCanvas.Handle:=0;
-         LCanvas.Free;
-       end;
-       exit(0);
-      end;
-
-      SBP_SIZEBOX,
-      SBP_GRIPPERHORZ,
-      SBP_GRIPPERVERT : exit(0);
+      Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
     end;
   end
   else
+  if THThemesClasses.TreeView.ContainsKey(THEME) then
   begin
-//    if ScrollBarList.ContainsKey(THEME) then
-//    begin
-//       for i :=1 to 5 do
-//       begin
-//         sCaller := ProcByLevel(i);
-//         AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
-//       end;
-//         AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
-//    end;
 
-    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-  end;
+    if (iPartId = TVP_GLYPH) and (iStateId=GLPS_OPENED) and ((pRect.Right-pRect.Left)=9) then
+    begin
+      sCaller  := ProcByLevel(4);
+      ApplyHook:= (sCaller = '');
+      if not ApplyHook then
+      begin
+        //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
+        begin
+            LHWND:=WindowFromDC(dc);
+            if LHWND<>0 then
+             begin
+              LFoundControl := FindControl(LHWND);
+              if LFoundControl<>nil then
+              begin
+                 LParentForm:=GetParentForm(LFoundControl);
+                 if LParentForm<>nil then
+                   ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+              end;
+             end;
+        end;
+      end;
+
+      if ApplyHook then
+      begin
+         LBuffer:=TBitmap.Create;
+         try
+           LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+           LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+           LBuffer.Canvas.Rectangle(LRect);
+           LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
+           LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) - 2, (LRect.Bottom-LRect.Top) div 2);
+
+           BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+         finally
+           LBuffer.Free;
+         end;
+         Exit(0);
+      end;
+    end
+    else
+    if (iPartId = TVP_GLYPH) and (iStateId=GLPS_CLOSED) and ((pRect.Right-pRect.Left)=9) then
+    begin
+      sCaller  := ProcByLevel(4);
+      ApplyHook:= (sCaller = '');
+      if not ApplyHook then
+      begin
+        //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
+        begin
+            LHWND:=WindowFromDC(dc);
+            if LHWND<>0 then
+             begin
+              LFoundControl := FindControl(LHWND);
+              if LFoundControl<>nil then
+              begin
+                 LParentForm:=GetParentForm(LFoundControl);
+                 if LParentForm<>nil then
+                   ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+              end;
+             end;
+        end;
+      end;
+
+      if ApplyHook then
+      begin
+         LBuffer:=TBitmap.Create;
+         try
+           LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+           LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+           LBuffer.Canvas.Rectangle(LRect);
+           LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
+           LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) - 2, (LRect.Bottom-LRect.Top) div 2);
+           LBuffer.Canvas.MoveTo((LRect.Right-LRect.Left) div 2, 2);
+           LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) div 2, (LRect.Bottom-LRect.Top) - 2);
+
+           BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+         finally
+           LBuffer.Free;
+         end;
+         Exit(0);
+      end;
+    end;
+
+  end
+//  else
+//  if THThemesClasses.Button.ContainsKey(THEME) then
+//  begin
+//    //if (iPartId = BP_CHECKBOX) then
+//    begin
+//      sCaller := ProcByLevel(4);
+//      AddLog('THThemesClasses.Button', sCaller);
+//      LHWND:=WindowFromDC(dc);
+//      if LHWND<>0 then
+//       begin
+//        LFoundControl := FindControl(LHWND);
+//         if LFoundControl<>nil then
+//          AddLog('THThemesClasses.Button', 'LFoundControl '+LFoundControl.ClassName);
+//       end;
+//
+//    end;
+//  end
+  ;
+
+  Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 end;
 
 type
@@ -655,8 +788,14 @@ initialization
 
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
 begin
-  ScrollBarList := TDictionary<HTHEME, String>.Create();
-  ScrollBarList.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+  THThemesClasses.ScrollBars := TDictionary<HTHEME, String>.Create();
+  THThemesClasses.ScrollBars.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+
+  THThemesClasses.TreeView := TDictionary<HTHEME, String>.Create();
+  THThemesClasses.TreeView.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
+
+  THThemesClasses.Button := TDictionary<HTHEME, String>.Create();
+  THThemesClasses.Button.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
 
   TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
 
@@ -706,5 +845,7 @@ if Assigned (TrampolineSetScrollInfo) then
   InterceptRemove(@TrampolineSetScrollInfo);
 
 if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
-  ScrollBarList.Free;
+  THThemesClasses.ScrollBars.Free;
+  THThemesClasses.TreeView.Free;
+  THThemesClasses.Button.Free;
 end.

@@ -185,8 +185,8 @@ begin
   if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)>=0 then
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
    begin
-     AddLog('RefreshIDETheme', 'Restore = '+BoolToStr(Restore, True));
-     AddLog('RefreshIDETheme', Screen.Forms[Index].ClassName);
+     //AddLog('RefreshIDETheme', 'Restore = '+BoolToStr(Restore, True));
+     //AddLog('RefreshIDETheme', Screen.Forms[Index].ClassName);
      ProcessComponent(AColorMap, AStyle, Screen.Forms[Index], Restore, Invalidate);
    end;
 //  {$IFDEF DELPHIXE2_UP}
