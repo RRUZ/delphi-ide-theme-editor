@@ -34,6 +34,7 @@ uses
   Classes,
   UxTheme,
 {$IFDEF DELPHIXE2_UP}
+  System.Types,
   Vcl.Styles,
   Vcl.Themes,
 {$ELSE}
@@ -314,6 +315,18 @@ begin
 end;
 {$ENDIF}
 
+{$IF CompilerVersion >= 23}
+
+{$ELSE}
+function RectCenter(var R: TRect; const Bounds: TRect): TRect;
+begin
+  OffsetRect(R, -R.Left, -R.Top);
+  OffsetRect(R, (RectWidth(Bounds) - RectWidth(R)) div 2, (RectHeight(Bounds) - RectHeight(R)) div 2);
+  OffsetRect(R, Bounds.Left, Bounds.Top);
+  Result := R;
+end;
+{$IFEND}
+
 function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
 const
   sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
@@ -327,9 +340,10 @@ var
   LFoundControl : TWinControl;
   LBuffer   : TBitmap;
   LRect     : TRect;
-  //i, SavedIndex : Integer;
+  LSize     : TSize;
+  Dx, Dy    : Integer;
 begin
-  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME)) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
+  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME) or THThemesClasses.Button.ContainsKey(THEME)) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 
   if THThemesClasses.ScrollBars.ContainsKey(THEME) then
@@ -636,7 +650,8 @@ begin
     if (iPartId = TVP_GLYPH) and (iStateId=GLPS_OPENED) and ((pRect.Right-pRect.Left)=9) then
     begin
       sCaller  := ProcByLevel(4);
-      ApplyHook:= (sCaller = '');
+                   //VirtualTreeView           //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
+      ApplyHook:= (sCaller = '') or (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller));
       if not ApplyHook then
       begin
         //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
@@ -678,7 +693,8 @@ begin
     if (iPartId = TVP_GLYPH) and (iStateId=GLPS_CLOSED) and ((pRect.Right-pRect.Left)=9) then
     begin
       sCaller  := ProcByLevel(4);
-      ApplyHook:= (sCaller = '');
+                   //VirtualTreeView           //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
+      ApplyHook:= (sCaller = '') or (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller));
       if not ApplyHook then
       begin
         //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
@@ -718,25 +734,90 @@ begin
          Exit(0);
       end;
     end;
-
+//      sCaller  := ProcByLevel(4);
+//      AddLog('THThemesClasses.TreeView','Ignored '+sCaller);
   end
-//  else
-//  if THThemesClasses.Button.ContainsKey(THEME) then
-//  begin
-//    //if (iPartId = BP_CHECKBOX) then
-//    begin
-//      sCaller := ProcByLevel(4);
-//      AddLog('THThemesClasses.Button', sCaller);
-//      LHWND:=WindowFromDC(dc);
-//      if LHWND<>0 then
-//       begin
-//        LFoundControl := FindControl(LHWND);
-//         if LFoundControl<>nil then
-//          AddLog('THThemesClasses.Button', 'LFoundControl '+LFoundControl.ClassName);
-//       end;
-//
-//    end;
-//  end
+  else
+  if THThemesClasses.Button.ContainsKey(THEME) then
+  begin
+    if (iPartId = BP_CHECKBOX) then
+    begin
+      LSize.cx:= 13;
+      LSize.cy:= 13;
+      LHWND:=WindowFromDC(dc);
+       //if LHWND<>0 then
+       begin
+        sCaller := ProcByLevel(4);
+        LFoundControl := FindControl(LHWND);
+        //VCLEditors.DrawCheckbox
+        //procedure DrawCheckbox(ACanvas: TCanvas; ARect : TRect;  ASelected, AEnabled, AAllEqual, AValue: Boolean);
+                                  //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
+        if (LFoundControl<>nil) or SameText('VCLEditors.DrawCheckbox', sCaller) then
+        begin
+           ApplyHook:=SameText('VCLEditors.DrawCheckbox', sCaller);
+
+           if not ApplyHook then
+           begin
+             try
+               ApplyHook:= not (csDesigning in LFoundControl.ComponentState);
+               LParentForm:=GetParentForm(LFoundControl);
+               if (LParentForm<>nil) and ApplyHook then
+                 ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+             except
+              ApplyHook:=False
+             end;
+           end;
+
+           if ApplyHook then
+           begin
+               case iStateId of
+                  CBS_UNCHECKEDNORMAL,
+                  CBS_UNCHECKEDHOT,
+                  CBS_UNCHECKEDPRESSED,
+                  CBS_UNCHECKEDDISABLED : begin
+                                             LBuffer:=TBitmap.Create;
+                                             try
+                                               LBuffer.SetSize(LSize.cx, LSize.cy);
+                                               LRect := Rect(0, 0, LSize.cx, LSize.cy);
+                                               if iStateId= CBS_UNCHECKEDHOT then
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor
+                                               else
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+
+                                               LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                               LBuffer.Canvas.Rectangle(LRect);
+                                               RectCenter(LRect, pRect);
+                                               BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+                                             finally
+                                               LBuffer.Free;
+                                             end;
+                                             Exit(0);
+                                          end;
+                  CBS_CHECKEDNORMAL,
+                  CBS_CHECKEDHOT,
+                  CBS_CHECKEDPRESSED,
+                  CBS_CHECKEDDISABLED   : begin
+                                             LBuffer:=TBitmap.Create;
+                                             try
+                                               LBuffer.SetSize(LSize.cx, LSize.cy);
+                                               LRect := Rect(0, 0, LSize.cx, LSize.cy);
+                                               LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+                                               LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                               LBuffer.Canvas.Rectangle(LRect);
+                                               DrawCheck(LBuffer.Canvas, Point(LRect.Left+3, LRect.Top+6), 2, False);
+                                               RectCenter(LRect, pRect);
+                                               BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+                                             finally
+                                               LBuffer.Free;
+                                             end;
+                                             Exit(0);
+                                          end;
+               end;
+           end;
+        end;
+       end;
+    end;
+  end
   ;
 
   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
