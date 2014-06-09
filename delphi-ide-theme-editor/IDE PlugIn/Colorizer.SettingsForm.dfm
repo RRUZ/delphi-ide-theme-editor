@@ -752,6 +752,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetAbout: TTabSheet
         Caption = 'About'
         ImageIndex = 5
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object MemoAbout: TMemo
           Left = 3
           Top = 3

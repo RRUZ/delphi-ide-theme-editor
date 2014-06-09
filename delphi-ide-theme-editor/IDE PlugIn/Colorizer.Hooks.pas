@@ -168,6 +168,8 @@ var
 
   //0005B7F4 1682 0BCA __fastcall Idelistbtns::TListButton::Paint()
   Trampoline_TListButton_Paint : procedure (Self : TCustomControl) = nil;
+  //000F1DD0 4400 1CD1 __fastcall Idevirtualtrees::TBaseVirtualTree::GetHintWindowClass()
+  Trampoline_TBaseVirtual_GetHintWindowClass : function (Self : TCustomControl) : THintWindowClass = nil;
 
 {$IFDEF DLLWIZARD}
   Trampoline_TCustomForm_WndProc :  procedure (Self : TCustomForm;var Message: TMessage) = nil;
@@ -257,7 +259,6 @@ begin
        RestoreIDESettingsFast();
      end;
  end;
-
  Trampoline_TCustomForm_WndProc(Self, Message);
 end;
 {$ENDIF}
@@ -408,9 +409,10 @@ var
 begin
   LastScrollWinControl:=Self;
 
-//  if SameText('TPopupListBox', Self.ClassName) then   //TInspListBox
-//     AddLog('CustomDefaultHandler', WM_To_String(TMessage(Message).Msg));
-
+//  if SameText('TMessageHintWindow', Self.ClassName) then
+//  begin
+//  end;
+//
     if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
     begin
      TrampolineTWinControl_DefaultHandler(Self, Message);
@@ -1898,7 +1900,7 @@ var
   GrayBitMap : TBitmap;
   LImageList : TCustomImageListClass;
 begin
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw then
     begin
       LImageList:=TCustomImageListClass(Self);
       if not LImageList.HandleAllocated then Exit;
@@ -1996,13 +1998,15 @@ end;
 //Hook for paint the gutter of the TEditControl and the background of the TGradientTabSet component
 procedure  Detour_TCanvas_FillRect(Self: TCanvas;const Rect: TRect);
 const
- sEditorControlSignature = 'EditorControl.TCustomEditControl.EVFillGutter';
- sGradientTabsSignature  = 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
+ sEditorControlSignature             = 'EditorControl.TCustomEditControl.EVFillGutter';
+ sGradientTabsSignature              = 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
+ sBaseVirtualTreePaintTreeSignature  = 'IDEVirtualTrees.TBaseVirtualTree.PaintTree';
 var
   sCaller : string;
-//  LHWND : HWND;
-//  LWinControl : TWinControl;
+  OrgBrush : Integer; //don't use SaveDC
 begin
+  OrgBrush:=Self.Brush.Color;
+  try
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clBtnFace) then
    begin
      sCaller := ProcByLevel(1);
@@ -2024,8 +2028,19 @@ begin
 //
 //         AddLog('CustomFillRect', '--------------');
 //      end;
+   end
+   else
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and  (Self.Brush.Color=clWindow) then
+   begin
+      sCaller := ProcByLevel(2);
+      if SameText(sCaller, sBaseVirtualTreePaintTreeSignature) then
+         Self.Brush.Color:= TColorizerLocalSettings.ColorMap.MenuColor;
    end;
+   //Self.Brush.Color:=clred;
    Trampoline_TCanvas_FillRect(Self, Rect);
+  finally
+   Self.Brush.Color:=OrgBrush;
+  end;
 end;
 
 //Hook for paint the header of the TVirtualStringTree component
@@ -2038,28 +2053,10 @@ var
   sCaller : string;
   LCanvas : TCanvas;
   SaveIndex: Integer;
-
-//  LWinControl : TWinControl;
-//  OrgHWND : HWND;
 begin
-
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
    begin
-
     sCaller := ProcByLevel(2);
-
-//        LWinControl:=nil;
-//        OrgHWND :=WindowFromDC(DC);
-//        if OrgHWND<>0 then
-//           LWinControl :=FindControl(OrgHWND);
-//
-//        if LWinControl<>nil then
-//        begin
-//        AddLog('CustomDrawElement' , LWinControl.ClassName);
-//        end
-//        else
-//        AddLog('CustomDrawElement Ignored' ,sCaller);
-
     if SameText(sCaller, sTVirtualTreeColumnsSignature) then
     begin
        SaveIndex := SaveDC(DC);
@@ -2767,7 +2764,6 @@ var
       DrawControlText(Canvas, LDetails, Text, R, DT_VCENTER or DT_LEFT or  DT_SINGLELINE or DT_END_ELLIPSIS);
     end;
 
-
 var
   Canvas: TCanvas;
   R, HeaderR: TRect;
@@ -2854,10 +2850,10 @@ const
  sTCustomVirtualStringTreeSignature = 'IDEVirtualTrees.TCustomVirtualStringTree.PaintNormalText';
 var
   sCaller : string;
-  OldColor: Integer;
+  OrgColor: Integer;
   RestoreColor : Boolean;
 begin
- OldColor:=0;
+ OrgColor:=0;
  RestoreColor:=False;
  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
  begin
@@ -2867,20 +2863,45 @@ begin
     if SameText(sCaller, sTCustomVirtualStringTreeSignature) then
     begin
        RestoreColor:=True;
-       OldColor:=GetTextColor(hDC);
+       OrgColor:=GetTextColor(hDC);
+       //SetBkColor(hDC, ColorToRGB(clYellow));
        SetTextColor(hDC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+       //SetTextColor(hDC, ColorToRGB(clRed));
     end;
   end;
  end;
 
   Result:=Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
   if RestoreColor then
-    SetTextColor(hDC, OldColor);
+    SetTextColor(hDC, OrgColor);
 end;
 
+//Hook for allow change font color in TVirtualTreeHintWindow.InternalPaint (font color in hint window) ,
+//Note  : This is a temporal workaround.
 function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
+const
+ sTVirtualTreeHintWindowInternalPaint= 'IDEVirtualTrees.TVirtualTreeHintWindow.InternalPaint';
+var
+  sCaller : string;
+  OrgColor : Cardinal;
+  RestoreColor : Boolean;
 begin
-  Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
+ OrgColor:=0;
+ RestoreColor:=False;
+ if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+ begin
+  OrgColor:= GetTextColor(DC);
+  if TColor(OrgColor) = TColorizerLocalSettings.ColorMap.FontColor then
+  begin
+    sCaller := ProcByLevel(2);
+    //AddLog('Detour_WinApi_DrawTextEx', sCaller);
+    if SameText(sCaller, sTVirtualTreeHintWindowInternalPaint) then
+     SetTextColor(DC, ColorToRGB(clBlack));
+  end;
+ end;
+ Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
+ if RestoreColor then
+   SetTextColor(DC, OrgColor);
 end;
 
 {
@@ -2897,13 +2918,40 @@ end;
 }
 procedure Detour_TCompilerMsgLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
 var
- OldFontColor : TColor;
+ SavedIndex : Integer;
 begin
- OldFontColor := Canvas.Font.Color;
+ SavedIndex := SaveDC(Canvas.Handle);
+ try
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
-   Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+  begin
+   if Canvas.Brush.Color=clWindow then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+   else
+   if Canvas.Brush.Color=clBtnFace then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.DisabledColor
+   else
+   if Canvas.Brush.Color=clHighlight then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+
+   if Canvas.Font.Color=clWindowText then
+    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor
+   else
+   if Canvas.Font.Color=clHighlightText then
+    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.SelectedFontColor;
+
+   if Canvas.Brush.Color=clWhite then //Show hint in white background
+    Canvas.Font.Color := clBlack;
+  end;
+
+  //  Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+  //  Canvas.Font.Color :=clBlack;
+  //AddLog('Detour_TCompilerMsgLine_Draw', Format('Canvas.Brush.Color %s Canvas.Font.Color %s Flag %s', [ColorToString(Canvas.Brush.Color), ColorToString(Canvas.Font.Color), BoolToStr(Flag, True)]));
+  //AddLog('Detour_TCompilerMsgLine_Draw',);
   Trampoline_CompilerMsgLine_Draw(Self, Canvas, Rect, Flag);
- Canvas.Font.Color:=OldFontColor;
+ finally
+  if SavedIndex<>0 then
+    RestoreDC(Canvas.Handle, SavedIndex);
+ end;
 end;
 
 
@@ -2914,13 +2962,33 @@ end;
 
 procedure Detour_TTitleLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
 var
- OldFontColor : TColor;
+ SavedIndex : Integer;
 begin
- OldFontColor := Canvas.Font.Color;
+ SavedIndex := SaveDC(Canvas.Handle);
+ try
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
-   Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+  begin
+   if Canvas.Brush.Color=clWindow then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+   else
+   if Canvas.Brush.Color=clBtnFace then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.DisabledColor
+   else
+   if Canvas.Brush.Color=clHighlight then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+
+   if Canvas.Font.Color=clWindowText then
+    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor
+   else
+   if Canvas.Font.Color=clHighlightText then
+    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.SelectedFontColor;
+  end;
+
   Trampoline_TitleLine_Draw(Self, Canvas, Rect, Flag);
- Canvas.Font.Color:=OldFontColor;
+ finally
+  if SavedIndex<>0 then
+    RestoreDC(Canvas.Handle, SavedIndex);
+ end;
 end;
 
 {
@@ -2929,16 +2997,38 @@ end;
 }
 procedure Detour_TFileFindLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
 var
- OldFontColor : TColor;
+ SavedIndex : Integer;
 begin
- OldFontColor := Canvas.Font.Color;
+ SavedIndex := SaveDC(Canvas.Handle);
+ try
+{
+Detour_TFileFindLine_Draw : Flag False Canvas.Brush.Color clWindow Canvas.Font.Color clWindowText
+Detour_TFileFindLine_Draw : Flag False Canvas.Brush.Color clBtnFace Canvas.Font.Color clWindowText
+Detour_TFileFindLine_Draw : Flag False Canvas.Brush.Color clHighlight Canvas.Font.Color clHighlightText
+}
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
   begin
-   Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-   Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor;
+   if Canvas.Brush.Color=clWindow then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
+   else
+   if Canvas.Brush.Color=clBtnFace then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.DisabledColor
+   else
+   if Canvas.Brush.Color=clHighlight then
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+
+   if Canvas.Font.Color=clWindowText then
+    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor
+   else
+   if Canvas.Font.Color=clHighlightText then
+    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.SelectedFontColor;
   end;
+
   Trampoline_TFileFindLine_Draw(Self, Canvas, Rect, Flag);
- Canvas.Font.Color:=OldFontColor;
+ finally
+  if SavedIndex<>0 then
+    RestoreDC(Canvas.Handle, SavedIndex);
+ end;
 end;
 
 {
@@ -2968,6 +3058,21 @@ begin
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
    begin
      case nIndex of
+       COLOR_INFOTEXT:
+       begin
+         if TColorizerLocalSettings.Settings.HookSystemColors then
+          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
+         else
+          Exit(Trampoline_GetSysColor(nIndex));
+       end;
+
+       COLOR_INFOBK:
+       begin
+         if TColorizerLocalSettings.Settings.HookSystemColors then
+          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.MenuColor))
+         else
+          Exit(Trampoline_GetSysColor(nIndex));
+       end;
 
        COLOR_INACTIVECAPTION :
        begin
@@ -3013,6 +3118,11 @@ begin
    Exit(Trampoline_GetSysColor(nIndex));
 end;
 
+function Detour_TBaseVirtual_GetHintWindowClass : THintWindowClass;
+begin
+  Result:= THintWindow;
+end;
+
 
 const
 {$IFDEF DELPHIXE}
@@ -3024,6 +3134,7 @@ const
   sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
   sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
   sFileFindLineInternalCalcDraw = '@Msglines@TFileFindLine@InternalCalcDraw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo';
+  sBaseVirtualTreeGetHintWindowClass = '@Idevirtualtrees@TBaseVirtualTree@GetHintWindowClass$qqrv';
 {$ENDIF}
 
   sProjectTree2PaintText      = '@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
@@ -3086,6 +3197,10 @@ begin
    pOrgAddress := GetProcAddress(VclIDEModule, sListButtonPaint);
    if Assigned(pOrgAddress) then
     Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @Detour_TListButton_Paint);
+
+//   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
+//   if Assigned(pOrgAddress) then
+//    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
   end;
 
   TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
@@ -3185,6 +3300,9 @@ begin
 
   if Assigned(Trampoline_TListButton_Paint) then
     InterceptRemove(@Trampoline_TListButton_Paint);
+
+  if Assigned(Trampoline_TBaseVirtual_GetHintWindowClass) then
+    InterceptRemove(@Trampoline_TBaseVirtual_GetHintWindowClass);
 
 {$IF CompilerVersion<27} //XE6
   if Assigned(TrampolineCustomImageList_DoDraw) then
