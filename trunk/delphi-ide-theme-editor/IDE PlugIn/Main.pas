@@ -32,12 +32,12 @@
   scroll fails on XE in preview of source highligter
   frame in buttons of TIDECategoryButtons   depending oh theme colors
   Improve support for TInspListBox
-  Fix hint font color in TBetterHintWindowVirtualDrawTree
   Add support for TPopupListBox
 }
 
 // DONE
 {
+  * Fix hint font color in TBetterHintWindowVirtualDrawTree  / TMessageHintWindow
   * Add support for TListButton
   * Add support for TCnProcDropDownBox
   * Improve support for TCnProcListComboBox (border , drop button)

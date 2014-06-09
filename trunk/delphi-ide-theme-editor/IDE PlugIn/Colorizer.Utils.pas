@@ -461,13 +461,19 @@ var
 procedure AddLog(const Category, Message : string);
 begin
 {$IFDEF ENABLELOG}
-   TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
+TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
 //   if not Assigned(LogFile) then exit;
 //
 //   if Category<>'' then
 //    LogFile.Add(Format('%s : %s', [Category, Message]))
 //   else
 //    LogFile.Add(Format('%s', [Message]));
+//
+// if (LogFile.Count mod 10) = 0 then
+// begin
+//  TFile.AppendAllText(sLogFileName, LogFile.Text);
+//  LogFile.Clear;
+// end;
 {$ENDIF}
 end;
 
