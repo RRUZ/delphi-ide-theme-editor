@@ -816,6 +816,7 @@ var
  OrgHWND : HWND;
  LWinControl : TWinControl;
  LParentForm : TCustomForm;
+ SavedIndex  : Integer;
 begin
    //DrawEdge(DC, R, EDGE_RAISED, BF_RECT or BF_MIDDLE or Flags);
   LWinControl:=nil;
@@ -839,6 +840,8 @@ begin
       EDGE_BUMP,
       EDGE_RAISED :
                     begin
+                      SavedIndex:=SaveDC(hdc);
+                      try
                         LCanvas:=TCanvas.Create;
                         try
                           LCanvas.Handle:=hdc;
@@ -852,6 +855,10 @@ begin
                           LCanvas.Handle:=0;
                           LCanvas.Free;
                         end;
+                      finally
+                        if SavedIndex<>0 then
+                          RestoreDC(hdc, SavedIndex);
+                      end;
                         Exit(True);
                     end;
 
@@ -3202,7 +3209,7 @@ begin
 //   if Assigned(pOrgAddress) then
 //    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
   end;
-
+//   *******************************************
   TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
 
   Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @Detour_THintWindow_Paint);
@@ -3219,9 +3226,9 @@ begin
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
-
-  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
-
+//
+//  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
+//************************************************
 {$IFDEF DELPHIXE2_UP}
   Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @Detour_TStyleEngine_HandleMessage);
   Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @Detour_TUxThemeStyle_DrawElement);
@@ -3234,7 +3241,7 @@ begin
   Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @Detour_TCustomListView_WndProc);
   Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
   Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
-
+// **************************************************
    GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
    if Assigned(GetSysColorOrgPointer) then
      Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @Detour_WinApi_GetSysColor);
@@ -3246,7 +3253,7 @@ begin
    pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
    if Assigned(pOrgAddress) then
      Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
-
+// *******************************************
   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @Detour_TCategoryButtons_DrawCategory);
   Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @Detour_TCustomPanel_Paint);
 
@@ -3256,7 +3263,7 @@ begin
 
   Trampoline_TSplitter_Paint            := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
   Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
-
+// *******************************************
 {$IFDEF DLLWIZARD}
   Trampoline_TCustomForm_WndProc        := InterceptCreate(@TCustomFormClass.WndProc, @Detour_TCustomForm_WndProc);
 {$ENDIF}
