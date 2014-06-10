@@ -6,6 +6,9 @@
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DeepskyBlue_default_layout_menu.png
 
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/YellowGreen_debug_layout_assembly.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/OrangeRed_default_layout_fmx.png
 
 == Local Variable Window ==
 
@@ -29,3 +32,14 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Peru_debug_layout_assembly.png
 
+
+== FireMonkey ==
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Peru_default_layout_fmx.png
+
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/SandyBrown_default_layout_fmx.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/SkyBlue_default_layout_fmx.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Tan_default_layout.png
