@@ -47,6 +47,7 @@ const
 
 var
   LastScrollWinControl  : TWinControl = nil;
+  LastWinControl        : TWinControl = nil;
 
 implementation
 
@@ -298,6 +299,22 @@ begin
   Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
   Self.Canvas.Rectangle(Self.ClientRect);
 
+  ListButton.LoadValues();
+//    AddLog('Detour_TListButton_Paint', Format('Self %p', [@Self]));
+//    AddLog('Detour_TListButton_Paint', 'Name '+ ListButton.ListButton.Name);
+//    AddLog('Detour_TListButton_Paint', 'MaxListWidth '+ IntToStr(ListButton.MaxListWidth));
+//    AddLog('Detour_TListButton_Paint', 'MinListWidth '+ IntToStr(ListButton.MinListWidth));
+//    AddLog('Detour_TListButton_Paint', 'ItemIndex    '+ IntToStr(ListButton.ItemIndex));
+//    AddLog('Detour_TListButton_Paint', 'ItemCount    '+ IntToStr(ListButton.ItemCount));
+//    AddLog('Detour_TListButton_Paint', 'SelectString '+ ListButton.SelectString);
+//    AddLog('Detour_TListButton_Paint', ListButton.Items.Text);
+//    if  ListButton.PopupPanel<>nil then
+//    AddLog('Detour_TListButton_Paint', 'PopupPanel ' + ListButton.PopupPanel.ClassName);
+//    if  ListButton.ListBox<>nil then
+//    AddLog('Detour_TListButton_Paint', 'ListBox ' + ListButton.ListBox.Items.Text);
+//    if  ListButton.Items<>nil then
+//    AddLog('Detour_TListButton_Paint', 'Items ' + ListButton.Items.Text);
+
   if (ListButton.Items.Count>0) or (ListButton.PopupPanel<>nil) then
   begin
     Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
@@ -408,6 +425,7 @@ var
   LParentForm : TCustomForm;
 begin
   LastScrollWinControl:=Self;
+  LastWinControl      :=Self;
 
 //  if SameText('TMessageHintWindow', Self.ClassName) then
 //  begin
@@ -817,6 +835,7 @@ var
  LWinControl : TWinControl;
  LParentForm : TCustomForm;
  SavedIndex  : Integer;
+ WClassName  : string;
 begin
    //DrawEdge(DC, R, EDGE_RAISED, BF_RECT or BF_MIDDLE or Flags);
   LWinControl:=nil;
@@ -832,6 +851,13 @@ begin
       //AddLog('CustomDrawEdge Ignored', IntToHex(OrgHWND,8));
       Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
     end;
+  end
+  else
+  if OrgHWND<>0 then
+  begin
+   WClassName := GetWindowClassName(OrgHWND);
+   if (WClassName<>'') and Assigned(TColorizerLocalSettings.WinAPIClasses) and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0) then
+     Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
   end;
 
    case  edge of
@@ -3173,7 +3199,6 @@ var
  CoreIDEModule, VclIDEModule : HMODULE;
 begin
  ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
-
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
   begin
@@ -3226,8 +3251,7 @@ begin
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
-//
-//  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
+ //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
 //************************************************
 {$IFDEF DELPHIXE2_UP}
   Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @Detour_TStyleEngine_HandleMessage);
@@ -3253,6 +3277,7 @@ begin
    pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
    if Assigned(pOrgAddress) then
      Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
+
 // *******************************************
   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @Detour_TCategoryButtons_DrawCategory);
   Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @Detour_TCustomPanel_Paint);

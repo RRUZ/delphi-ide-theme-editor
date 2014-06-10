@@ -650,6 +650,7 @@ begin
 
   MemoAbout.Lines.Add('');
   MemoAbout.Lines.Add('Third Party');
+  MemoAbout.Lines.Add('------------');
   MemoAbout.Lines.Add('VCL Styles Utils');
   MemoAbout.Lines.Add('https://code.google.com/p/vcl-styles-utils/');
   MemoAbout.Lines.Add('Delphi Detours Library');
@@ -677,8 +678,9 @@ begin
   {$IF CompilerVersion >= 23}
   TabSheetVCLStyles.TabVisible:={$IFDEF DLLWIZARD}False{$ELSE}True{$ENDIF};
   {$ELSE CompilerVersion}
-  TabSheetVCLStyles.TabVisible:=False;
+  TabSheetVCLStyles.TabVisible  :=False;
   {$IFEND}
+  TabSheetHookedForms.TabVisible:=False;
   ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
 end;
 

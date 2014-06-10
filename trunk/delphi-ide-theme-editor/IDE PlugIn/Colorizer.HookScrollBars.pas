@@ -38,6 +38,7 @@ uses
   Vcl.Styles,
   Vcl.Themes,
 {$ELSE}
+  Types,
   Themes,
 {$ENDIF}
   Controls,
@@ -333,7 +334,7 @@ const
 var
   s, sCaller, sCaller2 : string;
   LCanvas : TCanvas;
-  VCLClassName : string;
+  {WClassName, }VCLClassName : string;
   ApplyHook  : Boolean;
   LParentForm : TCustomForm;
   LHWND : HWND;
@@ -341,7 +342,7 @@ var
   LBuffer   : TBitmap;
   LRect     : TRect;
   LSize     : TSize;
-  Dx, Dy    : Integer;
+  //i : integer;
 begin
   if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME) or THThemesClasses.Button.ContainsKey(THEME)) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
@@ -407,6 +408,14 @@ begin
          ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
          if ApplyHook then break;
        end;
+
+//    AddLog('ScrollBar','LHWND '+IntToHex(LHWND, 8));
+//    if ApplyHook and (LHWND<>0) then
+//    begin
+//      WClassName := GetWindowClassName(LHWND);
+//      ApplyHook:= not ((WClassName<>'') and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0));
+//      AddLog('ScrollBar','WClassName '+WClassName);
+//    end;
 
     if ApplyHook then
     begin
@@ -630,15 +639,15 @@ begin
     end
     else
     begin
-  //    if ScrollBarList.ContainsKey(THEME) then
-  //    begin
-  //       for i :=1 to 5 do
-  //       begin
-  //         sCaller := ProcByLevel(i);
-  //         AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
-  //       end;
-  //         AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
-  //    end;
+//      if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+//      begin
+//         for i :=1 to 5 do
+//         begin
+//           sCaller := ProcByLevel(i);
+//           AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
+//         end;
+//           AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
+//      end;
 
       Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
     end;
@@ -747,12 +756,27 @@ begin
       LHWND:=WindowFromDC(dc);
        //if LHWND<>0 then
        begin
-        sCaller := ProcByLevel(4);
         LFoundControl := FindControl(LHWND);
+        if LFoundControl=nil then
+        begin
+          try
+            if Assigned(LastWinControl) then
+            begin
+              VCLClassName:=LastWinControl.ClassName;
+              LFoundControl:=LastWinControl;
+            end;
+          except
+            VCLClassName  := '';
+            LFoundControl := nil;
+          end;
+        end
+        else
+          sCaller := ProcByLevel(4);
+
         //VCLEditors.DrawCheckbox
         //procedure DrawCheckbox(ACanvas: TCanvas; ARect : TRect;  ASelected, AEnabled, AAllEqual, AValue: Boolean);
                                   //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
-        if (LFoundControl<>nil) or SameText('VCLEditors.DrawCheckbox', sCaller) then
+        if (LFoundControl<>nil) or SameText('VCLEditors.DrawCheckbox', sCaller) or SameText('IDEVirtualTrees.TBaseVirtualTree.PaintCheckImage', sCaller) then
         begin
            ApplyHook:=SameText('VCLEditors.DrawCheckbox', sCaller);
 
@@ -801,7 +825,10 @@ begin
                                              try
                                                LBuffer.SetSize(LSize.cx, LSize.cy);
                                                LRect := Rect(0, 0, LSize.cx, LSize.cy);
-                                               LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+                                               if iStateId= CBS_CHECKEDHOT then
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor
+                                               else
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
                                                LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
                                                LBuffer.Canvas.Rectangle(LRect);
                                                DrawCheck(LBuffer.Canvas, Point(LRect.Left+3, LRect.Top+6), 2, False);
@@ -816,6 +843,10 @@ begin
            end;
         end;
        end;
+
+
+//      sCaller  := ProcByLevel(4);
+//      AddLog('THThemesClasses.Button','VCLClassName '+VCLClassName+' - Ignored '+sCaller);
     end;
   end
   ;

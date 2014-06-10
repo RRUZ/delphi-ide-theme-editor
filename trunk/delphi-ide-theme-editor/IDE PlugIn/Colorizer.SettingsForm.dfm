@@ -761,6 +761,12 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Top = 3
           Width = 454
           Height = 374
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Style = []
+          ParentFont = False
           ReadOnly = True
           ScrollBars = ssBoth
           TabOrder = 0
