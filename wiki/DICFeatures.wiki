@@ -10,9 +10,27 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/OrangeRed_default_layout_fmx.png
 
+= Features =
+
+
+ * DIC is compatible with RAD Studio XE, XE2, XE3, XE4, XE5, X6. 
+ * Change the icons used in the title bar of the docked windows
+ * Set the colors, and gradient direction of the title bar of the docked windows
+ * Set the colors, and gradient direction of the toolbars
+ * Improve the drawing of the disabled icons used menus and toolbars
+ * Style the scrollbars, checkbox, 
+ 
+
+
+Check the next sample images
+
 == Project Manager ==
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/ProjectManager.gif
+
+== Tool Palette ==
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/ToolPalette.gif
 
 == Object Inspector ==
 
