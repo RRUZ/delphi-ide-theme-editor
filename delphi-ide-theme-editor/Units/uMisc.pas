@@ -48,6 +48,7 @@ function  RunAndWait(hWnd: HWND; const FileName, Params: string;RunAs:Boolean=Fa
 function  MakeValidTagName(const s: string): string;
 function  GetModuleLocation : string;
 function  WM_To_String(const WM_Message: Integer): string;
+function  GetWindowClassName(Window: HWND): String;
 
 implementation
 
@@ -80,6 +81,22 @@ Const
  DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
 
 function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+
+function GetWindowClassName(Window: HWND): String;
+var
+  sClassName: PChar;
+begin
+  GetMem(sClassName, 256);
+  try
+    if GetClassName(Window, sClassName, 256)<>0 then
+      Result := String(sClassName)
+    else
+      Result:='';
+  finally
+    FreeMem(sClassName, 256);
+  end;
+end;
+
 
 function WM_To_String(const WM_Message: Integer): string;
 begin

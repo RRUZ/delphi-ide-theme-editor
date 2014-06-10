@@ -73,6 +73,7 @@ procedure RegisterVClStylesFiles;
       class var ActionBarStyle : TActionBarStyle;
       class var HookedWindows     : TStringList;
       class var HookedScrollBars  : TStringList;
+      class var WinAPIClasses     : TStringList;
       class var HookedWindowsText    : string;
       class var HookedScrollBarsText  : string;
       class var VCLStylesPath  : string;

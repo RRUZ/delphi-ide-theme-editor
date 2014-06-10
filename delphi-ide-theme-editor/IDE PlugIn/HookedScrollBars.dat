@@ -23,3 +23,5 @@ TFlagsView
 TXMMRegisterView
 THistoryPropComboBox
 TRefactoringTree
+TListView
+TFormContainerForm

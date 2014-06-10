@@ -36,6 +36,7 @@
 
 // DONE
 {
+  * bug in bg color of controls in Font dialog
   * Improve support for TInspListBox
   * Fix hint font color in TBetterHintWindowVirtualDrawTree  / TMessageHintWindow
   * Add support for TListButton
@@ -266,6 +267,7 @@ begin
   TColorizerLocalSettings.DockImages.Free;
   FreeAndNil(TColorizerLocalSettings.HookedWindows);
   FreeAndNil(TColorizerLocalSettings.HookedScrollBars);
+  FreeAndNil(TColorizerLocalSettings.WinAPIClasses);
 
   IDEWizard.FinalizeColorizer();
   AddLog('FinalizeIDEColorizer', '4');
@@ -412,9 +414,13 @@ begin
     TColorizerLocalSettings.HookedWindows:=TStringList.Create;
     TColorizerLocalSettings.HookedWindows.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
     TColorizerLocalSettings.HookedWindowsText:=TColorizerLocalSettings.HookedWindows.Text;
+
     TColorizerLocalSettings.HookedScrollBars:=TStringList.Create;
     TColorizerLocalSettings.HookedScrollBars.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedScrollBars.dat');
     TColorizerLocalSettings.HookedScrollBarsText:=TColorizerLocalSettings.HookedScrollBars.Text;
+
+    TColorizerLocalSettings.WinAPIClasses:=TStringList.Create;
+    TColorizerLocalSettings.WinAPIClasses.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'WinAPIClasses.dat');
 
     TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
     LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);

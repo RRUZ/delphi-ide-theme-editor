@@ -87,12 +87,25 @@ type
     FPopupPanel: TCustomForm;
     FItems: TStrings;
     FListBox: TListBox;
+    FMaxListWidth: Integer;
+    FMinListWidth: Integer;
+    FItemIndex: Integer;
+    FListWidth: Integer;
+    FItemCount: Integer;
+    FSelectString: string;
    public
+    procedure LoadValues;
     constructor Create(ListButton : TCustomControl); reintroduce;
     property ListButton : TCustomControl read FListButton;
     property ListBox : TListBox read FListBox;
     property PopupPanel: TCustomForm read FPopupPanel;
     property Items: TStrings read FItems;
+    property MaxListWidth: Integer read FMaxListWidth;
+    property MinListWidth: Integer read FMinListWidth;
+    property ItemIndex: Integer read FItemIndex;
+    property ListWidth: Integer read FListWidth;
+    property ItemCount: Integer read FItemCount;
+    property SelectString : string read FSelectString;
   end;
 
 implementation
@@ -1137,8 +1150,7 @@ procedure TWrapperPropCheckBox.SetProperties(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-
-  //necesary to allow use a hook with the DrawFrameControl
+  //necesary to allow use a hook with the DrawFrameControl and set color of font
   if GetWindowTheme(TWinControl(AComponent).Handle) <>0 then
     SetWindowTheme(TWinControl(AComponent).Handle, '', '');
 
@@ -1223,10 +1235,21 @@ end;
 constructor TRttiListButton.Create(ListButton: TCustomControl);
 begin
   inherited Create(ListButton);
-  FListButton := ListButton;
-  FPopupPanel := RootType.GetProperty('PopupPanel').GetValue(FListButton).AsType<TCustomForm>;
-  FItems      := RootType.GetProperty('Items').GetValue(FListButton).AsType<TStrings>;
-  FListBox    := RootType.GetProperty('ListBox').GetValue(FListButton).AsType<TListBox>;
+  FListButton   := ListButton;
+  LoadValues();
+end;
+
+procedure TRttiListButton.LoadValues;
+begin
+  FPopupPanel   := RootType.GetProperty('PopupPanel').GetValue(FListButton).AsType<TCustomForm>;
+  FItems        := RootType.GetProperty('Items').GetValue(FListButton).AsType<TStrings>;
+  FListBox      := RootType.GetProperty('ListBox').GetValue(FListButton).AsType<TListBox>;
+  FMinListWidth := RootType.GetProperty('MinListWidth').GetValue(FListButton).AsInteger;
+  FMaxListWidth := RootType.GetProperty('MaxListWidth').GetValue(FListButton).AsInteger;
+  FItemIndex    := RootType.GetProperty('ItemIndex').GetValue(FListButton).AsInteger;
+  FListWidth    := RootType.GetProperty('ListWidth').GetValue(FListButton).AsInteger;
+  FItemCount    := RootType.GetProperty('ItemCount').GetValue(FListButton).AsInteger;
+  FSelectString := RootType.GetField('FSelectString').GetValue(FListButton).AsString;
 end;
 
 initialization

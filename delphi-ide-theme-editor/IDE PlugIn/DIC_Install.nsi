@@ -20,7 +20,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "2.81.0"
+  !define VER_MINOR "2.87.0"
 !endif
 
 !ifndef IDE_VERSION_DXE
@@ -251,6 +251,7 @@ Section "RAD Studio XE" SecDXE
   File "DownloadInfo.xml"
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"
+  File "WinAPIClasses.dat"
   SetOverwrite off
   File "Settings.ini"
   SetOverwrite on 
@@ -272,6 +273,7 @@ Section "RAD Studio XE2" SecDXE2
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
+  File "WinAPIClasses.dat"  
   SetOverwrite off
   File "Settings.ini"
   SetOverwrite on 
@@ -292,6 +294,7 @@ Section "RAD Studio XE3" SecDXE3
   File "DownloadInfo.xml"
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
+  File "WinAPIClasses.dat"  
   SetOverwrite off
   File "Settings.ini"
   SetOverwrite on
@@ -312,6 +315,7 @@ Section "RAD Studio XE4" SecDXE4
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
+  File "WinAPIClasses.dat"  
   SetOverwrite off
   File "Settings.ini"
   SetOverwrite on
@@ -332,6 +336,7 @@ Section "RAD Studio XE5" SecDXE5
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
+  File "WinAPIClasses.dat"  
   SetOverwrite off
   File "Settings.ini"
   SetOverwrite on
@@ -352,6 +357,7 @@ Section "RAD Studio XE6" SecDXE6
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
+  File "WinAPIClasses.dat"  
   SetOverwrite off
   File "Settings.ini"
   SetOverwrite on  
