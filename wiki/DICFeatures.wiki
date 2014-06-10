@@ -2,6 +2,15 @@
 
 = Introduction =
 
- The Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the visible *workspace* of the IDE, this plugin change the appearance of the menus, docked windows, scrollbars and others controls.
+ The Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel the *workspace* of the IDE, this plugin allows to change the appearance of the menus, docked windows, scrollbars and others controls. Also improve the drawing of the disabled icons in toolbars and menus, improve the icons used in the gutter and the debuger.
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DeepskyBlue_default_layout_menu.png
+
+
+== Local Variable Window ==
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/LocalVariables.gif
+
+== Breakpoint List ==
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/BreakpointList.gif
