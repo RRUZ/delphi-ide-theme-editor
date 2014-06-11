@@ -171,7 +171,6 @@ object FrmMain: TFrmMain
     Anchors = [akLeft, akTop, akRight]
     ScrollBars = ssBoth
     TabOrder = 0
-    ExplicitWidth = 567
   end
   object EditURI: TEdit
     Left = 18
@@ -182,7 +181,6 @@ object FrmMain: TFrmMain
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
-    ExplicitWidth = 446
   end
   object EditOutPut: TEdit
     Left = 18
@@ -192,7 +190,6 @@ object FrmMain: TFrmMain
     Anchors = [akLeft, akTop, akRight]
     Enabled = False
     TabOrder = 2
-    ExplicitWidth = 567
   end
   object BtnStart: TButton
     Left = 19
@@ -238,7 +235,6 @@ object FrmMain: TFrmMain
     RowSelect = True
     TabOrder = 4
     ViewStyle = vsReport
-    ExplicitWidth = 567
   end
   object PbGeneral: TProgressBar
     Left = 19
@@ -258,7 +254,6 @@ object FrmMain: TFrmMain
     TabOrder = 6
     Text = '10'
     OnExit = EditSegmentsExit
-    ExplicitLeft = 471
   end
   object BtnPause: TButton
     Left = 188
@@ -297,5 +292,10 @@ object FrmMain: TFrmMain
     TabOrder = 10
     Visible = False
     OnClick = BtnInstallClick
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 408
+    Top = 128
   end
 end

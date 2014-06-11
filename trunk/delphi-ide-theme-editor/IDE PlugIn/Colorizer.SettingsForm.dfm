@@ -44,9 +44,15 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         object Label1: TLabel
           Left = 3
           Top = 46
-          Width = 37
+          Width = 45
           Height = 13
           Caption = 'Themes'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
         end
         object Label7: TLabel
           Left = 154
@@ -65,9 +71,15 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         object LabelSetting: TLabel
           Left = 38
           Top = 0
-          Width = 59
+          Width = 71
           Height = 13
           Caption = 'LabelSetting'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
         end
         object ImagePalette: TImage
           Left = 5
@@ -85,26 +97,15 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         object Label2: TLabel
           Left = 3
           Top = 301
-          Width = 37
+          Width = 43
           Height = 13
           Caption = 'Options'
-        end
-        object Label18: TLabel
-          Left = 3
-          Top = 376
-          Width = 45
-          Height = 13
-          Caption = 'ColorMap'
-          Visible = False
-        end
-        object Label23: TLabel
-          Left = 170
-          Top = 376
-          Width = 24
-          Height = 13
-          Caption = 'Style'
-          FocusControl = StyleCombo
-          Visible = False
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
         end
         object Image2: TImage
           Left = 0
@@ -269,41 +270,30 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Caption = 'Fix disabled icons draw in IDE Menus and toolbars'
           TabOrder = 6
         end
-        object CheckBoxActivateDWM: TCheckBox
-          Left = 326
-          Top = 393
-          Width = 145
-          Height = 17
-          Caption = 'Activate Glass colorization'
-          DoubleBuffered = True
-          ParentDoubleBuffered = False
-          TabOrder = 7
-          Visible = False
-        end
         object CheckBoxGutterIcons: TCheckBox
           Left = 3
           Top = 354
           Width = 110
           Height = 17
           Caption = 'Modify Gutter Icons'
-          TabOrder = 8
+          TabOrder = 7
         end
         object ColorMapCombo: TComboBox
-          Left = 3
+          Left = 326
           Top = 391
-          Width = 157
+          Width = 84
           Height = 21
           Style = csDropDownList
-          TabOrder = 9
+          TabOrder = 8
           Visible = False
         end
         object StyleCombo: TComboBox
-          Left = 168
-          Top = 391
-          Width = 145
+          Left = 326
+          Top = 364
+          Width = 40
           Height = 21
           Style = csDropDownList
-          TabOrder = 10
+          TabOrder = 9
           Visible = False
         end
         object ColorBoxBase: TColorBox
@@ -313,7 +303,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 11
+          TabOrder = 10
           OnChange = ColorBoxBaseChange
           OnGetColors = ColorBoxBaseGetColors
         end
@@ -324,7 +314,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 22
           ImageIndex = 7
           Images = ImageList1
-          TabOrder = 12
+          TabOrder = 11
           OnClick = Button1Click
         end
         object EditThemeName: TEdit
@@ -332,7 +322,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Top = 130
           Width = 145
           Height = 21
-          TabOrder = 13
+          TabOrder = 12
         end
         object ColorListBox1: TColorListBox
           Left = 3
@@ -342,7 +332,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Selected = clScrollBar
           Style = [cbCustomColors]
           BevelInner = bvSpace
-          TabOrder = 14
+          TabOrder = 13
           OnGetColors = ColorListBox1GetColors
         end
         object ButtonDeleteTheme: TButton
@@ -351,8 +341,16 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 75
           Height = 25
           Caption = 'Delete'
-          TabOrder = 15
+          TabOrder = 14
           OnClick = ButtonDeleteThemeClick
+        end
+        object CheckBoxUpdates: TCheckBox
+          Left = 3
+          Top = 377
+          Width = 166
+          Height = 17
+          Caption = 'Check for updates on startup'
+          TabOrder = 15
         end
       end
       object TabSheet2: TTabSheet
@@ -370,6 +368,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Align = alClient
           BorderWidth = 5
           TabOrder = 0
+          ExplicitTop = -2
           object PageControl1: TPageControl
             Left = 6
             Top = 6
@@ -752,10 +751,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetAbout: TTabSheet
         Caption = 'About'
         ImageIndex = 5
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object MemoAbout: TMemo
           Left = 3
           Top = 3

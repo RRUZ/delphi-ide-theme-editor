@@ -443,6 +443,9 @@ begin
     FTimerRefresher.OnTimer :=OnRefreher;
     FTimerRefresher.Interval:=1500;
     FTimerRefresher.Enabled:=True;
+
+    if TColorizerLocalSettings.Settings.CheckUpdates then
+       CheckForUpdates(True);
   except
     on E: exception do
     begin
