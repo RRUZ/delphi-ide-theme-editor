@@ -65,13 +65,10 @@ type
     BtnApply: TButton;
     CheckBoxFixIDEDrawIcon: TCheckBox;
     ImagePalette: TImage;
-    CheckBoxActivateDWM: TCheckBox;
     Bevel1: TBevel;
     Label2: TLabel;
     CheckBoxGutterIcons: TCheckBox;
     PanelPreview: TPanel;
-    Label18: TLabel;
-    Label23: TLabel;
     ColorMapCombo: TComboBox;
     StyleCombo: TComboBox;
     TwilightColorMap: TTwilightColorMap;
@@ -132,6 +129,7 @@ type
     Button7: TButton;
     ColorBoxToolBarStartEnd: TColorBox;
     Label17: TLabel;
+    CheckBoxUpdates: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -190,6 +188,8 @@ type
   public
     procedure Init;
   end;
+
+  procedure CheckForUpdates(Silent : Boolean);
 
 const
   {$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -259,6 +259,14 @@ Uses
 
 {$R *.dfm}
 
+procedure CheckForUpdates(Silent : Boolean);
+begin
+  if Silent then
+   ShellExecute(0, 'open', PChar(ExtractFilePath(GetModuleLocation())+'Updater.exe'), PChar(Format('"%s" -Silent', [GetModuleLocation])), '', SW_SHOWNORMAL)
+  else
+   ShellExecute(0, 'open', PChar(ExtractFilePath(GetModuleLocation())+'Updater.exe'), PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
+end;
+
 function CalculateTextColor(const BackgroundColor: TColor): TColor;
 begin
   if (GetRValue(BackgroundColor) + GetGValue(BackgroundColor) + GetBValue(BackgroundColor)) > 384 then
@@ -312,7 +320,7 @@ begin
   begin
     FSettings.ThemeName := cbThemeName.Text;
     FSettings.Enabled   := CheckBoxEnabled.Checked;
-    FSettings.EnableDWMColorization   := CheckBoxActivateDWM.Checked;
+    //FSettings.EnableDWMColorization   := CheckBoxActivateDWM.Checked;
     FSettings.FixIDEDisabledIconsDraw   := CheckBoxFixIDEDrawIcon.Checked;
     FSettings.AutogenerateColors   := CheckBoxAutoColor.Checked;
 
@@ -510,7 +518,7 @@ end;
 
 procedure TFormIDEColorizerSettings.ButtonCheckUpdatesClick(Sender: TObject);
 begin
-  ShellExecute(0, 'open', PChar(ExtractFilePath(GetModuleLocation())+'Updater.exe'), PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
+ CheckForUpdates(False);
 end;
 
 procedure TFormIDEColorizerSettings.ButtonDeleteThemeClick(Sender: TObject);
@@ -912,6 +920,8 @@ procedure TFormIDEColorizerSettings.LoadSettings;
 begin
   ReadSettings(FSettings, GetSettingsFolder);
 
+  CheckBoxUpdates.Checked  := FSettings.CheckUpdates;
+
   CheckBoxHookSystemColors.Checked  := FSettings.HookSystemColors;
   CheckBoxCustomDockBars.Checked := FSettings.DockCustom;
 
@@ -931,7 +941,7 @@ begin
 
 
   CheckBoxEnabled.Checked:=FSettings.Enabled;
-  CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;
+  //CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;
   CheckBoxFixIDEDrawIcon.Checked:=FSettings.FixIDEDisabledIconsDraw;
   CheckBoxAutoColor.Checked:=FSettings.AutogenerateColors;
   CheckBoxGutterIcons.Checked:=FSettings.ChangeIconsGutter;

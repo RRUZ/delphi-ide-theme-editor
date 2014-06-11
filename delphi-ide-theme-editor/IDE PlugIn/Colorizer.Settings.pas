@@ -47,6 +47,7 @@ type
     FToolbarCustomColors: boolean;
     FToolbarStartGrad: string;
     FToolbarGradientHor: boolean;
+    FCheckUpdates: boolean;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -77,6 +78,8 @@ type
     property ToolbarCustomColors   : boolean read FToolbarCustomColors write FToolbarCustomColors;
     property ToolbarStartGrad  : string read FToolbarStartGrad write FToolbarStartGrad;
     property ToolbarEndGrad    : string read FToolbarEndGrad write FToolbarEndGrad;
+
+    property CheckUpdates    : boolean read FCheckUpdates write FCheckUpdates;
   end;
 
   procedure ReadSettings(Settings: TSettings;Const Path:String);
@@ -119,6 +122,8 @@ begin
     Settings.ToolbarCustomColors  := LIniFile.ReadBool('Global', 'ToolbarCustomColors', False);
     Settings.ToolbarStartGrad     := LIniFile.ReadString('Global', 'ToolbarStartGrad', 'clGray');
     Settings.ToolbarEndGrad       := LIniFile.ReadString('Global', 'ToolbarEndGrad', 'clSilver');
+
+    Settings.CheckUpdates         := LIniFile.ReadBool('Global', 'CheckUpdates', True);
   finally
     LIniFile.Free;
   end;
@@ -153,6 +158,8 @@ begin
     LIniFile.WriteBool('Global', 'ToolbarCustomColors', Settings.ToolbarCustomColors);
     LIniFile.WriteString('Global', 'ToolbarStartGrad', Settings.ToolbarStartGrad);
     LIniFile.WriteString('Global', 'ToolbarEndGrad', Settings.ToolbarEndGrad);
+
+    LIniFile.WriteBool('Global', 'CheckUpdates', Settings.CheckUpdates);
   finally
     LIniFile.Free;
   end;

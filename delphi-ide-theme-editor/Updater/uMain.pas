@@ -26,7 +26,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, IdComponent, Diagnostics, uHttpDownload,
-  Vcl.Imaging.pngimage, Vcl.ExtCtrls;
+  Vcl.Imaging.pngimage, Vcl.ExtCtrls, Vcl.AppEvnts;
 
 const
   WM_ALL_SEGMENTS_DONE = WM_USER + 666;
@@ -69,6 +69,7 @@ type
     Bevel1: TBevel;
     BtnCheckUpdates: TButton;
     BtnInstall: TButton;
+    Timer1: TTimer;
     procedure BtnStartClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure EditSegmentsExit(Sender: TObject);
@@ -77,36 +78,34 @@ type
     procedure FormActivate(Sender: TObject);
     procedure BtnCheckUpdatesClick(Sender: TObject);
     procedure BtnInstallClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     FApplicationName: string;
     FRemoteVersionFile : string;
-
     FXmlVersionInfo: string;
     FLocalVersion: string;
     FRemoteVersion: string;
     FUrlInstaller: string;
     FInstallerFileName: string;
     FTempInstallerFileName: string;
-
     FMaxsize: Integer;
-    //FFileName: string;
     FStopwatch: TStopwatch;
     FSegmentSize: Integer;
     FSegments: Integer;
     WaitDownloadThr : TWaitDownloadThr;
     FCheckExternal: boolean;
     FErrorUpdate : boolean;
+    FSilent : Boolean;
     procedure AddLog(const Msg: string);
     procedure UpdateProgress(Offset, lIndex, lDownloaded: Integer;
       lRate, lPorc: Double);
     procedure GetRemoteFileInfo;
     procedure InitThreads(Resume:Boolean);
     procedure MergeSegments;
-    function GetUpdateAvailable: Boolean;
-    property SegmentSize: Integer read FSegmentSize write FSegmentSize;
-    property Segments: Integer read FSegments write FSegments;
+    function  GetUpdateAvailable: Boolean;
+    property  SegmentSize: Integer read FSegmentSize write FSegmentSize;
+    property  Segments: Integer read FSegments write FSegments;
     procedure ReceiveMessage(var Msg: TMessage);  message WM_ALL_SEGMENTS_DONE;
-
     procedure ReadInfoUpdater;
     procedure ReadLocalInfo;
     procedure ReadRemoteInfo;
@@ -114,12 +113,12 @@ type
     procedure ExecuteInstaller;
   public
     property  CheckExternal   : boolean read FCheckExternal write FCheckExternal;
-    property XmlVersionInfo : string read FXmlVersionInfo write FXmlVersionInfo;
-    property RemoteVersion : string read FRemoteVersion write FRemoteVersion;
-    property LocalVersion  : string read FLocalVersion write FLocalVersion;
-    property UrlInstaller : string read FUrlInstaller write FUrlInstaller;
-    property InstallerFileName : string read FInstallerFileName write FInstallerFileName;
-    property TempInstallerFileName : string read FTempInstallerFileName write FTempInstallerFileName;
+    property  XmlVersionInfo : string read FXmlVersionInfo write FXmlVersionInfo;
+    property  RemoteVersion : string read FRemoteVersion write FRemoteVersion;
+    property  LocalVersion  : string read FLocalVersion write FLocalVersion;
+    property  UrlInstaller : string read FUrlInstaller write FUrlInstaller;
+    property  InstallerFileName : string read FInstallerFileName write FInstallerFileName;
+    property  TempInstallerFileName : string read FTempInstallerFileName write FTempInstallerFileName;
     property  UpdateAvailable : Boolean read GetUpdateAvailable;
     procedure ExecuteUpdater;
   end;
@@ -162,6 +161,8 @@ begin
       LHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
       try
         Http.IOHandler:=LHandler;
+        Http.Request.UserAgent:=sUserAgent;
+        Http.HandleRedirects:=True;
         Http.Get(Url, buffer);
         Result:=buffer.DataString;
       finally
@@ -225,29 +226,11 @@ end;
 procedure TFrmMain.Download;
 begin
   try
-   PbGeneral.Style:=pbstNormal;
-   AddLog('Getting Application information');
-  
-   //ProgressBar1.Max:= GetRemoteFileSize(UrlInstaller);
-   //SetMsg(Format('%s bytes to download ',[FormatFloat('#,', ProgressBar1.Max)]));
-   FTempInstallerFileName:=IncludeTrailingPathDelimiter(GetTempDirectory)+InstallerFileName;
-   DeleteFile(TempInstallerFileName);
-   {
-   FileStream:=TFileStream.Create(TempInstallerFileName,fmCreate);
-   try
-     FStopwatch.Reset;
-     FStopwatch.Start;
-     WinInet_HttpGet(UrlInstaller, FileStream, DownloadCallBack);
-     SetMsg('Application downloaded');
-   finally
-     FileStream.Free;
-   end;
-   }
-{   
-   BtnInstall.Visible:=FileExists(TempInstallerFileName);
-   BtnCheckUpdates.Visible:=not BtnInstall.Visible;
-   if BtnInstall.Visible and not CheckExternal then ExecuteInstaller;
-}
+    PbGeneral.Style:=pbstNormal;
+    AddLog('Getting Application information');
+    FTempInstallerFileName:=IncludeTrailingPathDelimiter(GetTempDirectory)+InstallerFileName;
+    DeleteFile(TempInstallerFileName);
+
     if PbGeneral.Position=0 then
       GetRemoteFileInfo;
     InitThreads(PbGeneral.Position=0);
@@ -279,20 +262,35 @@ end;
 procedure TFrmMain.ExecuteUpdater;
 begin
   try
+   if not Visible and not FSilent then
+   begin
+     Application.ShowMainForm:=True;
+     Show;
+   end;
+
+    ReadInfoUpdater();
+    ReadLocalInfo();
+    AddLog(Format('Current Version %s',[LocalVersion]));
+
     PbGeneral.Style:=pbstMarquee;
     BtnCheckUpdates.Enabled:=False;
     try
       if not UpdateAvailable then
       begin
-       if not FErrorUpdate then
-        MessageDlg(Format('%s is up to date',[FApplicationName]), mtConfirmation, [mbOK], 0);
+       if not FErrorUpdate and not FSilent then
+        MessageDlg(Format('%s is up to date',[FApplicationName]), mtInformation, [mbOK], 0);
        Close;
       end
       else
       begin
        if not Visible then
          Show;
-        Download;
+
+         if MessageDlg(Format('A new version (%s) of the %s was found. Do you want download and install?',[FRemoteVersion, FApplicationName]),  mtConfirmation, [mbYes,
+           mbNo], 0) = mrYes then
+           Download
+         else
+           Halt(0);
         //if CheckExternal then
         // ExecuteInstaller;
       end;
@@ -306,22 +304,20 @@ begin
 end;
 procedure TFrmMain.FormActivate(Sender: TObject);
 begin
-  if not CheckExternal then
-   ExecuteUpdater;
+//  if not CheckExternal then
+//   ExecuteUpdater;
 end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 begin
+  FSilent   := (ParamCount>1) and (SameText(ParamStr(2),'-Silent'));
   FRemoteVersion:='';
   FErrorUpdate  :=False;
   FCheckExternal:=False;
   PbGeneral.Position := 0;
-  FStopwatch := TStopwatch.Create;
-  ReadInfoUpdater();
-  ReadLocalInfo();
-  AddLog(Format('Current Version %s',[LocalVersion]));
   EditOutPut.Text := GetTempDirectory;
   FSegments := StrToInt(EditSegments.Text);
+  FStopwatch := TStopwatch.Create;
 end;
 
 procedure TFrmMain.GetRemoteFileInfo;
@@ -335,6 +331,8 @@ begin
     try
       AddLog('Getting file info');
       Http.IOHandler:=LHandler;
+      Http.Request.UserAgent:=sUserAgent;
+      Http.HandleRedirects:=True;
       Http.Head(FUrlInstaller);
       AddLog(Http.Response.RawHeaders.Text);
       FMaxsize := Http.Response.ContentLength;
@@ -451,7 +449,7 @@ begin
   LFile:=ExtractFilePath(ParamStr(0))+'DownloadInfo.xml';
   if not FileExists(LFile) then
    begin
-     ShowMessage(Format('File %s not found', [LFile]));
+     MessageDlg(Format('File %s not found', [LFile]), mtWarning, [mbOK], 0);
      Halt(0);
    end;
 
@@ -480,7 +478,7 @@ begin
    LBinaryFile:=ParamStr(1);
    if not FileExists(LBinaryFile) then
     begin
-      ShowMessage(Format('File %s not found', [LBinaryFile]));
+     MessageDlg(Format('File %s not found', [LBinaryFile]), mtWarning, [mbOK], 0);
       Halt(0);
     end;
 
@@ -530,6 +528,12 @@ begin
    if BtnInstall.Visible and not CheckExternal then ExecuteInstaller;  
 end;
 
+procedure TFrmMain.Timer1Timer(Sender: TObject);
+begin
+  TTimer(Sender).Enabled:=False;
+  ExecuteUpdater;
+end;
+
 procedure TFrmMain.UpdateProgress(Offset, lIndex, lDownloaded: Integer; lRate, lPorc: Double);
 var
   Rate: Double;
@@ -540,7 +544,6 @@ var
   Remaining: TTimeSpan;
   ListItem: TListItem;
 begin
-
   // update segment info in listview
   //if FStopwatch.Elapsed.TotalSeconds > 0 then
   //  Rate := lDownloaded / 1024.0 / FStopwatch.Elapsed.TotalSeconds;
