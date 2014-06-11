@@ -1,5 +1,4 @@
 //**************************************************************************************************
-//
 // Unit uWinInet
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -30,8 +29,8 @@ type
 
 
 function  GetRemoteFileSize(const Url : string): Integer;
-procedure WinInet_HttpGet(const Url: string;Stream:TStream;CallBack:TuWinInetProcCallBack);overload;
-function  WinInet_HttpGet(const Url: string;CallBack:TuWinInetProcCallBack): string;overload;
+procedure WinInet_HttpGet(const Url: string; Stream:TStream; CallBack:TuWinInetProcCallBack);overload;
+function  WinInet_HttpGet(const Url: string; CallBack:TuWinInetProcCallBack): string;overload;
 function  GetWinInetError(ErrorCode:Cardinal): string;
 
 
@@ -169,7 +168,7 @@ begin
 end;
 
 
-procedure WinInet_HttpGet(const Url: string;Stream:TStream;CallBack:TuWinInetProcCallBack);overload;
+procedure WinInet_HttpGet(const Url: string; Stream:TStream; CallBack:TuWinInetProcCallBack);overload;
 const
   BuffSize = 1024*64;
 var
@@ -190,7 +189,6 @@ begin
       Stream.Seek(0,0);
       GetMem(Buffer,BuffSize);
       try
-          Sleep(15000);
           hFile := InternetOpenUrl(hInter, PChar(Url), nil, 0, INTERNET_FLAG_RELOAD, 0);
           if hFile=nil then
           begin
@@ -219,14 +217,14 @@ begin
     end;
 end;
 
-function WinInet_HttpGet(const Url: string;CallBack:TuWinInetProcCallBack): string;overload;
+function WinInet_HttpGet(const Url: string; CallBack:TuWinInetProcCallBack): string;overload;
 Var
   StringStream : TStringStream;
 begin
   Result:='';
     StringStream:=TStringStream.Create('',TEncoding.UTF8);
     try
-        WinInet_HttpGet(Url,StringStream,CallBack);
+        WinInet_HttpGet(Url, StringStream, CallBack);
         if StringStream.Size>0 then
         begin
           StringStream.Seek(0,0);
