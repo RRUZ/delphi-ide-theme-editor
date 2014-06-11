@@ -248,6 +248,8 @@ Section "RAD Studio XE" SecDXE
   SectionIn 1 2
   SetOutPath $INSTDIR\XE
   File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   File "DownloadInfo.xml"
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"
@@ -270,6 +272,8 @@ Section "RAD Studio XE2" SecDXE2
   SectionIn 1 2
   SetOutPath $INSTDIR\XE2
   File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
@@ -291,6 +295,8 @@ Section "RAD Studio XE3" SecDXE3
   SectionIn 1 2
   SetOutPath $INSTDIR\XE3
   File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   File "DownloadInfo.xml"
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
@@ -312,6 +318,8 @@ Section "RAD Studio XE4" SecDXE4
   SectionIn 1 2
   SetOutPath $INSTDIR\XE4
   File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
@@ -333,6 +341,8 @@ Section "RAD Studio XE5" SecDXE5
   SectionIn 1 2
   SetOutPath $INSTDIR\XE5
   File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  
@@ -354,6 +364,8 @@ Section "RAD Studio XE6" SecDXE6
   SectionIn 1 2
   SetOutPath $INSTDIR\XE6
   File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   File "DownloadInfo.xml"  
   File "HookedWindows.dat"
   File "HookedScrollBars.dat"  

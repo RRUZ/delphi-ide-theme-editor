@@ -95,8 +95,6 @@ Type
    TProcCallBack= procedure(BytesRead:Integer) of object;
 
 const
-  //sRemoteVersionFile       = 'http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Version.xml';
-  //sApplicationName         = 'Delphi IDE Theme Editor';
   sXPathVersionNumber      = '/versioninfo/@versionapp';
   sXPathUrlInstaller       = '/versioninfo/@url';
   sXPathInstallerFileName  = '/versioninfo/@installerfilename';
@@ -133,7 +131,7 @@ begin
    try
      FStopwatch.Reset;
      FStopwatch.Start;
-     WinInet_HttpGet(UrlInstaller,FileStream,DownloadCallBack);
+     WinInet_HttpGet(UrlInstaller, FileStream, DownloadCallBack);
      SetMsg('Application downloaded');
    finally
      FileStream.Free;
