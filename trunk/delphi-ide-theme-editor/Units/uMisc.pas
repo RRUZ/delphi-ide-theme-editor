@@ -49,6 +49,7 @@ function  MakeValidTagName(const s: string): string;
 function  GetModuleLocation : string;
 function  WM_To_String(const WM_Message: Integer): string;
 function  GetWindowClassName(Window: HWND): String;
+function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
 
 implementation
 
@@ -81,6 +82,15 @@ Const
  DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
 
 function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+
+function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
+begin
+   try
+    Result:= StringToColor(StrColor);
+   except
+    Result:= Default;
+   end;
+end;
 
 function GetWindowClassName(Window: HWND): String;
 var

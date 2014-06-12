@@ -29,6 +29,7 @@ uses
   Colorizer.HookScrollBars in 'Colorizer.HookScrollBars.pas',
   Colorizer.uxThemeHelper in 'Colorizer.uxThemeHelper.pas',
   uColorSelector in '..\Units\uColorSelector.pas',	
+  Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',  
   Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas';

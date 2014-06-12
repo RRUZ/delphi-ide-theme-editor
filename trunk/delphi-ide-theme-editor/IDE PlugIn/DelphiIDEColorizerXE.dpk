@@ -62,6 +62,8 @@ contains
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
   uColorSelector in '..\Units\uColorSelector.pas',
+  Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',
   Colorizer.uxThemeHelper in 'Colorizer.uxThemeHelper.pas';
 
 end.
+
