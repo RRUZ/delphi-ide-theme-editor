@@ -48,6 +48,19 @@ type
     FToolbarStartGrad: string;
     FToolbarGradientHor: boolean;
     FCheckUpdates: boolean;
+    FDockActiveFontColor: string;
+    FDockInActiveFontColor: string;
+    FDockBorderRounded: boolean;
+    FDockActiveBorderColor: string;
+    FDockInActiveBorderColor: string;
+    FTabIDEEndGradInActive: string;
+    FTabIDEStartGradActive: string;
+    FTabIDEStartGradInActive: string;
+    FTabIDEEndGradActive: string;
+    FTabIDEOutLine: boolean;
+    FTabIDECustom: boolean;
+    FTabIDEActiveFontColor: string;
+    FTabIDEOutLineColor: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -70,6 +83,13 @@ type
     property DockEndGradActive    : string read FDockEndGradActive write FDockEndGradActive;
     property DockStartGradInActive  : string read FDockStartGradInActive write FDockStartGradInActive;
     property DockEndGradInActive  : string read FDockEndGradInActive write FDockEndGradInActive;
+    property DockActiveFontColor  : string read FDockActiveFontColor write FDockActiveFontColor;
+    property DockInActiveFontColor  : string read FDockInActiveFontColor write FDockInActiveFontColor;
+
+    property DockActiveBorderColor  : string read FDockActiveBorderColor write FDockActiveBorderColor;
+    property DockInActiveBorderColor  : string read FDockInActiveBorderColor write FDockInActiveBorderColor;
+    property DockBorderRounded    : boolean read FDockBorderRounded write FDockBorderRounded;
+
 
     property ChangeIconsGutter  : boolean read FChangeIconsGutter write FChangeIconsGutter;
 //    property ColorMapName  : string read FColorMapName write FColorMapName;
@@ -78,6 +98,16 @@ type
     property ToolbarCustomColors   : boolean read FToolbarCustomColors write FToolbarCustomColors;
     property ToolbarStartGrad  : string read FToolbarStartGrad write FToolbarStartGrad;
     property ToolbarEndGrad    : string read FToolbarEndGrad write FToolbarEndGrad;
+
+    property TabIDEStartGradActive   : string  read FTabIDEStartGradActive write FTabIDEStartGradActive;
+    property TabIDEEndGradActive     : string  read FTabIDEEndGradActive write FTabIDEEndGradActive;
+    property TabIDEStartGradInActive : string  read FTabIDEStartGradInActive write FTabIDEStartGradInActive;
+    property TabIDEEndGradInActive   : string  read FTabIDEEndGradInActive write FTabIDEEndGradInActive;
+    property TabIDEActiveFontColor   : string read FTabIDEActiveFontColor write FTabIDEActiveFontColor;
+    property TabIDEOutLineColor      : string read FTabIDEOutLineColor write FTabIDEOutLineColor;
+    property TabIDEOutLine           : boolean read FTabIDEOutLine write FTabIDEOutLine;
+    property TabIDECustom            : boolean read FTabIDECustom write FTabIDECustom;
+
 
     property CheckUpdates    : boolean read FCheckUpdates write FCheckUpdates;
   end;
@@ -116,12 +146,29 @@ begin
     Settings.DockEndGradActive       := LIniFile.ReadString('Global', 'DockEndGradActive', 'clBlack');
     Settings.DockStartGradInActive   := LIniFile.ReadString('Global', 'DockStartGradInActive', 'clBlack');
     Settings.DockEndGradInActive     := LIniFile.ReadString('Global', 'DockEndGradInActive', 'clBlack');
+    Settings.DockActiveFontColor     := LIniFile.ReadString('Global', 'DockActiveFontColor', 'clWhite');
+    Settings.DockInActiveFontColor   := LIniFile.ReadString('Global', 'DockInActiveFontColor', 'clWhite');
+
+    Settings.DockActiveBorderColor     := LIniFile.ReadString('Global', 'DockActiveBorderColor', 'clBlack');
+    Settings.DockInActiveBorderColor   := LIniFile.ReadString('Global', 'DockInActiveBorderColor', 'clBlack');
+    Settings.DockBorderRounded         := LIniFile.ReadBool('Global', 'DockBorderRounded', True);
+
     //    Settings.ColorMapName            := iniFile.ReadString('Global', 'ColorMapName', 'TXPColorMap');
 //    Settings.StyleBarName            := iniFile.ReadString('Global', 'StyleBarName', 'XP Style');
     Settings.ToolbarGradientHor   := LIniFile.ReadBool('Global', 'ToolbarGradientHor', True);
     Settings.ToolbarCustomColors  := LIniFile.ReadBool('Global', 'ToolbarCustomColors', False);
     Settings.ToolbarStartGrad     := LIniFile.ReadString('Global', 'ToolbarStartGrad', 'clGray');
     Settings.ToolbarEndGrad       := LIniFile.ReadString('Global', 'ToolbarEndGrad', 'clSilver');
+
+
+    Settings.TabIDECustom            := LIniFile.ReadBool('Global', 'TabIDECustom', False);
+    Settings.TabIDEOutLine           := LIniFile.ReadBool('Global', 'TabIDEOutLine', True);
+    Settings.TabIDEStartGradActive   := LIniFile.ReadString('Global', 'TabIDEStartGradActive', 'clBlack');
+    Settings.TabIDEEndGradActive     := LIniFile.ReadString('Global', 'TabIDEEndGradActive', 'clBlack');
+    Settings.TabIDEStartGradInActive := LIniFile.ReadString('Global', 'TabIDEStartGradInActive', 'clBlack');
+    Settings.TabIDEEndGradInActive   := LIniFile.ReadString('Global', 'TabIDEEndGradInActive', 'clBlack');
+    Settings.TabIDEActiveFontColor   := LIniFile.ReadString('Global', 'TabIDEActiveFontColor', 'clWhite');
+    Settings.TabIDEOutLineColor      := LIniFile.ReadString('Global', 'TabIDEOutLineColor', 'clBlack');
 
     Settings.CheckUpdates         := LIniFile.ReadBool('Global', 'CheckUpdates', True);
   finally
@@ -152,12 +199,27 @@ begin
     LIniFile.WriteString('Global', 'DockEndGradActive', Settings.DockEndGradActive);
     LIniFile.WriteString('Global', 'DockStartGradInActive', Settings.DockStartGradInActive);
     LIniFile.WriteString('Global', 'DockEndGradInActive', Settings.DockEndGradInActive);
+    LIniFile.WriteString('Global', 'DockActiveFontColor', Settings.DockActiveFontColor);
+    LIniFile.WriteString('Global', 'DockInActiveFontColor', Settings.DockInActiveFontColor);
+    LIniFile.WriteString('Global', 'DockActiveBorderColor', Settings.DockActiveBorderColor);
+    LIniFile.WriteString('Global', 'DockInActiveBorderColor', Settings.DockInActiveBorderColor);
+    LIniFile.WriteBool('Global', 'DockBorderRounded', Settings.DockBorderRounded);
+
 //    iniFile.WriteString('Global', 'ColorMapName', Settings.ColorMapName);
 //    iniFile.WriteString('Global', 'StyleBarName', Settings.StyleBarName);
     LIniFile.WriteBool('Global', 'ToolbarGradientHor', Settings.ToolbarGradientHor);
     LIniFile.WriteBool('Global', 'ToolbarCustomColors', Settings.ToolbarCustomColors);
     LIniFile.WriteString('Global', 'ToolbarStartGrad', Settings.ToolbarStartGrad);
     LIniFile.WriteString('Global', 'ToolbarEndGrad', Settings.ToolbarEndGrad);
+
+    LIniFile.WriteBool('Global', 'TabIDECustom', Settings.TabIDECustom);
+    LIniFile.WriteBool('Global', 'TabIDEOutLine', Settings.TabIDEOutLine);
+    LIniFile.WriteString('Global', 'TabIDEStartGradActive', Settings.TabIDEStartGradActive);
+    LIniFile.WriteString('Global', 'TabIDEEndGradActive', Settings.TabIDEEndGradActive);
+    LIniFile.WriteString('Global', 'TabIDEStartGradInActive', Settings.TabIDEStartGradInActive);
+    LIniFile.WriteString('Global', 'TabIDEEndGradInActive', Settings.TabIDEEndGradInActive);
+    LIniFile.WriteString('Global', 'TabIDEActiveFontColor', Settings.TabIDEActiveFontColor);
+    LIniFile.WriteString('Global', 'TabIDEOutLineColor', Settings.TabIDEOutLineColor);
 
     LIniFile.WriteBool('Global', 'CheckUpdates', Settings.CheckUpdates);
   finally

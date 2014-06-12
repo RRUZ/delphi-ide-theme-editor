@@ -117,6 +117,9 @@ var
   Trampoline_TCanvas_FillRect          : procedure (Self: TCanvas;const Rect: TRect) = nil;
   Trampoline_TCanvas_LineTo            : procedure (Self: TCanvas; X, Y: Integer) = nil;
   Trampoline_TCanvas_Rectangle         : procedure (Self: TCanvas; X1, Y1, X2, Y2: Integer) = nil;
+//  Trampoline_TCanvas_Polygon           : procedure (Self: TCanvas;const Points: array of TPoint) = nil;
+//  Trampoline_TCanvas_Polyline          : procedure (Self: TCanvas;const Points: array of TPoint) = nil;
+
 
   TrampolineTWinControl_DefaultHandler: procedure (Self : TWinControl;var Message) = nil;
 
@@ -889,7 +892,7 @@ begin
                     end;
 
    end;
-
+   
 
    Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
 end;
@@ -1995,10 +1998,18 @@ end;
 
 procedure  Detour_TCanvas_Rectangle(Self: TCanvas; X1, Y1, X2, Y2: Integer);
 begin
-  //Self.Brush.Color:=clRed;
   Trampoline_TCanvas_Rectangle(Self, X1, Y1, X2, Y2);
 end;
 
+//procedure Detour_TCanvas_Polygon(Self: TCanvas;const Points: array of TPoint);
+//begin
+//  Trampoline_TCanvas_Polygon(Self, Points);
+//end;
+//
+//procedure Detour_TCanvas_Polyline(Self: TCanvas;const Points: array of TPoint);
+//begin
+//  Trampoline_TCanvas_Polyline(Self, Points);
+//end;
 
 //Hook for paint the border of the TClosableTabScroller control
 procedure  Detour_TCanvas_LineTo(Self: TCanvas;X, Y: Integer);
@@ -2593,17 +2604,32 @@ begin
       GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
 
 
-    Canvas.Pen.Color :=  TColorizerLocalSettings.ColorMap.FrameTopLeftInner; //GetShadowColor(Canvas.Pen.Color, -20);
-    with CaptionRect do
-      Canvas.Polyline([Point(Left + 2, Top),
-        Point(Right - 2, Top),
-        Point(Right, Top + 2),
-        Point(Right, Bottom - 2),
-        Point(Right - 2, Bottom),
-        Point(Left + 2, Bottom),
-        Point(Left, Bottom - 2),
-        Point(Left, Top + 2),
-        Point(Left + 3, Top)]);
+     if TColorizerLocalSettings.Settings.DockCustomColors then
+     begin
+        if State.Focused then
+          try Canvas.Pen.Color:=StringToColor(TColorizerLocalSettings.Settings.DockActiveBorderColor) except Canvas.Pen.Color:=clBlack end
+        else
+          try Canvas.Pen.Color:=StringToColor(TColorizerLocalSettings.Settings.DockInActiveBorderColor) except Canvas.Pen.Color:=clBlack end;
+     end
+     else
+      Canvas.Pen.Color :=  TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(Canvas.Pen.Color, -20);
+
+    if TColorizerLocalSettings.Settings.DockBorderRounded then    
+      with CaptionRect do
+        Canvas.Polyline([Point(Left + 2, Top),
+          Point(Right - 2, Top),
+          Point(Right, Top + 2),
+          Point(Right, Bottom - 2),
+          Point(Right - 2, Bottom),
+          Point(Left + 2, Bottom),
+          Point(Left, Bottom - 2),
+          Point(Left, Top + 2),
+          Point(Left + 3, Top)])
+    else
+    begin
+      Canvas.Brush.Style:=bsClear;  
+      Canvas.Rectangle(CaptionRect);      
+    end;
 
     CloseRect := GetCloseRect(CaptionRect);
 
@@ -2639,7 +2665,6 @@ begin
     CaptionRect.Left := CaptionRect.Left + 6;
     DrawIcon;
     ShouldDrawClose := CloseRect.Left >= CaptionRect.Left;
-
   end
   else
   begin
@@ -2665,7 +2690,6 @@ begin
       GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom), gdHorizontal)
     else
       GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
-
 
     Canvas.Pen.Color := State.EndColor;
     Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Bottom);
@@ -2711,6 +2735,14 @@ begin
 
    if ShouldDrawClose then
      CaptionRect.Right := CaptionRect.Right - (CloseRect.Right - CloseRect.Left) - 4;
+
+     if TColorizerLocalSettings.Settings.DockCustomColors then
+     begin
+        if State.Focused then
+          try Canvas.Font.Color:=StringToColor(TColorizerLocalSettings.Settings.DockActiveFontColor) except Canvas.Font.Color:=clBlack end
+        else
+          try Canvas.Font.Color:=StringToColor(TColorizerLocalSettings.Settings.DockInActiveFontColor) except Canvas.Font.Color:=clBlack end;
+     end;
 
     Canvas.TextRect(CaptionRect, State.Caption,
       [tfEndEllipsis, tfVerticalCenter, tfSingleLine]);
@@ -3145,6 +3177,13 @@ begin
          if SameText(sCaller, '') then
            Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
        end;
+
+//       COLOR_BTNSHADOW :
+//       begin
+////         sCaller := ProcByLevel(2);
+////         if SameText(sCaller, '') then
+//           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
+//       end;
      end;
    end;
 
@@ -3247,6 +3286,9 @@ begin
   Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @Detour_TCanvas_LineTo);
   Trampoline_TCanvas_Rectangle    :=InterceptCreate(@TCanvas.Rectangle, @Detour_TCanvas_Rectangle);
 
+//  Trampoline_TCanvas_Polygon      :=InterceptCreate(@TCanvas.Polygon, @Detour_TCanvas_Polygon);
+//  Trampoline_TCanvas_Polyline     :=InterceptCreate(@TCanvas.Polyline, @Detour_TCanvas_Polyline);
+
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
@@ -3348,6 +3390,12 @@ begin
 
   if Assigned(Trampoline_TCanvas_Rectangle) then
     InterceptRemove(@Trampoline_TCanvas_Rectangle);
+
+//  if Assigned(Trampoline_TCanvas_Polygon) then
+//    InterceptRemove(@Trampoline_TCanvas_Polygon);
+//
+//  if Assigned(Trampoline_TCanvas_Polyline) then
+//    InterceptRemove(@Trampoline_TCanvas_Polyline);
 
 {$IFDEF DELPHIXE2_UP}
   if Assigned(Trampoline_TStyleEngine_HandleMessage) then

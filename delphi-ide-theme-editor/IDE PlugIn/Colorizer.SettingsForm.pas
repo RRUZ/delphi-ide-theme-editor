@@ -93,7 +93,6 @@ type
     ListBoxDockImages: TListBox;
     RbtnDockGradientHorz: TRadioButton;
     RbtnDockGradientVert: TRadioButton;
-    Label12: TLabel;
     CheckBoxCustomDockBars: TCheckBox;
     CheckBoxUseCustomColorsDock: TCheckBox;
     Label13: TLabel;
@@ -130,6 +129,43 @@ type
     ColorBoxToolBarStartEnd: TColorBox;
     Label17: TLabel;
     CheckBoxUpdates: TCheckBox;
+    Label18: TLabel;
+    ColorBoxDockFontActive: TColorBox;
+    Button8: TButton;
+    Label19: TLabel;
+    ColorBoxDockFontInActive: TColorBox;
+    Button9: TButton;
+    Label20: TLabel;
+    Label21: TLabel;
+    ColorBoxDockBorderInActive: TColorBox;
+    ColorBoxDockBorderActive: TColorBox;
+    Button10: TButton;
+    Button11: TButton;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    RbtnDockBorderRounded: TRadioButton;
+    RbtnDockBorderRectangle: TRadioButton;
+    TabSheet3: TTabSheet;
+    Button12: TButton;
+    Button13: TButton;
+    Button14: TButton;
+    Button15: TButton;
+    ColorBoxIDETabEndGradientInActive: TColorBox;
+    ColorBoxIDETabStartGradientInActive: TColorBox;
+    ColorBoxIDETabEndGradientActive: TColorBox;
+    ColorBoxIDETabStartGradientActive: TColorBox;
+    Label12: TLabel;
+    Label22: TLabel;
+    Label23: TLabel;
+    Label24: TLabel;
+    CheckBoxIDETabsCustom: TCheckBox;
+    CheckBoxIDETabsOutLine: TCheckBox;
+    ColorBoxIDETabOutLineColor: TColorBox;
+    ColorBoxIDETabFontActive: TColorBox;
+    Button16: TButton;
+    Button17: TButton;
+    Label25: TLabel;
+    Label26: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -165,6 +201,16 @@ type
     procedure ButtonCheckUpdatesClick(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Button11Click(Sender: TObject);
+    procedure Button15Click(Sender: TObject);
+    procedure Button14Click(Sender: TObject);
+    procedure Button13Click(Sender: TObject);
+    procedure Button12Click(Sender: TObject);
+    procedure Button16Click(Sender: TObject);
+    procedure Button17Click(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -191,48 +237,6 @@ type
 
   procedure CheckForUpdates(Silent : Boolean);
 
-const
-  {$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
-
-  DelphiIDEThemePaths: array[TDelphiVersions] of string = (
-  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-    '',
-    '',
-  {$ENDIF}
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    'BPL\XE',
-    'BPL\XE2',
-    '',
-    '',
-    '',
-    '',
-    '');
-
-  DelphiIDEExpertsNames: array[TDelphiVersions] of string = (
-  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-    '',
-    '',
-  {$ENDIF}
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    'DelphiIDEColorizerXE',
-    'DelphiIDEColorizerXE2',
-    'DelphiIDEColorizerXE3',
-    'DelphiIDEColorizerXE4',
-    'DelphiIDEColorizerXE5',
-    '',
-    '');
 
 implementation
 
@@ -338,7 +342,11 @@ begin
     FSettings.DockEndGradActive     := ColorToString(ColorBoxDockEndGradientActive.Selected);
     FSettings.DockStartGradInActive := ColorToString(ColorBoxDockStartGradientInActive.Selected);
     FSettings.DockEndGradInActive   := ColorToString(ColorBoxDockEndGradientInActive.Selected);
-
+    FSettings.DockActiveFontColor   := ColorToString(ColorBoxDockFontActive.Selected);
+    FSettings.DockInActiveFontColor := ColorToString(ColorBoxDockFontInActive.Selected);
+    FSettings.DockActiveBorderColor   := ColorToString(ColorBoxDockBorderActive.Selected);
+    FSettings.DockInActiveBorderColor := ColorToString(ColorBoxDockBorderInActive.Selected);
+    FSettings.DockBorderRounded       := RbtnDockBorderRounded.Checked;
 
     FSettings.ToolbarGradientHor    := RbtnToolBarGradientHorz.Checked;
     FSettings.ToolbarCustomColors   := CheckBoxUseCustomColorsToolbar.Checked;
@@ -346,6 +354,15 @@ begin
     FSettings.ToolbarEndGrad        := ColorToString(ColorBoxToolBarStartEnd.Selected);
 
     FSettings.HookSystemColors      := CheckBoxHookSystemColors.Checked;
+
+    FSettings.TabIDECustom            := CheckBoxIDETabsCustom.Checked;
+    FSettings.TabIDEOutLine           := CheckBoxIDETabsOutLine.Checked;
+    FSettings.TabIDEStartGradActive   := ColorToString(ColorBoxIDETabStartGradientActive.Selected);
+    FSettings.TabIDEEndGradActive     := ColorToString(ColorBoxIDETabEndGradientActive.Selected);
+    FSettings.TabIDEStartGradInActive := ColorToString(ColorBoxIDETabStartGradientInActive.Selected);
+    FSettings.TabIDEEndGradInActive   := ColorToString(ColorBoxIDETabEndGradientInActive.Selected);
+    FSettings.TabIDEActiveFontColor   := ColorToString(ColorBoxIDETabFontActive.Selected);
+    FSettings.TabIDEOutLineColor      := ColorToString(ColorBoxIDETabOutLineColor.Selected);
 
     WriteSettings(FSettings, GetSettingsFolder);
 
@@ -372,7 +389,10 @@ begin
     end;
     {$ENDIF}
 
-    RefreshIDETheme(True);
+    if FSettings.Enabled then
+      RefreshIDETheme(True)
+    else
+      RestoreIDESettings();
   end;
 end;
 
@@ -396,6 +416,83 @@ end;
 //    end;
 //  end;
 //end;
+
+procedure TFormIDEColorizerSettings.Button10Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxDockBorderActive.Selected);
+ if LColor<>clNone then
+    ColorBoxDockBorderActive.Selected:=LColor;
+end;
+
+
+procedure TFormIDEColorizerSettings.Button11Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxDockBorderInActive.Selected);
+ if LColor<>clNone then
+    ColorBoxDockBorderInActive.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button12Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxIDETabEndGradientInActive.Selected);
+ if LColor<>clNone then
+    ColorBoxIDETabEndGradientInActive.Selected:=LColor;
+end;
+
+
+
+procedure TFormIDEColorizerSettings.Button13Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxIDETabStartGradientInActive.Selected);
+ if LColor<>clNone then
+    ColorBoxIDETabStartGradientInActive.Selected:=LColor;
+end;
+
+
+procedure TFormIDEColorizerSettings.Button14Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxIDETabEndGradientActive.Selected);
+ if LColor<>clNone then
+    ColorBoxIDETabEndGradientActive.Selected:=LColor;
+end;
+
+
+procedure TFormIDEColorizerSettings.Button15Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxIDETabStartGradientActive.Selected);
+ if LColor<>clNone then
+    ColorBoxIDETabStartGradientActive.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button16Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxIDETabFontActive.Selected);
+ if LColor<>clNone then
+    ColorBoxIDETabFontActive.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button17Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxIDETabOutLineColor.Selected);
+ if LColor<>clNone then
+    ColorBoxIDETabOutLineColor.Selected:=LColor;
+end;
 
 procedure TFormIDEColorizerSettings.Button1Click(Sender: TObject);
 Var
@@ -492,6 +589,24 @@ begin
  LColor := DialogSelectColor(ColorBoxToolBarStartEnd.Selected);
  if LColor<>clNone then
     ColorBoxToolBarStartEnd.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button8Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxDockFontActive.Selected);
+ if LColor<>clNone then
+    ColorBoxDockFontActive.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button9Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxDockFontInActive.Selected);
+ if LColor<>clNone then
+    ColorBoxDockFontInActive.Selected:=LColor;
 end;
 
 procedure TFormIDEColorizerSettings.ButtonReportIssuesClick(Sender: TObject);
@@ -927,11 +1042,31 @@ begin
 
   RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
   RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
+
+  RbtnDockBorderRounded.Checked   := FSettings.DockBorderRounded;
+  RbtnDockBorderRectangle.Checked := not FSettings.DockBorderRounded;
+
   CheckBoxUseCustomColorsDock.Checked := FSettings.DockCustomColors;
   try ColorBoxDockStartGradientActive.Selected   := StringToColor(FSettings.DockStartGradActive); except end;
   try ColorBoxDockEndGradientActive.Selected     := StringToColor(FSettings.DockEndGradActive);  except end;
   try ColorBoxDockStartGradientInActive.Selected := StringToColor(FSettings.DockStartGradInActive); except end;
   try ColorBoxDockEndGradientInActive.Selected   := StringToColor(FSettings.DockEndGradInActive); except end;
+
+  try ColorBoxDockFontActive.Selected   := StringToColor(FSettings.DockActiveFontColor); except end;
+  try ColorBoxDockFontInActive.Selected   := StringToColor(FSettings.DockInActiveFontColor); except end;
+
+  try ColorBoxDockBorderActive.Selected     := StringToColor(FSettings.DockActiveBorderColor); except end;
+  try ColorBoxDockBorderInActive.Selected   := StringToColor(FSettings.DockInActiveBorderColor); except end;
+
+
+  CheckBoxIDETabsCustom.Checked  := FSettings.TabIDECustom;
+  CheckBoxIDETabsOutLine.Checked := FSettings.TabIDEOutLine;
+  try ColorBoxIDETabStartGradientActive.Selected   := StringToColor(FSettings.TabIDEStartGradActive); except end;
+  try ColorBoxIDETabEndGradientActive.Selected     := StringToColor(FSettings.TabIDEEndGradActive);  except end;
+  try ColorBoxIDETabStartGradientInActive.Selected := StringToColor(FSettings.TabIDEStartGradInActive); except end;
+  try ColorBoxIDETabEndGradientInActive.Selected   := StringToColor(FSettings.TabIDEEndGradInActive); except end;
+  try ColorBoxIDETabFontActive.Selected     := StringToColor(FSettings.TabIDEActiveFontColor); except end;
+  try ColorBoxIDETabOutLineColor.Selected   := StringToColor(FSettings.TabIDEOutLineColor); except end;
 
   RbtnToolBarGradientVert.Checked := FSettings.ToolbarGradientHor;
   RbtnToolBarGradientHorz.Checked := not FSettings.ToolbarGradientHor;

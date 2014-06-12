@@ -133,6 +133,7 @@ uses
   {$IFDEF DELPHI2009_UP}
   PngImage,
   {$ENDIF}
+  uMisc,
   Colorizer.Utils;
 
 type
@@ -777,16 +778,29 @@ end;
 
 procedure TWrapperGradientTabSet.SetProperties(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
-//var
-//  LCanvas : TCanvas;
-//  LRect   : TRect;
+var
+  LFontColor : TColor;
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+  if TColorizerLocalSettings.Settings.TabIDECustom then
+  begin
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, AColorMap.Color));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, AColorMap.MenuColor));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradInActive, AColorMap.MenuColor));
+  end
+  else
+  begin
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
+  end;
+
+  LFontColor:= AColorMap.FontColor;
+  if TColorizerLocalSettings.Settings.TabIDECustom then
+    LFontColor:=TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, AColorMap.FontColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', LFontColor);
 
 {
     00107A70 5253 0800 __fastcall Gdiplus::Gradienttabs::TTabInfo::TTabInfo(int, int, int, int)
@@ -814,30 +828,42 @@ begin
 
   TRttiUtils.SetRttiPropertyValue(AComponent,'Scroller.Brush.Color', AColorMap.Color);
 
-//  LCanvas:= TCanvas(TRttiUtils.GetRttiFieldValue(AComponent, 'Scroller.FCanvas').AsObject);
-//  if LCanvas<>nil then
-//  begin
-//     LRect:=TRttiUtils.GetRttiPropertyValue(AComponent, 'Scroller.ClientRect').AsType<TRect>;
-//     LCanvas.Brush.Color:=AColorMap.Color;
-//     AddLog('Foo', 'Foo');
-//     LCanvas.FillRect(LRect);
-//     AddLog('Bar', 'Bar');
-//  end;
-
-
+//  LObject := TRttiUtils.GetRttiFieldValue(AComponent,'FDrawer').AsObject;
+//  LObject := TRttiUtils.GetRttiPropertyValue(LObject,'TabColors').AsObject;
+//   TRttiUtils.DumpObject(LObject, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+LObject.ClassName+'.pas');
+  TCustomControl(AComponent).Invalidate;
 end;
 
 { TWrapperIDEGradientTabSet }
 
 procedure TWrapperIDEGradientTabSet.SetProperties(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
+var
+  LFontColor : TColor;
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);//AColorMap.HighlightColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+
+  if TColorizerLocalSettings.Settings.TabIDECustom then
+  begin
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, AColorMap.Color));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, AColorMap.MenuColor));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradInActive, AColorMap.MenuColor));
+  end
+  else
+  begin
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
+  end;
+
+  LFontColor:= AColorMap.FontColor;
+  if TColorizerLocalSettings.Settings.TabIDECustom then
+    LFontColor:=TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, AColorMap.FontColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', LFontColor);
+
+  TCustomControl(AComponent).Invalidate;
 end;
 
 { TWrapperTabSheet }

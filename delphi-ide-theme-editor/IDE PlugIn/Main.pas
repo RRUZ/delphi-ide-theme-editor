@@ -22,10 +22,14 @@
 //TODO
 
 {
-  * TIDEGradientTabSet border lines   -->  hook Pen.Color , Canvas.Polyline?  hook tbitmap ?
-  * Enable/Disable
+  TIDEGradientTabSet custom colors
+  TIDEGradientTabSet border  -->  gdi outline
+  TClosableTabScroller border  -->  gdi outline
+  header virtual trrees and listview
+  TDockToolBar (toolbars) remove border
 
   improve themes -> pro
+
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
 
@@ -36,6 +40,7 @@
 
 // DONE
 {
+  * Enable/Disable
   * bug in bg color of controls in Font dialog
   * Improve support for TInspListBox
   * Fix hint font color in TBetterHintWindowVirtualDrawTree  / TMessageHintWindow
