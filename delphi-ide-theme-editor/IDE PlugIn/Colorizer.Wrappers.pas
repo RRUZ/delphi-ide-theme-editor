@@ -356,7 +356,11 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
+  if TColorizerLocalSettings.Settings.HeaderCustom  then
+    TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, AColorMap.FontColor)) //ok
+  else
   TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', AColorMap.FontColor); //ok
+
   TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False); //ok
 
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.TreeLineColor', AColorMap.FontColor); //ok
@@ -654,17 +658,6 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
 end;
 
-{ TWrapperCodeEditorTabControl }
-
-procedure TWrapperCodeEditorTabControl.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
-begin
-  inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor',AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor',AColorMap.Color);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor',AColorMap.MenuColor);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
-end;
 
 { TWrapperEditControl }
 
@@ -713,8 +706,8 @@ begin
 
       if TColorizerLocalSettings.Settings.ToolbarCustomColors and not Restore then
       begin
-         try  GradientStartColor := StringToColor(TColorizerLocalSettings.Settings.ToolbarStartGrad) except GradientStartColor :=AColorMap.Color end;
-         try  GradientEndColor := StringToColor(TColorizerLocalSettings.Settings.ToolbarEndGrad) except GradientEndColor :=AColorMap.Color end;
+         GradientStartColor := TryStrToColor(TColorizerLocalSettings.Settings.ToolbarStartGrad, AColorMap.Color);
+         GradientEndColor   := TryStrToColor(TColorizerLocalSettings.Settings.ToolbarEndGrad, AColorMap.Color);
       end
       else
       begin
@@ -731,6 +724,28 @@ begin
 
 end;
 
+{ TWrapperCodeEditorTabControl }
+
+procedure TWrapperCodeEditorTabControl.SetProperties(AComponent: TComponent;
+  AColorMap: TCustomActionBarColorMap);
+begin
+  inherited;
+  if TColorizerLocalSettings.Settings.TabIDECustom then
+  begin
+    TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, AColorMap.Color));
+    TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, AColorMap.FontColor));
+  end
+  else
+  begin
+    TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor',AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor',AColorMap.Color);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor',AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+  end;
+end;
+
 { TWrapperTabSet }
 
 procedure TWrapperTabSet.SetProperties(AComponent: TComponent;
@@ -739,10 +754,20 @@ begin
   inherited;
   with TTabSet(AComponent) do
   begin
-    BackgroundColor:= AColorMap.MenuColor;
-    SelectedColor  := AColorMap.Color;
-    UnselectedColor:= AColorMap.MenuColor;
-    Font.Color     := AColorMap.FontColor;
+    if TColorizerLocalSettings.Settings.TabIDECustom then
+    begin
+      BackgroundColor:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, AColorMap.Color);
+      SelectedColor  := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color);
+      UnselectedColor:= AColorMap.MenuColor;
+      Font.Color     := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, AColorMap.FontColor);
+    end
+    else
+    begin
+      BackgroundColor:= AColorMap.MenuColor;
+      SelectedColor  := AColorMap.Color;
+      UnselectedColor:= AColorMap.MenuColor;
+      Font.Color     := AColorMap.FontColor;
+    end;
     Style          := tsModernTabs; //necessary for allow use the TTabset hook
   end
 
@@ -910,9 +935,11 @@ begin
   with TControlBar(AComponent) do
   begin
     Color := AColorMap.Color;
-    DrawingStyle := TBandDrawingStyle.dsGradient;
+    DrawingStyle := TBandDrawingStyle.dsNormal;
+    GradientDirection  := TGradientDirection.gdVertical;
     GradientStartColor :=  AColorMap.Color;
-    GradientEndColor   :=  AColorMap.Color;
+    GradientEndColor   :=  AColorMap.MenuColor;
+    BevelKind := bkNone;
   end;
 end;
 

@@ -1,6 +1,7 @@
 object FormIDEColorizerSettings: TFormIDEColorizerSettings
   Left = 509
   Top = 252
+  ActiveControl = BtnApply
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Delphi IDE Colorizer Settings'
@@ -212,7 +213,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Caption = 'Enabled'
           DoubleBuffered = True
           ParentDoubleBuffered = False
-          TabOrder = 5
+          TabOrder = 0
         end
         object cbThemeName: TComboBox
           Left = 3
@@ -221,7 +222,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 21
           Style = csDropDownList
           Color = clBtnFace
-          TabOrder = 1
+          TabOrder = 3
           OnChange = cbThemeNameChange
         end
         object ButtonSaveTheme: TButton
@@ -230,7 +231,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 75
           Height = 25
           Caption = 'Save'
-          TabOrder = 0
+          TabOrder = 1
           OnClick = ButtonSaveThemeClick
         end
         object CbClrElement: TColorBox
@@ -240,7 +241,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 3
+          TabOrder = 9
           OnChange = CbClrElementChange
           OnGetColors = ColorBoxBaseGetColors
         end
@@ -251,7 +252,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 22
           ImageIndex = 7
           Images = ImageList1
-          TabOrder = 4
+          TabOrder = 10
           OnClick = BtnSelForColorClick
         end
         object CheckBoxAutoColor: TCheckBox
@@ -260,7 +261,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 156
           Height = 17
           Caption = 'Auto Generate Color Values'
-          TabOrder = 2
+          TabOrder = 4
         end
         object CheckBoxFixIDEDrawIcon: TCheckBox
           Left = 3
@@ -268,7 +269,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 254
           Height = 17
           Caption = 'Fix disabled icons draw in IDE Menus and toolbars'
-          TabOrder = 6
+          TabOrder = 11
         end
         object CheckBoxGutterIcons: TCheckBox
           Left = 3
@@ -276,7 +277,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 110
           Height = 17
           Caption = 'Modify Gutter Icons'
-          TabOrder = 7
+          TabOrder = 12
         end
         object ColorMapCombo: TComboBox
           Left = 326
@@ -284,7 +285,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 84
           Height = 21
           Style = csDropDownList
-          TabOrder = 8
+          TabOrder = 15
           Visible = False
         end
         object StyleCombo: TComboBox
@@ -293,7 +294,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 40
           Height = 21
           Style = csDropDownList
-          TabOrder = 9
+          TabOrder = 13
           Visible = False
         end
         object ColorBoxBase: TColorBox
@@ -303,7 +304,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 22
           NoneColorColor = 16729138
           Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-          TabOrder = 10
+          TabOrder = 6
           OnChange = ColorBoxBaseChange
           OnGetColors = ColorBoxBaseGetColors
         end
@@ -314,7 +315,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 22
           ImageIndex = 7
           Images = ImageList1
-          TabOrder = 11
+          TabOrder = 5
           OnClick = Button1Click
         end
         object EditThemeName: TEdit
@@ -322,7 +323,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Top = 130
           Width = 145
           Height = 21
-          TabOrder = 12
+          TabOrder = 7
         end
         object ColorListBox1: TColorListBox
           Left = 3
@@ -332,7 +333,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Selected = clScrollBar
           Style = [cbCustomColors]
           BevelInner = bvSpace
-          TabOrder = 13
+          TabOrder = 8
           OnGetColors = ColorListBox1GetColors
         end
         object ButtonDeleteTheme: TButton
@@ -341,7 +342,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 75
           Height = 25
           Caption = 'Delete'
-          TabOrder = 14
+          TabOrder = 2
           OnClick = ButtonDeleteThemeClick
         end
         object CheckBoxUpdates: TCheckBox
@@ -350,7 +351,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 166
           Height = 17
           Caption = 'Check for updates on startup'
-          TabOrder = 15
+          TabOrder = 14
         end
       end
       object TabSheet2: TTabSheet
@@ -444,7 +445,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 209
                 Height = 79
                 Style = lbOwnerDrawVariable
-                TabOrder = 0
+                TabOrder = 1
                 OnDrawItem = ListBoxDockImagesDrawItem
                 OnMeasureItem = ListBoxDockImagesMeasureItem
               end
@@ -454,7 +455,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 209
                 Height = 17
                 Caption = 'Enable custom docked windows title bar'
-                TabOrder = 1
+                TabOrder = 0
               end
               object CheckBoxUseCustomColorsDock: TCheckBox
                 Left = 16
@@ -462,7 +463,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 185
                 Height = 17
                 Caption = 'Use custom colors for the title bar'
-                TabOrder = 2
+                TabOrder = 4
               end
               object ColorBoxDockStartGradientActive: TColorBox
                 Left = 162
@@ -471,7 +472,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 3
+                TabOrder = 5
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxDockEndGradientActive: TColorBox
@@ -481,7 +482,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 4
+                TabOrder = 7
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxDockStartGradientInActive: TColorBox
@@ -491,7 +492,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 5
+                TabOrder = 9
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxDockEndGradientInActive: TColorBox
@@ -501,7 +502,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 6
+                TabOrder = 11
                 OnGetColors = ColorBoxBaseGetColors
               end
               object Button2: TButton
@@ -511,7 +512,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 7
+                TabOrder = 6
                 OnClick = Button2Click
               end
               object Button4: TButton
@@ -531,7 +532,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 9
+                TabOrder = 10
                 OnClick = Button5Click
               end
               object Button6: TButton
@@ -541,7 +542,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 10
+                TabOrder = 12
                 OnClick = Button6Click
               end
               object Button8: TButton
@@ -551,7 +552,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 11
+                TabOrder = 14
                 OnClick = Button8Click
               end
               object ColorBoxDockFontActive: TColorBox
@@ -561,7 +562,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 12
+                TabOrder = 13
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxDockFontInActive: TColorBox
@@ -571,7 +572,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 13
+                TabOrder = 15
                 OnGetColors = ColorBoxBaseGetColors
               end
               object Button9: TButton
@@ -581,7 +582,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 14
+                TabOrder = 16
                 OnClick = Button9Click
               end
               object Button10: TButton
@@ -591,7 +592,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 15
+                TabOrder = 18
                 OnClick = Button10Click
               end
               object Button11: TButton
@@ -601,7 +602,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 16
+                TabOrder = 20
                 OnClick = Button11Click
               end
               object ColorBoxDockBorderInActive: TColorBox
@@ -611,7 +612,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 17
+                TabOrder = 19
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxDockBorderActive: TColorBox
@@ -621,7 +622,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 18
+                TabOrder = 17
                 OnGetColors = ColorBoxBaseGetColors
               end
               object GroupBox1: TGroupBox
@@ -630,7 +631,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 185
                 Height = 41
                 Caption = 'Gradient Direction'
-                TabOrder = 19
+                TabOrder = 2
                 object RbtnDockGradientHorz: TRadioButton
                   Left = 10
                   Top = 16
@@ -656,7 +657,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 185
                 Height = 41
                 Caption = 'Border Type'
-                TabOrder = 20
+                TabOrder = 3
                 object RbtnDockBorderRounded: TRadioButton
                   Left = 10
                   Top = 16
@@ -706,7 +707,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 57
                 Height = 17
                 Caption = 'Vertical'
-                TabOrder = 0
+                TabOrder = 1
               end
               object RbtnToolBarGradientHorz: TRadioButton
                 Left = 3
@@ -715,7 +716,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 17
                 Caption = 'Horizontal'
                 Checked = True
-                TabOrder = 1
+                TabOrder = 0
                 TabStop = True
               end
               object CheckBoxUseCustomColorsToolbar: TCheckBox
@@ -753,7 +754,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 5
+                TabOrder = 6
                 OnClick = Button7Click
               end
               object ColorBoxToolBarStartEnd: TColorBox
@@ -763,7 +764,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 6
+                TabOrder = 5
                 OnGetColors = ColorBoxBaseGetColors
               end
             end
@@ -799,7 +800,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Caption = 'End Color gradient inactive'
               end
               object Label25: TLabel
-                Left = 9
+                Left = 8
                 Top = 200
                 Width = 60
                 Height = 13
@@ -819,7 +820,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 0
+                TabOrder = 9
                 OnClick = Button12Click
               end
               object Button13: TButton
@@ -829,7 +830,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 1
+                TabOrder = 7
                 OnClick = Button13Click
               end
               object Button14: TButton
@@ -839,7 +840,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 2
+                TabOrder = 5
                 OnClick = Button14Click
               end
               object Button15: TButton
@@ -859,7 +860,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 4
+                TabOrder = 8
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxIDETabStartGradientInActive: TColorBox
@@ -869,7 +870,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 5
+                TabOrder = 6
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxIDETabEndGradientActive: TColorBox
@@ -879,7 +880,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 6
+                TabOrder = 4
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxIDETabStartGradientActive: TColorBox
@@ -889,7 +890,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 7
+                TabOrder = 2
                 OnGetColors = ColorBoxBaseGetColors
               end
               object CheckBoxIDETabsCustom: TCheckBox
@@ -898,7 +899,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 169
                 Height = 17
                 Caption = 'Use custom colors for the tabs'
-                TabOrder = 8
+                TabOrder = 0
               end
               object CheckBoxIDETabsOutLine: TCheckBox
                 Left = 178
@@ -906,7 +907,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Width = 119
                 Height = 17
                 Caption = 'Custom Border Color'
-                TabOrder = 9
+                TabOrder = 1
                 Visible = False
               end
               object ColorBoxIDETabOutLineColor: TColorBox
@@ -916,7 +917,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 10
+                TabOrder = 12
                 OnGetColors = ColorBoxBaseGetColors
               end
               object ColorBoxIDETabFontActive: TColorBox
@@ -926,7 +927,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 NoneColorColor = 16729138
                 Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-                TabOrder = 11
+                TabOrder = 10
                 OnGetColors = ColorBoxBaseGetColors
               end
               object Button16: TButton
@@ -936,7 +937,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 22
                 ImageIndex = 7
                 Images = ImageList1
-                TabOrder = 12
+                TabOrder = 11
                 OnClick = Button16Click
               end
               object Button17: TButton
@@ -948,6 +949,126 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Images = ImageList1
                 TabOrder = 13
                 OnClick = Button17Click
+              end
+            end
+            object TabSheet4: TTabSheet
+              Caption = 'Headers'
+              ImageIndex = 3
+              object Label27: TLabel
+                Left = 16
+                Top = 44
+                Width = 95
+                Height = 13
+                Caption = 'Start Color gradient'
+              end
+              object Label28: TLabel
+                Left = 16
+                Top = 72
+                Width = 89
+                Height = 13
+                Caption = 'End Color gradient'
+              end
+              object Label31: TLabel
+                Left = 16
+                Top = 128
+                Width = 60
+                Height = 13
+                Caption = 'Border Color'
+              end
+              object Label32: TLabel
+                Left = 16
+                Top = 100
+                Width = 50
+                Height = 13
+                Caption = 'Font Color'
+              end
+              object CheckBoxCustomHeader: TCheckBox
+                Left = 3
+                Top = 12
+                Width = 190
+                Height = 17
+                Caption = 'Use custom colors for the headers'
+                TabOrder = 0
+              end
+              object Button20: TButton
+                Left = 334
+                Top = 63
+                Width = 22
+                Height = 22
+                ImageIndex = 7
+                Images = ImageList1
+                TabOrder = 4
+                OnClick = Button20Click
+              end
+              object Button21: TButton
+                Left = 334
+                Top = 35
+                Width = 22
+                Height = 22
+                ImageIndex = 7
+                Images = ImageList1
+                TabOrder = 2
+                OnClick = Button21Click
+              end
+              object ColorBoxHeaderEndGradient: TColorBox
+                Left = 162
+                Top = 63
+                Width = 166
+                Height = 22
+                NoneColorColor = 16729138
+                Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+                TabOrder = 3
+                OnGetColors = ColorBoxBaseGetColors
+              end
+              object ColorBoxHeaderStartGradient: TColorBox
+                Left = 162
+                Top = 35
+                Width = 166
+                Height = 22
+                NoneColorColor = 16729138
+                Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+                TabOrder = 1
+                OnGetColors = ColorBoxBaseGetColors
+              end
+              object ColorBoxHeaderBorderColor: TColorBox
+                Left = 162
+                Top = 119
+                Width = 166
+                Height = 22
+                NoneColorColor = 16729138
+                Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+                TabOrder = 7
+                OnGetColors = ColorBoxBaseGetColors
+              end
+              object ColorBoxHeaderFontColor: TColorBox
+                Left = 162
+                Top = 91
+                Width = 166
+                Height = 22
+                NoneColorColor = 16729138
+                Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+                TabOrder = 5
+                OnGetColors = ColorBoxBaseGetColors
+              end
+              object Button22: TButton
+                Left = 334
+                Top = 91
+                Width = 22
+                Height = 22
+                ImageIndex = 7
+                Images = ImageList1
+                TabOrder = 6
+                OnClick = Button22Click
+              end
+              object Button23: TButton
+                Left = 334
+                Top = 119
+                Width = 22
+                Height = 22
+                ImageIndex = 7
+                Images = ImageList1
+                TabOrder = 8
+                OnClick = Button23Click
               end
             end
           end
@@ -1006,14 +1127,14 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 254
           Height = 393
           ItemHeight = 13
-          TabOrder = 0
+          TabOrder = 1
         end
         object EditFormClass: TEdit
           Left = 3
           Top = 24
           Width = 170
           Height = 21
-          TabOrder = 1
+          TabOrder = 0
         end
         object ButtonAddFormClass: TButton
           Left = 3
@@ -1546,8 +1667,8 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     HighlightColor = clWhite
     BtnSelectedColor = clBtnFace
     UnusedColor = clWhite
-    Left = 305
-    Top = 245
+    Left = 409
+    Top = 389
   end
   object ImageListDock: TImageList
     ColorDepth = cd32Bit

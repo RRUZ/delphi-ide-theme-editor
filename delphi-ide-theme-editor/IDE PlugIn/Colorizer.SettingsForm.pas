@@ -166,6 +166,20 @@ type
     Button17: TButton;
     Label25: TLabel;
     Label26: TLabel;
+    TabSheet4: TTabSheet;
+    CheckBoxCustomHeader: TCheckBox;
+    Label27: TLabel;
+    Label28: TLabel;
+    Label31: TLabel;
+    Label32: TLabel;
+    Button20: TButton;
+    Button21: TButton;
+    ColorBoxHeaderEndGradient: TColorBox;
+    ColorBoxHeaderStartGradient: TColorBox;
+    ColorBoxHeaderBorderColor: TColorBox;
+    ColorBoxHeaderFontColor: TColorBox;
+    Button22: TButton;
+    Button23: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -211,6 +225,10 @@ type
     procedure Button12Click(Sender: TObject);
     procedure Button16Click(Sender: TObject);
     procedure Button17Click(Sender: TObject);
+    procedure Button21Click(Sender: TObject);
+    procedure Button20Click(Sender: TObject);
+    procedure Button22Click(Sender: TObject);
+    procedure Button23Click(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -364,6 +382,12 @@ begin
     FSettings.TabIDEActiveFontColor   := ColorToString(ColorBoxIDETabFontActive.Selected);
     FSettings.TabIDEOutLineColor      := ColorToString(ColorBoxIDETabOutLineColor.Selected);
 
+    FSettings.HeaderCustom          := CheckBoxCustomHeader.Checked;
+    FSettings.HeaderStartGrad       := ColorToString(ColorBoxHeaderStartGradient.Selected);
+    FSettings.HeaderEndGrad         := ColorToString(ColorBoxHeaderEndGradient.Selected);
+    FSettings.HeaderFontColor       := ColorToString(ColorBoxHeaderFontColor.Selected);
+    FSettings.HeaderBorderColor     := ColorToString(ColorBoxHeaderBorderColor.Selected);
+
     WriteSettings(FSettings, GetSettingsFolder);
 
     ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
@@ -504,6 +528,42 @@ begin
     ColorBoxBase.Selected:=LColor;
     ColorBoxBaseChange(nil);
  end;
+end;
+
+procedure TFormIDEColorizerSettings.Button20Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxHeaderEndGradient.Selected);
+ if LColor<>clNone then
+    ColorBoxHeaderEndGradient.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button21Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxHeaderStartGradient.Selected);
+ if LColor<>clNone then
+    ColorBoxHeaderStartGradient.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button22Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxHeaderFontColor.Selected);
+ if LColor<>clNone then
+    ColorBoxHeaderFontColor.Selected:=LColor;
+end;
+
+procedure TFormIDEColorizerSettings.Button23Click(Sender: TObject);
+Var
+ LColor : TColor;
+begin
+ LColor := DialogSelectColor(ColorBoxHeaderBorderColor.Selected);
+ if LColor<>clNone then
+    ColorBoxHeaderBorderColor.Selected:=LColor;
 end;
 
 procedure TFormIDEColorizerSettings.Button2Click(Sender: TObject);
@@ -1036,44 +1096,44 @@ begin
   ReadSettings(FSettings, GetSettingsFolder);
 
   CheckBoxUpdates.Checked  := FSettings.CheckUpdates;
-
   CheckBoxHookSystemColors.Checked  := FSettings.HookSystemColors;
   CheckBoxCustomDockBars.Checked := FSettings.DockCustom;
-
   RbtnDockGradientHorz.Checked := FSettings.DockGradientHor;
   RbtnDockGradientVert.Checked := not FSettings.DockGradientHor;
-
   RbtnDockBorderRounded.Checked   := FSettings.DockBorderRounded;
   RbtnDockBorderRectangle.Checked := not FSettings.DockBorderRounded;
 
   CheckBoxUseCustomColorsDock.Checked := FSettings.DockCustomColors;
-  try ColorBoxDockStartGradientActive.Selected   := StringToColor(FSettings.DockStartGradActive); except end;
-  try ColorBoxDockEndGradientActive.Selected     := StringToColor(FSettings.DockEndGradActive);  except end;
-  try ColorBoxDockStartGradientInActive.Selected := StringToColor(FSettings.DockStartGradInActive); except end;
-  try ColorBoxDockEndGradientInActive.Selected   := StringToColor(FSettings.DockEndGradInActive); except end;
+  ColorBoxDockStartGradientActive.Selected   := TryStrToColor(FSettings.DockStartGradActive, clBtnFace);
+  ColorBoxDockEndGradientActive.Selected     := TryStrToColor(FSettings.DockEndGradActive, clBtnFace);
+  ColorBoxDockStartGradientInActive.Selected := TryStrToColor(FSettings.DockStartGradInActive, clBtnFace);
+  ColorBoxDockEndGradientInActive.Selected   := TryStrToColor(FSettings.DockEndGradInActive, clBtnFace);
 
-  try ColorBoxDockFontActive.Selected   := StringToColor(FSettings.DockActiveFontColor); except end;
-  try ColorBoxDockFontInActive.Selected   := StringToColor(FSettings.DockInActiveFontColor); except end;
-
-  try ColorBoxDockBorderActive.Selected     := StringToColor(FSettings.DockActiveBorderColor); except end;
-  try ColorBoxDockBorderInActive.Selected   := StringToColor(FSettings.DockInActiveBorderColor); except end;
-
+  ColorBoxDockFontActive.Selected   := TryStrToColor(FSettings.DockActiveFontColor, clBlack);
+  ColorBoxDockFontInActive.Selected   := TryStrToColor(FSettings.DockInActiveFontColor, clBlack);
+  ColorBoxDockBorderActive.Selected     := TryStrToColor(FSettings.DockActiveBorderColor, clBlack);
+  ColorBoxDockBorderInActive.Selected   := TryStrToColor(FSettings.DockInActiveBorderColor, clBlack);
 
   CheckBoxIDETabsCustom.Checked  := FSettings.TabIDECustom;
   CheckBoxIDETabsOutLine.Checked := FSettings.TabIDEOutLine;
-  try ColorBoxIDETabStartGradientActive.Selected   := StringToColor(FSettings.TabIDEStartGradActive); except end;
-  try ColorBoxIDETabEndGradientActive.Selected     := StringToColor(FSettings.TabIDEEndGradActive);  except end;
-  try ColorBoxIDETabStartGradientInActive.Selected := StringToColor(FSettings.TabIDEStartGradInActive); except end;
-  try ColorBoxIDETabEndGradientInActive.Selected   := StringToColor(FSettings.TabIDEEndGradInActive); except end;
-  try ColorBoxIDETabFontActive.Selected     := StringToColor(FSettings.TabIDEActiveFontColor); except end;
-  try ColorBoxIDETabOutLineColor.Selected   := StringToColor(FSettings.TabIDEOutLineColor); except end;
+  ColorBoxIDETabStartGradientActive.Selected   := TryStrToColor(FSettings.TabIDEStartGradActive, clBtnFace);
+  ColorBoxIDETabEndGradientActive.Selected     := TryStrToColor(FSettings.TabIDEEndGradActive, clBtnFace);
+  ColorBoxIDETabStartGradientInActive.Selected := TryStrToColor(FSettings.TabIDEStartGradInActive, clBtnFace);
+  ColorBoxIDETabEndGradientInActive.Selected   := TryStrToColor(FSettings.TabIDEEndGradInActive, clBtnFace);
+  ColorBoxIDETabFontActive.Selected     := TryStrToColor(FSettings.TabIDEActiveFontColor, clBlack);
+  ColorBoxIDETabOutLineColor.Selected   := TryStrToColor(FSettings.TabIDEOutLineColor, clBlack);
+
+  CheckBoxCustomHeader.Checked := FSettings.HeaderCustom;
+  ColorBoxHeaderStartGradient.Selected   := TryStrToColor(FSettings.HeaderStartGrad, clBtnFace);
+  ColorBoxHeaderEndGradient.Selected     := TryStrToColor(FSettings.HeaderEndGrad, clBtnFace);
+  ColorBoxHeaderBorderColor.Selected     := TryStrToColor(FSettings.HeaderBorderColor, clBlack);
+  ColorBoxHeaderFontColor.Selected       := TryStrToColor(FSettings.HeaderFontColor, clBlack);
 
   RbtnToolBarGradientVert.Checked := FSettings.ToolbarGradientHor;
   RbtnToolBarGradientHorz.Checked := not FSettings.ToolbarGradientHor;
   CheckBoxUseCustomColorsToolbar.Checked := FSettings.ToolbarCustomColors;
-  try ColorBoxToolBarStartGrad.Selected   := StringToColor(FSettings.ToolbarStartGrad); except end;
-  try ColorBoxToolBarStartEnd.Selected    := StringToColor(FSettings.ToolbarEndGrad);  except end;
-
+  ColorBoxToolBarStartGrad.Selected   := TryStrToColor(FSettings.ToolbarStartGrad, clBtnFace);
+  ColorBoxToolBarStartEnd.Selected    := TryStrToColor(FSettings.ToolbarEndGrad, clBtnFace);
 
   CheckBoxEnabled.Checked:=FSettings.Enabled;
   //CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;

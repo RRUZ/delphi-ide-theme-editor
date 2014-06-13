@@ -61,6 +61,11 @@ type
     FTabIDECustom: boolean;
     FTabIDEActiveFontColor: string;
     FTabIDEOutLineColor: string;
+    FHeaderEndGrad: string;
+    FHeaderFontColor: string;
+    FHeaderBorderColor: string;
+    FHeaderCustom: boolean;
+    FHeaderStartGrad: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -108,6 +113,11 @@ type
     property TabIDEOutLine           : boolean read FTabIDEOutLine write FTabIDEOutLine;
     property TabIDECustom            : boolean read FTabIDECustom write FTabIDECustom;
 
+    property HeaderStartGrad   : string  read FHeaderStartGrad write FHeaderStartGrad;
+    property HeaderEndGrad     : string  read FHeaderEndGrad write FHeaderEndGrad;
+    property HeaderFontColor   : string  read FHeaderFontColor write FHeaderFontColor;
+    property HeaderBorderColor : string  read FHeaderBorderColor write FHeaderBorderColor;
+    property HeaderCustom      : boolean read FHeaderCustom write FHeaderCustom;
 
     property CheckUpdates    : boolean read FCheckUpdates write FCheckUpdates;
   end;
@@ -170,6 +180,12 @@ begin
     Settings.TabIDEActiveFontColor   := LIniFile.ReadString('Global', 'TabIDEActiveFontColor', 'clWhite');
     Settings.TabIDEOutLineColor      := LIniFile.ReadString('Global', 'TabIDEOutLineColor', 'clBlack');
 
+    Settings.HeaderCustom            := LIniFile.ReadBool('Global', 'HeaderCustom', False);
+    Settings.HeaderStartGrad         := LIniFile.ReadString('Global', 'HeaderStartGrad', 'clSilver');
+    Settings.HeaderEndGrad           := LIniFile.ReadString('Global', 'HeaderEndGrad', 'clSilver');
+    Settings.HeaderFontColor         := LIniFile.ReadString('Global', 'HeaderFontColor', 'clBlack');
+    Settings.HeaderBorderColor       := LIniFile.ReadString('Global', 'HeaderBorderColor', 'clBlack');
+
     Settings.CheckUpdates         := LIniFile.ReadBool('Global', 'CheckUpdates', True);
   finally
     LIniFile.Free;
@@ -220,6 +236,12 @@ begin
     LIniFile.WriteString('Global', 'TabIDEEndGradInActive', Settings.TabIDEEndGradInActive);
     LIniFile.WriteString('Global', 'TabIDEActiveFontColor', Settings.TabIDEActiveFontColor);
     LIniFile.WriteString('Global', 'TabIDEOutLineColor', Settings.TabIDEOutLineColor);
+
+    LIniFile.WriteBool('Global', 'HeaderCustom', Settings.HeaderCustom);
+    LIniFile.WriteString('Global', 'HeaderStartGrad', Settings.HeaderStartGrad);
+    LIniFile.WriteString('Global', 'HeaderEndGrad', Settings.HeaderEndGrad);
+    LIniFile.WriteString('Global', 'HeaderFontColor', Settings.HeaderFontColor);
+    LIniFile.WriteString('Global', 'HeaderBorderColor', Settings.HeaderBorderColor);
 
     LIniFile.WriteBool('Global', 'CheckUpdates', Settings.CheckUpdates);
   finally

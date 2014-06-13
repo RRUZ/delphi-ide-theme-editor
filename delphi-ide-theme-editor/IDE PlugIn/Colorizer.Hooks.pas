@@ -77,6 +77,7 @@ uses
   Graphics,
   ImgList,
   CommCtrl,
+  //ExtCtrls,
   JclDebug,
   PngImage,
   Colorizer.Utils,
@@ -110,6 +111,8 @@ type
  TCustomComboClass       = class(TCustomCombo);
  TBevelClass             = class(TBevel);
  TCustomControlClass     = class(TCustomControl);
+ TCustomControlBarClass  = class(TCustomControlBar);
+
 var
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
@@ -178,9 +181,11 @@ var
 {$IFDEF DLLWIZARD}
   Trampoline_TCustomForm_WndProc :  procedure (Self : TCustomForm;var Message: TMessage) = nil;
 {$ENDIF}
+  Trampoline_Gradientdrawer_GetOutlineColor : function() : TColor = nil;
+
+  Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect)=nil;
 
   FGutterBkColor : TColor = clNone;
-
 type
   TCustomStatusBarHelper = class helper for TCustomStatusBar
   private
@@ -266,6 +271,87 @@ begin
  Trampoline_TCustomForm_WndProc(Self, Message);
 end;
 {$ENDIF}
+
+
+function Detour_Gradientdrawer_GetOutlineColor : TColor;
+begin
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
+  begin
+    Result := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+    if TColorizerLocalSettings.Settings.TabIDECustom then
+      Result := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter);
+    exit;
+  end;
+  Exit(Trampoline_Gradientdrawer_GetOutlineColor);
+end;
+
+procedure Detour_TCustomControlBar_PaintControlFrame(Self:TCustomControlBarClass; Canvas: TCanvas; AControl: TControl; var ARect: TRect);
+const
+  Offset = 3;
+var
+  LRect: TRect;
+  Options: TBandPaintOptions;
+  LParentForm : TCustomForm;
+begin
+
+  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+  begin
+    Trampoline_TCustomControlBar_PaintControlFrame(Self, Canvas, AControl, ARect);
+    exit;
+  end;
+
+  LParentForm:= GetParentForm(Self);
+  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+  begin
+    Trampoline_TCustomControlBar_PaintControlFrame(Self, Canvas, AControl, ARect);
+    exit;
+  end;
+
+  if  Self.DrawingStyle = TBandDrawingStyle.dsGradient then
+    Options := [bpoGrabber, bpoGradient, bpoRoundRect]
+  else
+    Options := [bpoGrabber, bpoFrame];
+
+  Self.DoBandPaint(AControl, Canvas, ARect, Options);
+  with Canvas do
+  begin
+    if bpoFrame in Options then
+      DrawEdge(Handle, ARect, BDR_RAISEDINNER, BF_RECT);
+
+    if bpoRoundRect in Options then
+    begin
+      BeginPath(Handle);
+        Polyline([Point(ARect.Left + Integer(Self.CornerEdge), ARect.Top),
+          Point(ARect.Right - Integer(Self.CornerEdge), ARect.Top), { Top line }
+          Point(ARect.Right, ARect.Top + Integer(Self.CornerEdge)), { Top right curve }
+          Point(ARect.Right, ARect.Bottom - Integer(Self.CornerEdge)), { Right side line }
+          Point(ARect.Right - Integer(Self.CornerEdge), ARect.Bottom), { Bottom right curve }
+          Point(ARect.Left + Integer(Self.CornerEdge), ARect.Bottom), { Bottom line }
+          Point(ARect.Left, ARect.Bottom - Integer(Self.CornerEdge)), { Bottom left curve }
+          Point(ARect.Left, ARect.Top + Integer(Self.CornerEdge)), { Left side line }
+          Point(ARect.Left + Integer(Self.CornerEdge), ARect.Top)]); { Top left curve }
+      EndPath(Handle);
+
+      SelectClipPath(Handle, RGN_COPY);
+    end;
+
+//    if bpoGradient in Options then
+//      DrawGradient;
+//
+    if bpoGrabber in Options then
+    begin
+      LRect := Rect(ARect.Left + Offset, ARect.Top + 2, ARect.Left + Offset + 2, ARect.Bottom - 3);
+      Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+      MoveTo(LRect.Left + 1, LRect.Top);
+      LineTo(LRect.Left, LRect.Top);
+      LineTo(LRect.Left, LRect.Bottom);
+      Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+      MoveTo(LRect.Right, LRect.Top);
+      LineTo(LRect.Right, LRect.Bottom - 1);
+      LineTo(LRect.Left, LRect.Bottom-1);
+    end;
+  end;
+end;
 
 //Detour for TListButton.Paint
 procedure Detour_TListButton_Paint(Self : TCustomControlClass);
@@ -680,9 +766,12 @@ begin
   //background
   with Self.GetMemBitmap.Canvas do
   begin
-    LBackgroundColor := TColorizerLocalSettings.ColorMap.Color;
+    LBackgroundColor := Self.BackgroundColor;//TColorizerLocalSettings.ColorMap.Color;
     Brush.Color := LBackgroundColor;
     Pen.Width := 1;
+    if TColorizerLocalSettings.Settings.TabIDECustom then
+      Self.GetMemBitmap.Canvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+    else
     Pen.Color := LBackgroundColor;
     LMemBitmapRect := Types.Rect(0, 0, Self.GetMemBitmap.Width, Self.GetMemBitmap.Height);
     Rectangle(LMemBitmapRect);
@@ -692,6 +781,9 @@ begin
     else
       Dec(YStart);
 
+    if TColorizerLocalSettings.Settings.TabIDECustom then
+      Self.GetMemBitmap.Canvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+    else
     Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
     DrawLine(Self.GetMemBitmap.Canvas, 0, YStart, TotalSize, YStart);
 
@@ -708,12 +800,23 @@ begin
 
     if TabSelected then
     begin
+      if TColorizerLocalSettings.Settings.TabIDECustom then
+        Self.GetMemBitmap.Canvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+      else
       Self.GetMemBitmap.Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+
       DrawLine( Self.GetMemBitmap.Canvas, TabPos.StartPos - TabOffset + 1, TabTop, TabPos.StartPos - TabOffset + 1, TabTop + Self.TabHeight);
 
+      if TColorizerLocalSettings.Settings.TabIDECustom then
+        Self.GetMemBitmap.Canvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+      else
       Self.GetMemBitmap.Canvas.Pen.Color := GetHighlightColor(Self.SelectedColor);
 
       DrawLine(Self.GetMemBitmap.Canvas, TabPos.StartPos - TabOffset + 2, TabTop, TabPos.StartPos - TabOffset + 2, TabTop + Self.TabHeight);
+
+      if TColorizerLocalSettings.Settings.TabIDECustom then
+        Self.GetMemBitmap.Canvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+      else
       Self.GetMemBitmap.Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
 
       if Self.TabPosition in [tpBottom, tpRight] then
@@ -750,6 +853,9 @@ begin
     end
     else if not TabNextSelected then
     begin
+      if TColorizerLocalSettings.Settings.TabIDECustom then
+        Self.GetMemBitmap.Canvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+      else
       Self.GetMemBitmap.Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
       DrawLine(Self.GetMemBitmap.Canvas, TabPos.StartPos + TabPos.Size + TabOffset, TabTop + 3, TabPos.StartPos + TabPos.Size + TabOffset, TabTop + Self.TabHeight - 1 - 2);
     end;
@@ -864,6 +970,7 @@ begin
   end;
 
    case  edge of
+      BDR_RAISEDINNER,
       EDGE_SUNKEN,
       EDGE_ETCHED,
       EDGE_BUMP,
@@ -2097,6 +2204,7 @@ var
   sCaller : string;
   LCanvas : TCanvas;
   SaveIndex: Integer;
+  LColor1, LColor2  : TColor;
 begin
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
    begin
@@ -2107,9 +2215,26 @@ begin
        LCanvas:=TCanvas.Create;
        try
          LCanvas.Handle:=DC;
-          GradientFillCanvas(LCanvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, R, gdVertical);
-          LCanvas.Brush.Style:=TBrushStyle.bsClear;
-          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+
+         if TColorizerLocalSettings.Settings.HeaderCustom  then
+         begin
+           LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
+           LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+         end
+         else
+         begin
+           LColor1:= TColorizerLocalSettings.ColorMap.Color;
+           LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+         end;
+
+         GradientFillCanvas(LCanvas, LColor1, LColor2, R, gdVertical);
+         LCanvas.Brush.Style:=TBrushStyle.bsClear;
+
+          if TColorizerLocalSettings.Settings.HeaderCustom  then
+            LCanvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+          else
+           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+
           LCanvas.Rectangle(R);
        finally
           LCanvas.Handle:=0;
@@ -2131,8 +2256,8 @@ var
   sCaller : string;
   LCanvas : TCanvas;
   SaveIndex: Integer;
+  LColor1, LColor2  : TColor;
 begin
-   //TFile.AppendAllText('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\CustomDrawElementXE.txt', Format('%s',['CustomDrawElement']));
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
    begin
     sCaller := ProcByLevel(2);
@@ -2142,9 +2267,23 @@ begin
        LCanvas:=TCanvas.Create;
        try
          LCanvas.Handle:=DC;
-          GradientFillCanvas(LCanvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, R, gdVertical);
+         if TColorizerLocalSettings.Settings.HeaderCustom  then
+         begin
+           LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
+           LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+         end
+         else
+         begin
+           LColor1:= TColorizerLocalSettings.ColorMap.Color;
+           LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+         end;
+
+          GradientFillCanvas(LCanvas, LColor1, LColor2, R, gdVertical);
           LCanvas.Brush.Style:=TBrushStyle.bsClear;
-          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+          if TColorizerLocalSettings.Settings.HeaderCustom  then
+            LCanvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+          else
+           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
           LCanvas.Rectangle(R);
        finally
           LCanvas.Handle:=0;
@@ -2164,6 +2303,7 @@ var
   sCaller : string;
   LCanvas : TCanvas;
   SaveIndex: Integer;
+  LColor1, LColor2  : TColor;
 begin
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and  (iPartId=HP_HEADERITEM) then
   begin
@@ -2174,9 +2314,23 @@ begin
        LCanvas:=TCanvas.Create;
        try
          LCanvas.Handle:=hdc;
-          GradientFillCanvas(LCanvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, pRect, gdVertical);
+         if TColorizerLocalSettings.Settings.HeaderCustom  then
+         begin
+           LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
+           LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+         end
+         else
+         begin
+           LColor1:= TColorizerLocalSettings.ColorMap.Color;
+           LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+         end;
+
+          GradientFillCanvas(LCanvas, LColor1, LColor2, pRect, gdVertical);
           LCanvas.Brush.Style:=TBrushStyle.bsClear;
-          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+          if TColorizerLocalSettings.Settings.HeaderCustom  then
+            LCanvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+          else
+           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
           LCanvas.Rectangle(pRect);
        finally
           LCanvas.Handle:=0;
@@ -2773,7 +2927,10 @@ var
       begin
         Canvas.Font := TWinControlClass(Self).Font;
         TextFormat := TTextFormatFlags(Flags);
-        Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        if TColorizerLocalSettings.Settings.HeaderCustom  then
+          Canvas.Font.Color := TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, TColorizerLocalSettings.ColorMap.FontColor)
+        else
+          Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
         LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
       end;
 
@@ -2786,6 +2943,7 @@ var
       IconWidth, IconHeight: Integer;
       LDetails: TThemedElementDetails;
       LBuffer : TBitmap;
+      LColor1, LColor2 : TColor;
     begin
       FillChar(Item, SizeOf(Item), 0);
       Item.Mask := HDI_FORMAT;
@@ -2798,9 +2956,26 @@ var
        {$ELSE}
        LBuffer.SetSize(R.Right-R.Left, R.Bottom-R.Top);
        {$ENDIF}
-       LBuffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+
+       if TColorizerLocalSettings.Settings.HeaderCustom  then
+        LBuffer.Canvas.Pen.Color:=TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+       else
+        LBuffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+
        LBuffer.Canvas.Rectangle(Rect(0, 0, R.Right, R.Bottom));
-       GradientFillCanvas(LBuffer.Canvas, TColorizerLocalSettings.ColorMap.Color, TColorizerLocalSettings.ColorMap.HighlightColor, Rect(1, 1, R.Right-1, R.Bottom-1), gdVertical);
+
+         if TColorizerLocalSettings.Settings.HeaderCustom  then
+         begin
+           LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
+           LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+         end
+         else
+         begin
+           LColor1:= TColorizerLocalSettings.ColorMap.Color;
+           LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+         end;
+
+       GradientFillCanvas(LBuffer.Canvas, LColor1, LColor2, Rect(1, 1, R.Right-1, R.Bottom-1), gdVertical);
        Canvas.Draw(R.Left, R.Top, LBuffer);
       finally
        LBuffer.Free;
@@ -3117,6 +3292,8 @@ end;
 
 //Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background
 function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
+const
+  SystemColor = $FF000000;
 var
   sCaller : string;
 begin
@@ -3125,7 +3302,7 @@ begin
      case nIndex of
        COLOR_INFOTEXT:
        begin
-         if TColorizerLocalSettings.Settings.HookSystemColors then
+         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.FontColor) then
           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
          else
           Exit(Trampoline_GetSysColor(nIndex));
@@ -3133,7 +3310,7 @@ begin
 
        COLOR_INFOBK:
        begin
-         if TColorizerLocalSettings.Settings.HookSystemColors then
+         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.MenuColor) then
           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.MenuColor))
          else
           Exit(Trampoline_GetSysColor(nIndex));
@@ -3141,7 +3318,7 @@ begin
 
        COLOR_INACTIVECAPTION :
        begin
-         if TColorizerLocalSettings.Settings.HookSystemColors then
+         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.DisabledColor) then
           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledColor))
          else
           Exit(Trampoline_GetSysColor(nIndex));
@@ -3149,7 +3326,7 @@ begin
 
        COLOR_INACTIVECAPTIONTEXT :
        begin
-         if TColorizerLocalSettings.Settings.HookSystemColors then
+         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.DisabledFontColor) then
           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor))
          else
           Exit(Trampoline_GetSysColor(nIndex));
@@ -3157,7 +3334,7 @@ begin
 
        COLOR_HIGHLIGHT :
        begin
-         if TColorizerLocalSettings.Settings.HookSystemColors then
+         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.SelectedColor) then
           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor))
          else
           Exit(Trampoline_GetSysColor(nIndex));
@@ -3165,25 +3342,20 @@ begin
 
        COLOR_HIGHLIGHTTEXT:
        begin
-         if TColorizerLocalSettings.Settings.HookSystemColors then
+         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.SelectedFontColor) then
           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor))
          else
           Exit(Trampoline_GetSysColor(nIndex));
        end;
 
        COLOR_BTNFACE :
+       if (TColor(SystemColor or nIndex)<>TColorizerLocalSettings.ColorMap.Color) then
        begin
          sCaller := ProcByLevel(2);
          if SameText(sCaller, '') then
            Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
        end;
 
-//       COLOR_BTNSHADOW :
-//       begin
-////         sCaller := ProcByLevel(2);
-////         if SameText(sCaller, '') then
-//           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
-//       end;
      end;
    end;
 
@@ -3201,12 +3373,14 @@ const
   sCompilerMsgLineDraw        = '@Msglines@TCompilerMsgLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
   sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
   sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
+  sGetOutlineColor            = '@Gdiplus@Gradientdrawer@GetOutlineColor$qqrv'; //Don't supported in XE
 {$ELSE}
   sCompilerMsgLineDraw        = '@Msglines@TCompilerMsgLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
   sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
   sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
   sFileFindLineInternalCalcDraw = '@Msglines@TFileFindLine@InternalCalcDraw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo';
   sBaseVirtualTreeGetHintWindowClass = '@Idevirtualtrees@TBaseVirtualTree@GetHintWindowClass$qqrv';
+  sGetOutlineColor            = '@Gdiplus@Gradientdrawer@GetOutlineColor$qqrv';
 {$ENDIF}
 
   sProjectTree2PaintText      = '@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
@@ -3269,6 +3443,11 @@ begin
    if Assigned(pOrgAddress) then
     Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @Detour_TListButton_Paint);
 
+   pOrgAddress := GetProcAddress(VclIDEModule, sGetOutlineColor);
+   if Assigned(pOrgAddress) then
+    Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(pOrgAddress, @Detour_Gradientdrawer_GetOutlineColor);
+
+
 //   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
 //   if Assigned(pOrgAddress) then
 //    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
@@ -3319,6 +3498,8 @@ begin
    pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
    if Assigned(pOrgAddress) then
      Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
+
+   Trampoline_TCustomControlBar_PaintControlFrame   :=  InterceptCreate(@TCustomControlBarClass.PaintControlFrame, @Detour_TCustomControlBar_PaintControlFrame);
 
 // *******************************************
   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @Detour_TCategoryButtons_DrawCategory);
@@ -3375,6 +3556,9 @@ begin
   if Assigned(Trampoline_TListButton_Paint) then
     InterceptRemove(@Trampoline_TListButton_Paint);
 
+  if Assigned(Trampoline_Gradientdrawer_GetOutlineColor) then
+    InterceptRemove(@Trampoline_Gradientdrawer_GetOutlineColor);
+
   if Assigned(Trampoline_TBaseVirtual_GetHintWindowClass) then
     InterceptRemove(@Trampoline_TBaseVirtual_GetHintWindowClass);
 
@@ -3391,9 +3575,9 @@ begin
   if Assigned(Trampoline_TCanvas_Rectangle) then
     InterceptRemove(@Trampoline_TCanvas_Rectangle);
 
-//  if Assigned(Trampoline_TCanvas_Polygon) then
-//    InterceptRemove(@Trampoline_TCanvas_Polygon);
-//
+  if Assigned(Trampoline_TCustomControlBar_PaintControlFrame) then
+    InterceptRemove(@Trampoline_TCustomControlBar_PaintControlFrame);
+
 //  if Assigned(Trampoline_TCanvas_Polyline) then
 //    InterceptRemove(@Trampoline_TCanvas_Polyline);
 
