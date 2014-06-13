@@ -22,24 +22,22 @@
 //TODO
 
 {
-  TIDEGradientTabSet custom colors
-  TIDEGradientTabSet border  -->  gdi outline
-  TClosableTabScroller border  -->  gdi outline
-  header virtual trrees and listview
-  TDockToolBar (toolbars) remove border
+  Add support for TPopupListBox
 
   improve themes -> pro
-
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
-
   scroll fails on XE in preview of source highligter
   frame in buttons of TIDECategoryButtons   depending oh theme colors
-  Add support for TPopupListBox
 }
 
 // DONE
 {
+  * add custom option for header virtual trees and listview
+  * TDockToolBar (toolbars) remove border
+  * TClosableTabScroller border  -->  gdi outline
+  * TIDEGradientTabSet custom colors
+  * TIDEGradientTabSet border  -->  gdi outline
   * Enable/Disable
   * bug in bg color of controls in Font dialog
   * Improve support for TInspListBox

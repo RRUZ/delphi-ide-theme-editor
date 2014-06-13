@@ -1,6 +1,7 @@
 object DialogColorSelector: TDialogColorSelector
   Left = 698
   Top = 364
+  ActiveControl = BtnApply
   BorderStyle = bsDialog
   Caption = 'Color Selector'
   ClientHeight = 379
@@ -3367,7 +3368,7 @@ object DialogColorSelector: TDialogColorSelector
     Width = 225
     Height = 212
     ActivePage = TabSheetHexa
-    TabOrder = 0
+    TabOrder = 1
     object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
       object HexaColorPicker1: THexaColorPicker
@@ -3387,10 +3388,14 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheetWEB: TTabSheet
       Caption = 'Web Palette'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mbColorPalette1: TmbColorPalette
         Left = 0
         Top = 0
-        Width = 210
+        Width = 168
         Height = 184
         Align = alClient
         Colors.Strings = (
@@ -3661,6 +3666,10 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheetHSL: TTabSheet
       Caption = 'HSL'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HSLColorPicker1: THSLColorPicker
         Left = 0
         Top = 0
@@ -3681,6 +3690,10 @@ object DialogColorSelector: TDialogColorSelector
     object TabSheetHSV: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HSVColorPicker1: THSVColorPicker
         Left = 35
         Top = 17
@@ -3706,7 +3719,7 @@ object DialogColorSelector: TDialogColorSelector
     Width = 75
     Height = 25
     Caption = 'Apply'
-    TabOrder = 2
+    TabOrder = 3
     OnClick = BtnApplyClick
   end
   object ButtonCancel: TButton
@@ -3715,7 +3728,7 @@ object DialogColorSelector: TDialogColorSelector
     Width = 75
     Height = 25
     Caption = 'Cancel'
-    TabOrder = 3
+    TabOrder = 4
     OnClick = ButtonCancelClick
   end
   object CheckBoxLive: TCheckBox
@@ -3726,14 +3739,14 @@ object DialogColorSelector: TDialogColorSelector
     Caption = 'Live Preview'
     Checked = True
     State = cbChecked
-    TabOrder = 1
+    TabOrder = 2
   end
   object PanelValues: TPanel
     Left = 8
     Top = 8
     Width = 233
     Height = 89
-    TabOrder = 4
+    TabOrder = 0
     object Label1: TLabel
       Left = 12
       Top = 1
@@ -3792,7 +3805,7 @@ object DialogColorSelector: TDialogColorSelector
       MaxLength = 3
       NumbersOnly = True
       ParentCtl3D = False
-      TabOrder = 0
+      TabOrder = 2
       Text = '0'
       OnExit = RedExit
     end
@@ -3818,7 +3831,7 @@ object DialogColorSelector: TDialogColorSelector
       Ctl3D = False
       MaxLength = 6
       ParentCtl3D = False
-      TabOrder = 2
+      TabOrder = 7
       Text = '255'
       OnExit = HexExit
       OnKeyPress = HexKeyPress
@@ -3859,7 +3872,7 @@ object DialogColorSelector: TDialogColorSelector
       Images = ImageList1
       ParentDoubleBuffered = False
       StylusHotImageIndex = 0
-      TabOrder = 5
+      TabOrder = 6
       OnSelColorChange = mbDeskPickerButton1SelColorChange
       ScreenHintFormat = 'RGB(%r, %g, %b)'#13'Hex: %h'
     end
@@ -3872,7 +3885,7 @@ object DialogColorSelector: TDialogColorSelector
       MaxLength = 3
       NumbersOnly = True
       ParentCtl3D = False
-      TabOrder = 6
+      TabOrder = 0
       Text = '255'
       OnExit = RedExit
     end
@@ -3885,7 +3898,7 @@ object DialogColorSelector: TDialogColorSelector
       MaxLength = 3
       NumbersOnly = True
       ParentCtl3D = False
-      TabOrder = 7
+      TabOrder = 5
       Text = '0'
       OnExit = HueExit
     end
