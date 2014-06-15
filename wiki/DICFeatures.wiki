@@ -6,6 +6,10 @@
 
 <wiki:video url="https://www.youtube.com/watch?v=DMTsIBceNWk"/>
 
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DIC_VS.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DIC_Debug_VS.png
+
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DeepskyBlue_default_layout_menu.png
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/YellowGreen_debug_layout_assembly.png
