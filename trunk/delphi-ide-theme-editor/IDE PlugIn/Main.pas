@@ -23,7 +23,6 @@
 
 {
   Add support for TPopupListBox
-
   improve themes -> pro
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
@@ -33,6 +32,7 @@
 
 // DONE
 {
+  * fix fonts colors in ide tabs XE6
   * add custom option for header virtual trees and listview
   * TDockToolBar (toolbars) remove border
   * TClosableTabScroller border  -->  gdi outline

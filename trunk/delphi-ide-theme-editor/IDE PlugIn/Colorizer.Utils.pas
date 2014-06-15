@@ -297,7 +297,6 @@ begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
-
       HideSeparators(LForm, 'TProjectManagerForm', 'ToolBar');
 
 

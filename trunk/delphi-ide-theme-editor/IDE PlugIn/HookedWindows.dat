@@ -38,3 +38,4 @@ TRegisteredTypeLibraryWindow
 TRegisteredTypeLibraryTabFrame
 TExpanderForm
 TSearchProgressDlg
+TExpandableEvalView
