@@ -103,7 +103,8 @@ begin
     pen.SetColor(LGPColor);
    end;
   end;
-    Exit(Trampoline_TGPGraphics_DrawPath(Self, pen, path));
+
+  Exit(Trampoline_TGPGraphics_DrawPath(Self, pen, path));
 end;
 
 function Detour_TGPGraphics_FillPath(Self : TGPGraphics; brush: TGPBrush; path: TGPGraphicsPath): TStatus;
@@ -113,21 +114,24 @@ var
  sCaller : string;
  color1, color2: TGPColor;
  LActive  : Boolean;
-begin
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.TabIDEOutLine   then
+begin                                                                                                                                               //improve performance
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.TabIDEOutLine and (brush is TGPLinearGradientBrush)  then
   begin
    sCaller  := ProcByLevel(3);
    //AddLog('Detour_TGPGraphics_FillPath', sCaller);
-   if SameText(sTGradientTabSet, sCaller) and (brush is TGPLinearGradientBrush) then
+   if SameText(sTGradientTabSet, sCaller) {and (brush is TGPLinearGradientBrush)} then
    begin
     TGPLinearGradientBrush(brush).GetLinearColors(color1, color2);
-    //use colors from tabs to determine active
+    //use colors from tabs to determine when tab is active
     {
       TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);
       TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
       TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
       TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
     }
+
+    //AddLog('Detour_TGPGraphics_FillPath', Format('Original Color1 %s Color2 %s', [ColorToString(TColor(ARGBToColorRef(color1))), ColorToString(TColor(ARGBToColorRef(color2)))]));
+
     if not TColorizerLocalSettings.Settings.TabIDECustom then
      LActive :=  (TColor(ARGBToColorRef(color1)) =  TColorizerLocalSettings.ColorMap.Color)
     else
@@ -149,17 +153,18 @@ begin
     begin
       if LActive then
       begin
-        try color1  :=  ColorRefToARGB(ColorToRGB(StringToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive))); except   end;
-        try color2  :=  ColorRefToARGB(ColorToRGB(StringToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive))); except   end;
+        try color1  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, TColorizerLocalSettings.ColorMap.Color))); except   end;
+        try color2  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, TColorizerLocalSettings.ColorMap.SelectedColor))); except   end;
       end
       else
       begin
-        try color1  :=  ColorRefToARGB(ColorToRGB(StringToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive))); except  end;
-        try color2  :=  ColorRefToARGB(ColorToRGB(StringToColor(TColorizerLocalSettings.Settings.TabIDEEndGradInActive))); except  end;
+        color1  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, TColorizerLocalSettings.ColorMap.MenuColor)));
+        color2  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradInActive, TColorizerLocalSettings.ColorMap.SelectedColor)));
       end;
     end;
 
-      TGPLinearGradientBrush(brush).SetLinearColors(color1, color2);
+    //AddLog('Detour_TGPGraphics_FillPath', Format('Used Color1 %s Color2 %s', [ColorToString(TColor(ARGBToColorRef(color1))), ColorToString(TColor(ARGBToColorRef(color2)))]));
+    TGPLinearGradientBrush(brush).SetLinearColors(color1, color2);
    end;
    //AddLog('Detour_TGPGraphics_FillPath', sCaller);
   end;

@@ -331,7 +331,7 @@ begin
   if TRegisteredWrappers.WrappersInstances.ContainsKey(AComponent.ClassName) then
   begin
 //    if Restore then
-//      AddLog('RunWrapper', AComponent.ClassName);
+    //AddLog('RunWrapper', AComponent.ClassName);
     LBaseWrapper:= TRegisteredWrappers.WrappersInstances.Items[AComponent.ClassName];
     LBaseWrapper.Restore:=Restore;
     LBaseWrapper.SetProperties(AComponent, AColorMap);
@@ -807,6 +807,8 @@ var
   LFontColor : TColor;
 begin
   inherited;
+  //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'_XE6.pas');
+
   if TColorizerLocalSettings.Settings.TabIDECustom then
   begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
@@ -888,6 +890,8 @@ begin
     LFontColor:=TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, AColorMap.FontColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', LFontColor);
 
+  //XE6
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'UseSystemColors', True);
   TCustomControl(AComponent).Invalidate;
 end;
 

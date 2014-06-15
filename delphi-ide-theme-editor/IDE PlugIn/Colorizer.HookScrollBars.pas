@@ -62,6 +62,7 @@ uses
      class var ScrollBars: TDictionary<HTHEME, String>;
      class var TreeView  : TDictionary<HTHEME, String>;
      class var Button    : TDictionary<HTHEME, String>;
+     class var ToolTip   : TDictionary<HTHEME, String>;
     end;
 
   var
@@ -147,6 +148,12 @@ begin
   begin
     if not THThemesClasses.Button.ContainsKey(Result) then
       THThemesClasses.Button.Add(Result, pszClassList);
+  end
+  else
+  if SameText(pszClassList, VSCLASS_TOOLTIP) then
+  begin
+    if not THThemesClasses.ToolTip.ContainsKey(Result) then
+      THThemesClasses.ToolTip.Add(Result, pszClassList);
   end
   ;
 end;
@@ -342,11 +349,37 @@ var
   LBuffer   : TBitmap;
   LRect     : TRect;
   LSize     : TSize;
-  //i : integer;
+  SavedIndex : integer;
 begin
-  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME) or THThemesClasses.Button.ContainsKey(THEME)) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
+  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME)
+     or THThemesClasses.Button.ContainsKey(THEME) or THThemesClasses.ToolTip.ContainsKey(THEME) ) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 
+  if THThemesClasses.ToolTip.ContainsKey(THEME) then
+  begin
+      case iPartId  of
+       TTP_STANDARD :
+                     begin
+                       SavedIndex:=SaveDC(dc);
+                       LCanvas:=TCanvas.Create;
+                       try
+                          LCanvas.Handle:=dc;
+                          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+                          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+                          LCanvas.Rectangle(pRect);
+                       finally
+                         LCanvas.Handle:=0;
+                         LCanvas.Free;
+                         if SavedIndex<>0 then
+                           RestoreDC(dc, SavedIndex);
+                       end;
+                       Exit(0);
+                     end;
+
+      end;
+   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+  end
+  else
   if THThemesClasses.ScrollBars.ContainsKey(THEME) then
   begin
     ApplyHook:=False;
@@ -909,6 +942,9 @@ begin
   THThemesClasses.Button := TDictionary<HTHEME, String>.Create();
   THThemesClasses.Button.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
 
+  THThemesClasses.ToolTip := TDictionary<HTHEME, String>.Create();
+  THThemesClasses.ToolTip.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
+
   TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
 
   OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
@@ -960,4 +996,5 @@ if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvai
   THThemesClasses.ScrollBars.Free;
   THThemesClasses.TreeView.Free;
   THThemesClasses.Button.Free;
+  THThemesClasses.ToolTip.Free;
 end.

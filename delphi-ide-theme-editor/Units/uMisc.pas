@@ -25,6 +25,7 @@ interface
 
 uses
  Windows,
+ Classes,
  Graphics,
  ImgList;
 
@@ -50,6 +51,7 @@ function  GetModuleLocation : string;
 function  WM_To_String(const WM_Message: Integer): string;
 function  GetWindowClassName(Window: HWND): String;
 function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
+procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);
 
 implementation
 
@@ -63,7 +65,6 @@ uses
   CommCtrl,
   StrUtils,
   ShellAPI,
-  Classes,
   Controls,
   Dialogs,
  {$IFDEF DELPHIXE2_UP}
@@ -90,6 +91,34 @@ begin
    except
     Result:= Default;
    end;
+end;
+
+procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);
+var
+  hSnapshot: THandle;
+  lpme: TModuleEntry32;
+  Exists: Boolean;
+begin
+  List.Clear;
+  hSnapshot := CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,  GetCurrentProcessId());
+  try
+    if hSnapshot =  INVALID_HANDLE_VALUE then Exit;
+    lpme.dwSize := SizeOf(lpme);
+    Exists := Module32First(hSnapshot, lpme);
+    while Exists do
+    begin
+
+      if OnlyNames then
+       List.Add(ExtractFileName(lpme.szExePath))
+      else
+       List.Add(lpme.szExePath);
+
+      Exists := Module32Next(hSnapshot, lpme);
+    end;
+  finally
+    if hSnapshot <> INVALID_HANDLE_VALUE then
+      CloseHandle(hSnapshot);
+  end;
 end;
 
 function GetWindowClassName(Window: HWND): String;
