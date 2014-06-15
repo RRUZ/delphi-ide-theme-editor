@@ -58,6 +58,7 @@ uses
 {$IFDEF DELPHIXE2_UP}
   Vcl.Styles,
   Vcl.Themes,
+  UxTheme,
 {$ELSE}
   Themes,
   UxTheme,
@@ -89,6 +90,8 @@ uses
   GraphUtil,
   CategoryButtons,
   ActnPopup,
+  //System.Diagnostics,
+  //TimeSpan,
   ActnMan,
   StdCtrls,
   Tabs,
@@ -171,8 +174,11 @@ var
   {$ENDIF}
   Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
   Trampoline_ProjectTree2PaintText         : procedure (Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
+
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
   Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
+  Trampoline_ExtTextOutW                   : function (DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall = nil;
+
   Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
 
   Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
@@ -219,6 +225,7 @@ var
   Trampoline_TExpandableEvalView_FormCreate : procedure(Self: TForm; Sender: TObject);
   Trampoline_TCustomForm_DoCreate: procedure(Self : TCustomForm) = nil;
 
+  Trampoline_DrawThemeText              : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
 
   FGutterBkColor : TColor = clNone;
 type
@@ -316,6 +323,13 @@ begin
 end;
 {$ENDIF}
 
+
+function Detour_UxTheme_DrawThemeText(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall;
+begin
+ //AddLog('Detour_UxTheme_DrawThemeText', string(pszText));
+ Exit(Trampoline_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+end;
+
 procedure Detour_TExpandableEvalView_FormCreate(Self: TForm; Sender: TObject);
 begin
   //AddLog('Detour_TExpandableEvalView_FormCreate', 'Foo');
@@ -326,6 +340,7 @@ procedure Detour_TCustomForm_DoCreate(Self : TCustomForm);
 begin
   Trampoline_TCustomForm_DoCreate(Self);
   //AddLog('Detour_TCustomForm_DoCreate', Self.ClassName);
+
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) then
     ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
 end;
@@ -3226,6 +3241,7 @@ begin
  end;
 
 
+  //SetTextColor(hDC, ColorToRGB(clRed));
   Result:=Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
   if RestoreColor then
     SetTextColor(hDC, OrgColor);
@@ -3288,7 +3304,44 @@ begin
 
  end;
 
+ //SetTextColor(DC, ColorToRGB(clRed));
  Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
+ if RestoreColor then
+   SetTextColor(DC, OrgColor);
+end;
+
+//Hook for allow change font color in IDE Insight Window
+function Detour_WinApi_ExtTextOutW(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall;
+const
+{$IFDEF DELPHIXE5_UP}
+ sDrawTreeDrawNode  ='IDEInsight.TIDEInsightForm.DrawTreeDrawNode';
+ sPaintItemNode     ='IDEInsight.TIDEInsightForm.PaintItemNode';
+ sPaintCategoryNode ='IDEInsight.TIDEInsightForm.PaintCategoryNode';
+{$ELSE}
+ sDrawTreeDrawNode  ='PopupSrchFrm.TPopupSearchForm.DrawTreeDrawNode';
+ sPaintItemNode     ='PopupSrchFrm.TPopupSearchForm.PaintItemNode';
+ sPaintCategoryNode ='PopupSrchFrm.TPopupSearchForm.PaintCategoryNode';
+{$ENDIF}
+var
+ sCaller  : string;
+ OrgColor : Cardinal;
+ RestoreColor : Boolean;
+begin
+ OrgColor:=GetTextColor(DC);
+ RestoreColor:=False;
+
+ if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+ if  OrgColor=0  then
+ begin
+  sCaller:=ProcByLevel(3);
+  if SameText(sCaller, sDrawTreeDrawNode) or SameText(sCaller, sPaintCategoryNode) or SameText(sCaller, sPaintItemNode) then
+  begin
+    SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+    RestoreColor:=True;
+  end;
+ end;
+
+ Result:=Trampoline_ExtTextOutW(DC, x, y, Options, Rect, Str, Count, Dx);
  if RestoreColor then
    SetTextColor(DC, OrgColor);
 end;
@@ -3640,9 +3693,13 @@ begin
   if Assigned(DrawThemeBackground) then
     Trampoline_DrawThemeBackground            := InterceptCreate(@DrawThemeBackground,   @Detour_UxTheme_DrawBackground);
 {$ENDIF}
+  if Assigned(DrawThemeText) then
+    Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
+
   Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @Detour_TCustomListView_WndProc);
   Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
   Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
+  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);
 // **************************************************
    GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
    if Assigned(GetSysColorOrgPointer) then
@@ -3773,6 +3830,10 @@ begin
   if Assigned(Trampoline_DrawThemeBackground) then
     InterceptRemove(@Trampoline_DrawThemeBackground);
 {$ENDIF}
+
+  if Assigned(Trampoline_DrawThemeText) then
+    InterceptRemove(@Trampoline_DrawThemeText);
+
   if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then
     InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
   if Assigned(Trampoline_TDockCaptionDrawer_DrawDockCaption) then
@@ -3790,6 +3851,10 @@ begin
 
   if Assigned(Trampoline_DrawTextEx) then
     InterceptRemove(@Trampoline_DrawTextEx);
+
+  if Assigned(Trampoline_ExtTextOutW) then
+    InterceptRemove(@Trampoline_ExtTextOutW);
+
 
   if Assigned(Trampoline_GetSysColor) then
     InterceptRemove(@Trampoline_GetSysColor);

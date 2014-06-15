@@ -26,7 +26,7 @@
   improve themes -> pro
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
-  scroll fails on XE in preview of source highligter
+  Scroll fails on XE in preview of source highligter
   frame in buttons of TIDECategoryButtons   depending oh theme colors
 }
 
