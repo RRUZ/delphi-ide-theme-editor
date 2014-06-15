@@ -299,6 +299,9 @@ begin
       LForm.Font.Color:=AColorMap.FontColor;
       HideSeparators(LForm, 'TProjectManagerForm', 'ToolBar');
 
+//      if SameText('TIDEInsightForm', AComponent.ClassName) then
+//       TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'_XE4.pas');
+
 
 
       //process field TComponent no registered in the components list

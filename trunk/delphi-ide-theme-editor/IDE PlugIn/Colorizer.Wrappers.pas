@@ -356,7 +356,7 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
-  if TColorizerLocalSettings.Settings.HeaderCustom  then
+  if TColorizerLocalSettings.Settings.HeaderCustom and not Restore then
     TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, AColorMap.FontColor)) //ok
   else
   TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', AColorMap.FontColor); //ok
@@ -730,7 +730,7 @@ procedure TWrapperCodeEditorTabControl.SetProperties(AComponent: TComponent;
   AColorMap: TCustomActionBarColorMap);
 begin
   inherited;
-  if TColorizerLocalSettings.Settings.TabIDECustom then
+  if TColorizerLocalSettings.Settings.TabIDECustom and not Restore then
   begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor', AColorMap.MenuColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
@@ -739,10 +739,10 @@ begin
   end
   else
   begin
-    TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor',AColorMap.MenuColor);
-    TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor',AColorMap.Color);
-    TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor',AColorMap.MenuColor);
-    TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor', AColorMap.Color);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
   end;
 end;
 
@@ -754,7 +754,7 @@ begin
   inherited;
   with TTabSet(AComponent) do
   begin
-    if TColorizerLocalSettings.Settings.TabIDECustom then
+    if TColorizerLocalSettings.Settings.TabIDECustom and not Restore then
     begin
       BackgroundColor:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, AColorMap.Color);
       SelectedColor  := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color);
@@ -768,7 +768,7 @@ begin
       UnselectedColor:= AColorMap.MenuColor;
       Font.Color     := AColorMap.FontColor;
     end;
-    Style          := tsModernTabs; //necessary for allow use the TTabset hook
+    Style            := tsModernTabs; //necessary for allow use the TTabset hook
   end
 
 end;
@@ -807,9 +807,8 @@ var
   LFontColor : TColor;
 begin
   inherited;
-  //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'_XE6.pas');
 
-  if TColorizerLocalSettings.Settings.TabIDECustom then
+  if TColorizerLocalSettings.Settings.TabIDECustom and not Restore then
   begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
     TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, AColorMap.Color));
@@ -870,7 +869,7 @@ var
 begin
   inherited;
 
-  if TColorizerLocalSettings.Settings.TabIDECustom then
+  if TColorizerLocalSettings.Settings.TabIDECustom and not Restore then
   begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color));
     TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, AColorMap.Color));
@@ -1318,6 +1317,7 @@ initialization
 
 
   RegisterColorizerWrapper('TVirtualStringTree',  TWrapperVirtualStringTree);
+  RegisterColorizerWrapper('TVirtualDrawTree',  TWrapperVirtualStringTree);
   RegisterColorizerWrapper('TBetterHintWindowVirtualDrawTree',  TWrapperVirtualStringTree);
 
   RegisterColorizerWrapper('TIDECategoryButtons',  TWrapperIDECategoryButtons);
@@ -1368,7 +1368,6 @@ initialization
 
   RegisterColorizerWrapper('TTabSet',  TWrapperTabSet);
   RegisterColorizerWrapper('TIDEDockTabSet',  TWrapperTabSet); //TIDEDockTabSet->TDockTabSet->TTabSet
-
 
   RegisterColorizerWrapper('TClosableTabScroller',  TWrapperClosableTabScroller);
   RegisterColorizerWrapper('TGradientTabSet',  TWrapperGradientTabSet);

@@ -1,6 +1,7 @@
 TCustomEditControl
 TBetterHintWindowVirtualDrawTree
 TVirtualStringTree
+TVirtualDrawTree
 TEditControl
 TInspListBox
 TIDECategoryButtons

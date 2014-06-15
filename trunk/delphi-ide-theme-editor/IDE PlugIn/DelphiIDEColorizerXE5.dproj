@@ -132,6 +132,7 @@
         <DCCReference Include="Colorizer.Wrappers.pas"/>
         <DCCReference Include="Colorizer.HookScrollBars.pas"/>
         <DCCReference Include="..\Units\uColorSelector.pas"/>
+        <DCCReference Include="Colorizer.Hooks.GDIPOBJ.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>
