@@ -444,7 +444,7 @@ var
 
     oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
     if hot then
-      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.BtnSelectedFont);
+      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor);
 
     if Disabled then
       oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor);
@@ -663,7 +663,7 @@ begin
 
   LColor   := TColorizerLocalSettings.ColorMap.FontColor;
   if isHot in State then
-    LColor   := TColorizerLocalSettings.ColorMap.BtnSelectedFont;
+    LColor   := TColorizerLocalSettings.ColorMap.SelectedFontColor;
 
   if isDisabled in State then
     LColor   := TColorizerLocalSettings.ColorMap.DisabledFontColor;
