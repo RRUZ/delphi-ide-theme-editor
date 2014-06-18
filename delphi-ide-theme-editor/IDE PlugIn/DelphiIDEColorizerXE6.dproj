@@ -121,7 +121,7 @@
         <DCCReference Include="Colorizer.HookForms.pas"/>
         <DCCReference Include="Colorizer.Hooks.pas"/>
         <DCCReference Include="Colorizer.StoreColorMap.pas"/>
-        <DCCReference Include="ColorXPStyleActnCtrls.pas"/>
+        <DCCReference Include="Colorizer.XPStyleActnCtrls.pas"/>
         <DCCReference Include="Colorizer.OptionsDlg.pas">
             <Form>FrameColorizer</Form>
             <DesignClass>TFrame</DesignClass>
@@ -140,12 +140,15 @@
         <DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
         <DCCReference Include="..\Units\uStackTrace.pas"/>
         <DCCReference Include="Colorizer.Wrappers.pas"/>
-        <DCCReference Include="Colorizer.HookScrollBars.pas"/>
+        <DCCReference Include="Colorizer.Hooks.UxTheme.pas"/>
         <DCCReference Include="..\Units\uColorSelector.pas"/>
         <DCCReference Include="Colorizer.Hooks.GDIPOBJ.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
         <DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>
+        <DCCReference Include="Colorizer.Hooks.Windows.pas"/>
+        <DCCReference Include="Colorizer.Hooks.IDE.pas"/>
+        <DCCReference Include="Colorizer.VirtualTrees.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

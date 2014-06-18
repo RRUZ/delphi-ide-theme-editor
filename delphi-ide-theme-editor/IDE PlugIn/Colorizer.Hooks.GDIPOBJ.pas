@@ -22,6 +22,7 @@
 unit Colorizer.Hooks.GDIPOBJ;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 uses
     Colorizer.Utils,

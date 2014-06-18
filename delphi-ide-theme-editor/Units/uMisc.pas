@@ -27,6 +27,7 @@ uses
  Windows,
  Classes,
  Graphics,
+ PngImage,
  ImgList;
 
 
@@ -52,6 +53,7 @@ function  WM_To_String(const WM_Message: Integer): string;
 function  GetWindowClassName(Window: HWND): String;
 function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
 procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);
+procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
 
 implementation
 
@@ -91,6 +93,56 @@ begin
    except
     Result:= Default;
    end;
+end;
+
+
+procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
+
+  function ColorToTriple(Color: TColor): TRGBTriple;
+  begin
+    Color := ColorToRGB(Color);
+    Result.rgbtBlue := Color shr 16 and $FF;
+    Result.rgbtGreen := Color shr 8 and $FF;
+    Result.rgbtRed := Color and $FF;
+  end;
+
+var
+   X, Y: Integer;
+   LBitmap: TBitmap;
+   LRGBLine: PRGBLine;
+   AlphaLineA, AlphaLineB: PngImage.PByteArray;
+begin
+  if (Source.Width < (Left + Width)) or (Source.Height < (Top + Height)) then
+    raise Exception.Create('Invalid position/size');
+
+  LBitmap := TBitmap.Create;
+  try
+    LBitmap.Width := Width;
+    LBitmap.Height := Height;
+    LBitmap.PixelFormat := pf24bit;
+
+    for Y := 0 to LBitmap.Height - 1 do
+    begin
+      LRGBLine := LBitmap.Scanline[Y];
+      for X := 0 to LBitmap.Width - 1 do
+        LRGBLine^[X] := ColorToTriple(Source.Pixels[Left + X, Top + Y]);
+    end;
+
+    Target := TPngImage.Create;
+    Target.Assign(LBitmap);
+  finally
+    LBitmap.Free;
+  end;
+
+  if Source.Header.ColorType in [COLOR_GRAYSCALEALPHA, COLOR_RGBALPHA] then begin
+    Target.CreateAlpha;
+    for Y := 0 to Target.Height - 1 do begin
+      AlphaLineA := Source.AlphaScanline[Top + Y];
+      AlphaLineB := Target.AlphaScanline[Y];
+      for X := 0 to Target.Width - 1 do
+        AlphaLineB^[X] := AlphaLineA^[X + Left];
+    end;
+  end;
 end;
 
 procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);

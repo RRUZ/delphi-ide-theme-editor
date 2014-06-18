@@ -22,7 +22,6 @@
 //TODO
 
 {
-  Add support for TPopupListBox
   improve themes -> pro
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
@@ -32,7 +31,8 @@
 
 // DONE
 {
-  * fix fonts colors in ide tabs XE6
+  * Add support for TPopupListBox
+  * Fix fonts colors in ide tabs XE6
   * add custom option for header virtual trees and listview
   * TDockToolBar (toolbars) remove border
   * TClosableTabScroller border  -->  gdi outline
@@ -106,7 +106,6 @@
 unit Main;
 
 interface
-
 {$I ..\Common\Jedi.inc}
 
 uses
@@ -175,8 +174,8 @@ uses
  Colorizer.SettingsForm,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
+ Colorizer.XPStyleActnCtrls,
  Vcl.Styles.Utils.FlatMenus,
- ColorXPStyleActnCtrls,
  uMisc;
 
 
@@ -425,7 +424,7 @@ begin
     TColorizerLocalSettings.WinAPIClasses:=TStringList.Create;
     TColorizerLocalSettings.WinAPIClasses.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'WinAPIClasses.dat');
 
-    TColorizerLocalSettings.ColorMap:=TColorXPColorMap.Create(nil);
+    TColorizerLocalSettings.ColorMap:=TColorizerColorMap.Create(nil);
     LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
     ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
     s:=IncludeTrailingPathDelimiter(ImagesPath)+TColorizerLocalSettings.Settings.DockImages+'.png';

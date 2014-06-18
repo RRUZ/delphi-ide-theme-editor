@@ -22,7 +22,6 @@
 unit Colorizer.Wrappers;
 
 interface
-
 {$I ..\Common\Jedi.inc}
 
 uses
@@ -30,13 +29,14 @@ uses
   Forms,
   ActnMan,
   Generics.Collections,
+  Colorizer.XPStyleActnCtrls,
   StdCtrls,
   Controls,
   Windows,
   Graphics,
   Classes;
 
-   function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False; Restore : Boolean = False) : Boolean;
+   function RunWrapper(AComponent : TComponent; AColorMap:TColorizerColorMap; Invalidate : Boolean = False; Restore : Boolean = False) : Boolean;
 
 type
    TBaseWrapper = class (TComponent)
@@ -44,7 +44,7 @@ type
     FRestore: Boolean;
     procedure SetFlatParent(AComponent: TComponent);
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); virtual;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); virtual;
     property  Restore : Boolean read FRestore Write FRestore;
    public
     constructor Create(AOwner: TComponent); override;
@@ -140,173 +140,173 @@ type
 
    TWrapperVirtualStringTree = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperIDECategoryButtons = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperDisassemblerView = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperTDStringGrid = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperDeguggerWindows = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperIDEComboBox = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
-   TWrapperSimpleControl = class(TBaseWrapper)
+   TWrapperSimpleEditControl = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperPanel = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperInspListBox = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperStringGrid = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperRefactoringTree = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperCodeEditorTabControl = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperEditControl = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperToolBar = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperComponentToolbarFrame = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperTabSet = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperClosableTabScroller = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperGradientTabSet = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperIDEGradientTabSet = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperTabSheet = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperActionMainMenuBar = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperPopupActionBar = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperActionToolBar = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperControlBar = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperStatusBar = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperLists = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperGroupComponents  = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperFontComponents  = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperDescriptionPane = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperHotCommands = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
 
    TWrapperGradientButton = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperCategoriesPopUp = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperPropCheckBox = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
    TWrapperListButton = class(TBaseWrapper)
    protected
-    procedure SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap); override;
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
 
@@ -323,7 +323,7 @@ begin
   end;
 end;
 
-function RunWrapper(AComponent : TComponent; AColorMap:TCustomActionBarColorMap; Invalidate : Boolean = False; Restore : Boolean = False) : Boolean;
+function RunWrapper(AComponent : TComponent; AColorMap:TColorizerColorMap; Invalidate : Boolean = False; Restore : Boolean = False) : Boolean;
 var
   LBaseWrapper : TBaseWrapper;
 begin
@@ -346,7 +346,7 @@ begin
 end;
 
 { TWrapperVirtualStringTree }
-procedure TWrapperVirtualStringTree.SetProperties(AComponent : TComponent; AColorMap:TCustomActionBarColorMap);
+procedure TWrapperVirtualStringTree.SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap);
 begin
   inherited;
   //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
@@ -354,7 +354,7 @@ begin
 
   TRttiUtils.SetRttiPropertyValue(AComponent,'BevelKind', TValue.From(TBevelKind.bkFlat));
   TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);  //ok
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);  //ok
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
   if TColorizerLocalSettings.Settings.HeaderCustom and not Restore then
     TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, AColorMap.FontColor)) //ok
@@ -437,6 +437,8 @@ begin
 //           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
 //        end;
 //       {$ENDIF}
+  if Restore then
+    TCustomControl(AComponent).Invalidate;
 end;
 
 { TBaseWrapper }
@@ -448,7 +450,7 @@ begin
 end;
 
 procedure TBaseWrapper.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
 
 end;
@@ -476,7 +478,7 @@ end;
 { TWrapperIDECategoryButtons }
 
 procedure TWrapperIDECategoryButtons.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
   LCategoryButtons : TCategoryButtons;
   i :   Integer;
@@ -504,10 +506,10 @@ end;
 { TWrapperDisassemblerView }
 
 procedure TWrapperDisassemblerView.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'BreakpointColor', AColorMap.SelectedColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'BreakpointTextColor', AColorMap.SelectedFontColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
@@ -525,10 +527,10 @@ end;
 { TWrapperTDStringGrid }
 
 procedure TWrapperTDStringGrid.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   //TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
   TRttiUtils.SetRttiPropertyValue(AComponent,'FixedColor', AColorMap.Color);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
@@ -539,11 +541,11 @@ end;
 { TWrapperDeguggerWindows }
 
 procedure TWrapperDeguggerWindows.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   //SetFlatParent(AComponent);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color',AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color',AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color',AColorMap.FontColor);
 end;
 
@@ -553,7 +555,7 @@ type
  TCustomComboBoxClass = class(TCustomComboBox);
 
 procedure TWrapperIDEComboBox.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 //var
 //  LCustomComboBox : TCustomComboBoxClass;
 begin
@@ -568,23 +570,30 @@ begin
   //LCustomComboBox.BevelKind  := bkFlat;
   //LCustomComboBox.BevelInner := bvNone;
   //LCustomComboBox.Ctl3D      := False;
+  if Restore then
+  begin
+    TCustomComboBoxClass(AComponent).Color:=clWindow;
+    TWinControl(AComponent).Invalidate;
+  end;
 end;
 
 { TWrapperStandardControl }
 
-procedure TWrapperSimpleControl.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+procedure TWrapperSimpleEditControl.SetProperties(AComponent: TComponent;
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   //AddLog('TWrapperSimpleControl', AComponent.ClassName);
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+  if Restore then
+    TWinControl(AComponent).Invalidate;
 end;
 
 { TWrapperPanel }
 
 procedure TWrapperPanel.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
   LPanel : TPanel;
 begin
@@ -597,7 +606,7 @@ end;
 { TWrapperInspListBox }
 
 procedure TWrapperInspListBox.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
     {
@@ -620,7 +629,7 @@ begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.Color);
     TRttiUtils.SetRttiPropertyValue(AComponent,'PropNameColor', AColorMap.FontColor);   //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'PropValueColor', AColorMap.FontColor);  //*
-    TRttiUtils.SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'EditBackgroundColor', AColorMap.WindowColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'EditValueColor', AColorMap.FontColor); //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'CategoryColor', AColorMap.FontColor); //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'GutterColor', AColorMap.Color);
@@ -639,10 +648,10 @@ end;
 { TWrapperStringGrid }
 
 procedure TWrapperStringGrid.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'FixedColor', AColorMap.Color);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
@@ -650,10 +659,10 @@ end;
 { TWrapperRefactoringTree }
 
 procedure TWrapperRefactoringTree.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
 end;
@@ -661,7 +670,7 @@ end;
 
 { TWrapperEditControl }
 
-procedure TWrapperEditControl.SetProperties(AComponent: TComponent; AColorMap: TCustomActionBarColorMap);
+procedure TWrapperEditControl.SetProperties(AComponent: TComponent; AColorMap: TColorizerColorMap);
 begin
   inherited;
    SetFlatParent(AComponent);
@@ -687,7 +696,9 @@ end;
 
 { TWrapperToolBar }
 
-procedure TWrapperToolBar.SetProperties(AComponent: TComponent;  AColorMap: TCustomActionBarColorMap);
+procedure TWrapperToolBar.SetProperties(AComponent: TComponent;  AColorMap: TColorizerColorMap);
+var
+ i : Integer;
 begin
   inherited;
   SetFlatParent(AComponent);
@@ -720,6 +731,13 @@ begin
     EdgeBorders        := [];
     Ctl3D:=False;
     //Flat:=True;
+
+    for  i :=0 to ButtonCount-1 do
+     if Restore and (Buttons[I].Style = TToolButtonStyle.tbsSeparator) and not (Buttons[I].Visible) then
+        Buttons[I].Visible:=True
+     else
+     if not Restore and (Buttons[I].Style = TToolButtonStyle.tbsSeparator) and (Buttons[I].Visible) then
+       Buttons[I].Visible:=False;
   end;
 
 end;
@@ -727,7 +745,7 @@ end;
 { TWrapperCodeEditorTabControl }
 
 procedure TWrapperCodeEditorTabControl.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   if TColorizerLocalSettings.Settings.TabIDECustom and not Restore then
@@ -749,7 +767,7 @@ end;
 { TWrapperTabSet }
 
 procedure TWrapperTabSet.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   with TTabSet(AComponent) do
@@ -776,7 +794,7 @@ end;
 { TWrapperClosableTabScroller }
 
 procedure TWrapperClosableTabScroller.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
    inherited;
    //SetBkColor
@@ -802,7 +820,7 @@ end;
 { TWrapperGradientTabSet }
 
 procedure TWrapperGradientTabSet.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
   LFontColor : TColor;
 begin
@@ -863,7 +881,7 @@ end;
 { TWrapperIDEGradientTabSet }
 
 procedure TWrapperIDEGradientTabSet.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
   LFontColor : TColor;
 begin
@@ -897,7 +915,7 @@ end;
 { TWrapperTabSheet }
 
 procedure TWrapperTabSheet.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   with TTabSheet(AComponent) do
@@ -910,7 +928,7 @@ end;
 { TWrapperActionMainMenuBar }
 
 procedure TWrapperActionMainMenuBar.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
   LColorMap      : TCustomActionBarColorMap;
 begin
@@ -926,13 +944,29 @@ begin
     Shadows         := True;
     Font.Color      := AColorMap.FontColor;
   end
+end;
 
+{ TWrapperActionToolBar }
+
+procedure TWrapperActionToolBar.SetProperties(AComponent: TComponent;
+  AColorMap: TColorizerColorMap);
+var
+  LColorMap      : TCustomActionBarColorMap;
+begin
+  inherited;
+  with TActionToolBar(AComponent) do
+  begin
+    LColorMap:=TXPColorMap.Create(AComponent);
+    LColorMap.Assign(AColorMap);
+    LColorMap.OnColorChange:=nil;
+    ColorMap:=LColorMap;
+  end;
 end;
 
 { TWrapperControlBar }
 
 procedure TWrapperControlBar.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   with TControlBar(AComponent) do
@@ -949,7 +983,7 @@ end;
 { TWrapperPopupActionBar }
 
 procedure TWrapperPopupActionBar.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 
     procedure ImageListAdd(LImages : TImageList;Index: Integer;const ResourceName: String);
     {$IFDEF DELPHI2009_UP}
@@ -1027,28 +1061,11 @@ begin
   end;
 end;
 
-{ TWrapperActionToolBar }
-
-procedure TWrapperActionToolBar.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
-var
-  LColorMap      : TCustomActionBarColorMap;
-begin
-  inherited;
-  with TActionToolBar(AComponent) do
-  begin
-    LColorMap:=TXPColorMap.Create(AComponent);
-    LColorMap.Assign(AColorMap);
-    LColorMap.OnColorChange:=nil;
-    ColorMap:=LColorMap;
-  end;
-end;
-
 
 { TWrapperStatusBar }
 
 procedure TWrapperStatusBar.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
   i : Integer;
 begin
@@ -1070,10 +1087,10 @@ end;
 { TWrapperLists }
 
 procedure TWrapperLists.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
@@ -1081,7 +1098,7 @@ end;
 { TWrapperGroupComponents }
 
 procedure TWrapperGroupComponents.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
@@ -1093,7 +1110,7 @@ end;
 { TWrapperFontComponents }
 
 procedure TWrapperFontComponents.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
@@ -1102,7 +1119,7 @@ end;
 { TWrapperDescriptionPane }
 
 procedure TWrapperDescriptionPane.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\TDescriptionPane.pas');
@@ -1127,7 +1144,7 @@ end;
 { TWrapperHotCommands }
 
 procedure TWrapperHotCommands.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\THotCommands.pas');
@@ -1138,7 +1155,7 @@ end;
 { TWrapperGradientButton }
 
 procedure TWrapperGradientButton.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 //var
 // lBitMap : TBitmap;
 begin
@@ -1187,7 +1204,7 @@ end;
 { TWrapperCategoriesPopUp }
 
 procedure TWrapperCategoriesPopUp.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 var
  LComponent : TComponent;
 begin
@@ -1203,28 +1220,29 @@ end;
 { TWrapperPropCheckBox }
 
 procedure TWrapperPropCheckBox.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   //necesary to allow use a hook with the DrawFrameControl and set color of font
-  if GetWindowTheme(TWinControl(AComponent).Handle) <>0 then
-    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
+  if not Restore and (GetWindowTheme(TWinControl(AComponent).Handle)<>0) then
+    SetWindowTheme(TWinControl(AComponent).Handle, '', '')
+  else
+  if Restore and (GetWindowTheme(TWinControl(AComponent).Handle)=0) then
+    SetWindowTheme(TWinControl(AComponent).Handle, VSCLASS_BUTTON, nil);
 
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.MenuColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
 { TWrapperListButton }
 
 procedure TWrapperListButton.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 //var
 //  ListBox: TListBox;
 //  PopupPanel: TCustomForm;
 begin
   inherited;
-  //TRttiUtils.SetRttiPropertyValue(AComponent,'PopupPanel.Color', AColorMap.Color);
-  //TRttiUtils.SetRttiPropertyValue(AComponent,'ListBox.Color', AColorMap.MenuColor);
 {
    property ListBox: TListBox;
    property PopupPanel: TCustomForm;
@@ -1242,7 +1260,7 @@ end;
 { TWrapperComponentToolbarFrame }
 
 procedure TWrapperComponentToolbarFrame.SetProperties(AComponent: TComponent;
-  AColorMap: TCustomActionBarColorMap);
+  AColorMap: TColorizerColorMap);
 begin
   inherited;
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
@@ -1347,10 +1365,10 @@ initialization
 
   RegisterColorizerWrapper('TPropCheckBox',  TWrapperPropCheckBox);
 
-  RegisterColorizerWrapper('TEdit',  TWrapperSimpleControl);
-  RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleControl);
-  RegisterColorizerWrapper('TEditorDockPanel',  TWrapperSimpleControl);
-  RegisterColorizerWrapper('TPopupListBox',  TWrapperSimpleControl);
+  RegisterColorizerWrapper('TEdit',  TWrapperSimpleEditControl);
+  RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleEditControl);
+  RegisterColorizerWrapper('TEditorDockPanel',  TWrapperSimpleEditControl);
+  //RegisterColorizerWrapper('TPopupListBox',  TWrapperSimpleControl); not used
 
   RegisterColorizerWrapper('TPanel',  TWrapperPanel);
   RegisterColorizerWrapper('TInspListBox',  TWrapperInspListBox);
@@ -1364,6 +1382,7 @@ initialization
   RegisterColorizerWrapper('TCnSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
   RegisterColorizerWrapper('TCnExternalSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
   RegisterColorizerWrapper('TGXToolBar',  TWrapperToolBar);//gexperts toolbar
+ // RegisterColorizerWrapper('TTBXToolbar',  TWrapperToolBar);//gexperts toolbar
 
 
   RegisterColorizerWrapper('TTabSet',  TWrapperTabSet);
