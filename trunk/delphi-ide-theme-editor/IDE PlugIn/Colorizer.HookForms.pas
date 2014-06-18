@@ -21,6 +21,7 @@
 unit Colorizer.HookForms;
 
 interface
+{$I ..\Common\Jedi.inc}
 
   Procedure InstallFormsHook();
   Procedure RemoveFormsHook();

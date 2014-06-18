@@ -22,6 +22,7 @@
 unit Colorizer.Settings;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 type
   TSettings=class
@@ -66,6 +67,7 @@ type
     FHeaderBorderColor: string;
     FHeaderCustom: boolean;
     FHeaderStartGrad: string;
+    function GetThemeFileName: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
@@ -120,6 +122,8 @@ type
     property HeaderCustom      : boolean read FHeaderCustom write FHeaderCustom;
 
     property CheckUpdates    : boolean read FCheckUpdates write FCheckUpdates;
+
+    property ThemeFileName   : string read GetThemeFileName;
   end;
 
   procedure ReadSettings(Settings: TSettings;Const Path:String);
@@ -129,6 +133,7 @@ implementation
 
 
 uses
+  uMisc,
   SysUtils,
   IniFiles;
 
@@ -247,6 +252,13 @@ begin
   finally
     LIniFile.Free;
   end;
+end;
+
+{ TSettings }
+
+function TSettings.GetThemeFileName: string;
+begin
+ Result:=IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation()))+'Themes\'+FThemeName+'.idetheme';
 end;
 
 end.

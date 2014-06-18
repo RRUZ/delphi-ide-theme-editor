@@ -44,7 +44,6 @@ contains
   Colorizer.HookForms in 'Colorizer.HookForms.pas',
   Colorizer.Hooks in 'Colorizer.Hooks.pas',
   Colorizer.StoreColorMap in 'Colorizer.StoreColorMap.pas',
-  ColorXPStyleActnCtrls in 'ColorXPStyleActnCtrls.pas',
   Colorizer.OptionsDlg in 'Colorizer.OptionsDlg.pas' {FrameColorizer: TFrame},
   Colorizer.SettingsForm in 'Colorizer.SettingsForm.pas' {FormIDEColorizerSettings},
   uDelphiVersions in '..\Units\uDelphiVersions.pas',
@@ -57,13 +56,17 @@ contains
   uDelphiIDEHighlight in '..\Units\uDelphiIDEHighlight.pas',
   uStackTrace in '..\Units\uStackTrace.pas',
   Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
-  Colorizer.HookScrollBars in 'Colorizer.HookScrollBars.pas',
   Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
   uColorSelector in '..\Units\uColorSelector.pas',
   Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',
-  Colorizer.uxThemeHelper in 'Colorizer.uxThemeHelper.pas';
+  Colorizer.uxThemeHelper in 'Colorizer.uxThemeHelper.pas',
+  Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas',
+  Colorizer.Hooks.UxTheme in 'Colorizer.Hooks.UxTheme.pas',
+  Colorizer.Hooks.Windows in 'Colorizer.Hooks.Windows.pas',
+  Colorizer.VirtualTrees in 'Colorizer.VirtualTrees.pas',
+  Colorizer.XPStyleActnCtrls in 'Colorizer.XPStyleActnCtrls.pas';
 
 end.
 

@@ -22,7 +22,6 @@
 unit Colorizer.Utils;
 
 interface
-
 {$I ..\Common\Jedi.inc}
 
 uses
@@ -42,23 +41,23 @@ uses
  PngImage,
  Graphics,
  Colorizer.Settings,
- ColorXPStyleActnCtrls;
+ Colorizer.XPStyleActnCtrls;
 
 {.$DEFINE ENABLELOG}
 
 procedure AddLog(const Message : string); overload;
 procedure AddLog(const Category, Message : string); overload;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False;Invalidate : Boolean = False); overload;
+procedure RefreshIDETheme(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;Restore : Boolean = False;Invalidate : Boolean = False); overload;
 procedure RefreshIDETheme(Invalidate : Boolean = False); overload;
 procedure RestoreIDESettings();
 procedure RestoreIDESettingsFast();
 
-procedure LoadSettings(AColorMap:TCustomActionBarColorMap; Settings : TSettings);
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate : Boolean = False);
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
+procedure LoadSettings(AColorMap:TColorizerColorMap; Settings : TSettings);
+procedure ProcessComponent(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate : Boolean = False);
+procedure GenerateColorMap(AColorMap:TColorizerColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);overload;
+procedure GenerateColorMap(AColorMap:TColorizerColorMap;Style:TCustomStyleServices);overload;
 procedure RegisterVClStylesFiles;
 {$ENDIF}
 
@@ -69,7 +68,7 @@ procedure RegisterVClStylesFiles;
       {$IFDEF DELPHI2009_UP}
       class var ActnStyleList : TList<TActionManager>;
       {$ENDIF}
-      class var ColorMap       : TCustomActionBarColorMap;
+      class var ColorMap       : TColorizerColorMap;
       class var ActionBarStyle : TActionBarStyle;
       class var HookedWindows     : TStringList;
       class var HookedScrollBars  : TStringList;
@@ -153,14 +152,22 @@ procedure RestoreIDESettingsFast();
 var
   i, j  : Integer;
   LComponent : TComponent;
-  NativeColorMap : TCustomActionBarColorMap;
-begin
+  NativeColorMap : TColorizerColorMap;
 {$IFDEF DELPHIXE_UP}
-  NativeColorMap:=TThemedColorMap.Create(nil);
+  LThemedColorMap : TThemedColorMap;
 {$ELSE}
-  NativeColorMap:=TStandardColorMap.Create(nil);
+  LThemedColorMap: TStandardColorMap;
 {$ENDIF}
+begin
+  NativeColorMap:=TColorizerColorMap.Create(nil);
   try
+{$IFDEF DELPHIXE_UP}
+  LThemedColorMap:=TThemedColorMap.Create(nil);
+{$ELSE}
+  LThemedColorMap:=TStandardColorMap.Create(nil);
+{$ENDIF}
+  NativeColorMap.Assign(LThemedColorMap);
+  NativeColorMap.WindowColor:=clWindow;
   for i := 0 to Screen.FormCount-1 do
    if SameText(Screen.Forms[i].ClassName, 'TAppBuilder') then
      for j := 0 to Screen.Forms[i].ComponentCount-1 do
@@ -169,12 +176,13 @@ begin
        if LComponent is TToolBar then
          RunWrapper(LComponent, NativeColorMap, False, True);
       end;
+
   finally
     NativeColorMap.Free;
   end;
 end;
 
-procedure RefreshIDETheme(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;Restore : Boolean = False; Invalidate : Boolean = False);
+procedure RefreshIDETheme(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;Restore : Boolean = False; Invalidate : Boolean = False);
 var
   Index     : Integer;
 begin
@@ -198,27 +206,25 @@ begin
 end;
 
 
-procedure LoadSettings(AColorMap:TCustomActionBarColorMap; Settings : TSettings);
-Var
- ThemeFileName : string;
+procedure LoadSettings(AColorMap:TColorizerColorMap; Settings : TSettings);
 begin
   if Settings=nil then exit;
   ReadSettings(Settings, ExtractFilePath(GetModuleLocation()));
-  ThemeFileName:=IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation()))+'Themes\'+Settings.ThemeName+'.idetheme';
-  if FileExists(ThemeFileName) then
-   LoadColorMapFromXmlFile(AColorMap, ThemeFileName);
+  if FileExists(Settings.ThemeFileName) then
+   LoadColorMapFromXmlFile(AColorMap, Settings.ThemeFileName);
 
 //  if ActionBarStyles.IndexOf(Settings.StyleBarName)>=0 then
 //    ActionBarStyle:= TActionBarStyle(ActionBarStyles.Objects[ActionBarStyles.IndexOf(Settings.StyleBarName)]);
 end;
 
 
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Color, FontColor:TColor);
+procedure GenerateColorMap(AColorMap:TColorizerColorMap;Color, FontColor:TColor);
 begin
   AColorMap.Color                 :=Color;
   AColorMap.ShadowColor           :=GetShadowColor(Color);
   AColorMap.FontColor             :=FontColor;
   AColorMap.MenuColor             :=GetHighLightColor(Color);
+  AColorMap.WindowColor           :=AColorMap.MenuColor;
   AColorMap.HighlightColor        :=GetHighLightColor(AColorMap.MenuColor);
   AColorMap.HotColor              :=GetHighLightColor(AColorMap.MenuColor);
   AColorMap.BtnSelectedColor      :=AColorMap.HotColor;
@@ -236,13 +242,14 @@ begin
 end;
 
 {$IFDEF DELPHIXE2_UP}
-procedure GenerateColorMap(AColorMap:TCustomActionBarColorMap;Style:TCustomStyleServices);
+procedure GenerateColorMap(AColorMap:TColorizerColorMap;Style:TCustomStyleServices);
 begin
   AColorMap.Color                 :=Style.GetStyleColor(scPanel);
   AColorMap.ShadowColor           :=StyleServices.GetSystemColor(clBtnShadow);
   AColorMap.FontColor             :=Style.GetStyleFontColor(sfButtonTextNormal);
 
-  AColorMap.MenuColor             :=Style.GetStyleColor(scWindow);
+  AColorMap.MenuColor             :=Style.GetStyleColor(scPanel);
+  AColorMap.WindowColor           :=Style.GetStyleColor(scWindow);
   AColorMap.HighlightColor        :=StyleServices.GetSystemColor(clHighlight);
   AColorMap.BtnSelectedColor      :=Style.GetStyleColor(scButtonHot);
 
@@ -260,23 +267,7 @@ begin
 end;
 {$ENDIF}
 
-procedure ProcessComponent(AColorMap:TCustomActionBarColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate: Boolean = False);
-
-  procedure HideSeparators(LForm : TForm; const AClassName, AToolBarName: string);
-  var
-    I        : Integer;
-    LToolbar : TToolBar;
-  begin
-      if SameText(LForm.ClassName, AClassName) then
-      begin
-        LToolbar := TToolBar(LForm.FindComponent(AToolBarName));
-        if LToolbar<>nil then
-         for  I :=0 to LToolbar.ButtonCount-1 do
-          if (LToolbar.Buttons[I].Style = TToolButtonStyle.tbsSeparator) and (LToolbar.Buttons[I].Visible) then
-            LToolbar.Buttons[I].Visible:=False;
-      end;
-  end;
-
+procedure ProcessComponent(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate: Boolean = False);
 var
   Index          : Integer;
   LActionManager : TActionManager;
@@ -297,7 +288,7 @@ begin
       LForm:=TForm(AComponent);
       LForm.Color := AColorMap.Color;
       LForm.Font.Color:=AColorMap.FontColor;
-      HideSeparators(LForm, 'TProjectManagerForm', 'ToolBar');
+      //HideSeparators(LForm, 'TProjectManagerForm', 'ToolBar');
 
 //      if SameText('TIDEInsightForm', AComponent.ClassName) then
 //       TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'_XE4.pas');
@@ -429,21 +420,38 @@ end;
 
 procedure RestoreIDESettings();
 var
- NativeColorMap : TCustomActionBarColorMap;
+ NativeColorMap : TColorizerColorMap;
+{$IFDEF DELPHIXE_UP}
+ LThemedColorMap : TThemedColorMap;
+{$ELSE}
+ LThemedColorMap: TStandardColorMap;
+{$ENDIF}
 begin
 {$IFDEF DELPHIXE2_UP}
   if TColorizerLocalSettings.Settings.UseVCLStyles then
     if not TStyleManager.ActiveStyle.IsSystemStyle  then
      TStyleManager.SetStyle('Windows');
 {$ENDIF}
+  NativeColorMap := TColorizerColorMap.Create(nil);
+  try
 
 {$IFDEF DELPHIXE_UP}
-  NativeColorMap:=TThemedColorMap.Create(nil);
+  LThemedColorMap  := TThemedColorMap.Create(nil);
+  try
+    NativeColorMap.Assign(LThemedColorMap);
+  finally
+   LThemedColorMap.Free;
+  end;
 {$ELSE}
-  NativeColorMap:=TStandardColorMap.Create(nil);
+  LThemedColorMap  := TStandardColorMap.Create(nil);
+  try
+    NativeColorMap.Assign(LThemedColorMap);
+  finally
+   LThemedColorMap.Free;
+  end;
 {$ENDIF}
 
-  try
+    NativeColorMap.WindowColor:=clWindow;
   {$IFDEF DELPHIXE_UP}
     RefreshIDETheme(NativeColorMap, PlatformDefaultStyle, True, False);
   {$ELSE}

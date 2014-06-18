@@ -1,7 +1,7 @@
 //**************************************************************************************************
 //
-// Unit ColorXPStyleActnCtrls
-// unit ColorXPStyleActnCtrls  for the Delphi IDE Colorizer
+// Unit Colorizer.XPStyleActnCtrls
+// unit Colorizer.XPStyleActnCtrls  for the Delphi IDE Colorizer
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -11,7 +11,7 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is ColorXPStyleActnCtrls.pas.
+// The Original Code is Colorizer.XPStyleActnCtrls.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
@@ -19,21 +19,28 @@
 //
 //**************************************************************************************************
 
-unit ColorXPStyleActnCtrls;
+unit Colorizer.XPStyleActnCtrls;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 uses
   ActnMan,
   ActnMenus,
+  Classes,
   Graphics,
   ActnColorMaps,
   ActnCtrls;
 
 type
-  TColorXPColorMap = class(TXPColorMap)
+  TColorizerColorMap = class(TXPColorMap)
+  private
+    FWindowColor: TColor;
   public
+    procedure Assign(Source: TPersistent); override;
     procedure UpdateColors; override;
+  published
+    property WindowColor: TColor read FWindowColor write FWindowColor default clNone;
   end;
 
 
@@ -57,6 +64,7 @@ implementation
 
 uses
   Colorizer.Utils,
+  Colorizer.StoreColorMap,
   ListActns,
   XPActnCtrls,
   {$IF CompilerVersion>=23} //XE2
@@ -85,7 +93,7 @@ begin
     Result := PlatformDefaultStyle.GetColorMapClass(ActionBar)
   else
   {$IFEND}
-    Result := {TXPColorMap{TTwilightColorMap}TColorXPColorMap; //use own
+    Result := {TXPColorMap{TTwilightColorMap}TColorizerColorMap; //use own
 end;
 
 function TColorXPStyleActionBars.GetControlClass(ActionBar: TCustomActionBar;
@@ -157,10 +165,41 @@ end;
 
 { TColorXPColorMap }
 
-procedure TColorXPColorMap.UpdateColors;
+procedure TColorizerColorMap.Assign(Source: TPersistent);
+begin
+  if Source is TCustomActionBarColorMap then
+  begin
+    BtnSelectedColor := TCustomActionBarColorMap(Source).BtnSelectedColor;
+    BtnFrameColor := TCustomActionBarColorMap(Source).BtnFrameColor;
+    BtnSelectedFont := TCustomActionBarColorMap(Source).BtnSelectedFont;
+    Color := TCustomActionBarColorMap(Source).Color;
+    DesignFocus := TCustomActionBarColorMap(Source).DesignFocus;
+    DisabledColor := TCustomActionBarColorMap(Source).DisabledColor;
+    DisabledFontColor := TCustomActionBarColorMap(Source).DisabledFontColor;
+    DisabledFontShadow := TCustomActionBarColorMap(Source).DisabledFontShadow;
+    FontColor := TCustomActionBarColorMap(Source).FontColor;
+    FrameTopLeftInner := TCustomActionBarColorMap(Source).FrameTopLeftInner;
+    FrameTopLeftOuter := TCustomActionBarColorMap(Source).FrameTopLeftOuter;
+    FrameBottomRightInner := TCustomActionBarColorMap(Source).FrameBottomRightInner;
+    FrameBottomRightOuter := TCustomActionBarColorMap(Source).FrameBottomRightOuter;
+    HighlightColor := TCustomActionBarColorMap(Source).HighlightColor;
+    HotColor := TCustomActionBarColorMap(Source).HotColor;
+    HotFontColor := TCustomActionBarColorMap(Source).HotFontColor;
+    MenuColor := TCustomActionBarColorMap(Source).MenuColor;
+    SelectedColor := TCustomActionBarColorMap(Source).SelectedColor;
+    SelectedFontColor := TCustomActionBarColorMap(Source).SelectedFontColor;
+    ShadowColor := TCustomActionBarColorMap(Source).ShadowColor;
+    UnusedColor := TCustomActionBarColorMap(Source).UnusedColor;
+    WindowColor := clWindow;
+  end;
+end;
+
+procedure TColorizerColorMap.UpdateColors;
 begin
   inherited;
-  LoadSettings(Self, TColorizerLocalSettings.Settings);
+  WindowColor:=clNone;
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
+   LoadColorMapFromXmlFile(Self, TColorizerLocalSettings.Settings.ThemeFileName);
 end;
 
 initialization

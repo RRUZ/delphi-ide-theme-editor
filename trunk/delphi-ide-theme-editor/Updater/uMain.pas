@@ -211,6 +211,8 @@ begin
     InitThreads(PbGeneral.Position=0);
   except
     on E: Exception do
+      if FSilent then Halt(0)
+      else
       AddLog(E.Message);
   end;
 end;
@@ -235,6 +237,8 @@ begin
       GetRemoteFileInfo;
     InitThreads(PbGeneral.Position=0);
   except on E : Exception do
+    if FSilent then Halt(0)
+    else
     AddLog(Format('Error checking updates %s',[E.Message]));
   end;
 end;
@@ -299,6 +303,8 @@ begin
       //BtnCheckUpdates.Enabled:=True;
     end;
   except on E : Exception do
+    if FSilent then Halt(0)
+    else
     AddLog(Format('Error checking updates %s',[E.Message]));
   end;
 end;
@@ -362,6 +368,8 @@ begin
  except on E : Exception do
    begin
     FErrorUpdate:=True;
+    if FSilent then Halt(0)
+    else
     MessageDlg(Format('Error checking updates %s',[E.Message]), mtWarning, [mbOK], 0);
    end;
  end;

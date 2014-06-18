@@ -22,18 +22,20 @@
 unit Colorizer.StoreColorMap;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 uses
   ActnMan,
+  Colorizer.XPStyleActnCtrls,
   ActnColorMaps;
 
-procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
-procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
-
+procedure  LoadColorMapFromXmlFile(AColorMap : TColorizerColorMap; const FileName:string);
+procedure  SaveColorMapToXmlFile(AColorMap : TColorizerColorMap; const FileName:string);
 
 implementation
 
 uses
+  Colorizer.Utils,
   XMLDoc,
   ComObj,
   XMLIntf,
@@ -43,8 +45,7 @@ uses
   SysUtils,
   Variants;
 
-
-procedure  LoadColorMapFromXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
+procedure  LoadColorMapFromXmlFile(AColorMap : TColorizerColorMap; const FileName:string);
 const
   Msxml2_DOMDocument='Msxml2.DOMDocument.6.0';
 var
@@ -63,7 +64,7 @@ begin
     if (XmlDocIDETheme.parseError.errorCode <> 0) then
      raise Exception.CreateFmt('Error in Delphi IDE Colorizer theme Xml Data %s',[XmlDocIDETheme.parseError]);
 
-    Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
+    Count := GetPropList(TypeInfo(TColorizerColorMap), tkAny, @Properties);
       for Index := 0 to Pred(Count) do
        if SameText(String(Properties[Index]^.PropType^.Name),'TColor') then
         begin
@@ -72,15 +73,20 @@ begin
           xPathElement:=Format('/DelphiColorizerTheme/ColorMap/%s',[PropName]);
           Node:=XmlDocIDETheme.selectSingleNode(xPathElement);
           if not VarIsClear(Node) then
-           SetOrdProp(AColorMap,PropName,StringToColor(Node.text));
+           SetOrdProp(AColorMap, PropName, StringToColor(Node.text))
+          else
+           SetOrdProp(AColorMap, PropName, clNone);
         end;
+   //AddLog('LoadColorMapFromXmlFile AColorMap.WindowColor', ColorToString(AColorMap.WindowColor));
+   if AColorMap.WindowColor=clNone then
+     AColorMap.WindowColor:= AColorMap.MenuColor;
   finally
    XmlDocIDETheme  :=Unassigned;
   end;
 end;
 
 
-procedure  SaveColorMapToXmlFile(AColorMap : TCustomActionBarColorMap; const FileName:string);
+procedure  SaveColorMapToXmlFile(AColorMap : TColorizerColorMap; const FileName:string);
 var
   PropName  : string;
   AColor    : TColor;
@@ -99,7 +105,7 @@ begin
   RootNode.Attributes['author']   := 'Delphi IDE Theme Colorizer';
   RootNode.Attributes['versionapp']  := '1.0.0.0';//GetFileVersion(ParamStr(0));
   ChildNode := RootNode.AddChild('ColorMap');
-  Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
+  Count := GetPropList(TypeInfo(TColorizerColorMap), tkAny, @Properties);
     for Index := 0 to Pred(Count) do
      if SameText(String(Properties[Index]^.PropType^.Name),'TColor') then
       begin

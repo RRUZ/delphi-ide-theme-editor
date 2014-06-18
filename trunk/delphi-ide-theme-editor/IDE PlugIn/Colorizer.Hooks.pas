@@ -1,4 +1,3 @@
-
 //**************************************************************************************************
 //
 // Unit Colorizer.Hooks
@@ -27,22 +26,6 @@ interface
 
 uses
   Controls;
-const
-{$IFDEF DELPHIXE}  sVclIDEModule =  'vclide150.bpl';{$ENDIF}
-{$IFDEF DELPHIXE2} sVclIDEModule =  'vclide160.bpl';{$ENDIF}
-{$IFDEF DELPHIXE3} sVclIDEModule =  'vclide170.bpl';{$ENDIF}
-{$IFDEF DELPHIXE4} sVclIDEModule =  'vclide180.bpl';{$ENDIF}
-{$IFDEF DELPHIXE5} sVclIDEModule =  'vclide190.bpl';{$ENDIF}
-{$IFDEF DELPHIXE6} sVclIDEModule =  'vclide200.bpl';{$ENDIF}
-
-{$IFDEF DELPHIXE}  sCoreIDEModule =  'coreide150.bpl';{$ENDIF}
-{$IFDEF DELPHIXE2} sCoreIDEModule =  'coreide160.bpl';{$ENDIF}
-{$IFDEF DELPHIXE3} sCoreIDEModule =  'coreide170.bpl';{$ENDIF}
-{$IFDEF DELPHIXE4} sCoreIDEModule =  'coreide180.bpl';{$ENDIF}
-{$IFDEF DELPHIXE5} sCoreIDEModule =  'coreide190.bpl';{$ENDIF}
-{$IFDEF DELPHIXE6} sCoreIDEModule =  'coreide200.bpl';{$ENDIF}
-
-{$IFDEF DELPHIXE6} sModernThemeModule =  'ModernTheme200.bpl';{$ENDIF}
 
  procedure InstallColorizerHooks;
  procedure RemoveColorizerHooks;
@@ -51,6 +34,7 @@ const
 var
   LastScrollWinControl  : TWinControl = nil;
   LastWinControl        : TWinControl = nil;
+  DrawNamePair          : Boolean     = False;
 
 implementation
 
@@ -86,12 +70,14 @@ uses
   PngImage,
   Colorizer.Utils,
   Colorizer.Wrappers,
+  Colorizer.VirtualTrees,
+  Colorizer.Hooks.Windows,
+  Colorizer.Hooks.UxTheme,
+  Colorizer.Hooks.IDE,
   CaptionedDockTree,
   GraphUtil,
   CategoryButtons,
   ActnPopup,
-//  System.Diagnostics,
-//  TimeSpan,
   ActnMan,
   StdCtrls,
   Tabs,
@@ -134,37 +120,8 @@ var
 //  Trampoline_TFont_SetColor            : procedure (const Self:TFont; const Value: TColor) = nil;
 
 
-  TrampolineTWinControl_DefaultHandler : procedure (Self : TWinControl;var Message) = nil;
+  Trampoline_TWinControl_DefaultHandler : procedure (Self : TWinControl;var Message) = nil;
   Trampoline_TCustomStatusBar_WMPAINT  : procedure (Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
-  Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
-
-  {$IFDEF DELPHIXE6_UP}
-  Trampoline_ModernDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
-//    000054E4   30 0017 __fastcall Moderntheme::TModernTheme::GetCaptionedDockTreeClass()
-//    000054E8   29 0018 __fastcall Moderntheme::TModernTheme::GetDisabledSingleColor()
-//    000054EC   28 0019 __fastcall Moderntheme::TModernTheme::GetFlat()
-//    000054F4   27 001A __fastcall Moderntheme::TModernTheme::GetFont()
-//    000054F8   26 001B __fastcall Moderntheme::TModernTheme::GetHotSingleColor()
-//    000054FC   25 001C __fastcall Moderntheme::TModernTheme::GetOutlineTabsetButtons()
-//    00005504   24 001D __fastcall Moderntheme::TModernTheme::GetTabColorActiveEnd()
-//    00005508   23 001E __fastcall Moderntheme::TModernTheme::GetTabColorActiveStart()
-//    0000550C   22 001F __fastcall Moderntheme::TModernTheme::GetTabDrawingStyle()
-//    00005514   21 0020 __fastcall Moderntheme::TModernTheme::GetViewBarDelta()
-//    00005518   20 0021 __fastcall Moderntheme::TModernTheme::GetViewBarTabStyle()
-//    00005520   19 0022 __fastcall Moderntheme::TModernTheme::ImageListReplace(Vcl::Imglist::TCustomImageList *)
-//    00005624   18 0023 __fastcall Moderntheme::TModernTheme::SetCaptionedDockTreeClass(const System::TMetaClass * const)
-//    00005628   17 0024 __fastcall Moderntheme::TModernTheme::SetDisabledSingleColor(const System::Uitypes::TColor)
-//    0000562C   16 0025 __fastcall Moderntheme::TModernTheme::SetFlat(const const bool)
-//    00005630   15 0026 __fastcall Moderntheme::TModernTheme::SetFont(const Vcl::Graphics::TFont * const)
-//    0000563C   14 0027 __fastcall Moderntheme::TModernTheme::SetHotSingleColor(const System::Uitypes::TColor)
-//    00005640   13 0028 __fastcall Moderntheme::TModernTheme::SetOutlineTabsetButtons(const const bool)
-//    00005644   12 0029 __fastcall Moderntheme::TModernTheme::SetTabColorActiveEnd(const System::Uitypes::TColor)
-//    00005648   11 002A __fastcall Moderntheme::TModernTheme::SetTabColorActiveStart(const System::Uitypes::TColor)
-//    0000564C   10 002B __fastcall Moderntheme::TModernTheme::SetTabDrawingStyle(const Brandingapi::TTabDrawingStyle)
-//    00005650    9 002C __fastcall Moderntheme::TModernTheme::SetViewBarDelta(const const int)
-//    00005654    8 002D __fastcall Moderntheme::TModernTheme::SetViewBarTabStyle(const Vcl::Tabs::TTabSetTabStyle)
-  Trampoline_TModernTheme_SetHotSingleColor : procedure(Self : TObject;Color : TColor) = nil;
-  {$ENDIF}
 
   {$IFDEF DELPHIXE2_UP}
   Trampoline_TStyleEngine_HandleMessage    : function (Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
@@ -174,13 +131,6 @@ var
   Trampoline_DrawThemeBackground           : function (hTheme: UxTheme.HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall = nil;
   {$ENDIF}
   Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
-  Trampoline_ProjectTree2PaintText         : procedure (Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType})=nil;
-
-  Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
-  Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
-  Trampoline_ExtTextOutW                   : function (DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall = nil;
-
-  Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
 
   Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
   //Trampoline_TBitmap_SetSize : procedure(Self : TBitmap;AWidth, AHeight: Integer) = nil;
@@ -191,42 +141,19 @@ var
   Trampoline_TCustomCombo_WndProc          : procedure (Self: TCustomCombo;var Message: TMessage) = nil;
 
   Trampoline_TButtonControl_WndProc        : procedure (Self:TButtonControlClass;var Message: TMessage) = nil;
-
-  Trampoline_DrawFrameControl              : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
-  Trampoline_DrawEdge                      : function (hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall = nil;
-
   Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
-
-  //002B7ADC 10611 2EDD __fastcall Msglines::TCompilerMsgLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-  Trampoline_CompilerMsgLine_Draw          : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
-  //002B7360 10632 2F54 __fastcall Msglines::TTitleLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-  Trampoline_TitleLine_Draw                : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
-  Trampoline_TFileFindLine_Draw            : procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean) = nil;
-  //002B7E78 10606 2F00 __fastcall Msglines::TFileFindLine::InternalCalcDraw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool, bool)
-  Trampoline_TFileFindLine_InternalCalcDraw: procedure (Self : TObject;Canvas : TCanvas; Rect : TRect; Flag, Flag2 : Boolean) = nil;
 
   Trampoline_HintWindow_Paint              : procedure (Self : THintWindow) = nil;
   Trampoline_MessageHintWindow_Paint       : procedure (Self : THintWindow) = nil;
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
 
-  //000E6D74 4639 1D48 __fastcall Idevirtualtrees::TBaseVirtualTree::PrepareBitmaps(bool, bool)
-  Trampoline_TBaseVirtualTree_PrepareBitmaps : procedure (Self : TCustomControl;NeedButtons, NeedLines: Boolean) = nil;
-
-  //0005B7F4 1682 0BCA __fastcall Idelistbtns::TListButton::Paint()
-  Trampoline_TListButton_Paint : procedure (Self : TCustomControl) = nil;
-  //000F1DD0 4400 1CD1 __fastcall Idevirtualtrees::TBaseVirtualTree::GetHintWindowClass()
-  Trampoline_TBaseVirtual_GetHintWindowClass : function (Self : TCustomControl) : THintWindowClass = nil;
-
 {$IFDEF DLLWIZARD}
   Trampoline_TCustomForm_WndProc :  procedure (Self : TCustomForm;var Message: TMessage) = nil;
 {$ENDIF}
-  Trampoline_Gradientdrawer_GetOutlineColor : function() : TColor = nil;
 
   Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect)=nil;
-  Trampoline_TExpandableEvalView_FormCreate : procedure(Self: TForm; Sender: TObject);
   Trampoline_TCustomForm_DoCreate: procedure(Self : TCustomForm) = nil;
 
-  Trampoline_DrawThemeText              : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
 
   FGutterBkColor : TColor = clNone;
 type
@@ -281,8 +208,6 @@ type
     function WMNCPaintAddress : Pointer;
   end;
 
-var
-   ListControlWrappers  : TObjectDictionary<TCustomControl, TRttiWrapper>;
 
 type
   TTabSetClass = class(TTabSet);
@@ -316,27 +241,6 @@ end;
 {$ENDIF}
 
 
-{$IFDEF DELPHIXE6_UP}
-procedure Detour_TModernTheme_SetHotSingleColor(Self : TObject;Color : TColor);
-begin
- //AddLog('Detour_TModernTheme_SetHotSingleColor');
- Trampoline_TModernTheme_SetHotSingleColor(Self, clYellow);
-end;
-{$ENDIF}
-
-
-function Detour_UxTheme_DrawThemeText(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall;
-begin
- //AddLog('Detour_UxTheme_DrawThemeText', string(pszText));
- Exit(Trampoline_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
-end;
-
-procedure Detour_TExpandableEvalView_FormCreate(Self: TForm; Sender: TObject);
-begin
-  //AddLog('Detour_TExpandableEvalView_FormCreate', 'Foo');
-  Trampoline_TExpandableEvalView_FormCreate(Self, Sender);
-end;
-
 procedure Detour_TCustomForm_DoCreate(Self : TCustomForm);
 begin
   Trampoline_TCustomForm_DoCreate(Self);
@@ -346,17 +250,6 @@ begin
     ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
 end;
 
-function Detour_Gradientdrawer_GetOutlineColor : TColor;
-begin
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
-  begin
-    Result := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-    if TColorizerLocalSettings.Settings.TabIDECustom then
-      Result := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter);
-    Exit;
-  end;
-  Exit(Trampoline_Gradientdrawer_GetOutlineColor);
-end;
 
 procedure Detour_TCustomControlBar_PaintControlFrame(Self:TCustomControlBarClass; Canvas: TCanvas; AControl: TControl; var ARect: TRect);
 const
@@ -426,160 +319,6 @@ begin
   end;
 end;
 
-//Detour for TListButton.Paint
-procedure Detour_TListButton_Paint(Self : TCustomControlClass);
-var
-  ArrowSize, i  : integer;
-  LPoint     : TPoint;
-  ListButton : TRttiListButton;
-  LRect      : TRect;
-  LParentForm : TCustomForm;
-begin
-  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
-  begin
-    Trampoline_TListButton_Paint(Self);
-    exit;
-  end;
-
-  LParentForm:= GetParentForm(Self);
-  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-  begin
-    Trampoline_TListButton_Paint(Self);
-    exit;
-  end;
-
-  if not ListControlWrappers.ContainsKey(Self) then
-   ListControlWrappers.Add(Self, TRttiListButton.Create(Self));
-  ListButton := TRttiListButton(ListControlWrappers.Items[Self]);
-
-  //ListButton.ListBox.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-  ArrowSize := 3;
-  if Self.Width>16 then ArrowSize := 4;
-  LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
-
-  Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-  Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-  Self.Canvas.Rectangle(Self.ClientRect);
-
-  ListButton.LoadValues();
-//    AddLog('Detour_TListButton_Paint', Format('Self %p', [@Self]));
-//    AddLog('Detour_TListButton_Paint', 'Name '+ ListButton.ListButton.Name);
-//    AddLog('Detour_TListButton_Paint', 'MaxListWidth '+ IntToStr(ListButton.MaxListWidth));
-//    AddLog('Detour_TListButton_Paint', 'MinListWidth '+ IntToStr(ListButton.MinListWidth));
-//    AddLog('Detour_TListButton_Paint', 'ItemIndex    '+ IntToStr(ListButton.ItemIndex));
-//    AddLog('Detour_TListButton_Paint', 'ItemCount    '+ IntToStr(ListButton.ItemCount));
-//    AddLog('Detour_TListButton_Paint', 'SelectString '+ ListButton.SelectString);
-//    AddLog('Detour_TListButton_Paint', ListButton.Items.Text);
-//    if  ListButton.PopupPanel<>nil then
-//    AddLog('Detour_TListButton_Paint', 'PopupPanel ' + ListButton.PopupPanel.ClassName);
-//    if  ListButton.ListBox<>nil then
-//    AddLog('Detour_TListButton_Paint', 'ListBox ' + ListButton.ListBox.Items.Text);
-//    if  ListButton.Items<>nil then
-//    AddLog('Detour_TListButton_Paint', 'Items ' + ListButton.Items.Text);
-
-  if (ListButton.Items.Count>0) or (ListButton.PopupPanel<>nil) then
-  begin
-    Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-    Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-    DrawArrow(Self.Canvas, TScrollDirection.sdDown, LPoint, ArrowSize);
-  end
-  else
-  begin
-    LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
-    for i := 0 to 2 do
-    begin
-     LRect := Rect(LPoint.X, LPoint.Y, LPoint.X+2, LPoint.Y+2);
-     Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-     Self.Canvas.FillRect(LRect);
-     LPoint.X:=LPoint.X+3;
-    end;
-  end;
-end;
-
-//Detour for TBaseVirtualTree.PrepareBitmaps
-procedure Detour_TBaseVirtualTree_PrepareBitmaps(Self : TCustomControl;NeedButtons, NeedLines: Boolean);
-const
-  LineBitsDotted: array [0..8] of Word = ($55, $AA, $55, $AA, $55, $AA, $55, $AA, $55);
-var
-  PatternBitmap: HBITMAP;
-  Bits: Pointer;
-  Size: TSize;
-
-  procedure FillBitmap(ABitmap: TBitmap);
-  begin
-    if Assigned(ABitmap) then
-    with ABitmap, Canvas do
-    begin
-      Width := Size.cx;
-      Height := Size.cy;
-      Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
-      FillRect(Rect(0, 0, Width, Height));
-    end;
-  end;
-
-var
-  LRttiBaseVirtualTree : TRttiBaseVirtualTree;
-  LParentForm          : TCustomForm;
-begin
-
-  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
-  begin
-    Trampoline_TBaseVirtualTree_PrepareBitmaps(Self, NeedButtons, NeedLines);
-    exit;
-  end;
-
-  LParentForm:= GetParentForm(Self);
-  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-  begin
-    Trampoline_TBaseVirtualTree_PrepareBitmaps(Self, NeedButtons, NeedLines);
-    exit;
-  end;
-
-    if not ListControlWrappers.ContainsKey(Self) then
-     ListControlWrappers.Add(Self, TRttiBaseVirtualTree.Create(Self));
-    LRttiBaseVirtualTree := TRttiBaseVirtualTree(ListControlWrappers.Items[Self]);
-
-    Size.cx := 9;
-    Size.cy := 9;
-
-    if NeedButtons then
-    begin
-       if Assigned(LRttiBaseVirtualTree.MinusBM) then
-       with LRttiBaseVirtualTree.MinusBM, Canvas do
-       begin
-        FillBitmap(LRttiBaseVirtualTree.MinusBM);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        Rectangle(0, 0, Width, Height);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        MoveTo(2, Width div 2);
-        LineTo(Width - 2, Width div 2);
-       end;
-
-      if Assigned(LRttiBaseVirtualTree.PlusBM) then
-      with LRttiBaseVirtualTree.PlusBM, Canvas do
-      begin
-        FillBitmap(LRttiBaseVirtualTree.PlusBM);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        Rectangle(0, 0, Width, Height);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        MoveTo(2, Width div 2);
-        LineTo(Width - 2, Width div 2);
-        MoveTo(Width div 2, 2);
-        LineTo(Width div 2, Width - 2);
-      end;
-    end;
-
-    if NeedLines then
-    begin
-      if LRttiBaseVirtualTree.DottedBrush <> 0 then
-        DeleteObject(LRttiBaseVirtualTree.DottedBrush);
-
-      Bits := @LineBitsDotted;
-      PatternBitmap := CreateBitmap(8, 8, 1, 1, Bits);
-      LRttiBaseVirtualTree.DottedBrush := CreatePatternBrush(PatternBitmap);
-      DeleteObject(PatternBitmap);
-    end;
-end;
 
 type
   THintWindowClass = class(THintWindow);
@@ -608,7 +347,7 @@ begin
   LTextColor := TColorizerLocalSettings.ColorMap.FontColor;
   ClipRect := R;
   InflateRect(R, 4, 4);
-  Self.Canvas.Brush.Color:= TColorizerLocalSettings.ColorMap.MenuColor;
+  Self.Canvas.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
   Self.Canvas.Pen.Color:= TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
   Self.Canvas.Rectangle(R);
   R := ClipRect;
@@ -661,10 +400,17 @@ begin
 //
 //  end;
 
+//  if SameText('TPopupListbox', Self.ClassName) then
+//  begin
+//    //AddLog('CustomDefaultHandler', Self.ClassName+' '+WM_To_String(TMessage(Message).Msg));
+//    if TMessage(Message).Msg=WM_PAINT then
+//      TListBox(Self).Color:=clRed;
+//  end;
+
 
     if  not Assigned(TColorizerLocalSettings.Settings) or (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState)  then
     begin
-     TrampolineTWinControl_DefaultHandler(Self, Message);
+     Trampoline_TWinControl_DefaultHandler(Self, Message);
      Exit;
     end;
 
@@ -677,7 +423,7 @@ begin
       LParentForm:= GetParentForm(Self);
       if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
       begin
-       TrampolineTWinControl_DefaultHandler(Self, Message);
+       Trampoline_TWinControl_DefaultHandler(Self, Message);
        exit;
       end
       else
@@ -692,9 +438,9 @@ begin
         begin
           //if (GetTextColor(TMessage(Message).WParam)<>ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor)) or (Self.Brush.Color<>TColorizerLocalSettings.ColorMap.MenuColor) then
           begin
-            //AddLog('CustomDefaultHandler', Self.ClassName);
+            //AddLog('CustomDefaultHandler', 'Color Applied'+Self.ClassName);
             SetTextColor(TMessage(Message).WParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-            Self.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+            Self.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
             SetBkColor(TMessage(Message).WParam, ColorToRGB(Self.Brush.Color));
             TMessage(Message).Result := Self.Brush.Handle;
             Exit;
@@ -702,7 +448,7 @@ begin
         end;
     end;
 
-  TrampolineTWinControl_DefaultHandler(Self, Message);
+  Trampoline_TWinControl_DefaultHandler(Self, Message);
 end;
 
 //Detour for TBevel.Paint
@@ -802,7 +548,7 @@ begin
       WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC:
         begin
           SetTextColor(Message.WParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-          Self.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+          Self.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
           SetBkColor(Message.WParam, ColorToRGB(Self.Brush.Color));
           Message.Result := Self.Brush.Handle;
           Exit;
@@ -1054,130 +800,6 @@ begin
   end;
 end;
 
-//Hook DrawEdge WinApi function
-function Detour_WinApi_DrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
-var
- LCanvas : TCanvas;
- OrgHWND : HWND;
- LWinControl : TWinControl;
- LParentForm : TCustomForm;
- SavedIndex  : Integer;
- WClassName  : string;
-begin
-   //DrawEdge(DC, R, EDGE_RAISED, BF_RECT or BF_MIDDLE or Flags);
-  LWinControl:=nil;
-  OrgHWND :=WindowFromDC(hdc);
-  if OrgHWND<>0 then
-     LWinControl :=FindControl(OrgHWND);
-
-  if LWinControl<>nil then
-  begin
-    LParentForm:= GetParentForm(LWinControl);
-    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-    begin
-      //AddLog('CustomDrawEdge Ignored', IntToHex(OrgHWND,8));
-      Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
-    end;
-  end
-  else
-  if OrgHWND<>0 then
-  begin
-   WClassName := GetWindowClassName(OrgHWND);
-   if (WClassName<>'') and Assigned(TColorizerLocalSettings.WinAPIClasses) and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0) then
-     Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
-  end;
-
-   case  edge of
-      BDR_RAISEDINNER,
-      EDGE_SUNKEN,
-      EDGE_ETCHED,
-      EDGE_BUMP,
-      EDGE_RAISED :
-                    begin
-                      SavedIndex:=SaveDC(hdc);
-                      try
-                        LCanvas:=TCanvas.Create;
-                        try
-                          LCanvas.Handle:=hdc;
-                           if (BF_RECT and grfFlags = BF_RECT) then
-                           begin
-                            LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
-                            LCanvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-                            LCanvas.Rectangle(qrc);
-                           end;
-                        finally
-                          LCanvas.Handle:=0;
-                          LCanvas.Free;
-                        end;
-                      finally
-                        if SavedIndex<>0 then
-                          RestoreDC(hdc, SavedIndex);
-                      end;
-                        Exit(True);
-                    end;
-
-   end;
-   
-
-   Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
-end;
-
-//hook for unthemed TCheckbox
-function Detour_WinApi_DrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
-var
- LCanvas : TCanvas;
- OrgHWND : HWND;
- LWinControl : TWinControl;
- LParentForm : TCustomForm;
-begin
-   if( uType=DFC_BUTTON) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
-   begin
-
-      if (DFCS_BUTTONCHECK and uState = DFCS_BUTTONCHECK) then
-      begin
-        LWinControl:=nil;
-        OrgHWND :=WindowFromDC(DC);
-        if OrgHWND<>0 then
-           LWinControl :=FindControl(OrgHWND);
-
-        if LWinControl<>nil then
-        begin
-          LParentForm:= GetParentForm(LWinControl);
-          if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-            Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
-        end;
-
-        LCanvas:=TCanvas.Create;
-        try
-          LCanvas.Handle:=DC;
-           if (DFCS_CHECKED and uState = DFCS_CHECKED) then
-           begin
-            LCanvas.Brush.Color:= TColorizerLocalSettings.ColorMap.MenuColor;
-            LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-//             if (DFCS_HOT and uState = DFCS_HOT) then
-//              LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.SelectedColor;
-            LCanvas.Rectangle(Rect^);
-            DrawCheck(LCanvas, Point(Rect^.Left+3, Rect^.Top+6), 2, False);
-           end
-           else
-           begin
-            LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-            LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-//             if (DFCS_HOT and uState = DFCS_HOT) then
-//              LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.SelectedColor;
-            LCanvas.Rectangle(Rect^);
-           end;
-        finally
-          LCanvas.Handle:=0;
-          LCanvas.Free;
-        end;
-        Exit(True);
-      end
-      else
-        Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
-   end;
-   Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
-end;
 
 function RectVCenter(var R: TRect; Bounds: TRect): TRect;
 begin
@@ -1309,7 +931,7 @@ var
         with Buffer.Canvas do
         begin
           Brush.Style := bsSolid;
-          Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
+          Brush.Color := TColorizerLocalSettings.ColorMap.WindowColor;
           FillRect(R);
         end;
         R := Rect(0, 0, Buffer.Width, Buffer.Height);
@@ -1319,7 +941,7 @@ var
       begin
         Buffer.Canvas.Brush.Style:=bsSolid;
         Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-        Buffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+        Buffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
         Buffer.Canvas.Rectangle(R);
       end;
 
@@ -1964,7 +1586,7 @@ begin
     with CategoryRealBounds do
     begin
       Right := Right - 1;
-      TempColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
+      TempColor := TColorizerLocalSettings.ColorMap.WindowColor;//Self.Color;
 
       Canvas.Pixels[Left, Top] := TempColor;
       Canvas.Pixels[Left+1, Top] := TempColor;
@@ -2303,7 +1925,7 @@ begin
    begin
       sCaller := ProcByLevel(2);
       if SameText(sCaller, sBaseVirtualTreePaintTreeSignature) then
-         Self.Brush.Color:= TColorizerLocalSettings.ColorMap.MenuColor;
+         Self.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
    end;
    //Self.Brush.Color:=clred;
    Trampoline_TCanvas_FillRect(Self, Rect);
@@ -2664,380 +2286,7 @@ begin
 
 end;
 
-procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
 
-  function ColorToTriple(Color: TColor): TRGBTriple;
-  begin
-    Color := ColorToRGB(Color);
-    Result.rgbtBlue := Color shr 16 and $FF;
-    Result.rgbtGreen := Color shr 8 and $FF;
-    Result.rgbtRed := Color and $FF;
-  end;
-
-var
-   X, Y: Integer;
-   LBitmap: TBitmap;
-   LRGBLine: PRGBLine;
-   AlphaLineA, AlphaLineB: PngImage.PByteArray;
-begin
-  if (Source.Width < (Left + Width)) or (Source.Height < (Top + Height)) then
-    raise Exception.Create('Invalid position/size');
-
-  LBitmap := TBitmap.Create;
-  try
-    LBitmap.Width := Width;
-    LBitmap.Height := Height;
-    LBitmap.PixelFormat := pf24bit;
-
-    for Y := 0 to LBitmap.Height - 1 do
-    begin
-      LRGBLine := LBitmap.Scanline[Y];
-      for X := 0 to LBitmap.Width - 1 do
-        LRGBLine^[X] := ColorToTriple(Source.Pixels[Left + X, Top + Y]);
-    end;
-
-    Target := TPngImage.Create;
-    Target.Assign(LBitmap);
-  finally
-    LBitmap.Free;
-  end;
-
-  if Source.Header.ColorType in [COLOR_GRAYSCALEALPHA, COLOR_RGBALPHA] then begin
-    Target.CreateAlpha;
-    for Y := 0 to Target.Height - 1 do begin
-      AlphaLineA := Source.AlphaScanline[Top + Y];
-      AlphaLineB := Target.AlphaScanline[Y];
-      for X := 0 to Target.Width - 1 do
-        AlphaLineB^[X] := AlphaLineA^[X + Left];
-    end;
-  end;
-end;
-
-//Hook for the docked IDE windows.
-function Detour_TDockCaptionDrawer_DrawDockCaption(Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest;
-var
-  LColorStart, LColorEnd : TColor;
-
-  procedure DrawIcon;
-  var
-    FormBitmap: TBitmap;
-    DestBitmap: TBitmap;
-    ImageSize: Integer;
-    X, Y: Integer;
-  begin
-    if (State.Icon <> nil) and (State.Icon.HandleAllocated) then
-    begin
-      if Self.DockCaptionOrientation = dcoHorizontal then
-      begin
-        ImageSize := CaptionRect.Bottom - CaptionRect.Top - 3;
-        X := CaptionRect.Left;
-        Y := CaptionRect.Top + 2;
-      end
-      else
-      begin
-        ImageSize := CaptionRect.Right - CaptionRect.Left - 3;
-        X := CaptionRect.Left + 1;
-        Y := CaptionRect.Top;
-      end;
-
-      FormBitmap := nil;
-      DestBitmap := TBitmap.Create;
-      try
-        FormBitmap := TBitmap.Create;
-        DestBitmap.Width :=  ImageSize;
-        DestBitmap.Height := ImageSize;
-        DestBitmap.Canvas.Brush.Color := clFuchsia;
-        DestBitmap.Canvas.FillRect(Rect(0, 0, DestBitmap.Width, DestBitmap.Height));
-        FormBitmap.Width := State.Icon.Width;
-        FormBitmap.Height := State.Icon.Height;
-        FormBitmap.Canvas.Draw(0, 0, State.Icon);
-        ScaleImage(FormBitmap, DestBitmap, DestBitmap.Width / FormBitmap.Width);
-
-        DestBitmap.TransparentColor := DestBitmap.Canvas.Pixels[0, DestBitmap.Height - 1];
-        DestBitmap.Transparent := True;
-
-        Canvas.Draw(X, Y, DestBitmap);
-      finally
-        FormBitmap.Free;
-        DestBitmap.Free;
-      end;
-
-      if Self.DockCaptionOrientation = dcoHorizontal then
-        CaptionRect.Left := CaptionRect.Left + 6 + ImageSize
-      else
-        CaptionRect.Top := CaptionRect.Top + 6 + ImageSize;
-    end;
-  end;
-
-  function CalcButtonSize(
-    const CaptionRect: TRect): Integer;
-  const
-    cButtonBuffer = 8;
-  begin
-    if Self.DockCaptionOrientation = dcoHorizontal then
-      Result := CaptionRect.Bottom - CaptionRect.Top - cButtonBuffer
-    else
-      Result := CaptionRect.Right - CaptionRect.Left - cButtonBuffer;
-  end;
-
-  function GetCloseRect(const CaptionRect: TRect): TRect;
-  const
-    cSideBuffer = 4;
-  var
-    CloseSize: Integer;
-  begin
-    CloseSize := CalcButtonSize(CaptionRect);
-    if Self.DockCaptionOrientation = dcoHorizontal then
-    begin
-      Result.Left := CaptionRect.Right - CloseSize - cSideBuffer;
-      Result.Top := CaptionRect.Top + ((CaptionRect.Bottom - CaptionRect.Top) - CloseSize) div 2;
-    end
-    else
-    begin
-      Result.Left := CaptionRect.Left + ((CaptionRect.Right - CaptionRect.Left) - CloseSize) div 2;
-      Result.Top := CaptionRect.Top + 2 * cSideBuffer;
-    end;
-    Result.Right := Result.Left + CloseSize;
-    Result.Bottom := Result.Top + CloseSize;
-  end;
-
-  function GetPinRect(const CaptionRect: TRect): TRect;
-  const
-    cSideBuffer = 4;
-  var
-    PinSize: Integer;
-  begin
-    PinSize := CalcButtonSize(CaptionRect);
-    if Self.DockCaptionOrientation = dcoHorizontal then
-    begin
-      Result.Left := CaptionRect.Right - 2*PinSize - 2*cSideBuffer;
-      Result.Top := CaptionRect.Top + ((CaptionRect.Bottom - CaptionRect.Top) - PinSize) div 2;
-    end
-    else
-    begin
-      Result.Left := CaptionRect.Left + ((CaptionRect.Right - CaptionRect.Left) - PinSize) div 2;
-      Result.Top := CaptionRect.Top + 2*cSideBuffer + 2*PinSize;
-    end;
-    Result.Right := Result.Left + PinSize + 2;
-    Result.Bottom := Result.Top + PinSize;
-  end;
-
-var
-  ShouldDrawClose: Boolean;
-  CloseRect, PinRect: TRect;
-  LPngImage : TPngImage;
-begin
-
-  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (not TColorizerLocalSettings.Settings.DockCustom) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
-  begin
-    {$IFDEF DELPHIXE6_UP}
-      if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
-       Exit(Trampoline_ModernDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State))
-      else
-    {$ENDIF}
-    Exit(Trampoline_TDockCaptionDrawer_DrawDockCaption(Self, Canvas, CaptionRect, State));
-  end;
-
-  Canvas.Font.Color :=  TColorizerLocalSettings.ColorMap.FontColor;
-  if Self.DockCaptionOrientation = dcoHorizontal then
-  begin
-    Canvas.Pen.Width := 1;
-    Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-
-    CaptionRect.Top := CaptionRect.Top + 1;
-
-    if State.Focused then
-    begin
-      if not TColorizerLocalSettings.Settings.DockCustomColors then
-      begin
-        LColorStart := TColorizerLocalSettings.ColorMap.Color;
-        LColorEnd   := TColorizerLocalSettings.ColorMap.HighlightColor;
-      end
-      else
-      begin
-        try LColorStart := StringToColor(TColorizerLocalSettings.Settings.DockStartGradActive); except LColorStart := TColorizerLocalSettings.ColorMap.Color; end;
-        try LColorEnd   := StringToColor(TColorizerLocalSettings.Settings.DockEndGradActive);   except LColorEnd   := TColorizerLocalSettings.ColorMap.HighlightColor; end;
-      end;
-
-    end
-    else
-    begin
-      if not TColorizerLocalSettings.Settings.DockCustomColors then
-      begin
-        LColorStart := TColorizerLocalSettings.ColorMap.DisabledColor;
-        LColorEnd   := TColorizerLocalSettings.ColorMap.DisabledColor;//GetHighLightColor(TColorizerLocalSettings.ColorMap.DisabledColor);
-      end
-      else
-      begin
-        try LColorStart := StringToColor(TColorizerLocalSettings.Settings.DockStartGradInActive); except LColorStart := TColorizerLocalSettings.ColorMap.DisabledColor; end;
-        try LColorEnd   := StringToColor(TColorizerLocalSettings.Settings.DockEndGradInActive); except LColorEnd   := TColorizerLocalSettings.ColorMap.DisabledColor; end;
-      end;
-    end;
-
-    //Canvas.Brush.Color := LColor;
-
-    if TColorizerLocalSettings.Settings.DockGradientHor then
-      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdHorizontal)
-    else
-      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left + 1, CaptionRect.Top + 1, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
-
-
-     if TColorizerLocalSettings.Settings.DockCustomColors then
-     begin
-        if State.Focused then
-          try Canvas.Pen.Color:=StringToColor(TColorizerLocalSettings.Settings.DockActiveBorderColor) except Canvas.Pen.Color:=clBlack end
-        else
-          try Canvas.Pen.Color:=StringToColor(TColorizerLocalSettings.Settings.DockInActiveBorderColor) except Canvas.Pen.Color:=clBlack end;
-     end
-     else
-      Canvas.Pen.Color :=  TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(Canvas.Pen.Color, -20);
-
-    if TColorizerLocalSettings.Settings.DockBorderRounded then    
-      with CaptionRect do
-        Canvas.Polyline([Point(Left + 2, Top),
-          Point(Right - 2, Top),
-          Point(Right, Top + 2),
-          Point(Right, Bottom - 2),
-          Point(Right - 2, Bottom),
-          Point(Left + 2, Bottom),
-          Point(Left, Bottom - 2),
-          Point(Left, Top + 2),
-          Point(Left + 3, Top)])
-    else
-    begin
-      Canvas.Brush.Style:=bsClear;  
-      Canvas.Rectangle(CaptionRect);      
-    end;
-
-    CloseRect := GetCloseRect(CaptionRect);
-
-    if Self.DockCaptionPinButton <> dcpbNone then
-    begin
-      PinRect := GetPinRect(CaptionRect);
-
-        if Self.DockCaptionPinButton = dcpbUp then
-        begin
-          CropPNG(TColorizerLocalSettings.DockImages, 32, 0, 16, 16, LPngImage);
-          try
-            Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
-          finally
-            LPngImage.free;
-          end;
-        end
-        else
-        begin
-            CropPNG(TColorizerLocalSettings.DockImages, 16, 0, 16, 16, LPngImage);
-            try
-              Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
-            finally
-              LPngImage.free;
-            end;
-        end;
-
-
-      CaptionRect.Right := PinRect.Right - 2;
-    end
-    else
-      CaptionRect.Right := CloseRect.Right - 2;
-
-    CaptionRect.Left := CaptionRect.Left + 6;
-    DrawIcon;
-    ShouldDrawClose := CloseRect.Left >= CaptionRect.Left;
-  end
-  else
-  begin
-    Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Top + 1);
-    Canvas.LineTo(CaptionRect.Right - 1, CaptionRect.Top + 1);
-
-
-    if State.Focused then
-    begin
-      LColorStart := TColorizerLocalSettings.ColorMap.Color;
-      LColorEnd   := TColorizerLocalSettings.ColorMap.HighlightColor;
-    end
-    else
-    begin
-      LColorStart := TColorizerLocalSettings.ColorMap.DisabledColor;
-      LColorEnd   := GetHighLightColor(TColorizerLocalSettings.ColorMap.DisabledColor);
-    end;
-
-    //Canvas.Brush.Color := LColor;
-
-    //Canvas.FillRect(Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom));
-    if TColorizerLocalSettings.Settings.DockGradientHor then
-      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom), gdHorizontal)
-    else
-      GradientFillCanvas(Canvas, LColorStart, LColorEnd, Rect(CaptionRect.Left, CaptionRect.Top + 2, CaptionRect.Right, CaptionRect.Bottom), gdVertical);
-
-    Canvas.Pen.Color := State.EndColor;
-    Canvas.MoveTo(CaptionRect.Left + 1, CaptionRect.Bottom);
-    Canvas.LineTo(CaptionRect.Right - 1, CaptionRect.Bottom);
-
-    Canvas.Font.Orientation := 900;
-    CloseRect := GetCloseRect(CaptionRect);
-
-    if Self.DockCaptionPinButton <> dcpbNone then
-    begin
-      PinRect := GetPinRect(CaptionRect);
-      LPngImage:=TPNGImage.Create;
-      try
-        if Self.DockCaptionPinButton = dcpbUp then
-         LPngImage.LoadFromResourceName(HInstance, 'pin_dock_left')
-        else
-         LPngImage.LoadFromResourceName(HInstance, 'pin_dock');
-
-        Canvas.Draw(PinRect.Left, PinRect.Top, LPngImage);
-      finally
-        LPngImage.free;
-      end;
-      CaptionRect.Top := PinRect.Bottom + 2;
-    end
-    else
-      CaptionRect.Top := CloseRect.Bottom + 2;
-
-    ShouldDrawClose   := CaptionRect.Top < CaptionRect.Bottom;
-    CaptionRect.Right := CaptionRect.Left + (CaptionRect.Bottom - CaptionRect.Top - 2);
-    CaptionRect.Top   := CaptionRect.Top + Canvas.TextWidth(State.Caption) + 2;
-
-    if CaptionRect.Top > CaptionRect.Bottom then
-      CaptionRect.Top := CaptionRect.Bottom;
-  end;
-
-  Canvas.Brush.Style := bsClear;
-  if State.Caption <> '' then
-  begin
-    if State.Focused then
-      Canvas.Font.Style := Canvas.Font.Style + [fsBold]
-    else
-      Canvas.Font.Style := Canvas.Font.Style - [fsBold];
-
-   if ShouldDrawClose then
-     CaptionRect.Right := CaptionRect.Right - (CloseRect.Right - CloseRect.Left) - 4;
-
-     if TColorizerLocalSettings.Settings.DockCustomColors then
-     begin
-        if State.Focused then
-          try Canvas.Font.Color:=StringToColor(TColorizerLocalSettings.Settings.DockActiveFontColor) except Canvas.Font.Color:=clBlack end
-        else
-          try Canvas.Font.Color:=StringToColor(TColorizerLocalSettings.Settings.DockInActiveFontColor) except Canvas.Font.Color:=clBlack end;
-     end;
-
-    Canvas.TextRect(CaptionRect, State.Caption,
-      [tfEndEllipsis, tfVerticalCenter, tfSingleLine]);
-  end;
-
-  if ShouldDrawClose then
-  begin
-      CropPNG(TColorizerLocalSettings.DockImages, 0, 0, 16, 16, LPngImage);
-      try
-        Canvas.Draw(CloseRect.Left, CloseRect.Top, LPngImage);
-      finally
-        LPngImage.free;
-      end;
-  end;
-
-  Exit(0);
-end;
 
 //Hook for the TCustomListView component
 procedure Detour_TCustomListView_WndProc(Self:TCustomListView;var Message: TMessage);
@@ -3199,415 +2448,11 @@ begin
   Trampoline_TCustomListView_HeaderWndProc(Self, Message);
 end;
 
-//procedure CustomProjectTree2PaintText(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType});
-//begin
-//  //TargetCanvas.Font.Color:=clRed;
-//  Trampoline_ProjectTree2PaintText(Self, Sender, TargetCanvas, Node, Column, TextType);
-//end;
 
 //Hook for allow change font color in TProjectManagerForm.TVirtualStringTree ,
-//because this component is not using the colors set via RTTI
-//Note  : This is a temporal workaround.
-function Detour_WinApi_DrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
-const
- sCustomVirtualStringTreeSignature  = 'IDEVirtualTrees.TCustomVirtualStringTree.PaintNormalText';
- sVirtualTreeHintWindow             = 'IDEVirtualTrees.TVirtualTreeHintWindow.AnimationCallback';
-var
-  sCaller : string;
-  OrgColor, LFontColor: Cardinal;
-  RestoreColor : Boolean;
-begin
- OrgColor:=0;
- RestoreColor:=False;
- sCaller:='';
-
- if (uFormat=2084) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
- begin
-   OrgColor:=GetTextColor(hDC);
-   LFontColor :=ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
-
-   if (OrgColor=0) and (LFontColor<>OrgColor) then
-   begin
-    sCaller := ProcByLevel(2);
-    if SameText(sCaller, sVirtualTreeHintWindow) then
-    begin
-//       AddLog('Detour_WinApi_DrawTextEx', sCaller);
-//       AddLog('Detour_WinApi_DrawText', 'uFormat ' + IntToStr(uFormat));
-//       if LastWinControl<>nil then
-//         AddLog('Detour_WinApi_DrawText', 'ClassName ' + LastWinControl.ClassName);
-       RestoreColor:=True;
-       SetTextColor(hDC, LFontColor);
-    end;
-   end;
-
-  if not RestoreColor  and (LFontColor<>OrgColor) and (OrgColor = GetSysColor(COLOR_WINDOWTEXT)) then
-  begin
-   if sCaller<>'' then
-     sCaller := ProcByLevel(2);
-    if SameText(sCaller, sCustomVirtualStringTreeSignature) then
-    begin
-//       AddLog('Detour_WinApi_DrawTextEx', sCaller);
-//       AddLog('Detour_WinApi_DrawText', 'uFormat ' + IntToStr(uFormat));
-//       if LastWinControl<>nil then
-//         AddLog('Detour_WinApi_DrawText', 'ClassName ' + LastWinControl.ClassName);
-       RestoreColor:=True;
-       SetTextColor(hDC, LFontColor);
-    end;
-  end;
- end;
 
 
-  //SetTextColor(hDC, ColorToRGB(clRed));
-  Result:=Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
-  if RestoreColor then
-    SetTextColor(hDC, OrgColor);
-end;
 
-//Hook for allow change font color in TVirtualTreeHintWindow.InternalPaint (font color in hint window) ,
-//Note  : This is a temporal workaround.
-function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
- //sVirtualTreeHintWindowInternalPaint = 'IDEVirtualTrees.TVirtualTreeHintWindow.InternalPaint';
-{$IFDEF DELPHIXE6_UP}
-const
- sDrawActiveTab                      =  'GDIPlus.GradientDrawer.TGradientTabDrawer.DrawActiveTab';
- sDrawInactiveTab                    =  'GDIPlus.GradientDrawer.TGradientTabDrawer.DrawInactiveTab';
-{$ENDIF}
-{$IFDEF DELPHIXE6_UP}
-var
-  sCaller : string;
-  OrgColor : Cardinal;
-  RestoreColor : Boolean;
-{$ENDIF}
-begin
-{$IFDEF DELPHIXE6_UP}
- OrgColor:=0;
- RestoreColor:=False;
- if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
- begin
-  OrgColor:= GetTextColor(DC);
-
-  //if TColor(OrgColor) = TColorizerLocalSettings.ColorMap.FontColor then
-//  if cchText>80 then
-//  begin
-//    sCaller := ProcByLevel(2);
-//    AddLog('Detour_WinApi_DrawTextEx', sCaller);
-//    //if SameText(sCaller, sVirtualTreeHintWindowInternalPaint) then
-//     SetTextColor(DC, ColorToRGB(clRed));
-//  end;
-
-   if (TColor(OrgColor) = clWhite) or (TColor(OrgColor) = clBlack)  then
-   begin
-     sCaller := ProcByLevel(4);
-     //AddLog('Detour_WinApi_DrawTextEx', sCaller);
-     if SameText(sCaller, sDrawActiveTab) then
-     begin
-       if not TColorizerLocalSettings.Settings.TabIDECustom then
-        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
-       else
-        SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
-     end
-     else
-     if SameText(sCaller, sDrawInactiveTab) then
-     begin
-       if not TColorizerLocalSettings.Settings.TabIDECustom then
-        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
-       else
-        SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
-     end;
-   end;
-
- end;
-{$ENDIF}
-
- //SetTextColor(DC, ColorToRGB(clRed));
- Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
-{$IFDEF DELPHIXE6_UP}
- if RestoreColor then
-   SetTextColor(DC, OrgColor);
-{$ENDIF}
-end;
-
-//Hook for allow change font color in IDE Insight Window
-function Detour_WinApi_ExtTextOutW(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall;
-const
-{$IFDEF DELPHIXE5_UP}
- sDrawTreeDrawNode  ='IDEInsight.TIDEInsightForm.DrawTreeDrawNode';
- sPaintItemNode     ='IDEInsight.TIDEInsightForm.PaintItemNode';
- sPaintCategoryNode ='IDEInsight.TIDEInsightForm.PaintCategoryNode';
-{$ELSE}
- sDrawTreeDrawNode  ='PopupSrchFrm.TPopupSearchForm.DrawTreeDrawNode';
- sPaintItemNode     ='PopupSrchFrm.TPopupSearchForm.PaintItemNode';
- sPaintCategoryNode ='PopupSrchFrm.TPopupSearchForm.PaintCategoryNode';
-{$ENDIF}
-var
- sCaller  : string;
- OrgColor : Cardinal;
- RestoreColor : Boolean;
- sClassName : string;
-begin
- OrgColor     :=0;
- //OrgColor:=GetTextColor(DC);
- RestoreColor:=False;
-
- if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
- //if  OrgColor=0  then
- begin
-  sClassName := LastWinControl.ClassName;
-//  sCaller:=ProcByLevel(3);
-//  if SameText(sCaller, sDrawTreeDrawNode) or SameText(sCaller, sPaintCategoryNode) or SameText(sCaller, sPaintItemNode) then
-//  begin
-//     if LastWinControl<>nil then
-//       AddLog('Detour_WinApi_ExtTextOutW ', LastWinControl.ClassName)
-//     else
-//       AddLog('Detour_WinApi_ExtTextOutW ', 'nil');
-//
-//    SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-//    RestoreColor:=True;
-//  end;
-  {$IFDEF DELPHIXE5_UP}
-  if  SameStr(sClassName, 'TButtonedEdit') or SameStr(sClassName, 'TIDEInsightForm') or SameStr(sClassName, 'TVirtualDrawTree') then
-  {$ELSE}
-  if  SameStr(sClassName, 'TFilterEdit') or SameStr(sClassName, 'TIDEInsightForm') or SameStr(sClassName, 'TVirtualDrawTree') then
-  {$ENDIF}
-  begin
-    OrgColor:=GetTextColor(DC);
-     if  OrgColor=0  then
-     begin
-       sCaller:=ProcByLevel(3);
-       if SameStr(sCaller, sDrawTreeDrawNode) or SameStr(sCaller, sPaintCategoryNode) or SameStr(sCaller, sPaintItemNode) then
-       begin
-         RestoreColor:=True;
-         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-       end;
-     end;
-  end;
- end;
-
- Result:=Trampoline_ExtTextOutW(DC, x, y, Options, Rect, Str, Count, Dx);
- if RestoreColor then
-   SetTextColor(DC, OrgColor);
-end;
-
-{
-    002B4B34 10661 2EDB Msglines::TCompilerMsgLine::
-    002B7A68 10612 2EDC __fastcall Msglines::TCompilerMsgLine::TCompilerMsgLine(Compintf::TMsgKind, int, const System::UnicodeString, int, int, const System::UnicodeString, const System::UnicodeString, bool, const System::DelphiInterface<Msglinesintf::IMessageGroup>)
-    002B7ADC 10611 2EDD __fastcall Msglines::TCompilerMsgLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-    002B7BBC 10610 2EDE __fastcall Msglines::TCompilerMsgLine::GetLineText()
-
-@Msglines@TCompilerMsgLine@
-@Msglines@TCompilerMsgLine@$bctr$qqr17Compintf@TMsgKindix20System@UnicodeStringiit3t3ox54System@%DelphiInterface$t26Msglinesintf@IMessageGroup%
-@Msglines@TCompilerMsgLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto
-@Msglines@TCompilerMsgLine@GetLineText$qqrv
-
-}
-procedure Detour_TCompilerMsgLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
-var
- SavedIndex : Integer;
-begin
- SavedIndex := SaveDC(Canvas.Handle);
- try
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
-  begin
-   if Canvas.Brush.Color=clWindow then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
-   else
-   if Canvas.Brush.Color=clBtnFace then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.DisabledColor
-   else
-   if Canvas.Brush.Color=clHighlight then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
-
-   if Canvas.Font.Color=clWindowText then
-    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor
-   else
-   if Canvas.Font.Color=clHighlightText then
-    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.SelectedFontColor;
-
-   if Canvas.Brush.Color=clWhite then //Show hint in white background
-   begin
-    Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
-    Canvas.Font.Color  := TColorizerLocalSettings.ColorMap.FontColor;
-   end;
-  end;
-
-  //  Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-  //  Canvas.Font.Color :=clBlack;
-  //AddLog('Detour_TCompilerMsgLine_Draw', Format('Canvas.Brush.Color %s Canvas.Font.Color %s Flag %s', [ColorToString(Canvas.Brush.Color), ColorToString(Canvas.Font.Color), BoolToStr(Flag, True)]));
-  //AddLog('Detour_TCompilerMsgLine_Draw',);
-  Trampoline_CompilerMsgLine_Draw(Self, Canvas, Rect, Flag);
- finally
-  if SavedIndex<>0 then
-    RestoreDC(Canvas.Handle, SavedIndex);
- end;
-end;
-
-
-{
-    002B7360 10632 2F54 __fastcall Msglines::TTitleLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-    @Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto
-}
-
-procedure Detour_TTitleLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
-var
- SavedIndex : Integer;
-begin
- SavedIndex := SaveDC(Canvas.Handle);
- try
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
-  begin
-   if Canvas.Brush.Color=clWindow then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
-   else
-   if Canvas.Brush.Color=clBtnFace then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.DisabledColor
-   else
-   if Canvas.Brush.Color=clHighlight then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
-
-   if Canvas.Font.Color=clWindowText then
-    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor
-   else
-   if Canvas.Font.Color=clHighlightText then
-    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.SelectedFontColor;
-  end;
-
-  Trampoline_TitleLine_Draw(Self, Canvas, Rect, Flag);
- finally
-  if SavedIndex<>0 then
-    RestoreDC(Canvas.Handle, SavedIndex);
- end;
-end;
-
-{
-    002B7E58 10607 2EFE __fastcall Msglines::TFileFindLine::Draw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool)
-    @Msglines@TFileFindLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto
-}
-procedure Detour_TFileFindLine_Draw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag : Boolean);
-var
- SavedIndex : Integer;
-begin
- SavedIndex := SaveDC(Canvas.Handle);
- try
-{
-Detour_TFileFindLine_Draw : Flag False Canvas.Brush.Color clWindow Canvas.Font.Color clWindowText
-Detour_TFileFindLine_Draw : Flag False Canvas.Brush.Color clBtnFace Canvas.Font.Color clWindowText
-Detour_TFileFindLine_Draw : Flag False Canvas.Brush.Color clHighlight Canvas.Font.Color clHighlightText
-}
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
-  begin
-   if Canvas.Brush.Color=clWindow then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor
-   else
-   if Canvas.Brush.Color=clBtnFace then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.DisabledColor
-   else
-   if Canvas.Brush.Color=clHighlight then
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
-
-   if Canvas.Font.Color=clWindowText then
-    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.FontColor
-   else
-   if Canvas.Font.Color=clHighlightText then
-    Canvas.Font.Color :=TColorizerLocalSettings.ColorMap.SelectedFontColor;
-  end;
-
-  Trampoline_TFileFindLine_Draw(Self, Canvas, Rect, Flag);
- finally
-  if SavedIndex<>0 then
-    RestoreDC(Canvas.Handle, SavedIndex);
- end;
-end;
-
-{
-    002B7E78 10606 2F00 __fastcall Msglines::TFileFindLine::InternalCalcDraw(Vcl::Graphics::TCanvas *, System::Types::TRect&, bool, bool)
-    @Msglines@TFileFindLine@InternalCalcDraw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo
-}
-procedure Detour_TFileFindLine_InternalCalcDraw(Self: TObject;Canvas : TCanvas; Rect : TRect; Flag, Flag2 : Boolean);
-var
- OldFontColor : TColor;
-begin
- OldFontColor := Canvas.Font.Color;
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
-  begin
-   Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-   Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-  end;
-  Trampoline_TFileFindLine_InternalCalcDraw(Self, Canvas, Rect, Flag, Flag2);
- Canvas.Font.Color:=OldFontColor;
-end;
-
-
-//Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background
-function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
-const
-  SystemColor = $FF000000;
-var
-  sCaller : string;
-begin
-   if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
-   begin
-     case nIndex of
-       COLOR_INFOTEXT:
-       begin
-         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.FontColor) then
-          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
-         else
-          Exit(Trampoline_GetSysColor(nIndex));
-       end;
-
-       COLOR_INFOBK:
-       begin
-         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.MenuColor) then
-          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.MenuColor))
-         else
-          Exit(Trampoline_GetSysColor(nIndex));
-       end;
-
-       COLOR_INACTIVECAPTION :
-       begin
-         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.DisabledColor) then
-          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledColor))
-         else
-          Exit(Trampoline_GetSysColor(nIndex));
-       end;
-
-       COLOR_INACTIVECAPTIONTEXT :
-       begin
-         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.DisabledFontColor) then
-          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor))
-         else
-          Exit(Trampoline_GetSysColor(nIndex));
-       end;
-
-       COLOR_HIGHLIGHT :
-       begin
-         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.SelectedColor) then
-          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor))
-         else
-          Exit(Trampoline_GetSysColor(nIndex));
-       end;
-
-       COLOR_HIGHLIGHTTEXT:
-       begin
-         if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.SelectedFontColor) then
-          Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor))
-         else
-          Exit(Trampoline_GetSysColor(nIndex));
-       end;
-
-       COLOR_BTNFACE :
-       if (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.Color) then
-       begin
-         sCaller := ProcByLevel(2);
-         if SameText(sCaller, '') then
-           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
-       end;
-
-     end;
-   end;
-
-   Exit(Trampoline_GetSysColor(nIndex));
-end;
 
 //function Detour_TBaseVirtual_GetHintWindowClass : THintWindowClass;
 //begin
@@ -3615,29 +2460,6 @@ end;
 //end;
 
 
-const
-{$IFDEF DELPHIXE}
-  sCompilerMsgLineDraw        = '@Msglines@TCompilerMsgLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
-  sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
-  sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
-  sGetOutlineColor            = '@Gdiplus@Gradientdrawer@GetOutlineColor$qqrv'; //Don't supported in XE
-{$ELSE}
-  sCompilerMsgLineDraw        = '@Msglines@TCompilerMsgLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
-  sTitleLineDraw              = '@Msglines@TTitleLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
-  sFileFindLineDraw           = '@Msglines@TFileFindLine@Draw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRecto';
-  sFileFindLineInternalCalcDraw = '@Msglines@TFileFindLine@InternalCalcDraw$qqrp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo';
-  sBaseVirtualTreeGetHintWindowClass = '@Idevirtualtrees@TBaseVirtualTree@GetHintWindowClass$qqrv';
-  sGetOutlineColor               = '@Gdiplus@Gradientdrawer@GetOutlineColor$qqrv';
-  sExpandableEvalViewFormCreate  = '@Expandableevaltree@TExpandableEvalView@FormCreate$qqrp14System@TObject';
-{$ENDIF}
-
-  sProjectTree2PaintText      = '@Projectfrm@TProjectManagerForm@ProjectTree2PaintText$qqrp32Idevirtualtrees@TBaseVirtualTreexp20Vcl@Graphics@TCanvasp28Idevirtualtrees@TVirtualNodei28Idevirtualtrees@TVSTTextType';
-{$IFDEF DELPHIXE6_UP}
-  sModernThemeDrawDockCaption  = '@Moderntheme@TModernDockCaptionDrawer@DrawDockCaption$qqrxp20Vcl@Graphics@TCanvasrx18System@Types@TRectrx38Vcl@Captioneddocktree@TParentFormState';
-  sModernThemeSetHotSingleColor= '@Moderntheme@TModernTheme@SetHotSingleColor$qqrx21System@Uitypes@TColor';
-{$ENDIF}
-  sBaseVirtualTreePrepareBitmaps = '@Idevirtualtrees@TBaseVirtualTree@PrepareBitmaps$qqroo';
-  sListButtonPaint               = '@Idelistbtns@TListButton@Paint$qqrv';
 
 {$IFNDEF DELPHIXE2_UP}
 type
@@ -3647,65 +2469,12 @@ type
 
 
 procedure InstallColorizerHooks;
-var
-  pOrgAddress, GetSysColorOrgPointer : Pointer;
-{$IFDEF DELPHIXE6_UP}
-  ModernThemeModule           : HMODULE;
-  Modules                     : TStrings;
-  ModernThemeLoaded           : Boolean;
-{$ENDIF}
 {$IFNDEF DELPHIXE2_UP}
+var
  LThemeServicesDrawElement2   : TThemeServicesDrawElement2;
 {$ENDIF}
- CoreIDEModule, VclIDEModule : HMODULE;
 begin
- ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
-  CoreIDEModule := LoadLibrary(sCoreIDEModule);
-  if CoreIDEModule<>0 then
-  begin
-   pOrgAddress := GetProcAddress(CoreIDEModule, sCompilerMsgLineDraw);
-   if Assigned(pOrgAddress) then
-    Trampoline_CompilerMsgLine_Draw := InterceptCreate(pOrgAddress, @Detour_TCompilerMsgLine_Draw);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sTitleLineDraw);
-   if Assigned(pOrgAddress) then
-     Trampoline_TitleLine_Draw   := InterceptCreate(pOrgAddress, @Detour_TTitleLine_Draw);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sFileFindLineDraw);
-   if Assigned(pOrgAddress) then
-     Trampoline_TFileFindLine_Draw   := InterceptCreate(pOrgAddress, @Detour_TFileFindLine_Draw);
-
-//   pOrgAddress := GetProcAddress(CoreIDEModule, sFileFindLineInternalCalcDraw);
-//   if Assigned(pOrgAddress) then
-//     Trampoline_TFileFindLine_InternalCalcDraw   := InterceptCreate(pOrgAddress, @Detour_TFileFindLine_InternalCalcDraw);
-
-//   pOrgAddress := GetProcAddress(CoreIDEModule, sExpandableEvalViewFormCreate);
-//   if Assigned(pOrgAddress) then
-//     Trampoline_TExpandableEvalView_FormCreate   := InterceptCreate(pOrgAddress, @Detour_TExpandableEvalView_FormCreate);
-  end;
-
-  VclIDEModule := LoadLibrary(sVclIDEModule);
-  if VclIDEModule<>0 then
-  begin
- //  pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
-//   if Assigned(pOrgAddress) then
- //   Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
-
-   pOrgAddress := GetProcAddress(VclIDEModule, sListButtonPaint);
-   if Assigned(pOrgAddress) then
-    Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @Detour_TListButton_Paint);
-
-   pOrgAddress := GetProcAddress(VclIDEModule, sGetOutlineColor);
-   if Assigned(pOrgAddress) then
-    Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(pOrgAddress, @Detour_Gradientdrawer_GetOutlineColor);
-
-
-//   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
-//   if Assigned(pOrgAddress) then
-//    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
-  end;
-//   *******************************************
-  TrampolineTWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
+  Trampoline_TWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
 
   Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @Detour_THintWindow_Paint);
   Trampoline_Bevel_Paint      := InterceptCreate(@TBevelClass.Paint, @Detour_TBevel_Paint);
@@ -3724,7 +2493,6 @@ begin
   Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
-  Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
 //************************************************
 {$IFDEF DELPHIXE2_UP}
@@ -3736,25 +2504,9 @@ begin
   if Assigned(DrawThemeBackground) then
     Trampoline_DrawThemeBackground            := InterceptCreate(@DrawThemeBackground,   @Detour_UxTheme_DrawBackground);
 {$ENDIF}
-  if Assigned(DrawThemeText) then
-    Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
 
   Trampoline_TCustomListView_HeaderWndProc  := InterceptCreate(TCustomListViewClass(nil).HeaderWndProcAddress, @Detour_TCustomListView_WndProc);
-  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
-  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
-  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);
 // **************************************************
-   GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
-   if Assigned(GetSysColorOrgPointer) then
-     Trampoline_GetSysColor    :=  InterceptCreate(GetSysColorOrgPointer, @Detour_WinApi_GetSysColor);
-
-   pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawFrameControl');
-   if Assigned(pOrgAddress) then
-     Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawFrameControl);
-
-   pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
-   if Assigned(pOrgAddress) then
-     Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
 
    Trampoline_TCustomControlBar_PaintControlFrame   :=  InterceptCreate(@TCustomControlBarClass.PaintControlFrame, @Detour_TCustomControlBar_PaintControlFrame);
 
@@ -3774,74 +2526,21 @@ begin
   Trampoline_TCustomForm_WndProc        := InterceptCreate(@TCustomFormClass.WndProc, @Detour_TCustomForm_WndProc);
 {$ENDIF}
 
-{$IFDEF DELPHIXE6_UP}
-  Modules:=TStringList.Create;
-  try
-  GetLoadedModules(Modules, True);
-  ModernThemeLoaded:=Modules.IndexOf(sModernThemeModule)>=0;
-  finally
-    Modules.Free;
-  end;
-
-  if ModernThemeLoaded then //avoid to load the ModernTheme module
-  begin
-    //AddLog('ModernThemeLoaded');
-    ModernThemeModule := LoadLibrary(sModernThemeModule);
-    if ModernThemeModule<>0 then
-    begin
-     pOrgAddress := GetProcAddress(ModernThemeModule, sModernThemeDrawDockCaption);
-     if Assigned(pOrgAddress) then
-       Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(pOrgAddress, @Detour_TDockCaptionDrawer_DrawDockCaption);
-
-//     pOrgAddress := GetProcAddress(ModernThemeModule, sModernThemeSetHotSingleColor);
-//     if Assigned(pOrgAddress) then
-//       Trampoline_TModernTheme_SetHotSingleColor:= InterceptCreate(pOrgAddress, @Detour_TModernTheme_SetHotSingleColor);
-    end;
-
-  end;
-{$ENDIF}
 end;
 
 procedure RemoveColorizerHooks;
 begin
-  if Assigned(Trampoline_CompilerMsgLine_Draw) then
-    InterceptRemove(@Trampoline_CompilerMsgLine_Draw);
-
-  if Assigned(Trampoline_TitleLine_Draw) then
-    InterceptRemove(@Trampoline_TitleLine_Draw);
-
-  if Assigned(Trampoline_TFileFindLine_Draw) then
-    InterceptRemove(@Trampoline_TFileFindLine_Draw);
-
-  if Assigned(Trampoline_TFileFindLine_InternalCalcDraw) then
-    InterceptRemove(@Trampoline_TFileFindLine_InternalCalcDraw);
-
-  if Assigned(Trampoline_TExpandableEvalView_FormCreate) then
-    InterceptRemove(@Trampoline_TExpandableEvalView_FormCreate);
-
   if Assigned(Trampoline_HintWindow_Paint) then
     InterceptRemove(@Trampoline_HintWindow_Paint);
 
   if Assigned(Trampoline_MessageHintWindow_Paint) then
     InterceptRemove(@Trampoline_MessageHintWindow_Paint);
 
-  if Assigned (TrampolineTWinControl_DefaultHandler) then
-    InterceptRemove(@TrampolineTWinControl_DefaultHandler);
+  if Assigned (Trampoline_TWinControl_DefaultHandler) then
+    InterceptRemove(@Trampoline_TWinControl_DefaultHandler);
 
   if Assigned(Trampoline_Bevel_Paint) then
     InterceptRemove(@Trampoline_Bevel_Paint);
-
-  if Assigned(Trampoline_TBaseVirtualTree_PrepareBitmaps) then
-    InterceptRemove(@Trampoline_TBaseVirtualTree_PrepareBitmaps);
-
-  if Assigned(Trampoline_TListButton_Paint) then
-    InterceptRemove(@Trampoline_TListButton_Paint);
-
-  if Assigned(Trampoline_Gradientdrawer_GetOutlineColor) then
-    InterceptRemove(@Trampoline_Gradientdrawer_GetOutlineColor);
-
-  if Assigned(Trampoline_TBaseVirtual_GetHintWindowClass) then
-    InterceptRemove(@Trampoline_TBaseVirtual_GetHintWindowClass);
 
 {$IF CompilerVersion<27} //XE6
   if Assigned(TrampolineCustomImageList_DoDraw) then
@@ -3877,33 +2576,14 @@ begin
     InterceptRemove(@Trampoline_DrawThemeBackground);
 {$ENDIF}
 
-  if Assigned(Trampoline_DrawThemeText) then
-    InterceptRemove(@Trampoline_DrawThemeText);
-
   if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then
     InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
-  if Assigned(Trampoline_TDockCaptionDrawer_DrawDockCaption) then
-    InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);
+
   if Assigned(Trampoline_TCustomListView_HeaderWndProc) then
     InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
-  if Assigned(Trampoline_ProjectTree2PaintText) then
-    InterceptRemove(@Trampoline_ProjectTree2PaintText);
 
   if Assigned(Trampoline_DoModernPainting) then
      InterceptRemove(@Trampoline_DoModernPainting);
-
-  if Assigned(Trampoline_DrawText) then
-    InterceptRemove(@Trampoline_DrawText);
-
-  if Assigned(Trampoline_DrawTextEx) then
-    InterceptRemove(@Trampoline_DrawTextEx);
-
-  if Assigned(Trampoline_ExtTextOutW) then
-    InterceptRemove(@Trampoline_ExtTextOutW);
-
-
-  if Assigned(Trampoline_GetSysColor) then
-    InterceptRemove(@Trampoline_GetSysColor);
 
   if Assigned(Trampoline_TCustomForm_DoCreate) then
     InterceptRemove(@Trampoline_TCustomForm_DoCreate);
@@ -3929,19 +2609,6 @@ begin
   if Assigned(Trampoline_TCustomCombo_WndProc) then
     InterceptRemove(@Trampoline_TCustomCombo_WndProc);
 
-  if Assigned(Trampoline_DrawFrameControl) then
-    InterceptRemove(@Trampoline_DrawFrameControl);
-
-  if Assigned(Trampoline_DrawEdge) then
-    InterceptRemove(@Trampoline_DrawEdge);
-
-{$IFDEF DELPHIXE6_UP}
-  if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
-    InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
-
-  if Assigned(Trampoline_TModernTheme_SetHotSingleColor) then
-    InterceptRemove(@Trampoline_TModernTheme_SetHotSingleColor);
-{$ENDIF}
 
 {$IFDEF DLLWIZARD}
   if Assigned(Trampoline_TCustomForm_WndProc) then
@@ -3949,7 +2616,6 @@ begin
 {$ENDIF}
 
 
-   ListControlWrappers.Free;
 end;
 
 end.

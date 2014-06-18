@@ -26,7 +26,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, pngimage, ExtCtrls, StdCtrls, Grids, ComCtrls, ImgList,
-  ActnMan, ActnColorMaps, Colorizer.Settings, uDelphiVersions{$IF CompilerVersion >= 23}, Vcl.Styles.Ext{$IFEND};
+  ActnMan, ActnColorMaps, Colorizer.Settings, uDelphiVersions{$IF CompilerVersion >= 23}, Vcl.Styles.Ext{$IFEND}
+  ,Colorizer.XPStyleActnCtrls;
 
 type
   TColorListBox = class(ExtCtrls.TColorListBox)
@@ -50,7 +51,6 @@ type
     TabSheetMain: TTabSheet;
     PanelMain: TPanel;
     ImageList1: TImageList;
-    XPColorMap: TXPColorMap;
     CbClrElement: TColorBox;
     BtnSelForColor: TButton;
     Label7: TLabel;
@@ -69,12 +69,7 @@ type
     Label2: TLabel;
     CheckBoxGutterIcons: TCheckBox;
     PanelPreview: TPanel;
-    ColorMapCombo: TComboBox;
-    StyleCombo: TComboBox;
-    TwilightColorMap: TTwilightColorMap;
-    StandardColorMap: TStandardColorMap;
     Image2: TImage;
-    XPColorMap1: TXPColorMap;
     Button1: TButton;
     ColorBoxBase: TColorBox;
     Label3: TLabel;
@@ -280,6 +275,9 @@ Uses
  TypInfo;
 
 {$R *.dfm}
+var
+  ColorizerColorMap : TColorizerColorMap;
+
 
 procedure CheckForUpdates(Silent : Boolean);
 begin
@@ -602,7 +600,7 @@ begin
         exit;
 
 
-   SaveColorMapToXmlFile(XPColorMap, FileName);
+   SaveColorMapToXmlFile(ColorizerColorMap, FileName);
    if FileExists(FileName) then
    begin
     MsgBox(Format('The theme %s was saved',[ThemeName]));
@@ -727,7 +725,7 @@ begin
  begin
    PropName:=ColorListBox1.Items[ColorListBox1.ItemIndex];
    AColor:=CbClrElement.Selected;
-   SetOrdProp(XPColorMap, PropName, AColor);
+   SetOrdProp(ColorizerColorMap, PropName, AColor);
     OldIndex:=ColorListBox1.ItemIndex;
     ColorListBox1.PopulateList;
     if OldIndex>=0 then
@@ -743,7 +741,7 @@ begin
  if ColorListBox1.ItemIndex>=0 then
  begin
    PropName:= ColorListBox1.Items[ColorListBox1.ItemIndex];
-   AColor  := GetOrdProp(XPColorMap, PropName);
+   AColor  := GetOrdProp(ColorizerColorMap, PropName);
    CbClrElement.Selected:=AColor;
  end;
 end;
@@ -763,11 +761,11 @@ begin
   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+cbThemeName.Text+'.idetheme';
   if FileExists(FileName)  then
   begin
-    LoadColorMapFromXmlFile(XPColorMap, FileName);
+    LoadColorMapFromXmlFile(ColorizerColorMap, FileName);
     LoadColorsTheme();
     DrawPalette();
     EditThemeName.Text:=cbThemeName.Text;
-    ColorBoxBase.Selected:=XPColorMap.Color;
+    ColorBoxBase.Selected:=ColorizerColorMap.Color;
   end;
 end;
 
@@ -782,7 +780,7 @@ procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
 begin
  if CheckBoxAutoColor.Checked then
  begin
-   GenerateColorMap(XPColorMap, ColorBoxBase.Selected, CalculateTextColor(ColorBoxBase.Selected));
+   GenerateColorMap(ColorizerColorMap, ColorBoxBase.Selected, CalculateTextColor(ColorBoxBase.Selected));
    LoadColorsTheme();
    DrawPalette();
  end;
@@ -804,15 +802,15 @@ var
   Properties  : TPropList;
   PropName : string;
 begin
-  Count := GetPropList(TypeInfo(TXPColorMap), tkAny, @Properties);
+  Count := GetPropList(TypeInfo(TColorizerColorMap), tkAny, @Properties);
     for Index := 0 to Pred(Count) do
      if SameText(string(Properties[Index]^.PropType^.Name),'TColor') then
      begin
       PropName:=string(Properties[Index]^.Name);
       if Items.IndexOf(PropName)>=0 then
-        Items.Objects[Items.IndexOf(PropName)]:=TObject(Integer(GetPropValue(XPColorMap, PropName)))
+        Items.Objects[Items.IndexOf(PropName)]:=TObject(Integer(GetPropValue(ColorizerColorMap, PropName)))
       else
-       Items.AddObject( PropName, TObject(Integer(GetPropValue(XPColorMap, PropName))));
+       Items.AddObject(PropName, TObject(Integer(GetPropValue(ColorizerColorMap, PropName))));
      end;
 end;
 
@@ -825,12 +823,11 @@ end;
 procedure TFormIDEColorizerSettings.FormCreate(Sender: TObject);
 var
   sVersion : string;
-  I: Integer;
+  //I: Integer;
 begin
   LoadDockIcons;
   sVersion:=uMisc.GetFileVersion(GetModuleLocation);
   MemoAbout.Text:=Format(SColorizerPluginDescription, [sVersion]);
-
   MemoAbout.Lines.Add('');
   MemoAbout.Lines.Add('Third Party');
   MemoAbout.Lines.Add('------------');
@@ -842,15 +839,15 @@ begin
   MemoAbout.Lines.Add('http://sourceforge.net/projects/jcl/');
   MemoAbout.Lines.Add('');
 
-  ColorMapCombo.Items.AddObject('(Default)', nil);
-  ColorMapCombo.ItemIndex := 0;
-  for I := 0 to ComponentCount - 1 do
-    if Components[I] is TCustomActionBarColorMap then
-      ColorMapCombo.Items.AddObject(Components[I].Name, Components[I]);
+//  ColorMapCombo.Items.AddObject('(Default)', nil);
+//  ColorMapCombo.ItemIndex := 0;
+//  for I := 0 to ComponentCount - 1 do
+//    if Components[I] is TCustomActionBarColorMap then
+//      ColorMapCombo.Items.AddObject(Components[I].Name, Components[I]);
 
   ColorListBox1.OnChange:=ColorListChange;
 
-  StyleCombo.Items.Assign(ActionBarStyles);
+  //StyleCombo.Items.Assign(ActionBarStyles);
   {$IFDEF DELPHIXE2_UP}
   FPreview:=TVclStylesPreview.Create(Self);
   FPreview.Parent:=PanelPreview;
@@ -875,26 +872,26 @@ begin
     LBitMap:=TBitmap.Create;
     try
      CreateArrayBitmap(ImagePalette.ClientWidth, ImagePalette.ClientHeight,[
-      XPColorMap.ShadowColor,
-      XPColorMap.Color,
-      XPColorMap.DisabledColor,
-      XPColorMap.DisabledFontColor,
-      XPColorMap.DisabledFontShadow,
-      XPColorMap.FontColor,
-      XPColorMap.HighlightColor,
-      XPColorMap.HotColor,
-      XPColorMap.HotFontColor,
-      XPColorMap.MenuColor,
-      XPColorMap.FrameTopLeftInner,
-      XPColorMap.FrameTopLeftOuter,
-      XPColorMap.FrameBottomRightInner,
-      XPColorMap.FrameBottomRightOuter,
-      XPColorMap.BtnFrameColor,
-      XPColorMap.BtnSelectedColor,
-      XPColorMap.BtnSelectedFont,
-      XPColorMap.SelectedColor,
-      XPColorMap.SelectedFontColor,
-      XPColorMap.UnusedColor
+      ColorizerColorMap.ShadowColor,
+      ColorizerColorMap.Color,
+      ColorizerColorMap.DisabledColor,
+      ColorizerColorMap.DisabledFontColor,
+      ColorizerColorMap.DisabledFontShadow,
+      ColorizerColorMap.FontColor,
+      ColorizerColorMap.HighlightColor,
+      ColorizerColorMap.HotColor,
+      ColorizerColorMap.HotFontColor,
+      ColorizerColorMap.MenuColor,
+      ColorizerColorMap.FrameTopLeftInner,
+      ColorizerColorMap.FrameTopLeftOuter,
+      ColorizerColorMap.FrameBottomRightInner,
+      ColorizerColorMap.FrameBottomRightOuter,
+      ColorizerColorMap.BtnFrameColor,
+      ColorizerColorMap.BtnSelectedColor,
+      ColorizerColorMap.BtnSelectedFont,
+      ColorizerColorMap.SelectedColor,
+      ColorizerColorMap.SelectedFontColor,
+      ColorizerColorMap.UnusedColor
       ], LBitMap);
      ImagePalette.Picture.Assign(LBitMap);
     finally
@@ -939,39 +936,39 @@ end;
 
 
 procedure TFormIDEColorizerSettings.GenerateIDEThemes(const Path: string);
-Var
-  i        : integer;
-  FileName : string;
+//Var
+//  i        : integer;
+//  FileName : string;
 begin
-
-   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'Twilight.idetheme';
-   SaveColorMapToXmlFile(TwilightColorMap, FileName);
-
-   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'XPColorMap.idetheme';
-   SaveColorMapToXmlFile(XPColorMap1, FileName);
-
-   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'StandardColorMap.idetheme';
-   SaveColorMapToXmlFile(StandardColorMap, FileName);
-
-
-   for i:=0 to WebNamedColorsCount-1 do
-   begin
-     GenerateColorMap(XPColorMap, WebNamedColors[i].Value, CalculateTextColor(WebNamedColors[i].Value));
-     FileName:=StringReplace(WebNamedColors[i].Name,'clWeb','',[rfReplaceAll]);
-     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'.idetheme';
-     SaveColorMapToXmlFile(XPColorMap, FileName);
-
-//     GenerateColorMap(XPColorMap, GetHighLightColor(WebNamedColors[i].Value));
-//     FileName:=StringReplace(WebNamedColors[i].Name, 'clWeb', '',[rfReplaceAll]);
-//     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'Light.idetheme';
-//     SaveColorMapToXmlFile(XPColorMap, FileName);
+//
+//   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'Twilight.idetheme';
+//   SaveColorMapToXmlFile(TwilightColorMap, FileName);
+//
+//   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'XPColorMap.idetheme';
+//   SaveColorMapToXmlFile(XPColorMap1, FileName);
+//
+//   FileName:=IncludeTrailingPathDelimiter(GetIDEThemesFolder)+'StandardColorMap.idetheme';
+//   SaveColorMapToXmlFile(StandardColorMap, FileName);
 //
 //
-//     GenerateColorMap(XPColorMap, GetShadowColor(WebNamedColors[i].Value));
-//     FileName:=StringReplace(WebNamedColors[i].Name, 'clWeb', '',[rfReplaceAll]);
-//     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'Dark.idetheme';
+//   for i:=0 to WebNamedColorsCount-1 do
+//   begin
+//     GenerateColorMap(XPColorMap, WebNamedColors[i].Value, CalculateTextColor(WebNamedColors[i].Value));
+//     FileName:=StringReplace(WebNamedColors[i].Name,'clWeb','',[rfReplaceAll]);
+//     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'.idetheme';
 //     SaveColorMapToXmlFile(XPColorMap, FileName);
-   end;
+//
+////     GenerateColorMap(XPColorMap, GetHighLightColor(WebNamedColors[i].Value));
+////     FileName:=StringReplace(WebNamedColors[i].Name, 'clWeb', '',[rfReplaceAll]);
+////     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'Light.idetheme';
+////     SaveColorMapToXmlFile(XPColorMap, FileName);
+////
+////
+////     GenerateColorMap(XPColorMap, GetShadowColor(WebNamedColors[i].Value));
+////     FileName:=StringReplace(WebNamedColors[i].Name, 'clWeb', '',[rfReplaceAll]);
+////     FileName:=IncludeTrailingPathDelimiter(Path)+FileName+'Dark.idetheme';
+////     SaveColorMapToXmlFile(XPColorMap, FileName);
+//   end;
 end;
 
 function TFormIDEColorizerSettings.GetIDEThemesFolder: String;
@@ -1222,4 +1219,8 @@ begin
   end;
 end;
 
+initialization
+  ColorizerColorMap:=TColorizerColorMap.Create(nil);
+finalization
+  ColorizerColorMap.Free;
 end.

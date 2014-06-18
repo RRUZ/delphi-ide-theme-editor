@@ -1,7 +1,7 @@
 //**************************************************************************************************
 //
-// Unit Colorizer.HookScrollBars
-// unit Colorizer.HookScrollBars for the Delphi IDE Colorizer
+// Unit Colorizer.Hooks.UxTheme
+// unit Colorizer.Hooks.UxTheme for the Delphi IDE Colorizer
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -11,7 +11,7 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is Colorizer.HookScrollBars.pas.
+// The Original Code is Colorizer.Hooks.UxTheme.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
@@ -19,11 +19,12 @@
 //
 //**************************************************************************************************
 
-unit Colorizer.HookScrollBars;
+unit Colorizer.Hooks.UxTheme;
 
-{$I ..\Common\Jedi.inc}
 
 interface
+{$I ..\Common\Jedi.inc}
+
 
 implementation
 uses
@@ -49,10 +50,10 @@ uses
   StrUtils,
   SysUtils,
   GraphUtil,
-
   Forms,
   StdCtrls,
   Colorizer.Hooks,
+  Colorizer.Hooks.IDE,
   Dialogs,
   DDetours;
 
@@ -73,6 +74,8 @@ uses
   TrampolineOpenThemeData             : function(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall = nil;
   //TrampolineCloseThemeData            : function(hTheme: HTHEME): HRESULT; stdcall = nil;
   TrampolineDrawThemeBackground       : function(HTHEME: HTHEME; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall = nil;
+  Trampoline_DrawThemeText              : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
+
   TrampolineTWinControl_WMNCPaint     : procedure (Self : TWinControl;var Message: TWMNCPaint) = nil;
   TrampolineBaseVirtualTreeOriginalWMNCPaint : procedure (Self : TCustomControl;DC: HDC) = nil;
   //Scroll Bar Functions http://msdn.microsoft.com/en-us/library/windows/desktop/ff486021%28v=vs.85%29.aspx
@@ -94,6 +97,11 @@ uses
   TrampolineSetScrollPos              : function (hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall = nil;
   TrampolineSetScrollInfo             : function (hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall = nil;
 
+function Detour_UxTheme_DrawThemeText(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall;
+begin
+ //AddLog('Detour_UxTheme_DrawThemeText', string(pszText));
+ Exit(Trampoline_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+end;
 
 function Detour_WinApi_SetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
 begin
@@ -364,7 +372,7 @@ begin
                        LCanvas:=TCanvas.Create;
                        try
                           LCanvas.Handle:=dc;
-                          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+                          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
                           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
                           LCanvas.Rectangle(pRect);
                        finally
@@ -718,7 +726,7 @@ begin
          try
            LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
            LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
            LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
            LBuffer.Canvas.Rectangle(LRect);
            LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
@@ -761,7 +769,7 @@ begin
          try
            LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
            LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
            LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
            LBuffer.Canvas.Rectangle(LRect);
            LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
@@ -839,7 +847,7 @@ begin
                                                if iStateId= CBS_UNCHECKEDHOT then
                                                  LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor
                                                else
-                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
 
                                                LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
                                                LBuffer.Canvas.Rectangle(LRect);
@@ -861,7 +869,7 @@ begin
                                                if iStateId= CBS_CHECKEDHOT then
                                                  LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor
                                                else
-                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
                                                LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
                                                LBuffer.Canvas.Rectangle(LRect);
                                                DrawCheck(LBuffer.Canvas, Point(LRect.Left+3, LRect.Top+6), 2, False);
@@ -947,6 +955,9 @@ begin
 
   TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
 
+  if Assigned(DrawThemeText) then
+    Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
+
   OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
   if Assigned (OpenThemeDataOrgPointer) then
    TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @Detour_UxTheme_OpenThemeData);
@@ -985,6 +996,9 @@ if Assigned (TrampolineBaseVirtualTreeOriginalWMNCPaint) then
 
 if Assigned (TrampolineDrawThemeBackground) then
   InterceptRemove(@TrampolineDrawThemeBackground);
+
+if Assigned(Trampoline_DrawThemeText) then
+  InterceptRemove(@Trampoline_DrawThemeText);
 
 if Assigned (TrampolineSetScrollPos) then
   InterceptRemove(@TrampolineSetScrollPos);

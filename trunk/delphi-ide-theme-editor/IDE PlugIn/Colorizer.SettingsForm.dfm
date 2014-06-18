@@ -32,7 +32,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 417
     object PageControlSettings: TPageControl
       Left = 0
       Top = 0
@@ -41,7 +40,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 417
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
         object Label1: TLabel
@@ -219,7 +217,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
         end
         object cbThemeName: TComboBox
           Left = 3
-          Top = 64
+          Top = 65
           Width = 264
           Height = 21
           Style = csDropDownList
@@ -281,24 +279,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Caption = 'Modify Gutter Icons'
           TabOrder = 12
         end
-        object ColorMapCombo: TComboBox
-          Left = 326
-          Top = 391
-          Width = 84
-          Height = 21
-          Style = csDropDownList
-          TabOrder = 15
-          Visible = False
-        end
-        object StyleCombo: TComboBox
-          Left = 326
-          Top = 364
-          Width = 40
-          Height = 21
-          Style = csDropDownList
-          TabOrder = 13
-          Visible = False
-        end
         object ColorBoxBase: TColorBox
           Left = 154
           Top = 129
@@ -353,13 +333,12 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 166
           Height = 17
           Caption = 'Check for updates on startup'
-          TabOrder = 14
+          TabOrder = 13
         end
       end
       object TabSheet2: TTabSheet
         Caption = 'Custom options'
         ImageIndex = 5
-        ExplicitWidth = 409
         object Panel2: TPanel
           Left = 0
           Top = 0
@@ -368,7 +347,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Align = alClient
           BorderWidth = 5
           TabOrder = 0
-          ExplicitWidth = 409
           object PageControl1: TPageControl
             Left = 6
             Top = 6
@@ -377,7 +355,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             ActivePage = TabSheetDockOptions
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 397
             object TabSheetDockOptions: TTabSheet
               Caption = 'Docked Windows'
               ImageIndex = 4
@@ -776,7 +753,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheet3: TTabSheet
               Caption = 'IDE Tabs'
               ImageIndex = 2
-              ExplicitWidth = 389
               object Label12: TLabel
                 Left = 8
                 Top = 60
@@ -1227,7 +1203,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitWidth = 417
       object BtnApply: TButton
         Left = 4
         Top = 6
@@ -1646,36 +1621,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
-  end
-  object XPColorMap: TXPColorMap
-    HighlightColor = clWhite
-    BtnSelectedColor = clBtnFace
-    UnusedColor = clWhite
-    Left = 401
-    Top = 325
-  end
-  object TwilightColorMap: TTwilightColorMap
-    HighlightColor = clBlack
-    FrameBottomRightOuter = clBlack
-    BtnFrameColor = clBlack
-    DisabledColor = cl3DDkShadow
-    Left = 456
-    Top = 363
-  end
-  object StandardColorMap: TStandardColorMap
-    HighlightColor = clBtnHighlight
-    UnusedColor = 15988985
-    MenuColor = clMenu
-    SelectedColor = clHighlight
-    Left = 424
-    Top = 20
-  end
-  object XPColorMap1: TXPColorMap
-    HighlightColor = clWhite
-    BtnSelectedColor = clBtnFace
-    UnusedColor = clWhite
-    Left = 409
-    Top = 389
   end
   object ImageListDock: TImageList
     ColorDepth = cd32Bit
