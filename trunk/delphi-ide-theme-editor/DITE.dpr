@@ -4,7 +4,7 @@ program DITE;
 
 uses
   {$IFDEF DEBUG}
-  {$ENDIF}
+  {$ENDIF }
   uStackTrace in 'Units\uStackTrace.pas',
   Generics.Defaults,
   Generics.Collections,
@@ -23,8 +23,6 @@ uses
   uSupportedIDEs in 'Units\uSupportedIDEs.pas',
   uMisc in 'Units\uMisc.pas',
   uLazarusIDEHighlight in 'Units\uLazarusIDEHighlight.pas',
-  uCheckUpdate in 'Units\uCheckUpdate.pas' {FrmCheckUpdate},
-  uWinInet in 'Units\uWinInet.pas',
   Vcl.Themes,
   Vcl.Styles,
   uVclStylesFix in 'Units\uVclStylesFix.pas',
@@ -52,20 +50,6 @@ uses
 
 {$R *.res}
 
-procedure UpdateApp;
-var
-  Frm: TFrmCheckUpdate;
-begin
-  Frm := TFrmCheckUpdate.Create(nil);
-  try
-    Frm.CheckExternal:=True;
-    if Frm.UpdateAvailable then
-      Frm.ExecuteUpdater;
-  finally
-    Frm.Free;
-  end;
-end;
-
 Var
   IDEsList:TList<TDelphiVersionData>;
 begin
@@ -85,7 +69,7 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);
   if FrmMain.Settings.CheckForUpdates then
-   UpdateApp;
+   CheckForUpdates(True);
 
 
   Application.Run;

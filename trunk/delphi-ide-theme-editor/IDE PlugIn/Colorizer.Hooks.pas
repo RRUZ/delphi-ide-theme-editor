@@ -50,7 +50,6 @@ uses
 {$ENDIF}
   Messages,
   Forms,
-  IOUtils,
   ExtCtrls,
   Dialogs,
   ComCtrls,
@@ -80,6 +79,7 @@ uses
   ActnPopup,
   ActnMan,
   StdCtrls,
+  ActnMenus,
   Tabs,
   uRttiHelper,
   Rtti,
@@ -104,10 +104,10 @@ type
  TRadioButtonClass       = class(TRadioButton);
  TCustomComboClass       = class(TCustomCombo);
  TBevelClass             = class(TBevel);
- TFontClass              = class(TFont);
+ TCustomActionPopupMenuClass = class(TCustomActionPopupMenu);
  TCustomControlClass     = class(TCustomControl);
  TCustomControlBarClass  = class(TCustomControlBar);
-
+ TCustomButtonClass      = class(TCustomButton);
 var
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
@@ -145,7 +145,9 @@ var
 
   Trampoline_HintWindow_Paint              : procedure (Self : THintWindow) = nil;
   Trampoline_MessageHintWindow_Paint       : procedure (Self : THintWindow) = nil;
+
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
+
 
 {$IFDEF DLLWIZARD}
   Trampoline_TCustomForm_WndProc :  procedure (Self : TCustomForm;var Message: TMessage) = nil;
@@ -153,6 +155,8 @@ var
 
   Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect)=nil;
   Trampoline_TCustomForm_DoCreate: procedure(Self : TCustomForm) = nil;
+
+  //Trampoline_TCustomActionPopupMenu_CreateParams : procedure(Self: TCustomActionPopupMenu;var Params: TCreateParams) = nil;
 
 
   FGutterBkColor : TColor = clNone;
@@ -240,11 +244,23 @@ begin
 end;
 {$ENDIF}
 
+//procedure Detour_TCustomActionPopupMenu_CreateParams(Self: TCustomActionPopupMenu;var Params : TCreateParams);
+//begin
+//  AddLog('Detour_TCustomActionPopupMenu_CreateParams', 'Hooked');
+//  Trampoline_TCustomActionPopupMenu_CreateParams(Self, Params);
+//  with Params do
+//  begin
+//      ExStyle := ExStyle or WS_EX_LAYERED;
+//  end;
+//end;
+
 
 procedure Detour_TCustomForm_DoCreate(Self : TCustomForm);
 begin
   Trampoline_TCustomForm_DoCreate(Self);
   //AddLog('Detour_TCustomForm_DoCreate', Self.ClassName);
+//  if SameText(Self.ClassName, 'TProgressForm') then
+//    TRttiUtils.DumpObject(Self, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+Self.ClassName+'.pas');
 
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) then
     ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
@@ -813,8 +829,96 @@ end;
 //Hook for change color of TCustomCheckBox
 procedure Detour_TButtonControlClass_WndProc(Self : TButtonControlClass;var Message: TMessage);
 var
+  LCanvas : TCanvas;
+  Details:  TThemedElementDetails;
   LBrush : TBrush;
   LParentForm : TCustomForm;
+  LStyleServices : {$IFDEF DELPHIXE2_UP}  TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
+  sCaption: string;
+  LRect : TRect;
+  DC: HDC;
+  LBuffer : TBitmap;
+  lpPaint : TPaintStruct;
+  LFontColor : TColor;
+
+      procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+        const S: string; var R: TRect; Flags: Cardinal);
+      var
+        TextFormat: TTextFormatFlags;
+      begin
+        Canvas.Font := TWinControlClass(Self).Font;
+        TextFormat := TTextFormatFlags(Flags);
+        Canvas.Font.Color := LFontColor;
+        LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+      end;
+
+      procedure PaintButton;
+      begin
+        {$IFDEF DELPHIXE2_UP}
+        LStyleServices:=StyleServices;
+        {$ELSE}
+        LStyleServices :=ThemeServices
+        {$ENDIF};
+        DC := TWMPaint(Message).DC;
+        LCanvas := TCanvas.Create;
+        try
+            if DC <> 0 then
+              LCanvas.Handle := DC
+            else
+              LCanvas.Handle := BeginPaint(Self.Handle, LpPaint);
+            //AddLog('Detour_TButtonControlClass_WndProc', IntToHex(DC, 8));
+            if (DC = 0) then
+            begin
+              LBuffer := TBitmap.Create;
+              try
+                LRect:=Self.ClientRect;
+                LBuffer.SetSize(Self.Width, Self.Height);
+                if not TCustomButtonClass(Self).Enabled then
+                begin
+                  Details := LStyleServices.GetElementDetails(tbPushButtonDisabled);
+                  LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+                  LFontColor:=TColorizerLocalSettings.ColorMap.DisabledFontColor;
+                end
+                else if TCustomButtonClass(Self).MouseInClient then
+                begin
+                  Details := LStyleServices.GetElementDetails(tbPushButtonHot);
+                  LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.BtnSelectedColor;
+                  LFontColor:=TColorizerLocalSettings.ColorMap.BtnSelectedFont;
+                end
+                else
+                begin
+                  Details := LStyleServices.GetElementDetails(tbPushButtonNormal);
+                  LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+                  LFontColor:=TColorizerLocalSettings.ColorMap.FontColor;
+                end;
+
+                LBuffer.Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+                LBuffer.Canvas.Rectangle(LRect);
+
+
+                sCaption:=TCustomButtonClass(Self).Caption;
+                LRect:=TCustomButtonClass(Self).ClientRect;
+
+                DrawControlText(LBuffer.Canvas, Details, sCaption, LRect, DT_VCENTER or DT_CENTER or DT_SINGLELINE);
+
+                if Self is TWinControl then
+                  TWinControlClass(Self).PaintControls(LBuffer.Canvas.Handle, nil);
+                LCanvas.Draw(0, 0, LBuffer);
+              finally
+                LBuffer.Free;
+              end;
+            end;
+
+        finally
+          LCanvas.Handle := 0;
+          LCanvas.Free;
+          if DC = 0 then
+            EndPaint(Self.Handle, LpPaint);
+        end;
+
+        Message.Result := 0;
+      end;
+
 begin
   if (TButtonControl(Self) is TCustomCheckBox) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
   begin
@@ -838,6 +942,32 @@ begin
         end;
     else
        Trampoline_TButtonControl_WndProc(Self, Message);
+    end;
+  end
+  else
+  if (TButtonControl(Self) is TButton) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
+  begin
+
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+      Trampoline_TButtonControl_WndProc(Self, Message);
+      exit;
+    end;
+
+    //AddLog('Detour_TButtonControlClass_WndProc', WM_To_String(TMessage(Message).Msg));
+    case TMessage(Message).Msg of
+       CN_NOTIFY     :
+       begin
+          Trampoline_TButtonControl_WndProc(Self, Message);
+          InvalidateRect(Self.Handle, nil, False);
+       end;
+
+       WM_PAINT      : PaintButton();
+       WM_ERASEBKGND : Message.Result := 1
+
+      else
+        Trampoline_TButtonControl_WndProc(Self, Message);
     end;
   end
   else
@@ -2476,6 +2606,8 @@ var
 begin
   Trampoline_TWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
 
+  //Trampoline_TCustomActionPopupMenu_CreateParams :=InterceptCreate(@TCustomActionPopupMenuClass.CreateParams, @Detour_TCustomActionPopupMenu_CreateParams);
+
   Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @Detour_THintWindow_Paint);
   Trampoline_Bevel_Paint      := InterceptCreate(@TBevelClass.Paint, @Detour_TBevel_Paint);
 
@@ -2555,8 +2687,8 @@ begin
   if Assigned(Trampoline_TCanvas_Rectangle) then
     InterceptRemove(@Trampoline_TCanvas_Rectangle);
 
-//  if Assigned(Trampoline_TFont_SetColor) then
-//    InterceptRemove(@Trampoline_TFont_SetColor);
+//  if Assigned(Trampoline_TCustomActionPopupMenu_CreateParams) then
+//    InterceptRemove(@Trampoline_TCustomActionPopupMenu_CreateParams);
 
   if Assigned(Trampoline_TCustomControlBar_PaintControlFrame) then
     InterceptRemove(@Trampoline_TCustomControlBar_PaintControlFrame);

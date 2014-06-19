@@ -264,7 +264,6 @@ uses
   uSMSIDEHighlight,
   uStackTrace,
   uSMSVersions,
-  uCheckUpdate,
   uLoadThemesImages,
   uHelpInsight,
   uStdActionsPopMenu;
@@ -1155,15 +1154,8 @@ begin
 end;
 
 procedure TFrmMain.ImageUpdateClick(Sender: TObject);
-var
-  Frm : TFrmCheckUpdate;
 begin
-  Frm:=TFrmCheckUpdate.Create(nil);
-  try
-    Frm.ShowModal();
-  finally
-    Frm.Free;
-  end;
+ CheckForUpdates(False);
 end;
 
 procedure TFrmMain.LoadActionImages;

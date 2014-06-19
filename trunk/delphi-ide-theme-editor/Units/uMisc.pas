@@ -54,6 +54,7 @@ function  GetWindowClassName(Window: HWND): String;
 function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
 procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);
 procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
+procedure CheckForUpdates(Silent : Boolean);
 
 implementation
 
@@ -94,6 +95,18 @@ begin
     Result:= Default;
    end;
 end;
+
+procedure CheckForUpdates(Silent : Boolean);
+var
+  LBinaryPath : string;
+begin
+  LBinaryPath:=GetModuleLocation();
+  if Silent then
+   ShellExecute(0, 'open', PChar(ExtractFilePath(LBinaryPath)+'Updater.exe'), PChar(Format('"%s" -Silent', [GetModuleLocation])), '', SW_SHOWNORMAL)
+  else
+   ShellExecute(0, 'open', PChar(ExtractFilePath(LBinaryPath)+'Updater.exe'), PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
+end;
+
 
 
 procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
@@ -546,9 +559,10 @@ begin
     CN_SYSKEYDOWN        : Result := 'CN_SYSKEYDOWN';
     CN_SYSCHAR           : Result := 'CN_SYSCHAR';
     CN_NOTIFY            : Result := 'CN_NOTIFY';
-
-  else Result := 'Unknown(' + IntToHex(WM_Message, 4) + ')';
+  else Exit('Unknown(' + IntToHex(WM_Message, 4) + ')');
   end; { Case }
+
+  Result:= Result +' (' + IntToHex(WM_Message, 4) + ')';
 end;
 
 

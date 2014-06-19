@@ -299,7 +299,7 @@ type
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
-   TWrapperPropCheckBox = class(TBaseWrapper)
+   TWrapperCheckBox = class(TBaseWrapper)
    protected
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
@@ -1217,9 +1217,9 @@ begin
   //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\TCategoriesPopup.pas');
 end;
 
-{ TWrapperPropCheckBox }
+{ TWrapperCheckBox }
 
-procedure TWrapperPropCheckBox.SetProperties(AComponent: TComponent;
+procedure TWrapperCheckBox.SetProperties(AComponent: TComponent;
   AColorMap: TColorizerColorMap);
 begin
   inherited;
@@ -1363,7 +1363,8 @@ initialization
   RegisterColorizerWrapper('TCloseButton',  TWrapperGradientButton);
   RegisterColorizerWrapper('TGradientButton',  TWrapperGradientButton);
 
-  RegisterColorizerWrapper('TPropCheckBox',  TWrapperPropCheckBox);
+  RegisterColorizerWrapper('TPropCheckBox',  TWrapperCheckBox);
+  RegisterColorizerWrapper('TCheckBox',  TWrapperCheckBox);
 
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleEditControl);
   RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleEditControl);

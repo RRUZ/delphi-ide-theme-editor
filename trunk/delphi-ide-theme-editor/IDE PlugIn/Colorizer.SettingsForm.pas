@@ -248,8 +248,6 @@ type
     procedure Init;
   end;
 
-  procedure CheckForUpdates(Silent : Boolean);
-
 
 implementation
 
@@ -279,13 +277,6 @@ var
   ColorizerColorMap : TColorizerColorMap;
 
 
-procedure CheckForUpdates(Silent : Boolean);
-begin
-  if Silent then
-   ShellExecute(0, 'open', PChar(ExtractFilePath(GetModuleLocation())+'Updater.exe'), PChar(Format('"%s" -Silent', [GetModuleLocation])), '', SW_SHOWNORMAL)
-  else
-   ShellExecute(0, 'open', PChar(ExtractFilePath(GetModuleLocation())+'Updater.exe'), PChar(Format('"%s"', [GetModuleLocation])), '', SW_SHOWNORMAL);
-end;
 
 function CalculateTextColor(const BackgroundColor: TColor): TColor;
 begin

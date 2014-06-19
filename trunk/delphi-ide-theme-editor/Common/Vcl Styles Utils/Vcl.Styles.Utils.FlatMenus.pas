@@ -375,7 +375,7 @@ var
   LSize: TSize;
   MI: TMenuItem;
   ImageIndex: integer;
-  LTextRect, LImageRect, R: TRect;
+  LTextRect, LImageRect, R, LRect: TRect;
   LImageWidth: integer;
   hBmp: HBITMAP;
   BmpHeight, BmpWidth: integer;
@@ -384,7 +384,7 @@ var
   Sign: Char;
   SysItem: TSysPopupItem;
   sShortCut: String;
-  Bmp: TBitmap;
+  Bmp, LBitmapCheck: TBitmap;
   LColor : TColor;
 
   procedure DrawSubMenu(const ItemRect: TRect);
@@ -629,12 +629,20 @@ begin
     end;
     //StyleServices.DrawElement(DC, LDetails, LImageRect);
 
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
-    Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-    Canvas.Rectangle(Rect(ItemRect.Left, ItemRect.Top+1, ItemRect.Left+20, ItemRect.Bottom-1));
-    LColor   := TColorizerLocalSettings.ColorMap.FontColor;
-    Canvas.Pen.Color:=LColor;
-    DrawCheck(Canvas, Point(LImageRect.Left+2, LImageRect.Top), 2, False);
+    LBitmapCheck:=TBitmap.Create;
+    try
+      LRect:=Rect(ItemRect.Left, ItemRect.Top+1, ItemRect.Left+20, ItemRect.Bottom-1);
+      LBitmapCheck.SetSize(LRect.Right- LRect.Left, LRect.Bottom - LRect.Top);
+      LBitmapCheck.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+      LBitmapCheck.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+      LBitmapCheck.Canvas.Rectangle(0, 0 , LBitmapCheck.Width, LBitmapCheck.Height);
+      LBitmapCheck.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+      DrawCheck(LBitmapCheck.Canvas, Point(6, 8), 2, False);
+      Canvas.Draw(ItemRect.Left, ItemRect.Top+1, LBitmapCheck);
+    finally
+      LBitmapCheck.Free;
+    end;
+
   end;
 
   { Draw Text }

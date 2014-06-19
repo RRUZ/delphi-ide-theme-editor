@@ -42,6 +42,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label1: TLabel
           Left = 3
           Top = 46
@@ -339,6 +343,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheet2: TTabSheet
         Caption = 'Custom options'
         ImageIndex = 5
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Panel2: TPanel
           Left = 0
           Top = 0
@@ -358,6 +366,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheetDockOptions: TTabSheet
               Caption = 'Docked Windows'
               ImageIndex = 4
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Label11: TLabel
                 Left = 16
                 Top = 23
@@ -662,6 +674,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             end
             object TabSheet1: TTabSheet
               Caption = 'ToolBars'
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Label4: TLabel
                 Left = 3
                 Top = 13
@@ -753,6 +769,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheet3: TTabSheet
               Caption = 'IDE Tabs'
               ImageIndex = 2
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Label12: TLabel
                 Left = 8
                 Top = 60
@@ -936,6 +956,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheet4: TTabSheet
               Caption = 'Headers'
               ImageIndex = 3
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Label27: TLabel
                 Left = 16
                 Top = 44
@@ -1059,6 +1083,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 26
@@ -1096,6 +1124,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetHookedForms: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -1151,6 +1183,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetAbout: TTabSheet
         Caption = 'About'
         ImageIndex = 5
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object MemoAbout: TMemo
           Left = 3
           Top = 3
