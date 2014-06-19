@@ -128,7 +128,7 @@ Color15=$FFFFFF
     'RAD Studio XE4',
     'RAD Studio XE5',
     'Appmethod 1.13',
-    'RAD Studio XE6'
+    'RAD Studio XE6/Appmethod 1.14'
     );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
@@ -348,6 +348,13 @@ begin
     Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_CURRENT_USER);
     if Found then
       Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName, HKEY_CURRENT_USER) and FileExists(FileName);
+
+    if  (DelphiComp>=DelphiXE6) and not Found then
+    begin
+      FileName:=StringReplace(FileName, 'bds.exe', 'appmethod.exe', [rfReplaceAll]);
+      Found:=FileExists(FileName);
+    end;
+
 
     if not Found then
     begin

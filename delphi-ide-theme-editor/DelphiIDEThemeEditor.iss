@@ -1902,6 +1902,8 @@ Source: Styles\Sterling.vsf; DestDir: {app}\Styles\
 Source: Styles\TabletDark.vsf; DestDir: {app}\Styles\
 Source: Styles\TurquoiseGray.vsf; DestDir: {app}\Styles\
 Source: Styles\YellowGraphite.vsf; DestDir: {app}\Styles\
+Source: Updater.exe; DestDir: {app}
+Source: DownloadInfo.xml; DestDir: {app}
 
 [Setup]
 UsePreviousLanguage=no

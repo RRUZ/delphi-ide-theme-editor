@@ -20,7 +20,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "3.30.0"
+  !define VER_MINOR "3.41.0"
 !endif
 
 !ifndef IDE_VERSION_DXE
@@ -70,7 +70,7 @@ RequestExecutionLevel admin
   !endif
   !ifdef IDE_VERSION_DXE6
     !define IDE_SHORT_NAME "DXE6"
-    !define IDE_LONG_NAME "RAD Studio XE6"
+    !define IDE_LONG_NAME "RAD Studio XE6 / Appmethod 1.14"
   !endif
 !endif
 
