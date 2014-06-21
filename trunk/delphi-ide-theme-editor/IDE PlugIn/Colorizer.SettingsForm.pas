@@ -175,6 +175,11 @@ type
     ColorBoxHeaderFontColor: TColorBox;
     Button22: TButton;
     Button23: TButton;
+    CheckBoxVCLStylesForms: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    CheckBox4: TCheckBox;
+    Bevel2: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -256,6 +261,7 @@ Uses
  VCL.Themes,
  VCL.Styles,
  System.UITypes,
+ Colorizer.Vcl.Styles,
  {$IFEND}
  {$WARN UNIT_PLATFORM OFF}
  FileCtrl,
@@ -269,6 +275,7 @@ Uses
  GraphUtil,
  CommCtrl,
  Colorizer.Utils,
+ Colorizer.Hook.Forms,
  uColorSelector,
  TypInfo;
 
@@ -316,10 +323,16 @@ end;
 
 procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
-   s, ImagesPath, sMessage{$IFDEF DELPHIXE2_UP}, StyleFile {$ENDIF} : string;
-   FShowWarning : Boolean;
+   {$IFDEF DELPHIXE2_UP}OrgVclStyleName, {$ENDIF}s, ImagesPath, sMessage : string;
+   {$IFDEF DELPHIXE2_UP}OrgVclStyleForms, OrgVclStyle, {$ENDIF}FShowWarning : Boolean;
 begin
-  FShowWarning:=(CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter);
+{$IFDEF DELPHIXE2_UP}
+  OrgVclStyleName :=FSettings.VCLStyleName;
+  OrgVclStyle     :=FSettings.UseVCLStyles;
+  OrgVclStyleForms:=FSettings.VCLStylesForms;
+{$ENDIF}
+
+  FShowWarning:=(CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter) or (CheckBoxHookSystemColors.Checked <> FSettings.HookSystemColors);
 
   if FShowWarning then
     sMessage:= Format('Do you want apply the changes?'+sLineBreak+
@@ -335,11 +348,13 @@ begin
     FSettings.FixIDEDisabledIconsDraw   := CheckBoxFixIDEDrawIcon.Checked;
     FSettings.AutogenerateColors   := CheckBoxAutoColor.Checked;
 
-    FSettings.UseVCLStyles :=CheckBoxUseVClStyles.Checked;
+    FSettings.VCLStyleName  := CbStyles.Text;
+    FSettings.UseVCLStyles  := CheckBoxUseVClStyles.Checked;
+    FSettings.VCLStylesForms:= CheckBoxVCLStylesForms.Checked;
+
     FSettings.ChangeIconsGutter :=CheckBoxGutterIcons.Checked;
 //    FSettings.ColorMapName      :=ColorMapCombo.Text;
 //    FSettings.StyleBarName      :=StyleCombo.Text;
-    FSettings.VCLStyleName := CbStyles.Text;
     FSettings.DockImages   := ListBoxDockImages.Items[ListBoxDockImages.ItemIndex];
 
     FSettings.DockGradientHor:= RbtnDockGradientHorz.Checked;
@@ -391,17 +406,31 @@ begin
     {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles then
     begin
-      StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
-      if FileExists(StyleFile) then
-      begin
-        TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
-        GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
-      end
-      else
-        MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
+//      StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
+//      if FileExists(StyleFile) then
+//      begin
+//        TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
+//        GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
+//      end
+//      else
+//        MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
+
+     if (TColorizerLocalSettings.Settings.VCLStylesForms<>OrgVclStyleForms) or (TColorizerLocalSettings.Settings.UseVCLStyles<>OrgVclStyle) or (TColorizerLocalSettings.Settings.VCLStyleName<>OrgVclStyleName) then
+     begin
+       SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+       RefreshColorizerVCLStyle();
+     end;
+
+    end
+    else
+    begin
+     if (TColorizerLocalSettings.Settings.UseVCLStyles<>OrgVclStyle) then
+     begin
+       SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+       RefreshColorizerVCLStyle();
+     end;
     end;
     {$ENDIF}
-
     if FSettings.Enabled then
       RefreshIDETheme(True)
     else
@@ -846,11 +875,11 @@ begin
   {$ENDIF}
   FSettings:=TSettings.Create;
   //CheckBoxActivateDWM.Enabled:=DwmIsEnabled;
-  {$IF CompilerVersion >= 23}
-  TabSheetVCLStyles.TabVisible:={$IFDEF DLLWIZARD}False{$ELSE}True{$ENDIF};
-  {$ELSE CompilerVersion}
-  TabSheetVCLStyles.TabVisible  :=False;
-  {$IFEND}
+  {$IFDEF DELPHIXE2_UP}
+  TabSheetVCLStyles.TabVisible  := True;//{$IFDEF DLLWIZARD}False{$ELSE}True{$ENDIF};
+  {$ELSE}
+  TabSheetVCLStyles.TabVisible  := False;
+  {$ENDIF}
   TabSheetHookedForms.TabVisible:=False;
   ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
 end;
@@ -1134,7 +1163,8 @@ begin
   cbThemeName.ItemIndex:=cbThemeName.Items.IndexOf(EditThemeName.Text);
   cbThemeNameChange(nil);
 
-  CheckBoxUseVClStyles.Checked:=FSettings.UseVCLStyles;
+  CheckBoxUseVClStyles.Checked   := FSettings.UseVCLStyles;
+  CheckBoxVCLStylesForms.Checked := FSettings.VCLStylesForms;
 {$IFDEF DELPHIXE2_UP}
   LoadVClStylesList;
 {$ENDIF}
@@ -1176,6 +1206,7 @@ begin
   CbStyles.Items.Clear;
   RegisterVClStylesFiles();
    for s in TStyleManager.StyleNames do
+    if not SameText(s, 'Windows') then
     CbStyles.Items.Add(s);
 
    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);

@@ -42,7 +42,7 @@ uses
 {$IFDEF DELPHIXE2_UP}
   Vcl.Styles,
   Vcl.Themes,
-  UxTheme,
+  Winapi.UxTheme,
 {$ELSE}
   Themes,
   UxTheme,
@@ -95,7 +95,6 @@ type
 {$IFDEF DELPHIXE2_UP}
  TUxThemeStyleClass      = class(TUxThemeStyle);
 {$ENDIF}
- TCustomFormClass        = class(TCustomForm);
  TBrushClass             = class(TBrush);
  TCustomListViewClass    = class(TCustomListView);
  TSplitterClass          = class(TSplitter);
@@ -124,7 +123,7 @@ var
   Trampoline_TCustomStatusBar_WMPAINT  : procedure (Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
 
   {$IFDEF DELPHIXE2_UP}
-  Trampoline_TStyleEngine_HandleMessage    : function (Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
+  //Trampoline_TStyleEngine_HandleMessage    : function (Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TUxThemeStyle_DoDrawElement   : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
   {$ELSE}
   Trampoline_TUxTheme_DrawElement          : procedure (Self : TThemeServices;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: TRect);
@@ -149,12 +148,7 @@ var
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
 
 
-{$IFDEF DLLWIZARD}
-  Trampoline_TCustomForm_WndProc :  procedure (Self : TCustomForm;var Message: TMessage) = nil;
-{$ENDIF}
-
   Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect)=nil;
-  Trampoline_TCustomForm_DoCreate: procedure(Self : TCustomForm) = nil;
 
   //Trampoline_TCustomActionPopupMenu_CreateParams : procedure(Self: TCustomActionPopupMenu;var Params: TCreateParams) = nil;
 
@@ -225,24 +219,8 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
-
-{$IFDEF DLLWIZARD}
-procedure Detour_TCustomForm_WndProc(Self : TCustomForm;var Message: TMessage);
-begin
- if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
- case Message.Msg of
-  WM_CLOSE  :
-  //WM_DESTROY,
-  //WM_QUIT :
-     begin
-       //AddLog('Detour_TCustomForm_WndProc', Self.ClassName+' ' +WM_To_String(Message.Msg));
-       //RestoreIDESettings();
-       RestoreIDESettingsFast();
-     end;
- end;
- Trampoline_TCustomForm_WndProc(Self, Message);
-end;
-{$ENDIF}
+//var
+//  FormMessages : TStrings;
 
 //procedure Detour_TCustomActionPopupMenu_CreateParams(Self: TCustomActionPopupMenu;var Params : TCreateParams);
 //begin
@@ -254,17 +232,6 @@ end;
 //  end;
 //end;
 
-
-procedure Detour_TCustomForm_DoCreate(Self : TCustomForm);
-begin
-  Trampoline_TCustomForm_DoCreate(Self);
-  //AddLog('Detour_TCustomForm_DoCreate', Self.ClassName);
-//  if SameText(Self.ClassName, 'TProgressForm') then
-//    TRttiUtils.DumpObject(Self, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+Self.ClassName+'.pas');
-
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) then
-    ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
-end;
 
 
 procedure Detour_TCustomControlBar_PaintControlFrame(Self:TCustomControlBarClass; Canvas: TCanvas; AControl: TControl; var ARect: TRect);
@@ -609,7 +576,7 @@ var
   LBackgroundColor: TColor;
   LParentForm : TCustomForm;
 begin
-    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
     begin
      Trampoline_DoModernPainting(Self);
      exit;
@@ -894,7 +861,6 @@ var
 
                 LBuffer.Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
                 LBuffer.Canvas.Rectangle(LRect);
-
 
                 sCaption:=TCustomButtonClass(Self).Caption;
                 LRect:=TCustomButtonClass(Self).ClientRect;
@@ -2222,16 +2188,16 @@ end;
 
 {$IFDEF DELPHIXE2_UP}
 //Hook, for avoid apply a VCL Style to a TWinControl in desing time
-function Detour_TStyleEngine_HandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
-begin
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
-  begin
-    Result:=False;
-    if not Assigned(Control) then exit;
-    if csDesigning in Control.ComponentState then  exit;
-  end;
-  Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
-end;
+//function Detour_TStyleEngine_HandleMessage(Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean;
+//begin
+//  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles then
+//  begin
+//    Result:=False;
+//    if not Assigned(Control) then exit;
+//    if csDesigning in Control.ComponentState then  exit;
+//  end;
+//  Result:=Trampoline_TStyleEngine_HandleMessage(Self, Control, Message, DefWndProc);
+//end;
 {$ENDIF}
 
 //Hook for paint IDE TStatusBar
@@ -2366,7 +2332,7 @@ var
       end;
 
 begin
-    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) or (Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles) then
+    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
     begin
      Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
      exit;
@@ -2628,7 +2594,7 @@ begin
  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
 //************************************************
 {$IFDEF DELPHIXE2_UP}
-  Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @Detour_TStyleEngine_HandleMessage);
+  //Trampoline_TStyleEngine_HandleMessage     := InterceptCreate(@TStyleEngine.HandleMessage,   @Detour_TStyleEngine_HandleMessage);
   Trampoline_TUxThemeStyle_DoDrawElement    := InterceptCreate(@TUxThemeStyleClass.DoDrawElement,   @Detour_TUxThemeStyle_DrawElement);
 {$ELSE}
   LThemeServicesDrawElement2                := ThemeServices.DrawElement;
@@ -2643,7 +2609,6 @@ begin
    Trampoline_TCustomControlBar_PaintControlFrame   :=  InterceptCreate(@TCustomControlBarClass.PaintControlFrame, @Detour_TCustomControlBar_PaintControlFrame);
 
 // *******************************************
-  Trampoline_TCustomForm_DoCreate          := InterceptCreate(@TCustomFormClass.DoCreate,   @Detour_TCustomForm_DoCreate);
   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @Detour_TCategoryButtons_DrawCategory);
   Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @Detour_TCustomPanel_Paint);
 
@@ -2654,9 +2619,6 @@ begin
   Trampoline_TSplitter_Paint            := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
   Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
 // *******************************************
-{$IFDEF DLLWIZARD}
-  Trampoline_TCustomForm_WndProc        := InterceptCreate(@TCustomFormClass.WndProc, @Detour_TCustomForm_WndProc);
-{$ENDIF}
 
 end;
 
@@ -2697,8 +2659,8 @@ begin
 //    InterceptRemove(@Trampoline_TCanvas_Polyline);
 
 {$IFDEF DELPHIXE2_UP}
-  if Assigned(Trampoline_TStyleEngine_HandleMessage) then
-    InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
+//  if Assigned(Trampoline_TStyleEngine_HandleMessage) then
+//    InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
   if Assigned(Trampoline_TUxThemeStyle_DoDrawElement) then
     InterceptRemove(@Trampoline_TUxThemeStyle_DoDrawElement);
 {$ELSE}
@@ -2716,9 +2678,6 @@ begin
 
   if Assigned(Trampoline_DoModernPainting) then
      InterceptRemove(@Trampoline_DoModernPainting);
-
-  if Assigned(Trampoline_TCustomForm_DoCreate) then
-    InterceptRemove(@Trampoline_TCustomForm_DoCreate);
 
   if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
     InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
@@ -2742,13 +2701,12 @@ begin
     InterceptRemove(@Trampoline_TCustomCombo_WndProc);
 
 
-{$IFDEF DLLWIZARD}
-  if Assigned(Trampoline_TCustomForm_WndProc) then
-    InterceptRemove(@Trampoline_TCustomForm_WndProc);
-{$ENDIF}
-
-
 end;
 
+//initialization
+//  FormMessages:= TStringList.Create;
+//finalization
+//  FormMessages.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\FormsMessages.txt');
+//  FormMessages.Free;
 end.
 

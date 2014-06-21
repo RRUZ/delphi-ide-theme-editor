@@ -43,7 +43,6 @@ contains
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
-  Colorizer.HookForms in 'Colorizer.HookForms.pas',
   Colorizer.Hooks in 'Colorizer.Hooks.pas',
   Colorizer.StoreColorMap in 'Colorizer.StoreColorMap.pas',
   Colorizer.XPStyleActnCtrls in 'Colorizer.XPStyleActnCtrls.pas',
@@ -68,7 +67,9 @@ contains
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
   Colorizer.Hooks.Windows in 'Colorizer.Hooks.Windows.pas',
   Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas',
-  Colorizer.VirtualTrees in 'Colorizer.VirtualTrees.pas';
+  Colorizer.VirtualTrees in 'Colorizer.VirtualTrees.pas',
+  Colorizer.Hook.Forms in 'Colorizer.Hook.Forms.pas',
+  Colorizer.Vcl.Styles in 'Colorizer.Vcl.Styles.pas';
 
 end.
 

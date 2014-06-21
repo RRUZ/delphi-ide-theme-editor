@@ -67,6 +67,7 @@ type
     FHeaderBorderColor: string;
     FHeaderCustom: boolean;
     FHeaderStartGrad: string;
+    FVCLStylesForms: boolean;
     function GetThemeFileName: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
@@ -79,6 +80,7 @@ type
 
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
+    property VCLStylesForms  : boolean read FVCLStylesForms write FVCLStylesForms;
 
     property HookSystemColors : boolean read FHookSystemColors write FHookSystemColors;
 
@@ -149,8 +151,12 @@ begin
     Settings.FixIDEDisabledIconsDraw := LIniFile.ReadBool('Global', 'FixIDEDisabledIconsDraw', True);
     Settings.AutogenerateColors      := LIniFile.ReadBool('Global', 'AutogenerateColors', True);
     Settings.ThemeName               := LIniFile.ReadString('Global', 'ThemeName', '');
+
     Settings.VCLStyleName            := LIniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
     Settings.UseVCLStyles            := LIniFile.ReadBool('Global', 'UseVCLStyles', False);
+    Settings.VCLStylesForms          := LIniFile.ReadBool('Global', 'VCLStylesForms', True);
+
+
     Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
     Settings.HookSystemColors        := LIniFile.ReadBool('Global', 'HookSystemColors', True);
     Settings.DockImages              := LIniFile.ReadString('Global', 'DockImages', 'red');
@@ -208,8 +214,11 @@ begin
     LIniFile.WriteBool('Global', 'FixIDEDisabledIconsDraw', Settings.FixIDEDisabledIconsDraw);
     LIniFile.WriteBool('Global', 'AutogenerateColors', Settings.AutogenerateColors);
     LIniFile.WriteString('Global', 'ThemeName', Settings.ThemeName);
+
     LIniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
     LIniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
+    LIniFile.WriteBool('Global', 'VCLStylesForms', Settings.VCLStylesForms);
+
     LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
     LIniFile.WriteBool('Global', 'HookSystemColors', Settings.HookSystemColors);
     LIniFile.WriteString('Global', 'DockImages', Settings.DockImages);

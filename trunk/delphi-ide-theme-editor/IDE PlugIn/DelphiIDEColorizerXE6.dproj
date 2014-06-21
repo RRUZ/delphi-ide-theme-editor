@@ -118,7 +118,6 @@
         <DCCReference Include="Main.pas"/>
         <DCCReference Include="Colorizer.Utils.pas"/>
         <DCCReference Include="Colorizer.Settings.pas"/>
-        <DCCReference Include="Colorizer.HookForms.pas"/>
         <DCCReference Include="Colorizer.Hooks.pas"/>
         <DCCReference Include="Colorizer.StoreColorMap.pas"/>
         <DCCReference Include="Colorizer.XPStyleActnCtrls.pas"/>
@@ -149,6 +148,8 @@
         <DCCReference Include="Colorizer.Hooks.Windows.pas"/>
         <DCCReference Include="Colorizer.Hooks.IDE.pas"/>
         <DCCReference Include="Colorizer.VirtualTrees.pas"/>
+        <DCCReference Include="Colorizer.Hook.Forms.pas"/>
+        <DCCReference Include="Colorizer.Vcl.Styles.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
