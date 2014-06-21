@@ -1371,16 +1371,6 @@ begin
           if Assigned(Result) then
             Exit;
         end;
-
-        // TODO : Add recursive implementation to detect any child TPopupMenu
-        (* for k := 0 to Form.Components[j].ComponentCount-1 do
-          if Form.Components[j].Components[k] is TPopupMenu then
-          begin
-          //OutputDebugString(PChar('K: '+Form.Components[j].Components[k].ClassName));
-          PopupMenu := TPopupMenu(Form.Components[j].Components[k]);
-          if PopupMenu.Handle = FMenu then
-          Exit(PopupMenu.Items);
-          end; *)
       end;
     end;
   end;
@@ -1477,12 +1467,12 @@ end;
 procedure RegisterFlatMenusHooks;
 begin
  if{$IF CompilerVersion >= 23}(StyleServices.Available){$ELSE} ThemeServices.ThemesAvailable {$IFEND} then
-  TSysStyleManager.RegisterSysStyleHook('#32768', TFlatPopupStyleHook);
+  TFlatStyleManager.RegisterSysStyleHook('#32768', TFlatPopupStyleHook);
 end;
 
 procedure UnregisterFlatMenusHooks;
 begin
-  TSysStyleManager.UnRegisterSysStyleHook('#32768', TFlatPopupStyleHook);
+  TFlatStyleManager.UnRegisterSysStyleHook('#32768', TFlatPopupStyleHook);
 end;
 
 initialization

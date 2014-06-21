@@ -26,7 +26,10 @@
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
-  frame in buttons of TIDECategoryButtons   depending oh theme colors
+  frame in buttons of TIDECategoryButtons   depending oh theme colors7
+
+  VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
+  VCL Styles - some issues in overlaped floating windows
 }
 
 // DONE
@@ -170,11 +173,14 @@ uses
  PngImage,
  uDelphiVersions,
  Colorizer.Hooks,
- Colorizer.HookForms,
+ Colorizer.Hook.Forms,
  Colorizer.SettingsForm,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
  Colorizer.XPStyleActnCtrls,
+{$IFDEF DELPHIXE2_UP}
+ Colorizer.Vcl.Styles,
+ {$ENDIF}
  Vcl.Styles.Utils.FlatMenus,
  uMisc;
 
@@ -353,10 +359,10 @@ begin
         begin
           RegisterColorizerAddinOptions;
           {$IFDEF DELPHIXE2_UP}
-          //RegisterVClStylesFiles();
+          RegisterVClStylesFiles();
           if (TColorizerLocalSettings.Settings.UseVCLStyles) and (TColorizerLocalSettings.Settings.VCLStyleName<>'') then
           begin
-            RegisterVClStylesFiles();
+            //RegisterVClStylesFiles();
             found:=false;
             for s in TStyleManager.StyleNames do
              if not SameText(s, 'Windows') and SameText(s, TColorizerLocalSettings.Settings.VCLStyleName) then
@@ -367,8 +373,9 @@ begin
 
             if found then
             begin
-              TStyleManager.SetStyle(TColorizerLocalSettings.Settings.VCLStyleName);
-              GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
+              //TStyleManager.SetStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+              SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+              //GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
             end
             else
               MessageDlg(Format('The VCL Style %s was not found',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);

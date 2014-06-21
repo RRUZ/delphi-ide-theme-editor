@@ -262,6 +262,9 @@ type
 {$ENDREGION}
 
 function IsControlHooked(Handle: HWND): Boolean;
+{$IF CompilerVersion >= 23}
+function FlatStyleServices: TCustomStyleServices;
+{$IFEND}
 
 implementation
 
@@ -272,12 +275,13 @@ uses
   Vcl.Styles.Utils.FlatControls;
 
 {$IF CompilerVersion >= 23}
-
-{$ELSE}
-
+function FlatStyleServices: TCustomStyleServices;
+begin
+ //Result := TStyleManager.Style['Jet'];
+ Result:= StyleServices;
+end;
 {$IFEND}
 
-// ------------------------------------------------------------------------------
 
 function IsControlHooked(Handle: HWND): Boolean;
 begin
@@ -286,7 +290,6 @@ begin
   if Handle > 0 then
     Result := (SendMessage(Handle, CM_CONTROLHOOKED, 0, 0) = $77);
 end;
-// ------------------------------------------------------------------------------
 
 { TSysControl }
 {$REGION 'TSysControl'}
@@ -608,15 +611,15 @@ var
 begin
   Canvas.Font := SysControl.Font;
   TextFormat := TTextFormatFlags(Flags);
-  if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
+  if FlatStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
   begin
     Canvas.Font.Color := ThemeTextColor;
-    StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+    FlatStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
   end
   else
   begin
     Canvas.Refresh;
-    StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
+    FlatStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
   end;
 end;
 {$IFEND}
@@ -676,7 +679,7 @@ begin
   SaveIndex := SaveDC(DC);
   try
     SetBkMode(DC, TRANSPARENT);
-    if not StyleServices.GetElementColor(Details, ecTextColor, sColor) then
+    if not FlatStyleServices.GetElementColor(Details, ecTextColor, sColor) then
       sColor := FontColor;
     if not OverrideFont then
       sColor := FontColor;
@@ -699,7 +702,7 @@ begin
   SaveIndex := SaveDC(DC);
   try
     SetBkMode(DC, TRANSPARENT);
-    if not StyleServices.GetElementColor(Details, ecTextColor, sColor) then
+    if not FlatStyleServices.GetElementColor(Details, ecTextColor, sColor) then
       sColor := FontColor;
     if not OverrideFont then
       sColor := FontColor;
@@ -822,7 +825,7 @@ function TSysStyleHook.StyleServicesEnabled: Boolean;
 begin
   Result := {$IF CompilerVersion >= 23}(StyleServices.Available) and (StyleServices.IsSystemStyle) {$ELSE} ThemeServices.ThemesAvailable {$IFEND};
   if Result then
-    if not TSysStyleManager.HookVclControls then
+    if not TFlatStyleManager.HookVclControls then
       Result := not(IsVCLControl(Handle));
 end;
 
@@ -831,11 +834,11 @@ procedure TSysStyleHook.UpdateColors;
 begin
   {$IF CompilerVersion >= 23}
   if (OverrideEraseBkgnd) or (OverridePaint) then
-    Color := StyleServices.GetStyleColor(scWindow)
+    Color := FlatStyleServices.GetStyleColor(scWindow)
   else
     Color := clBtnFace;
   if OverrideFont then
-    FontColor := StyleServices.GetSystemColor(clWindowText)
+    FontColor := FlatStyleServices.GetSystemColor(clWindowText)
   else
     FontColor := clBlack;
   {$IFEND}
@@ -908,8 +911,8 @@ begin
         end;
         with DrawRect do
           ExcludeClipRect(DC, Left + BorderSize.Left, Top + BorderSize.Top, Right - BorderSize.Right, Bottom - BorderSize.Bottom);
-        Details := {$IF CompilerVersion >= 23}StyleServices.{$ELSE}ThemeServices.{$IFEND}GetElementDetails(teEditTextNormal);
-        {$IF CompilerVersion >= 23}StyleServices.{$ELSE}ThemeServices.{$IFEND}DrawElement(DC, Details, DrawRect);
+        Details := {$IF CompilerVersion >= 23}FlatStyleServices.{$ELSE}ThemeServices.{$IFEND}GetElementDetails(teEditTextNormal);
+        {$IF CompilerVersion >= 23}FlatStyleServices.{$ELSE}ThemeServices.{$IFEND}DrawElement(DC, Details, DrawRect);
       finally
         ReleaseDC(Handle, DC);
       end;
@@ -1184,7 +1187,7 @@ begin
 end;
 
 type
-  TSysStyleManagerClass = type TSysStyleManager;
+  TSysStyleManagerClass = type TFlatStyleManager;
 
 procedure TSysStyleHook.WndProc(var Message: TMessage);
 var
@@ -1203,7 +1206,7 @@ begin
     CM_INITCHILDS:
       begin
         Message.Result := 0;
-        with TSysStyleManagerClass(TSysStyleManager) do
+        with TSysStyleManagerClass(TFlatStyleManager) do
         begin
           for ChildHandle in FChildRegSysStylesList.Keys do
             if (not IsControlHooked(ChildHandle)) and (FChildRegSysStylesList[ChildHandle].Parent = Handle) then
@@ -1265,7 +1268,7 @@ begin
     WM_CTLCOLORMSGBOX .. WM_CTLCOLORSTATIC:
       begin
         // avoid use cuurent style colors on ignored controls
-        if (not StyleServicesEnabled) or (not TSysStyleManager.UseStyleColorsChildControls and (not TSysStyleManager.SysStyleHookList.ContainsKey(Message.lParam))) then
+        if (not StyleServicesEnabled) or (not TFlatStyleManager.UseStyleColorsChildControls and (not TFlatStyleManager.SysStyleHookList.ContainsKey(Message.lParam))) then
         // if (not StyleServicesEnabled) then
         begin
           Message.Result := CallDefaultProc(Message);

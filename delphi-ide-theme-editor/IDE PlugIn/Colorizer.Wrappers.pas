@@ -429,14 +429,6 @@ begin
 //    property UnfocusedSelectionColor: TColor index 6 read GetColor write SetColor default clBtnFace;
 //    property UnfocusedSelectionBorderColor: TColor index 10 read GetColor write SetColor default clBtnFace;
 //  end;
-
-//       {$IFDEF DELPHIXE2_UP}
-//        if TColorizerLocalSettings.Settings.UseVCLStyles then
-//        begin
-//          if not IsStyleHookRegistered(AComponent.ClassType, TTreeViewStyleHook) then
-//           TStyleEngine.RegisterStyleHook(AComponent.ClassType, TTreeViewStyleHook);
-//        end;
-//       {$ENDIF}
   if Restore then
     TCustomControl(AComponent).Invalidate;
 end;
@@ -573,7 +565,9 @@ begin
   if Restore then
   begin
     TCustomComboBoxClass(AComponent).Color:=clWindow;
-    TWinControl(AComponent).Invalidate;
+    TCustomComboBoxClass(AComponent).Invalidate;
+    //Application.ProcessMessages;
+    //TCustomComboBoxClass(AComponent).RecreateWnd;
   end;
 end;
 

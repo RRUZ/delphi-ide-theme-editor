@@ -44,7 +44,7 @@ contains
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
-  Colorizer.HookForms in 'Colorizer.HookForms.pas',
+  Colorizer.Hook.Forms in 'Colorizer.Hook.Forms.pas',
   Colorizer.Hooks in 'Colorizer.Hooks.pas',
   Colorizer.StoreColorMap in 'Colorizer.StoreColorMap.pas',
   Colorizer.OptionsDlg in 'Colorizer.OptionsDlg.pas' {FrameColorizer: TFrame},
@@ -69,7 +69,9 @@ contains
   Colorizer.Hooks.UxTheme in 'Colorizer.Hooks.UxTheme.pas',
   Colorizer.Hooks.Windows in 'Colorizer.Hooks.Windows.pas',
   Colorizer.XPStyleActnCtrls in 'Colorizer.XPStyleActnCtrls.pas',
-  Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas';
+  Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas',
+  Colorizer.Hooks.NCForms in 'Colorizer.Hooks.NCForms.pas',
+  Colorizer.Vcl.Styles in 'Colorizer.Vcl.Styles.pas';
 
 end.
 

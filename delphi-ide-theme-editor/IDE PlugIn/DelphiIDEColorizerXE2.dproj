@@ -101,7 +101,7 @@
 			<DCCReference Include="Main.pas"/>
 			<DCCReference Include="Colorizer.Utils.pas"/>
 			<DCCReference Include="Colorizer.Settings.pas"/>
-			<DCCReference Include="Colorizer.HookForms.pas"/>
+			<DCCReference Include="Colorizer.Hook.Forms.pas"/>
 			<DCCReference Include="Colorizer.Hooks.pas"/>
 			<DCCReference Include="Colorizer.StoreColorMap.pas"/>
 			<DCCReference Include="Colorizer.OptionsDlg.pas">
@@ -152,7 +152,7 @@
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">2</VersionInfo>
-						<VersionInfo Name="Build">176</VersionInfo>
+						<VersionInfo Name="Build">177</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -164,7 +164,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">0.1.2.176</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.2.177</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
