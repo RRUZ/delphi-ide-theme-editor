@@ -28,6 +28,7 @@ uses
  {$IFDEF DELPHIXE2_UP}
  VCL.Themes,
  VCL.Styles,
+ Colorizer.Vcl.Styles,
  {$ENDIF}
  Classes,
  {$IFDEF DELPHI2009_UP}
@@ -57,7 +58,7 @@ procedure LoadSettings(AColorMap:TColorizerColorMap; Settings : TSettings);
 procedure ProcessComponent(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;AComponent: TComponent;Restore : Boolean = False; Invalidate : Boolean = False);
 procedure GenerateColorMap(AColorMap:TColorizerColorMap;Color, FontColor:TColor);{$IF CompilerVersion >= 23}overload;{$IFEND}
 {$IFDEF DELPHIXE2_UP}
-procedure GenerateColorMap(AColorMap:TColorizerColorMap;Style:TCustomStyleServices);overload;
+procedure AssignColorsFromVCLStyle(AColorMap:TColorizerColorMap;Style:TCustomStyleServices);
 procedure RegisterVClStylesFiles;
 {$ENDIF}
 
@@ -210,8 +211,12 @@ procedure LoadSettings(AColorMap:TColorizerColorMap; Settings : TSettings);
 begin
   if Settings=nil then exit;
   ReadSettings(Settings, ExtractFilePath(GetModuleLocation()));
+
   if FileExists(Settings.ThemeFileName) then
    LoadColorMapFromXmlFile(AColorMap, Settings.ThemeFileName);
+
+  if Settings.UseVCLStyles and Settings.VCLStylesMenusColors then
+    AssignColorsFromVCLStyle(AColorMap, ColorizerStyleServices);
 
 //  if ActionBarStyles.IndexOf(Settings.StyleBarName)>=0 then
 //    ActionBarStyle:= TActionBarStyle(ActionBarStyles.Objects[ActionBarStyles.IndexOf(Settings.StyleBarName)]);
@@ -242,25 +247,32 @@ begin
 end;
 
 {$IFDEF DELPHIXE2_UP}
-procedure GenerateColorMap(AColorMap:TColorizerColorMap;Style:TCustomStyleServices);
+procedure AssignColorsFromVCLStyle(AColorMap:TColorizerColorMap;Style:TCustomStyleServices);
+var
+  LDetails        : TThemedElementDetails;
+  ThemeTextColor  : TColor;
 begin
   AColorMap.Color                 :=Style.GetStyleColor(scPanel);
-  AColorMap.ShadowColor           :=StyleServices.GetSystemColor(clBtnShadow);
-  AColorMap.FontColor             :=Style.GetStyleFontColor(sfButtonTextNormal);
+  AColorMap.ShadowColor           :=Style.GetStyleColor(scBorder);
+
+  LDetails := Style.GetElementDetails(tmMenuBarItemNormal);
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+
+  AColorMap.FontColor             :=ThemeTextColor;//Style.GetStyleFontColor(sfButtonTextNormal);
 
   AColorMap.MenuColor             :=Style.GetStyleColor(scPanel);
   AColorMap.WindowColor           :=Style.GetStyleColor(scWindow);
-  AColorMap.HighlightColor        :=StyleServices.GetSystemColor(clHighlight);
+
+  AColorMap.HighlightColor        :=Style.GetStyleColor(scButtonHot);
   AColorMap.BtnSelectedColor      :=Style.GetStyleColor(scButtonHot);
+  AColorMap.SelectedColor         :=Style.GetStyleColor(scButtonHot);
 
-  AColorMap.BtnSelectedFont       :=StyleServices.GetSystemColor(clHighlightText);
-
-  AColorMap.SelectedColor         :=StyleServices.GetSystemColor(clHighlight);
-  AColorMap.SelectedFontColor     :=StyleServices.GetSystemColor(clHighlightText);
+  AColorMap.BtnSelectedFont       :=Style.GetStyleFontColor(sfButtonTextHot);
+  AColorMap.SelectedFontColor     :=Style.GetStyleFontColor(sfButtonTextHot);
 
   AColorMap.BtnFrameColor         :=StyleServices.GetSystemColor(clBtnShadow);
 
-  AColorMap.FrameTopLeftInner     :=StyleServices.GetSystemColor(clBtnShadow);
+  AColorMap.FrameTopLeftInner     :=Style.GetStyleColor(scBorder);
   AColorMap.FrameTopLeftOuter     :=AColorMap.FrameTopLeftInner;
   AColorMap.FrameBottomRightInner :=AColorMap.FrameTopLeftInner;
   AColorMap.FrameBottomRightOuter :=AColorMap.FrameTopLeftInner;

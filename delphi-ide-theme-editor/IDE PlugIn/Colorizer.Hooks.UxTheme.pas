@@ -38,6 +38,7 @@ uses
   System.Types,
   Vcl.Styles,
   Vcl.Themes,
+  Colorizer.Vcl.Styles,
 {$ELSE}
   Types,
   Themes,
@@ -358,109 +359,177 @@ var
   LRect     : TRect;
   LSize     : TSize;
   SavedIndex : integer;
-begin
-  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME)
-     or THThemesClasses.Button.ContainsKey(THEME) or THThemesClasses.ToolTip.ContainsKey(THEME) ) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
-   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 
-  if THThemesClasses.ToolTip.ContainsKey(THEME) then
+  function DrawScrollBarVCLStyles : HRESULT;
+  var
+    LDetails: TThemedElementDetails;
+    LStyle: TCustomStyleServices;
+    LScrollDetails: TThemedScrollBar;
+//    B: TBitmap;
+//    R : TRect;
   begin
+    Result:=0;
+    LStyle := ColorizerStyleServices;
+    if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+    begin
+      LScrollDetails := tsScrollBarRoot;
+      LDetails.Element := TThemedElement.teScrollBar;
+      LDetails.Part := iPartId;
+      LDetails.State := iStateId;
+      LDetails := LStyle.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
+
       case iPartId  of
-       TTP_STANDARD :
-                     begin
-                       SavedIndex:=SaveDC(dc);
-                       LCanvas:=TCanvas.Create;
-                       try
-                          LCanvas.Handle:=dc;
-                          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
-                          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-                          LCanvas.Rectangle(pRect);
-                       finally
-                         LCanvas.Handle:=0;
-                         LCanvas.Free;
-                         if SavedIndex<>0 then
-                           RestoreDC(dc, SavedIndex);
-                       end;
-                       Exit(0);
-                     end;
+        SBP_ARROWBTN :
+        begin
+          case iStateId of
+            ABS_UPNORMAL      : LScrollDetails := tsArrowBtnUpNormal;
+            ABS_UPHOT         : LScrollDetails := tsArrowBtnUpHot;
+            ABS_UPPRESSED     : LScrollDetails := tsArrowBtnUpPressed;
+            ABS_UPDISABLED    : LScrollDetails := tsArrowBtnUpDisabled;
+            ABS_DOWNNORMAL    : LScrollDetails := tsArrowBtnDownNormal;
+            ABS_DOWNHOT       : LScrollDetails := tsArrowBtnDownHot;
+            ABS_DOWNPRESSED   : LScrollDetails := tsArrowBtnDownPressed;
+            ABS_DOWNDISABLED  : LScrollDetails := tsArrowBtnDownDisabled;
+            ABS_LEFTNORMAL    : LScrollDetails := tsArrowBtnLeftNormal;
+            ABS_LEFTHOT       : LScrollDetails := tsArrowBtnLeftHot;
+            ABS_LEFTPRESSED   : LScrollDetails := tsArrowBtnLeftPressed;
+            ABS_LEFTDISABLED  : LScrollDetails := tsArrowBtnLeftDisabled;
+            ABS_RIGHTNORMAL   : LScrollDetails := tsArrowBtnRightNormal;
+            ABS_RIGHTHOT      : LScrollDetails := tsArrowBtnRightHot;
+            ABS_RIGHTPRESSED  : LScrollDetails := tsArrowBtnRightPressed;
+            ABS_RIGHTDISABLED : LScrollDetails := tsArrowBtnRightDisabled;
+            ABS_UPHOVER       : LScrollDetails := tsArrowBtnUpNormal;//tsArrowBtnUpHover;
+            ABS_DOWNHOVER     : LScrollDetails := tsArrowBtnDownNormal;//tsArrowBtnDownHover;
+            ABS_LEFTHOVER     : LScrollDetails := tsArrowBtnLeftNormal;//tsArrowBtnLeftHover;
+            ABS_RIGHTHOVER    : LScrollDetails := tsArrowBtnRightNormal;//tsArrowBtnRightHover;
+          end;
+        end;
+
+        SBP_THUMBBTNHORZ:
+        begin
+          case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsThumbBtnHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsThumbBtnHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsThumbBtnHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsThumbBtnHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsThumbBtnHorzNormal;
+          end;
+        end;
+
+        SBP_THUMBBTNVERT:
+        begin
+          case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsThumbBtnVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsThumbBtnVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsThumbBtnVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsThumbBtnVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsThumbBtnVertNormal;
+          end;
+        end;
+
+        SBP_LOWERTRACKHORZ:
+        begin
+          case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsLowerTrackHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsLowerTrackHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsLowerTrackHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsLowerTrackHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsLowerTrackHorzNormal;//tsLowerTrackHorzHover; //no support for hover
+          end;
+        end;
+
+        SBP_UPPERTRACKHORZ :
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsUpperTrackHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsUpperTrackHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsUpperTrackHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsUpperTrackHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsUpperTrackHorzNormal;//tsUpperTrackHorzHover; //no support for hover
+         end;
+        end;
+
+        SBP_LOWERTRACKVERT:
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsLowerTrackVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsLowerTrackVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsLowerTrackVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsLowerTrackVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsLowerTrackVertNormal;//tsLowerTrackVertHover; //no support for hover
+         end;
+        end;
+
+        SBP_UPPERTRACKVERT:
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsUpperTrackVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsUpperTrackVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsUpperTrackVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsUpperTrackVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsUpperTrackVertNormal;//tsUpperTrackVertHover; //no support for hover
+         end;
+        end;
+
+        SBP_SIZEBOX :
+        begin
+         case iStateId of
+          SZB_RIGHTALIGN            : LScrollDetails := tsSizeBoxRightAlign;
+          SZB_LEFTALIGN             : LScrollDetails := tsSizeBoxLeftAlign;
+          SZB_TOPRIGHTALIGN         : LScrollDetails := tsSizeBoxTopRightAlign;
+          SZB_TOPLEFTALIGN          : LScrollDetails := tsSizeBoxTopLeftAlign;
+          SZB_HALFBOTTOMRIGHTALIGN  : LScrollDetails := tsSizeBoxHalfBottomRightAlign;
+          SZB_HALFBOTTOMLEFTALIGN   : LScrollDetails := tsSizeBoxHalfBottomLeftAlign;
+          SZB_HALFTOPRIGHTALIGN     : LScrollDetails := tsSizeBoxHalfTopRightAlign;
+          SZB_HALFTOPLEFTALIGN      : LScrollDetails := tsSizeBoxHalfTopLeftAlign;
+         end;
+        end;
+
+        SBP_GRIPPERHORZ :
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsGripperHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsGripperHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsGripperHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsGripperHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsGripperHorzHover;//tsGripperHorzHover; //no support for hover
+         end;
+        end;
+
+        SBP_GRIPPERVERT :
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsGripperVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsGripperVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsGripperVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsGripperVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsGripperVertNormal;//tsGripperVertHover; //no support for hover
+         end;
+        end;
 
       end;
-   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-  end
-  else
-  if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+      LDetails := LStyle.GetElementDetails(LScrollDetails);
+
+//      B := TBitmap.Create;
+//      try
+//        B.Width := pRect.Width;
+//        B.Height := pRect.Height;
+//        MoveWindowOrg(B.Canvas.Handle, -pRect.Left, -pRect.Top);
+//        R:=Rect(0 , 0, B.Width, B.Height);
+//        LStyle.DrawElement(b.Canvas.Handle, LDetails, R, nil);
+//        //BitBlt(DC, Left, Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
+//        BitBlt(dc, pRect.Left, pRect.Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
+//      finally
+//        B.Free;
+//      end;
+      LStyle.DrawElement(dc, LDetails, pRect, pClipRect);
+      Exit(0);
+    end;
+  end;
+
+  function DrawScrollBarFlat : HRESULT; stdcall;
   begin
-    ApplyHook:=False;
-    sCaller :='';
-    sCaller2:='';
-    VCLClassName:='';
-    LFoundControl:=nil;
-
-    try
-      if Assigned(LastScrollWinControl) then
-        VCLClassName:=LastScrollWinControl.ClassName;
-    except
-      VCLClassName := '';
-    end;
-    //LastScrollWinControl:=nil;
-
-    LHWND:=WindowFromDC(dc);
-    if LHWND<>0 then
-     begin
-      LFoundControl := FindControl(LHWND);
-      if LFoundControl<>nil then
-        VCLClassName:= LFoundControl.ClassName;
-     end;
-
-    if LFoundControl<>nil then
-    begin
-       try
-         ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-         LParentForm:=GetParentForm(LFoundControl);
-         if (LParentForm<>nil) and ApplyHook then
-           ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
-       except
-        ApplyHook:=False
-       end;
-    end;
-
-    if not ApplyHook then
-    begin
-
-      sCaller := ProcByLevel(1);
-      if sCaller<>'' then
-        sCaller2 := ProcByLevel(2);
-
-      ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-    end;
-
-    //look for hooked controls in the caller level 1
-    if not ApplyHook and (sCaller<>'') then
-       for s in SplitString(sCaller,'.') do
-       begin
-         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
-         if ApplyHook then break;
-       end;
-
-    //look for hooked controls in the caller level 2
-    if not ApplyHook and (sCaller2<>'') then
-       for s in SplitString(sCaller2,'.') do
-       begin
-         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
-         if ApplyHook then break;
-       end;
-
-//    AddLog('ScrollBar','LHWND '+IntToHex(LHWND, 8));
-//    if ApplyHook and (LHWND<>0) then
-//    begin
-//      WClassName := GetWindowClassName(LHWND);
-//      ApplyHook:= not ((WClassName<>'') and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0));
-//      AddLog('ScrollBar','WClassName '+WClassName);
-//    end;
-
-    if ApplyHook then
-    begin
-      //Result:=0;
+    Result:=0;
       case iPartId  of
         SBP_ARROWBTN :
         begin
@@ -677,6 +746,114 @@ begin
         SBP_GRIPPERHORZ,
         SBP_GRIPPERVERT : exit(0);
       end;
+  end;
+
+begin
+  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME)
+     or THThemesClasses.Button.ContainsKey(THEME) or THThemesClasses.ToolTip.ContainsKey(THEME) ) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
+   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+
+  if THThemesClasses.ToolTip.ContainsKey(THEME) then
+  begin
+      case iPartId  of
+       TTP_STANDARD :
+                     begin
+                       SavedIndex:=SaveDC(dc);
+                       LCanvas:=TCanvas.Create;
+                       try
+                          LCanvas.Handle:=dc;
+                          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+                          LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+                          LCanvas.Rectangle(pRect);
+                       finally
+                         LCanvas.Handle:=0;
+                         LCanvas.Free;
+                         if SavedIndex<>0 then
+                           RestoreDC(dc, SavedIndex);
+                       end;
+                       Exit(0);
+                     end;
+
+      end;
+   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+  end
+  else
+  if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+  begin
+    ApplyHook:=False;
+    sCaller :='';
+    sCaller2:='';
+    VCLClassName:='';
+    LFoundControl:=nil;
+
+    try
+      if Assigned(LastScrollWinControl) then
+        VCLClassName:=LastScrollWinControl.ClassName;
+    except
+      VCLClassName := '';
+    end;
+    //LastScrollWinControl:=nil;
+
+    LHWND:=WindowFromDC(dc);
+    if LHWND<>0 then
+     begin
+      LFoundControl := FindControl(LHWND);
+      if LFoundControl<>nil then
+        VCLClassName:= LFoundControl.ClassName;
+     end;
+
+    if LFoundControl<>nil then
+    begin
+       try
+         ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
+         LParentForm:=GetParentForm(LFoundControl);
+         if (LParentForm<>nil) and ApplyHook then
+           ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+       except
+        ApplyHook:=False
+       end;
+    end;
+
+    if not ApplyHook then
+    begin
+
+      sCaller := ProcByLevel(1);
+      if sCaller<>'' then
+        sCaller2 := ProcByLevel(2);
+
+      ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
+    end;
+
+    //look for hooked controls in the caller level 1
+    if not ApplyHook and (sCaller<>'') then
+       for s in SplitString(sCaller,'.') do
+       begin
+         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
+         if ApplyHook then break;
+       end;
+
+    //look for hooked controls in the caller level 2
+    if not ApplyHook and (sCaller2<>'') then
+       for s in SplitString(sCaller2,'.') do
+       begin
+         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
+         if ApplyHook then break;
+       end;
+
+//    AddLog('ScrollBar','LHWND '+IntToHex(LHWND, 8));
+//    if ApplyHook and (LHWND<>0) then
+//    begin
+//      WClassName := GetWindowClassName(LHWND);
+//      ApplyHook:= not ((WClassName<>'') and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0));
+//      AddLog('ScrollBar','WClassName '+WClassName);
+//    end;
+
+    if ApplyHook then
+    begin
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesScrollBars then
+        Exit(DrawScrollBarVCLStyles())
+      else
+        Exit(DrawScrollBarFlat());
     end
     else
     begin

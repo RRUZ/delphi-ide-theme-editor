@@ -151,7 +151,6 @@
         <DCCReference Include="Colorizer.Hooks.Windows.pas"/>
         <DCCReference Include="Colorizer.XPStyleActnCtrls.pas"/>
         <DCCReference Include="Colorizer.Hooks.IDE.pas"/>
-        <DCCReference Include="Colorizer.Hooks.NCForms.pas"/>
         <DCCReference Include="Colorizer.Vcl.Styles.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -178,7 +177,7 @@
                     <VersionInfo Name="MajorVer">0</VersionInfo>
                     <VersionInfo Name="MinorVer">1</VersionInfo>
                     <VersionInfo Name="Release">2</VersionInfo>
-                    <VersionInfo Name="Build">280</VersionInfo>
+                    <VersionInfo Name="Build">286</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -190,7 +189,7 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName"/>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">0.1.2.280</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">0.1.2.286</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright"/>
                     <VersionInfoKeys Name="LegalTrademarks"/>

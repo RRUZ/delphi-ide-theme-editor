@@ -176,8 +176,8 @@ type
     Button22: TButton;
     Button23: TButton;
     CheckBoxVCLStylesForms: TCheckBox;
-    CheckBox2: TCheckBox;
-    CheckBox3: TCheckBox;
+    CheckBoxVCLStylesMenusColors: TCheckBox;
+    CheckBoxVCLStylesScrollBars: TCheckBox;
     CheckBox4: TCheckBox;
     Bevel2: TBevel;
     procedure FormCreate(Sender: TObject);
@@ -351,6 +351,8 @@ begin
     FSettings.VCLStyleName  := CbStyles.Text;
     FSettings.UseVCLStyles  := CheckBoxUseVClStyles.Checked;
     FSettings.VCLStylesForms:= CheckBoxVCLStylesForms.Checked;
+    FSettings.VCLStylesMenusColors:= CheckBoxVCLStylesMenusColors.Checked;
+    FSettings.VCLStylesScrollBars := CheckBoxVCLStylesScrollBars.Checked;
 
     FSettings.ChangeIconsGutter :=CheckBoxGutterIcons.Checked;
 //    FSettings.ColorMapName      :=ColorMapCombo.Text;
@@ -406,31 +408,26 @@ begin
     {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles then
     begin
-//      StyleFile:=IncludeTrailingPathDelimiter(TColorizerLocalSettings.VCLStylesPath)+TColorizerLocalSettings.Settings.VCLStyleName;
-//      if FileExists(StyleFile) then
-//      begin
-//        TStyleManager.SetStyle(TStyleManager.LoadFromFile(StyleFile));
-//        GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
-//      end
-//      else
-//        MessageDlg(Format('The VCL Style file %s was not found',[StyleFile]), mtInformation, [mbOK], 0);
-
      if (TColorizerLocalSettings.Settings.VCLStylesForms<>OrgVclStyleForms) or (TColorizerLocalSettings.Settings.UseVCLStyles<>OrgVclStyle) or (TColorizerLocalSettings.Settings.VCLStyleName<>OrgVclStyleName) then
      begin
        SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+       //reload colors again
+       Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
        RefreshColorizerVCLStyle();
      end;
-
     end
     else
     begin
      if (TColorizerLocalSettings.Settings.UseVCLStyles<>OrgVclStyle) then
      begin
        SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+       //reload colors again
+       Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
        RefreshColorizerVCLStyle();
      end;
     end;
     {$ENDIF}
+
     if FSettings.Enabled then
       RefreshIDETheme(True)
     else
@@ -1165,6 +1162,8 @@ begin
 
   CheckBoxUseVClStyles.Checked   := FSettings.UseVCLStyles;
   CheckBoxVCLStylesForms.Checked := FSettings.VCLStylesForms;
+  CheckBoxVCLStylesMenusColors.Checked := FSettings.VCLStylesMenusColors;
+  CheckBoxVCLStylesScrollBars.Checked  := FSettings.VCLStylesScrollBars;
 {$IFDEF DELPHIXE2_UP}
   LoadVClStylesList;
 {$ENDIF}

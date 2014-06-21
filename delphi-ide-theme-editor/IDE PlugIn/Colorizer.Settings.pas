@@ -68,6 +68,8 @@ type
     FHeaderCustom: boolean;
     FHeaderStartGrad: string;
     FVCLStylesForms: boolean;
+    FVCLStylesMenusColors: boolean;
+    FVCLStylesScrollBars: boolean;
     function GetThemeFileName: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
@@ -81,6 +83,8 @@ type
     property UseVCLStyles  : boolean read FUseVCLStyles write FUseVCLStyles;
     property VCLStyleName  : string read FVCLStyleName write FVCLStyleName;
     property VCLStylesForms  : boolean read FVCLStylesForms write FVCLStylesForms;
+    property VCLStylesMenusColors  : boolean read FVCLStylesMenusColors write FVCLStylesMenusColors;
+    property VCLStylesScrollBars   : boolean read FVCLStylesScrollBars write FVCLStylesScrollBars;
 
     property HookSystemColors : boolean read FHookSystemColors write FHookSystemColors;
 
@@ -155,6 +159,8 @@ begin
     Settings.VCLStyleName            := LIniFile.ReadString('Global', 'VCLStyleName', 'Carbon.vsf');
     Settings.UseVCLStyles            := LIniFile.ReadBool('Global', 'UseVCLStyles', False);
     Settings.VCLStylesForms          := LIniFile.ReadBool('Global', 'VCLStylesForms', True);
+    Settings.VCLStylesMenusColors    := LIniFile.ReadBool('Global', 'VCLStylesMenusColors', False);
+    Settings.VCLStylesScrollBars     := LIniFile.ReadBool('Global', 'VCLStylesScrollBars', True);
 
 
     Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
@@ -218,6 +224,8 @@ begin
     LIniFile.WriteString('Global', 'VCLStyleName', Settings.VCLStyleName);
     LIniFile.WriteBool('Global', 'UseVCLStyles', Settings.UseVCLStyles);
     LIniFile.WriteBool('Global', 'VCLStylesForms', Settings.VCLStylesForms);
+    LIniFile.WriteBool('Global', 'VCLStylesMenusColors', Settings.VCLStylesMenusColors);
+    LIniFile.WriteBool('Global', 'VCLStylesScrollBars', Settings.VCLStylesScrollBars);
 
     LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
     LIniFile.WriteBool('Global', 'HookSystemColors', Settings.HookSystemColors);

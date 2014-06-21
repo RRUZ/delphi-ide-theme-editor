@@ -1116,20 +1116,26 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           ShowHint = True
           TabOrder = 3
         end
-        object CheckBox2: TCheckBox
+        object CheckBoxVCLStylesMenusColors: TCheckBox
           Left = 3
           Top = 65
           Width = 118
           Height = 17
+          Hint = 'Use the VCL Styles Colors in menus and controls'
           Caption = 'Menus and Colors'
+          ParentShowHint = False
+          ShowHint = True
           TabOrder = 4
         end
-        object CheckBox3: TCheckBox
+        object CheckBoxVCLStylesScrollBars: TCheckBox
           Left = 3
           Top = 88
           Width = 70
           Height = 17
+          Hint = 'Use the VCL Styles scrollbars'
           Caption = 'Scrollbars'
+          ParentShowHint = False
+          ShowHint = True
           TabOrder = 5
         end
         object CheckBox4: TCheckBox
