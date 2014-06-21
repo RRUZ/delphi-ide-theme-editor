@@ -200,7 +200,6 @@ type
     property Handle;
   end;
 
-
    procedure SetColorizerVCLStyle(const StyleName : string);
    function  ColorizerStyleServices: TCustomStyleServices;
 
@@ -238,7 +237,7 @@ begin
  if found or (StyleName='') then
    CurrentStyleName:=StyleName;
 
- AddLog('SetColorizerVCLStyle', StyleName);
+ //AddLog('SetColorizerVCLStyle', StyleName);
 end;
 
 function ColorizerStyleServices: TCustomStyleServices;
@@ -1134,19 +1133,11 @@ end;
 
 procedure TColorizerFormStyleHook.PaintBackground(Canvas: TCanvas);
 var
-//  Details: TThemedElementDetails;
   R: TRect;
 begin
    R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
    Canvas.FillRect(R);
-//  if ColorizerStyleServices.Available then
-//  begin
-//    Details.Element := teWindow;
-//    Details.Part := 0;
-//    R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
-//    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
-//  end;
 end;
 
 function TColorizerFormStyleHook.GetBorderSize: TRect;
@@ -1207,19 +1198,7 @@ var
   WindowPos, ClientPos: TPoint;
   HandleParent: HWnd;
 begin
-  if Form.Parent <> nil then
-  begin
-    WindowPos := Point(FLeft, FTop);
-    ClientToScreen(Form.Parent.Handle, WindowPos);
-    ClientPos := Point(0, 0);
-    ClientToScreen(Handle, ClientPos);
-    Result := P;
-    ScreenToClient(Handle, Result);
-    Inc(Result.X, ClientPos.X - WindowPos.X);
-    Inc(Result.Y, ClientPos.Y - WindowPos.Y);
-  end
-  else
-  if TCustomFormClass(Form).FormStyle = fsMDIChild then
+  if (TCustomFormClass(Form).FormStyle = fsMDIChild) or (Form.Parent <> nil) then
   begin
     HandleParent := GetParent(Control.Handle);
     WindowPos := Point(FLeft, FTop);
@@ -1242,6 +1221,7 @@ begin
     Inc(Result.Y, ClientPos.Y - WindowPos.Y);
   end;
 end;
+
 
 function TColorizerFormStyleHook.GetHitTest(P: TPoint): Integer;
 var

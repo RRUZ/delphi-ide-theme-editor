@@ -30,6 +30,7 @@
 
   VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
   VCL Styles - some issues in overlaped floating windows
+  VCL Styles - some issues in scrollbars with some vcl styles (ex : Tablet Dark)
 }
 
 // DONE
@@ -375,6 +376,8 @@ begin
             begin
               //TStyleManager.SetStyle(TColorizerLocalSettings.Settings.VCLStyleName);
               SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);
+              //refresh the colormap colors
+              LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
               //GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
             end
             else

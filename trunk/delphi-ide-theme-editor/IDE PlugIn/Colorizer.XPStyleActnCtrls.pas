@@ -67,9 +67,10 @@ uses
   Colorizer.StoreColorMap,
   ListActns,
   XPActnCtrls,
-  {$IF CompilerVersion>=23} //XE2
+  {$IFDEF DELPHIXE2_UP}
   PlatformDefaultStyleActnCtrls,
-  {$IFEND}
+  Colorizer.Vcl.Styles,
+  {$ENDIF}
   Themes;
 
 { TColorXPStyleActionBars }
@@ -77,33 +78,33 @@ uses
 function TColorXPStyleActionBars.GetAddRemoveItemClass(
   ActionBar: TCustomActionBar): TCustomAddRemoveItemClass;
 begin
-  {$IF CompilerVersion>=23} //XE2
+  {$IFDEF DELPHIXE2_UP}
   if TStyleManager.IsCustomStyleActive then
     Result := PlatformDefaultStyle.GetAddRemoveItemClass(ActionBar)
   else
-  {$IFEND}
+  {$ENDIF}
     Result := TXPStyleAddRemoveItem;
 end;
 
 function TColorXPStyleActionBars.GetColorMapClass(
   ActionBar: TCustomActionBar): TCustomColorMapClass;
 begin
-  {$IF CompilerVersion>=23} //XE2
+  {$IFDEF DELPHIXE2_UP}
   if TStyleManager.IsCustomStyleActive then
     Result := PlatformDefaultStyle.GetColorMapClass(ActionBar)
   else
-  {$IFEND}
+  {$ENDIF}
     Result := {TXPColorMap{TTwilightColorMap}TColorizerColorMap; //use own
 end;
 
 function TColorXPStyleActionBars.GetControlClass(ActionBar: TCustomActionBar;
   AnItem: TActionClientItem): TCustomActionControlClass;
 begin
-  {$IF CompilerVersion>=23} //XE2
+  {$IFDEF DELPHIXE2_UP}
   if TStyleManager.IsCustomStyleActive then
     Result := PlatformDefaultStyle.GetControlClass(ActionBar, AnItem)
   else
-  {$IFEND}
+  {$ENDIF}
   begin
     if ActionBar is TCustomActionToolBar then
     begin
@@ -137,11 +138,11 @@ end;
 function TColorXPStyleActionBars.GetPopupClass(
   ActionBar: TCustomActionBar): TCustomPopupClass;
 begin
-  {$IF CompilerVersion>=23} //XE2
+  {$IFDEF DELPHIXE2_UP}
   if TStyleManager.IsCustomStyleActive then
     Result := PlatformDefaultStyle.GetPopupClass(ActionBar)
   else
-  {$IFEND}
+  {$ENDIF}
   if ActionBar is TCustomActionToolBar then
     Result := TXPStyleCustomizePopup
   else
@@ -150,11 +151,11 @@ end;
 
 function TColorXPStyleActionBars.GetScrollBtnClass: TCustomToolScrollBtnClass;
 begin
-  {$IF CompilerVersion>=23} //XE2
+  {$IFDEF DELPHIXE2_UP}
   if TStyleManager.IsCustomStyleActive then
     Result := PlatformDefaultStyle.GetScrollBtnClass
   else
-  {$IFEND}
+  {$ENDIF}
     Result := TXPStyleToolScrollBtn;
 end;
 
@@ -200,6 +201,9 @@ begin
   WindowColor:=clNone;
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
    LoadColorMapFromXmlFile(Self, TColorizerLocalSettings.Settings.ThemeFileName);
+
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors  then
+   AssignColorsFromVCLStyle(Self, ColorizerStyleServices);
 end;
 
 initialization
