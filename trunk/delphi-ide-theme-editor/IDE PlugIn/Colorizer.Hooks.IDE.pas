@@ -49,6 +49,8 @@ const
 
 {$IFDEF DELPHIXE6} sModernThemeModule =  'ModernTheme200.bpl';{$ENDIF}
 
+procedure InstallHooksIDE;
+Procedure RemoveHooksIDE;
 
 implementation
 
@@ -65,6 +67,7 @@ uses
   Controls,
   PngImage,
   GraphUtil,
+  SysUtils,
   CaptionedDockTree,
   Graphics;
 
@@ -854,6 +857,8 @@ const
 {$ENDIF}
 
 
+
+procedure InstallHooksIDE;
 var
   pOrgAddress : Pointer;
 {$IFDEF DELPHIXE6_UP}
@@ -862,8 +867,7 @@ var
   ModernThemeLoaded           : Boolean;
 {$ENDIF}
  CoreIDEModule, VclIDEModule  : HMODULE;
-
-initialization
+begin
 
  ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
@@ -952,9 +956,10 @@ initialization
 
   end;
 {$ENDIF}
+end;
 
-finalization
-
+Procedure RemoveHooksIDE;
+begin
   if Assigned(Trampoline_CompilerMsgLine_Draw) then
     InterceptRemove(@Trampoline_CompilerMsgLine_Draw);
 
@@ -1011,6 +1016,7 @@ finalization
     InterceptRemove(@Trampoline_TModernTheme_SetHotSingleColor);
 {$ENDIF}
 
-   ListControlWrappers.Free;
+   FreeAndNil(ListControlWrappers);
+end;
 
 end.

@@ -496,14 +496,4 @@ end;
 {$IFEND}
 
 
-initialization
-
-{$IF CompilerVersion > 20}
-{$IFEND}
-
-finalization
-{$IF CompilerVersion > 20}
-
-{$IFEND}
-
 end.

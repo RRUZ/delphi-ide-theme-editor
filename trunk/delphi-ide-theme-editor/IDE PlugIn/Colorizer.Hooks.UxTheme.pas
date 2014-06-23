@@ -25,6 +25,8 @@ unit Colorizer.Hooks.UxTheme;
 interface
 {$I ..\Common\Jedi.inc}
 
+procedure InstallHooksUXTheme;
+procedure RemoveHooksUXTheme;
 
 implementation
 uses
@@ -360,13 +362,36 @@ var
   LSize     : TSize;
   SavedIndex : integer;
 
+{$IFDEF DELPHIXE2_UP}
+
+//  procedure PremultiplyBitmap(Bitmap: TBitmap);
+//  var
+//    Row, Col: integer;
+//    p: PRGBQuad;
+//  begin
+//    for Row := 0 to Bitmap.Height-1 do
+//    begin
+//      Col := Bitmap.Width;
+//      p := Bitmap.ScanLine[Row];
+//      while (Col > 0) do
+//      begin
+//        p.rgbBlue := p.rgbBlue * p.rgbReserved div 255;
+//        p.rgbGreen := p.rgbGreen * p.rgbReserved div 255;
+//        p.rgbRed := p.rgbRed * p.rgbReserved div 255;
+//        inc(p);
+//        dec(Col);
+//      end;
+//    end;
+//  end;
+
   function DrawScrollBarVCLStyles : HRESULT;
   var
     LDetails: TThemedElementDetails;
     LStyle: TCustomStyleServices;
     LScrollDetails: TThemedScrollBar;
-//    B: TBitmap;
-//    R : TRect;
+//    LBitMap: TBitmap;
+//    LRect : TRect;
+//    p : Pointer;
   begin
     Result:=0;
     LStyle := ColorizerStyleServices;
@@ -510,23 +535,49 @@ var
       end;
       LDetails := LStyle.GetElementDetails(LScrollDetails);
 
-//      B := TBitmap.Create;
-//      try
-//        B.Width := pRect.Width;
-//        B.Height := pRect.Height;
-//        MoveWindowOrg(B.Canvas.Handle, -pRect.Left, -pRect.Top);
-//        R:=Rect(0 , 0, B.Width, B.Height);
-//        LStyle.DrawElement(b.Canvas.Handle, LDetails, R, nil);
-//        //BitBlt(DC, Left, Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
-//        BitBlt(dc, pRect.Left, pRect.Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
-//      finally
-//        B.Free;
-//      end;
+//       LCanvas:=TCanvas.Create;
+//       try
+//         LCanvas.Handle:=dc;
+//          LBitMap := TBitmap.Create;
+//          try
+//            LBitMap.PixelFormat:=pf32bit;
+//            LBitMap.Width := pRect.Width;
+//            LBitMap.Height := pRect.Height;
+//            LBitMap.HandleType := bmDIB;
+//            LBitMap.IgnorePalette:=True;
+//            LBitMap.AlphaFormat:=TAlphaFormat.afPremultiplied;
+//            p := LBitMap.ScanLine[LBitMap.Height - 1];
+//            ZeroMemory(p, LBitMap.Width * LBitMap.Height * 4);
+//            LRect:=Rect(0 , 0, LBitMap.Width, LBitMap.Height);
+//            LStyle.DrawElement(LBitMap.Canvas.Handle, LDetails, LRect, nil);
+//            //BitBlt(DC, Left, Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
+//            //BitBlt(dc, pRect.Left, pRect.Top, pRect.Width, pRect.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
+//
+////            if (iPartId=SBP_THUMBBTNHORZ) and (B.Width>50) then
+////              B.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\test.bmp');
+//            PremultiplyBitmap(LBitMap);
+//            DrawTransparentBitmap(LBitMap, LCanvas, pRect, 255);
+//            //LCanvas.Draw(pRect.Left, pRect.Top, B, 255);
+//          finally
+//            LBitMap.Free;
+//          end;
+//       finally
+//         LCanvas.Handle:=0;
+//         LCanvas.Free;
+//       end;
+
+      //LStyle.DrawParentBackground(Self.Handle, dc, LDetails, False);
+      if (iPartId=SBP_THUMBBTNHORZ) then
+        LStyle.DrawElement(dc, LStyle.GetElementDetails(tsUpperTrackHorzNormal), pRect, pClipRect)
+      else
+      if (iPartId=SBP_THUMBBTNVERT) then
+        LStyle.DrawElement(dc, LStyle.GetElementDetails(tsUpperTrackVertNormal), pRect, pClipRect);
+
       LStyle.DrawElement(dc, LDetails, pRect, pClipRect);
       Exit(0);
     end;
   end;
-
+{$ENDIF}
   function DrawScrollBarFlat : HRESULT; stdcall;
   begin
     Result:=0;
@@ -850,9 +901,11 @@ begin
 
     if ApplyHook then
     begin
+      {$IFDEF DELPHIXE2_UP}
       if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesScrollBars then
         Exit(DrawScrollBarVCLStyles())
       else
+      {$ENDIF}
         Exit(DrawScrollBarFlat());
     end
     else
@@ -1107,85 +1160,89 @@ begin
     Result := Method;
 end;
 
+
+procedure InstallHooksUXTheme;
 const
   sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
-
 var
   pHook, psBaseVirtualTreeOriginalWMNCPaint : Pointer;
   VclIDEModule : HMODULE;
-
-initialization
-
-if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
 begin
-  THThemesClasses.ScrollBars := TDictionary<HTHEME, String>.Create();
-  THThemesClasses.ScrollBars.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
-
-  THThemesClasses.TreeView := TDictionary<HTHEME, String>.Create();
-  THThemesClasses.TreeView.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
-
-  THThemesClasses.Button := TDictionary<HTHEME, String>.Create();
-  THThemesClasses.Button.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
-
-  THThemesClasses.ToolTip := TDictionary<HTHEME, String>.Create();
-  THThemesClasses.ToolTip.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
-
-  TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
-
-  if Assigned(DrawThemeText) then
-    Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
-
-  OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
-  if Assigned (OpenThemeDataOrgPointer) then
-   TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @Detour_UxTheme_OpenThemeData);
-
-  DrawThemeBackgroundOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'), 'DrawThemeBackground');
-  if Assigned (DrawThemeBackgroundOrgPointer) then
-   TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @Detour_UxTheme_DrawThemeBackground);
-
-  VclIDEModule := LoadLibrary(sVclIDEModule);
-  if VclIDEModule<>0 then
+  if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
-   psBaseVirtualTreeOriginalWMNCPaint := GetBplMethodAddress(GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint));
-   if Assigned(psBaseVirtualTreeOriginalWMNCPaint) then
-    TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
+    THThemesClasses.ScrollBars := TDictionary<HTHEME, String>.Create();
+    THThemesClasses.ScrollBars.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+
+    THThemesClasses.TreeView := TDictionary<HTHEME, String>.Create();
+    THThemesClasses.TreeView.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
+
+    THThemesClasses.Button := TDictionary<HTHEME, String>.Create();
+    THThemesClasses.Button.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
+
+    THThemesClasses.ToolTip := TDictionary<HTHEME, String>.Create();
+    THThemesClasses.ToolTip.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
+
+    TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
+
+    if Assigned(DrawThemeText) then
+      Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
+
+    OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
+    if Assigned (OpenThemeDataOrgPointer) then
+     TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @Detour_UxTheme_OpenThemeData);
+
+    DrawThemeBackgroundOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'), 'DrawThemeBackground');
+    if Assigned (DrawThemeBackgroundOrgPointer) then
+     TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @Detour_UxTheme_DrawThemeBackground);
+
+    VclIDEModule := LoadLibrary(sVclIDEModule);
+    if VclIDEModule<>0 then
+    begin
+     psBaseVirtualTreeOriginalWMNCPaint := GetBplMethodAddress(GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint));
+     if Assigned(psBaseVirtualTreeOriginalWMNCPaint) then
+      TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
+    end;
+
+    pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollPos');
+    if Assigned (pHook) then
+     TrampolineSetScrollPos := InterceptCreate(pHook, @Detour_WinApi_SetScrollPos);
+
+    pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollInfo');
+    if Assigned (pHook) then
+     TrampolineSetScrollInfo := InterceptCreate(pHook, @Detour_WinApi_SetScrollInfo);
   end;
 
-  pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollPos');
-  if Assigned (pHook) then
-   TrampolineSetScrollPos := InterceptCreate(pHook, @Detour_WinApi_SetScrollPos);
-
-  pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollInfo');
-  if Assigned (pHook) then
-   TrampolineSetScrollInfo := InterceptCreate(pHook, @Detour_WinApi_SetScrollInfo);
 end;
 
-finalization
+procedure RemoveHooksUXTheme;
+begin
 
-if Assigned (TrampolineTWinControl_WMNCPaint) then
-  InterceptRemove(@TrampolineTWinControl_WMNCPaint);
+  if Assigned (TrampolineTWinControl_WMNCPaint) then
+    InterceptRemove(@TrampolineTWinControl_WMNCPaint);
 
-if Assigned (TrampolineOpenThemeData) then
-  InterceptRemove(@TrampolineOpenThemeData);
+  if Assigned (TrampolineOpenThemeData) then
+    InterceptRemove(@TrampolineOpenThemeData);
 
-if Assigned (TrampolineBaseVirtualTreeOriginalWMNCPaint) then
-  InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
+  if Assigned (TrampolineBaseVirtualTreeOriginalWMNCPaint) then
+    InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
 
-if Assigned (TrampolineDrawThemeBackground) then
-  InterceptRemove(@TrampolineDrawThemeBackground);
+  if Assigned (TrampolineDrawThemeBackground) then
+    InterceptRemove(@TrampolineDrawThemeBackground);
 
-if Assigned(Trampoline_DrawThemeText) then
-  InterceptRemove(@Trampoline_DrawThemeText);
+  if Assigned(Trampoline_DrawThemeText) then
+    InterceptRemove(@Trampoline_DrawThemeText);
 
-if Assigned (TrampolineSetScrollPos) then
-  InterceptRemove(@TrampolineSetScrollPos);
+  if Assigned (TrampolineSetScrollPos) then
+    InterceptRemove(@TrampolineSetScrollPos);
 
-if Assigned (TrampolineSetScrollInfo) then
-  InterceptRemove(@TrampolineSetScrollInfo);
+  if Assigned (TrampolineSetScrollInfo) then
+    InterceptRemove(@TrampolineSetScrollInfo);
 
-if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
-  THThemesClasses.ScrollBars.Free;
-  THThemesClasses.TreeView.Free;
-  THThemesClasses.Button.Free;
-  THThemesClasses.ToolTip.Free;
+  if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
+    THThemesClasses.ScrollBars.Free;
+    THThemesClasses.TreeView.Free;
+    THThemesClasses.Button.Free;
+    THThemesClasses.ToolTip.Free;
+end;
+
 end.

@@ -976,6 +976,12 @@ var
 begin
   // AddToLog(Message);
   case Message.Msg of
+//    WM_CREATE  :
+//     begin
+//      SetWindowLong(SysControl.Handle, GWL_EXSTYLE, SysControl.ExStyle or WS_EX_LAYERED);
+//      SetLayeredWindowAttributes(SysControl.Handle, 0, 220, LWA_ALPHA);
+//      Handled:=False;
+//     end;
 
     MN_SELECTITEM, WM_PRINT:
       begin

@@ -23,6 +23,9 @@ unit Colorizer.Hooks.Windows;
 interface
 {$I ..\Common\Jedi.inc}
 
+procedure InstallHooksWinAPI();
+procedure RemoveHooksWinAPI();
+
 implementation
 
 uses
@@ -309,7 +312,7 @@ begin
  RestoreColor :=False;
  {$IFDEF DELPHIXE5_UP}
  if LastWinControl<>nil then
-   sClassName := LastWinControl.ClassName
+  try sClassName := LastWinControl.ClassName except sClassName:=''; end
  else
    sClassName:='';
  {$ENDIF}
@@ -448,11 +451,11 @@ begin
    Exit(Trampoline_GetSysColor(nIndex));
 end;
 
+
+procedure InstallHooksWinAPI();
 var
   pOrgAddress : Pointer;
-
-initialization
-
+begin
  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);
@@ -468,9 +471,10 @@ initialization
  pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
  if Assigned(pOrgAddress) then
    Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
+end;
 
-finalization
-
+procedure RemoveHooksWinAPI();
+begin
   if Assigned(Trampoline_DrawText) then
     InterceptRemove(@Trampoline_DrawText);
 
@@ -488,5 +492,7 @@ finalization
 
   if Assigned(Trampoline_DrawEdge) then
     InterceptRemove(@Trampoline_DrawEdge);
+end;
 
 end.
+

@@ -218,7 +218,7 @@ type
   TCustomFormClass = class(TCustomForm);
 
 var
-   CurrentStyleName : string;
+   CurrentStyleName : string ='';
 
 procedure SetColorizerVCLStyle(const StyleName : string);
 var
@@ -2361,6 +2361,4 @@ begin
   end;
 end;
 
-initialization
-  CurrentStyleName:='';
 end.

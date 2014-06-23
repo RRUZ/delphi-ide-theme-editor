@@ -43,6 +43,7 @@ uses
 {$ENDIF}
   Classes,
   Forms,
+  uMisc,
   DDetours,
   Windows,
   SysUtils,
@@ -63,7 +64,7 @@ type
 var
  hhk: HHOOK = 0;
 {$IFDEF DELPHIXE2_UP}
- Trampoline_TWinControl_WndProc : procedure (Self : TWinControl;var Message: TMessage) = nil;
+ //Trampoline_TWinControl_WndProc : procedure (Self : TWinControl;var Message: TMessage) = nil;
  //Trampoline_TWinControl_Destroy : procedure (Self : TWinControl);
 {$ENDIF}
  Trampoline_TCustomForm_WndProc : procedure (Self : TCustomForm;var Message: TMessage) = nil;
@@ -96,6 +97,8 @@ begin
         PostMessage(LForm.Handle, CM_RECREATEWND, 0, 0);
         if LControl <> nil then
           LForm.ActiveControl:= LControl;
+
+        //SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
       end
       else
       if Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[i].ClassName)>=0) then
@@ -105,13 +108,15 @@ begin
         SendMessage(LForm.Handle, CM_RECREATEWND, 0, 0);
         if LControl <> nil then
           LForm.ActiveControl:= LControl;
+
+        //SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
       end;
 
-//    if Screen.Forms[i].HandleAllocated then
-//      if IsWindowVisible(Screen.Forms[I].Handle) then
-//        PostMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
+//    if LForm.HandleAllocated then
+//      if IsWindowVisible(LForm.Handle) then
+//        PostMessage(LForm.Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
 //      else
-//        SendMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
+//        SendMessage(LForm.Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
   end;
 
   if Invalidate then
@@ -120,36 +125,38 @@ end;
 
 function HandleColorizerStyleMessage(Self : TWinControl;var Message: TMessage; WindowProc : TWndMethod): Boolean;
 var
-  LStyleHook: TColorizerStyleHook;
+  LHook: TColorizerStyleHook;
 begin
   if HookedControls.ContainsKey(Self) then
-    LStyleHook:=HookedControls[Self]
+    LHook:=HookedControls[Self]
   else
   begin
     HookedControls.Add(Self, TColorizerFormStyleHook.Create(Self));
-    LStyleHook:=HookedControls[Self];
+    LHook:=HookedControls[Self];
   end;
 
-  Result := LStyleHook.HandleMessage(Message);
+  Result := LHook.HandleMessage(Message);
+  //AddLog('HandleColorizerStyleMessage', Self.ClassName+' '+WM_To_String(Message.Msg));
 end;
 
-procedure Detour_TWinControl_WndProc(Self : TWinControl;var Message: TMessage);
-var
- LWindowProc : TWndMethod;
-begin
- LWindowProc := TWinControlClass(Self).WindowProc;
-  if (Self is TCustomForm) and (Self.Parent=nil) and (Self.HostDockSite=nil) and
-     Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms and (TColorizerLocalSettings.Settings.VCLStyleName<>'') and
-     Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) and
-     (TWinControlClass(Self).WindowHandle <> 0) {HandleAllocated} and
-     not (csDestroying in TWinControlClass(Self).ComponentState) and
-     not (csDestroyingHandle in TWinControlClass(Self).ControlState) and
-     not (csOverrideStylePaint in TWinControlClass(Self).ControlStyle) and
-     HandleColorizerStyleMessage(Self, Message, LWindowProc) then
-    Exit;
-
-  Trampoline_TWinControl_WndProc(Self, Message);
-end;
+//procedure Detour_TWinControl_WndProc(Self : TWinControl;var Message: TMessage);
+//var
+// LWindowProc : TWndMethod;
+//begin
+// LWindowProc := TWinControlClass(Self).WindowProc;
+//  if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms and (TColorizerLocalSettings.Settings.VCLStyleName<>'') and
+//     Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) and
+//     (Self is TCustomForm) and (Self.Parent=nil) and (Self.HostDockSite=nil) and
+//     //not (csDesigning in Self.ComponentState) and
+//     (TWinControlClass(Self).WindowHandle <> 0) {HandleAllocated} and
+//     not (csDestroying in TWinControlClass(Self).ComponentState) and
+//     not (csDestroyingHandle in TWinControlClass(Self).ControlState) and
+//     not (csOverrideStylePaint in TWinControlClass(Self).ControlStyle) and
+//     HandleColorizerStyleMessage(Self, Message, LWindowProc) then
+//    Exit;
+//
+//  Trampoline_TWinControl_WndProc(Self, Message);
+//end;
 
 //procedure Detour_TWinControl_Destroy(Self : TWinControl);
 //begin
@@ -160,18 +167,38 @@ end;
 {$ENDIF}
 
 procedure Detour_TCustomForm_WndProc(Self : TCustomForm;var Message: TMessage);
+{$IFDEF DELPHIXE2_UP}
+var
+ LWindowProc : TWndMethod;
+ sClassName  : string;
+{$ENDIF}
 begin
+{$IFDEF DELPHIXE2_UP}
+ sClassName:=Self.ClassName;
+// if (TWinControlClass(Self).WindowHandle <> 0) then
+//  sClassName := GetWindowClassName(TWinControlClass(Self).WindowHandle);
+ LWindowProc := Self.WindowProc;
+  if not TColorizerLocalSettings.Unloading and
+     (sClassName<>'') and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms and (TColorizerLocalSettings.Settings.VCLStyleName<>'') and
+     (Self.Visible) and
+     Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(sClassName)>=0) and
+     (Self.Parent=nil) and (Self.HostDockSite=nil) and
+     not (csDesigning in Self.ComponentState) and
+     not (csDestroying in Self.ComponentState) and
+     not (csDestroyingHandle in Self.ControlState) and
+     not (csOverrideStylePaint in Self.ControlStyle) and
+     HandleColorizerStyleMessage(Self, Message, LWindowProc) then
+    Exit;
+{$ENDIF}
+
 {$IFDEF DLLWIZARD}
- if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
  case Message.Msg of
-  WM_CLOSE  :
-  //WM_DESTROY,
-  //WM_QUIT :
-     begin
-       //AddLog('Detour_TCustomForm_WndProc', Self.ClassName+' ' +WM_To_String(Message.Msg));
-       //RestoreIDESettings();
-       RestoreIDESettingsFast();
-     end;
+  WM_CLOSE  : if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
+              begin
+                AddLog('WM_CLOSE', '0');
+                RestoreIDESettingsFast();
+                AddLog('WM_CLOSE', '1');
+              end;
  end;
 {$ENDIF}
  Trampoline_TCustomForm_WndProc(Self, Message);
@@ -180,11 +207,8 @@ end;
 procedure Detour_TCustomForm_DoCreate(Self : TCustomForm);
 begin
   Trampoline_TCustomForm_DoCreate(Self);
-  //AddLog('Detour_TCustomForm_DoCreate', Self.ClassName);
-//  if SameText(Self.ClassName, 'TProgressForm') then
-//    TRttiUtils.DumpObject(Self, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+Self.ClassName+'.pas');
 
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) then
+  if not TColorizerLocalSettings.Unloading and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Self.ClassName)>=0) then
     ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
 end;
 
@@ -200,7 +224,7 @@ var
  LWinControl : TWinControl;
  LParentForm : TCustomForm;
 begin
-   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap)
+   if not TColorizerLocalSettings.Unloading and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap)
    and Assigned(TColorizerLocalSettings.HookedWindows) and Assigned(TColorizerLocalSettings.HookedScrollBars) then
    case nCode of
 
@@ -267,42 +291,36 @@ begin
    hhk := SetWindowsHookEx(WH_CBT, @CBT_FUNC, hInstance, GetCurrentThreadId());
 
 {$IFDEF DELPHIXE2_UP}
-  Trampoline_TWinControl_WndProc    := InterceptCreate(@TWinControlClass.WndProc, @Detour_TWinControl_WndProc);
+  //Trampoline_TWinControl_WndProc    := InterceptCreate(@TWinControlClass.WndProc, @Detour_TWinControl_WndProc);
   //Trampoline_TWinControl_Destroy    := InterceptCreate(@TWinControlClass.Destroy, @Detour_TWinControl_Destroy);
 {$ENDIF}
-  Trampoline_TCustomForm_DoCreate   := InterceptCreate(@TCustomFormClass.DoCreate,   @Detour_TCustomForm_DoCreate);
+  Trampoline_TCustomForm_DoCreate   := InterceptCreate(@TCustomFormClass.DoCreate, @Detour_TCustomForm_DoCreate);
   Trampoline_TCustomForm_WndProc    := InterceptCreate(@TCustomFormClass.WndProc, @Detour_TCustomForm_WndProc);
 end;
 
 Procedure RemoveFormsHook();
 begin
-{$IFDEF DELPHIXE2_UP}
-  HookedControls.Free;
-{$ENDIF}
-
   if (hhk <> 0) then
   begin
     UnhookWindowsHookEx(hhk);
     hhk:=0;
   end;
 
-{$IFDEF DELPHIXE2_UP}
-  SetColorizerVCLStyle('');
-
-  if Assigned(Trampoline_TWinControl_WndProc) then
-    InterceptRemove(@Trampoline_TWinControl_WndProc);
-
-//  if Assigned(Trampoline_TWinControl_Destroy) then
-//    InterceptRemove(@Trampoline_TWinControl_Destroy);
-
-  RefreshColorizerVCLStyle;
-{$ENDIF}
-
   if Assigned(Trampoline_TCustomForm_DoCreate) then
     InterceptRemove(@Trampoline_TCustomForm_DoCreate);
 
   if Assigned(Trampoline_TCustomForm_WndProc) then
     InterceptRemove(@Trampoline_TCustomForm_WndProc);
+
+{$IFDEF DELPHIXE2_UP}
+  SetColorizerVCLStyle('');
+  RefreshColorizerVCLStyle;
+{$ENDIF}
+
+
+{$IFDEF DELPHIXE2_UP}
+  FreeAndNil(HookedControls);
+{$ENDIF}
 end;
 
 end.

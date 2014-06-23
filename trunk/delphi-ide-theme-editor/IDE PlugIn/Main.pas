@@ -29,12 +29,12 @@
   frame in buttons of TIDECategoryButtons   depending oh theme colors7
 
   VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
-  VCL Styles - some issues in overlaped floating windows
-  VCL Styles - some issues in scrollbars with some vcl styles (ex : Tablet Dark)
 }
 
 // DONE
 {
+  * VCL Styles - some issues in scrollbars with some vcl styles (ex : Tablet Dark)
+  * VCL Styles - some issues in overlaped floating windows
   * Add support for TPopupListBox
   * Fix fonts colors in ide tabs XE6
   * add custom option for header virtual trees and listview
@@ -175,7 +175,11 @@ uses
  uDelphiVersions,
  Colorizer.Hooks,
  Colorizer.Hook.Forms,
+ Colorizer.Hooks.GDIPOBJ,
+ Colorizer.Hooks.Windows,
+ Colorizer.Hooks.UxTheme,
  Colorizer.SettingsForm,
+ Colorizer.Hooks.IDE,
  Colorizer.Settings,
  Colorizer.OptionsDlg,
  Colorizer.XPStyleActnCtrls,
@@ -243,6 +247,33 @@ begin
   FPlugInInfo:=InvalidIndex;
 end;
 
+procedure InstallAllHooks;
+begin
+  AddLog('InstallAllHooks', 'Init');
+  InstallHooksWinAPI();
+  InstallHooksUXTheme();
+  InstallFormsHook();
+  InstallHooksIDE();
+  InstallHooksGDI();
+  InstallColorizerHooks();
+  RegisterFlatMenusHooks();
+  AddLog('InstallAllHooks', 'Done');
+end;
+
+procedure RemoveAllHooks;
+begin
+  //don't change unload order
+  AddLog('RemoveAllHooks', 'Init');
+  RemoveColorizerHooks();
+  RemoveHooksWinAPI();
+  RemoveHooksUXTheme();
+  RemoveFormsHook();
+  RemoveHooksIDE();
+  RemoveHooksGDI();
+  UnregisterFlatMenusHooks();
+  AddLog('RemoveAllHooks', 'Done');
+end;
+
 
 procedure FinalizeIDEColorizer;
 {$IFDEF DLLWIZARD}
@@ -259,9 +290,7 @@ begin
 {$ENDIF}
 
   AddLog('FinalizeIDEColorizer', '1');
-  RemoveFormsHook();
-  RemoveColorizerHooks();
-  UnregisterFlatMenusHooks();
+  RemoveAllHooks();
 
   UnRegisterPlugIn;
   IDEWizard.RemoveMenuItems;
@@ -413,6 +442,7 @@ begin
     ReportMemoryLeaksOnShutdown:=DebugHook<>0;
     {$WARN SYMBOL_PLATFORM ON}
     //SourceEditorNotifiers := TList.Create;
+    TColorizerLocalSettings.Unloading:=False;
     TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
     FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
     TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
@@ -444,11 +474,7 @@ begin
     RegisterPlugIn;
     AddMenuItems;
 
-    if TColorizerLocalSettings.Settings.Enabled then
-      RegisterFlatMenusHooks();
-
-    InstallFormsHook();
-    InstallColorizerHooks();
+    InstallAllHooks();
 
     InitColorizer();
     FTimerRefresher:=TTimer.Create(nil);
@@ -469,6 +495,7 @@ end;
 
 destructor TIDEWizard.Destroy;
 begin
+  TColorizerLocalSettings.Unloading:=True;
   {$IFNDEF DLLWIZARD}
   FinalizeIDEColorizer();
   {$ENDIF}

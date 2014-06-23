@@ -139,6 +139,9 @@ procedure MoveWindowOrg(DC: HDC; const DX, DY: Integer);
 
 implementation
 
+uses
+ Colorizer.Utils;
+
 function GetWindowClassName(Window: HWND): String;
 var
   sClassName: PChar;
@@ -301,7 +304,7 @@ begin
   Result := CallNextHookEx(FHook, nCode, wParam, lParam);
   if not FEnabled then
     Exit;
-  if (nCode = HCBT_CREATEWND) {$IF CompilerVersion >= 23} and (StyleServices.IsSystemStyle) {$IFEND} then
+  if (nCode = HCBT_CREATEWND) {$IF CompilerVersion >= 23} and (StyleServices.IsSystemStyle)  {$IFEND} and  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
   begin
 
     CBTSturct := PCBTCreateWnd(lParam)^;
