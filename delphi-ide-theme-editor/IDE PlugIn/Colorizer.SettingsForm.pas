@@ -325,6 +325,7 @@ procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
    {$IFDEF DELPHIXE2_UP}OrgVclStyleName, {$ENDIF}s, ImagesPath, sMessage : string;
    {$IFDEF DELPHIXE2_UP}OrgVclStyleForms, OrgVclStyle, {$ENDIF}FShowWarning : Boolean;
+   {$IFDEF DELPHIXE2_UP}i :integer;{$ENDIF}
 begin
 {$IFDEF DELPHIXE2_UP}
   OrgVclStyleName :=FSettings.VCLStyleName;
@@ -342,6 +343,11 @@ begin
 
   if MessageDlg(sMessage,  mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
+
+    if Parent=nil then
+      Close();
+    //AddLog('Close', 'Close');
+
     FSettings.ThemeName := cbThemeName.Text;
     FSettings.Enabled   := CheckBoxEnabled.Checked;
     //FSettings.EnableDWMColorization   := CheckBoxActivateDWM.Checked;
@@ -402,9 +408,8 @@ begin
       TColorizerLocalSettings.DockImages.LoadFromFile(s);
 
 
-    ListBoxFormsHooked.Items.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
+    //ListBoxFormsHooked.Items.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
     Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
-
     {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles then
     begin
@@ -431,7 +436,18 @@ begin
     if FSettings.Enabled then
       RefreshIDETheme(True)
     else
+    begin
+    {$IFDEF DELPHIXE2_UP}
+     for i := 0 to Screen.FormCount - 1 do
+      if Screen.Forms[i].HandleAllocated then
+        if IsWindowVisible(Screen.Forms[I].Handle) then
+          PostMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
+        else
+          SendMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
+    {$ENDIF}
+
       RestoreIDESettings();
+    end;
   end;
 end;
 

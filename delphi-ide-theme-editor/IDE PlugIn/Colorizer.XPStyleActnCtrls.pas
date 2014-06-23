@@ -202,8 +202,10 @@ begin
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
    LoadColorMapFromXmlFile(Self, TColorizerLocalSettings.Settings.ThemeFileName);
 
+ {$IFDEF DELPHIXE2_UP}
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors  then
    AssignColorsFromVCLStyle(Self, ColorizerStyleServices);
+{$ENDIF}
 end;
 
 initialization

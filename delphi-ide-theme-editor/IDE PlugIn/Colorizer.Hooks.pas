@@ -26,7 +26,6 @@ interface
 
 uses
   Controls;
-
  procedure InstallColorizerHooks;
  procedure RemoveColorizerHooks;
  procedure DrawNCBorder(Self : TWinControl; EraseLRCorner: Boolean);
@@ -390,7 +389,8 @@ begin
 //      TListBox(Self).Color:=clRed;
 //  end;
 
-
+  if not TColorizerLocalSettings.Unloading then
+  begin
     if  not Assigned(TColorizerLocalSettings.Settings) or (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState)  then
     begin
      Trampoline_TWinControl_DefaultHandler(Self, Message);
@@ -430,6 +430,7 @@ begin
           end;
         end;
     end;
+  end;
 
   Trampoline_TWinControl_DefaultHandler(Self, Message);
 end;
@@ -2699,14 +2700,7 @@ begin
 
   if Assigned(Trampoline_TCustomCombo_WndProc) then
     InterceptRemove(@Trampoline_TCustomCombo_WndProc);
-
-
 end;
 
-//initialization
-//  FormMessages:= TStringList.Create;
-//finalization
-//  FormMessages.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\FormsMessages.txt');
-//  FormMessages.Free;
 end.
 

@@ -27,7 +27,7 @@ interface
 type
   TSettings=class
   private
-    FEnableDWMColorization: boolean;
+    //FEnableDWMColorization: boolean;
     FEnabled: boolean;
     FThemeName: string;
     FFixIDEDisabledIconsDraw: boolean;
@@ -74,7 +74,7 @@ type
 //    FStyleBarName: string;
 //    FColorMapName: string;
   public
-    property EnableDWMColorization : boolean read FEnableDWMColorization write FEnableDWMColorization;
+    //property EnableDWMColorization : boolean read FEnableDWMColorization write FEnableDWMColorization;
     property Enabled : boolean read FEnabled write FEnabled;
     property ThemeName : string read FThemeName write FThemeName;
     property FixIDEDisabledIconsDraw : boolean read FFixIDEDisabledIconsDraw write FFixIDEDisabledIconsDraw;
@@ -150,7 +150,7 @@ var
 begin
   LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
-    Settings.EnableDWMColorization   := LIniFile.ReadBool('Global', 'EnableDWMColorization', True);
+    //Settings.EnableDWMColorization   := LIniFile.ReadBool('Global', 'EnableDWMColorization', True);
     Settings.Enabled                 := LIniFile.ReadBool('Global', 'Enabled', True);
     Settings.FixIDEDisabledIconsDraw := LIniFile.ReadBool('Global', 'FixIDEDisabledIconsDraw', True);
     Settings.AutogenerateColors      := LIniFile.ReadBool('Global', 'AutogenerateColors', True);
@@ -215,7 +215,7 @@ var
 begin
   LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
-    LIniFile.WriteBool('Global', 'EnableDWMColorization', Settings.EnableDWMColorization);
+    //LIniFile.WriteBool('Global', 'EnableDWMColorization', Settings.EnableDWMColorization);
     LIniFile.WriteBool('Global', 'Enabled', Settings.Enabled);
     LIniFile.WriteBool('Global', 'FixIDEDisabledIconsDraw', Settings.FixIDEDisabledIconsDraw);
     LIniFile.WriteBool('Global', 'AutogenerateColors', Settings.AutogenerateColors);

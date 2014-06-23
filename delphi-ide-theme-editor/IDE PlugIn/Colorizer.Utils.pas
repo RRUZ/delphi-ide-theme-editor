@@ -81,6 +81,7 @@ procedure RegisterVClStylesFiles;
       class var ImagesGutterChanged : Boolean;
       class var IDEData        : TDelphiVersionData;
       class var DockImages     : TPngImage;
+      class var Unloading : Boolean;
     end;
 
 implementation
@@ -215,8 +216,10 @@ begin
   if FileExists(Settings.ThemeFileName) then
    LoadColorMapFromXmlFile(AColorMap, Settings.ThemeFileName);
 
+ {$IFDEF DELPHIXE2_UP}
   if Settings.UseVCLStyles and Settings.VCLStylesMenusColors then
     AssignColorsFromVCLStyle(AColorMap, ColorizerStyleServices);
+{$ENDIF}
 
 //  if ActionBarStyles.IndexOf(Settings.StyleBarName)>=0 then
 //    ActionBarStyle:= TActionBarStyle(ActionBarStyles.Objects[ActionBarStyles.IndexOf(Settings.StyleBarName)]);
@@ -472,7 +475,7 @@ begin
   finally
     NativeColorMap.Free;
   end;
-  RestoreActnManagerStyles();
+  //RestoreActnManagerStyles();
 end;
 
 {$IFDEF ENABLELOG}

@@ -24,6 +24,11 @@ unit Colorizer.Hooks.GDIPOBJ;
 interface
 {$I ..\Common\Jedi.inc}
 
+  procedure InstallHooksGDI;
+  procedure RemoveHooksGDI;
+
+implementation
+
 uses
     Colorizer.Utils,
     JclDebug,
@@ -33,8 +38,6 @@ uses
     uMisc,
     GDIPAPI,
     GDIPOBJ;
-
-implementation
 
 {
     __fastcall Winapi::Gdipobj::initialization()
@@ -172,15 +175,19 @@ begin                                                                           
   Exit(Trampoline_TGPGraphics_FillPath(Self, brush, path));
 end;
 
-initialization
+
+procedure InstallHooksGDI;
+begin
   Trampoline_TGPGraphics_DrawPath            := InterceptCreate(@TGPGraphics.DrawPath, @Detour_TGPGraphics_DrawPath);
   Trampoline_TGPGraphics_FillPath            := InterceptCreate(@TGPGraphics.FillPath, @Detour_TGPGraphics_FillPath);
+end;
 
-finalization
-
+procedure RemoveHooksGDI;
+begin
   if Assigned(Trampoline_TGPGraphics_DrawPath) then
     InterceptRemove(@Trampoline_TGPGraphics_DrawPath);
 
   if Assigned(Trampoline_TGPGraphics_FillPath) then
     InterceptRemove(@Trampoline_TGPGraphics_FillPath);
+end;
 end.
