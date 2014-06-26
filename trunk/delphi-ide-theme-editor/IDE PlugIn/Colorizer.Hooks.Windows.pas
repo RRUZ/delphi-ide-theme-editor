@@ -40,6 +40,10 @@ uses
  Classes,
  Types,
  GraphUtil,
+{$IFDEF DELPHIXE2_UP}
+ Colorizer.Vcl.Styles,
+ VCl.Themes,
+{$ENDIF}
  Colorizer.Hooks,
  Colorizer.Hooks.IDE,
  Forms;
@@ -126,6 +130,10 @@ var
  OrgHWND : HWND;
  LWinControl : TWinControl;
  LParentForm : TCustomForm;
+{$IFDEF DELPHIXE2_UP}
+ LDetails: TThemedElementDetails;
+ LStyleServices: TCustomStyleServices;
+{$ENDIF}
 begin
    if( uType=DFC_BUTTON) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
    begin
@@ -147,6 +155,20 @@ begin
         LCanvas:=TCanvas.Create;
         try
           LCanvas.Handle:=DC;
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         begin
+           LStyleServices:= ColorizerStyleServices;
+           if (DFCS_CHECKED and uState = DFCS_CHECKED) then
+            LDetails := LStyleServices.GetElementDetails(tbCheckBoxCheckedNormal)
+           else
+            LDetails := LStyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
+
+          LStyleServices.DrawElement(LCanvas.Handle, LDetails, Rect^);
+         end
+         else
+         {$ENDIF}
+         begin
            if (DFCS_CHECKED and uState = DFCS_CHECKED) then
            begin
             LCanvas.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
@@ -164,6 +186,8 @@ begin
 //              LCanvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.SelectedColor;
             LCanvas.Rectangle(Rect^);
            end;
+         end;
+
         finally
           LCanvas.Handle:=0;
           LCanvas.Free;

@@ -352,7 +352,7 @@ const
 var
   s, sCaller, sCaller2 : string;
   LCanvas : TCanvas;
-  {WClassName, }VCLClassName : string;
+  VCLClassName : string;
   ApplyHook  : Boolean;
   LParentForm : TCustomForm;
   LHWND : HWND;
@@ -361,47 +361,25 @@ var
   LRect     : TRect;
   LSize     : TSize;
   SavedIndex : integer;
+  {$IFDEF DELPHIXE2_UP}
+  LStyleServices: TCustomStyleServices;
+  LDetails: TThemedElementDetails;
+  {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
-
-//  procedure PremultiplyBitmap(Bitmap: TBitmap);
-//  var
-//    Row, Col: integer;
-//    p: PRGBQuad;
-//  begin
-//    for Row := 0 to Bitmap.Height-1 do
-//    begin
-//      Col := Bitmap.Width;
-//      p := Bitmap.ScanLine[Row];
-//      while (Col > 0) do
-//      begin
-//        p.rgbBlue := p.rgbBlue * p.rgbReserved div 255;
-//        p.rgbGreen := p.rgbGreen * p.rgbReserved div 255;
-//        p.rgbRed := p.rgbRed * p.rgbReserved div 255;
-//        inc(p);
-//        dec(Col);
-//      end;
-//    end;
-//  end;
-
   function DrawScrollBarVCLStyles : HRESULT;
   var
-    LDetails: TThemedElementDetails;
-    LStyle: TCustomStyleServices;
     LScrollDetails: TThemedScrollBar;
-//    LBitMap: TBitmap;
-//    LRect : TRect;
-//    p : Pointer;
   begin
     Result:=0;
-    LStyle := ColorizerStyleServices;
+    LStyleServices := ColorizerStyleServices;
     if THThemesClasses.ScrollBars.ContainsKey(THEME) then
     begin
       LScrollDetails := tsScrollBarRoot;
       LDetails.Element := TThemedElement.teScrollBar;
       LDetails.Part := iPartId;
       LDetails.State := iStateId;
-      LDetails := LStyle.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
+      LDetails := LStyleServices.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
 
       case iPartId  of
         SBP_ARROWBTN :
@@ -533,47 +511,16 @@ var
         end;
 
       end;
-      LDetails := LStyle.GetElementDetails(LScrollDetails);
-
-//       LCanvas:=TCanvas.Create;
-//       try
-//         LCanvas.Handle:=dc;
-//          LBitMap := TBitmap.Create;
-//          try
-//            LBitMap.PixelFormat:=pf32bit;
-//            LBitMap.Width := pRect.Width;
-//            LBitMap.Height := pRect.Height;
-//            LBitMap.HandleType := bmDIB;
-//            LBitMap.IgnorePalette:=True;
-//            LBitMap.AlphaFormat:=TAlphaFormat.afPremultiplied;
-//            p := LBitMap.ScanLine[LBitMap.Height - 1];
-//            ZeroMemory(p, LBitMap.Width * LBitMap.Height * 4);
-//            LRect:=Rect(0 , 0, LBitMap.Width, LBitMap.Height);
-//            LStyle.DrawElement(LBitMap.Canvas.Handle, LDetails, LRect, nil);
-//            //BitBlt(DC, Left, Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
-//            //BitBlt(dc, pRect.Left, pRect.Top, pRect.Width, pRect.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
-//
-////            if (iPartId=SBP_THUMBBTNHORZ) and (B.Width>50) then
-////              B.SaveToFile('C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\test.bmp');
-//            PremultiplyBitmap(LBitMap);
-//            DrawTransparentBitmap(LBitMap, LCanvas, pRect, 255);
-//            //LCanvas.Draw(pRect.Left, pRect.Top, B, 255);
-//          finally
-//            LBitMap.Free;
-//          end;
-//       finally
-//         LCanvas.Handle:=0;
-//         LCanvas.Free;
-//       end;
+      LDetails := LStyleServices.GetElementDetails(LScrollDetails);
 
       //LStyle.DrawParentBackground(Self.Handle, dc, LDetails, False);
       if (iPartId=SBP_THUMBBTNHORZ) then
-        LStyle.DrawElement(dc, LStyle.GetElementDetails(tsUpperTrackHorzNormal), pRect, pClipRect)
+        LStyleServices.DrawElement(dc, LStyleServices.GetElementDetails(tsUpperTrackHorzNormal), pRect, pClipRect)
       else
       if (iPartId=SBP_THUMBBTNVERT) then
-        LStyle.DrawElement(dc, LStyle.GetElementDetails(tsUpperTrackVertNormal), pRect, pClipRect);
+        LStyleServices.DrawElement(dc, LStyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, pClipRect);
 
-      LStyle.DrawElement(dc, LDetails, pRect, pClipRect);
+      LStyleServices.DrawElement(dc, LDetails, pRect, pClipRect);
       Exit(0);
     end;
   end;
@@ -952,19 +899,38 @@ begin
 
       if ApplyHook then
       begin
-         LBuffer:=TBitmap.Create;
-         try
-           LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-           LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
-           LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-           LBuffer.Canvas.Rectangle(LRect);
-           LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
-           LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) - 2, (LRect.Bottom-LRect.Top) div 2);
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         begin
+           LStyleServices:= ColorizerStyleServices;
+           LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphOpened);
+           LBuffer:=TBitmap.Create;
+           try
+             LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+             BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+           finally
+             LBuffer.Free;
+           end;
+         end
+         else
+         {$ENDIF}
+         begin
+           LBuffer:=TBitmap.Create;
+           try
+             LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+             LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+             LBuffer.Canvas.Rectangle(LRect);
+             LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
+             LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) - 2, (LRect.Bottom-LRect.Top) div 2);
 
-           BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
-         finally
-           LBuffer.Free;
+             BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+           finally
+             LBuffer.Free;
+           end;
          end;
          Exit(0);
       end;
@@ -995,21 +961,40 @@ begin
 
       if ApplyHook then
       begin
-         LBuffer:=TBitmap.Create;
-         try
-           LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-           LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-           LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
-           LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-           LBuffer.Canvas.Rectangle(LRect);
-           LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
-           LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) - 2, (LRect.Bottom-LRect.Top) div 2);
-           LBuffer.Canvas.MoveTo((LRect.Right-LRect.Left) div 2, 2);
-           LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) div 2, (LRect.Bottom-LRect.Top) - 2);
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         begin
+           LStyleServices:= ColorizerStyleServices;
+           LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphClosed);
+           LBuffer:=TBitmap.Create;
+           try
+             LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+             BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+           finally
+             LBuffer.Free;
+           end;
+         end
+         else
+         {$ENDIF}
+         begin
+           LBuffer:=TBitmap.Create;
+           try
+             LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+             LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+             LBuffer.Canvas.Rectangle(LRect);
+             LBuffer.Canvas.MoveTo(2, (LRect.Bottom-LRect.Top) div 2);
+             LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) - 2, (LRect.Bottom-LRect.Top) div 2);
+             LBuffer.Canvas.MoveTo((LRect.Right-LRect.Left) div 2, 2);
+             LBuffer.Canvas.LineTo((LRect.Right-LRect.Left) div 2, (LRect.Bottom-LRect.Top) - 2);
 
-           BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
-         finally
-           LBuffer.Free;
+             BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+           finally
+             LBuffer.Free;
+           end;
          end;
          Exit(0);
       end;
@@ -1065,6 +1050,44 @@ begin
 
            if ApplyHook then
            begin
+             {$IFDEF DELPHIXE2_UP}
+             if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+             begin
+               LStyleServices:= ColorizerStyleServices;
+                {
+                    tbCheckBoxUncheckedNormal, tbCheckBoxUncheckedHot, tbCheckBoxUncheckedPressed, tbCheckBoxUncheckedDisabled,
+                    tbCheckBoxCheckedNormal, tbCheckBoxCheckedHot, tbCheckBoxCheckedPressed, tbCheckBoxCheckedDisabled,
+                    tbCheckBoxMixedNormal, tbCheckBoxMixedHot, tbCheckBoxMixedPressed, tbCheckBoxMixedDisabled,
+                    tbCheckBoxImplicitNormal, tbCheckBoxImplicitHot, tbCheckBoxImplicitPressed, tbCheckBoxImplicitDisabled, // Windows Vista or later
+                    tbCheckBoxExcludedNormal, tbCheckBoxExcludedHot, tbCheckBoxExcludedPressed, tbCheckBoxExcludedDisabled, // Windows Vista or later
+
+                }
+               case iStateId of
+                  CBS_UNCHECKEDNORMAL  :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
+                  CBS_UNCHECKEDHOT     :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxUncheckedHot);
+                  CBS_UNCHECKEDPRESSED :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxUncheckedPressed);
+                  CBS_UNCHECKEDDISABLED:  LDetails := LStyleServices.GetElementDetails(tbCheckBoxUncheckedDisabled);
+                  CBS_CHECKEDNORMAL    :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxCheckedNormal);
+                  CBS_CHECKEDHOT       :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxCheckedHot);
+                  CBS_CHECKEDPRESSED   :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxCheckedPressed);
+                  CBS_CHECKEDDISABLED  :  LDetails := LStyleServices.GetElementDetails(tbCheckBoxCheckedDisabled);
+               end;
+
+               LBuffer:=TBitmap.Create;
+               try
+                 LBuffer.SetSize(LSize.cx, LSize.cy);
+                 LRect := Rect(0, 0, LSize.cx, LSize.cy);
+                 LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+                 RectCenter(LRect, pRect);
+                 BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+               finally
+                 LBuffer.Free;
+               end;
+               Exit(0);
+             end
+             else
+             {$ENDIF}
+             begin
                case iStateId of
                   CBS_UNCHECKEDNORMAL,
                   CBS_UNCHECKEDHOT,
@@ -1111,6 +1134,7 @@ begin
                                              Exit(0);
                                           end;
                end;
+             end;
            end;
         end;
        end;

@@ -70,6 +70,7 @@ type
     FVCLStylesForms: boolean;
     FVCLStylesMenusColors: boolean;
     FVCLStylesScrollBars: boolean;
+    FVCLStylesControls: boolean;
     function GetThemeFileName: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
@@ -85,6 +86,7 @@ type
     property VCLStylesForms  : boolean read FVCLStylesForms write FVCLStylesForms;
     property VCLStylesMenusColors  : boolean read FVCLStylesMenusColors write FVCLStylesMenusColors;
     property VCLStylesScrollBars   : boolean read FVCLStylesScrollBars write FVCLStylesScrollBars;
+    property VCLStylesControls     : boolean read FVCLStylesControls write FVCLStylesControls;
 
     property HookSystemColors : boolean read FHookSystemColors write FHookSystemColors;
 
@@ -161,7 +163,7 @@ begin
     Settings.VCLStylesForms          := LIniFile.ReadBool('Global', 'VCLStylesForms', True);
     Settings.VCLStylesMenusColors    := LIniFile.ReadBool('Global', 'VCLStylesMenusColors', False);
     Settings.VCLStylesScrollBars     := LIniFile.ReadBool('Global', 'VCLStylesScrollBars', True);
-
+    Settings.VCLStylesControls       := LIniFile.ReadBool('Global', 'VCLStylesControls', True);
 
     Settings.ChangeIconsGutter       := LIniFile.ReadBool('Global', 'ChangeIconsGutter', True);
     Settings.HookSystemColors        := LIniFile.ReadBool('Global', 'HookSystemColors', True);
@@ -226,6 +228,7 @@ begin
     LIniFile.WriteBool('Global', 'VCLStylesForms', Settings.VCLStylesForms);
     LIniFile.WriteBool('Global', 'VCLStylesMenusColors', Settings.VCLStylesMenusColors);
     LIniFile.WriteBool('Global', 'VCLStylesScrollBars', Settings.VCLStylesScrollBars);
+    LIniFile.WriteBool('Global', 'VCLStylesControls', Settings.VCLStylesControls);
 
     LIniFile.WriteBool('Global', 'ChangeIconsGutter', Settings.ChangeIconsGutter);
     LIniFile.WriteBool('Global', 'HookSystemColors', Settings.HookSystemColors);

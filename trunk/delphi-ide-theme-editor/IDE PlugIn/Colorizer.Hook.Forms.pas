@@ -77,7 +77,7 @@ Procedure RefreshColorizerVCLStyle(Invalidate : Boolean = False);
 var
   i : Integer;
   LForm    : TCustomForm;
-  LControl : TWinControl;
+//  LControl : TWinControl;
 begin
   for i := 0 to Screen.FormCount - 1 do
   if Invalidate then
@@ -89,34 +89,38 @@ begin
   else
   begin
     LForm:=Screen.Forms[i];
-    if LForm.HandleAllocated then
-      if IsWindowVisible(LForm.Handle) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LForm.ClassName)>=0) then
-      begin
-        LControl := LForm.ActiveControl;
-        PostMessage(LForm.Handle, WM_SETREDRAW, WPARAM(LongBool(False)), 0);
-        PostMessage(LForm.Handle, CM_RECREATEWND, 0, 0);
-        if LControl <> nil then
-          LForm.ActiveControl:= LControl;
-
-        //SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
-      end
-      else
-      if Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[i].ClassName)>=0) then
-      begin
-        LControl := LForm.ActiveControl;
-        SendMessage(LForm.Handle, WM_SETREDRAW, WPARAM(LongBool(False)), 0);
-        SendMessage(LForm.Handle, CM_RECREATEWND, 0, 0);
-        if LControl <> nil then
-          LForm.ActiveControl:= LControl;
-
-        //SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
-      end;
-
 //    if LForm.HandleAllocated then
-//      if IsWindowVisible(LForm.Handle) then
+//      if IsWindowVisible(LForm.Handle) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LForm.ClassName)>=0) then
+//      begin
+//        LControl := LForm.ActiveControl;
+//        PostMessage(LForm.Handle, WM_SETREDRAW, WPARAM(LongBool(False)), 0);
+//        PostMessage(LForm.Handle, CM_RECREATEWND, 0, 0);
+//        if LControl <> nil then
+//          LForm.ActiveControl:= LControl;
+//
+//        //SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
+//      end
+//      else
+//      if Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[i].ClassName)>=0) then
+//      begin
+//        LControl := LForm.ActiveControl;
+//        SendMessage(LForm.Handle, WM_SETREDRAW, WPARAM(LongBool(False)), 0);
+//        SendMessage(LForm.Handle, CM_RECREATEWND, 0, 0);
+//        if LControl <> nil then
+//          LForm.ActiveControl:= LControl;
+//
+//        //SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
+//      end;
+
+//    if (LForm.HandleAllocated) and (LForm.Parent=nil) then
+//      if IsWindowVisible(LForm.Handle) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LForm.ClassName)>=0)  then
 //        PostMessage(LForm.Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
 //      else
+//      if Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[i].ClassName)>=0) then
 //        SendMessage(LForm.Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
+
+    if (LForm.HandleAllocated) and (LForm.Parent=nil) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LForm.ClassName)>=0) then
+        SetWindowPos(LForm.Handle, 0, 0, 0, 0, 0, SWP_FRAMECHANGED or SWP_NOMOVE or SWP_NOZORDER or SWP_NOSIZE or SWP_NOACTIVATE);
   end;
 
   if Invalidate then

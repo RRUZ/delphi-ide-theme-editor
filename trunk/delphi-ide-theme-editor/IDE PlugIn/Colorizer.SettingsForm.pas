@@ -103,16 +103,13 @@ type
     Button5: TButton;
     Button6: TButton;
     TabSheetAbout: TTabSheet;
-    MemoAbout: TMemo;
+    MemoThirdParty: TMemo;
     ButtonReportIssues: TButton;
     ButtonProjectPage: TButton;
     ButtonCheckUpdates: TButton;
     ButtonDeleteTheme: TButton;
     CheckBoxHookSystemColors: TCheckBox;
-    PageControl1: TPageControl;
     TabSheet1: TTabSheet;
-    Panel2: TPanel;
-    TabSheet2: TTabSheet;
     RbtnToolBarGradientVert: TRadioButton;
     RbtnToolBarGradientHorz: TRadioButton;
     Label4: TLabel;
@@ -178,8 +175,21 @@ type
     CheckBoxVCLStylesForms: TCheckBox;
     CheckBoxVCLStylesMenusColors: TCheckBox;
     CheckBoxVCLStylesScrollBars: TCheckBox;
-    CheckBox4: TCheckBox;
+    CheckBoxVCLStylesControls: TCheckBox;
     Bevel2: TBevel;
+    LabelVersion: TLabel;
+    LabelVersion2: TLabel;
+    LabelVersion3: TLabel;
+    LinkLabel1: TLinkLabel;
+    Image1: TImage;
+    Image3: TImage;
+    Label29: TLabel;
+    Image4: TImage;
+    Image5: TImage;
+    PageControl2: TPageControl;
+    TabSheet5: TTabSheet;
+    Panel3: TPanel;
+    Image6: TImage;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -229,6 +239,8 @@ type
     procedure Button20Click(Sender: TObject);
     procedure Button22Click(Sender: TObject);
     procedure Button23Click(Sender: TObject);
+    procedure Image3Click(Sender: TObject);
+    procedure Image1Click(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -333,7 +345,16 @@ begin
   OrgVclStyleForms:=FSettings.VCLStylesForms;
 {$ENDIF}
 
-  FShowWarning:=(CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter) or (CheckBoxHookSystemColors.Checked <> FSettings.HookSystemColors);
+  FShowWarning:=(not CheckBoxUseVClStyles.Checked and FSettings.UseVCLStyles) or (not CheckBoxEnabled.Checked and FSettings.UseVCLStyles and FSettings.Enabled);
+
+  sMessage:= Format('Disabling the VCL Styles (or the expert) while the IDE is running will cause which some of the windows will'+sLineBreak+
+  'loose the aero and glass effect on the non client area. You will need restart the IDE in order to get the native aero look and feel back on the IDE'+sLineBreak+
+  'Do you want to continue?', []);
+  if FShowWarning and (MessageDlg(sMessage,  mtWarning, [mbYes, mbNo], 0) <> mrYes) then
+    exit;
+
+
+  FShowWarning:=(not FShowWarning) and (CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter) or (CheckBoxHookSystemColors.Checked <> FSettings.HookSystemColors);
 
   if FShowWarning then
     sMessage:= Format('Do you want apply the changes?'+sLineBreak+
@@ -344,8 +365,8 @@ begin
   if MessageDlg(sMessage,  mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
 
-    if Parent=nil then
-      Close();
+//    if Parent=nil then
+//      Close();
     //AddLog('Close', 'Close');
 
     FSettings.ThemeName := cbThemeName.Text;
@@ -359,6 +380,7 @@ begin
     FSettings.VCLStylesForms:= CheckBoxVCLStylesForms.Checked;
     FSettings.VCLStylesMenusColors:= CheckBoxVCLStylesMenusColors.Checked;
     FSettings.VCLStylesScrollBars := CheckBoxVCLStylesScrollBars.Checked;
+    FSettings.VCLStylesControls   := CheckBoxVCLStylesControls.Checked;
 
     FSettings.ChangeIconsGutter :=CheckBoxGutterIcons.Checked;
 //    FSettings.ColorMapName      :=ColorMapCombo.Text;
@@ -438,12 +460,12 @@ begin
     else
     begin
     {$IFDEF DELPHIXE2_UP}
-     for i := 0 to Screen.FormCount - 1 do
-      if Screen.Forms[i].HandleAllocated then
-        if IsWindowVisible(Screen.Forms[I].Handle) then
-          PostMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
-        else
-          SendMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
+//     for i := 0 to Screen.FormCount - 1 do
+//      if Screen.Forms[i].HandleAllocated then
+//        if IsWindowVisible(Screen.Forms[I].Handle) then
+//          PostMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
+//        else
+//          SendMessage(Screen.Forms[i].Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
     {$ENDIF}
 
       RestoreIDESettings();
@@ -806,6 +828,7 @@ procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
 begin
 {$IFDEF DELPHIXE2_UP}
   LoadVClStylesList;
+
 {$ENDIF}
 end;
 
@@ -860,17 +883,19 @@ var
 begin
   LoadDockIcons;
   sVersion:=uMisc.GetFileVersion(GetModuleLocation);
-  MemoAbout.Text:=Format(SColorizerPluginDescription, [sVersion]);
-  MemoAbout.Lines.Add('');
-  MemoAbout.Lines.Add('Third Party');
-  MemoAbout.Lines.Add('------------');
-  MemoAbout.Lines.Add('VCL Styles Utils');
-  MemoAbout.Lines.Add('https://code.google.com/p/vcl-styles-utils/');
-  MemoAbout.Lines.Add('Delphi Detours Library');
-  MemoAbout.Lines.Add('https://code.google.com/p/delphi-detours-library/');
-  MemoAbout.Lines.Add('JCL Debug');
-  MemoAbout.Lines.Add('http://sourceforge.net/projects/jcl/');
-  MemoAbout.Lines.Add('');
+
+  LabelVersion.Caption :='Delphi IDE Colorizer '+sVersion;
+  LabelVersion2.Caption:='Copyright: 2011-2014 Rodrigo Ruz V. All rights reserved.';
+  LabelVersion3.Caption:='blog http://theroadtodelphi.wordpress.com/';
+  LinkLabel1.Caption   :='<a href="https://code.google.com/p/delphi-ide-theme-editor">site https://code.google.com/p/delphi-ide-theme-editor</a>';
+
+  MemoThirdParty.Lines.Add('VCL Styles Utils');
+  MemoThirdParty.Lines.Add('https://code.google.com/p/vcl-styles-utils/');
+  MemoThirdParty.Lines.Add('Delphi Detours Library');
+  MemoThirdParty.Lines.Add('https://code.google.com/p/delphi-detours-library/');
+  MemoThirdParty.Lines.Add('JCL Debug');
+  MemoThirdParty.Lines.Add('http://sourceforge.net/projects/jcl/');
+  MemoThirdParty.Lines.Add('');
 
 //  ColorMapCombo.Items.AddObject('(Default)', nil);
 //  ColorMapCombo.ItemIndex := 0;
@@ -1012,6 +1037,16 @@ end;
 function TFormIDEColorizerSettings.GetSettingsFolder: String;
 begin
   Result:=ExtractFilePath(GetModuleLocation());
+end;
+
+procedure TFormIDEColorizerSettings.Image1Click(Sender: TObject);
+begin
+  ShellExecute(0, 'open', 'https://twitter.com/RRUZ', '', '', SW_SHOWNORMAL);
+end;
+
+procedure TFormIDEColorizerSettings.Image3Click(Sender: TObject);
+begin
+  ShellExecute(0, 'open', 'https://plus.google.com/112937016948869859802', '', '', SW_SHOWNORMAL);
 end;
 
 procedure TFormIDEColorizerSettings.Init;
@@ -1180,6 +1215,7 @@ begin
   CheckBoxVCLStylesForms.Checked := FSettings.VCLStylesForms;
   CheckBoxVCLStylesMenusColors.Checked := FSettings.VCLStylesMenusColors;
   CheckBoxVCLStylesScrollBars.Checked  := FSettings.VCLStylesScrollBars;
+  CheckBoxVCLStylesControls.Checked    := FSettings.VCLStylesControls;
 {$IFDEF DELPHIXE2_UP}
   LoadVClStylesList;
 {$ENDIF}
