@@ -445,6 +445,7 @@ begin
  Canvas.Font.Color:=OldFontColor;
 end;
 
+//hook used for paint the TPopupListBox control
 procedure Detour_TPropertyInspector_DrawNamePair(Self : TObject;Canvas : TCanvas; Rect : TRect; Flag, Flag2 : Boolean; const Str1, Str2 : String);
 begin
  //AddLog('Detour_TPropertyInspector_DrawNamePair', 'Hooked');

@@ -42,6 +42,7 @@ uses
   Vcl.Styles,
   Vcl.Themes,
   Winapi.UxTheme,
+  Colorizer.VCL.Styles,
 {$ELSE}
   Themes,
   UxTheme,
@@ -798,10 +799,10 @@ end;
 procedure Detour_TButtonControlClass_WndProc(Self : TButtonControlClass;var Message: TMessage);
 var
   LCanvas : TCanvas;
-  Details:  TThemedElementDetails;
   LBrush : TBrush;
   LParentForm : TCustomForm;
   LStyleServices : {$IFDEF DELPHIXE2_UP}  TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
+  Details:  TThemedElementDetails;
   sCaption: string;
   LRect : TRect;
   DC: HDC;
@@ -823,7 +824,10 @@ var
       procedure PaintButton;
       begin
         {$IFDEF DELPHIXE2_UP}
-        LStyleServices:=StyleServices;
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         LStyleServices:= ColorizerStyleServices
+        else
+         LStyleServices:= StyleServices;
         {$ELSE}
         LStyleServices :=ThemeServices
         {$ENDIF};
@@ -859,9 +863,18 @@ var
                   LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
                   LFontColor:=TColorizerLocalSettings.ColorMap.FontColor;
                 end;
-
-                LBuffer.Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-                LBuffer.Canvas.Rectangle(LRect);
+                {$IFDEF DELPHIXE2_UP}
+                if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+                begin
+                  LStyleServices.DrawElement(LBuffer.Canvas.Handle, Details, LRect);
+                  LStyleServices.GetElementColor(Details, ecTextColor, LFontColor);
+                end
+                else
+                {$ENDIF}
+                begin
+                  LBuffer.Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+                  LBuffer.Canvas.Rectangle(LRect);
+                end;
 
                 sCaption:=TCustomButtonClass(Self).Caption;
                 LRect:=TCustomButtonClass(Self).ClientRect;
@@ -949,6 +962,11 @@ procedure Detour_TCustomComboBox_WMPaint(Self: TCustomComboBoxClass;var Message:
 var
    FListHandle : HWND;
    FEditHandle : HWND;
+   {$IFDEF DELPHIXE2_UP}
+   LStyleServices :  TCustomStyleServices;
+   {$ENDIF}
+
+
   function GetButtonRect: TRect;
   begin
     Result := Self.ClientRect;
@@ -981,38 +999,46 @@ var
   procedure PaintBorder(Canvas: TCanvas);
   var
     R, ControlRect, EditRect, ListRect: TRect;
-    //DrawState: TThemedComboBox;
-    //BtnDrawState: TThemedComboBox;
-    //Details: TThemedElementDetails;
+    {$IFDEF DELPHIXE2_UP}
+    BtnDrawState: TThemedComboBox;
+    Details: TThemedElementDetails;
+    DrawState: TThemedComboBox;
+    {$ENDIF}
     Buffer: TBitmap;
   begin
     //if not StyleServices.Available then Exit;
 
-//    if not Self.Enabled then
-//      BtnDrawState := tcDropDownButtonDisabled
-//    else if Self.DroppedDown then
-//      BtnDrawState := tcDropDownButtonPressed
-//    else if Self.FMouseOnButton then
-//      BtnDrawState := tcDropDownButtonHot
-//    else
-//      BtnDrawState := tcDropDownButtonNormal;
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+    begin
+      if not Self.Enabled then
+        BtnDrawState := tcDropDownButtonDisabled
+      else if Self.DroppedDown then
+        BtnDrawState := tcDropDownButtonPressed
+//      else if Self.FMouseOnButton then
+//        BtnDrawState := tcDropDownButtonHot
+      else
+        BtnDrawState := tcDropDownButtonNormal;
+  //
+      if not Self.Enabled then
+        DrawState := tcBorderDisabled
+      else
+      if Self.Focused then
+        DrawState := tcBorderFocused
+//      else if Self.MouseInControl then
+//        DrawState := tcBorderHot
+      else
+        DrawState := tcBorderNormal;
 
-//    if not Self.Enabled then
-//      DrawState := tcBorderDisabled
-//    else
-//    if Self.Focused then
-//      DrawState := tcBorderFocused
-//    else if MouseInControl then
-//      DrawState := tcBorderHot
-//    else
-//      DrawState := tcBorderNormal;
+      Details := StyleServices.GetElementDetails(DrawState);
+    end;
+    {$ENDIF}
 
     Buffer := TBitMap.Create;
     Buffer.SetSize(Self.Width, Self.Height);
     try
       R := Rect(0, 0, Buffer.Width, Buffer.Height);
       // draw border + client in buffer
-      //Details := StyleServices.GetElementDetails(DrawState);
 
       if (Self.Style = csSimple) and (FListHandle <> 0) then
       begin
@@ -1020,9 +1046,16 @@ var
         GetWindowRect(Self.Handle, ControlRect);
         R.Bottom := ListRect.Top - ControlRect.Top;
 
-        Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-        Buffer.Canvas.Brush.Style:=bsClear;
-        Buffer.Canvas.Rectangle(R);
+        {$IFDEF DELPHIXE2_UP}
+//        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+//         LStyleServices.DrawElement(Buffer.Canvas.Handle, Details, R)
+//        else
+        {$ENDIF}
+        begin
+          Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+          Buffer.Canvas.Brush.Style:=bsClear;
+          Buffer.Canvas.Rectangle(R);
+        end;
 
         R := Rect(0, Self.Height - (ControlRect.Bottom - ListRect.Bottom), Self.Width, Self.Height);
         with Buffer.Canvas do
@@ -1036,23 +1069,40 @@ var
       end
       else
       begin
-        Buffer.Canvas.Brush.Style:=bsSolid;
-        Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-        Buffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
-        Buffer.Canvas.Rectangle(R);
+        {$IFDEF DELPHIXE2_UP}
+//        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+//         LStyleServices.DrawElement(Buffer.Canvas.Handle, Details, R)
+//        else
+        {$ENDIF}
+        begin
+          Buffer.Canvas.Brush.Style:=bsSolid;
+          Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+          Buffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+          Buffer.Canvas.Rectangle(R);
+        end;
       end;
 
       // draw button in buffer
       if Self.Style <> csSimple then
       begin
         R:=GetButtonRect;
-        Buffer.Canvas.Brush.Style:=bsSolid;
-        Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-        Buffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-        Buffer.Canvas.Rectangle(R);
+        {$IFDEF DELPHIXE2_UP}
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+        begin
+          Details := LStyleServices.GetElementDetails(BtnDrawState);
+          LStyleServices.DrawElement(Buffer.Canvas.Handle, Details, R);
+        end
+        else
+        {$ENDIF}
+        begin
+          Buffer.Canvas.Brush.Style:=bsSolid;
+          Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+          Buffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+          Buffer.Canvas.Rectangle(R);
 
-        Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-        DrawArrow(Buffer.Canvas,TScrollDirection.sdDown, Point( R.Left + ((R.Right - R.Left) Div 2)-4 , R.Top + ((R.Bottom - R.Top) Div 2) - 2) ,4);
+          Buffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+          DrawArrow(Buffer.Canvas,TScrollDirection.sdDown, Point( R.Left + ((R.Right - R.Left) Div 2)-4 , R.Top + ((R.Bottom - R.Top) Div 2) - 2) ,4);
+        end;
       end;
 
       if (SendMessage(Self.Handle, CB_GETCURSEL, 0, 0) >= 0) and (FEditHandle = 0) then
@@ -1095,6 +1145,13 @@ begin
       Trampoline_CustomComboBox_WMPaint(Self, Message);
       exit;
     end;
+
+  {$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+   LStyleServices:= ColorizerStyleServices
+  else
+   LStyleServices:= StyleServices;
+  {$ENDIF}
 
     FillChar(LComboBoxInfo, Sizeof(LComboBoxInfo), 0);
     GetComboBoxInfo(Self.Handle, LComboBoxInfo);
@@ -1597,24 +1654,53 @@ const
     procedure DrawPlusMinus;
     var
       Width, Height: Integer;
+      {$IFDEF DELPHIXE2_UP}
+      LStyleServices : TCustomStyleServices;
+      LDetails       : TThemedElementDetails;
+      LBuffer        : TBitmap;
+      LRect          : TRect;
+      {$ENDIF}
     begin
       Width := 9;
       Height := Width;
       Inc(X, 2);
       Inc(Y, 2);
 
-      Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
-      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-      Canvas.Rectangle(X, Y, X + Width, Y + Height);
-      Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
-
-      Canvas.MoveTo(X + 2, Y + Width div 2);
-      Canvas.LineTo(X + Width - 2, Y + Width div 2);
-
-      if Collapsed then
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
       begin
-        Canvas.MoveTo(X + Width div 2, Y + 2);
-        Canvas.LineTo(X + Width div 2, Y + Width - 2);
+       LStyleServices:= ColorizerStyleServices;
+       if not Collapsed then
+        LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphOpened)
+       else
+        LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphClosed);
+
+         LBuffer:=TBitmap.Create;
+         try
+           LBuffer.SetSize(Width, Height);
+           LRect := Rect(0, 0, Width, Height);
+           LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+           BitBlt(Canvas.Handle, X, Y, Width, Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+         finally
+           LBuffer.Free;
+         end;
+      end
+      else
+      {$ENDIF}
+      begin
+        Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
+        Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+        Canvas.Rectangle(X, Y, X + Width, Y + Height);
+        Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
+
+        Canvas.MoveTo(X + 2, Y + Width div 2);
+        Canvas.LineTo(X + Width - 2, Y + Width div 2);
+
+        if Collapsed then
+        begin
+          Canvas.MoveTo(X + Width div 2, Y + 2);
+          Canvas.LineTo(X + Width div 2, Y + Width - 2);
+        end;
       end;
     end;
 
@@ -1870,7 +1956,6 @@ begin
   end;
 end;
 
-
 type
   TCustomImageListClass = class(TCustomImageList);
 
@@ -2048,6 +2133,10 @@ var
   LCanvas : TCanvas;
   SaveIndex: Integer;
   LColor1, LColor2  : TColor;
+  {$IFDEF DELPHIXE2_UP}
+  LStyleServices :  TCustomStyleServices;
+  LDetails : TThemedElementDetails;
+  {$ENDIF}
 begin
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
    begin
@@ -2058,27 +2147,36 @@ begin
        LCanvas:=TCanvas.Create;
        try
          LCanvas.Handle:=DC;
-
-         if TColorizerLocalSettings.Settings.HeaderCustom  then
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
          begin
-           LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
-           LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+           LStyleServices:= ColorizerStyleServices;
+           LDetails := LStyleServices.GetElementDetails(thHeaderItemNormal);
+           LStyleServices.DrawElement(LCanvas.Handle, LDetails, R, ClipRect);
          end
          else
+         {$ENDIF}
          begin
-           LColor1:= TColorizerLocalSettings.ColorMap.Color;
-           LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
-         end;
+           if TColorizerLocalSettings.Settings.HeaderCustom  then
+           begin
+             LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
+             LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+           end
+           else
+           begin
+             LColor1:= TColorizerLocalSettings.ColorMap.Color;
+             LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+           end;
 
-         GradientFillCanvas(LCanvas, LColor1, LColor2, R, gdVertical);
-         LCanvas.Brush.Style:=TBrushStyle.bsClear;
+           GradientFillCanvas(LCanvas, LColor1, LColor2, R, gdVertical);
+           LCanvas.Brush.Style:=TBrushStyle.bsClear;
 
-          if TColorizerLocalSettings.Settings.HeaderCustom  then
+           if TColorizerLocalSettings.Settings.HeaderCustom  then
             LCanvas.Pen.Color:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
-          else
-           LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-
-          LCanvas.Rectangle(R);
+           else
+            LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+           LCanvas.Rectangle(R);
+         end;
        finally
           LCanvas.Handle:=0;
           LCanvas.Free;
@@ -2339,7 +2437,6 @@ begin
      exit;
     end;
 
-
     LParentForm:= GetParentForm(Self);
     if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
     begin
@@ -2347,9 +2444,7 @@ begin
       exit;
     end;
 
-
     Self.DoUpdatePanels(False, True);
-
     DC := HDC(Message.DC);
     LCanvas := TCanvas.Create;
     try
@@ -2380,10 +2475,7 @@ begin
       LCanvas.Handle := 0;
       LCanvas.Free;
     end;
-
 end;
-
-
 
 //Hook for the TCustomListView component
 procedure Detour_TCustomListView_WndProc(Self:TCustomListView;var Message: TMessage);
@@ -2409,11 +2501,14 @@ var
     var
       Item: THDItem;
       ImageList: HIMAGELIST;
-      DrawState: TThemedHeader;
       IconWidth, IconHeight: Integer;
       LDetails: TThemedElementDetails;
       LBuffer : TBitmap;
       LColor1, LColor2 : TColor;
+      {$IFDEF DELPHIXE2_UP}
+      DrawState: TThemedHeader;
+      LStyleServices :  TCustomStyleServices;
+      {$ENDIF}
     begin
       FillChar(Item, SizeOf(Item), 0);
       Item.Mask := HDI_FORMAT;
@@ -2427,25 +2522,47 @@ var
        LBuffer.SetSize(R.Right-R.Left, R.Bottom-R.Top);
        {$ENDIF}
 
-       if TColorizerLocalSettings.Settings.HeaderCustom  then
-        LBuffer.Canvas.Pen.Color:=TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
-       else
-        LBuffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
 
-       LBuffer.Canvas.Rectangle(Rect(0, 0, R.Right, R.Bottom));
 
-         if TColorizerLocalSettings.Settings.HeaderCustom  then
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
          begin
-           LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
-           LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+          if IsBackground then
+            DrawState := thHeaderItemNormal
+          else
+          if IsPressed then
+            DrawState := thHeaderItemPressed
+          else
+            DrawState := thHeaderItemNormal;
+
+           LStyleServices:= ColorizerStyleServices;
+           LDetails := LStyleServices.GetElementDetails(DrawState);
+           LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, Rect(0, 0, R.Right, R.Bottom));
          end
          else
+         {$ENDIF}
          begin
-           LColor1:= TColorizerLocalSettings.ColorMap.Color;
-           LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+           if TColorizerLocalSettings.Settings.HeaderCustom  then
+            LBuffer.Canvas.Pen.Color:=TryStrToColor(TColorizerLocalSettings.Settings.HeaderBorderColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)
+           else
+            LBuffer.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+
+           LBuffer.Canvas.Rectangle(Rect(0, 0, R.Right, R.Bottom));
+
+             if TColorizerLocalSettings.Settings.HeaderCustom  then
+             begin
+               LColor1:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderStartGrad, TColorizerLocalSettings.ColorMap.Color);
+               LColor2:= TryStrToColor(TColorizerLocalSettings.Settings.HeaderEndGrad, TColorizerLocalSettings.ColorMap.MenuColor);
+             end
+             else
+             begin
+               LColor1:= TColorizerLocalSettings.ColorMap.Color;
+               LColor2:= TColorizerLocalSettings.ColorMap.MenuColor;
+             end;
+
+           GradientFillCanvas(LBuffer.Canvas, LColor1, LColor2, Rect(1, 1, R.Right-1, R.Bottom-1), gdVertical);
          end;
 
-       GradientFillCanvas(LBuffer.Canvas, LColor1, LColor2, Rect(1, 1, R.Right-1, R.Bottom-1), gdVertical);
        Canvas.Draw(R.Left, R.Top, LBuffer);
       finally
        LBuffer.Free;
@@ -2462,15 +2579,6 @@ var
         Inc(R.Left, IconWidth + 5);
       end;
 
-      if IsBackground then
-        DrawState := thHeaderItemNormal
-      else
-      if IsPressed then
-        DrawState := thHeaderItemPressed
-      else
-        DrawState := thHeaderItemNormal;
-
-      LDetails := LStyleServices.GetElementDetails(DrawState);
       DrawControlText(Canvas, LDetails, Text, R, DT_VCENTER or DT_LEFT or  DT_SINGLELINE or DT_END_ELLIPSIS);
     end;
 

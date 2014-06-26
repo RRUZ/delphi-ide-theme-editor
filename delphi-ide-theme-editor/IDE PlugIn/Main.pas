@@ -27,12 +27,11 @@
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
   frame in buttons of TIDECategoryButtons   depending oh theme colors7
-
-  VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
 }
 
 // DONE
 {
+  * VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
   * VCL Styles - some issues in scrollbars with some vcl styles (ex : Tablet Dark)
   * VCL Styles - some issues in overlaped floating windows
   * Add support for TPopupListBox
@@ -410,7 +409,11 @@ begin
               //GenerateColorMap(TColorizerLocalSettings.ColorMap,TStyleManager.ActiveStyle);
             end
             else
-              MessageDlg(Format('The VCL Style %s was not found',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);
+            begin
+              MessageDlg(Format('The VCL Style %s was not found. The VCL Styles will be disabled',[TColorizerLocalSettings.Settings.VCLStyleName]), mtInformation, [mbOK], 0);
+              TColorizerLocalSettings.Settings.UseVCLStyles:=False;
+              WriteSettings(TColorizerLocalSettings.Settings, ExtractFilePath(GetModuleLocation()));
+            end;
           end;
           {$ENDIF}
           if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
