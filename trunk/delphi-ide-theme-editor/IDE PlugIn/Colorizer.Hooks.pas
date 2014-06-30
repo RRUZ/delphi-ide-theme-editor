@@ -1007,6 +1007,9 @@ var
     Buffer: TBitmap;
   begin
     //if not StyleServices.Available then Exit;
+    {$IFDEF DELPHIXE2_UP}
+    BtnDrawState := tcDropDownButtonNormal;
+    {$ENDIF}
 
     {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then

@@ -337,7 +337,6 @@ procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
    {$IFDEF DELPHIXE2_UP}OrgVclStyleName, {$ENDIF}s, ImagesPath, sMessage : string;
    {$IFDEF DELPHIXE2_UP}OrgVclStyleForms, OrgVclStyle, {$ENDIF}FShowWarning : Boolean;
-   {$IFDEF DELPHIXE2_UP}i :integer;{$ENDIF}
 begin
 {$IFDEF DELPHIXE2_UP}
   OrgVclStyleName :=FSettings.VCLStyleName;
