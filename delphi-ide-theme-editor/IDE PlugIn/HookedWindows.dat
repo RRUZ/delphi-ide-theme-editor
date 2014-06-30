@@ -40,3 +40,4 @@ TExpanderForm
 TSearchProgressDlg
 TExpandableEvalView
 TProgressForm
+TDebugInspector

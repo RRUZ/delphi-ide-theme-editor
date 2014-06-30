@@ -1403,7 +1403,7 @@ initialization
   RegisterColorizerWrapper('TGroupBox',  TWrapperGroupComponents);
   RegisterColorizerWrapper('TRadioGroup',  TWrapperGroupComponents);
   RegisterColorizerWrapper('TPropRadioGroup',  TWrapperGroupComponents);
-
+  //TXTabControl  TTabControlStyleHook
   RegisterColorizerWrapper('TLabel',  TWrapperFontComponents);
   RegisterColorizerWrapper('TCheckBox',  TWrapperFontComponents);
   RegisterColorizerWrapper('TListButton',  TWrapperListButton);

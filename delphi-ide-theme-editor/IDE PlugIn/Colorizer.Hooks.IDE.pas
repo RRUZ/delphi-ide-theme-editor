@@ -55,6 +55,11 @@ Procedure RemoveHooksIDE;
 implementation
 
 uses
+  {$IFDEF DELPHIXE2_UP}
+  Colorizer.Vcl.Styles,
+  Vcl.Styles,
+  Vcl.Themes,
+  {$ENDIF}
   Colorizer.VirtualTrees,
   Colorizer.Wrappers,
   Colorizer.Utils,
@@ -150,6 +155,11 @@ var
   ListButton : TRttiListButton;
   LRect      : TRect;
   LParentForm : TCustomForm;
+  {$IFDEF DELPHIXE2_UP}
+  LStyleServices: TCustomStyleServices;
+  LDetails: TThemedElementDetails;
+  LBuffer : TBitmap;
+  {$ENDIF}
 begin
   if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
   begin
@@ -172,9 +182,32 @@ begin
   if Self.Width>16 then ArrowSize := 4;
   LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
 
-  Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-  Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-  Self.Canvas.Rectangle(Self.ClientRect);
+  {$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+  begin
+    LRect := Self.ClientRect;
+    LStyleServices:= ColorizerStyleServices;
+    //LDetails := LStyleServices.GetElementDetails(tbPushButtonNormal);
+    LDetails := LStyleServices.GetElementDetails(tcDropDownButtonNormal);
+    //LStyleServices.DrawElement(Self.Canvas.Handle, LDetails, Self.ClientRect);
+     LBuffer:=TBitmap.Create;
+     try
+       LRect := Rect(0, 0, LRect.Width, LRect.Height);
+       LBuffer.SetSize(LRect.Width, LRect.Height);
+       LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+       BitBlt(Self.Canvas.Handle, Self.ClientRect.Left, Self.ClientRect.Top, Self.ClientRect.Width, Self.ClientRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+     finally
+       LBuffer.Free;
+     end;
+
+  end
+  else
+  {$ENDIF}
+  begin
+    Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+    Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+    Self.Canvas.Rectangle(Self.ClientRect);
+  end;
 
   ListButton.LoadValues();
 //    AddLog('Detour_TListButton_Paint', Format('Self %p', [@Self]));
@@ -192,21 +225,28 @@ begin
 //    if  ListButton.Items<>nil then
 //    AddLog('Detour_TListButton_Paint', 'Items ' + ListButton.Items.Text);
 
-  if (ListButton.Items.Count>0) or (ListButton.PopupPanel<>nil) then
-  begin
-    Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-    Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-    DrawArrow(Self.Canvas, TScrollDirection.sdDown, LPoint, ArrowSize);
-  end
+  {$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+
   else
+  {$ENDIF}
   begin
-    LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
-    for i := 0 to 2 do
+    if (ListButton.Items.Count>0) or (ListButton.PopupPanel<>nil) then
     begin
-     LRect := Rect(LPoint.X, LPoint.Y, LPoint.X+2, LPoint.Y+2);
-     Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-     Self.Canvas.FillRect(LRect);
-     LPoint.X:=LPoint.X+3;
+      Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+      Self.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+      DrawArrow(Self.Canvas, TScrollDirection.sdDown, LPoint, ArrowSize);
+    end
+    else
+    begin
+      LPoint    := Point(Self.ClientRect.Left+4, Self.ClientRect.Top+6);
+      for i := 0 to 2 do
+      begin
+       LRect := Rect(LPoint.X, LPoint.Y, LPoint.X+2, LPoint.Y+2);
+       Self.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+       Self.Canvas.FillRect(LRect);
+       LPoint.X:=LPoint.X+3;
+      end;
     end;
   end;
 end;

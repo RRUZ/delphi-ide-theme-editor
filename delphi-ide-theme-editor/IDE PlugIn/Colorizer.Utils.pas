@@ -381,6 +381,10 @@ begin
       Font.Color:=AColorMap.FontColor;
     end;
 
+    //if SameText('TXTabControl', AComponent.ClassName) then
+     //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
+
+
     RunWrapper(AComponent, AColorMap, Invalidate, Restore);
 
     //process components
