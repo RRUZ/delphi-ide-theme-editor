@@ -49,6 +49,7 @@ uses
   Colorizer.uxThemeHelper,
 {$ENDIF}
   Messages,
+  TypInfo,
   Forms,
   ExtCtrls,
   Dialogs,
@@ -866,6 +867,8 @@ var
                 {$IFDEF DELPHIXE2_UP}
                 if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
                 begin
+                  LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+                  LBuffer.Canvas.FillRect(LRect);
                   LStyleServices.DrawElement(LBuffer.Canvas.Handle, Details, LRect);
                   LStyleServices.GetElementColor(Details, ecTextColor, LFontColor);
                 end
@@ -1660,8 +1663,8 @@ const
       {$IFDEF DELPHIXE2_UP}
       LStyleServices : TCustomStyleServices;
       LDetails       : TThemedElementDetails;
-      LBuffer        : TBitmap;
-      LRect          : TRect;
+      //LBuffer        : TBitmap;
+      //LRect          : TRect;
       {$ENDIF}
     begin
       Width := 9;
@@ -1677,16 +1680,16 @@ const
         LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphOpened)
        else
         LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphClosed);
-
-         LBuffer:=TBitmap.Create;
-         try
-           LBuffer.SetSize(Width, Height);
-           LRect := Rect(0, 0, Width, Height);
-           LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
-           BitBlt(Canvas.Handle, X, Y, Width, Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
-         finally
-           LBuffer.Free;
-         end;
+        LStyleServices.DrawElement(Canvas.Handle, LDetails, Rect(X, Y, X+Width, Y+Height));
+//         LBuffer:=TBitmap.Create;
+//         try
+//           LBuffer.SetSize(Width, Height);
+//           LRect := Rect(0, 0, Width, Height);
+//           LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+//           BitBlt(Canvas.Handle, X, Y, Width, Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+//         finally
+//           LBuffer.Free;
+//         end;
       end
       else
       {$ENDIF}
@@ -2484,18 +2487,31 @@ end;
 procedure Detour_TCustomListView_WndProc(Self:TCustomListView;var Message: TMessage);
 var
   LStyleServices : {$IFDEF DELPHIXE2_UP} TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
+  LDetails: TThemedElementDetails;
 
       procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
         const S: string; var R: TRect; Flags: Cardinal);
       var
         TextFormat: TTextFormatFlags;
+        {$IFDEF DELPHIXE2_UP}
+        ThemeTextColor : TColor;
+        {$ENDIF}
       begin
         Canvas.Font := TWinControlClass(Self).Font;
-        TextFormat := TTextFormatFlags(Flags);
+        TextFormat  := TTextFormatFlags(Flags);
+        {$IFDEF DELPHIXE2_UP}
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+        begin
+          ColorizerStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
+          Canvas.Font.Color := ThemeTextColor;
+        end
+        else
+        {$ENDIF}
         if TColorizerLocalSettings.Settings.HeaderCustom  then
           Canvas.Font.Color := TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, TColorizerLocalSettings.ColorMap.FontColor)
         else
           Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+
         LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
       end;
 
@@ -2505,7 +2521,6 @@ var
       Item: THDItem;
       ImageList: HIMAGELIST;
       IconWidth, IconHeight: Integer;
-      LDetails: TThemedElementDetails;
       LBuffer : TBitmap;
       LColor1, LColor2 : TColor;
       {$IFDEF DELPHIXE2_UP}
@@ -2524,8 +2539,6 @@ var
        {$ELSE}
        LBuffer.SetSize(R.Right-R.Left, R.Bottom-R.Top);
        {$ENDIF}
-
-
 
          {$IFDEF DELPHIXE2_UP}
          if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then

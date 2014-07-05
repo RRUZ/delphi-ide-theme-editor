@@ -129,6 +129,7 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Styles.Ext,
+  Colorizer.Vcl.Styles,
   {$ENDIF}
   {$IFDEF DELPHI2009_UP}
   PngImage,
@@ -347,6 +348,11 @@ end;
 
 { TWrapperVirtualStringTree }
 procedure TWrapperVirtualStringTree.SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap);
+{$IFDEF DELPHIXE2_UP}
+var
+ ThemeTextColor : TColor;
+ LDetails       : TThemedElementDetails;
+{$ENDIF}
 begin
   inherited;
   //TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
@@ -356,6 +362,16 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'BorderStyle', TValue.From(TFormBorderStyle.bsNone));
   TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);  //ok
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor); //ok
+
+{$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls  then
+  begin
+    LDetails := ColorizerStyleServices.GetElementDetails(thHeaderItemNormal);
+    ColorizerStyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', ThemeTextColor);
+  end
+  else
+{$ENDIF}
   if TColorizerLocalSettings.Settings.HeaderCustom and not Restore then
     TRttiUtils.SetRttiPropertyValue(AComponent,'Header.Font.Color', TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, AColorMap.FontColor)) //ok
   else

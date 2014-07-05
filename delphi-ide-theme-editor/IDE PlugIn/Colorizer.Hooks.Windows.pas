@@ -164,6 +164,8 @@ begin
            else
             LDetails := LStyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
 
+          LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+          LCanvas.FillRect(Rect^);
           LStyleServices.DrawElement(LCanvas.Handle, LDetails, Rect^);
          end
          else
@@ -234,7 +236,7 @@ begin
     end;
    end;
 
-  if not RestoreColor  and (LFontColor<>OrgColor) and (OrgColor = GetSysColor(COLOR_WINDOWTEXT)) then
+  if not RestoreColor and (LFontColor<>OrgColor) and (OrgColor = GetSysColor(COLOR_WINDOWTEXT)) then
   begin
    if sCaller<>'' then
      sCaller := ProcByLevel(2);
@@ -278,7 +280,6 @@ begin
  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
  begin
   OrgColor:= GetTextColor(DC);
-
    if (TColor(OrgColor) = clWhite) or (TColor(OrgColor) = clBlack)  then
    begin
      sCaller := ProcByLevel(4);
@@ -298,10 +299,8 @@ begin
         SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
      end;
    end;
-
  end;
 {$ENDIF}
-
  //SetTextColor(DC, ColorToRGB(clRed));
  Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
 {$IFDEF DELPHIXE6_UP}
