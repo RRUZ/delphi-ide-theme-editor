@@ -873,7 +873,7 @@ begin
   else
   if THThemesClasses.TreeView.ContainsKey(THEME) then
   begin
-
+           //deshabilitar en treeeview
     if (iPartId = TVP_GLYPH) and (iStateId=GLPS_OPENED) and ((pRect.Right-pRect.Left)=9) then
     begin
       sCaller  := ProcByLevel(4);
@@ -900,16 +900,21 @@ begin
       if ApplyHook then
       begin
          {$IFDEF DELPHIXE2_UP}
-         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         if (sCaller<>'') and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
          begin
            LStyleServices:= ColorizerStyleServices;
            LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphOpened);
            LBuffer:=TBitmap.Create;
            try
-             LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-             LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             //LStyleServices.GetElementSize(LBuffer.Canvas.Handle, LDetails, esActual, LSize);
+             //AddLog('tcbCategoryGlyphOpened', 'LSize.Width '+IntToStr(LSize.Width)+' LSize.Height '+IntToStr(LSize.Height));
+             LSize.cx:=10;
+             LSize.cy:=10;
+             //LRect := Rect(0, 0, pRect.Width, pRect.Height);
+             LRect := Rect(0, 0, LSize.Width, LSize.Height);
+             LBuffer.SetSize(LRect.Width, LRect.Height);
              LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
-             BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+             BitBlt(dc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
            finally
              LBuffer.Free;
            end;
@@ -962,16 +967,21 @@ begin
       if ApplyHook then
       begin
          {$IFDEF DELPHIXE2_UP}
-         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         if (sCaller<>'') and  TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
          begin
            LStyleServices:= ColorizerStyleServices;
            LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphClosed);
            LBuffer:=TBitmap.Create;
            try
-             LBuffer.SetSize((pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
-             LRect := Rect(0, 0, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top));
+             //LStyleServices.GetElementSize(LBuffer.Canvas.Handle, LDetails, esActual, LSize);
+             //AddLog('tcbCategoryGlyphClosed', 'LSize.Width '+IntToStr(LSize.Width)+' LSize.Height '+IntToStr(LSize.Height));
+             LSize.cx:=10;
+             LSize.cy:=10;
+             //LRect := Rect(0, 0, pRect.Width, pRect.Height);
+             LRect := Rect(0, 0, LSize.Width, LSize.Height);
+             LBuffer.SetSize(LRect.Width, LRect.Height);
              LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
-             BitBlt(dc, pRect.Left, pRect.Top, (pRect.Right-pRect.Left), (pRect.Bottom-pRect.Top), LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+             BitBlt(dc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
            finally
              LBuffer.Free;
            end;
@@ -1077,6 +1087,8 @@ begin
                try
                  LBuffer.SetSize(LSize.cx, LSize.cy);
                  LRect := Rect(0, 0, LSize.cx, LSize.cy);
+                 LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+                 LBuffer.Canvas.FillRect(LRect);
                  LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
                  RectCenter(LRect, pRect);
                  BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);

@@ -26,11 +26,13 @@
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
-  frame in buttons of TIDECategoryButtons   depending oh theme colors7
+  frame in buttons of TIDECategoryButtons   depending oh theme colors
+
 }
 
 // DONE
 {
+  * Fix background for vcl styles controls (button, checkbox)
   * VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
   * VCL Styles - some issues in scrollbars with some vcl styles (ex : Tablet Dark)
   * VCL Styles - some issues in overlaped floating windows
@@ -85,26 +87,6 @@
   * tidegradeint buttons , not paint correctly  done:)
   * border of panel in options window is not painted corectly done
 }
-
-//options
-{
-
-  * Fix icons gray
-  * hook main menu
-  * Hook ide code editor
-  * hook all ide windows
-
-  * Looad feel select (standard, XP)
-  * choose the colors automatic way
-  * activate glass colorization vista and windows 7?
-
-    background color for windows (tlistview and treeview)
-    skin by contorls (by xml) ->>then use ClassName ;)
-     * treeview
-     * TListBox
-     * TlistView
-}
-
 
 unit Main;
 

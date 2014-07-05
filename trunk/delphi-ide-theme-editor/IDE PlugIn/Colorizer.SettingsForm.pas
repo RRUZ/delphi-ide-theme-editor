@@ -195,7 +195,6 @@ type
       Change: TItemChange);
     procedure FormDestroy(Sender: TObject);
     procedure BtnSelForColorClick(Sender: TObject);
-    procedure BtnCancelClick(Sender: TObject);
     procedure CbClrElementChange(Sender: TObject);
     procedure ButtonSaveThemeClick(Sender: TObject);
     procedure cbThemeNameChange(Sender: TObject);
@@ -335,22 +334,26 @@ end;
 
 procedure TFormIDEColorizerSettings.BtnApplyClick(Sender: TObject);
 var
-   {$IFDEF DELPHIXE2_UP}OrgVclStyleName, {$ENDIF}s, ImagesPath, sMessage : string;
-   {$IFDEF DELPHIXE2_UP}OrgVclStyleForms, OrgVclStyle, {$ENDIF}FShowWarning : Boolean;
+  {$IFDEF DELPHIXE2_UP}OrgVclStyleName, {$ENDIF}s, ImagesPath, sMessage : string;
+  {$IFDEF DELPHIXE2_UP}OrgVclStyleForms, OrgVclStyle, {$ENDIF}FShowWarning : Boolean;
 begin
 {$IFDEF DELPHIXE2_UP}
   OrgVclStyleName :=FSettings.VCLStyleName;
   OrgVclStyle     :=FSettings.UseVCLStyles;
   OrgVclStyleForms:=FSettings.VCLStylesForms;
-{$ENDIF}
 
-  FShowWarning:=(not CheckBoxUseVClStyles.Checked and FSettings.UseVCLStyles) or (not CheckBoxEnabled.Checked and FSettings.UseVCLStyles and FSettings.Enabled);
+  FShowWarning:=(not CheckBoxUseVClStyles.Checked and FSettings.UseVCLStyles)
+  or (not CheckBoxEnabled.Checked and FSettings.UseVCLStyles and FSettings.Enabled)
+  or (CheckBoxUseVClStyles.Checked and FSettings.VCLStylesForms and not CheckBoxVCLStylesForms.Checked);
 
-  sMessage:= Format('Disabling the VCL Styles (or the expert) while the IDE is running will cause which some of the windows will'+sLineBreak+
-  'loose the aero and glass effect on the non client area. You will need restart the IDE in order to get the native aero look and feel back on the IDE'+sLineBreak+
-  'Do you want to continue?', []);
+  sMessage:= Format('Disabling the VCL Styles (or the expert) while the RAD Studio IDE is running may cause which some of the windows will'+sLineBreak+
+  'loose the aero and glass effect on the non client area. You will need restart the IDE in order to get the native aero look and feel back on the IDE'+sLineBreak+sLineBreak+
+  'Do you want to continue ?', []);
   if FShowWarning and (MessageDlg(sMessage,  mtWarning, [mbYes, mbNo], 0) <> mrYes) then
     exit;
+{$ELSE}
+  FShowWarning:=False;
+{$ENDIF}
 
 
   FShowWarning:=(not FShowWarning) and (CheckBoxEnabled.Checked <> FSettings.Enabled) or (CheckBoxGutterIcons.Checked <> FSettings.ChangeIconsGutter) or (CheckBoxHookSystemColors.Checked <> FSettings.HookSystemColors);
@@ -471,27 +474,6 @@ begin
     end;
   end;
 end;
-
-procedure TFormIDEColorizerSettings.BtnCancelClick(Sender: TObject);
-begin
-end;
-
-//procedure TFormIDEColorizerSettings.BtnInstallClick(Sender: TObject);
-//begin
-//  if IsAppRunning(IDEData.Path) then
-//    MsgBox(Format('Before to continue you must close all running instances of the %s IDE',
-//      [IDEData.Name]))
-//  else
-//  if MessageDlg(Format('Do you want install the plugin (expert) in the %s IDE?', [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-//  begin
-//    if InstallExpert(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+DelphiIDEThemePaths[IDEData.Version]+'\'+DelphiIDEExpertsNames[IDEData.Version]+'.bpl','Delphi IDE Colorizer', IDEData.Version) then
-//    begin
-//     MsgBox('PlugIn Installed');
-//     BtnInstall.Enabled:=False;
-//     BtnUnInstall.Enabled:=True;
-//    end;
-//  end;
-//end;
 
 procedure TFormIDEColorizerSettings.Button10Click(Sender: TObject);
 Var

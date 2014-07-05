@@ -1904,6 +1904,8 @@ Source: Styles\TurquoiseGray.vsf; DestDir: {app}\Styles\
 Source: Styles\YellowGraphite.vsf; DestDir: {app}\Styles\
 Source: Updater.exe; DestDir: {app}
 Source: DownloadInfo.xml; DestDir: {app}
+Source: Updater\libeay32.dll; DestDir: {app}
+Source: Updater\ssleay32.dll; DestDir: {app}
 
 [Setup]
 UsePreviousLanguage=no
