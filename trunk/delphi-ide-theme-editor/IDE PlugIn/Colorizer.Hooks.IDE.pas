@@ -670,7 +670,7 @@ begin
       if not TColorizerLocalSettings.Settings.DockCustomColors then
       begin
         LColorStart := TColorizerLocalSettings.ColorMap.Color;
-        LColorEnd   := TColorizerLocalSettings.ColorMap.HighlightColor;
+        LColorEnd   := GetHighLightColor(LColorStart);//TColorizerLocalSettings.ColorMap.HighlightColor;
       end
       else
       begin
@@ -683,8 +683,10 @@ begin
     begin
       if not TColorizerLocalSettings.Settings.DockCustomColors then
       begin
-        LColorStart := TColorizerLocalSettings.ColorMap.DisabledColor;
-        LColorEnd   := TColorizerLocalSettings.ColorMap.DisabledColor;//GetHighLightColor(TColorizerLocalSettings.ColorMap.DisabledColor);
+        LColorStart := TColorizerLocalSettings.ColorMap.Color;//TColorizerLocalSettings.ColorMap.DisabledColor;
+        LColorEnd   := GetShadowColor(LColorStart);//TColorizerLocalSettings.ColorMap.DisabledColor;//GetHighLightColor(TColorizerLocalSettings.ColorMap.DisabledColor);
+        if IsHighlightColor(LColorEnd) then
+          LColorEnd:=LColorStart;
       end
       else
       begin
@@ -709,7 +711,7 @@ begin
           try Canvas.Pen.Color:=StringToColor(TColorizerLocalSettings.Settings.DockInActiveBorderColor) except Canvas.Pen.Color:=clBlack end;
      end
      else
-      Canvas.Pen.Color :=  TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(Canvas.Pen.Color, -20);
+      Canvas.Pen.Color :=  TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
 
     if TColorizerLocalSettings.Settings.DockBorderRounded then
       with CaptionRect do

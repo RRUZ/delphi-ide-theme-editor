@@ -133,6 +133,8 @@ var
   Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
 
   Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
+  Trampoline_TCategoryButtons_DrawButton   : procedure(Self :TCategoryButtons;const Button: TButtonItem; Canvas: TCanvas; Rect: TRect; State: TButtonDrawState);
+
   //Trampoline_TBitmap_SetSize : procedure(Self : TBitmap;AWidth, AHeight: Integer) = nil;
   Trampoline_TCustomPanel_Paint            : procedure (Self : TCustomPanelClass) = nil;
   Trampoline_TWinControl_WMNCPaint         : procedure (Self: TWinControlClass; var Message: TWMNCPaint);
@@ -195,6 +197,10 @@ type
     function  FSideBufferSizeHelper : Integer;
     function  FHotButtonHelper: TButtonItem;
     function  FDownButtonHelper: TButtonItem;
+    function  InsertBottomHelper : TBaseItem;
+    function  InsertTopHelper : TBaseItem;
+    function  InsertRightHelper : TBaseItem;
+    function  InsertLeftHelper : TBaseItem;
    end;
 
   TCustomComboBoxBarHelper = class helper for TCustomComboBox
@@ -1629,6 +1635,26 @@ begin
  Result := Self.GetChevronBounds(CategoryBounds);
 end;
 
+function TCategoryButtonsHelper.InsertBottomHelper: TBaseItem;
+begin
+ Result:= Self.FInsertBottom;
+end;
+
+function TCategoryButtonsHelper.InsertLeftHelper: TBaseItem;
+begin
+ Result:= Self.FInsertLeft;
+end;
+
+function TCategoryButtonsHelper.InsertRightHelper: TBaseItem;
+begin
+ Result:= Self.FInsertRight;
+end;
+
+function TCategoryButtonsHelper.InsertTopHelper: TBaseItem;
+begin
+ Result:= Self.FInsertTop;
+end;
+
 function  TCategoryButtonsHelper.FSideBufferSizeHelper : Integer;
 begin
  Result:= Self.FSideBufferSize;
@@ -1647,25 +1673,260 @@ end;
 type
  TCategoryButtonsClass = class(TCategoryButtons);
 
+
+procedure Detour_TCategoryButtons_DrawButton(Self :TCategoryButtonsClass;const Button: TButtonItem; Canvas: TCanvas;
+  Rect: TRect; State: TButtonDrawState);
+var
+  TextLeft, TextTop: Integer;
+  RectHeight: Integer;
+  ImgTop: Integer;
+  TextOffset: Integer;
+  FillColor: TColor;
+  EdgeColor: TColor;
+  InsertIndication: TRect;
+  TextRect: TRect;
+  OrgRect: TRect;
+  Caption: string;
+  {$IFDEF DELPHIXE2_UP}
+  LStyle: TCustomStyleServices;
+  LDetails: TThemedElementDetails;
+  LColor: TColor;
+  TxtColor: TColor;
+  SaveIndex: Integer;
+  {$ENDIF}
+  FontColor: TColor;
+
+  LParentForm : TCustomForm;
+begin
+  LParentForm:=GetParentForm(Self);
+
+  if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled)
+    and Assigned(LParentForm) and  (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0) {SameText(Self.ClassName, 'TIDECategoryButtons') and}
+    and Assigned(TColorizerLocalSettings.ColorMap) then
+  begin
+    if Assigned(Self.OnDrawButton) and (not (csDesigning in Self.ComponentState)) then
+      Self.OnDrawButton(Self, Button, Canvas, Rect, State)
+    else
+    begin
+      {$IFDEF DELPHIXE2_UP}
+      LStyle := ColorizerStyleServices;
+      {$ENDIF}
+      OrgRect := Rect;
+      if Assigned(Self.OnBeforeDrawButton) then
+        Self.OnBeforeDrawButton(Self, Button, Canvas, Rect, State);
+      InflateRect(Rect, -1, -1);
+
+      FontColor := Self.Font.Color;
+
+      if bdsHot in State then
+      begin
+        FillColor := TColorizerLocalSettings.ColorMap.HotColor;//Self.HotButtonColor;
+        if bdsSelected in State then
+          FillColor := TColorizerLocalSettings.ColorMap.HotColor;//GetShadowColor(FillColor, -10);
+        EdgeColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;//GetShadowColor(FillColor);
+        FontColor := TColorizerLocalSettings.ColorMap.HotFontColor;
+       {$IFDEF DELPHIXE2_UP}
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+        begin
+          LDetails := LStyle.GetElementDetails(tcbButtonHot);
+          if LStyle.GetElementColor(LDetails, ecTextColor, LColor) and (LColor <> clNone) then
+            FontColor := LColor;
+          if LStyle.GetElementColor(LDetails, ecBorderColor, LColor) and (LColor <> clNone) then
+            EdgeColor := LColor;
+        end;
+       {$ENDIF}
+      end
+      else
+      if bdsSelected in State then
+      begin
+        FillColor := TColorizerLocalSettings.ColorMap.Color; //Self.SelectedButtonColor;
+        EdgeColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(FillColor);
+        FontColor := TColorizerLocalSettings.ColorMap.FontColor;
+        {$IFDEF DELPHIXE2_UP}
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+        begin
+          LDetails := LStyle.GetElementDetails(tcbButtonSelected);
+          if LStyle.GetElementColor(LDetails, ecTextColor, LColor) and (LColor <> clNone) then
+            FontColor := LColor;
+          if LStyle.GetElementColor(LDetails, ecBorderColor, LColor) and (LColor <> clNone) then
+            EdgeColor := LColor;
+        end;
+        {$ENDIF}
+      end
+      else
+      begin
+        FillColor := TColorizerLocalSettings.ColorMap.Color;// Self.RegularButtonColor;
+        if (bdsFocused in State) then
+          EdgeColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter //GetShadowColor(Self.SelectedButtonColor)
+        else
+          EdgeColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(FillColor);
+        {$IFDEF DELPHIXE2_UP}
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+        begin
+          LDetails := LStyle.GetElementDetails(tcbButtonNormal);
+          if LStyle.GetElementColor(LDetails, ecTextColor, LColor) and (LColor <> clNone) then
+            FontColor := LColor;
+          if LStyle.GetElementColor(LDetails, ecBorderColor, LColor) and (LColor <> clNone) then
+            EdgeColor := LColor;
+        end;
+        {$ENDIF}
+      end;
+
+//      if IsStyleEnabled and TStyleManager.IsCustomStyleActive and not (seFont in StyleElements) then
+//        FontColor := Font.Color;
+
+      Canvas.Font.Color  := FontColor;
+      Canvas.Brush.Color := FillColor;
+
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+      begin
+        SaveIndex := SaveDC(Canvas.Handle);
+        try
+          LStyle.DrawElement(Canvas.Handle, LDetails, Rect);
+        finally
+          RestoreDC(Canvas.Handle, SaveIndex);
+        end;
+      end
+      else
+      {$ENDIF}
+      if FillColor <> clNone then
+      begin
+        Canvas.FillRect(Rect);
+        Canvas.Brush.Color := EdgeColor;
+        Canvas.FrameRect(Rect);
+      end;
+
+      if bdsFocused in State then
+      begin
+        InflateRect(Rect, -1, -1);
+        Canvas.FrameRect(Rect);
+      end;
+
+      Canvas.Brush.Color := FillColor;
+
+      TextLeft := Rect.Left + 4;
+      RectHeight := Rect.Bottom - Rect.Top;
+      TextTop := Rect.Top + (RectHeight - Canvas.TextHeight('Wg')) div 2;
+
+      if boFullSize in Self.ButtonOptions then
+        Inc(TextLeft, 4);
+
+      if TextTop < Rect.Top then
+        TextTop := Rect.Top;
+      if bdsDown in State then
+      begin
+        Inc(TextTop);
+        Inc(TextLeft);
+      end;
+
+      TextOffset := 0;
+      if Assigned(Self.OnDrawIcon) then
+        Self.OnDrawIcon(Self, Button, Canvas, OrgRect, State, TextOffset)
+      else if (Self.Images <> nil) and (Button.ImageIndex > -1) and
+          (Button.ImageIndex < Self.Images.Count) then
+      begin
+        ImgTop := Rect.Top + (RectHeight - Self.Images.Height) div 2;
+        if ImgTop < Rect.Top then
+          ImgTop := Rect.Top;
+        if bdsDown in State then
+          Inc(ImgTop);
+        Self.Images.Draw(Canvas, TextLeft - 1, ImgTop, Button.ImageIndex);
+        TextOffset := Self.Images.Width + 1;
+      end;
+
+      if [bdsInsertLeft, bdsInsertTop, bdsInsertRight, bdsInsertBottom] * State <> [] then
+      begin
+        Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(EdgeColor);
+        InsertIndication := Rect;
+        if bdsInsertLeft in State then
+        begin
+          Dec(InsertIndication.Left, 2);
+          InsertIndication.Right := InsertIndication.Left + 2;
+        end
+        else if bdsInsertTop in State then
+        begin
+          Dec(InsertIndication.Top);
+          InsertIndication.Bottom := InsertIndication.Top + 2;
+        end
+        else if bdsInsertRight in State then
+        begin
+          Inc(InsertIndication.Right, 2);
+          InsertIndication.Left := InsertIndication.Right - 2;
+        end
+        else if bdsInsertBottom in State then
+        begin
+          Inc(InsertIndication.Bottom);
+          InsertIndication.Top := InsertIndication.Bottom - 2;
+        end;
+        Canvas.FillRect(InsertIndication);
+        Canvas.Brush.Color := FillColor;
+      end;
+
+      if boShowCaptions in Self.ButtonOptions then
+      begin
+        if FillColor = clNone then
+          Canvas.Brush.Style := bsClear;
+
+        Inc(TextLeft, TextOffset);
+        TextRect.Left := TextLeft;
+        TextRect.Right := Rect.Right - 2;
+        TextRect.Top := TextTop;
+        TextRect.Bottom := Rect.Bottom - 2;
+
+        if Assigned(Self.OnDrawText) then
+          Self.OnDrawText(Self, Button, Canvas, TextRect, State)
+        else
+        begin
+          Caption := Button.Caption;
+          {$IFDEF DELPHIXE2_UP}
+          if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+          begin
+            Canvas.Brush.Style := bsClear;
+            if LStyle.GetElementColor(LDetails, ecTextColor, TxtColor) then
+              Canvas.Font.Color := TxtColor;
+            Canvas.TextRect(TextRect, Caption, [tfEndEllipsis, tfVerticalCenter]);
+            Canvas.Brush.Style := bsSolid;
+          end
+          else
+          {$ENDIF}
+          begin
+            Canvas.Brush.Style := bsClear;
+            Canvas.TextRect(TextRect, Caption, [tfEndEllipsis, tfVerticalCenter]);
+          end;
+        end;
+      end;
+
+      if Assigned(Self.OnAfterDrawButton) then
+        Self.OnAfterDrawButton(Self, Button, Canvas, OrgRect, State);
+    end;
+    Canvas.Brush.Color := Self.Color;
+  end
+  else
+   Trampoline_TCategoryButtons_DrawButton(Self, Button, Canvas, Rect, State);
+end;
+
 procedure Detour_TCategoryButtons_DrawCategory(Self :TCategoryButtonsClass; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer);
 const
   cDropDownSize = 13;
+{$IFDEF DELPHIXE2_UP}
+var
+  LStyleServices : TCustomStyleServices;
+  LDetails       : TThemedElementDetails;
+{$ENDIF}
 
-  procedure DrawDropDownButton(X, Y: Integer; Collapsed: Boolean);
+  procedure DrawDropDownButton(X, Y: Integer; Collapsed, Selected: Boolean);
   const
     ChevronDirection: array[Boolean] of TScrollDirection = (sdDown, sdRight);
+    {$IFDEF DELPHIXE2_UP}
+    Elements: array[Boolean] of TThemedCategoryButtons = (tcbCategoryChevronOpened, tcbCategoryChevronClosed);
+    {$ENDIF}
     ChevronXPosAdjust: array[Boolean] of Integer = (2, 0);
     ChevronYPosAdjust: array[Boolean] of Integer = (1, 3);
 
     procedure DrawPlusMinus;
     var
       Width, Height: Integer;
-      {$IFDEF DELPHIXE2_UP}
-      LStyleServices : TCustomStyleServices;
-      LDetails       : TThemedElementDetails;
-      //LBuffer        : TBitmap;
-      //LRect          : TRect;
-      {$ENDIF}
     begin
       Width := 9;
       Height := Width;
@@ -1673,9 +1934,8 @@ const
       Inc(Y, 2);
 
       {$IFDEF DELPHIXE2_UP}
-      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
       begin
-       LStyleServices:= ColorizerStyleServices;
        if not Collapsed then
         LDetails := LStyleServices.GetElementDetails(tcbCategoryGlyphOpened)
        else
@@ -1694,11 +1954,18 @@ const
       else
       {$ENDIF}
       begin
-        Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
-        Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-        Canvas.Rectangle(X, Y, X + Width, Y + Height);
-        Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
+        if Selected then
+        begin
+          Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.HotFontColor;
+          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.HotColor;
+        end
+        else
+        begin
+          Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FontColor;
+          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+        end;
 
+        Canvas.Rectangle(X, Y, X + Width, Y + Height);
         Canvas.MoveTo(X + 2, Y + Width div 2);
         Canvas.LineTo(X + Width - 2, Y + Width div 2);
 
@@ -1728,7 +1995,7 @@ var
   CatHeight: Integer;
   CategoryBounds, CategoryFrameBounds,
   ButtonBounds, ChevronBounds: TRect;
-  GradientColor, SourceColor, TempColor: TColor;
+  LColor, FontColor, GradientColor, SourceColor, TempColor: TColor;
   Caption: string;
   CaptionRect: TRect;
   CategoryRealBounds: TRect;
@@ -1742,13 +2009,41 @@ begin
     and Assigned(TColorizerLocalSettings.ColorMap) then
   begin
     Self.GetCategoryBoundsHelper(Category, StartingPos, CategoryBounds, ButtonBounds);
+    FontColor   := TColorizerLocalSettings.ColorMap.FontColor;
 
-    if (Self.SelectedItem = Category) and (Self.SelectedButtonColor <> clNone) then
-      SourceColor := TColorizerLocalSettings.ColorMap.SelectedColor//Self.SelectedButtonColor
-    else if Category.Color <> clNone then
-      SourceColor := TColorizerLocalSettings.ColorMap.Color//Category.Color
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+    begin
+      LStyleServices:= ColorizerStyleServices;
+      if Self.SelectedItem = Category then
+        LDetails := LStyleServices.GetElementDetails(tcbCategorySelected)
+      else if Category.Color <> clNone then
+        LDetails := LStyleServices.GetElementDetails(tcbCategoryNormal)
+      else
+        LDetails := LStyleServices.GetElementDetails(tcbBackground);
+
+      if LStyleServices.GetElementColor(LDetails, ecGradientColor1, LColor) and (LColor <> clNone) then
+        SourceColor := LColor
+      else
+        SourceColor := clNone;
+    end
     else
-      SourceColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
+   {$ENDIF}
+      SourceColor := clNone;
+
+    if SourceColor = clNone then
+    begin
+      if (Self.SelectedItem = Category) and (Self.SelectedButtonColor <> clNone) then
+      begin
+        SourceColor := TColorizerLocalSettings.ColorMap.HotColor;//Self.SelectedButtonColor
+        FontColor   := TColorizerLocalSettings.ColorMap.HotFontColor;
+      end
+      else
+      if Category.Color <> clNone then
+        SourceColor := TColorizerLocalSettings.ColorMap.Color//Category.Color
+      else
+        SourceColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
+    end;
 
     CategoryFrameBounds := CategoryBounds;
     Self.AdjustCategoryBoundsHelper(Category, CategoryFrameBounds);
@@ -1768,13 +2063,33 @@ begin
     end
     else
     begin
-      Canvas.Brush.Color := SourceColor;
-      Canvas.FillRect(CategoryRealBounds)
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors and
+         LStyleServices.GetElementColor(LDetails, ecGradientColor2, LColor) and (LColor <> clNone) then
+        GradientFillCanvas(Canvas, SourceColor, LColor, CategoryRealBounds, Self.GradientDirection)
+      else
+      {$ENDIF}
+      begin
+        Canvas.Brush.Color := SourceColor;
+        Canvas.FillRect(CategoryRealBounds)
+      end;
     end;
 
     with CategoryRealBounds do
     begin
       Right := Right - 1;
+
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+      begin
+        LDetails := LStyleServices.GetElementDetails(tcbBackground);
+        if LStyleServices.GetElementColor(LDetails, ecFillColor, LColor) and (LColor <> clNone) then
+          TempColor := LColor
+        else
+          TempColor := Self.Color;
+      end
+      else
+      {$ENDIF}
       TempColor := TColorizerLocalSettings.ColorMap.WindowColor;//Self.Color;
 
       Canvas.Pixels[Left, Top] := TempColor;
@@ -1786,6 +2101,22 @@ begin
       Canvas.Pixels[Left, Bottom-1] := TempColor;
 
       if Self.BackgroundGradientColor <> clNone then
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+      begin
+        LDetails := LStyleServices.GetElementDetails(tcbBackground);
+        if TStyleManager.IsCustomStyleActive and LStyleServices.GetElementColor(LDetails, ecFillColor, LColor) and
+           (LColor <> clNone)
+        then
+          TempColor := LColor
+        else
+        if LStyleServices.GetElementColor(LDetails, ecGradientColor1, LColor) and (LColor <> clNone) then
+          TempColor := LColor
+        else
+          TempColor := Self.BackgroundGradientColor;
+      end
+      else
+      {$ENDIF}
         TempColor := Self.BackgroundGradientColor;
 
       Canvas.Pixels[Right, Top] := TempColor;
@@ -1797,22 +2128,33 @@ begin
       Canvas.Pixels[Right, Bottom-1] := TempColor;
 
       Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+      begin
+        if Self.SelectedItem = Category then
+          LDetails := LStyleServices.GetElementDetails(tcbCategorySelected)
+        else
+          LDetails := LStyleServices.GetElementDetails(tcbCategoryNormal);
+        if LStyleServices.GetElementColor(LDetails, ecBorderColor, LColor) and (LColor <> clNone) then
+          Canvas.Pen.Color := LColor;
+      end;
+      {$ENDIF}
 
-      Canvas.Polyline([Point(Left + 2, Top),
-        Point(Right - 2, Top), { Top line }
-        Point(Right, Top + 2), { Top right curve }
-        Point(Right, Bottom - 2), { Right side line }
-        Point(Right - 2, Bottom), { Bottom right curve }
-        Point(Left + 2, Bottom), { Bottom line }
-        Point(Left, Bottom - 2), { Bottom left curve }
-        Point(Left, Top + 2), { Left side line }
-        Point(Left + 2, Top)]); { Top left curve }
+      Canvas.Polyline([Point(Left + 2, Top), Point(Right - 2, Top), Point(Right, Top + 2),
+        Point(Right, Bottom - 2), Point(Right - 2, Bottom), Point(Left + 2, Bottom), Point(Left, Bottom - 2),
+        Point(Left, Top + 2), Point(Left + 2, Top)]);
     end;
 
     if ((Category.Collapsed) and (Self.SelectedItem <> nil) and
        (Self.CurrentCategory = Category)) or (Self.SelectedItem = Category) then
     begin
-      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;//GetShadowColor(SourceColor, -75);
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors and
+       LStyleServices.GetElementColor(LDetails, ecEdgeShadowColor, LColor) and (LColor <> clNone) then
+        Canvas.Brush.Color := LColor
+      else
+      {$ENDIF}
+      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
       with CategoryFrameBounds do
         Canvas.FrameRect(Rect(Left + 1, Top + 1, Right, Bottom));
     end;
@@ -1820,8 +2162,7 @@ begin
     ChevronBounds := Self.GetChevronBoundsHelper(CategoryRealBounds);
 
     if (Category.Items <> nil) and (Category.Items.Count > 0) then
-      DrawDropDownButton(ChevronBounds.Left, ChevronBounds.Top,
-        Category.Collapsed);
+      DrawDropDownButton(ChevronBounds.Left, ChevronBounds.Top, Category.Collapsed, ((Self.SelectedItem = Category) and (Self.SelectedButtonColor <> clNone)));
 
     VerticalCaption := Self.HasVerticalCaption(Category);
 
@@ -1842,7 +2183,17 @@ begin
 
 
     Canvas.Brush.Style := bsClear;
-    Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+    Canvas.Font.Color  := FontColor;
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+    begin
+      if Self.SelectedItem = Category then
+        LDetails := LStyleServices.GetElementDetails(tcbCategorySelected)
+      else
+        LDetails := LStyleServices.GetElementDetails(tcbCategoryNormal);
+    end;
+   {$ENDIF}
+
 
     if not VerticalCaption then
     begin
@@ -1903,14 +2254,14 @@ begin
           else if (Button = Self.FocusedItem) and Self.Focused and (Self.FDownButtonHelper = nil) then
             Include(DrawState, bdsFocused);
 
-//          if Button = FInsertTop then
-//            Include(DrawState, bdsInsertTop)
-//          else if Button = FInsertBottom then
-//            Include(DrawState, bdsInsertBottom)
-//          else if Button = FInsertRight then
-//            Include(DrawState, bdsInsertRight)
-//          else if Button = FInsertLeft then
-//            Include(DrawState, bdsInsertLeft);
+          if Button = Self.InsertTopHelper then
+            Include(DrawState, bdsInsertTop)
+          else if Button = Self.InsertBottomHelper then
+            Include(DrawState, bdsInsertBottom)
+          else if Button = Self.InsertRightHelper then
+            Include(DrawState, bdsInsertRight)
+          else if Button = Self.InsertLeftHelper then
+            Include(DrawState, bdsInsertLeft);
 
           Self.DrawButton(Button, Canvas, ButtonRect, DrawState);
         end;
@@ -1923,7 +2274,6 @@ begin
         end;
       end;
     end;
-
   end
   else
   Trampoline_TCategoryButtons_DrawCategory(Self, Category, Canvas, StartingPos);
@@ -2735,6 +3085,8 @@ begin
 
 // *******************************************
   Trampoline_TCategoryButtons_DrawCategory := InterceptCreate(TCategoryButtons(nil).DrawCategoryAddress,   @Detour_TCategoryButtons_DrawCategory);
+  Trampoline_TCategoryButtons_DrawButton   := InterceptCreate(@TCategoryButtonsClass.DrawButton,   @Detour_TCategoryButtons_DrawButton);
+
   Trampoline_TCustomPanel_Paint            := InterceptCreate(@TCustomPanelClass.Paint, @Detour_TCustomPanel_Paint);
 
   Trampoline_TWinControl_WMNCPaint      := InterceptCreate(TWinControl(nil).WMNCPaintAddress, @Detour_TWinControl_WMNCPaint);
@@ -2806,6 +3158,10 @@ begin
 
   if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
     InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
+
+  if Assigned(Trampoline_TCategoryButtons_DrawButton) then
+    InterceptRemove(@Trampoline_TCategoryButtons_DrawButton);
+
 
   if Assigned(Trampoline_TCustomPanel_Paint) then
     InterceptRemove(@Trampoline_TCustomPanel_Paint);

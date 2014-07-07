@@ -55,6 +55,7 @@ function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
 procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);
 procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
 procedure CheckForUpdates(Silent : Boolean);
+function  IsHighlightColor(Color: TColor): Boolean;
 
 implementation
 
@@ -86,6 +87,17 @@ Const
  DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
 
 function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+
+function IsHighlightColor(Color: TColor): Boolean;
+var
+  R, G, B : Byte;
+begin
+  R:= GetRValue(Color);
+  G:= GetGValue(Color);
+  B:= GetBValue(Color);
+  Result:= Sqrt( (R*R*0.241)+(G*G*0.691)+(B*B*0.068))>130;
+end;
+
 
 function  TryStrToColor(const StrColor : string; Default : TColor) : TColor;
 begin

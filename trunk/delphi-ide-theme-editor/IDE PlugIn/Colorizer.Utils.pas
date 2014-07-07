@@ -267,6 +267,7 @@ begin
   AColorMap.WindowColor           :=Style.GetStyleColor(scWindow);
 
   AColorMap.HighlightColor        :=Style.GetStyleColor(scButtonHot);
+  AColorMap.HotColor              :=Style.GetStyleColor(scButtonHot);
   AColorMap.BtnSelectedColor      :=Style.GetStyleColor(scButtonHot);
   AColorMap.SelectedColor         :=Style.GetStyleColor(scButtonHot);
 
