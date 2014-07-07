@@ -255,7 +255,7 @@ Section "RAD Studio XE" SecDXE
   File "HookedScrollBars.dat"
   File "WinAPIClasses.dat"
   SetOverwrite off
-  File "Settings.ini"
+  File "Init\Settings.ini"
   SetOverwrite on 
   File "DelphiIDEColorizer_XE.dll"
   SetOutPath $INSTDIR\XE\Themes
@@ -279,7 +279,7 @@ Section "RAD Studio XE2" SecDXE2
   File "HookedScrollBars.dat"  
   File "WinAPIClasses.dat"  
   SetOverwrite off
-  File "Settings.ini"
+  File "Init\Settings.ini"  
   SetOverwrite on 
   File "DelphiIDEColorizer_XE2.dll"
   SetOutPath $INSTDIR\XE2\Themes
@@ -302,7 +302,7 @@ Section "RAD Studio XE3" SecDXE3
   File "HookedScrollBars.dat"  
   File "WinAPIClasses.dat"  
   SetOverwrite off
-  File "Settings.ini"
+  File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE3.dll"
   SetOutPath $INSTDIR\XE3\Themes
@@ -325,7 +325,7 @@ Section "RAD Studio XE4" SecDXE4
   File "HookedScrollBars.dat"  
   File "WinAPIClasses.dat"  
   SetOverwrite off
-  File "Settings.ini"
+  File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE4.dll"
   SetOutPath $INSTDIR\XE4\Themes
@@ -348,7 +348,7 @@ Section "RAD Studio XE5" SecDXE5
   File "HookedScrollBars.dat"  
   File "WinAPIClasses.dat"  
   SetOverwrite off
-  File "Settings.ini"
+  File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE5.dll"
   SetOutPath $INSTDIR\XE5\Themes
@@ -371,7 +371,7 @@ Section "RAD Studio XE6" SecDXE6
   File "HookedScrollBars.dat"  
   File "WinAPIClasses.dat"  
   SetOverwrite off
-  File "Settings.ini"
+  File "Init\Settings.ini"
   SetOverwrite on  
   File "DelphiIDEColorizer_XE6.dll"
   SetOutPath $INSTDIR\XE6\Themes

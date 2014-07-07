@@ -26,12 +26,11 @@
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
-  frame in buttons of TIDECategoryButtons   depending oh theme colors
-
 }
 
 // DONE
 {
+  * frame in buttons of TIDECategoryButtons   depending oh theme colors
   * Fix background for vcl styles controls (button, checkbox)
   * VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)
   * VCL Styles - some issues in scrollbars with some vcl styles (ex : Tablet Dark)

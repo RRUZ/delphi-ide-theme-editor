@@ -41,3 +41,5 @@ TSearchProgressDlg
 TExpandableEvalView
 TProgressForm
 TDebugInspector
+FMTFormBoundary
+FMTFormContainerForm
