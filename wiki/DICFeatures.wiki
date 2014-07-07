@@ -5,6 +5,7 @@
  The Delphi IDE Colorizer (DIC) is a Wizard which allows to customize the look and feel of the *workspace* of the  RAD Studio IDE. 
 
 <wiki:video url="https://www.youtube.com/watch?v=DMTsIBceNWk"/>
+<wiki:video url="https://www.youtube.com/watch?v=_AYKSjI1CVg"/>
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DIC_VS.png
 
