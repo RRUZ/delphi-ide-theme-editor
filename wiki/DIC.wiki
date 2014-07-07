@@ -12,7 +12,7 @@
 
 == What is DIC? ==
 
-  Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the menus, popup menus, docked windows and components included in the *workspace* of the IDE.
+  Delphi IDE Colorizer (DIC) is a RAD Studio Wizard which allows to customize the look and feel of the menus, popup menus, docked and floating windows and all the components included in the *workspace* of the IDE.
 
 == Which versions of Delphi (RAD Studio) supports DIC? ==
  
@@ -25,14 +25,14 @@
 
 == DIC supports design-time components? == 
 
- No, the aim of DIC is only change the appearance of the windows and components used by the IDE. a not interfere with the VCL or FMX components in design time. If any component in design time is modified in any way by the DIC Wizard this situation must be reported as a bug. 
+ No, the aim of DIC is only change the appearance of the windows and components used by the IDE. and not interfere with the VCL or FMX components in design time. If any component in design time is modified in any way by the DIC Wizard this situation must be reported as a bug. 
 
 == DIC supports modify the non client area of the floating IDE windows? == 
- No, DIC only can change the appearance of the docked windows. 
+ Yes, this option works with RAD Studio XE2 and above and uses the VCL Styles to do this task.
 
 == DIC supports VCL Styles? == 
 
- DIC has a experimental support for the VCL Styles, but is not ready for test yet. The main reason is which some components used by the RAD Studio IDE doesn't supports VCL Styles and that implies which many hooks must be written to add a proper support for such components.
+ Yes, this option works with RAD Studio XE2 and above . The VCL Styles can be used for paint the forms and components of the workspace area.
 
 == How I can change the options of the DIC? ==
 
