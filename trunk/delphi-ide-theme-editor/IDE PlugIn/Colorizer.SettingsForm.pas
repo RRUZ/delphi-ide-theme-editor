@@ -877,7 +877,8 @@ begin
   MemoThirdParty.Lines.Add('JCL Debug');
   MemoThirdParty.Lines.Add('http://sourceforge.net/projects/jcl/');
   MemoThirdParty.Lines.Add('');
-
+  MemoThirdParty.Lines.Add('This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit');
+  MemoThirdParty.Lines.Add('http://www.openssl.org/');
 //  ColorMapCombo.Items.AddObject('(Default)', nil);
 //  ColorMapCombo.ItemIndex := 0;
 //  for I := 0 to ComponentCount - 1 do
