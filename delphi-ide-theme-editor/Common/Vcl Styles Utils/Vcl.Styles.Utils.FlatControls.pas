@@ -335,6 +335,9 @@ begin
       Tmp := LowerCase(GetWindowClassName(Parent));
       Info.ParentClassName := PChar(Tmp);
 
+//      if IsVCLControl(wParam) then
+//        AddLog('TFlatStyleManager', 'IsVCLControl');
+
       if not HookVclControls then
         if IsVCLControl(wParam) then
           Exit;

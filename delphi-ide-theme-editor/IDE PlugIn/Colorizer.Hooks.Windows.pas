@@ -36,6 +36,7 @@ uses
  Windows,
  Graphics,
  Controls,
+ StdCtrls,
  SysUtils,
  Classes,
  Types,
@@ -48,6 +49,8 @@ uses
  Colorizer.Hooks.IDE,
  Forms;
 
+type
+ TCustomListBoxClass     = class(TCustomListBox);
 
 var
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
@@ -66,8 +69,10 @@ var
  LParentForm : TCustomForm;
  SavedIndex  : Integer;
  WClassName  : string;
+ Applyhook   : Boolean;
 begin
    //DrawEdge(DC, R, EDGE_RAISED, BF_RECT or BF_MIDDLE or Flags);
+  Applyhook:=True;
   LWinControl:=nil;
   OrgHWND :=WindowFromDC(hdc);
   if OrgHWND<>0 then
@@ -87,9 +92,20 @@ begin
   begin
    WClassName := GetWindowClassName(OrgHWND);
    if (WClassName<>'') and Assigned(TColorizerLocalSettings.WinAPIClasses) and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0) then
+   begin
+     //AddLog('CustomDrawEdge WinAPIClasses', WClassName);
      Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
+   end;
   end;
 
+  if (LWinControl<>nil) then
+  begin
+    //avoid paint the TCustomListBox when is ownerdraw
+    if  (LWinControl is TCustomListBox) then
+     Applyhook := TCustomListBoxClass(LWinControl).Style = lbStandard;
+  end;
+
+   if Applyhook then
    case  edge of
       BDR_RAISEDINNER,
       EDGE_SUNKEN,

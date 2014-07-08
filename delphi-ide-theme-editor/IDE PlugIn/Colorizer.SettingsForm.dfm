@@ -5,7 +5,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   BorderStyle = bsSingle
   Caption = 'Delphi IDE Colorizer Settings'
   ClientHeight = 530
-  ClientWidth = 461
+  ClientWidth = 478
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -26,7 +26,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   object PanelMain: TPanel
     Left = 0
     Top = 0
-    Width = 461
+    Width = 478
     Height = 530
     Align = alClient
     BevelOuter = bvNone
@@ -34,21 +34,17 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     object PageControlSettings: TPageControl
       Left = 0
       Top = 0
-      Width = 461
+      Width = 478
       Height = 489
       ActivePage = TabSheetMain
       Align = alClient
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel3: TPanel
           Left = 0
           Top = 0
-          Width = 453
+          Width = 470
           Height = 461
           Align = alClient
           BorderWidth = 5
@@ -57,17 +53,13 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           object PageControl2: TPageControl
             Left = 6
             Top = 6
-            Width = 441
+            Width = 458
             Height = 449
             ActivePage = TabSheet5
             Align = alClient
             TabOrder = 0
             object TabSheet5: TTabSheet
               Caption = 'Theme'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Bevel1: TBevel
                 Left = 3
                 Top = 320
@@ -345,10 +337,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheetDockOptions: TTabSheet
               Caption = 'Docked Windows'
               ImageIndex = 4
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label11: TLabel
                 Left = 17
                 Top = 41
@@ -720,10 +708,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             end
             object TabSheet1: TTabSheet
               Caption = 'ToolBars'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label4: TLabel
                 Left = 3
                 Top = 13
@@ -815,10 +799,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheet3: TTabSheet
               Caption = 'IDE Tabs'
               ImageIndex = 2
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label12: TLabel
                 Left = 8
                 Top = 60
@@ -1002,10 +982,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheet4: TTabSheet
               Caption = 'Headers'
               ImageIndex = 3
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label27: TLabel
                 Left = 16
                 Top = 44
@@ -1129,10 +1105,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 134
@@ -1261,10 +1233,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetHookedForms: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -1320,10 +1288,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetAbout: TTabSheet
         Caption = 'About'
         ImageIndex = 5
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object LabelVersion: TLabel
           Left = 46
           Top = 3
@@ -1656,12 +1620,11 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     object Panel1: TPanel
       Left = 0
       Top = 489
-      Width = 461
+      Width = 478
       Height = 41
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitTop = 491
       object BtnApply: TButton
         Left = 4
         Top = 6

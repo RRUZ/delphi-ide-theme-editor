@@ -77,7 +77,6 @@ type
 
   TFlatPopupStyleHook = class(TSysStyleHook)
   private type
-{$REGION 'TSysPopupItem'}
     TSysPopupItem = class
     private
       FIndex: integer;
@@ -118,7 +117,6 @@ type
       property VCLItem: TMenuItem read GetVCLRealItem;
       property Bitmap: HBITMAP read GetItemBitmap;
     end;
-{$ENDREGION}
 
   var
     FItemsPainted: Boolean;
@@ -1347,14 +1345,13 @@ begin
     if TPopupMenu(PopupList.Items[i]).Handle = FMenu then
       Exit(TPopupMenu(PopupList.Items[i]).Items);
 
-  for i := 0 to Application.ComponentCount - 1 do
+
+  for i := 0 to Screen.FormCount - 1 do
   begin
-    if Application.Components[i] is TCustomForm then
-    begin
-      Form := TCustomForm(Application.Components[i]);
+   Form := Screen.Forms[i];
+   //AddLog('Form', 'ClassName '+Form.ClassName);
       for j := 0 to Form.ComponentCount - 1 do
       begin
-
         if Form.Components[j] is TMenuItem then
         begin
           MI := TMenuItem(Form.Components[j]);
@@ -1378,8 +1375,42 @@ begin
             Exit;
         end;
       end;
-    end;
   end;
+
+//  for i := 0 to Application.ComponentCount - 1 do
+//  begin
+//    if Application.Components[i] is TCustomForm then
+//    begin
+//      Form := TCustomForm(Application.Components[i]);
+//      //AddLog('Form', 'ClassName '+Form.ClassName);
+//      for j := 0 to Form.ComponentCount - 1 do
+//      begin
+//
+//        if Form.Components[j] is TMenuItem then
+//        begin
+//          MI := TMenuItem(Form.Components[j]);
+//          if MI.Handle = FMenu then
+//            Exit(MI);
+//        end
+//        else if Form.Components[j] is TPopupMenu then
+//        begin
+//          PopupMenu := TPopupMenu(Form.Components[j]);
+//          if PopupMenu.Handle = FMenu then
+//            Exit(PopupMenu.Items);
+//
+//          Result := ProcessMenu(PopupMenu.Items);
+//          if Assigned(Result) then
+//            Exit;
+//        end
+//        else
+//        begin
+//          Result := GetChildPopup(Form.Components[j]);
+//          if Assigned(Result) then
+//            Exit;
+//        end;
+//      end;
+//    end;
+//  end;
 end;
 
 function TFlatPopupStyleHook.TSysPopupItem.GetVCLMenuItemsFast: TMenuItem;

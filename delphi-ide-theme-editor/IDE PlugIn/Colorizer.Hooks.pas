@@ -257,8 +257,11 @@ begin
   end;
 
   LParentForm:= GetParentForm(Self);
+//  if LParentForm<>nil then
+//   AddLog('Detour_TCustomControlBar_PaintControlFrame', 'LParentForm.ClassName '+ LParentForm.ClassName);
   if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
   begin
+    //AddLog('Detour_TCustomControlBar_PaintControlFrame', 'ignored LParentForm.ClassName '+ LParentForm.ClassName);
     Trampoline_TCustomControlBar_PaintControlFrame(Self, Canvas, AControl, ARect);
     exit;
   end;
