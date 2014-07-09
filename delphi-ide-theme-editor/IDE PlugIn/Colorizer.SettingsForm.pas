@@ -273,6 +273,7 @@ Uses
  VCL.Styles,
  System.UITypes,
  Colorizer.Vcl.Styles,
+ Vcl.PlatformDefaultStyleActnCtrls,
  {$IFEND}
  {$WARN UNIT_PLATFORM OFF}
  FileCtrl,
@@ -433,10 +434,19 @@ begin
 
 
     //ListBoxFormsHooked.Items.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
+
+    {$IFDEF DELPHIXE2_UP}
+    if CheckBoxUseVClStyles.Checked and CheckBoxVCLStylesMenusColors.Checked then
+     TColorizerLocalSettings.ActionBarStyle := PlatformDefaultStyle
+    else
+     TColorizerLocalSettings.ActionBarStyle := ColorXPStyle;
+    {$ENDIF}
+
     Colorizer.Utils.LoadSettings(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.Settings);
     {$IFDEF DELPHIXE2_UP}
     if TColorizerLocalSettings.Settings.UseVCLStyles then
     begin
+
      if (TColorizerLocalSettings.Settings.VCLStylesForms<>OrgVclStyleForms) or (TColorizerLocalSettings.Settings.UseVCLStyles<>OrgVclStyle) or (TColorizerLocalSettings.Settings.VCLStyleName<>OrgVclStyleName) then
      begin
        SetColorizerVCLStyle(TColorizerLocalSettings.Settings.VCLStyleName);

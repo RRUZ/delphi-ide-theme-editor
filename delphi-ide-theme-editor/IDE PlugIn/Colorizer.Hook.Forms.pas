@@ -195,13 +195,20 @@ begin
     Exit;
 {$ENDIF}
 
+//  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
+//    AddLog('Detour_TCustomForm_WndProc', WM_To_String(Message.Msg));
 {$IFDEF DLLWIZARD}
  case Message.Msg of
+  WM_PAINT  : if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
+              begin
+                 RefreshIDETheme();
+              end;
+
   WM_CLOSE  : if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
               begin
-                AddLog('WM_CLOSE', '0');
+                //AddLog('WM_CLOSE', '0');
                 RestoreIDESettingsFast();
-                AddLog('WM_CLOSE', '1');
+                //AddLog('WM_CLOSE', '1');
               end;
  end;
 {$ENDIF}

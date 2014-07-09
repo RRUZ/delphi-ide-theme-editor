@@ -21,6 +21,7 @@
 unit Vcl.Styles.Utils.FlatMenus;
 
 interface
+{$I ..\Common\Jedi.inc}
 
 uses
   Classes,
@@ -30,12 +31,14 @@ uses
   Messages,
   Graphics,
   UxTheme,
-  {$IF CompilerVersion >= 23}
+  {$IFDEF DELPHIXE2_UP}
+  Colorizer.Vcl.Styles,
   Vcl.Styles,
+  Vcl.Themes,
   {$ELSE}
   Colorizer.uxThemeHelper,
-  {$IFEND}
   Themes,
+  {$ENDIF}
   Forms,
   ImgList,
   GraphUtil,
@@ -384,6 +387,10 @@ var
   sShortCut: String;
   Bmp, LBitmapCheck: TBitmap;
   LColor : TColor;
+  {$IFDEF DELPHIXE2_UP}
+  Detail: TThemedMenu;
+  LDetails: TThemedElementDetails;
+  {$ENDIF}
 
   procedure DrawSubMenu(const ItemRect: TRect);
   const
@@ -391,6 +398,10 @@ var
   var
     SubMenuSize: TSize;
     LSubMenuRect: TRect;
+  {$IFDEF DELPHIXE2_UP}
+    LSubMenuDetails: TThemedElementDetails;
+    LSubMenuDetail: TThemedMenu;
+  {$ENDIF}
   begin
     LSubMenuRect := Rect(0, 0, 0, 0);
     SubMenuSize.cx:= 3;
@@ -401,14 +412,50 @@ var
     else
       LSubMenuRect := Rect(ItemRect.Left + 4, ItemRect.Top, ItemRect.Left + 4 + SubMenuSize.cx, ItemRect.Bottom);
 
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-    Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
-    if RightToLeft then
-      DrawArrow(Canvas, TScrollDirection.sdLeft, Point(LSubMenuRect.Left - ArrowPos, LSubMenuRect.Top + 7), 3)
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+    begin
+      LSubMenuDetail := tmPopupSubMenuNormal;
+      if isDisabled in State then
+        LSubMenuDetail := tmPopupSubMenuDisabled;
+      LSubMenuDetails := ColorizerStyleServices.GetElementDetails(LSubMenuDetail);
+      ColorizerStyleServices.GetElementSize(DC, LSubMenuDetails, esActual, SubMenuSize);
+      if not RightToLeft then
+        LSubMenuRect := Rect(ItemRect.Right - SubMenuSize.cx, ItemRect.Top, ItemRect.Right, ItemRect.Top + SubMenuSize.cy)
+      else
+        LSubMenuRect := Rect(ItemRect.Left + 4, ItemRect.Top, ItemRect.Left + 4 + SubMenuSize.Width, ItemRect.Bottom);
+      Bmp := TBitmap.Create;
+      try
+        Bmp.SetSize(SubMenuSize.Width, SubMenuSize.Height);
+        Bmp.Canvas.Brush.Color := clFuchsia;
+        Bmp.Canvas.FillRect(Rect(0, 0, SubMenuSize.Width, SubMenuSize.Height));
+        ColorizerStyleServices.DrawElement(Bmp.Canvas.Handle, LSubMenuDetails, Rect(0, 0, SubMenuSize.Width, SubMenuSize.Height));
+        if RightToLeft then
+        begin
+          RotateBitmap(Bmp, DegToRad(180), False, clFuchsia);
+          inc(LSubMenuRect.Top, (Bmp.Height div 2) - 2);
+        End
+        else
+          Dec(LSubMenuRect.Left, 4);
+
+        TransparentBlt(DC, LSubMenuRect.Left, LSubMenuRect.Top, SubMenuSize.Width, SubMenuSize.Height, Bmp.Canvas.Handle, 0, 0, SubMenuSize.Width, SubMenuSize.Height, clFuchsia);
+      finally
+        Bmp.Free;
+      end;
+      Dec(LTextRect.Right, LSubMenuRect.Width);
+    end
     else
-      DrawArrow(Canvas, TScrollDirection.sdRight, Point(LSubMenuRect.Left - ArrowPos, LSubMenuRect.Top + 7), 3);
-    Dec(LTextRect.Right, (LSubMenuRect.Right - LSubMenuRect.Left));
-//   DrawArrow(Canvas, sdRight, Point(LSubMenuRect.Width - ArrowPos, LSubMenuRect.Height div 2 - 3), 3);
+    {$ENDIF}
+    begin
+      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+      Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+      if RightToLeft then
+        DrawArrow(Canvas, TScrollDirection.sdLeft, Point(LSubMenuRect.Left - ArrowPos, LSubMenuRect.Top + 7), 3)
+      else
+        DrawArrow(Canvas, TScrollDirection.sdRight, Point(LSubMenuRect.Left - ArrowPos, LSubMenuRect.Top + 7), 3);
+
+      Dec(LTextRect.Right, (LSubMenuRect.Right - LSubMenuRect.Left));
+    end;
   end;
 
 
@@ -440,12 +487,27 @@ var
     LogFont.lfFaceName := 'Marlett';
     AFont := CreateFontIndirect(LogFont);
 
-    oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
-    if hot then
-      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor);
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+    begin
+      oldColor := ColorizerStyleServices.GetStyleFontColor(sfMenuItemTextNormal);
 
-    if Disabled then
-      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor);
+      if hot then
+        oldColor := ColorizerStyleServices.GetStyleFontColor(sfMenuItemTextHot);
+
+      if Disabled then
+        oldColor := ColorizerStyleServices.GetStyleFontColor(sfMenuItemTextDisabled);
+    end
+    else
+    {$ENDIF}
+    begin
+      oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
+      if hot then
+        oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor);
+
+      if Disabled then
+        oldColor := ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor);
+    end;
 
     oldColor := SetTextColor(DC, oldColor);
     pOldFont := SelectObject(DC, AFont);
@@ -477,11 +539,31 @@ begin
     inc(R.Left, 25);
   end;
 
-  if (LPopupType <> tmPopupItemNormal) and (LPopupType <> tmPopupItemDisabled) then
+
+  {$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
-     Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
-     Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-     Canvas.Rectangle(R);
+    Detail := TThemedMenu.tmPopupItemNormal;
+    if isHot in State then
+      Detail := TThemedMenu.tmPopupItemHot;
+    if isDisabled in State then
+      Detail := TThemedMenu.tmPopupItemDisabled;
+    if Style = isSep then
+      Detail := TThemedMenu.tmPopupSeparator;
+
+    LDetails := ColorizerStyleServices.GetElementDetails(Detail);
+    if (Detail <> TThemedMenu.tmPopupItemNormal) and (Detail <> TThemedMenu.tmPopupItemDisabled) then
+      ColorizerStyleServices.DrawElement(DC, LDetails, R);
+  end
+  else
+  {$ENDIF}
+  begin
+    if (LPopupType <> tmPopupItemNormal) and (LPopupType <> tmPopupItemDisabled) then
+    begin
+       Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+       Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+       Canvas.Rectangle(R);
+    end;
   end;
 
   if Style = isDropDown then
@@ -608,37 +690,53 @@ begin
 
   if (SysItem.Checked) and (DisplayCheckedGlyph) then
   begin
-//    Detail := TThemedMenu(integer(tmPopupCheckNormal) + integer(SysItem.Disabled));
-//    if SysItem.RadioCheck then
-//      Detail := TThemedMenu(integer(tmPopupBulletNormal) + integer(SysItem.Disabled));
-//    LDetails := StyleServices.GetElementDetails(Detail);
-//    StyleServices.GetElementSize(DC, LDetails, esActual, LSize);
-
-    LSize.cx:=2;
-    LSize.cy:=2;
-    LImageRect := Rect(0, 0, LSize.cx, LSize.cy);
-    RectVCenter(LImageRect, ItemRect);
-    if not RightToLeft then
-      OffsetRect(LImageRect, 4, 0)
-    else
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
     begin
-      LImageRect.Left := ItemRect.Right - LSize.cx - 4;
-      LImageRect.Right := ItemRect.Right;
-    end;
-    //StyleServices.DrawElement(DC, LDetails, LImageRect);
+      Detail := TThemedMenu(integer(tmPopupCheckNormal) + integer(SysItem.Disabled));
+      if SysItem.RadioCheck then
+        Detail := TThemedMenu(integer(tmPopupBulletNormal) + integer(SysItem.Disabled));
+      LDetails := ColorizerStyleServices.GetElementDetails(Detail);
+      ColorizerStyleServices.GetElementSize(DC, LDetails, esActual, LSize);
+      LImageRect := Rect(0, 0, LSize.Width, LSize.Height);
+      RectVCenter(LImageRect, ItemRect);
+      if not RightToLeft then
+        OffsetRect(LImageRect, 4, 0)
+      else
+      begin
+        LImageRect.Left := ItemRect.Right - LSize.Width - 4;
+        LImageRect.Right := ItemRect.Right;
+      end;
+      ColorizerStyleServices.DrawElement(DC, LDetails, LImageRect);
+    end
+    else
+    {$ENDIF}
+    begin
+      LSize.cx:=2;
+      LSize.cy:=2;
+      LImageRect := Rect(0, 0, LSize.cx, LSize.cy);
+      RectVCenter(LImageRect, ItemRect);
+      if not RightToLeft then
+        OffsetRect(LImageRect, 4, 0)
+      else
+      begin
+        LImageRect.Left := ItemRect.Right - LSize.cx - 4;
+        LImageRect.Right := ItemRect.Right;
+      end;
 
-    LBitmapCheck:=TBitmap.Create;
-    try
-      LRect:=Rect(ItemRect.Left, ItemRect.Top+1, ItemRect.Left+20, ItemRect.Bottom-1);
-      LBitmapCheck.SetSize(LRect.Right- LRect.Left, LRect.Bottom - LRect.Top);
-      LBitmapCheck.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
-      LBitmapCheck.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
-      LBitmapCheck.Canvas.Rectangle(0, 0 , LBitmapCheck.Width, LBitmapCheck.Height);
-      LBitmapCheck.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FontColor;
-      DrawCheck(LBitmapCheck.Canvas, Point(6, 8), 2, False);
-      Canvas.Draw(ItemRect.Left, ItemRect.Top+1, LBitmapCheck);
-    finally
-      LBitmapCheck.Free;
+      LBitmapCheck:=TBitmap.Create;
+      try
+        LRect:=Rect(ItemRect.Left, ItemRect.Top+1, ItemRect.Left+20, ItemRect.Bottom-1);
+        LBitmapCheck.SetSize(LRect.Right- LRect.Left, LRect.Bottom - LRect.Top);
+        LBitmapCheck.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor;
+        LBitmapCheck.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
+        LBitmapCheck.Canvas.Rectangle(0, 0 , LBitmapCheck.Width, LBitmapCheck.Height);
+        LBitmapCheck.Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FontColor;
+        DrawCheck(LBitmapCheck.Canvas, Point(6, 8), 2, False);
+        Canvas.Draw(ItemRect.Left, ItemRect.Top+1, LBitmapCheck);
+      finally
+        LBitmapCheck.Free;
+      end;
     end;
 
   end;
@@ -677,8 +775,23 @@ begin
   if SysItem.DefaultItem then
     Canvas.Font.Style := [fsBold];
 
-  Inc(LTextRect.Left, 5);
-  DrawText(Canvas.Handle, LColor, ItemText, LTextRect, LTextFormat);
+  {$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  begin
+    LDetails := ColorizerStyleServices.GetElementDetails(TThemedMenu.tmPopupItemNormal);
+    if isHot in State then
+      LDetails := ColorizerStyleServices.GetElementDetails(TThemedMenu.tmPopupItemHot);
+    if isDisabled in State then
+      LDetails := ColorizerStyleServices.GetElementDetails(TThemedMenu.tmPopupItemDisabled);
+
+    DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat);
+  end
+  else
+  {$ENDIF}
+  begin
+    Inc(LTextRect.Left, 5);
+    DrawText(Canvas.Handle, LColor, ItemText, LTextRect, LTextFormat);
+  end;
 
   { Draw ShortCut Text . }
   if MI <> nil then
@@ -697,6 +810,12 @@ begin
         LTextRect.Left := ItemRect.Right - 14 - Canvas.TextWidth(sShortCut);
         LTextRect.Right := ItemRect.Right;
       end;
+
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+        DrawText(Canvas.Handle, LDetails, sShortCut, LTextRect, LTextFormat)
+      else
+      {$ENDIF}
       DrawText(Canvas.Handle, LColor, sShortCut, LTextRect, LTextFormat);
     end;
   end;
@@ -750,17 +869,31 @@ begin
 end;
 
 procedure TFlatPopupStyleHook.PaintBackground(Canvas: TCanvas);
+{$IFDEF DELPHIXE2_UP}
+var
+  LDetails: TThemedElementDetails;
+{$ENDIF}
 begin
-  if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled then
+  {$IFDEF DELPHIXE2_UP}
+  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
-    Canvas.FillRect(SysControl.ClientRect);
-    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
-    Canvas.FillRect(Rect(SysControl.ClientRect.Left, SysControl.ClientRect.Top, SysControl.ClientRect.Left+25, SysControl.ClientRect.Bottom));
-    Canvas.Brush.Style:=bsClear;
-    Canvas.Pen.Width:=2;
-    Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-    Canvas.Rectangle(SysControl.ClientRect);
+    LDetails := ColorizerStyleServices.GetElementDetails(tmPopupBorders);
+    ColorizerStyleServices.DrawElement(Canvas.Handle, LDetails, SysControl.ClientRect);
+  end
+  else
+  {$ENDIF}
+  begin
+    if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled then
+    begin
+      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
+      Canvas.FillRect(SysControl.ClientRect);
+      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+      Canvas.FillRect(Rect(SysControl.ClientRect.Left, SysControl.ClientRect.Top, SysControl.ClientRect.Left+25, SysControl.ClientRect.Bottom));
+      Canvas.Brush.Style:=bsClear;
+      Canvas.Pen.Width:=2;
+      Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+      Canvas.Rectangle(SysControl.ClientRect);
+    end;
   end;
 end;
 

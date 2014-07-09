@@ -26,6 +26,7 @@ uses
   Graphics,
   {$IF CompilerVersion >= 23}
   Vcl.Styles,
+  Colorizer.Vcl.Styles,
   {$ELSE}
   Colorizer.uxThemeHelper,
   {$IFEND}
@@ -679,7 +680,7 @@ begin
   SaveIndex := SaveDC(DC);
   try
     SetBkMode(DC, TRANSPARENT);
-    if not FlatStyleServices.GetElementColor(Details, ecTextColor, sColor) then
+    if not ColorizerStyleServices.GetElementColor(Details, ecTextColor, sColor) then
       sColor := FontColor;
     if not OverrideFont then
       sColor := FontColor;
