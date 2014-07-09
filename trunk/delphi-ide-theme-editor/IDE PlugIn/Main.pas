@@ -20,12 +20,14 @@
 //**************************************************************************************************
 
 //TODO
-
 {
-  improve themes -> pro
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
+
+  Transparent menus
+  Fast vcl styles/themes switch
+
 }
 
 // DONE
@@ -131,6 +133,7 @@ uses
  {$IF CompilerVersion >= 23}
  Vcl.Styles,
  Vcl.Themes,
+ Vcl.PlatformDefaultStyleActnCtrls,
  {$IFEND}
  {$IFDEF DELPHI2009_UP}
  Generics.Collections,
@@ -163,7 +166,8 @@ uses
  Colorizer.Settings,
  Colorizer.OptionsDlg,
  Colorizer.XPStyleActnCtrls,
-{$IFDEF DELPHIXE2_UP}
+ {$IFDEF DELPHIXE2_UP}
+ Colorizer.Hooks.ThemedActnCtrls,
  Colorizer.Vcl.Styles,
  {$ENDIF}
  Vcl.Styles.Utils.FlatMenus,
@@ -236,6 +240,9 @@ begin
   InstallHooksIDE();
   InstallHooksGDI();
   InstallColorizerHooks();
+  {$IFDEF DELPHIXE2_UP}
+  InstallThemedActnCtrlsHooks();
+  {$ENDIF}
   RegisterFlatMenusHooks();
   AddLog('InstallAllHooks', 'Done');
 end;
@@ -250,6 +257,9 @@ begin
   RemoveFormsHook();
   RemoveHooksIDE();
   RemoveHooksGDI();
+  {$IFDEF DELPHIXE2_UP}
+  RemoveThemedActnCtrlsHooks();
+  {$ENDIF}
   UnregisterFlatMenusHooks();
   AddLog('RemoveAllHooks', 'Done');
 end;
@@ -396,7 +406,11 @@ begin
               WriteSettings(TColorizerLocalSettings.Settings, ExtractFilePath(GetModuleLocation()));
             end;
           end;
+
+          if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+           TColorizerLocalSettings.ActionBarStyle:=PlatformDefaultStyle;
           {$ENDIF}
+
           if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
             RefreshIDETheme();
         end;
