@@ -33,6 +33,7 @@ implementation
 
 uses
   Windows,
+  Messages,
   Forms,
   Menus,
   System.Classes,
@@ -48,6 +49,7 @@ uses
   Vcl.ActnMan,
   Vcl.ThemedActnCtrls,
   Vcl.XPActnCtrls,
+  Vcl.Controls,
   DDetours;
 
 type
@@ -56,7 +58,7 @@ type
   TThemedPopupMenuClass       = class(TThemedPopupMenu);
   TCustomActionPopupMenuClass = class(TCustomActionPopupMenu);
   TXPStylePopupMenuClass      = class(TXPStylePopupMenu);
-
+  TWinControlClass            = class(TWinControl);
 var
   Trampoline_TThemedMenuItem_DrawBackground  : procedure (Self: TThemedMenuItemClass;var PaintRect: TRect) = nil;
   Trampoline_TThemedMenuItem_DrawSeparator   : procedure (Self: TThemedMenuItemClass;const Offset: Integer) = nil;
@@ -70,6 +72,10 @@ var
 
   Trampoline_TThemedPopupMenu_NCPaint        : procedure (Self: TThemedPopupMenuClass; DC: HDC) = nil;
   Trampoline_TCustomActionPopupMenu_DrawBackground  : procedure (Self : TCustomActionPopupMenuClass) = nil;
+  Trampoline_TCustomActionPopupMenu_CreateParams    : procedure (Self : TCustomActionPopupMenuClass; var Params: TCreateParams) = nil;
+  Trampoline_TCustomActionPopupMenu_CMVisibleChanged: procedure (Self : TCustomActionPopupMenuClass;var Message: TMessage) = nil;
+  Trampoline_TWinControl_CreateWnd                  : procedure (Self : TWinControl) = nil;
+
   //used for TCustomActionPopupMenuEx
   Trampoline_TXPStylePopupMenu_NCPaint       : procedure(Self : TXPStylePopupMenuClass;DC: HDC) = nil;
 
@@ -104,7 +110,7 @@ type
 
 procedure Detour_TThemedMenuItem_DrawBackground(Self: TThemedMenuItemClass;var PaintRect: TRect);
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     Self.PaintRectHelper := PaintRect;
     if ColorizerStyleServices.IsSystemStyle then
@@ -119,7 +125,7 @@ procedure  Detour_TThemedMenuItem_DrawSeparator(Self: TThemedMenuItemClass;const
 var
   LRect: TRect;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     LRect := Rect(Self.GutterRectHelper.Right + 1, 0, Self.Width, Self.SeparatorHeightHelper);
     ColorizerStyleServices.DrawElement(Self.Canvas.Handle, ColorizerStyleServices.GetElementDetails(tmPopupSeparator), LRect);
@@ -134,7 +140,7 @@ const
 var
   LRect: TRect;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     LRect := Self.SubMenuGlyphRectHelper;
     OffsetRect(LRect, Self.Width, 1);
@@ -149,7 +155,7 @@ procedure  Detour_TThemedMenuItem_DrawText(Self: TThemedMenuItemClass;var Rect: 
 var
   LRect: TRect;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     if Self.Selected and Self.Enabled then
       ColorizerStyleServices.DrawElement(Self.Canvas.Handle, ColorizerStyleServices.GetElementDetails(tmPopupItemHot), Self.PaintRectHelper)
@@ -188,7 +194,7 @@ var
   LColor: TColor;
   LDetails: TThemedElementDetails;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     LFormats := TTextFormatFlags(Flags);
     if Self.Selected and Self.Enabled then
@@ -214,7 +220,7 @@ const
   CheckMarkBkgStates: array[Boolean] of TThemedMenu = (tmPopupCheckBackgroundDisabled, tmPopupCheckBackgroundNormal);
   CheckMarkStates: array[Boolean] of TThemedMenu = (tmPopupCheckDisabled, tmPopupCheckNormal);
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     if Self.IsChecked then
     begin
@@ -233,7 +239,7 @@ var
   RC, RW: TRect;
   OldHandle: THandle;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     Windows.GetClientRect(Self.Handle, RC);
     GetWindowRect(Self.Handle, RW);
@@ -254,9 +260,52 @@ begin
    Trampoline_TThemedPopupMenu_NCPaint(Self, DC);
 end;
 
+//procedure Detour_TWinControl_CreateWnd(Self : TWinControl);
+//var
+//  AStyle : NativeInt;
+//begin
+//  Trampoline_TWinControl_CreateWnd(Self);
+//  if TColorizerLocalSettings.Settings.Enabled then
+//  begin
+//    if (Self is TCustomActionPopupMenu) {or (Self is TThemedPopupMenu) or (Self is TXPStylePopupMenu)} then
+//    begin
+//     AStyle := GetWindowLong(Self.Handle, GWL_EXSTYLE);
+//      if (AStyle and WS_EX_LAYERED) = 0 then
+//        SetWindowLong(Self.Handle, GWL_EXSTYLE, AStyle or WS_EX_LAYERED);
+//     SetLayeredWindowAttributes(Self.Handle, 0, 220, LWA_ALPHA);
+//    end;
+//  end;
+//end;
+
+procedure Detour_TCustomActionPopupMenu_CMVisibleChanged(Self : TCustomActionPopupMenuClass;var Message: TMessage);
+var
+  AStyle : NativeInt;
+begin
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.MenuTransparent and Self.Visible then
+  begin
+     AStyle := GetWindowLong(Self.Handle, GWL_EXSTYLE);
+      if (AStyle and WS_EX_LAYERED) = 0 then
+        SetWindowLong(Self.Handle, GWL_EXSTYLE, AStyle or WS_EX_LAYERED);
+     SetLayeredWindowAttributes(Self.Handle, 0, TColorizerLocalSettings.Settings.MenuTransLevel, LWA_ALPHA);
+  end;
+  Trampoline_TCustomActionPopupMenu_CMVisibleChanged(Self, Message);
+end;
+
+//procedure  Detour_TCustomActionPopupMenu_CreateParams(Self : TCustomActionPopupMenuClass; var Params: TCreateParams);
+//begin
+//  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+//  begin
+//    with Params do
+//      if (ExStyle and WS_EX_LAYERED) = 0 then
+//         ExStyle := ExStyle or WS_EX_LAYERED;
+//  end;
+//  Trampoline_TCustomActionPopupMenu_CreateParams(Self, Params);
+//end;
+
+
 procedure Detour_TCustomActionPopupMenu_DrawBackground(Self : TCustomActionPopupMenuClass);
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     ColorizerStyleServices.DrawElement(Self.Canvas.Handle, ColorizerStyleServices.GetElementDetails(tmPopupBackground), Rect(0, 0, Self.Width, Self.Height))
   end
@@ -274,7 +323,7 @@ var
   LColor: TColor;
   LDetails: TThemedElementDetails;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     LFormats := TTextFormatFlags(Flags);
     if Self.Enabled then
@@ -308,7 +357,7 @@ const
   MenuStates: array[Boolean, Boolean] of TThemedMenu =
     ((tmMenuBarItemNormal, tmMenuBarItemPushed), (tmMenuBarItemHot, tmMenuBarItemPushed));
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     Self.Canvas.Brush.Color := Self.ActionBar.ColorMap.Color;
     ColorizerStyleServices.DrawElement(Self.Canvas.Handle, ColorizerStyleServices.GetElementDetails(MenuStates[Self.MouseInControl, Self.Selected]), PaintRect);
@@ -322,7 +371,7 @@ var
   RC, RW: TRect;
   OldHandle: THandle;
 begin
-  if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     Windows.GetClientRect(Self.Handle, RC);
     GetWindowRect(Self.Handle, RW);
@@ -439,7 +488,12 @@ begin
   Trampoline_TThemedMenuItem_DoDrawText       := InterceptCreate(TThemedMenuItem(nil).DoDrawTextAddress, @Detour_TThemedMenuItem_DoDrawText);
   Trampoline_TThemedMenuItem_DoDrawMenuCheck  := InterceptCreate(TThemedMenuItem(nil).DoDrawMenuCheckAddress, @Detour_TThemedMenuItem_DoDrawMenuCheck);
   Trampoline_TThemedPopupMenu_NCPaint         := InterceptCreate(@TThemedPopupMenuClass.NCPaint, @Detour_TThemedPopupMenu_NCPaint);
+
   Trampoline_TCustomActionPopupMenu_DrawBackground  := InterceptCreate(@TCustomActionPopupMenuClass.DrawBackground, @Detour_TCustomActionPopupMenu_DrawBackground);
+  //Trampoline_TCustomActionPopupMenu_CreateParams    := InterceptCreate(@TCustomActionPopupMenuClass.CreateParams, @Detour_TCustomActionPopupMenu_CreateParams);
+  Trampoline_TCustomActionPopupMenu_CMVisibleChanged  := InterceptCreate(@TCustomActionPopupMenuClass.CMVisibleChanged, @Detour_TCustomActionPopupMenu_CMVisibleChanged);
+  //Trampoline_TWinControl_CreateWnd                  := InterceptCreate(@TWinControlClass.CreateWnd, @Detour_TWinControl_CreateWnd);
+
   Trampoline_TThemedMenuButton_DoDrawText     := InterceptCreate(TThemedMenuButton(nil).DoDrawTextAddress, @Detour_TThemedMenuButton_DoDrawText);
   Trampoline_TThemedMenuButton_DrawBackground := InterceptCreate(@TThemedMenuButtonClass.DrawBackground, @Detour_TThemedMenuButton_DrawBackground);
   Trampoline_TXPStylePopupMenu_NCPaint        := InterceptCreate(@TXPStylePopupMenuClass.NCPaint, @Detour_TXPStylePopupMenu_NCPaint);
@@ -470,6 +524,12 @@ begin
 
   if Assigned(Trampoline_TCustomActionPopupMenu_DrawBackground) then
     InterceptRemove(@Trampoline_TCustomActionPopupMenu_DrawBackground);
+
+  if Assigned(Trampoline_TCustomActionPopupMenu_CMVisibleChanged) then
+    InterceptRemove(@Trampoline_TCustomActionPopupMenu_CMVisibleChanged);
+
+//  if Assigned(Trampoline_TWinControl_CreateWnd) then
+//    InterceptRemove(@Trampoline_TWinControl_CreateWnd);
 
   if Assigned(Trampoline_TThemedMenuButton_DoDrawText) then
     InterceptRemove(@Trampoline_TThemedMenuButton_DoDrawText);
