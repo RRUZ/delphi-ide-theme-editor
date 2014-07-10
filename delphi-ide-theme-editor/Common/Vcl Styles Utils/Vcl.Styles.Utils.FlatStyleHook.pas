@@ -826,7 +826,7 @@ function TSysStyleHook.StyleServicesEnabled: Boolean;
 begin
   Result := {$IF CompilerVersion >= 23}(StyleServices.Available) and (StyleServices.IsSystemStyle) {$ELSE} ThemeServices.ThemesAvailable {$IFEND};
   if Result then
-    if not TFlatStyleManager.HookVclControls then
+    if not TColorizerStyleManager.HookVclControls then
       Result := not(IsVCLControl(Handle));
 end;
 
@@ -1037,7 +1037,6 @@ var
   PTest: PInteger;
   ParentHandle: HWND;
 begin
-
   Test := $93;
   PTest := @Test;
   Result := False;
@@ -1188,7 +1187,7 @@ begin
 end;
 
 type
-  TSysStyleManagerClass = type TFlatStyleManager;
+  TSysStyleManagerClass = type TColorizerStyleManager;
 
 procedure TSysStyleHook.WndProc(var Message: TMessage);
 var
@@ -1207,7 +1206,7 @@ begin
     CM_INITCHILDS:
       begin
         Message.Result := 0;
-        with TSysStyleManagerClass(TFlatStyleManager) do
+        with TSysStyleManagerClass(TColorizerStyleManager) do
         begin
           for ChildHandle in FChildRegSysStylesList.Keys do
             if (not IsControlHooked(ChildHandle)) and (FChildRegSysStylesList[ChildHandle].Parent = Handle) then
@@ -1269,7 +1268,7 @@ begin
     WM_CTLCOLORMSGBOX .. WM_CTLCOLORSTATIC:
       begin
         // avoid use cuurent style colors on ignored controls
-        if (not StyleServicesEnabled) or (not TFlatStyleManager.UseStyleColorsChildControls and (not TFlatStyleManager.SysStyleHookList.ContainsKey(Message.lParam))) then
+        if (not StyleServicesEnabled) or (not TColorizerStyleManager.UseStyleColorsChildControls and (not TColorizerStyleManager.SysStyleHookList.ContainsKey(Message.lParam))) then
         // if (not StyleServicesEnabled) then
         begin
           Message.Result := CallDefaultProc(Message);

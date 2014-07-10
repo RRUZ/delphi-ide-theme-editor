@@ -195,8 +195,8 @@ begin
     Exit;
 {$ENDIF}
 
-//  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
-//    AddLog('Detour_TCustomForm_WndProc', WM_To_String(Message.Msg));
+  //if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TDisassemblyView')) then
+    //AddLog('Detour_TCustomForm_WndProc', Self.ClassName+' '+WM_To_String(Message.Msg));
 {$IFDEF DLLWIZARD}
  case Message.Msg of
   WM_PAINT  : if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then

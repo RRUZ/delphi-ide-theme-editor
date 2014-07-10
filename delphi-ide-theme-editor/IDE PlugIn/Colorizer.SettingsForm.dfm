@@ -55,10 +55,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             Top = 6
             Width = 458
             Height = 449
-            ActivePage = TabSheet5
+            ActivePage = TabSheetTheme
             Align = alClient
             TabOrder = 0
-            object TabSheet5: TTabSheet
+            object TabSheetTheme: TTabSheet
               Caption = 'Theme'
               object Bevel1: TBevel
                 Left = 3
@@ -706,7 +706,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 end
               end
             end
-            object TabSheet1: TTabSheet
+            object TabSheetToolBars: TTabSheet
               Caption = 'ToolBars'
               object Label4: TLabel
                 Left = 3
@@ -796,7 +796,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 OnGetColors = ColorBoxBaseGetColors
               end
             end
-            object TabSheet3: TTabSheet
+            object TabSheetIDETabs: TTabSheet
               Caption = 'IDE Tabs'
               ImageIndex = 2
               object Label12: TLabel
@@ -979,7 +979,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 OnClick = Button17Click
               end
             end
-            object TabSheet4: TTabSheet
+            object TabSheetHeaders: TTabSheet
               Caption = 'Headers'
               ImageIndex = 3
               object Label27: TLabel
@@ -1097,6 +1097,45 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Images = ImageList1
                 TabOrder = 8
                 OnClick = Button23Click
+              end
+            end
+            object TabSheetMenu: TTabSheet
+              Caption = 'Menus'
+              ImageIndex = 5
+              object Level: TLabel
+                Left = 3
+                Top = 26
+                Width = 94
+                Height = 13
+                Caption = 'Transparency Level'
+              end
+              object CheckBoxTransparentMenus: TCheckBox
+                Left = 3
+                Top = 3
+                Width = 134
+                Height = 17
+                Caption = 'Use transparent menus'
+                TabOrder = 0
+              end
+              object EditMenuTransValue: TEdit
+                Left = 122
+                Top = 26
+                Width = 41
+                Height = 21
+                NumbersOnly = True
+                ReadOnly = True
+                TabOrder = 1
+                Text = '220'
+              end
+              object UpDownMenu: TUpDown
+                Left = 163
+                Top = 26
+                Width = 16
+                Height = 21
+                Associate = EditMenuTransValue
+                Max = 255
+                Position = 220
+                TabOrder = 2
               end
             end
           end
@@ -1641,7 +1680,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 416
     Top = 304
     Bitmap = {
-      494C010108000D00080010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

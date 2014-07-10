@@ -109,6 +109,7 @@ type
  TCustomControlBarClass  = class(TCustomControlBar);
  TCustomButtonClass      = class(TCustomButton);
 var
+  //FHOOK: HHOOK = 0;
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   {$IFEND}
@@ -3041,6 +3042,30 @@ type
  TThemeServicesDrawElement2 =  procedure (DC: HDC; Details: TThemedElementDetails;  const R: TRect; ClipRect: TRect) of object;
 {$ENDIF}
 
+//function HookCallWndProc(nCode: Integer; wParam, lParam: Longint): Longint; stdcall;
+//var
+//  LCWPStruct: TCWPStruct;
+//  AStyle : NativeInt;
+//begin
+//  if (nCode = HC_ACTION) then
+//  begin
+//    CopyMemory(@LCWPStruct, Pointer(lParam), SizeOf(CWPSTRUCT));
+//    case LCWPStruct.message of
+//      WM_CREATE:
+//        begin
+//          if SameText(GetWindowClassName(LCWPStruct.hwnd), '#32768') then
+//          begin
+//             AStyle := GetWindowLong(LCWPStruct.hwnd, GWL_EXSTYLE);
+//              if (AStyle and WS_EX_LAYERED) = 0 then
+//                SetWindowLong(LCWPStruct.hwnd, GWL_EXSTYLE, AStyle or WS_EX_LAYERED);
+//             SetLayeredWindowAttributes(LCWPStruct.hwnd, 0, 220, LWA_ALPHA);
+//          end;
+//        end;
+//    end;
+//  end;
+//  Result := CallNextHookEx(WH_CALLWNDPROC, nCode, wParam, lParam);
+//end;
+
 
 procedure InstallColorizerHooks;
 {$IFNDEF DELPHIXE2_UP}
@@ -3048,6 +3073,7 @@ var
  LThemeServicesDrawElement2   : TThemeServicesDrawElement2;
 {$ENDIF}
 begin
+  //FHOOK := SetWindowsHookEx(WH_CALLWNDPROC, @HookCallWndProc, 0, GetCurrentThreadId());
   Trampoline_TWinControl_DefaultHandler:=InterceptCreate(@TWinControl.DefaultHandler, @Detour_TWinControl_DefaultHandler);
 
   //Trampoline_TCustomActionPopupMenu_CreateParams :=InterceptCreate(@TCustomActionPopupMenuClass.CreateParams, @Detour_TCustomActionPopupMenu_CreateParams);
@@ -3104,6 +3130,12 @@ end;
 
 procedure RemoveColorizerHooks;
 begin
+//  if (FHOOK<>0) then
+//  begin
+//    UnhookWindowsHookEx(FHOOK);
+//    FHOOK:=0;
+//  end;
+
   if Assigned(Trampoline_HintWindow_Paint) then
     InterceptRemove(@Trampoline_HintWindow_Paint);
 

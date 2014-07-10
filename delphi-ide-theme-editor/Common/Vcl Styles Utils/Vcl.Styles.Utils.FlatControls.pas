@@ -64,7 +64,7 @@ type
   TBeforeHookingControl = function(Info: PControlInfo): Boolean;
   TSysHookNotification = procedure(Action: TSysHookAction; Info: PControlInfo);
 
-  TFlatStyleManager = class(TComponent)
+  TColorizerStyleManager = class(TComponent)
   private
   class var
     FEnabled: Boolean;
@@ -233,7 +233,7 @@ begin
 
 end;
 
-class constructor TFlatStyleManager.Create;
+class constructor TColorizerStyleManager.Create;
 begin
   FBeforeHookingControlProc := @BeforeHookingControl;
   FSysHookNotificationProc := @HookNotification;
@@ -246,7 +246,7 @@ begin
   InstallHook;
 end;
 
-class destructor TFlatStyleManager.Destroy;
+class destructor TColorizerStyleManager.Destroy;
 begin
   RemoveHook;
   FRegSysStylesList.Free;
@@ -255,17 +255,17 @@ begin
   inherited;
 end;
 
-constructor TFlatStyleManager.Create(AOwner: TComponent);
+constructor TColorizerStyleManager.Create(AOwner: TComponent);
 begin
   inherited;
 end;
 
-destructor TFlatStyleManager.Destroy;
+destructor TColorizerStyleManager.Destroy;
 begin
 
 end;
 
-class function TFlatStyleManager.HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
+class function TColorizerStyleManager.HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
 var
   CBTSturct: TCBTCreateWnd;
   sClassName, Tmp: string;
@@ -393,25 +393,25 @@ begin
   end;
 end;
 
-class procedure TFlatStyleManager.InstallHook;
+class procedure TColorizerStyleManager.InstallHook;
 begin
   FHook := SetWindowsHookEx(WH_CBT, @HookCBProc, 0, GetCurrentThreadId());
 end;
 
-class procedure TFlatStyleManager.RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+class procedure TColorizerStyleManager.RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
 begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));
   FRegSysStylesList.Add(LowerCase(SysControlClass), SysStyleHookClass);
 end;
 
-class procedure TFlatStyleManager.RemoveHook;
+class procedure TColorizerStyleManager.RemoveHook;
 begin
   if FHook <> 0 then
     UnhookWindowsHookEx(FHook);
 end;
 
-class procedure TFlatStyleManager.UnRegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+class procedure TColorizerStyleManager.UnRegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
 begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));

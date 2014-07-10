@@ -109,7 +109,7 @@ type
     ButtonCheckUpdates: TButton;
     ButtonDeleteTheme: TButton;
     CheckBoxHookSystemColors: TCheckBox;
-    TabSheet1: TTabSheet;
+    TabSheetToolBars: TTabSheet;
     RbtnToolBarGradientVert: TRadioButton;
     RbtnToolBarGradientHorz: TRadioButton;
     Label4: TLabel;
@@ -137,7 +137,7 @@ type
     GroupBox2: TGroupBox;
     RbtnDockBorderRounded: TRadioButton;
     RbtnDockBorderRectangle: TRadioButton;
-    TabSheet3: TTabSheet;
+    TabSheetIDETabs: TTabSheet;
     Button12: TButton;
     Button13: TButton;
     Button14: TButton;
@@ -158,7 +158,7 @@ type
     Button17: TButton;
     Label25: TLabel;
     Label26: TLabel;
-    TabSheet4: TTabSheet;
+    TabSheetHeaders: TTabSheet;
     CheckBoxCustomHeader: TCheckBox;
     Label27: TLabel;
     Label28: TLabel;
@@ -187,9 +187,14 @@ type
     Image4: TImage;
     Image5: TImage;
     PageControl2: TPageControl;
-    TabSheet5: TTabSheet;
+    TabSheetTheme: TTabSheet;
     Panel3: TPanel;
     Image6: TImage;
+    CheckBoxTransparentMenus: TCheckBox;
+    Level: TLabel;
+    EditMenuTransValue: TEdit;
+    UpDownMenu: TUpDown;
+    TabSheetMenu: TTabSheet;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -424,6 +429,9 @@ begin
     FSettings.HeaderEndGrad         := ColorToString(ColorBoxHeaderEndGradient.Selected);
     FSettings.HeaderFontColor       := ColorToString(ColorBoxHeaderFontColor.Selected);
     FSettings.HeaderBorderColor     := ColorToString(ColorBoxHeaderBorderColor.Selected);
+
+    FSettings.MenuTransparent       := CheckBoxTransparentMenus.Checked;
+    FSettings.MenuTransLevel        := UpDownMenu.Position;
 
     WriteSettings(FSettings, GetSettingsFolder);
 
@@ -907,8 +915,10 @@ begin
   //CheckBoxActivateDWM.Enabled:=DwmIsEnabled;
   {$IFDEF DELPHIXE2_UP}
   TabSheetVCLStyles.TabVisible  := True;//{$IFDEF DLLWIZARD}False{$ELSE}True{$ENDIF};
+  TabSheetMenu.TabVisible := True;
   {$ELSE}
   TabSheetVCLStyles.TabVisible  := False;
+  TabSheetMenu.TabVisible := False;
   {$ENDIF}
   TabSheetHookedForms.TabVisible:=False;
   ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
@@ -1191,6 +1201,9 @@ begin
   CheckBoxUseCustomColorsToolbar.Checked := FSettings.ToolbarCustomColors;
   ColorBoxToolBarStartGrad.Selected   := TryStrToColor(FSettings.ToolbarStartGrad, clBtnFace);
   ColorBoxToolBarStartEnd.Selected    := TryStrToColor(FSettings.ToolbarEndGrad, clBtnFace);
+
+  CheckBoxTransparentMenus.Checked    := FSettings.MenuTransparent;
+  UpDownMenu.Position                 := FSettings.MenuTransLevel;
 
   CheckBoxEnabled.Checked:=FSettings.Enabled;
   //CheckBoxActivateDWM.Checked:=FSettings.EnableDWMColorization;

@@ -71,6 +71,8 @@ type
     FVCLStylesMenusColors: boolean;
     FVCLStylesScrollBars: boolean;
     FVCLStylesControls: boolean;
+    FMenuTransLevel: Integer;
+    FMenuTransparent: boolean;
     function GetThemeFileName: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
@@ -128,6 +130,9 @@ type
     property HeaderFontColor   : string  read FHeaderFontColor write FHeaderFontColor;
     property HeaderBorderColor : string  read FHeaderBorderColor write FHeaderBorderColor;
     property HeaderCustom      : boolean read FHeaderCustom write FHeaderCustom;
+
+    property MenuTransparent   : boolean read FMenuTransparent write FMenuTransparent;
+    property MenuTransLevel    : Integer read FMenuTransLevel write FMenuTransLevel;
 
     property CheckUpdates    : boolean read FCheckUpdates write FCheckUpdates;
 
@@ -205,6 +210,10 @@ begin
     Settings.HeaderFontColor         := LIniFile.ReadString('Global', 'HeaderFontColor', 'clBlack');
     Settings.HeaderBorderColor       := LIniFile.ReadString('Global', 'HeaderBorderColor', 'clBlack');
 
+
+    Settings.MenuTransparent         := LIniFile.ReadBool('Global', 'MenuTransparent', False);
+    Settings.MenuTransLevel          := LIniFile.ReadInteger('Global', 'MenuTransLevel', 220);
+
     Settings.CheckUpdates         := LIniFile.ReadBool('Global', 'CheckUpdates', True);
   finally
     LIniFile.Free;
@@ -268,6 +277,8 @@ begin
     LIniFile.WriteString('Global', 'HeaderFontColor', Settings.HeaderFontColor);
     LIniFile.WriteString('Global', 'HeaderBorderColor', Settings.HeaderBorderColor);
 
+    LIniFile.WriteBool('Global', 'MenuTransparent', Settings.MenuTransparent);
+    LIniFile.WriteInteger('Global', 'MenuTransLevel', Settings.MenuTransLevel);
     LIniFile.WriteBool('Global', 'CheckUpdates', Settings.CheckUpdates);
   finally
     LIniFile.Free;
