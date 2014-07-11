@@ -25,7 +25,7 @@ https://theroadtodelphi.files.wordpress.com/2014/07/dic_debug_vs.png
  * DIC is compatible with RAD Studio XE, XE2, XE3, XE4, XE5, X6.
  * Support for VCL Styles (XE2-XE6)
  * Transparent menus.
- * Allow to change the icons used in the title bar, set the colors, and gradient direction of the title bar of the docked windows.
+ * Allow to change the icons, set the colors, and gradient direction of the title bar of the docked windows.
  * Set the colors, and gradient direction of the toolbars.
  * Improve the drawing of the disabled icons used in menus and toolbars
  * Compatible with CnWizards and GExperts
