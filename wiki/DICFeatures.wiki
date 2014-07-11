@@ -32,7 +32,8 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/
 
 == Download ==
 
-[https://goo.gl/qtOSmK Installer of the Delphi IDE Colorizer]
+[https://goo.gl/qtOSmK Installer of the Delphi IDE Colorizer - Mirror 1]
+[https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNUDBTTGh4aEhsN1k Installer of the Delphi IDE Colorizer - Mirror 2]
 
 Check the next sample images
 
