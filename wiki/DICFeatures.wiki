@@ -7,15 +7,18 @@
 <wiki:video url="https://www.youtube.com/watch?v=DMTsIBceNWk"/>
 <wiki:video url="https://www.youtube.com/watch?v=_AYKSjI1CVg"/>
 
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DIC_Transparent_Menus.png
+https://theroadtodelphi.files.wordpress.com/2014/07/dic_transparent_menus.png
 
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DIC_Debug_VS.png
+https://theroadtodelphi.files.wordpress.com/2014/07/yellowgreen_debug_layout_assembly.png
 
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/DeepskyBlue_default_layout_menu.png
+https://theroadtodelphi.files.wordpress.com/2014/07/dic_vs.png
 
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/YellowGreen_debug_layout_assembly.png
 
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/OrangeRed_default_layout_fmx.png
+https://theroadtodelphi.files.wordpress.com/2014/07/dic_vclstyles_menus.png
+
+https://theroadtodelphi.files.wordpress.com/2014/07/deepskyblue_default_layout.png
+
+https://theroadtodelphi.files.wordpress.com/2014/07/dic_debug_vs.png
 
 = Features =
 
@@ -32,60 +35,6 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/
 
 == Download ==
 
-[https://goo.gl/qtOSmK Installer of the Delphi IDE Colorizer - Mirror 1]
+[https://goo.gl/qtOSmK Installer - Mirror 1]
 
-[https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNUDBTTGh4aEhsN1k Installer of the Delphi IDE Colorizer - Mirror 2]
-
-Check the next sample images
-
-== Project Manager ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/ProjectManager.gif
-
-== Tool Palette ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/ToolPalette.gif
-
-== Object Inspector ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/ObjectInspector.gif
-
-== Local Variable Window ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/LocalVariables.gif
-
-== Breakpoint List ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/BreakpointList.gif
-
-== Watch List ==
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/WatchList.gif
-
-== Thread Status ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Wheat_ThreadStatus.png
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Twilight%20Green_ThreadStatus.png
-
-
-== Debugger Windows ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/LemonChiffon_debug_layout_assembly.png
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/LightBlue_debug_layout_assembly.png
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/LightSkyBlue_debug_layout_assembly.png
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Peru_debug_layout_assembly.png
-
-
-== !FireMonkey ==
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Peru_default_layout_fmx.png
-
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/SandyBrown_default_layout_fmx.png
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/SkyBlue_default_layout_fmx.png
-
-https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/Tan_default_layout.png
+[https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNUDBTTGh4aEhsN1k Installer - Mirror 2]
