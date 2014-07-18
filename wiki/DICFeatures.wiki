@@ -4,7 +4,21 @@
 
 https://theroadtodelphi.files.wordpress.com/2014/07/rad_appmethod.png
 
- The Delphi IDE Colorizer (DIC) is a Wizard which allows to customize the look and feel of the *workspace* of the  RAD Studio IDE. 
+ The Delphi IDE Colorizer (DIC) is a plugin which allows to customize the look and feel of the *workspace* of the  <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> IDE and <a href="http://www.appmethod.com/">Appmethod</a>. 
+
+
+= Features =
+
+ * DIC is compatible with <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> XE, XE2, XE3, XE4, XE5, X6 and <a href="http://www.appmethod.com/">Appmethod</a> 1.14
+ * Support for VCL Styles (XE2-XE6)
+ * Transparent menus.
+ * Allow to change the icons, set the colors, and gradient direction of the title bar of the docked windows.
+ * Set the colors, and gradient direction of the toolbars.
+ * Improve the drawing of the disabled icons used in menus and toolbars
+ * Compatible with <a href="http://www.cnpack.org/index.php?lang=en">CnWizards</a> and <a href="http://www.gexperts.org">GExperts</a>
+ * Replace the icons used in the gutter and the debugger.
+ * Includes 80+ themes.
+
 
 <wiki:video url="https://www.youtube.com/watch?v=DMTsIBceNWk"/>
 <wiki:video url="https://www.youtube.com/watch?v=_AYKSjI1CVg"/>
@@ -22,20 +36,9 @@ https://theroadtodelphi.files.wordpress.com/2014/07/deepskyblue_default_layout.p
 
 https://theroadtodelphi.files.wordpress.com/2014/07/dic_debug_vs.png
 
-= Features =
-
- * DIC is compatible with RAD Studio XE, XE2, XE3, XE4, XE5, X6.
- * Support for VCL Styles (XE2-XE6)
- * Transparent menus.
- * Allow to change the icons, set the colors, and gradient direction of the title bar of the docked windows.
- * Set the colors, and gradient direction of the toolbars.
- * Improve the drawing of the disabled icons used in menus and toolbars
- * Compatible with CnWizards and GExperts
- * Replace the icons used in the gutter and the debugger.
- * Includes 80+ themes.
  
 
-== Download ==
+= Download =
 
 [https://goo.gl/qtOSmK Installer - Mirror 1]
 
