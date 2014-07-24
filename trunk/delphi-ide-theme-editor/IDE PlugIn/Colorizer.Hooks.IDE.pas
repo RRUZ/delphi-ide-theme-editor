@@ -26,10 +26,10 @@ interface
 
 var
   DrawNamePair          : Boolean     = False;
+  DrawItemPopupSearchForm    : Boolean     = False;
+  DrawItemSelPopupSearchForm : Boolean     = False;
   {$IFDEF DELPHIXE5_UP}
   {$ELSE}
-  DrawItemIDEInsight    : Boolean     = False;
-  DrawItemIDEInsightSel : Boolean     = False;
   {$ENDIF}
 
 const
@@ -103,10 +103,10 @@ var
 
   {$IFDEF DELPHIXE5_UP}
   {$ELSE}
+  {$ENDIF}
   Trampoline_TPopupSearchForm_DrawTreeDrawNode : procedure (Self: TObject;BaseVirtualTree: TCustomControl;const PaintInfo: TVTPaintInfo) = nil;
   Trampoline_TPopupSearchForm_PaintCategoryNode: procedure (Self: TObject;VirtualNode : TVirtualNode; Canvas : TCanvas; Rect:TRect; Category : TObject; Flag: Boolean) = nil;
   Trampoline_TPopupSearchForm_PaintItemNode    : procedure (Self: TObject;VirtualNode : TVirtualNode; Canvas : TCanvas; Rect:TRect; Item : TObject; Flag: Boolean) = nil;
-  {$ENDIF}
 
   //  0022C1A0 7413 2BF5 __fastcall Ideinsight::TIDEInsightForm::DrawTreeDrawNode(Idevirtualtrees::TBaseVirtualTree *, Idevirtualtrees::TVTPaintInfo&)
   //  0022CE84 7395 2C05 __fastcall Ideinsight::TIDEInsightForm::PaintCategoryNode(Idevirtualtrees::TVirtualNode *, Vcl::Graphics::TCanvas *, System::Types::TRect&, Ideinsightmgr::TIDEInsightCategory *, bool)
@@ -495,30 +495,31 @@ end;
 
 {$IFDEF DELPHIXE5_UP}
 {$ELSE}
+{$ENDIF}
+
 procedure Detour_TPopupSearchForm_DrawTreeDrawNode(Self: TObject;BaseVirtualTree: TCustomControl;const PaintInfo: TVTPaintInfo);
 begin
   //AddLog('Detour_TPopupSearchForm_DrawTreeDrawNode', 'Hooked');
-  DrawItemIDEInsight:=True;
-  DrawItemIDEInsightSel:=False;
+  DrawItemPopupSearchForm:=True;
+  DrawItemSelPopupSearchForm:=False;
   Trampoline_TPopupSearchForm_DrawTreeDrawNode(Self, BaseVirtualTree, PaintInfo);
 end;
 
 procedure Detour_TPopupSearchForm_PaintCategoryNode(Self: TObject;VirtualNode : TVirtualNode; Canvas : TCanvas; Rect:TRect; Category : TObject; Flag: Boolean);
 begin
   //AddLog('Detour_TPopupSearchForm_PaintCategoryNode', 'Hooked');
-  DrawItemIDEInsight:=True;
-  DrawItemIDEInsightSel:= vsSelected in VirtualNode.States;
+  DrawItemPopupSearchForm:=True;
+  DrawItemSelPopupSearchForm:= vsSelected in VirtualNode.States;
   Trampoline_TPopupSearchForm_PaintCategoryNode(Self, VirtualNode, Canvas, Rect, Category, Flag);
 end;
 
 procedure Detour_TPopupSearchForm_PaintItemNode(Self: TObject;VirtualNode : TVirtualNode; Canvas : TCanvas; Rect:TRect; Item : TObject; Flag: Boolean);
 begin
   //AddLog('Detour_TPopupSearchForm_PaintItemNode', 'Hooked');
-  DrawItemIDEInsight:=True;
-  DrawItemIDEInsightSel:= vsSelected in VirtualNode.States;
+  DrawItemPopupSearchForm:=True;
+  DrawItemSelPopupSearchForm:= vsSelected in VirtualNode.States;
   Trampoline_TPopupSearchForm_PaintItemNode(Self, VirtualNode, Canvas, Rect, Item, Flag);
 end;
-{$ENDIF}
 
 function Detour_Gradientdrawer_GetOutlineColor : TColor;
 begin
@@ -886,20 +887,21 @@ const
   sBaseVirtualTreePrepareBitmaps = '@Idevirtualtrees@TBaseVirtualTree@PrepareBitmaps$qqroo';
   sListButtonPaint               = '@Idelistbtns@TListButton@Paint$qqrv';
 
-{$IFDEF DELPHIXE5_UP}
- sIDEInsight_DrawTreeDrawNode  = '@Ideinsight@TIDEInsightForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
- sIDEInsight_PaintCategoryNode = '@Ideinsight@TIDEInsightForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
- sIDEInsight_PaintItemNode     = '@Ideinsight@TIDEInsightForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
+//{$IFDEF DELPHIXE5_UP}
+// sIDEInsight_DrawTreeDrawNode  = '@Ideinsight@TIDEInsightForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
+// sIDEInsight_PaintCategoryNode = '@Ideinsight@TIDEInsightForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
+// sIDEInsight_PaintItemNode     = '@Ideinsight@TIDEInsightForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
+//{$ELSE}
 // sIDEInsight_DrawTreeDrawNode  = '@Popupsrchfrm@TPopupSearchForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
 // sIDEInsight_PaintCategoryNode = '@Popupsrchfrm@TPopupSearchForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
 // sIDEInsight_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
-{$ELSE}
- sIDEInsight_DrawTreeDrawNode  = '@Popupsrchfrm@TPopupSearchForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
- sIDEInsight_PaintCategoryNode = '@Popupsrchfrm@TPopupSearchForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
- sIDEInsight_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
-{$ENDIF}
-
-
+//{$ENDIF}
+ //signatures to hook
+ //search for forms/units (XE-X6)
+ //IDE Insight (XE-XE4)
+ sPopupSearchForm_DrawTreeDrawNode  = '@Popupsrchfrm@TPopupSearchForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
+ sPopupSearchForm_PaintCategoryNode = '@Popupsrchfrm@TPopupSearchForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
+ sPopupSearchForm_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
 
 procedure InstallHooksIDE;
 var
@@ -934,18 +936,18 @@ begin
 
 {$IFDEF DELPHIXE5_UP}
 {$ELSE}
-   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_DrawTreeDrawNode);
+{$ENDIF}
+   pOrgAddress := GetProcAddress(CoreIDEModule, sPopupSearchForm_DrawTreeDrawNode);
    if Assigned(pOrgAddress) then
    Trampoline_TPopupSearchForm_DrawTreeDrawNode  := InterceptCreate(pOrgAddress, @Detour_TPopupSearchForm_DrawTreeDrawNode);
 
-   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_PaintCategoryNode);
+   pOrgAddress := GetProcAddress(CoreIDEModule, sPopupSearchForm_PaintCategoryNode);
    if Assigned(pOrgAddress) then
    Trampoline_TPopupSearchForm_PaintCategoryNode:= InterceptCreate(pOrgAddress, @Detour_TPopupSearchForm_PaintCategoryNode);
 
-   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_PaintItemNode);
+   pOrgAddress := GetProcAddress(CoreIDEModule, sPopupSearchForm_PaintItemNode);
    if Assigned(pOrgAddress) then
    Trampoline_TPopupSearchForm_PaintItemNode    := InterceptCreate(pOrgAddress, @Detour_TPopupSearchForm_PaintItemNode);
-{$ENDIF}
   end;
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
@@ -1017,6 +1019,7 @@ begin
 
 {$IFDEF DELPHIXE5_UP}
 {$ELSE}
+{$ENDIF}
   if Assigned(Trampoline_TPopupSearchForm_DrawTreeDrawNode) then
     InterceptRemove(@Trampoline_TPopupSearchForm_DrawTreeDrawNode);
 
@@ -1025,7 +1028,6 @@ begin
 
   if Assigned(Trampoline_TPopupSearchForm_PaintItemNode) then
     InterceptRemove(@Trampoline_TPopupSearchForm_PaintItemNode);
-{$ENDIF}
 
   if Assigned(Trampoline_TFileFindLine_InternalCalcDraw) then
     InterceptRemove(@Trampoline_TFileFindLine_InternalCalcDraw);

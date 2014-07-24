@@ -20,7 +20,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "4.19.0"
+  !define VER_MINOR "4.31.0"
 !endif
 
 !ifndef IDE_VERSION_DXE
