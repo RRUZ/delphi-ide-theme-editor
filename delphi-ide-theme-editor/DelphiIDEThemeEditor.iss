@@ -1917,6 +1917,7 @@ AppPublisherURL=http://theroadtodelphi.wordpress.com/
 AppSupportURL=http://theroadtodelphi.wordpress.com/
 AppUpdatesURL=http://theroadtodelphi.wordpress.com/
 DefaultDirName={pf}\The Road To Delphi\Delphi IDE Theme Editor
+OutputDir=C:\Delphi\google-code\DITE\delphi-ide-theme-editor
 OutputBaseFileName=Setup_DelphiIDEThemeEditor
 DisableDirPage=false
 Compression=lzma
@@ -1942,11 +1943,6 @@ Name: {userappdata}\DITE\Themes VS
 Name: {userappdata}\DITE\Themes Lazarus
 Name: {userappdata}\DITE\Themes
 Name: {app}\Images
-Name: {app}\BPL
-Name: {app}\BPL\XE
-Name: {app}\BPL\XE\Themes
-Name: {app}\BPL\XE2
-Name: {app}\BPL\XE2\Themes
 Name: {app}\Styles
 Name: {app}\HelpInsight
 [Icons]

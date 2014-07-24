@@ -1879,7 +1879,13 @@ begin
         TextRect.Bottom := Rect.Bottom - 2;
 
         if Assigned(Self.OnDrawText) then
+        begin
+         {$IFDEF DELPHIXE2_UP}
+          if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
+            Canvas.Brush.Style := bsClear;
+         {$ENDIF}
           Self.OnDrawText(Self, Button, Canvas, TextRect, State)
+        end
         else
         begin
           Caption := Button.Caption;
@@ -1889,6 +1895,7 @@ begin
             Canvas.Brush.Style := bsClear;
             if LStyle.GetElementColor(LDetails, ecTextColor, TxtColor) then
               Canvas.Font.Color := TxtColor;
+
             Canvas.TextRect(TextRect, Caption, [tfEndEllipsis, tfVerticalCenter]);
             Canvas.Brush.Style := bsSolid;
           end
