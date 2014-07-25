@@ -36,7 +36,7 @@ https://theroadtodelphi.files.wordpress.com/2014/07/deepskyblue_default_layout.p
 
 https://theroadtodelphi.files.wordpress.com/2014/07/dic_debug_vs.png
 
- 
+For more sample images try the [https://code.google.com/p/delphi-ide-theme-editor/wiki/DICGalleryVCLStyles image gallery] 
 
 = Download =
 
