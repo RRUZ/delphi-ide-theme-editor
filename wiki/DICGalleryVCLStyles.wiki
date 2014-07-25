@@ -1,7 +1,8 @@
 #summary Delphi IDE Colorizer (DIC) VCL Styles Gallery
 
 Turquoise gray
-http://theroadtodelphi.files.wordpress.com/2014/07/turquoise-gray.png
+
+[http://theroadtodelphi.files.wordpress.com/2014/07/turquoise-gray.png http://theroadtodelphi.files.wordpress.com/2014/07/turquoise-gray.png]
 
 Table Dark
 http://theroadtodelphi.files.wordpress.com/2014/07/table-dark.png
