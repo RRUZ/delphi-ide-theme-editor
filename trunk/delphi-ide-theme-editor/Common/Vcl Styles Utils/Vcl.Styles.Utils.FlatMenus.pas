@@ -44,6 +44,7 @@ uses
   GraphUtil,
   Controls,
   Menus,
+  uMisc,
   Colorizer.Utils, //remove in the future
   Math,
   Vcl.Styles.Utils.FlatStyleHook;
@@ -264,8 +265,6 @@ end;
 
 { TSysPopupStyleHook }
 constructor TColorizerPopupStyleHook.Create(AHandle: THandle);
-//var
-//  AStyle : NativeInt;
 begin
   inherited;
 {$IF CompilerVersion > 23}
@@ -280,12 +279,6 @@ begin
   FItemsPainted := False;
   FSysPopupItem := nil;
   FVCLMenuItems := nil;
-  // Font := Screen.MenuFont;
-// AddLog('TColorizerPopupStyleHook.Create', IntToHex(AHandle, 8));
-//  AStyle := GetWindowLong(AHandle, GWL_EXSTYLE);
-//   if (SysControl.ExStyle and WS_EX_LAYERED) = 0 then
-//    SetWindowLong(AHandle, GWL_EXSTYLE, AStyle or WS_EX_LAYERED);
-//  SetLayeredWindowAttributes(AHandle, 0, 220, LWA_ALPHA);
 end;
 
 destructor TColorizerPopupStyleHook.Destroy;
@@ -890,11 +883,12 @@ begin
   else
   {$ENDIF}
   begin
+
     if Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled then
     begin
       Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.MenuColor;
       Canvas.FillRect(SysControl.ClientRect);
-      Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+      Canvas.Brush.Color:= TColorizerLocalSettings.ColorMap.Color;
       Canvas.FillRect(Rect(SysControl.ClientRect.Left, SysControl.ClientRect.Top, SysControl.ClientRect.Left+25, SysControl.ClientRect.Bottom));
       Canvas.Brush.Style:=bsClear;
       Canvas.Pen.Width:=2;
@@ -1116,6 +1110,7 @@ begin
 
     MN_SELECTITEM, WM_PRINT:
       begin
+
         if (not OverridePaint) or (not OverridePaintNC) then
         begin
           Message.Result := CallDefaultProc(Message);
@@ -1131,6 +1126,7 @@ begin
           Exit;
         end;
         SetRedraw(False);
+
         Message.Result := CallDefaultProc(Message);
         SetRedraw(True);
         Exit; { Do not Dispatch . }

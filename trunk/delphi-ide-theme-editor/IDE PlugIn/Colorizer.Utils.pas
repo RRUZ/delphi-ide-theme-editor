@@ -296,7 +296,7 @@ var
 begin
     if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
-//    if SameText(AComponent.ClassName, 'TMessageHintWindow') then
+//    if SameText(AComponent.ClassName, 'TTBXToolbar') then
 //     TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
 
     if AComponent is TForm then

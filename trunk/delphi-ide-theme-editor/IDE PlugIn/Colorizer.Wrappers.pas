@@ -209,6 +209,12 @@ type
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
+
+//   TWrapperTTBXToolbar = class(TBaseWrapper)
+//   protected
+//    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
+//   end;
+
    TWrapperComponentToolbarFrame = class(TBaseWrapper)
    protected
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
@@ -1277,6 +1283,16 @@ begin
   //TRttiUtils.SetRttiPropertyValue(AComponent,'TabControl.Scroller.', AColorMap.Color);
 end;
 
+{ TWrapperTTBXToolbar }
+
+//procedure TWrapperTTBXToolbar.SetProperties(AComponent: TComponent;
+//  AColorMap: TColorizerColorMap);
+//begin
+//  inherited;
+//  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
+//end;
+
+
 { TRttiWrapper }
 
 constructor TRttiWrapper.Create(AObject : TObject);
@@ -1336,6 +1352,7 @@ begin
   FSelectString := RootType.GetField('FSelectString').GetValue(FListButton).AsString;
 end;
 
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
@@ -1378,7 +1395,10 @@ initialization
 
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleEditControl);
   RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleEditControl);
-  RegisterColorizerWrapper('TEditorDockPanel',  TWrapperSimpleEditControl);
+  RegisterColorizerWrapper('TRichEdit',  TWrapperSimpleEditControl);
+  RegisterColorizerWrapper('TMemo',  TWrapperSimpleEditControl);
+  //RegisterColorizerWrapper('TRichEditEx',  TWrapperSimpleEditControl); //MMX
+
   //RegisterColorizerWrapper('TPopupListBox',  TWrapperSimpleControl); not used
 
   RegisterColorizerWrapper('TPanel',  TWrapperPanel);
@@ -1393,8 +1413,9 @@ initialization
   RegisterColorizerWrapper('TCnSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
   RegisterColorizerWrapper('TCnExternalSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
   RegisterColorizerWrapper('TGXToolBar',  TWrapperToolBar);//gexperts toolbar
- // RegisterColorizerWrapper('TTBXToolbar',  TWrapperToolBar);//gexperts toolbar
+  RegisterColorizerWrapper('TMenuBar',  TWrapperToolBar);//gexperts TMenuBar(TToolBar)
 
+  //RegisterColorizerWrapper('TTBXToolbar',  TWrapperTTBXToolbar);//MMX toolbar
 
   RegisterColorizerWrapper('TTabSet',  TWrapperTabSet);
   RegisterColorizerWrapper('TIDEDockTabSet',  TWrapperTabSet); //TIDEDockTabSet->TDockTabSet->TTabSet
@@ -1415,6 +1436,9 @@ initialization
   RegisterColorizerWrapper('TCheckListBox',  TWrapperLists);
   RegisterColorizerWrapper('TExplorerCheckListBox',  TWrapperLists);
   RegisterColorizerWrapper('THintListView',  TWrapperLists);
+  //RegisterColorizerWrapper('TAutoScrollTreeView',  TWrapperLists);  //MMX  OK
+  //RegisterColorizerWrapper('TAutoScrollListView',  TWrapperLists);  //MMX
+
 
   RegisterColorizerWrapper('TGroupBox',  TWrapperGroupComponents);
   RegisterColorizerWrapper('TRadioGroup',  TWrapperGroupComponents);
