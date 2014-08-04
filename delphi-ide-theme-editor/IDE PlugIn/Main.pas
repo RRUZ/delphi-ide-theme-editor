@@ -25,7 +25,7 @@
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
 
-  Add support for Tcheclbox, TRadiobutton (including fonts)
+  Add support for TCheckbox, TRadiobutton (including fonts)
   Transparent system menus
   Fast vcl styles/themes switch
 

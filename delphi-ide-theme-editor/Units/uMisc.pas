@@ -481,6 +481,7 @@ begin
     $0284: Result := 'WM_IME_COMPOSITIONFULL';
     $0285: Result := 'WM_IME_SELECT';
     $0286: Result := 'WM_IME_CHAR';
+    $0287: Result := 'WM_IME_SYSTEM';
     $0288: Result := 'WM_IME_REQUEST';
     $0290: Result := 'WM_IME_KEYDOWN';
     $0291: Result := 'WM_IME_KEYUP';
@@ -546,7 +547,36 @@ begin
     $046A: Result := 'UDM_GETBUDDY';
     $102C: Result := 'LVM_GETITEMSTATE';
     $8000: Result := 'WM_APP';
+    //menus
+    $01E0 : Result:= 'MN_SETHMENU';
+    $01E1 : Result:= 'MN_GETHMENU';
+    $01E2 : Result:= 'MN_SIZEWINDOW';
+    $01E3 : Result:= 'MN_OPENHIERARCHY';
+    $01E4 : Result:= 'MN_CLOSEHIERARCHY';
+    $01E5 : Result:= 'MN_SELECTITEM';
+    $01E6 : Result:= 'MN_CANCELMENUS';
+    $01E7 : Result:= 'MN_SELECTFIRSTVALIDITEM';
+    $01EA : Result:= 'MN_GETPPOPUPMENU';
+    $01EB : Result:= 'MN_FINDMENUWINDOWFROMPOINT';
+    $01EC : Result:= 'MN_SHOWPOPUPWINDOW';
+    $01ED : Result:= 'MN_BUTTONDOWN';
+    $01EE : Result:= 'MN_MOUSEMOVE';
+    $01EF : Result:= 'MN_BUTTONUP';
+    $01F0 : Result:= 'MN_SETTIMERTOOPENHIERARCHY';
+    $01F1 : Result:= 'MN_DBLCLK';
+    $01F2 : Result:= 'MN_ENDMENU';
+    $01F3 : Result:= 'MN_DODRAGDROP';
+    $01F4 : Result:= 'MN_ENDMENU';
 
+    $0090: Result:= 'WM_UAHDESTROYWINDOW';
+    $0091: Result:= 'WM_UAHDRAWMENU';
+    $0092: Result:= 'WM_UAHDRAWMENUITEM';
+    $0093: Result:= 'WM_UAHINITMENU';
+    $0094: Result:= 'WM_UAHMEASUREMENUITEM';
+    $0095: Result:= 'WM_UAHNCPAINTMENUPOPUP';
+
+    $00AE : Result:= 'WM_NCUAHDRAWCAPTION'; //undocumented
+    $00AF : Result:= 'WM_NCUAHDRAWFRAME'; //undocumented
     //VCL control notifications
     CN_CHARTOITEM        : Result := 'CN_CHARTOITEM';
     CN_COMMAND           : Result := 'CN_COMMAND';

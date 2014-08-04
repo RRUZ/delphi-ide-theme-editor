@@ -44,3 +44,7 @@ TDebugInspector
 FMTFormBoundary
 FMTFormContainerForm
 TViewFormUnitDialog
+TfmClipboardHistory
+TfmGrepResults
+TfmMacroLibrary
+TfmToDo

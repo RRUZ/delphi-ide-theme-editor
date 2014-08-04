@@ -219,6 +219,7 @@ begin
    Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
 end;
 
+//Hook for allow change font color in TProjectManagerForm.TCustomVirtualStringTree.PaintNormalText (font color in project manager window) ,
 //because this component is not using the colors set via RTTI
 //Note  : This is a temporal workaround.
 function Detour_WinApi_DrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
@@ -326,49 +327,19 @@ begin
 {$ENDIF}
 end;
 
-//Hook for allow change font color in IDE Insight Window  and TPopupListBox (TInspListBox)
+//Hook for allow change font color in IDE Insight Window and TPopupListBox (TInspListBox)
 function Detour_WinApi_ExtTextOutW(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall;
-const
-{$IFDEF DELPHIXE5_UP}
- sDrawTreeDrawNode  ='IDEInsight.TIDEInsightForm.DrawTreeDrawNode';
- sPaintItemNode     ='IDEInsight.TIDEInsightForm.PaintItemNode';
- sPaintCategoryNode ='IDEInsight.TIDEInsightForm.PaintCategoryNode';
- //hook TViewFormUnitDialog (search for forms/units)
- sSearchFormUnitDrawTreeDrawNode  ='PopupSrchFrm.TPopupSearchForm.DrawTreeDrawNode';
- sSearchFormUnitPaintItemNode     ='PopupSrchFrm.TPopupSearchForm.PaintItemNode';
- sSearchFormUnitPaintCategoryNode ='PopupSrchFrm.TPopupSearchForm.PaintCategoryNode';
-{$ELSE}
- sDrawTreeDrawNode  ='PopupSrchFrm.TPopupSearchForm.DrawTreeDrawNode';
- sPaintItemNode     ='PopupSrchFrm.TPopupSearchForm.PaintItemNode';
- sPaintCategoryNode ='PopupSrchFrm.TPopupSearchForm.PaintCategoryNode';
-{$ENDIF}
 var
-{$IFDEF DELPHIXE5_UP}
- sCaller  : string;
- sClassName : string;
-{$ENDIF}
  LBgColor, OrgColor : Cardinal;
  RestoreColor{, RestoreBg} : Boolean;
 begin
  OrgColor     :=0;
- //LBgColor     :=0;
- //RestoreBg    :=False;
  RestoreColor :=False;
- {$IFDEF DELPHIXE5_UP}
- if LastWinControl<>nil then
-  try sClassName := LastWinControl.ClassName except sClassName:=''; end
- else
-   sClassName:='';
- {$ENDIF}
 
  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
  begin
-  if DrawNamePair then {SameStr(sClassName, 'TPopupListBox')}
+  if DrawNamePair then
   begin
-    //PropInsp.TPropertyInspector.InstanceListDrawItem
-    //PropInsp.TPropertyInspector.DrawNamePair
-    //sCaller:=ProcByLevel(3);
-   // RestoreBg :=True;
     LBgColor:=GetBkColor(DC);
     if (TColor(LBgColor) = clWhite) or (TColor(LBgColor) = TColorizerLocalSettings.ColorMap.WindowColor) then
     begin
@@ -385,34 +356,31 @@ begin
   end
   else
   begin
-
-
   {$IFDEF DELPHIXE5_UP}
     if DrawItemPopupSearchForm then
     begin
       if DrawItemSelPopupSearchForm then
         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor))
       else
-        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-
-      DrawItemPopupSearchForm:=False;
-      DrawItemSelPopupSearchForm:=False;
+      begin
+        if TColor(GetTextColor(DC))=$006D6D6D then
+         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor))
+        else
+         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+      end;
     end
     else
-    if  SameStr(sClassName, 'TButtonedEdit') or SameStr(sClassName, 'TIDEInsightForm') or SameStr(sClassName, 'TVirtualDrawTree') then
-    //or SameStr(sClassName, 'TPanel') or SameStr(sClassName, 'TButton') or SameStr(sClassName, 'TAppBuilder') then
+    if DrawItemIDEInsight then
     begin
-      OrgColor:=GetTextColor(DC);
-       if  OrgColor=0  then
-       begin
-         sCaller:=ProcByLevel(3);
-         if SameStr(sCaller, sDrawTreeDrawNode) or SameStr(sCaller, sPaintCategoryNode) or SameStr(sCaller, sPaintItemNode) then
-           //or  SameStr(sCaller, sSearchFormUnitDrawTreeDrawNode) or SameStr(sCaller, sSearchFormUnitPaintItemNode) or SameStr(sCaller, sSearchFormUnitPaintCategoryNode) then
-         begin
-           RestoreColor:=True;
-           SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-         end;
-       end;
+      if DrawItemSelIDEInsight then
+        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor))
+      else
+      begin
+        if TColor(GetTextColor(DC))=$006D6D6D then
+         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor))
+        else
+         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+      end;
     end;
   {$ELSE}
     if DrawItemPopupSearchForm then
@@ -420,21 +388,20 @@ begin
       if DrawItemSelPopupSearchForm then
         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor))
       else
-        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-
-      DrawItemPopupSearchForm:=False;
-      DrawItemSelPopupSearchForm:=False;
+      begin
+        if TColor(GetTextColor(DC))=$006D6D6D then
+         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.DisabledFontColor))
+        else
+         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+      end;
     end;
   {$ENDIF}
   end;
  end;
 
- //SetTextColor(DC, ColorToRGB(clRed));
  Result:=Trampoline_ExtTextOutW(DC, x, y, Options, Rect, Str, Count, Dx);
  if RestoreColor then
    SetTextColor(DC, OrgColor);
-// if RestoreBg then
-//   SetBkColor(DC, LBgColor);
 end;
 
 //Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background

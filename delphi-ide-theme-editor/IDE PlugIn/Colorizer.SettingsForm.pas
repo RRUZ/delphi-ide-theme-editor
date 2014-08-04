@@ -195,6 +195,9 @@ type
     EditMenuTransValue: TEdit;
     UpDownMenu: TUpDown;
     TabSheetMenu: TTabSheet;
+    TabSheetContribute: TTabSheet;
+    Image7: TImage;
+    Label30: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -245,6 +248,7 @@ type
     procedure Button23Click(Sender: TObject);
     procedure Image3Click(Sender: TObject);
     procedure Image1Click(Sender: TObject);
+    procedure Image7Click(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -1049,6 +1053,11 @@ end;
 procedure TFormIDEColorizerSettings.Image3Click(Sender: TObject);
 begin
   ShellExecute(0, 'open', 'https://plus.google.com/112937016948869859802', '', '', SW_SHOWNORMAL);
+end;
+
+procedure TFormIDEColorizerSettings.Image7Click(Sender: TObject);
+begin
+  ShellExecute(0, 'open', 'https://code.google.com/p/delphi-ide-theme-editor/', '', '', SW_SHOWNORMAL);
 end;
 
 procedure TFormIDEColorizerSettings.Init;

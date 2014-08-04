@@ -109,7 +109,6 @@ type
  TCustomControlBarClass  = class(TCustomControlBar);
  TCustomButtonClass      = class(TCustomButton);
 var
-  //FHOOK: HHOOK = 0;
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
   {$IFEND}
@@ -227,20 +226,6 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
-//var
-//  FormMessages : TStrings;
-
-//procedure Detour_TCustomActionPopupMenu_CreateParams(Self: TCustomActionPopupMenu;var Params : TCreateParams);
-//begin
-//  AddLog('Detour_TCustomActionPopupMenu_CreateParams', 'Hooked');
-//  Trampoline_TCustomActionPopupMenu_CreateParams(Self, Params);
-//  with Params do
-//  begin
-//      ExStyle := ExStyle or WS_EX_LAYERED;
-//  end;
-//end;
-
-
 
 procedure Detour_TCustomControlBar_PaintControlFrame(Self:TCustomControlBarClass; Canvas: TCanvas; AControl: TControl; var ARect: TRect);
 const
@@ -2847,7 +2832,7 @@ end;
 //Hook for the TCustomListView component
 procedure Detour_TCustomListView_WndProc(Self:TCustomListView;var Message: TMessage);
 var
-  LStyleServices : {$IFDEF DELPHIXE2_UP} TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
+  //LStyleServices : {$IFDEF DELPHIXE2_UP} TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
   LDetails: TThemedElementDetails;
 
       procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
@@ -2872,8 +2857,18 @@ var
           Canvas.Font.Color := TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, TColorizerLocalSettings.ColorMap.FontColor)
         else
           Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        //AddLog('DrawControlText', S);
+        //Canvas.Font.Color:= clRed;
+        {$IFDEF DELPHIXE2_UP}
+        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+          ColorizerStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color)
+        else
+          StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+        {$ELSE}
+          ThemeServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+        {$ENDIF};
 
-        LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+        //LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
       end;
 
     procedure DrawHeaderSection(Canvas: TCanvas; R: TRect; Index: Integer;
@@ -2889,6 +2884,7 @@ var
       LStyleServices :  TCustomStyleServices;
       {$ENDIF}
     begin
+
       FillChar(Item, SizeOf(Item), 0);
       Item.Mask := HDI_FORMAT;
       Header_GetItem(Self.Handle, Index, Item);
@@ -2970,11 +2966,11 @@ var
   Buffer: array [0..255] of Char;
   LParentForm : TCustomForm;
 begin
-  {$IFDEF DELPHIXE2_UP}
-  LStyleServices:=StyleServices;
-  {$ELSE}
-  LStyleServices:=ThemeServices
-  {$ENDIF};
+//  {$IFDEF DELPHIXE2_UP}
+//  LStyleServices:=StyleServices;
+//  {$ELSE}
+//  LStyleServices:=ThemeServices
+//  {$ENDIF};
 
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and  (Message.Msg=WM_PAINT) then
   if not (csDesigning in Self.ComponentState) then
@@ -3031,47 +3027,11 @@ begin
 end;
 
 
-//Hook for allow change font color in TProjectManagerForm.TVirtualStringTree ,
-
-
-
-
-//function Detour_TBaseVirtual_GetHintWindowClass : THintWindowClass;
-//begin
-//  Result:= THintWindow;
-//end;
-
-
-
 {$IFNDEF DELPHIXE2_UP}
 type
  //TThemeServicesDrawElement1 =  procedure (DC: HDC; Details: TThemedElementDetails;  const R: TRect) of object;
  TThemeServicesDrawElement2 =  procedure (DC: HDC; Details: TThemedElementDetails;  const R: TRect; ClipRect: TRect) of object;
 {$ENDIF}
-
-//function HookCallWndProc(nCode: Integer; wParam, lParam: Longint): Longint; stdcall;
-//var
-//  LCWPStruct: TCWPStruct;
-//  AStyle : NativeInt;
-//begin
-//  if (nCode = HC_ACTION) then
-//  begin
-//    CopyMemory(@LCWPStruct, Pointer(lParam), SizeOf(CWPSTRUCT));
-//    case LCWPStruct.message of
-//      WM_CREATE:
-//        begin
-//          if SameText(GetWindowClassName(LCWPStruct.hwnd), '#32768') then
-//          begin
-//             AStyle := GetWindowLong(LCWPStruct.hwnd, GWL_EXSTYLE);
-//              if (AStyle and WS_EX_LAYERED) = 0 then
-//                SetWindowLong(LCWPStruct.hwnd, GWL_EXSTYLE, AStyle or WS_EX_LAYERED);
-//             SetLayeredWindowAttributes(LCWPStruct.hwnd, 0, 220, LWA_ALPHA);
-//          end;
-//        end;
-//    end;
-//  end;
-//  Result := CallNextHookEx(WH_CALLWNDPROC, nCode, wParam, lParam);
-//end;
 
 
 procedure InstallColorizerHooks;
@@ -3137,12 +3097,6 @@ end;
 
 procedure RemoveColorizerHooks;
 begin
-//  if (FHOOK<>0) then
-//  begin
-//    UnhookWindowsHookEx(FHOOK);
-//    FHOOK:=0;
-//  end;
-
   if Assigned(Trampoline_HintWindow_Paint) then
     InterceptRemove(@Trampoline_HintWindow_Paint);
 
