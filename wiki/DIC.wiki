@@ -16,7 +16,7 @@
 
 == Which versions of Delphi (RAD Studio) supports DIC? ==
  
- Currently DIC supports RAD Studio XE, XE2, XE3, XE4, XE5, X6. 
+ Currently DIC supports RAD Studio XE-X6 and Appmethod 1.14. 
 
 == DIC supports modify the syntax highlight colors? == 
 
