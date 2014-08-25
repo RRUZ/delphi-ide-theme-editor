@@ -46,7 +46,9 @@ uses
   Vcl.Styles.Utils.SysStyleHook in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.SystemMenu in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.SystemMenu.pas',
   DDetours in 'Common\delphi-detours-library\DDetours.pas',
-  InstDecode in 'Common\delphi-detours-library\InstDecode.pas';
+  InstDecode in 'Common\delphi-detours-library\InstDecode.pas',
+  Vcl.Styles.FormStyleHooks in 'Common\Vcl Styles Utils\Vcl.Styles.FormStyleHooks.pas',
+  Vcl.Styles.NC in 'Common\Vcl Styles Utils\Vcl.Styles.NC.pas';
 
 {$R *.res}
 

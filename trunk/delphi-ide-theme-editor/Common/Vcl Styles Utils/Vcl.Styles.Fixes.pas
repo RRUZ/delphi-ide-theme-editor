@@ -343,16 +343,22 @@ begin
     begin
       // finally the text is aligned and drawn depending of the value of the ImageAlignment property
       case TCustomButton(Control).ImageAlignment of
-        TImageAlignment.iaLeft, TImageAlignment.iaRight,
-          TImageAlignment.iaCenter:
-          DrawControlText(Canvas, LDetails, BCaption, DrawRect,
-            DT_VCENTER or DT_CENTER);
-        TImageAlignment.iaBottom:
-          DrawControlText(Canvas, LDetails, BCaption, DrawRect,
-            DT_TOP or DT_CENTER);
-        TImageAlignment.iaTop:
-          DrawControlText(Canvas, LDetails, BCaption, DrawRect,
-            DT_BOTTOM or DT_CENTER);
+        TImageAlignment.iaLeft,
+        TImageAlignment.iaRight,
+        TImageAlignment.iaCenter:  if (Control is TCustomButton) and TCustomButtonClass(Control).WordWrap then
+                                    DrawControlText(Canvas, LDetails, BCaption, DrawRect, DT_VCENTER or DT_CENTER or DT_WORDBREAK or Control.DrawTextBiDiModeFlags(0))
+                                   else
+                                    DrawControlText(Canvas, LDetails, BCaption, DrawRect, DT_VCENTER or DT_CENTER or Control.DrawTextBiDiModeFlags(0));
+
+        TImageAlignment.iaBottom:  if (Control is TCustomButton) and TCustomButtonClass(Control).WordWrap then
+                                     DrawControlText(Canvas, LDetails, BCaption, DrawRect, DT_TOP or DT_CENTER or DT_WORDBREAK or Control.DrawTextBiDiModeFlags(0))
+                                   else
+                                     DrawControlText(Canvas, LDetails, BCaption, DrawRect, DT_TOP or DT_CENTER or Control.DrawTextBiDiModeFlags(0));
+
+        TImageAlignment.iaTop:     if (Control is TCustomButton) and TCustomButtonClass(Control).WordWrap then
+                                     DrawControlText(Canvas, LDetails, BCaption, DrawRect, DT_BOTTOM or DT_CENTER or DT_WORDBREAK or Control.DrawTextBiDiModeFlags(0))
+                                   else
+                                     DrawControlText(Canvas, LDetails, BCaption, DrawRect, DT_BOTTOM or DT_CENTER or Control.DrawTextBiDiModeFlags(0));
       end;
     end;
   end;

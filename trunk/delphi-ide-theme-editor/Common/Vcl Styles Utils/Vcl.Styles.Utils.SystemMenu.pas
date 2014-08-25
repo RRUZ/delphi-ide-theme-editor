@@ -41,6 +41,7 @@ type
    Value2 : TValue;
    Method : TProcCallback;
   end;
+
   TVclStylesSystemMenu=class(TComponent)
   strict private
     FVCLStylesMenu : HMenu;
