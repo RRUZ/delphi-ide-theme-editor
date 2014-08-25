@@ -1,4 +1,5 @@
 
+
 !include "Sections.nsh"
 !include "MUI.nsh"
 !include "LogicLib.nsh"
@@ -20,7 +21,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "4.52.0"
+  !define VER_MINOR "4.65.0"
 !endif
 
 !ifndef IDE_VERSION_DXE
@@ -138,7 +139,38 @@ FunctionEnd
 !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
 
-!include "Lang\DIC_en.nsh"
+!insertmacro MUI_LANGUAGE "English"
+
+; CnWizards Name
+LangString APPNAME        1033 "Delphi IDE Colorizer"
+
+; Install Type
+LangString TYPICALINST    1033 "Typical"
+LangString MINIINST       1033 "Minimized"
+LangString CUSTINST       1033 "Custom"
+
+; Section Name
+LangString PROGRAMDATA    1033 "Data files"
+LangString HELPFILE       1033 "Help Files"
+LangString OTHERTOOLS     1033 "Tools"
+
+; Shortcut Name
+LangString SUNINSTALL     1033 "Uninstall"
+
+
+; Dialog Message
+LangString SQUERYIDE      1033 "Setup has detected some wizard dlls are in using.$\n\
+                                Please close Delphi (RAD Studio) first.$\n$\n\
+                                Click [OK] to retry and continue.$\n\
+                                Click [Cancel] to exit Setup."
+LangString SQUERYDELETE   1033 "Delete user data files and wizards settings?$\n(If you want to keep them, please click [No].)"
+
+; Section Description
+LangString DESCDATA       1033 "The core programs and data files required to use wizards."
+LangString DESCHELP       1033 "Help file for wizards."
+LangString DESDLL         1033 "Install wizard dll file for #DLL#."
+
+;!include "Lang\DIC_en.nsh"
 !verbose 4
 
 
@@ -231,7 +263,7 @@ InitOk:
   ;SetOutPath $INSTDIR\Themes
   ;File "Themes\*.idetheme"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayIcon" '"$INSTDIR\uninst.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayName" "${APPNAMEDIR}"
+  ;WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayName" "${APPNAMEDIR}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayVersion" "${VERSION_STRING}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "HelpLink" "http://code.google.com/p/delphi-ide-theme-editor/"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "Publisher" "Rodrigo Ruz"
@@ -282,6 +314,8 @@ Section "RAD Studio XE2" SecDXE2
   File "Init\Settings.ini"  
   SetOverwrite on 
   File "DelphiIDEColorizer_XE2.dll"
+  SetOutPath $INSTDIR\XE2\Styles
+  File "Styles\*.vsf"    
   SetOutPath $INSTDIR\XE2\Themes
   File "Themes\*.idetheme"  
   SetOutPath $INSTDIR\XE2\Images\dock_images
@@ -305,6 +339,8 @@ Section "RAD Studio XE3" SecDXE3
   File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE3.dll"
+  SetOutPath $INSTDIR\XE3\Styles
+  File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE3\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE3\Images\dock_images
@@ -328,6 +364,8 @@ Section "RAD Studio XE4" SecDXE4
   File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE4.dll"
+  SetOutPath $INSTDIR\XE4\Styles
+  File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE4\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE4\Images\dock_images
@@ -351,6 +389,8 @@ Section "RAD Studio XE5" SecDXE5
   File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE5.dll"
+  SetOutPath $INSTDIR\XE5\Styles
+  File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE5\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE5\Images\dock_images
@@ -374,6 +414,8 @@ Section "RAD Studio XE6" SecDXE6
   File "Init\Settings.ini"
   SetOverwrite on  
   File "DelphiIDEColorizer_XE6.dll"
+  SetOutPath $INSTDIR\XE6\Styles
+  File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE6\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE6\Images\dock_images
@@ -387,10 +429,8 @@ SectionEnd
 Function .onInit
 
   InitPluginsDir
-  ;Get the skin file to use
-  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  ;Load the skin using the LoadVCLStyle function 
-  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  ;File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
   
   ;!insertmacro MUI_LANGDLL_DISPLAY
   Call InitVersion
@@ -530,14 +570,13 @@ Section "Uninstall"
   DeleteRegKey HKCU "Software\The Road To Delphi\DIC"
   ;RMDir /r $INSTDIR
 
-NODelete:
+;NODelete:
 SectionEnd
 
 Function un.onInit
   InitPluginsDir
-  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  ;Load the skin using the LoadVCLStyle function 
-  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  ;File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
 FunctionEnd
 
 
