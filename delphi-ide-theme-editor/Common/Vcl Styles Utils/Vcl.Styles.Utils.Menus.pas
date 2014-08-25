@@ -361,6 +361,8 @@ var
   SysItem: TSysPopupItem;
   sShortCut: String;
   Bmp: TBitmap;
+  LParentMenu : TMenu;
+
 
   procedure DrawSubMenu(const ItemRect: TRect);
   var
@@ -507,6 +509,15 @@ begin
   // SysItem.VCLMenuItems;
   // OutputDebugString(PChar('MI = nil'));
   // end;
+  LParentMenu:=nil;
+  if (MI <> nil) then
+    LParentMenu:=MI.GetParentMenu;
+  if (LParentMenu<>nil) and (LParentMenu.OwnerDraw) and (@MI.OnDrawItem<>nil) then
+  begin
+    MI.OnDrawItem(MI, Canvas, ItemRect, (isHot in State));
+    exit;
+  end;
+
 
   if MI <> nil then
   begin
@@ -703,10 +714,13 @@ var
   Bmp: TBitmap;
 begin
   Bmp := TBitmap.Create;
-  Bmp.SetSize(SysControl.Width, SysControl.Height);
-  PaintBackground(Bmp.Canvas);
-  BitBlt(Canvas.Handle, ItemRect.Left, ItemRect.Top, ItemRect.Width, ItemRect.Height, Bmp.Canvas.Handle, ItemRect.Left, ItemRect.Top, SRCCOPY);
-  Bmp.Free;
+  try
+    Bmp.SetSize(SysControl.Width, SysControl.Height);
+    PaintBackground(Bmp.Canvas);
+    BitBlt(Canvas.Handle, ItemRect.Left, ItemRect.Top, ItemRect.Width, ItemRect.Height, Bmp.Canvas.Handle, ItemRect.Left, ItemRect.Top, SRCCOPY);
+  finally
+    Bmp.Free;
+  end;
 end;
 
 function TSysPopupStyleHook.GetItemsCount: integer;
@@ -723,11 +737,12 @@ function TSysPopupStyleHook.GetRightToLeft: Boolean;
 var
   info: TMenuItemInfo;
 begin
+  Result:=False;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_TYPE;
-  GetMenuItemInfo(FMenu, 0, True, info);
-  Result := ((info.fType and MFT_RIGHTORDER) = MFT_RIGHTORDER) or ((info.fType and MFT_RIGHTJUSTIFY) = MFT_RIGHTJUSTIFY);
+  if GetMenuItemInfo(FMenu, 0, True, info) then
+    Result := ((info.fType and MFT_RIGHTORDER) = MFT_RIGHTORDER) or ((info.fType and MFT_RIGHTJUSTIFY) = MFT_RIGHTJUSTIFY);
 end;
 
 function TSysPopupStyleHook.GetSysPopupItem(Index: integer): TSysPopupItem;
@@ -945,11 +960,12 @@ begin
     Use this function instead of Items[Index].Separator .
     ==> Fast access in WM_KEYDOWN .
   }
+  Result:=False;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_FTYPE;
-  GetMenuItemInfo(Menu, ItemIndex, True, info);
-  Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
+  if GetMenuItemInfo(Menu, ItemIndex, True, info) then
+    Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
 end;
 // ------------------------------------------------------------------------------
 
@@ -1154,13 +1170,16 @@ function TSysPopupStyleHook.TSysPopupItem.GetItemBitmap: HBITMAP;
 var
   info: TMenuItemInfo;
 begin
+  Result:=0;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := info.hbmpItem;
-  if Result = 0 then
-    Result := info.hbmpUnchecked;
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+  begin
+    Result := info.hbmpItem;
+    if Result = 0 then
+      Result := info.hbmpUnchecked;
+  end;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetItemID: WORD;
@@ -1201,33 +1220,35 @@ begin
   info.cbSize := sizeof(MENUITEMINFO);
   info.fMask := MIIM_STRING or MIIM_FTYPE;
   info.dwTypeData := nil;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  if not(info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
   begin
-    { The Size needed for the Buffer . }
-    StrSize := info.cch * 2 + 2;
-    GetMem(Buffer, StrSize);
-    try
-      info.dwTypeData := Buffer;
-      { inc cch to get the last char . }
-      inc(info.cch);
-      GetMenuItemInfo(FMenu, FIndex, True, info);
-      Result := String(Buffer);
-    finally
-      FreeMem(Buffer, StrSize);
+    if not(info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
+    begin
+      { The Size needed for the Buffer . }
+      StrSize := info.cch * 2 + 2;
+      GetMem(Buffer, StrSize);
+      try
+        info.dwTypeData := Buffer;
+        { inc cch to get the last char . }
+        inc(info.cch);
+        if GetMenuItemInfo(FMenu, FIndex, True, info) then
+          Result := String(Buffer);
+      finally
+        FreeMem(Buffer, StrSize);
+      end;
+      Exit;
+    end
+    else
+    begin
+      { if the item is owner draw then we need another way to get
+        the item text since , when setting an item to ownerdraw windows
+        will destroy the dwTypeData that hold the text . }
+      FillChar(info, sizeof(MENUITEMINFO), Char(0));
+      info.cbSize := sizeof(MENUITEMINFO);
+      info.fMask := MIIM_DATA;
+      if GetMenuItemInfo(FMenu, FIndex, True, info) then
+        Result := String(PChar(info.dwItemData));
     end;
-    Exit;
-  end
-  else
-  begin
-    { if the item is owner draw then we need another way to get
-      the item text since , when setting an item to ownerdraw windows
-      will destroy the dwTypeData that hold the text . }
-    FillChar(info, sizeof(MENUITEMINFO), Char(0));
-    info.cbSize := sizeof(MENUITEMINFO);
-    info.fMask := MIIM_DATA;
-    GetMenuItemInfo(FMenu, FIndex, True, info);
-    Result := String(PChar(info.dwItemData));
   end;
 end;
 
@@ -1385,45 +1406,49 @@ function TSysPopupStyleHook.TSysPopupItem.IsItemDisabled: Boolean;
 var
   info: TMenuItemInfo;
 begin
+  Result:=False;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_STATE;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := (info.fState and MFS_DISABLED = MFS_DISABLED) or (info.fState and MF_DISABLED = MF_DISABLED) or (info.fState and MF_GRAYED = MF_GRAYED);
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+    Result := (info.fState and MFS_DISABLED = MFS_DISABLED) or (info.fState and MF_DISABLED = MF_DISABLED) or (info.fState and MF_GRAYED = MF_GRAYED);
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemOwnerDraw: Boolean;
 var
   info: TMenuItemInfo;
 begin
+  Result:=False;
   FillChar(info, sizeof(MENUITEMINFO), Char(0));
   info.cbSize := sizeof(MENUITEMINFO);
   info.fMask := MIIM_FTYPE;
   info.dwTypeData := nil;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := (info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW);
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+    Result := (info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW);
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemRadioCheck: Boolean;
 var
   info: TMenuItemInfo;
 begin
+  Result:=False;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_FTYPE;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := (info.fType and MFT_RADIOCHECK) = MFT_RADIOCHECK;
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+    Result := (info.fType and MFT_RADIOCHECK) = MFT_RADIOCHECK;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemChecked: Boolean;
 var
   info: TMenuItemInfo;
 begin
+  Result:=False;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_STATE;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := (info.fState and MFS_CHECKED) = MFS_CHECKED;
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+    Result := (info.fState and MFS_CHECKED) = MFS_CHECKED;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemContainsSubMenu: Boolean;
@@ -1435,11 +1460,12 @@ function TSysPopupStyleHook.TSysPopupItem.IsItemDefault: Boolean;
 var
   info: TMenuItemInfo;
 begin
+  Result:=False;
   FillChar(info, sizeof(info), Char(0));
   info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_STATE;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := (info.fState and MFS_DEFAULT) = MFS_DEFAULT;
+  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+    Result := (info.fState and MFS_DEFAULT) = MFS_DEFAULT;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemSeparator: Boolean;
@@ -1452,8 +1478,8 @@ begin
   Result := False;
   if (FIndex > -1) and (FIndex < GetMenuItemCount(FMenu) - 1) then
   begin
-    GetMenuItemInfo(FMenu, FIndex, True, info);
-    Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
+    if GetMenuItemInfo(FMenu, FIndex, True, info) then
+      Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
   end;
 end;
 

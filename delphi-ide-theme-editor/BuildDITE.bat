@@ -8,7 +8,7 @@ EXIT
 :INNO
 "C:\Program Files (x86)\Inno Setup 5\iscc.exe" "C:\Delphi\google-code\DITE\delphi-ide-theme-editor\DelphiIDEThemeEditor.iss"
 set INNO_STATUS=%ERRORLEVEL%
-if %INNO_STATUS%==0 GOTO ZIP
+if %INNO_STATUS%==0 GOTO END
 pause
 EXIT
 

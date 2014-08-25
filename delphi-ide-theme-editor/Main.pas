@@ -70,7 +70,7 @@ uses
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,  uColorSelector,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,  uAppMethodVersions,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
-  Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes;
+  Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -112,7 +112,6 @@ type
     Label6:      TLabel;
     EditThemeName: TEdit;
     BtnSave:     TButton;
-    ImageLogo:   TImage;
     BtnApplyFont: TButton;
     Label7:      TLabel;
     LvThemes:    TListView;
@@ -124,14 +123,11 @@ type
     ProgressBar1: TProgressBar;
     LabelVersion: TLabel;
     SynEditCode: TSynEdit;
-    ImageConf:   TImage;
-    ImageHue:    TImage;
     CbIDEThemeImport: TComboBox;
     ImageListlGutterGlyphs: TImageList;
     BtnSelForColor: TButton;
     ImageList1: TImageList;
     BtnSelBackColor: TButton;
-    ImageBug: TImage;
     PopupMenuThemes: TPopupMenu;
     CloneTheme1: TMenuItem;
     DeleteTheme1: TMenuItem;
@@ -143,7 +139,6 @@ type
     SynExporterHTML1: TSynExporterHTML;
     BtnExportToLazarusTheme: TButton;
     OpenDialogExport: TOpenDialog;
-    ImageUpdate: TImage;
     ComboBoxExIDEs: TComboBoxEx;
     ImageListThemes: TImageList;
     PopupMenu1: TPopupMenu;
@@ -159,6 +154,7 @@ type
     PanelColors: TPanel;
     RadioButtonFore: TRadioButton;
     RadioButtonBack: TRadioButton;
+    ImageList2: TImageList;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -175,7 +171,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure ImageConfClick(Sender: TObject);
     procedure ImageHueClick(Sender: TObject);
-    procedure WMNCHitTest(var Msg: TWMNCHitTest); message WM_NCHitTest;
     procedure SynEditCodeSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
     procedure SynEditCodeGutterClick(Sender: TObject; Button: TMouseButton;
@@ -206,7 +201,7 @@ type
     IDEsList:TList<TDelphiVersionData>;
     FIDEData: TDelphiVersionData;
     FrmColorPanel      : TColorPanel;
-
+    NCControls: TNCControls;
 
     ActionImages : TObjectDictionary<string, TCompPngImages>;
     procedure LoadActionImages;
@@ -922,6 +917,66 @@ Var
   IDEData  : TDelphiVersionData;
   Index    : Integer;
 begin
+ NCControls:=TNCControls.Create(Self);
+ NCControls.List.Add(TNCButton.Create(NCControls));
+ NCControls.List[0].Style := nsSplitButton;
+ NCControls.List[0].ImageStyle := isGrayHot;
+ NCControls.List[0].Images := ImageList2;
+ NCControls.List[0].ImageIndex := 0;
+ NCControls.List[0].BoundsRect := Rect(30,5,100,25);
+ NCControls.List[0].Caption := 'Menu';
+ NCControls.List[0].DropDownMenu:= PopupMenuThemes;
+ //NCControls.List[0].OnClick := ButtonNCClick;
+
+ NCControls.List.Add(TNCButton.Create(NCControls));
+ NCControls.List[1].Style := nsTranparent;
+ NCControls.List[1].ImageStyle := isGrayHot;
+ NCControls.List[1].Images := ImageList2;
+ NCControls.List[1].ImageIndex := 3;
+ NCControls.List[1].BoundsRect := Rect(105,5,125,25);
+ NCControls.List[1].Name       := 'NCHue';
+ NCControls.List[1].ShowHint   := True;
+ NCControls.List[1].Hint       := 'Change Hue/Saturation';
+ NCControls.List[1].Caption := '';
+ NCControls.List[1].OnClick := ImageHueClick;
+
+ NCControls.List.Add(TNCButton.Create(NCControls));
+ NCControls.List[2].Style := nsTranparent;
+ NCControls.List[2].ImageStyle := isGrayHot;
+ NCControls.List[2].Images := ImageList2;
+ NCControls.List[2].ImageIndex := 2;
+ NCControls.List[2].BoundsRect := Rect(130,5,155,25);
+ NCControls.List[2].Name       := 'NCConf';
+ NCControls.List[2].ShowHint   := True;
+ NCControls.List[2].Hint       := 'Settings';
+ NCControls.List[2].Caption := '';
+ NCControls.List[2].OnClick := ImageConfClick;
+
+ NCControls.List.Add(TNCButton.Create(NCControls));
+ NCControls.List[3].Style := nsTranparent;
+ NCControls.List[3].ImageStyle := isGrayHot;
+ NCControls.List[3].Images := ImageList2;
+ NCControls.List[3].ImageIndex := 1;
+ NCControls.List[3].BoundsRect := Rect(155,5,175,25);
+ NCControls.List[3].Name       := 'NCBug';
+ NCControls.List[3].ShowHint   := True;
+ NCControls.List[3].Hint       := 'Report Bugs';
+ NCControls.List[3].Caption := '';
+ NCControls.List[3].OnClick := ImageBugClick;
+
+ NCControls.List.Add(TNCButton.Create(NCControls));
+ NCControls.List[4].Style := nsTranparent;
+ NCControls.List[4].ImageStyle := isGrayHot;
+ NCControls.List[4].Images := ImageList2;
+ NCControls.List[4].ImageIndex := 4;
+ NCControls.List[4].BoundsRect := Rect(180,5,200,25);
+ NCControls.List[4].Name       := 'NCUpdate';
+ NCControls.List[4].ShowHint   := True;
+ NCControls.List[4].Hint       := 'Check for updates';
+ NCControls.List[4].Caption    := '';
+ NCControls.List[4].OnClick := ImageUpdateClick;
+
+
   IDEsList:=TList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);
 
@@ -1159,7 +1214,7 @@ begin
 end;
 
 procedure TFrmMain.LoadActionImages;
-
+{
  procedure AddImage(Image:TImage;Const Normal, BN:string);
   Var
    Png : TPngImage;
@@ -1174,13 +1229,15 @@ procedure TFrmMain.LoadActionImages;
   Png.LoadFromFile(BN);
   Image.Picture.Assign(ActionImages.Items[Image.Name].BN);
  end;
-
+}
 
 begin
+{
   AddImage(ImageBug,ExtractFilePath(ParamStr(0))+'images\Bug.png',ExtractFilePath(ParamStr(0))+'images\BugBN.png');
   AddImage(ImageUpdate,ExtractFilePath(ParamStr(0))+'images\Update.png',ExtractFilePath(ParamStr(0))+'images\UpdateBN.png');
   AddImage(ImageHue,ExtractFilePath(ParamStr(0))+'images\Hue.png',ExtractFilePath(ParamStr(0))+'images\HueBN.png');
   AddImage(ImageConf,ExtractFilePath(ParamStr(0))+'images\Conf.png',ExtractFilePath(ParamStr(0))+'images\ConfBN.png');
+}
 end;
 
 procedure TFrmMain.LoadFixedWidthFonts;
@@ -1739,22 +1796,6 @@ begin
     ErrorLineLine     : SetColorSpecialLine(ErrorLine);
   end;
 end;
-
-procedure TFrmMain.WMNCHitTest(var Msg: TWMNCHitTest);
-var
-  APoint: TPoint;
-begin
-  inherited;
-  APoint.X := Msg.XPos;
-  APoint.Y := Msg.YPos;
-  APoint   := ScreenToClient(APoint);
-  if (Msg.Result = htClient) and ((APoint.Y <= GlassFrame.Top) or (APoint.Y >= ClientHeight - GlassFrame.Bottom)) and
-    (not PtInRect(ImageHue.BoundsRect, APoint)) and  (not PtInRect(ImageConf.BoundsRect, APoint)) and  (not PtInRect(ImageBug.BoundsRect, APoint))
-    and  (not PtInRect(ImageUpdate.BoundsRect, APoint))
-    then
-    Msg.Result := htCaption;
-end;
-
 
 { TCompPngImages }
 

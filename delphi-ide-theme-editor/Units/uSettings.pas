@@ -138,10 +138,13 @@ begin
   iniFile := TIniFile.Create(GetSettingsFolder + 'Settings.ini');
   try
     Settings.ActivateColorizer:= iniFile.ReadBool('Global', 'ActivateColorizer',  False);
-    Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Windows');
+    Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Glossy');
     Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  GetSettingsFolder + 'Themes');
     Settings.CheckForUpdates :=iniFile.ReadBool('Global', 'CheckForUpdates',  True);
     Settings.ApplyThemeHelpInsight :=iniFile.ReadBool('Global', 'ApplyThemeHelpInsight',  True);
+    if (Settings.VCLStyle='') or SameText(Settings.VCLStyle, 'Windows')  then
+      Settings.VCLStyle  := 'Glossy';
+
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
       Settings.ThemePath := GetSettingsFolder + 'Themes';
@@ -255,6 +258,7 @@ begin
     ComboBoxVCLStyle.Items.BeginUpdate;
     ComboBoxVCLStyle.Items.Clear;
     for Style in TStyleManager.StyleNames do
+     if not SameText(Style, 'Windows') then
       ComboBoxVCLStyle.Items.Add(Style);
   finally
     ComboBoxVCLStyle.Items.EndUpdate;

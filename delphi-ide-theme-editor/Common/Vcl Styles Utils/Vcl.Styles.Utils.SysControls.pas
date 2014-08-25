@@ -503,15 +503,11 @@ end;
 
 function GetWindowClassName(Window: HWND): String;
 var
-  sClassName: PChar;
+  lpClassName : array [0..255] of Char;
 begin
-  GetMem(sClassName, 256);
-  try
-    GetClassName(Window, sClassName, 256);
-    Result := String(sClassName);
-  finally
-    FreeMem(sClassName, 256);
-  end;
+  Result:='';
+  if GetClassName(Window, @lpClassName, Length(lpClassName))>0 then
+   Result := lpClassName;
 end;
 
 function RectVCenter(var R: TRect; const Bounds: TRect): TRect;
@@ -665,6 +661,7 @@ begin
     CBTSturct := PCBTCreateWnd(lParam)^;
     sClassName := GetWindowClassName(wParam);
     sClassName := LowerCase(sClassName);
+
     Parent := CBTSturct.lpcs.hwndParent;
     Style := CBTSturct.lpcs.Style;
     ExStyle := CBTSturct.lpcs.dwExStyle;
