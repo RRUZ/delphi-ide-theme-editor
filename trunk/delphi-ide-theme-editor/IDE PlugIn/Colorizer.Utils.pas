@@ -99,8 +99,6 @@ uses
  {$ENDIF}
  Types,
  IOUtils,
-{$IFDEF ENABLELOG}
-{$ENDIF}
  Forms,
  SysUtils,
  Controls,
@@ -123,18 +121,29 @@ var
 procedure RegisterVClStylesFiles;
 var
  sPath, FileName : string;
+ LFiles  : TStringDynArray;
 begin
   sPath:=TColorizerLocalSettings.VCLStylesPath;
-  if SysUtils.DirectoryExists(sPath) then
-  for FileName in TDirectory.GetFiles(sPath, '*.vsf') do
-   if TStyleManager.IsValidStyle(FileName) then
-    begin
-       try
-         TStyleManager.LoadFromFile(FileName);
-       except
-         on EDuplicateStyleException do
-       end;
-    end;
+  if SysUtils.DirectoryExists(sPath)  then
+    LFiles := TDirectory.GetFiles(sPath, '*.vsf');
+
+  if not SysUtils.DirectoryExists(sPath) or (Length(LFiles)=0)  then
+  begin
+    sPath:=ExtractFilePath(GetModuleLocation())+'Styles\';
+    if SysUtils.DirectoryExists(sPath)  then
+      LFiles := TDirectory.GetFiles(sPath, '*.vsf');
+  end;
+
+    if Length(LFiles)>0 then
+    for FileName in LFiles do
+     if TStyleManager.IsValidStyle(FileName) then
+      begin
+         try
+           TStyleManager.LoadFromFile(FileName);
+         except
+           on EDuplicateStyleException do
+         end;
+      end;
 end;
 {$ENDIF}
 
