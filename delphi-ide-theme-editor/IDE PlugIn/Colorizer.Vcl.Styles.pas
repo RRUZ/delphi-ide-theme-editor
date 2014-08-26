@@ -1313,9 +1313,8 @@ begin
   FRedraw := True;
   if not (fsShowing in Form.FormState) and IsWindowVisible(Form.Handle) then
   begin
-    //AddLog('TColorizerFormStyleHook.WMSetText', 'Before');
-    //Application.ProcessMessages;
-    //AddLog('TColorizerFormStyleHook.WMSetText', 'After');
+    if not SameText(Form.ClassName, 'TEditWindow') then
+     Application.ProcessMessages;
     FRedraw := False;
     SetRedraw(False);
   end;
