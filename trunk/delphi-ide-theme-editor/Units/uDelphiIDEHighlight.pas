@@ -331,7 +331,7 @@ begin
 
 
   //Result:=False;
-  ResName  := GetEnumName(TypeInfo(TDelphiVersions),integer(DelphiVersion));
+  ResName  := GetEnumName(TypeInfo(TDelphiVersions), Integer(DelphiVersion));
   FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
   if TFile.Exists(FileName) then
     TFile.Delete(FileName);

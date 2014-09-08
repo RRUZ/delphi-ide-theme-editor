@@ -36,7 +36,6 @@ uses
   Vcl.Styles.Ext in 'Common\Vcl Styles Utils\Vcl.Styles.Ext.pas',
   Vcl.Styles.Fixes in 'Common\Vcl Styles Utils\Vcl.Styles.Fixes.pas',
   Vcl.Styles.Hooks in 'Common\Vcl Styles Utils\Vcl.Styles.Hooks.pas',
-  Vcl.Styles.OwnerDrawFix in 'Common\Vcl Styles Utils\Vcl.Styles.OwnerDrawFix.pas',
   Vcl.Styles.Utils.ComCtrls in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.ComCtrls.pas',
   Vcl.Styles.Utils.Forms in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.Forms.pas',
   Vcl.Styles.Utils.Menus in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas',
@@ -48,7 +47,8 @@ uses
   DDetours in 'Common\delphi-detours-library\DDetours.pas',
   InstDecode in 'Common\delphi-detours-library\InstDecode.pas',
   Vcl.Styles.FormStyleHooks in 'Common\Vcl Styles Utils\Vcl.Styles.FormStyleHooks.pas',
-  Vcl.Styles.NC in 'Common\Vcl Styles Utils\Vcl.Styles.NC.pas';
+  Vcl.Styles.NC in 'Common\Vcl Styles Utils\Vcl.Styles.NC.pas',
+  Vcl.Styles.OwnerDrawFix in 'Common\Vcl Styles Utils\Vcl.Styles.OwnerDrawFix.pas';
 
 {$R *.res}
 

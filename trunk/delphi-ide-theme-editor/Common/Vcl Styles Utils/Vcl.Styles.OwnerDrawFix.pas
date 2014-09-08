@@ -125,7 +125,6 @@ var
   LColor    : TColor;
   ImageSize : Integer;
 begin
-  ImageSize:=0;
   LStyles:=StyleServices;
   if not LStyles.GetElementColor(LStyles.GetElementDetails(ttItemNormal), ecTextColor, LColor) or  (LColor = clNone) then
   LColor := LStyles.GetSystemColor(clWindowText);

@@ -54,7 +54,8 @@ type
     DelphiXE4,
     DelphiXE5,
     Appmethod,
-    DelphiXE6
+    DelphiXE6,
+    DelphiXE7
 );
 
   TDelphiVersionData = Class
@@ -128,7 +129,8 @@ Color15=$FFFFFF
     'RAD Studio XE4',
     'RAD Studio XE5',
     'Appmethod 1.13',
-    'RAD Studio XE6/Appmethod 1.14'
+    'RAD Studio XE6/Appmethod 1.14',
+    'RAD Studio XE7/Appmethod 1.15'
     );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
@@ -150,7 +152,8 @@ Color15=$FFFFFF
     25,      // 'RAD Studio XE4'
     26,      // 'RAD Studio XE5'
     27,      // 'Appmethod 1.13'
-    27       // 'RAD Studio XE6'
+    27,      // 'RAD Studio XE6'
+    28       // 'RAD Studio XE7'
     );
 
 
@@ -173,7 +176,8 @@ Color15=$FFFFFF
     '\Software\Embarcadero\BDS\11.0',
     '\Software\Embarcadero\BDS\12.0',
     '\Software\Embarcadero\BDS\13.0',
-    '\Software\Embarcadero\BDS\14.0'
+    '\Software\Embarcadero\BDS\14.0',
+    '\Software\Embarcadero\BDS\15.0'
     );
 
   DelphiVCLStylesPaths: array[TDelphiVersions] of string = (
@@ -194,7 +198,8 @@ Color15=$FFFFFF
     'RAD Studio\11.0\Styles',
     'RAD Studio\12.0\Styles',
     '',
-    'Embarcadero\Studio\14.0\Styles'
+    'Embarcadero\Studio\14.0\Styles',
+    'Embarcadero\Studio\15.0\Styles'
     );
 
 

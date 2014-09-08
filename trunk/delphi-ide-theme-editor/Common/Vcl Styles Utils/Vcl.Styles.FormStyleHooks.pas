@@ -155,6 +155,7 @@ type
     function _GetIconFast: TIcon;
     procedure _ChangeSize;
     function _NormalizePoint(P: TPoint): TPoint;
+    function _GetHitTest(P: TPoint): Integer;
   end;
 
   function RectVCenter(var R: TRect; Bounds: TRect): TRect;
@@ -1390,6 +1391,11 @@ end;
 function TFormStyleHookHelper._GetBorderSize: TRect;
 begin
   Result:=Self.GetBorderSize;
+end;
+
+function TFormStyleHookHelper._GetHitTest(P: TPoint): Integer;
+begin
+ result:= Self.GetHitTest(P);
 end;
 
 function TFormStyleHookHelper._GetIconFast: TIcon;

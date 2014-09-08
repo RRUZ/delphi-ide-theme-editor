@@ -70,7 +70,8 @@ uses
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,  uColorSelector,
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup,  uAppMethodVersions,
   pngimage, uSettings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
-  Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC;
+  Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC,
+  Vcl.ActnMan;
 
 {.$DEFINE ENABLE_THEME_EXPORT}
 
@@ -115,15 +116,10 @@ type
     BtnApplyFont: TButton;
     Label7:      TLabel;
     LvThemes:    TListView;
-    BtnImport:   TButton;
     OpenDialogImport: TOpenDialog;
-    BtnImportRegTheme: TButton;
-    BtnSetDefault: TButton;
     Label8:      TLabel;
     ProgressBar1: TProgressBar;
-    LabelVersion: TLabel;
     SynEditCode: TSynEdit;
-    CbIDEThemeImport: TComboBox;
     ImageListlGutterGlyphs: TImageList;
     BtnSelForColor: TButton;
     ImageList1: TImageList;
@@ -135,9 +131,7 @@ type
     SaveChanges1: TMenuItem;
     SaveAs1: TMenuItem;
     LabelMsg: TLabel;
-    BtnContribute: TButton;
     SynExporterHTML1: TSynExporterHTML;
-    BtnExportToLazarusTheme: TButton;
     OpenDialogExport: TOpenDialog;
     ComboBoxExIDEs: TComboBoxEx;
     ImageListThemes: TImageList;
@@ -148,13 +142,25 @@ type
     ActionDeleteTheme: TAction;
     ActionSaveChanges: TAction;
     ActionSaveAs: TAction;
-    BtnIDEColorizer: TButton;
     PopupActionBar1: TPopupActionBar;
     Button1: TButton;
     PanelColors: TPanel;
     RadioButtonFore: TRadioButton;
     RadioButtonBack: TRadioButton;
     ImageList2: TImageList;
+    N1: TMenuItem;
+    ImportVSTheme1: TMenuItem;
+    ImportEclipseTheme1: TMenuItem;
+    N2: TMenuItem;
+    Contribute1: TMenuItem;
+    ActionManager1: TActionManager;
+    ActionExoLazarusClrSch: TAction;
+    ActionImportThemeReg: TAction;
+    N3: TMenuItem;
+    ExportThemetoLazarusColorScheme1: TMenuItem;
+    ImportcurrentIDEThemefromregistry1: TMenuItem;
+    ActionSetDefaultTheme: TAction;
+    SetdefaultthemevaluesforselectedIDE1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -164,9 +170,6 @@ type
     procedure BtnApplyFontClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure LvThemesChange(Sender: TObject; Item: TListItem; Change: TItemChange);
-    procedure BtnImportClick(Sender: TObject);
-    procedure BtnImportRegThemeClick(Sender: TObject);
-    procedure BtnSetDefaultClick(Sender: TObject);
     procedure SynEditCodeClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ImageConfClick(Sender: TObject);
@@ -178,8 +181,6 @@ type
     procedure BtnSelForColorClick(Sender: TObject);
     procedure ImageBugClick(Sender: TObject);
     procedure BtnSelBackColorClick(Sender: TObject);
-    procedure BtnContributeClick(Sender: TObject);
-    procedure BtnExportToLazarusThemeClick(Sender: TObject);
     procedure ImageUpdateClick(Sender: TObject);
     procedure ComboBoxExIDEsChange(Sender: TObject);
     procedure ActionDeleteThemeExecute(Sender: TObject);
@@ -187,11 +188,19 @@ type
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionApplyThemeExecute(Sender: TObject);
     procedure ActionSaveChangesExecute(Sender: TObject);
-    procedure BtnIDEColorizerClick(Sender: TObject);
     procedure ImageBugMouseEnter(Sender: TObject);
     procedure ImageBugMouseLeave(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure RadioButtonForeClick(Sender: TObject);
+    procedure ImportVSTheme1Click(Sender: TObject);
+    procedure ImportEclipseTheme1Click(Sender: TObject);
+    procedure Contribute1Click(Sender: TObject);
+    procedure ActionExoLazarusClrSchUpdate(Sender: TObject);
+    procedure ActionExoLazarusClrSchExecute(Sender: TObject);
+    procedure ActionImportThemeRegUpdate(Sender: TObject);
+    procedure ActionImportThemeRegExecute(Sender: TObject);
+    procedure ActionSetDefaultThemeUpdate(Sender: TObject);
+    procedure ActionSetDefaultThemeExecute(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -219,6 +228,10 @@ type
     procedure OnSelBackGroundColorChange(Sender: TObject);
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
     procedure GenerateThumbnail;
+    procedure ImportTheme(ImportType: TIDEImportThemes);
+    procedure ExportToLazarusTheme();
+    procedure ImportDelphiThemeRegistry();
+    procedure SetDefaultDelphiTheme();
     {$IFDEF ENABLE_THEME_EXPORT}
     procedure ExportThemeHtml;
     {$ENDIF}
@@ -247,13 +260,13 @@ uses
   StrUtils,
   GraphUtil,
   CommCtrl,
-  VCl.Styles,
-  VCl.Themes,
+  Vcl.Styles,
+  Vcl.Themes,
+  Vcl.Styles.OwnerDrawFix,
   uVclStylesFix,
   uHueSat,
   EclipseThemes,
   VSThemes,
-  Vcl.Styles.OwnerDrawFix,
   uMisc,
   uLazarusIDEHighlight,
   uSMSIDEHighlight,
@@ -346,6 +359,26 @@ begin
   end;
 end;
 
+procedure TFrmMain.ActionExoLazarusClrSchExecute(Sender: TObject);
+begin
+ ExportToLazarusTheme();
+end;
+
+procedure TFrmMain.ActionExoLazarusClrSchUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
+end;
+
+procedure TFrmMain.ActionImportThemeRegExecute(Sender: TObject);
+begin
+  ImportDelphiThemeRegistry();
+end;
+
+procedure TFrmMain.ActionImportThemeRegUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled:=(IDEData.IDEType=TSupportedIDEs.DelphiIDE) and not DelphiIsOldVersion(IDEData.Version);
+end;
+
 procedure TFrmMain.ActionSaveAsExecute(Sender: TObject);
 var
   index: integer;
@@ -394,6 +427,16 @@ begin
       MsgBox(Format('Error Saving theme  Message : %s : Trace %s',
         [E.Message, E.StackTrace]));
   end;
+end;
+
+procedure TFrmMain.ActionSetDefaultThemeExecute(Sender: TObject);
+begin
+  SetDefaultDelphiTheme();
+end;
+
+procedure TFrmMain.ActionSetDefaultThemeUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled:=(IDEData.IDEType=TSupportedIDEs.DelphiIDE);
 end;
 
 procedure TFrmMain.ApplyCurentTheme;
@@ -490,7 +533,7 @@ begin
   end;
 end;
 
-procedure TFrmMain.BtnExportToLazarusThemeClick(Sender: TObject);
+procedure TFrmMain.ExportToLazarusTheme();
 var
   i: integer;
   OutPutFolder : String;
@@ -563,7 +606,7 @@ begin
 end;
 
 
-procedure TFrmMain.BtnSetDefaultClick(Sender: TObject);
+procedure TFrmMain.SetDefaultDelphiTheme;
 begin
   try
     if ComboBoxExIDEs.ItemIndex>=0 then
@@ -648,11 +691,6 @@ begin
 end;
 
 
-procedure TFrmMain.BtnContributeClick(Sender: TObject);
-begin
- ShellExecute(Handle, 'open', PChar('http://theroadtodelphi.wordpress.com/contributions/'), nil, nil, SW_SHOW);
-end;
-
 procedure TFrmMain.BtnSelForColorClick(Sender: TObject);
 var
    Frm      : TDialogColorSelector;
@@ -728,7 +766,7 @@ begin
   CblForegroundChange(nil);
 end;
 
-procedure TFrmMain.BtnImportRegThemeClick(Sender: TObject);
+procedure TFrmMain.ImportDelphiThemeRegistry();
 var
   ThemeName: string;
   DelphiVersion: TDelphiVersions;
@@ -783,37 +821,21 @@ begin
 
 end;
 
-procedure TFrmMain.BtnIDEColorizerClick(Sender: TObject);
-//Var
-//  Frm : TFrmIDEColorizerSettings;
-//  Icon: TIcon;
+procedure TFrmMain.ImportEclipseTheme1Click(Sender: TObject);
 begin
-
-//  Frm:=TFrmIDEColorizerSettings.Create(nil);
-//  Icon:=TIcon.Create;
-//  try
-//    Frm.IDEData:=FIDEData;
-//    Frm.init();
-//    ExtractIconFile(Icon,IDEData.Path, SHGFI_LARGEICON);
-//    Frm.ImageIDELogo.Picture.Icon:=Icon;
-//    Frm.ShowModal();
-//  finally
-//    Icon.Free;
-//    Frm.Free;
-//  end;
+ ImportTheme(TIDEImportThemes.EclipseTheme);
 end;
 
-procedure TFrmMain.BtnImportClick(Sender: TObject);
+procedure TFrmMain.ImportTheme(ImportType: TIDEImportThemes);
 var
   ThemeName: string;
   i:      integer;
   DelphiVersion: TDelphiVersions;
-  ImportType: TIDEImportThemes;
   GoNext: boolean;
   s : TStopwatch;
 begin
-  ImportType := TIDEImportThemes(
-    CbIDEThemeImport.Items.Objects[CbIDEThemeImport.ItemIndex]);
+//  ImportType := TIDEImportThemes(
+//    CbIDEThemeImport.Items.Objects[CbIDEThemeImport.ItemIndex]);
   OpenDialogImport.Filter := IDEImportThemesDialogFilter[ImportType];
   OpenDialogImport.InitialDir := ExtractFilePath(ParamStr(0));
   try
@@ -894,6 +916,11 @@ begin
   end;
 end;
 
+procedure TFrmMain.ImportVSTheme1Click(Sender: TObject);
+begin
+ ImportTheme(TIDEImportThemes.VisualStudioThemes);
+end;
+
 procedure TFrmMain.CbElementChange(Sender: TObject);
 begin
   LoadValuesElements;
@@ -918,12 +945,13 @@ Var
   Index    : Integer;
 begin
  NCControls:=TNCControls.Create(Self);
+ NCControls.ShowSystemMenu:=False;
  NCControls.List.Add(TNCButton.Create(NCControls));
  NCControls.List[0].Style := nsSplitButton;
  NCControls.List[0].ImageStyle := isGrayHot;
  NCControls.List[0].Images := ImageList2;
  NCControls.List[0].ImageIndex := 0;
- NCControls.List[0].BoundsRect := Rect(30,5,100,25);
+ NCControls.List[0].BoundsRect := Rect(5,5,75,25);
  NCControls.List[0].Caption := 'Menu';
  NCControls.List[0].DropDownMenu:= PopupMenuThemes;
  //NCControls.List[0].OnClick := ButtonNCClick;
@@ -933,7 +961,7 @@ begin
  NCControls.List[1].ImageStyle := isGrayHot;
  NCControls.List[1].Images := ImageList2;
  NCControls.List[1].ImageIndex := 3;
- NCControls.List[1].BoundsRect := Rect(105,5,125,25);
+ NCControls.List[1].BoundsRect := Rect(78,5,98,25);
  NCControls.List[1].Name       := 'NCHue';
  NCControls.List[1].ShowHint   := True;
  NCControls.List[1].Hint       := 'Change Hue/Saturation';
@@ -945,7 +973,7 @@ begin
  NCControls.List[2].ImageStyle := isGrayHot;
  NCControls.List[2].Images := ImageList2;
  NCControls.List[2].ImageIndex := 2;
- NCControls.List[2].BoundsRect := Rect(130,5,155,25);
+ NCControls.List[2].BoundsRect := Rect(101,5,121,25);
  NCControls.List[2].Name       := 'NCConf';
  NCControls.List[2].ShowHint   := True;
  NCControls.List[2].Hint       := 'Settings';
@@ -957,7 +985,7 @@ begin
  NCControls.List[3].ImageStyle := isGrayHot;
  NCControls.List[3].Images := ImageList2;
  NCControls.List[3].ImageIndex := 1;
- NCControls.List[3].BoundsRect := Rect(155,5,175,25);
+ NCControls.List[3].BoundsRect := Rect(124,5,144,25);
  NCControls.List[3].Name       := 'NCBug';
  NCControls.List[3].ShowHint   := True;
  NCControls.List[3].Hint       := 'Report Bugs';
@@ -969,7 +997,7 @@ begin
  NCControls.List[4].ImageStyle := isGrayHot;
  NCControls.List[4].Images := ImageList2;
  NCControls.List[4].ImageIndex := 4;
- NCControls.List[4].BoundsRect := Rect(180,5,200,25);
+ NCControls.List[4].BoundsRect := Rect(147,5,167,25);
  NCControls.List[4].Name       := 'NCUpdate';
  NCControls.List[4].ShowHint   := True;
  NCControls.List[4].Hint       := 'Check for updates';
@@ -1043,10 +1071,10 @@ begin
   end;
   FThemeChangued := False;
 
-  FillListIDEThemesImport(CbIDEThemeImport.Items);
-  CbIDEThemeImport.ItemIndex := 0;
+//  FillListIDEThemesImport(CbIDEThemeImport.Items);
+//  CbIDEThemeImport.ItemIndex := 0;
 
-  LabelVersion.Caption := Format('Version %s', [uMisc.GetFileVersion(ParamStr(0))]);
+  Self.Caption := Caption + Format(' %s', [uMisc.GetFileVersion(ParamStr(0))]);
 
   LoadFixedWidthFonts;
   LoadThemes;
@@ -1362,8 +1390,8 @@ begin
     CbIDEFontsChange(nil);
     BtnApplyFont.Enabled := False;
 
-    BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEData.IDEType=TSupportedIDEs.DelphiIDE);
-    BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
+    //BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEData.IDEType=TSupportedIDEs.DelphiIDE);
+    //BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
 
     if (LvThemes.Selected <> nil) and (CbElement.Items.Count > 0) then
     begin
@@ -1452,8 +1480,8 @@ begin
   CbIDEFonts.Style:=csDropDownList;
   CbIDEFonts.OnDrawItem:=nil;
 
-  CbIDEThemeImport.Style:=csDropDownList;
-  CbIDEThemeImport.OnDrawItem:=nil;
+//  CbIDEThemeImport.Style:=csDropDownList;
+//  CbIDEThemeImport.OnDrawItem:=nil;
 
   LvThemes.OwnerDraw  :=false;
   LvThemes.OnDrawItem :=nil;
@@ -1467,8 +1495,8 @@ begin
     CbIDEFonts.Style:=csOwnerDrawFixed;
     CbIDEFonts.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
 
-    CbIDEThemeImport.Style:=csOwnerDrawFixed;
-    CbIDEThemeImport.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+//    CbIDEThemeImport.Style:=csOwnerDrawFixed;
+//    CbIDEThemeImport.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
 
     LvThemes.OwnerDraw  :=True;
     LvThemes.OnDrawItem :=VclStylesOwnerDrawFix.ListViewDrawItem;
@@ -1498,8 +1526,7 @@ begin
     //if IDEType=TSupportedIDEs.LazarusIDE then
      DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus, SMS or Appmethod use the Delphi XE elements
 
-
-    BtnIDEColorizer.Enabled:=FSettings.ActivateColorizer and (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
+    //BtnIDEColorizer.Enabled:=FSettings.ActivateColorizer and (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
 
     FillListAvailableElements(DelphiVersion, CbElement.Items);
 
@@ -1545,8 +1572,8 @@ begin
     CbIDEFontsChange(nil);
     BtnApplyFont.Enabled := False;
 
-    BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEData.IDEType=TSupportedIDEs.DelphiIDE);
-    BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
+    //BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEData.IDEType=TSupportedIDEs.DelphiIDE);
+    //BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
 
     if CurrentThemeName<>'' then
       for i:=0 to LvThemes.Items.Count-1 do
@@ -1565,6 +1592,11 @@ begin
   end;
 end;
 
+
+procedure TFrmMain.Contribute1Click(Sender: TObject);
+begin
+ ShellExecute(Handle, 'open', PChar('http://theroadtodelphi.wordpress.com/contributions/'), nil, nil, SW_SHOW);
+end;
 
 procedure TFrmMain.CreateThemeFile;
 var
