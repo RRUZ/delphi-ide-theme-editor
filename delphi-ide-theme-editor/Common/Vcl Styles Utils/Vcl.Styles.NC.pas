@@ -49,6 +49,7 @@ type
     FStyleServices  : TCustomStyleServices;
     FVisible: Boolean;
     FForm : TCustomForm;
+    FShowSystemMenu: Boolean;
     function GetStyleServices: TCustomStyleServices;
     procedure SetStyleServices(const Value: TCustomStyleServices);
     procedure SetVisible(const Value: Boolean);
@@ -56,6 +57,7 @@ type
     property List : TListNCButtons read FList;
     property StyleServices : TCustomStyleServices read GetStyleServices write SetStyleServices;
     property Visible : Boolean read FVisible write SetVisible;
+    property ShowSystemMenu : Boolean read FShowSystemMenu write FShowSystemMenu;
     constructor Create(AOwner: TComponent);override;
     destructor Destroy; override;
   end;
@@ -128,6 +130,7 @@ type
     procedure WMNCLButtonDown(var Message: TWMNCHitMessage); message WM_NCLBUTTONDOWN;
     procedure WMNCLButtonUp(var Message: TWMNCHitMessage); message WM_NCLBUTTONUP;
     procedure WMNCLButtonDblClk(var Message: TWMNCHitMessage); message WM_NCLBUTTONDBLCLK;
+    procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
     procedure PaintNCControls(Canvas: TCanvas; ARect : TRect);
     procedure PaintNC(Canvas: TCanvas); override;
   strict protected
@@ -142,6 +145,13 @@ type
     destructor Destroy; override;
   end;
 
+
+{
+ TODO
+   add more buttons styles  (colors, gradient, glow, link)
+   add hot effects (glow, menu sel)
+   add support for TAction
+}
 
 implementation
 
@@ -197,6 +207,7 @@ begin
   FList  :=TListNCButtons.Create(True);
   FStyleServices:=nil;
   FVisible:=True;
+  FShowSystemMenu:=True;
   if not IsStyleHookRegistered(AOwner.ClassType, TFormStyleNCControls) then
     TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
   FForm.Perform(CM_RECREATEWND, 0, 0);
@@ -289,8 +300,6 @@ begin
     LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
   end;
 end;
-
-
 
 procedure DoDrawGrayImage(hdcDst: HDC; himl: HIMAGELIST; ImageIndex, X, Y: Integer);
 var
@@ -654,7 +663,38 @@ begin
    end;
 end;
 
+
+procedure TFormStyleNCControls.WMNCHitTest(var Message: TWMNCHitTest);
+var
+  P : TPoint;
+  LHitTest : Integer;
+begin
+  if (NCControls<>nil) and (NCControls.Visible) then
+  begin
+      {$IF CompilerVersion>23}
+      if (TStyleManager.FormBorderStyle = fbsCurrentStyle) and (seBorder in Form.StyleElements) then
+      {$IFEND}
+      begin
+        P := _NormalizePoint(Point(Message.XPos, Message.YPos));
+        LHitTest := _GetHitTest(P);
+        if (LHitTest<>HTSYSMENU) or ((LHitTest=HTSYSMENU)  and NCControls.ShowSystemMenu) then
+        begin
+          Message.Result := LHitTest;
+          Handled := True;
+        end
+        else
+        begin
+          Message.Result := WM_NULL;
+          Handled := True;
+        end;
+      end;
+  end
+  else
+   inherited;
+end;
+
 //Avoid maximize or restore on DblClk
+
 procedure TFormStyleNCControls.WMNCLButtonDblClk(var Message: TWMNCHitMessage);
 var
  P : TPoint;
@@ -778,7 +818,7 @@ begin
     end;
     {$IFEND}
 
-    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and PointInButton(P) then
+    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION) or (not  NCControls.ShowSystemMenu and (Message.HitTest = HTSYSMENU) )) and PointInButton(P) then
     begin
       if FHotNCBtnIndex <> GetButtonIndex(P) then
       begin
@@ -866,7 +906,8 @@ begin
   CaptionDetails := Details;
 
   //icon
-  if (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+  if ((NCControls<>nil) and NCControls.ShowSystemMenu)  and
+     (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
      (Form.BorderStyle <> bsDialog) and
      (Form.BorderStyle <> bsToolWindow) and
      (Form.BorderStyle <> bsSizeToolWin) then

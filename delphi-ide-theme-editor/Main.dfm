@@ -48,12 +48,11 @@ object FrmMain: TFrmMain
   end
   object Label6: TLabel
     Left = 8
-    Top = 339
+    Top = 441
     Width = 62
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = 'Theme Name'
-    ExplicitTop = 412
   end
   object Label7: TLabel
     Left = 8
@@ -64,31 +63,20 @@ object FrmMain: TFrmMain
   end
   object Label8: TLabel
     Left = 8
-    Top = 547
+    Top = 560
     Width = 152
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = 'Author : Rodrigo Ruz V. (RRUZ)'
-    ExplicitTop = 620
-  end
-  object LabelVersion: TLabel
-    Left = 8
-    Top = 560
-    Width = 35
-    Height = 13
-    Anchors = [akLeft, akBottom]
-    Caption = 'Version'
-    ExplicitTop = 633
   end
   object LabelMsg: TLabel
     Left = 8
-    Top = 498
+    Top = 518
     Width = 44
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = 'LabelMsg'
     Visible = False
-    ExplicitTop = 571
   end
   object CbElement: TComboBox
     Left = 244
@@ -96,7 +84,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 21
     Style = csDropDownList
-    TabOrder = 7
+    TabOrder = 6
     OnChange = CbElementChange
   end
   object GroupBox1: TGroupBox
@@ -105,7 +93,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 46
     Caption = 'Text Attributes'
-    TabOrder = 8
+    TabOrder = 7
     object CheckBold: TCheckBox
       Left = 16
       Top = 19
@@ -140,7 +128,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 46
     Caption = 'Use defaults for'
-    TabOrder = 9
+    TabOrder = 8
     object CheckForeground: TCheckBox
       Left = 16
       Top = 19
@@ -167,7 +155,7 @@ object FrmMain: TFrmMain
     Height = 22
     NoneColorColor = 16729138
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-    TabOrder = 10
+    TabOrder = 9
     OnChange = CblForegroundChange
   end
   object CblBackground: TColorBox
@@ -177,7 +165,7 @@ object FrmMain: TFrmMain
     Height = 22
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
     Enabled = False
-    TabOrder = 12
+    TabOrder = 11
     OnChange = CblForegroundChange
   end
   object CbIDEFonts: TComboBox
@@ -187,7 +175,7 @@ object FrmMain: TFrmMain
     Height = 21
     Style = csDropDownList
     Sorted = True
-    TabOrder = 4
+    TabOrder = 3
     OnChange = CbIDEFontsChange
   end
   object EditFontSize: TEdit
@@ -196,7 +184,7 @@ object FrmMain: TFrmMain
     Width = 23
     Height = 21
     ReadOnly = True
-    TabOrder = 5
+    TabOrder = 4
     Text = '5'
     OnChange = CbIDEFontsChange
   end
@@ -209,35 +197,35 @@ object FrmMain: TFrmMain
     Min = 1
     Max = 30
     Position = 5
-    TabOrder = 6
+    TabOrder = 5
   end
   object BtnApply: TButton
     Left = 128
-    Top = 385
+    Top = 487
     Width = 110
     Height = 25
     Action = ActionApplyTheme
     Anchors = [akLeft, akBottom]
-    TabOrder = 17
+    TabOrder = 16
   end
   object EditThemeName: TEdit
     Left = 8
-    Top = 358
+    Top = 460
     Width = 230
     Height = 21
     Anchors = [akLeft, akBottom]
     DoubleBuffered = True
     ParentDoubleBuffered = False
-    TabOrder = 15
+    TabOrder = 14
   end
   object BtnSave: TButton
     Left = 8
-    Top = 385
+    Top = 487
     Width = 114
     Height = 25
     Action = ActionSaveChanges
     Anchors = [akLeft, akBottom]
-    TabOrder = 16
+    TabOrder = 15
   end
   object BtnApplyFont: TButton
     Left = 641
@@ -253,7 +241,7 @@ object FrmMain: TFrmMain
     Left = 8
     Top = 35
     Width = 230
-    Height = 298
+    Height = 400
     Anchors = [akLeft, akTop, akBottom]
     Columns = <
       item
@@ -272,47 +260,17 @@ object FrmMain: TFrmMain
     PopupMenu = PopupMenuThemes
     ShowColumnHeaders = False
     SmallImages = ImageListThemes
-    TabOrder = 2
+    TabOrder = 1
     ViewStyle = vsReport
     OnChange = LvThemesChange
   end
-  object BtnImport: TButton
-    Left = 213
-    Top = 363
-    Width = 25
-    Height = 21
-    Anchors = [akLeft, akBottom]
-    Caption = '>'
-    TabOrder = 19
-    OnClick = BtnImportClick
-  end
-  object BtnImportRegTheme: TButton
-    Left = 8
-    Top = 447
-    Width = 225
-    Height = 25
-    Anchors = [akLeft, akBottom]
-    Caption = 'Import current IDE theme from registry'
-    TabOrder = 21
-    OnClick = BtnImportRegThemeClick
-  end
-  object BtnSetDefault: TButton
-    Left = 8
-    Top = 517
-    Width = 225
-    Height = 25
-    Anchors = [akLeft, akBottom]
-    Caption = 'Set default theme values for selected IDE'
-    TabOrder = 23
-    OnClick = BtnSetDefaultClick
-  end
   object ProgressBar1: TProgressBar
     Left = 8
-    Top = 478
+    Top = 537
     Width = 225
     Height = 17
     Anchors = [akLeft, akBottom]
-    TabOrder = 22
+    TabOrder = 17
     Visible = False
   end
   object SynEditCode: TSynEdit
@@ -329,7 +287,7 @@ object FrmMain: TFrmMain
     Font.Name = 'Consolas'
     Font.Pitch = fpFixed
     Font.Style = []
-    TabOrder = 14
+    TabOrder = 13
     OnClick = SynEditCodeClick
     Gutter.BorderColor = clYellow
     Gutter.DigitCount = 3
@@ -370,15 +328,6 @@ object FrmMain: TFrmMain
     OnSpecialLineColors = SynEditCodeSpecialLineColors
     FontSmoothing = fsmNone
   end
-  object CbIDEThemeImport: TComboBox
-    Left = 8
-    Top = 416
-    Width = 199
-    Height = 21
-    Style = csDropDownList
-    Anchors = [akLeft, akBottom]
-    TabOrder = 18
-  end
   object BtnSelForColor: TButton
     Left = 455
     Top = 164
@@ -386,7 +335,7 @@ object FrmMain: TFrmMain
     Height = 22
     ImageIndex = 2
     Images = ImageList1
-    TabOrder = 11
+    TabOrder = 10
     OnClick = BtnSelForColorClick
   end
   object BtnSelBackColor: TButton
@@ -397,29 +346,8 @@ object FrmMain: TFrmMain
     Enabled = False
     ImageIndex = 2
     Images = ImageList1
-    TabOrder = 13
+    TabOrder = 12
     OnClick = BtnSelBackColorClick
-  end
-  object BtnContribute: TButton
-    Left = 166
-    Top = 547
-    Width = 67
-    Height = 25
-    Anchors = [akLeft, akBottom]
-    Caption = 'Contribute'
-    TabOrder = 24
-    OnClick = BtnContributeClick
-  end
-  object BtnExportToLazarusTheme: TButton
-    Left = 8
-    Top = 447
-    Width = 225
-    Height = 25
-    Anchors = [akLeft, akBottom]
-    Caption = 'Export Theme to Lazarus Color Scheme'
-    TabOrder = 20
-    Visible = False
-    OnClick = BtnExportToLazarusThemeClick
   end
   object ComboBoxExIDEs: TComboBoxEx
     Left = 244
@@ -428,20 +356,9 @@ object FrmMain: TFrmMain
     Height = 22
     ItemsEx = <>
     Style = csExDropDownList
-    TabOrder = 3
+    TabOrder = 2
     OnChange = ComboBoxExIDEsChange
     Images = ImageListDelphiVersion
-  end
-  object BtnIDEColorizer: TButton
-    Left = 617
-    Top = 79
-    Width = 98
-    Height = 25
-    Caption = 'IDE Colorizer'
-    Enabled = False
-    TabOrder = 1
-    Visible = False
-    OnClick = BtnIDEColorizerClick
   end
   object Button1: TButton
     Left = 483
@@ -449,18 +366,18 @@ object FrmMain: TFrmMain
     Width = 122
     Height = 25
     Caption = 'Generate Thumbnails'
-    TabOrder = 25
+    TabOrder = 18
     Visible = False
     OnClick = Button1Click
   end
   object PanelColors: TPanel
-    Left = 721
+    Left = 722
     Top = 15
     Width = 236
     Height = 558
     Anchors = [akTop, akRight, akBottom]
     BevelOuter = bvNone
-    TabOrder = 26
+    TabOrder = 19
   end
   object RadioButtonFore: TRadioButton
     Left = 244
@@ -469,7 +386,7 @@ object FrmMain: TFrmMain
     Height = 17
     Caption = 'Foreground'
     Checked = True
-    TabOrder = 27
+    TabOrder = 20
     TabStop = True
     OnClick = RadioButtonForeClick
   end
@@ -479,7 +396,7 @@ object FrmMain: TFrmMain
     Width = 79
     Height = 17
     Caption = 'Background'
-    TabOrder = 28
+    TabOrder = 21
     OnClick = RadioButtonForeClick
   end
   object ImageListDelphiVersion: TImageList
@@ -967,6 +884,37 @@ object FrmMain: TFrmMain
     end
     object SaveAs1: TMenuItem
       Action = ActionSaveAs
+      Caption = 'Save Theme As...'
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object ExportThemetoLazarusColorScheme1: TMenuItem
+      Action = ActionExoLazarusClrSch
+    end
+    object ImportcurrentIDEThemefromregistry1: TMenuItem
+      Action = ActionImportThemeReg
+    end
+    object SetdefaultthemevaluesforselectedIDE1: TMenuItem
+      Action = ActionSetDefaultTheme
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object ImportVSTheme1: TMenuItem
+      Caption = 'Import VS Theme'
+      OnClick = ImportVSTheme1Click
+    end
+    object ImportEclipseTheme1: TMenuItem
+      Caption = 'Import Eclipse Theme'
+      OnClick = ImportEclipseTheme1Click
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Contribute1: TMenuItem
+      Caption = 'Contribute'
+      OnClick = Contribute1Click
     end
   end
   object SynExporterHTML1: TSynExporterHTML
@@ -999,8 +947,8 @@ object FrmMain: TFrmMain
     Top = 232
   end
   object ActionList1: TActionList
-    Left = 492
-    Top = 224
+    Left = 380
+    Top = 64
     object ActionApplyTheme: TAction
       Caption = 'Apply Theme'
       ImageIndex = 6
@@ -1306,5 +1254,25 @@ object FrmMain: TFrmMain
       0003C003000000010003E003000000010003E003800100010003C001C0010001
       00038001E0010000FFFFFC3FF801000000000000000000000000000000000000
       000000000000}
+  end
+  object ActionManager1: TActionManager
+    Left = 344
+    Top = 64
+    StyleName = 'Platform Default'
+    object ActionExoLazarusClrSch: TAction
+      Caption = 'Export Theme to Lazarus Color Scheme'
+      OnExecute = ActionExoLazarusClrSchExecute
+      OnUpdate = ActionExoLazarusClrSchUpdate
+    end
+    object ActionImportThemeReg: TAction
+      Caption = 'Import current IDE Theme from registry'
+      OnExecute = ActionImportThemeRegExecute
+      OnUpdate = ActionImportThemeRegUpdate
+    end
+    object ActionSetDefaultTheme: TAction
+      Caption = 'Set default theme values for selected IDE'
+      OnExecute = ActionSetDefaultThemeExecute
+      OnUpdate = ActionSetDefaultThemeUpdate
+    end
   end
 end

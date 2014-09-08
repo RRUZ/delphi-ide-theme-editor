@@ -47,7 +47,8 @@ const
     '\ObjRepos\en',  //XE4
     '\ObjRepos\en',  //XE5
     '\ObjRepos\en',  //Appmethod
-    '\ObjRepos\en'   //XE6
+    '\ObjRepos\en',  //XE6
+    '\ObjRepos\en'   //XE7
     );
 
 
