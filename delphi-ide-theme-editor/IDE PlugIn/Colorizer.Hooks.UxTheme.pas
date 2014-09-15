@@ -1178,25 +1178,6 @@ begin
   Result     := TMethod(MethodAddr).Code;
 end;
 
-
-function GetBplMethodAddress(Method: Pointer): Pointer;
-type
-  PJmpCode = ^TJmpCode;
-  TJmpCode = packed record
-    Code: Word;
-    Addr: ^Pointer;
-  end;
-const
-  csJmpCode = $E9;
-  csJmp32Code = $25FF;
-begin
-  if PJmpCode(Method)^.Code = csJmp32Code then
-    Result := PJmpCode(Method)^.Addr^
-  else
-    Result := Method;
-end;
-
-
 procedure InstallHooksUXTheme;
 const
   sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
@@ -1234,7 +1215,7 @@ begin
     VclIDEModule := LoadLibrary(sVclIDEModule);
     if VclIDEModule<>0 then
     begin
-     psBaseVirtualTreeOriginalWMNCPaint := GetBplMethodAddress(GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint));
+     psBaseVirtualTreeOriginalWMNCPaint := GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint);
      if Assigned(psBaseVirtualTreeOriginalWMNCPaint) then
       TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
     end;
