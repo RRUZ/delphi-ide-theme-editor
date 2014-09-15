@@ -21,7 +21,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "4.71.0"
+  !define VER_MINOR "4.75.0"
 !endif
 
 !ifndef IDE_VERSION_DXE
@@ -30,6 +30,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_DXE4
 !ifndef IDE_VERSION_DXE5
 !ifndef IDE_VERSION_DXE6
+!ifndef IDE_VERSION_DXE7
 
   !define FULL_VERSION    "1"  
   !define IDE_VERSION_DXE  "1"  
@@ -38,7 +39,9 @@ RequestExecutionLevel admin
   !define IDE_VERSION_DXE4 "1"
   !define IDE_VERSION_DXE5 "1"
   !define IDE_VERSION_DXE6 "1"
+  !define IDE_VERSION_DXE7 "1"
 
+!endif
 !endif
 !endif
 !endif
@@ -72,6 +75,10 @@ RequestExecutionLevel admin
   !ifdef IDE_VERSION_DXE6
     !define IDE_SHORT_NAME "DXE6"
     !define IDE_LONG_NAME "RAD Studio XE6 / Appmethod 1.14"
+  !endif
+  !ifdef IDE_VERSION_DXE7
+    !define IDE_SHORT_NAME "DXE7"
+    !define IDE_LONG_NAME "RAD Studio XE7 / Appmethod 1.15"
   !endif
 !endif
 
@@ -241,6 +248,13 @@ FileLoop:
 !ifdef IDE_VERSION_DXE6
   IfFileExists "$INSTDIR\XE6\DelphiIDEColorizer_XE6.dll" 0 +4
   FileOpen $0 "$INSTDIR\XE6\DelphiIDEColorizer_XE6.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_DXE7
+  IfFileExists "$INSTDIR\XE7\DelphiIDEColorizer_XE7.dll" 0 +4
+  FileOpen $0 "$INSTDIR\XE7\DelphiIDEColorizer_XE7.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
@@ -424,13 +438,39 @@ Section "RAD Studio XE6" SecDXE6
 SectionEnd
 !endif
 
+
+!ifdef IDE_VERSION_DXE7
+Section "RAD Studio XE7" SecDXE7
+  SectionIn 1 2
+  SetOutPath $INSTDIR\XE7
+  File "Updater.exe"
+  File "libeay32.dll"
+  File "ssleay32.dll"
+  File "DownloadInfo.xml"  
+  File "HookedWindows.dat"
+  File "HookedScrollBars.dat"  
+  File "WinAPIClasses.dat"  
+  SetOverwrite off
+  File "Init\Settings.ini"
+  SetOverwrite on  
+  File "DelphiIDEColorizer_XE7.dll"
+  SetOutPath $INSTDIR\XE7\Styles
+  File "Styles\*.vsf"      
+  SetOutPath $INSTDIR\XE7\Themes
+  File "Themes\*.idetheme" 
+  SetOutPath $INSTDIR\XE7\Images\dock_images
+  File "Images\dock_images\*.png"    
+  WriteRegStr HKCU "Software\Embarcadero\BDS\15.0\Experts" "DelphiIDEColorizer_XE7" "$INSTDIR\XE7\DelphiIDEColorizer_XE7.dll"
+SectionEnd
+!endif
+
 !define SF_SELBOLD    9
 
 Function .onInit
 
   InitPluginsDir
-  ;File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  ;NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
   
   ;!insertmacro MUI_LANGDLL_DISPLAY
   Call InitVersion
@@ -478,7 +518,10 @@ FunctionEnd
 !ifdef IDE_VERSION_DXE6
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE6} "Delphi IDE Colorizer for Delphi XE6"
 !endif
-	
+!ifdef IDE_VERSION_DXE7
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE7} "Delphi IDE Colorizer for Delphi XE7"
+!endif	
+
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function SetCheckBoxes
@@ -503,7 +546,9 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_DXE6
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\14.0" "App" ${SecDXE6}
 !endif
-
+!ifdef IDE_VERSION_DXE7
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\15.0" "App" ${SecDXE7}
+!endif
 FunctionEnd
 
 
@@ -533,6 +578,8 @@ Section "Uninstall"
   Delete "$INSTDIR\XE6\*.xml"     
   Delete "$INSTDIR\XE6\*.dll"
   Delete "$INSTDIR\XE6\*.dat"
+  Delete "$INSTDIR\XE7\*.dll"
+  Delete "$INSTDIR\XE7\*.dat"
   Delete "$INSTDIR\XE\Images\dock_images\*.*"  
   Delete "$INSTDIR\XE\Themes\*.*"  
   Delete "$INSTDIR\XE2\Images\dock_images\*.*"  
@@ -545,6 +592,8 @@ Section "Uninstall"
   Delete "$INSTDIR\XE5\Themes\*.*"
   Delete "$INSTDIR\XE6\Images\dock_images\*.*"    
   Delete "$INSTDIR\XE6\Themes\*.*"
+  Delete "$INSTDIR\XE7\Images\dock_images\*.*"    
+  Delete "$INSTDIR\XE7\Themes\*.*"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC"
 
 !ifdef IDE_VERSION_DXE
@@ -565,6 +614,9 @@ Section "Uninstall"
 !ifdef IDE_VERSION_DXE6
   DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "DelphiIDEColorizer_XE6"
 !endif
+!ifdef IDE_VERSION_DXE7
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\15.0\Experts" "DelphiIDEColorizer_XE7"
+!endif
 
   ;MessageBox MB_YESNO|MB_ICONQUESTION "$(SQUERYDELETE)" IDNO NoDelete
   DeleteRegKey HKCU "Software\The Road To Delphi\DIC"
@@ -575,8 +627,8 @@ SectionEnd
 
 Function un.onInit
   InitPluginsDir
-  ;File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  ;NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
 FunctionEnd
 
 

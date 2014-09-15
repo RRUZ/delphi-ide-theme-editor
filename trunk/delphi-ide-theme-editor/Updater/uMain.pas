@@ -26,7 +26,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, IdComponent, Diagnostics, uHttpDownload,
-  Vcl.Imaging.pngimage, Vcl.ExtCtrls, Vcl.AppEvnts;
+  pngimage, ExtCtrls, AppEvnts;
 
 const
   WM_ALL_SEGMENTS_DONE = WM_USER + 666;
@@ -136,7 +136,7 @@ uses
   ComObj,
   IdHTTP,
   ShellAPI,
-  System.UITypes,
+  //System.UITypes,
   uMisc;
 
 {$R *.dfm}

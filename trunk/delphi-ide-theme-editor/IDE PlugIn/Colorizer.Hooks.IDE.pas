@@ -41,6 +41,7 @@ const
 {$IFDEF DELPHIXE4} sVclIDEModule =  'vclide180.bpl';{$ENDIF}
 {$IFDEF DELPHIXE5} sVclIDEModule =  'vclide190.bpl';{$ENDIF}
 {$IFDEF DELPHIXE6} sVclIDEModule =  'vclide200.bpl';{$ENDIF}
+{$IFDEF DELPHIXE7} sVclIDEModule =  'vclide210.bpl';{$ENDIF}
 
 {$IFDEF DELPHIXE}  sCoreIDEModule =  'coreide150.bpl';{$ENDIF}
 {$IFDEF DELPHIXE2} sCoreIDEModule =  'coreide160.bpl';{$ENDIF}
@@ -48,8 +49,10 @@ const
 {$IFDEF DELPHIXE4} sCoreIDEModule =  'coreide180.bpl';{$ENDIF}
 {$IFDEF DELPHIXE5} sCoreIDEModule =  'coreide190.bpl';{$ENDIF}
 {$IFDEF DELPHIXE6} sCoreIDEModule =  'coreide200.bpl';{$ENDIF}
+{$IFDEF DELPHIXE7} sCoreIDEModule =  'coreide210.bpl';{$ENDIF}
 
 {$IFDEF DELPHIXE6} sModernThemeModule =  'ModernTheme200.bpl';{$ENDIF}
+{$IFDEF DELPHIXE7} sModernThemeModule =  'ModernTheme210.bpl';{$ENDIF}
 
 procedure InstallHooksIDE;
 Procedure RemoveHooksIDE;
@@ -914,24 +917,6 @@ begin
 end;
 
 
-function GetBplMethodAddress(Method: Pointer): Pointer;
-type
-  PJmpCode = ^TJmpCode;
-  TJmpCode = packed record
-    Code: Word;
-    Addr: ^Pointer;
-  end;
-const
-  csJmpCode = $E9;
-  csJmp32Code = $25FF;
-begin
-  if PJmpCode(Method)^.Code = csJmp32Code then
-    Result := PJmpCode(Method)^.Addr^
-  else
-    Result := Method;
-end;
-
-
 const
 {$IFDEF DELPHIXE}
   sCompilerMsgLineDraw           = '@Msglines@TCompilerMsgLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
@@ -1010,7 +995,7 @@ begin
    if Assigned(pOrgAddress) then
    Trampoline_IDEInsight_DrawTreeDrawNode  := InterceptCreate(pOrgAddress, @Detour_IDEInsight_DrawTreeDrawNode);
 
-   pOrgAddress := GetBplMethodAddress(GetProcAddress(CoreIDEModule, sIDEInsight_PaintCategoryNode));
+   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_PaintCategoryNode);
    if Assigned(pOrgAddress) then
      Trampoline_IDEInsight_PaintCategoryNode:= InterceptCreate(pOrgAddress, @Detour_IDEInsight_PaintCategoryNode);
 
