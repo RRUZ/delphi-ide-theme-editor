@@ -4,13 +4,13 @@
 
 https://theroadtodelphi.files.wordpress.com/2014/07/rad_appmethod.png
 
- The Delphi IDE Colorizer (DIC) is a plugin which allows to customize the look and feel of the *workspace* of the  <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> IDE and <a href="http://www.appmethod.com/">Appmethod</a>. 
+ The Delphi IDE Colorizer (DIC) is a plugin which allows to skin the look and feel of the *workspace* of the  <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> IDE and <a href="http://www.appmethod.com/">Appmethod</a>. 
 
 
 = Features =
 
- * DIC is compatible with <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> XE, XE2, XE3, XE4, XE5, X6 and <a href="http://www.appmethod.com/">Appmethod</a> 1.14
- * Support for VCL Styles (XE2-XE6)
+ * DIC is compatible with <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> XE, XE2, XE3, XE4, XE5, X6, XE7 and <a href="http://www.appmethod.com/">Appmethod</a> 1.14
+ * Support for VCL Styles (XE2-XE7)
  * Transparent menus.
  * Allow to change the icons, set the colors, and gradient direction of the title bar for the docked windows.
  * Set the colors, and gradient direction of the toolbars.
