@@ -42,6 +42,9 @@
 
  The files used by the DIC Wizard are stored in the %LOCALAPPDATA%\The Road To Delphi\DIC folder 
 
+== How I can Uninstall the plugin? ==
+ go to the  *%LOCALAPPDATA%\The Road To Delphi\DIC*  folder and run the uninst.exe App.
+
 == How I must report a bug? ==
 
   All the bugs found must be reported using the issue page of the project located here https://code.google.com/p/delphi-ide-theme-editor/issues/list . exist a sample bug issue (https://code.google.com/p/delphi-ide-theme-editor/issues/detail?id=42) which you can use as a guide. please remember add the "DIC" prefix to the summary of the issue report.
