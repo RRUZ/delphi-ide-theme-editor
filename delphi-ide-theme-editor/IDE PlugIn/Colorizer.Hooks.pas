@@ -1991,7 +1991,7 @@ var
   CatHeight: Integer;
   CategoryBounds, CategoryFrameBounds,
   ButtonBounds, ChevronBounds: TRect;
-  LColor, FontColor, GradientColor, SourceColor, TempColor: TColor;
+  {$IFDEF DELPHIXE2_UP}LColor, {$ENDIF}FontColor, GradientColor, SourceColor, TempColor: TColor;
   Caption: string;
   CaptionRect: TRect;
   CategoryRealBounds: TRect;
@@ -2404,6 +2404,11 @@ const
  sEditorControlSignature             = 'EditorControl.TCustomEditControl.EVFillGutter';
  sGradientTabsSignature              = 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
  sBaseVirtualTreePaintTreeSignature  = 'IDEVirtualTrees.TBaseVirtualTree.PaintTree';
+
+{$IFDEF DELPHIXE7_UP}
+ //used to paint background of MultiView related combobox (2)
+ sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
+{$ENDIF}
 var
   sCaller : string;
   OrgBrush : Integer; //don't use SaveDC
@@ -2437,7 +2442,12 @@ begin
    begin
       sCaller := ProcByLevel(2);
       if SameText(sCaller, sBaseVirtualTreePaintTreeSignature) then
-         Self.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
+         Self.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor
+      {$IFDEF DELPHIXE7_UP}
+//      else
+//      if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
+//         Self.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
+      {$ENDIF}
    end;
    //Self.Brush.Color:=clred;
    Trampoline_TCanvas_FillRect(Self, Rect);

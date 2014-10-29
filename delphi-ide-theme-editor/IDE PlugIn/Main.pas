@@ -234,7 +234,7 @@ end;
 
 procedure InstallAllHooks;
 begin
-  AddLog('InstallAllHooks', 'Init');
+  AddLog2('InstallAllHooks', 'Init');
   InstallHooksWinAPI();
   InstallHooksUXTheme();
   InstallFormsHook();
@@ -245,13 +245,13 @@ begin
   InstallThemedActnCtrlsHooks();
   {$ENDIF}
   RegisterFlatMenusHooks();
-  AddLog('InstallAllHooks', 'Done');
+  AddLog2('InstallAllHooks', 'Done');
 end;
 
 procedure RemoveAllHooks;
 begin
   //don't change unload order
-  AddLog('RemoveAllHooks', 'Init');
+  AddLog2('RemoveAllHooks', 'Init');
   RemoveColorizerHooks();
   RemoveHooksWinAPI();
   RemoveHooksUXTheme();
@@ -262,7 +262,7 @@ begin
   RemoveThemedActnCtrlsHooks();
   {$ENDIF}
   UnregisterFlatMenusHooks();
-  AddLog('RemoveAllHooks', 'Done');
+  AddLog2('RemoveAllHooks', 'Done');
 end;
 
 
@@ -272,7 +272,7 @@ var
   WizardServices: IOTAWizardServices;
 {$ENDIF}
 begin
-  AddLog('FinalizeIDEColorizer', '0');
+  AddLog2('FinalizeIDEColorizer', '0');
   IDEWizard.FTimerRefresher.Enabled:=False;
   IDEWizard.FTimerRefresher.Free;
 
@@ -280,16 +280,16 @@ begin
   RestoreIDESettings();
 {$ENDIF}
 
-  AddLog('FinalizeIDEColorizer', '1');
+  AddLog2('FinalizeIDEColorizer', '1');
   RemoveAllHooks();
 
   UnRegisterPlugIn;
   IDEWizard.RemoveMenuItems;
-  AddLog('FinalizeIDEColorizer', '2');
+  AddLog2('FinalizeIDEColorizer', '2');
   FreeAndNil(SplashBmp);
   FreeAndNil(AboutBmp);
 
-  AddLog('FinalizeIDEColorizer', '3');
+  AddLog2('FinalizeIDEColorizer', '3');
   FreeAndNil(TColorizerLocalSettings.ActnStyleList);
   FreeAndNil(TColorizerLocalSettings.Settings);
   TColorizerLocalSettings.IDEData.Free;
@@ -299,12 +299,12 @@ begin
   FreeAndNil(TColorizerLocalSettings.WinAPIClasses);
 
   IDEWizard.FinalizeColorizer();
-  AddLog('FinalizeIDEColorizer', '4');
+  AddLog2('FinalizeIDEColorizer', '4');
 
 {$IFDEF DLLWIZARD}
   if FWizardIndex <> InvalidIndex then
   begin
-    AddLog('FinalizeIDEColorizer', '5');
+    AddLog2('FinalizeIDEColorizer', '5');
     Assert(Assigned(BorlandIDEServices));
     WizardServices := BorlandIDEServices as IOTAWizardServices;
     Assert(Assigned(WizardServices));

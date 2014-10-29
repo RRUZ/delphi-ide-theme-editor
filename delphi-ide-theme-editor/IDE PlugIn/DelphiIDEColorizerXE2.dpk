@@ -4,6 +4,7 @@
 package DelphiIDEColorizerXE2;
 
 {$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -25,6 +26,8 @@ package DelphiIDEColorizerXE2;
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'Delphi IDE Colorizer'}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
@@ -60,7 +63,9 @@ contains
   uColorSelector in '..\Units\uColorSelector.pas',
   Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
-  Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',  
-  Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas';
+  Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',
+  Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
+  Colorizer.Hooks.UxTheme in 'Colorizer.Hooks.UxTheme.pas',
+  Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas';
 
 end.

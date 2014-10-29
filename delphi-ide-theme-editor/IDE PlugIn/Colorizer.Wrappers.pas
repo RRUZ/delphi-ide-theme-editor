@@ -1381,6 +1381,7 @@ initialization
   RegisterColorizerWrapper('TDescriptionPane',  TWrapperDescriptionPane);
   RegisterColorizerWrapper('THotCommands',  TWrapperHotCommands);
 
+  //RegisterColorizerWrapper('TCustomComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('TComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('TDesktopComboBox',  TWrapperIDEComboBox);
   RegisterColorizerWrapper('THistoryPropComboBox',  TWrapperIDEComboBox);
