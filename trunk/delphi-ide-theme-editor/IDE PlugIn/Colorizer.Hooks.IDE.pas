@@ -54,6 +54,9 @@ const
 {$IFDEF DELPHIXE6} sModernThemeModule =  'ModernTheme200.bpl';{$ENDIF}
 {$IFDEF DELPHIXE7} sModernThemeModule =  'ModernTheme210.bpl';{$ENDIF}
 
+{$IFDEF DELPHIXE7} sdesignideModule   =  'designide210.bpl';{$ENDIF}
+
+
 procedure InstallHooksIDE;
 Procedure RemoveHooksIDE;
 
@@ -64,6 +67,8 @@ uses
   Colorizer.Vcl.Styles,
   Vcl.Styles,
   Vcl.Themes,
+  {$ELSE}
+  Themes,
   {$ENDIF}
   Colorizer.VirtualTrees,
   Colorizer.Wrappers,
@@ -135,6 +140,19 @@ var
   {$ENDIF}
   Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
 
+{
+@Viewselector@TViewSelectorFrame@cbStyleSelectorDrawItem$qqrp24Vcl@Controls@TWinControlirx18System@Types@TRect60System@%Set$32Winapi@Windows@Winapi_Windows__1t1$i0$t1$i12$%
+@Viewselector@TViewSelectorFrame@cbStyleSelectorChange$qqrp14System@TObject
+@Viewselector@TViewSelectorFrame@cbDeviceSelectorDrawItem$qqrp24Vcl@Controls@TWinControlirx18System@Types@TRect60System@%Set$32Winapi@Windows@Winapi_Windows__1t1$i0$t1$i12$%
+
+    000AE804 4530 1440 __fastcall Viewselector::TViewSelectorFrame::cbDeviceSelectorDrawItem(Vcl::Controls::TWinControl *, int, System::Types::TRect&, System::Set<Winapi::Windows::Winapi_Windows__1, 0, 12>)
+    000AECB4 4529 1441 __fastcall Viewselector::TViewSelectorFrame::cbStyleSelectorChange(System::TObject *)
+    000AED9C 4528 1442 __fastcall Viewselector::TViewSelectorFrame::cbStyleSelectorDrawItem(Vcl::Controls::TWinControl *, int, System::Types::TRect&, System::Set<Winapi::Windows::Winapi_Windows__1, 0, 12>)
+
+  TDrawItemEvent = procedure(Control: TWinControl; Index: Integer;
+    Rect: TRect; State: TOwnerDrawState) of object;
+
+}
 procedure CustomProjectTree2PaintText(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType});
 begin
   //TargetCanvas.Font.Color:=clRed;
@@ -701,6 +719,12 @@ var
   ShouldDrawClose: Boolean;
   CloseRect, PinRect: TRect;
   LPngImage : TPngImage;
+ {$IFDEF DELPHIXE2_UP}
+  LDetails : TThemedElementDetails;
+  LStyleServices : TCustomStyleServices;
+  SavedIndex : Integer;
+ {$ENDIF}
+
 begin
 
   if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (not TColorizerLocalSettings.Settings.DockCustom) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
@@ -720,7 +744,8 @@ begin
     Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
 
     CaptionRect.Top := CaptionRect.Top + 1;
-
+   if not TColorizerLocalSettings.Settings.UseVCLStyles then
+   begin
     if State.Focused then
     begin
       if not TColorizerLocalSettings.Settings.DockCustomColors then
@@ -785,6 +810,24 @@ begin
       Canvas.Brush.Style:=bsClear;
       Canvas.Rectangle(CaptionRect);
     end;
+   end
+   else
+   begin
+    {$IFDEF DELPHIXE2_UP}
+      LStyleServices:= ColorizerStyleServices;
+      if State.Focused then
+        LDetails:=LStyleServices.GetElementDetails(twSmallCaptionActive)
+      else
+        LDetails:=LStyleServices.GetElementDetails(twSmallCaptionInactive);
+
+      SavedIndex := SaveDC(Canvas.Handle);
+      try
+        LStyleServices.DrawElement(Canvas.Handle, LDetails, CaptionRect);
+      finally
+        RestoreDC(Canvas.Handle, SavedIndex);
+      end;
+    {$ENDIF}
+   end;
 
     CloseRect := GetCloseRect(CaptionRect);
 

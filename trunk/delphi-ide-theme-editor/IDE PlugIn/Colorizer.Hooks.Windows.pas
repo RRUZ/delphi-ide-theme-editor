@@ -276,6 +276,17 @@ begin
     SetTextColor(hDC, OrgColor);
 end;
 
+
+{.$IFDEF DELPHIXE7_UP}
+function ColorToRGBTrampoline(Color: TColor): Longint;
+begin
+  if Color < 0 then
+    Result := Trampoline_GetSysColor(Color and $000000FF) else
+    Result := Color;
+end;
+{.$ENDIF}
+
+
 //Hook for allow change font color in TVirtualTreeHintWindow.InternalPaint (font color in hint window) ,
 //Note  : This is a temporal workaround.
 function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
@@ -285,13 +296,33 @@ const
  sDrawActiveTab                      =  'GDIPlus.GradientDrawer.TGradientTabDrawer.DrawActiveTab';
  sDrawInactiveTab                    =  'GDIPlus.GradientDrawer.TGradientTabDrawer.DrawInactiveTab';
 {$ENDIF}
+{$IFDEF DELPHIXE7_UP}
+ //used to paint background of MultiView related combobox (2)
+ //Note : If these combobox/views are styled the icons maintains the white background.
+ //So for now these elements will not be styled. Only a patch id applied to avoid apply the current style font colors.
+ sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
+{$ENDIF}
+
 {$IFDEF DELPHIXE6_UP}
 var
   sCaller : string;
   OrgColor : Cardinal;
   RestoreColor : Boolean;
 {$ENDIF}
+{$IFDEF DELPHIXE7_UP}
+  OrgColorBrush : Cardinal;
+{$ENDIF}
+  //i : integer;
 begin
+
+// if SameText(lpchText, '32-bit Windows') then
+// for i:=1 to 5 do
+// begin
+//     sCaller := ProcByLevel(i);
+//     AddLog2(Format('Level %d %s',[i, sCaller]));
+// end;
+
+
 {$IFDEF DELPHIXE6_UP}
  OrgColor:=0;
  RestoreColor:=False;
@@ -317,6 +348,26 @@ begin
         SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
      end;
    end;
+
+   {$IFDEF DELPHIXE7_UP}
+   OrgColorBrush:= GetBkColor(DC);
+   if (TColor(OrgColorBrush) = ColorToRGBTrampoline(clWindow)) then
+   begin
+     sCaller := ProcByLevel(3);
+     if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
+      SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
+       //SetBkColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.WindowColor));
+     else
+     begin
+       //Fix text color of the platform device selection ComboBox
+       sCaller := ProcByLevel(4);
+       if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
+        SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
+     end;
+   end;
+   {$ENDIF}
+
+
  end;
 {$ENDIF}
  //SetTextColor(DC, ColorToRGB(clRed));
@@ -463,7 +514,7 @@ begin
        end;
 
        COLOR_BTNFACE :
-       if (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.Color) then
+       if (TColor(SystemColor or Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.Color) then
        begin
          sCaller := ProcByLevel(2);
          if SameText(sCaller, '') then

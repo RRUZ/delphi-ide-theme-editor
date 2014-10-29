@@ -63,10 +63,8 @@ uses
   type
     THThemesClasses = class
     public
-     class var ScrollBars: TDictionary<HTHEME, String>;
-     class var TreeView  : TDictionary<HTHEME, String>;
-     class var Button    : TDictionary<HTHEME, String>;
-     class var ToolTip   : TDictionary<HTHEME, String>;
+     class var Classes : TDictionary<HTHEME, String>;
+     class var Windows : TDictionary<HTHEME, HWND>;
     end;
 
   var
@@ -143,55 +141,59 @@ begin
   Result := TrampolineOpenThemeData(hwnd, pszClassList);
   //AddLog('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
 
-  if SameText(pszClassList, VSCLASS_SCROLLBAR) then
-  begin
-    if not THThemesClasses.ScrollBars.ContainsKey(Result) then
-      THThemesClasses.ScrollBars.Add(Result, pszClassList);
-  end
-  else
-  if SameText(pszClassList, VSCLASS_TREEVIEW) then
-  begin
-    if not THThemesClasses.TreeView.ContainsKey(Result) then
-      THThemesClasses.TreeView.Add(Result, pszClassList);
-  end
-  else
-  if SameText(pszClassList, VSCLASS_BUTTON) then
-  begin
-    if not THThemesClasses.Button.ContainsKey(Result) then
-      THThemesClasses.Button.Add(Result, pszClassList);
-  end
-  else
-  if SameText(pszClassList, VSCLASS_TOOLTIP) then
-  begin
-    if not THThemesClasses.ToolTip.ContainsKey(Result) then
-      THThemesClasses.ToolTip.Add(Result, pszClassList);
-  end
-  ;
+  if THThemesClasses.Classes.ContainsKey(Result) then
+    THThemesClasses.Classes.Remove(Result);
+  THThemesClasses.Classes.Add(Result, pszClassList);
+
+  if THThemesClasses.Windows.ContainsKey(Result) then
+    THThemesClasses.Windows.Remove(Result);
+  THThemesClasses.Windows.Add(Result, hwnd);
 end;
 
 
-//function CustomCloseThemeData(hTheme: HTHEME): HRESULT; stdcall;
-//begin
-//    if ScrollBarList.ContainsKey(hTheme) then
-//      ScrollBarList.Remove(hTheme);
-//   Result := TrampolineCloseThemeData(hTheme);
-//end;
+{$IF CompilerVersion >= 23}
+
+{$ELSE}
+function RectCenter(var R: TRect; const Bounds: TRect): TRect;
+begin
+  OffsetRect(R, -R.Left, -R.Top);
+  OffsetRect(R, (RectWidth(Bounds) - RectWidth(R)) div 2, (RectHeight(Bounds) - RectHeight(R)) div 2);
+  OffsetRect(R, Bounds.Left, Bounds.Top);
+  Result := R;
+end;
+{$IFEND}
+
+function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
+const
+  sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
+var
+  s, sCaller, sCaller2 : string;
+  LCanvas : TCanvas;
+  VCLClassName : string;
+  ApplyHook  : Boolean;
+  LParentForm : TCustomForm;
+  LHWND : HWND;
+  LFoundControl : TWinControl;
+  LBuffer   : TBitmap;
+  LRect     : TRect;
+  LSize     : TSize;
+  SavedIndex : integer;
+  {$IFDEF DELPHIXE2_UP}
+  LStyleServices: TCustomStyleServices;
+  LDetails: TThemedElementDetails;
+  {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
-function CustomStyleDrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
-var
-  LDetails: TThemedElementDetails;
-  LStyle: TCustomStyleServices;
-  LScrollDetails: TThemedScrollBar;
-begin
-  LStyle := TStyleManager.Style['Jet'];
-  if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+  function DrawScrollBarVCLStyles : HRESULT;
+  var
+    LScrollDetails: TThemedScrollBar;
   begin
+    LStyleServices := ColorizerStyleServices;
     LScrollDetails := tsScrollBarRoot;
     LDetails.Element := TThemedElement.teScrollBar;
     LDetails.Part := iPartId;
     LDetails.State := iStateId;
-    LDetails := LStyle.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
+    LDetails := LStyleServices.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
 
     case iPartId  of
       SBP_ARROWBTN :
@@ -323,206 +325,17 @@ begin
       end;
 
     end;
-    LDetails := LStyle.GetElementDetails(LScrollDetails);
-    LStyle.DrawElement(dc, LDetails, pRect, pClipRect);
+    LDetails := LStyleServices.GetElementDetails(LScrollDetails);
+
+    //LStyle.DrawParentBackground(Self.Handle, dc, LDetails, False);
+    if (iPartId=SBP_THUMBBTNHORZ) then
+      LStyleServices.DrawElement(dc, LStyleServices.GetElementDetails(tsUpperTrackHorzNormal), pRect, pClipRect)
+    else
+    if (iPartId=SBP_THUMBBTNVERT) then
+      LStyleServices.DrawElement(dc, LStyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, pClipRect);
+
+    LStyleServices.DrawElement(dc, LDetails, pRect, pClipRect);
     Exit(0);
-  end
-  else
-  begin
-    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-  end;
-end;
-{$ENDIF}
-
-{$IF CompilerVersion >= 23}
-
-{$ELSE}
-function RectCenter(var R: TRect; const Bounds: TRect): TRect;
-begin
-  OffsetRect(R, -R.Left, -R.Top);
-  OffsetRect(R, (RectWidth(Bounds) - RectWidth(R)) div 2, (RectHeight(Bounds) - RectHeight(R)) div 2);
-  OffsetRect(R, Bounds.Left, Bounds.Top);
-  Result := R;
-end;
-{$IFEND}
-
-function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
-const
-  sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
-var
-  s, sCaller, sCaller2 : string;
-  LCanvas : TCanvas;
-  VCLClassName : string;
-  ApplyHook  : Boolean;
-  LParentForm : TCustomForm;
-  LHWND : HWND;
-  LFoundControl : TWinControl;
-  LBuffer   : TBitmap;
-  LRect     : TRect;
-  LSize     : TSize;
-  SavedIndex : integer;
-  {$IFDEF DELPHIXE2_UP}
-  LStyleServices: TCustomStyleServices;
-  LDetails: TThemedElementDetails;
-  {$ENDIF}
-
-{$IFDEF DELPHIXE2_UP}
-  function DrawScrollBarVCLStyles : HRESULT;
-  var
-    LScrollDetails: TThemedScrollBar;
-  begin
-    Result:=0;
-    LStyleServices := ColorizerStyleServices;
-    if THThemesClasses.ScrollBars.ContainsKey(THEME) then
-    begin
-      LScrollDetails := tsScrollBarRoot;
-      LDetails.Element := TThemedElement.teScrollBar;
-      LDetails.Part := iPartId;
-      LDetails.State := iStateId;
-      LDetails := LStyleServices.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
-
-      case iPartId  of
-        SBP_ARROWBTN :
-        begin
-          case iStateId of
-            ABS_UPNORMAL      : LScrollDetails := tsArrowBtnUpNormal;
-            ABS_UPHOT         : LScrollDetails := tsArrowBtnUpHot;
-            ABS_UPPRESSED     : LScrollDetails := tsArrowBtnUpPressed;
-            ABS_UPDISABLED    : LScrollDetails := tsArrowBtnUpDisabled;
-            ABS_DOWNNORMAL    : LScrollDetails := tsArrowBtnDownNormal;
-            ABS_DOWNHOT       : LScrollDetails := tsArrowBtnDownHot;
-            ABS_DOWNPRESSED   : LScrollDetails := tsArrowBtnDownPressed;
-            ABS_DOWNDISABLED  : LScrollDetails := tsArrowBtnDownDisabled;
-            ABS_LEFTNORMAL    : LScrollDetails := tsArrowBtnLeftNormal;
-            ABS_LEFTHOT       : LScrollDetails := tsArrowBtnLeftHot;
-            ABS_LEFTPRESSED   : LScrollDetails := tsArrowBtnLeftPressed;
-            ABS_LEFTDISABLED  : LScrollDetails := tsArrowBtnLeftDisabled;
-            ABS_RIGHTNORMAL   : LScrollDetails := tsArrowBtnRightNormal;
-            ABS_RIGHTHOT      : LScrollDetails := tsArrowBtnRightHot;
-            ABS_RIGHTPRESSED  : LScrollDetails := tsArrowBtnRightPressed;
-            ABS_RIGHTDISABLED : LScrollDetails := tsArrowBtnRightDisabled;
-            ABS_UPHOVER       : LScrollDetails := tsArrowBtnUpNormal;//tsArrowBtnUpHover;
-            ABS_DOWNHOVER     : LScrollDetails := tsArrowBtnDownNormal;//tsArrowBtnDownHover;
-            ABS_LEFTHOVER     : LScrollDetails := tsArrowBtnLeftNormal;//tsArrowBtnLeftHover;
-            ABS_RIGHTHOVER    : LScrollDetails := tsArrowBtnRightNormal;//tsArrowBtnRightHover;
-          end;
-        end;
-
-        SBP_THUMBBTNHORZ:
-        begin
-          case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsThumbBtnHorzNormal;
-           SCRBS_HOT      : LScrollDetails := tsThumbBtnHorzHot;
-           SCRBS_PRESSED  : LScrollDetails := tsThumbBtnHorzPressed;
-           SCRBS_DISABLED : LScrollDetails := tsThumbBtnHorzDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsThumbBtnHorzNormal;
-          end;
-        end;
-
-        SBP_THUMBBTNVERT:
-        begin
-          case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsThumbBtnVertNormal;
-           SCRBS_HOT      : LScrollDetails := tsThumbBtnVertHot;
-           SCRBS_PRESSED  : LScrollDetails := tsThumbBtnVertPressed;
-           SCRBS_DISABLED : LScrollDetails := tsThumbBtnVertDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsThumbBtnVertNormal;
-          end;
-        end;
-
-        SBP_LOWERTRACKHORZ:
-        begin
-          case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsLowerTrackHorzNormal;
-           SCRBS_HOT      : LScrollDetails := tsLowerTrackHorzHot;
-           SCRBS_PRESSED  : LScrollDetails := tsLowerTrackHorzPressed;
-           SCRBS_DISABLED : LScrollDetails := tsLowerTrackHorzDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsLowerTrackHorzNormal;//tsLowerTrackHorzHover; //no support for hover
-          end;
-        end;
-
-        SBP_UPPERTRACKHORZ :
-        begin
-         case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsUpperTrackHorzNormal;
-           SCRBS_HOT      : LScrollDetails := tsUpperTrackHorzHot;
-           SCRBS_PRESSED  : LScrollDetails := tsUpperTrackHorzPressed;
-           SCRBS_DISABLED : LScrollDetails := tsUpperTrackHorzDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsUpperTrackHorzNormal;//tsUpperTrackHorzHover; //no support for hover
-         end;
-        end;
-
-        SBP_LOWERTRACKVERT:
-        begin
-         case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsLowerTrackVertNormal;
-           SCRBS_HOT      : LScrollDetails := tsLowerTrackVertHot;
-           SCRBS_PRESSED  : LScrollDetails := tsLowerTrackVertPressed;
-           SCRBS_DISABLED : LScrollDetails := tsLowerTrackVertDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsLowerTrackVertNormal;//tsLowerTrackVertHover; //no support for hover
-         end;
-        end;
-
-        SBP_UPPERTRACKVERT:
-        begin
-         case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsUpperTrackVertNormal;
-           SCRBS_HOT      : LScrollDetails := tsUpperTrackVertHot;
-           SCRBS_PRESSED  : LScrollDetails := tsUpperTrackVertPressed;
-           SCRBS_DISABLED : LScrollDetails := tsUpperTrackVertDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsUpperTrackVertNormal;//tsUpperTrackVertHover; //no support for hover
-         end;
-        end;
-
-        SBP_SIZEBOX :
-        begin
-         case iStateId of
-          SZB_RIGHTALIGN            : LScrollDetails := tsSizeBoxRightAlign;
-          SZB_LEFTALIGN             : LScrollDetails := tsSizeBoxLeftAlign;
-          SZB_TOPRIGHTALIGN         : LScrollDetails := tsSizeBoxTopRightAlign;
-          SZB_TOPLEFTALIGN          : LScrollDetails := tsSizeBoxTopLeftAlign;
-          SZB_HALFBOTTOMRIGHTALIGN  : LScrollDetails := tsSizeBoxHalfBottomRightAlign;
-          SZB_HALFBOTTOMLEFTALIGN   : LScrollDetails := tsSizeBoxHalfBottomLeftAlign;
-          SZB_HALFTOPRIGHTALIGN     : LScrollDetails := tsSizeBoxHalfTopRightAlign;
-          SZB_HALFTOPLEFTALIGN      : LScrollDetails := tsSizeBoxHalfTopLeftAlign;
-         end;
-        end;
-
-        SBP_GRIPPERHORZ :
-        begin
-         case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsGripperHorzNormal;
-           SCRBS_HOT      : LScrollDetails := tsGripperHorzHot;
-           SCRBS_PRESSED  : LScrollDetails := tsGripperHorzPressed;
-           SCRBS_DISABLED : LScrollDetails := tsGripperHorzDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsGripperHorzHover;//tsGripperHorzHover; //no support for hover
-         end;
-        end;
-
-        SBP_GRIPPERVERT :
-        begin
-         case iStateId of
-           SCRBS_NORMAL   : LScrollDetails := tsGripperVertNormal;
-           SCRBS_HOT      : LScrollDetails := tsGripperVertHot;
-           SCRBS_PRESSED  : LScrollDetails := tsGripperVertPressed;
-           SCRBS_DISABLED : LScrollDetails := tsGripperVertDisabled;
-           SCRBS_HOVER    : LScrollDetails := tsGripperVertNormal;//tsGripperVertHover; //no support for hover
-         end;
-        end;
-
-      end;
-      LDetails := LStyleServices.GetElementDetails(LScrollDetails);
-
-      //LStyle.DrawParentBackground(Self.Handle, dc, LDetails, False);
-      if (iPartId=SBP_THUMBBTNHORZ) then
-        LStyleServices.DrawElement(dc, LStyleServices.GetElementDetails(tsUpperTrackHorzNormal), pRect, pClipRect)
-      else
-      if (iPartId=SBP_THUMBBTNVERT) then
-        LStyleServices.DrawElement(dc, LStyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, pClipRect);
-
-      LStyleServices.DrawElement(dc, LDetails, pRect, pClipRect);
-      Exit(0);
-    end;
   end;
 {$ENDIF}
   function DrawScrollBarFlat : HRESULT; stdcall;
@@ -747,11 +560,10 @@ var
   end;
 
 begin
-  if not ( (THThemesClasses.ScrollBars.ContainsKey(THEME) or THThemesClasses.TreeView.ContainsKey(THEME)
-     or THThemesClasses.Button.ContainsKey(THEME) or THThemesClasses.ToolTip.ContainsKey(THEME) ) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
+  if not (THThemesClasses.Classes.ContainsKey(THEME) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 
-  if THThemesClasses.ToolTip.ContainsKey(THEME) then
+  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_TOOLTIP) then
   begin
       case iPartId  of
        TTP_STANDARD :
@@ -776,7 +588,7 @@ begin
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
   end
   else
-  if THThemesClasses.ScrollBars.ContainsKey(THEME) then
+  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_SCROLLBAR) then
   begin
     ApplyHook:=False;
     sCaller :='';
@@ -792,7 +604,13 @@ begin
     end;
     //LastScrollWinControl:=nil;
 
-    LHWND:=WindowFromDC(dc);
+     LHWND:=0;
+    if THThemesClasses.Windows.ContainsKey(THEME) then
+     LHWND:=THThemesClasses.Windows.Items[THEME];
+
+    if LHWND=0 then
+     LHWND:=WindowFromDC(dc);
+
     if LHWND<>0 then
      begin
       LFoundControl := FindControl(LHWND);
@@ -814,7 +632,6 @@ begin
 
     if not ApplyHook then
     begin
-
       sCaller := ProcByLevel(1);
       if sCaller<>'' then
         sCaller2 := ProcByLevel(2);
@@ -871,7 +688,7 @@ begin
     end;
   end
   else
-  if THThemesClasses.TreeView.ContainsKey(THEME) then
+  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_TREEVIEW) then
   begin
            //deshabilitar en treeeview
     if (iPartId = TVP_GLYPH) and (iStateId=GLPS_OPENED) and ((pRect.Right-pRect.Left)=9) then
@@ -883,7 +700,13 @@ begin
       begin
         //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
         begin
-            LHWND:=WindowFromDC(dc);
+            LHWND:=0;
+            if THThemesClasses.Windows.ContainsKey(THEME) then
+             LHWND:=THThemesClasses.Windows.Items[THEME];
+
+            if LHWND=0 then
+              LHWND:=WindowFromDC(dc);
+
             if LHWND<>0 then
              begin
               LFoundControl := FindControl(LHWND);
@@ -950,7 +773,13 @@ begin
       begin
         //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
         begin
-            LHWND:=WindowFromDC(dc);
+             LHWND:=0;
+            if THThemesClasses.Windows.ContainsKey(THEME) then
+             LHWND:=THThemesClasses.Windows.Items[THEME];
+
+            if LHWND=0 then
+              LHWND:=WindowFromDC(dc);
+
             if LHWND<>0 then
              begin
               LFoundControl := FindControl(LHWND);
@@ -1013,13 +842,17 @@ begin
 //      AddLog('THThemesClasses.TreeView','Ignored '+sCaller);
   end
   else
-  if THThemesClasses.Button.ContainsKey(THEME) then
+  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_BUTTON) then
   begin
     if (iPartId = BP_CHECKBOX) then
     begin
       LSize.cx:= 13;
       LSize.cy:= 13;
-      LHWND:=WindowFromDC(dc);
+      LHWND:=0;
+      if THThemesClasses.Windows.ContainsKey(THEME) then
+       LHWND:=THThemesClasses.Windows.Items[THEME];
+      if LHWND=0 then
+        LHWND:=WindowFromDC(dc);
        //if LHWND<>0 then
        begin
         LFoundControl := FindControl(LHWND);
@@ -1187,17 +1020,12 @@ var
 begin
   if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
-    THThemesClasses.ScrollBars := TDictionary<HTHEME, String>.Create();
-    THThemesClasses.ScrollBars.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
-
-    THThemesClasses.TreeView := TDictionary<HTHEME, String>.Create();
-    THThemesClasses.TreeView.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
-
-    THThemesClasses.Button := TDictionary<HTHEME, String>.Create();
-    THThemesClasses.Button.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
-
-    THThemesClasses.ToolTip := TDictionary<HTHEME, String>.Create();
-    THThemesClasses.ToolTip.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
+    THThemesClasses.Classes := TDictionary<HTHEME, String>.Create();
+    THThemesClasses.Windows := TDictionary<HTHEME, HWND>.Create();
+    THThemesClasses.Classes.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
 
     TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
 
@@ -1256,10 +1084,10 @@ begin
     InterceptRemove(@TrampolineSetScrollInfo);
 
   if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
-    THThemesClasses.ScrollBars.Free;
-    THThemesClasses.TreeView.Free;
-    THThemesClasses.Button.Free;
-    THThemesClasses.ToolTip.Free;
+  begin
+    THThemesClasses.Classes.Free;
+    THThemesClasses.Windows.Free;
+  end;
 end;
 
 end.

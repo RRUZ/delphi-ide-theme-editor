@@ -159,7 +159,10 @@ begin
          if (not IsUACEnabled)  and CurrentUserIsAdmin then
            LGif.SaveToFile(GifFile)
          else
+         begin
+           LGif.SaveToFile(TempGifFile);
            RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s"',[TempGifFile, GifFile]));
+         end;
        finally
          LGif.Free;
        end;

@@ -2,11 +2,6 @@
 library DelphiIDEColorizer_XE;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',

@@ -36,6 +36,7 @@ uses
  {$ENDIF}
  ActnMan,
  ComCtrls,
+ StdCtrls,
  uDelphiVersions,
  ActnColorMaps,
  Windows,
@@ -46,8 +47,8 @@ uses
 
 {.$DEFINE ENABLELOG}
 
-procedure AddLog(const Message : string); overload;
-procedure AddLog(const Category, Message : string); overload;
+procedure AddLog2(const Message : string); overload;
+procedure AddLog2(const Category, Message : string); overload;
 
 procedure RefreshIDETheme(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;Restore : Boolean = False;Invalidate : Boolean = False); overload;
 procedure RefreshIDETheme(Invalidate : Boolean = False); overload;
@@ -148,9 +149,9 @@ end;
 {$ENDIF}
 
 
-procedure AddLog(const Message : string);
+procedure AddLog2(const Message : string);
 begin
-  AddLog('', Message);
+  AddLog2('', Message);
 end;
 
 
@@ -305,6 +306,15 @@ var
 begin
     if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
+
+    //cbDeviceSelector
+//    if SameText(AComponent.Name, 'cbDeviceSelector') and TComboBox(AComponent).im then
+//    begin
+//      //TRttiUtils.DumpObject(AComponent, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\cbDeviceSelector.pas');
+//
+//    end;
+
+
 //    if SameText(AComponent.ClassName, 'TTBXToolbar') then
 //     TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
 
@@ -438,7 +448,7 @@ begin
       end;
     end;
   except on e: exception do //sometimes the references to the objects contained in ActionBarStyles are lost when the IDE is closed.
-    AddLog(Format(' LActionManager.Style exception RestoreActnManagerStyles Message %s Trace %s ',[e.Message, e.StackTrace]));
+    AddLog2('', Format(' LActionManager.Style exception RestoreActnManagerStyles Message %s Trace %s ',[e.Message, e.StackTrace]));
   end;
  {$ELSE DELPHI2009_UP}
    //TODO
@@ -498,22 +508,10 @@ var
 {$ENDIF}
 
 
-procedure AddLog(const Category, Message : string);
+procedure AddLog2(const Category, Message : string);
 begin
 {$IFDEF ENABLELOG}
 TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
-//   if not Assigned(LogFile) then exit;
-//
-//   if Category<>'' then
-//    LogFile.Add(Format('%s : %s', [Category, Message]))
-//   else
-//    LogFile.Add(Format('%s', [Message]));
-//
-// if (LogFile.Count mod 10) = 0 then
-// begin
-//  TFile.AppendAllText(sLogFileName, LogFile.Text);
-//  LogFile.Clear;
-// end;
 {$ENDIF}
 end;
 
