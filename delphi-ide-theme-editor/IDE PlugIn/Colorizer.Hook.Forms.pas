@@ -247,7 +247,6 @@ begin
           RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
           if RetVal>0 then
           begin
-            Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
             //AddLog('Before HCBT_SETFOCUS '+ClassNameBuffer);
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(ClassNameBuffer)>=0) then
             begin
@@ -276,7 +275,6 @@ begin
           RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
           if RetVal>0 then
           begin
-             Assert(RetVal < ClassNameBufferSize, 'Class name larger than fixed buffer size');
              //AddLog('Before HCBT_ACTIVATE '+ClassNameBuffer);
             if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
             for i := 0 to Screen.FormCount-1 do

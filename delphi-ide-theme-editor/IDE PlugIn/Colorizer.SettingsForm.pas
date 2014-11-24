@@ -386,6 +386,7 @@ begin
     //FSettings.EnableDWMColorization   := CheckBoxActivateDWM.Checked;
     FSettings.FixIDEDisabledIconsDraw   := CheckBoxFixIDEDrawIcon.Checked;
     FSettings.AutogenerateColors   := CheckBoxAutoColor.Checked;
+    FSettings.CheckUpdates  := CheckBoxUpdates.Checked;
 
     FSettings.VCLStyleName  := CbStyles.Text;
     FSettings.UseVCLStyles  := CheckBoxUseVClStyles.Checked;

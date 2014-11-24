@@ -21,7 +21,7 @@ RequestExecutionLevel admin
 !endif
 
 !ifndef VER_MINOR
-  !define VER_MINOR "5.12.0"
+  !define VER_MINOR "5.2.5"
 !endif
 
 !ifndef IDE_VERSION_DXE
@@ -469,8 +469,8 @@ SectionEnd
 Function .onInit
 
   InitPluginsDir
-  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  File /oname=$PLUGINSDIR\Auric.vsf "..\Styles\Auric.vsf"
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Auric.vsf
   
   ;!insertmacro MUI_LANGDLL_DISPLAY
   Call InitVersion
@@ -627,8 +627,8 @@ SectionEnd
 
 Function un.onInit
   InitPluginsDir
-  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf
+  File /oname=$PLUGINSDIR\Auric.vsf "..\Styles\Auric.vsf"
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Auric.vsf
 FunctionEnd
 
 

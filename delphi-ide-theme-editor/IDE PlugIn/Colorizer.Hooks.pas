@@ -39,7 +39,6 @@ implementation
 
 uses
 {$IFDEF DELPHIXE2_UP}
-  Vcl.Styles,
   Vcl.Themes,
   Winapi.UxTheme,
   Colorizer.VCL.Styles,
@@ -521,7 +520,7 @@ begin
     LParentForm:= GetParentForm(Self);
     if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
     begin
-     Trampoline_TCustomCombo_WndProc(Self, Message);
+      Trampoline_TCustomCombo_WndProc(Self, Message);
       exit;
     end;
 
@@ -574,18 +573,18 @@ var
   LBackgroundColor: TColor;
   LParentForm : TCustomForm;
 begin
-    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
-    begin
-     Trampoline_DoModernPainting(Self);
-     exit;
-    end;
+  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+  begin
+   Trampoline_DoModernPainting(Self);
+   exit;
+  end;
 
-    LParentForm:= GetParentForm(Self);
-    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-    begin
-     Trampoline_DoModernPainting(Self);
-      exit;
-    end;
+  LParentForm:= GetParentForm(Self);
+  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+  begin
+   Trampoline_DoModernPainting(Self);
+    exit;
+  end;
 
   if Self.TabPosition in [tpBottom, tpRight] then
   begin
@@ -1220,7 +1219,6 @@ var
 begin
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
   begin
-
     LParentForm:= GetParentForm(Self);
     if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
     begin
@@ -2823,41 +2821,41 @@ var
   //LStyleServices : {$IFDEF DELPHIXE2_UP} TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
   LDetails: TThemedElementDetails;
 
-      procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
-        const S: string; var R: TRect; Flags: Cardinal);
-      var
-        TextFormat: TTextFormatFlags;
-        {$IFDEF DELPHIXE2_UP}
-        ThemeTextColor : TColor;
-        {$ENDIF}
+    procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+      const S: string; var R: TRect; Flags: Cardinal);
+    var
+      TextFormat: TTextFormatFlags;
+      {$IFDEF DELPHIXE2_UP}
+      ThemeTextColor : TColor;
+      {$ENDIF}
+    begin
+      Canvas.Font := TWinControlClass(Self).Font;
+      TextFormat  := TTextFormatFlags(Flags);
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
       begin
-        Canvas.Font := TWinControlClass(Self).Font;
-        TextFormat  := TTextFormatFlags(Flags);
-        {$IFDEF DELPHIXE2_UP}
-        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
-        begin
-          ColorizerStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
-          Canvas.Font.Color := ThemeTextColor;
-        end
-        else
-        {$ENDIF}
-        if TColorizerLocalSettings.Settings.HeaderCustom  then
-          Canvas.Font.Color := TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, TColorizerLocalSettings.ColorMap.FontColor)
-        else
-          Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        //AddLog('DrawControlText', S);
-        //Canvas.Font.Color:= clRed;
-        {$IFDEF DELPHIXE2_UP}
-        if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
-          ColorizerStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color)
-        else
-          StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-        {$ELSE}
-          ThemeServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-        {$ENDIF};
+        ColorizerStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
+        Canvas.Font.Color := ThemeTextColor;
+      end
+      else
+      {$ENDIF}
+      if TColorizerLocalSettings.Settings.HeaderCustom  then
+        Canvas.Font.Color := TryStrToColor(TColorizerLocalSettings.Settings.HeaderFontColor, TColorizerLocalSettings.ColorMap.FontColor)
+      else
+        Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      //AddLog('DrawControlText', S);
+      //Canvas.Font.Color:= clRed;
+      {$IFDEF DELPHIXE2_UP}
+      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+        ColorizerStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color)
+      else
+        StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+      {$ELSE}
+        ThemeServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+      {$ENDIF};
 
-        //LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-      end;
+      //LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+    end;
 
     procedure DrawHeaderSection(Canvas: TCanvas; R: TRect; Index: Integer;
       const Text: string; IsPressed, IsBackground: Boolean);
@@ -3085,36 +3083,22 @@ end;
 
 procedure RemoveColorizerHooks;
 begin
-  if Assigned(Trampoline_HintWindow_Paint) then
-    InterceptRemove(@Trampoline_HintWindow_Paint);
-
-  if Assigned(Trampoline_MessageHintWindow_Paint) then
-    InterceptRemove(@Trampoline_MessageHintWindow_Paint);
-
-  if Assigned (Trampoline_TWinControl_DefaultHandler) then
-    InterceptRemove(@Trampoline_TWinControl_DefaultHandler);
-
-  if Assigned(Trampoline_Bevel_Paint) then
-    InterceptRemove(@Trampoline_Bevel_Paint);
+   InterceptRemove(@Trampoline_HintWindow_Paint);
+   InterceptRemove(@Trampoline_MessageHintWindow_Paint);
+   InterceptRemove(@Trampoline_TWinControl_DefaultHandler);
+   InterceptRemove(@Trampoline_Bevel_Paint);
 
 {$IF CompilerVersion<27} //XE6
-  if Assigned(TrampolineCustomImageList_DoDraw) then
-    InterceptRemove(@TrampolineCustomImageList_DoDraw);
+   InterceptRemove(@TrampolineCustomImageList_DoDraw);
 {$IFEND}
-  if Assigned(Trampoline_TCanvas_FillRect) then
-    InterceptRemove(@Trampoline_TCanvas_FillRect);
-
-  if Assigned(Trampoline_TCanvas_LineTo) then
-    InterceptRemove(@Trampoline_TCanvas_LineTo);
-
-  if Assigned(Trampoline_TCanvas_Rectangle) then
-    InterceptRemove(@Trampoline_TCanvas_Rectangle);
+   InterceptRemove(@Trampoline_TCanvas_FillRect);
+   InterceptRemove(@Trampoline_TCanvas_LineTo);
+   InterceptRemove(@Trampoline_TCanvas_Rectangle);
 
 //  if Assigned(Trampoline_TCustomActionPopupMenu_CreateParams) then
 //    InterceptRemove(@Trampoline_TCustomActionPopupMenu_CreateParams);
 
-  if Assigned(Trampoline_TCustomControlBar_PaintControlFrame) then
-    InterceptRemove(@Trampoline_TCustomControlBar_PaintControlFrame);
+   InterceptRemove(@Trampoline_TCustomControlBar_PaintControlFrame);
 
 //  if Assigned(Trampoline_TCanvas_Polyline) then
 //    InterceptRemove(@Trampoline_TCanvas_Polyline);
@@ -3122,48 +3106,23 @@ begin
 {$IFDEF DELPHIXE2_UP}
 //  if Assigned(Trampoline_TStyleEngine_HandleMessage) then
 //    InterceptRemove(@Trampoline_TStyleEngine_HandleMessage);
-  if Assigned(Trampoline_TUxThemeStyle_DoDrawElement) then
-    InterceptRemove(@Trampoline_TUxThemeStyle_DoDrawElement);
+   InterceptRemove(@Trampoline_TUxThemeStyle_DoDrawElement);
 {$ELSE}
-  if Assigned(Trampoline_TUxTheme_DrawElement) then
-    InterceptRemove(@Trampoline_TUxTheme_DrawElement);
-  if Assigned(Trampoline_DrawThemeBackground) then
-    InterceptRemove(@Trampoline_DrawThemeBackground);
+   InterceptRemove(@Trampoline_TUxTheme_DrawElement);
+   InterceptRemove(@Trampoline_DrawThemeBackground);
 {$ENDIF}
 
-  if Assigned(Trampoline_TCustomStatusBar_WMPAINT) then
-    InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
-
-  if Assigned(Trampoline_TCustomListView_HeaderWndProc) then
-    InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
-
-  if Assigned(Trampoline_DoModernPainting) then
-     InterceptRemove(@Trampoline_DoModernPainting);
-
-  if Assigned(Trampoline_TCategoryButtons_DrawCategory) then
-    InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
-
-  if Assigned(Trampoline_TCategoryButtons_DrawButton) then
-    InterceptRemove(@Trampoline_TCategoryButtons_DrawButton);
-
-
-  if Assigned(Trampoline_TCustomPanel_Paint) then
-    InterceptRemove(@Trampoline_TCustomPanel_Paint);
-
-  if Assigned(Trampoline_TWinControl_WMNCPaint) then
-    InterceptRemove(@Trampoline_TWinControl_WMNCPaint);
-
-  if Assigned(Trampoline_TButtonControl_WndProc) then
-    InterceptRemove(@Trampoline_TButtonControl_WndProc);
-
-  if Assigned(Trampoline_TSplitter_Paint) then
-    InterceptRemove(@Trampoline_TSplitter_Paint);
-
-  if Assigned(Trampoline_CustomComboBox_WMPaint) then
-    InterceptRemove(@Trampoline_CustomComboBox_WMPaint);
-
-  if Assigned(Trampoline_TCustomCombo_WndProc) then
-    InterceptRemove(@Trampoline_TCustomCombo_WndProc);
+   InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
+   InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
+   InterceptRemove(@Trampoline_DoModernPainting);
+   InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
+   InterceptRemove(@Trampoline_TCategoryButtons_DrawButton);
+   InterceptRemove(@Trampoline_TCustomPanel_Paint);
+   InterceptRemove(@Trampoline_TWinControl_WMNCPaint);
+   InterceptRemove(@Trampoline_TButtonControl_WndProc);
+   InterceptRemove(@Trampoline_TSplitter_Paint);
+   InterceptRemove(@Trampoline_CustomComboBox_WMPaint);
+   InterceptRemove(@Trampoline_TCustomCombo_WndProc);
 end;
 
 end.

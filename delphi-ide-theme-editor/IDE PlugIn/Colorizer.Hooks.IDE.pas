@@ -1004,9 +1004,7 @@ const
 
 procedure InstallHooksIDE;
 var
-  pOrgAddress : Pointer;
 {$IFDEF DELPHIXE6_UP}
-  ModernThemeModule           : HMODULE;
   Modules                     : TStrings;
   ModernThemeLoaded           : Boolean;
 {$ENDIF}
@@ -1017,47 +1015,20 @@ begin
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
   begin
-   pOrgAddress := GetProcAddress(CoreIDEModule, sCompilerMsgLineDraw);
-   if Assigned(pOrgAddress) then
-    Trampoline_CompilerMsgLine_Draw := InterceptCreate(pOrgAddress, @Detour_TCompilerMsgLine_Draw);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sTitleLineDraw);
-   if Assigned(pOrgAddress) then
-     Trampoline_TitleLine_Draw   := InterceptCreate(pOrgAddress, @Detour_TTitleLine_Draw);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sFileFindLineDraw);
-   if Assigned(pOrgAddress) then
-     Trampoline_TFileFindLine_Draw   := InterceptCreate(pOrgAddress, @Detour_TFileFindLine_Draw);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sPropertyInspectorDrawNamePair);
-   if Assigned(pOrgAddress) then
-     Trampoline_TPropertyInspector_DrawNamePair  := InterceptCreate(pOrgAddress, @Detour_TPropertyInspector_DrawNamePair);
+    Trampoline_CompilerMsgLine_Draw := InterceptCreate(sCoreIDEModule, sCompilerMsgLineDraw, @Detour_TCompilerMsgLine_Draw);
+    Trampoline_TitleLine_Draw       := InterceptCreate(sCoreIDEModule, sTitleLineDraw, @Detour_TTitleLine_Draw);
+    Trampoline_TFileFindLine_Draw   := InterceptCreate(sCoreIDEModule, sFileFindLineDraw, @Detour_TFileFindLine_Draw);
+    Trampoline_TPropertyInspector_DrawNamePair  := InterceptCreate(sCoreIDEModule, sPropertyInspectorDrawNamePair, @Detour_TPropertyInspector_DrawNamePair);
 
 {$IFDEF DELPHIXE5_UP}
-   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_DrawTreeDrawNode);
-   if Assigned(pOrgAddress) then
-   Trampoline_IDEInsight_DrawTreeDrawNode  := InterceptCreate(pOrgAddress, @Detour_IDEInsight_DrawTreeDrawNode);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_PaintCategoryNode);
-   if Assigned(pOrgAddress) then
-     Trampoline_IDEInsight_PaintCategoryNode:= InterceptCreate(pOrgAddress, @Detour_IDEInsight_PaintCategoryNode);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sIDEInsight_PaintItemNode);
-   if Assigned(pOrgAddress) then
-   Trampoline_IDEInsight_PaintItemNode    := InterceptCreate(pOrgAddress, @Detour_IDEInsight_PaintItemNode);
+   Trampoline_IDEInsight_DrawTreeDrawNode  := InterceptCreate(sCoreIDEModule, sIDEInsight_DrawTreeDrawNode, @Detour_IDEInsight_DrawTreeDrawNode);
+   Trampoline_IDEInsight_PaintCategoryNode := InterceptCreate(sCoreIDEModule, sIDEInsight_PaintCategoryNode, @Detour_IDEInsight_PaintCategoryNode);
+   Trampoline_IDEInsight_PaintItemNode     := InterceptCreate(sCoreIDEModule, sIDEInsight_PaintItemNode, @Detour_IDEInsight_PaintItemNode);
 {$ELSE}
 {$ENDIF}
-   pOrgAddress := GetProcAddress(CoreIDEModule, sPopupSearchForm_DrawTreeDrawNode);
-   if Assigned(pOrgAddress) then
-   Trampoline_TPopupSearchForm_DrawTreeDrawNode  := InterceptCreate(pOrgAddress, @Detour_TPopupSearchForm_DrawTreeDrawNode);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sPopupSearchForm_PaintCategoryNode);
-   if Assigned(pOrgAddress) then
-   Trampoline_TPopupSearchForm_PaintCategoryNode:= InterceptCreate(pOrgAddress, @Detour_TPopupSearchForm_PaintCategoryNode);
-
-   pOrgAddress := GetProcAddress(CoreIDEModule, sPopupSearchForm_PaintItemNode);
-   if Assigned(pOrgAddress) then
-   Trampoline_TPopupSearchForm_PaintItemNode    := InterceptCreate(pOrgAddress, @Detour_TPopupSearchForm_PaintItemNode);
+   Trampoline_TPopupSearchForm_DrawTreeDrawNode  := InterceptCreate(sCoreIDEModule, sPopupSearchForm_DrawTreeDrawNode, @Detour_TPopupSearchForm_DrawTreeDrawNode);
+   Trampoline_TPopupSearchForm_PaintCategoryNode := InterceptCreate(sCoreIDEModule, sPopupSearchForm_PaintCategoryNode, @Detour_TPopupSearchForm_PaintCategoryNode);
+   Trampoline_TPopupSearchForm_PaintItemNode     := InterceptCreate(sCoreIDEModule, sPopupSearchForm_PaintItemNode, @Detour_TPopupSearchForm_PaintItemNode);
   end;
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
@@ -1066,16 +1037,8 @@ begin
  //  pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
 //   if Assigned(pOrgAddress) then
  //   Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
-
-   pOrgAddress := GetProcAddress(VclIDEModule, sListButtonPaint);
-   if Assigned(pOrgAddress) then
-    Trampoline_TListButton_Paint := InterceptCreate(pOrgAddress, @Detour_TListButton_Paint);
-
-   pOrgAddress := GetProcAddress(VclIDEModule, sGetOutlineColor);
-   if Assigned(pOrgAddress) then
-    Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(pOrgAddress, @Detour_Gradientdrawer_GetOutlineColor);
-
-
+    Trampoline_TListButton_Paint := InterceptCreate(sVclIDEModule, sListButtonPaint, @Detour_TListButton_Paint);
+    Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(sVclIDEModule, sGetOutlineColor, @Detour_Gradientdrawer_GetOutlineColor);
 //   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
 //   if Assigned(pOrgAddress) then
 //    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
@@ -1083,7 +1046,6 @@ begin
 //   *******************************************
 
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
-
 
 {$IFDEF DELPHIXE6_UP}
   Modules:=TStringList.Create;
@@ -1096,19 +1058,10 @@ begin
 
   if ModernThemeLoaded then //avoid to load the ModernTheme module
   begin
-    //AddLog('ModernThemeLoaded');
-    ModernThemeModule := LoadLibrary(sModernThemeModule);
-    if ModernThemeModule<>0 then
-    begin
-     pOrgAddress := GetProcAddress(ModernThemeModule, sModernThemeDrawDockCaption);
-     if Assigned(pOrgAddress) then
-       Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(pOrgAddress, @Detour_TDockCaptionDrawer_DrawDockCaption);
-
+       Trampoline_ModernDockCaptionDrawer_DrawDockCaption:= InterceptCreate(sModernThemeModule, sModernThemeDrawDockCaption, @Detour_TDockCaptionDrawer_DrawDockCaption);
 //     pOrgAddress := GetProcAddress(ModernThemeModule, sModernThemeSetHotSingleColor);
 //     if Assigned(pOrgAddress) then
 //       Trampoline_TModernTheme_SetHotSingleColor:= InterceptCreate(pOrgAddress, @Detour_TModernTheme_SetHotSingleColor);
-    end;
-
   end;
 {$ENDIF}
 end;
