@@ -48,6 +48,7 @@ uses
   Controls,
   uMisc,
   JclDebug,
+  SyncObjs,
   Messages,
   IOUtils,
   StrUtils,
@@ -68,6 +69,8 @@ uses
     end;
 
   var
+  ColorizerLock    : TCriticalSection = nil;
+
   DrawThemeBackgroundOrgPointer : Pointer = nil;
   OpenThemeDataOrgPointer       : Pointer = nil;
   //CloseThemeDataOrgPointer      : Pointer = nil;
@@ -106,13 +109,23 @@ end;
 
 function Detour_WinApi_SetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
 begin
-  LastScrollWinControl:=FindControl(hWnd);
+  ColorizerLock.Enter;
+  try
+    LastScrollWinControl:=FindControl(hWnd);
+  finally
+    ColorizerLock.Leave;
+  end;
   Exit(TrampolineSetScrollPos(hWnd, nBar, nPos, bRedraw));
 end;
 
 function Detour_WinApi_SetScrollInfo(hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall;
 begin
-  LastScrollWinControl:=FindControl(hWnd);
+  ColorizerLock.Enter;
+  try
+    LastScrollWinControl:=FindControl(hWnd);
+  finally
+    ColorizerLock.Leave;
+  end;
   Exit(TrampolineSetScrollInfo(hWnd, BarFlag, ScrollInfo, Redraw));
 end;
 
@@ -138,16 +151,21 @@ end;
 
 function Detour_UxTheme_OpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
 begin
-  Result := TrampolineOpenThemeData(hwnd, pszClassList);
-  //AddLog('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
+  ColorizerLock.Enter;
+  try
+    Result := TrampolineOpenThemeData(hwnd, pszClassList);
+    //AddLog('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
 
-  if THThemesClasses.Classes.ContainsKey(Result) then
-    THThemesClasses.Classes.Remove(Result);
-  THThemesClasses.Classes.Add(Result, pszClassList);
+    if THThemesClasses.Classes.ContainsKey(Result) then
+      THThemesClasses.Classes.Remove(Result);
+    THThemesClasses.Classes.Add(Result, pszClassList);
 
-  if THThemesClasses.Windows.ContainsKey(Result) then
-    THThemesClasses.Windows.Remove(Result);
-  THThemesClasses.Windows.Add(Result, hwnd);
+    if THThemesClasses.Windows.ContainsKey(Result) then
+      THThemesClasses.Windows.Remove(Result);
+    THThemesClasses.Windows.Add(Result, hwnd);
+  finally
+    ColorizerLock.Leave;
+  end;
 end;
 
 
@@ -983,10 +1001,6 @@ begin
            end;
         end;
        end;
-
-
-//      sCaller  := ProcByLevel(4);
-//      AddLog('THThemesClasses.Button','VCLClassName '+VCLClassName+' - Ignored '+sCaller);
     end;
   end
   ;
@@ -1013,75 +1027,39 @@ end;
 
 procedure InstallHooksUXTheme;
 const
+  themelib = 'uxtheme.dll';
   sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
-var
-  pHook, psBaseVirtualTreeOriginalWMNCPaint : Pointer;
-  VclIDEModule : HMODULE;
 begin
   if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
     THThemesClasses.Classes := TDictionary<HTHEME, String>.Create();
     THThemesClasses.Windows := TDictionary<HTHEME, HWND>.Create();
-    THThemesClasses.Classes.Add( {$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
 
     TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
-
     if Assigned(DrawThemeText) then
       Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
-
-    OpenThemeDataOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'),  'OpenThemeData');
-    if Assigned (OpenThemeDataOrgPointer) then
-     TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @Detour_UxTheme_OpenThemeData);
-
-    DrawThemeBackgroundOrgPointer  := GetProcAddress(GetModuleHandle('UxTheme.dll'), 'DrawThemeBackground');
-    if Assigned (DrawThemeBackgroundOrgPointer) then
-     TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @Detour_UxTheme_DrawThemeBackground);
-
-    VclIDEModule := LoadLibrary(sVclIDEModule);
-    if VclIDEModule<>0 then
-    begin
-     psBaseVirtualTreeOriginalWMNCPaint := GetProcAddress(VclIDEModule, sBaseVirtualTreeOriginalWMNCPaint);
-     if Assigned(psBaseVirtualTreeOriginalWMNCPaint) then
-      TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(psBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
-    end;
-
-    pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollPos');
-    if Assigned (pHook) then
-     TrampolineSetScrollPos := InterceptCreate(pHook, @Detour_WinApi_SetScrollPos);
-
-    pHook  := GetProcAddress(GetModuleHandle(user32), 'SetScrollInfo');
-    if Assigned (pHook) then
-     TrampolineSetScrollInfo := InterceptCreate(pHook, @Detour_WinApi_SetScrollInfo);
+    TrampolineOpenThemeData       := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
+    TrampolineDrawThemeBackground := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
+    TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(sVclIDEModule, sBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
+    TrampolineSetScrollPos  := InterceptCreate(user32,  'SetScrollPos', @Detour_WinApi_SetScrollPos);
+    TrampolineSetScrollInfo := InterceptCreate(user32, 'SetScrollInfo', @Detour_WinApi_SetScrollInfo);
   end;
 
 end;
 
 procedure RemoveHooksUXTheme;
 begin
-
-  if Assigned (TrampolineTWinControl_WMNCPaint) then
-    InterceptRemove(@TrampolineTWinControl_WMNCPaint);
-
-  if Assigned (TrampolineOpenThemeData) then
-    InterceptRemove(@TrampolineOpenThemeData);
-
-  if Assigned (TrampolineBaseVirtualTreeOriginalWMNCPaint) then
-    InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
-
-  if Assigned (TrampolineDrawThemeBackground) then
-    InterceptRemove(@TrampolineDrawThemeBackground);
-
-  if Assigned(Trampoline_DrawThemeText) then
-    InterceptRemove(@Trampoline_DrawThemeText);
-
-  if Assigned (TrampolineSetScrollPos) then
-    InterceptRemove(@TrampolineSetScrollPos);
-
-  if Assigned (TrampolineSetScrollInfo) then
-    InterceptRemove(@TrampolineSetScrollInfo);
+  InterceptRemove(@TrampolineTWinControl_WMNCPaint);
+  InterceptRemove(@TrampolineOpenThemeData);
+  InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
+  InterceptRemove(@TrampolineDrawThemeBackground);
+  InterceptRemove(@Trampoline_DrawThemeText);
+  InterceptRemove(@TrampolineSetScrollPos);
+  InterceptRemove(@TrampolineSetScrollInfo);
 
   if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
@@ -1089,5 +1067,13 @@ begin
     THThemesClasses.Windows.Free;
   end;
 end;
+
+
+initialization
+  ColorizerLock    := TCriticalSection.Create;
+finalization
+  ColorizerLock.Free;
+  ColorizerLock := nil;
+
 
 end.

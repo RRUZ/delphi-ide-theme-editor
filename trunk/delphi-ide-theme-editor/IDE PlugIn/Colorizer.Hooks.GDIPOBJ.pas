@@ -184,10 +184,7 @@ end;
 
 procedure RemoveHooksGDI;
 begin
-  if Assigned(Trampoline_TGPGraphics_DrawPath) then
-    InterceptRemove(@Trampoline_TGPGraphics_DrawPath);
-
-  if Assigned(Trampoline_TGPGraphics_FillPath) then
-    InterceptRemove(@Trampoline_TGPGraphics_FillPath);
+  InterceptRemove(@Trampoline_TGPGraphics_DrawPath);
+  InterceptRemove(@Trampoline_TGPGraphics_FillPath);
 end;
 end.

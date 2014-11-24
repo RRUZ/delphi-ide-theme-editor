@@ -41,6 +41,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object Panel3: TPanel
           Left = 0
           Top = 0
@@ -60,6 +64,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             TabOrder = 0
             object TabSheetTheme: TTabSheet
               Caption = 'Theme'
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Bevel1: TBevel
                 Left = 3
                 Top = 320
@@ -1118,10 +1126,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheetMenu: TTabSheet
               Caption = 'Menus'
               ImageIndex = 5
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Level: TLabel
                 Left = 3
                 Top = 26
@@ -1164,10 +1168,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetVCLStyles: TTabSheet
         Caption = 'VCL Styles'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label9: TLabel
           Left = 3
           Top = 134
@@ -1296,10 +1296,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetHookedForms: TTabSheet
         Caption = 'Hooked Forms'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label8: TLabel
           Left = 3
           Top = 11
@@ -1355,10 +1351,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetAbout: TTabSheet
         Caption = 'About'
         ImageIndex = 5
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object LabelVersion: TLabel
           Left = 46
           Top = 3
@@ -1690,10 +1682,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetContribute: TTabSheet
         Caption = 'Contribute'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Image7: TImage
           Left = 3
           Top = 35
@@ -2536,7 +2524,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 416
     Top = 304
     Bitmap = {
-      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00080010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
