@@ -135,6 +135,7 @@ uses
   PngImage,
   {$ENDIF}
   uMisc,
+  Colorizer.Settings,
   Colorizer.Utils;
 
 type
@@ -395,6 +396,78 @@ begin
 
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.UnfocusedSelectionColor', AColorMap.DisabledColor);   //ok
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.UnfocusedSelectionBorderColor', AColorMap.FrameTopLeftInner);  //ok
+
+//  if Restore then
+//  begin
+//
+//    if (TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName<>'') then
+//    begin
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Name', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName);
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Size', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize);
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'DefaultNodeHeight', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize);
+//      AddLog2(AComponent.Name+' Restore');
+//      AddLog2(Format('Font.Name         %s', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName]));
+//      AddLog2(Format('Font.Size         %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize]));
+//      AddLog2(Format('DefaultNodeHeight %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultNodeHeight]));
+//      AddLog2('--------------------------------------------------------');
+//    end;
+//  end
+//  else
+//  begin
+//    if not TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.ContainsKey(AComponent.Name) then
+//    begin
+//      TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Add(
+//        AComponent.Name,
+//        TComponentFontSettings.Create(TRttiUtils.GetRttiPropertyValue(AComponent,'Font.Name').AsString,
+//        TRttiUtils.GetRttiPropertyValue(AComponent,'Font.Size').AsInteger,
+//        TRttiUtils.GetRttiPropertyValue(AComponent,'DefaultNodeHeight').AsInteger)
+//      );
+//      //AddLog2(AComponent.Name+' empty default');
+//    end
+//    else
+//    if TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName='' then
+//    begin
+//       TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName  := TRttiUtils.GetRttiPropertyValue(AComponent,'Font.Name').AsString;
+//       TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize      := TRttiUtils.GetRttiPropertyValue(AComponent,'Font.Size').AsInteger;
+//       TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultNodeHeight:= TRttiUtils.GetRttiPropertyValue(AComponent,'DefaultNodeHeight').AsInteger;
+//       AddLog2(AComponent.Name+' first default');
+//       AddLog2(Format('Font.Name         %s', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName]));
+//       AddLog2(Format('Font.Size         %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize]));
+//       AddLog2(Format('DefaultNodeHeight %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultNodeHeight]));
+//       AddLog2('--------------------------------------------------------');
+//    end;
+//
+//    if (TColorizerLocalSettings.Settings.VirtualStringTreeFontDefault) and (TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName<>'') then
+//    begin
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Name', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName);
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Size', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize);
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'DefaultNodeHeight', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize);
+//      AddLog2(AComponent.Name+' Set default');
+//      AddLog2(Format('Font.Name         %s', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultFontName]));
+//      AddLog2(Format('Font.Size         %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultSize]));
+//      AddLog2(Format('DefaultNodeHeight %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].DefaultNodeHeight]));
+//      AddLog2('--------------------------------------------------------');
+//    end;
+//
+//    if (not TColorizerLocalSettings.Settings.VirtualStringTreeFontDefault) and (TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].FontName<>'') then
+//    begin
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Name', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].FontName);
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Size', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].Size);
+//      TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].NodeHeight:=GetFontHeight(TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].FontName, TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].Size)+4;
+//      TRttiUtils.SetRttiPropertyValue(AComponent,'DefaultNodeHeight', TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].NodeHeight);
+//      AddLog2(AComponent.Name+' Set custom');
+//      AddLog2(Format('Font.Name  %s', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].FontName]));
+//      AddLog2(Format('Font.Size  %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].Size]));
+//      AddLog2(Format('NodeHeight %d', [TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Items[AComponent.Name].NodeHeight]));
+//      AddLog2('--------------------------------------------------------');
+//    end;
+//  end;
+
+
+  //AddLog2('TWrapperVirtualStringTree '+AComponent.Name);
+  //AddLog2('TWrapperVirtualStringTree DefaultNodeHeight '+TRttiUtils.GetRttiPropertyValue(AComponent,'DefaultNodeHeight').AsInteger.ToString());
+  // AddLog2('TWrapperVirtualStringTree '+TRttiUtils.GetRttiPropertyValue(AComponent,'Font.Name').AsString);
+  // AddLog2('TWrapperVirtualStringTree '+TRttiUtils.GetRttiPropertyValue(AComponent,'Font.Size').AsInteger.ToString());
 
         //  TVTColors
         //	__fastcall TVTColors(TBaseVirtualTree* AOwner);
@@ -659,6 +732,9 @@ begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'HighlightColor', AColorMap.SelectedColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'HighlightFontColor', AColorMap.SelectedFontColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+
+    //AddLog2('TWrapperInspListBox '+AComponent.Name);
+    //TWinControl(AComponent).;
 end;
 
 { TWrapperStringGrid }

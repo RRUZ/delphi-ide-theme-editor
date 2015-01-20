@@ -41,10 +41,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel3: TPanel
           Left = 0
           Top = 0
@@ -64,10 +60,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             TabOrder = 0
             object TabSheetTheme: TTabSheet
               Caption = 'Theme'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Bevel1: TBevel
                 Left = 3
                 Top = 320
@@ -345,10 +337,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheetDockOptions: TTabSheet
               Caption = 'Docked Windows'
               ImageIndex = 4
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label11: TLabel
                 Left = 17
                 Top = 41
@@ -720,10 +708,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             end
             object TabSheetToolBars: TTabSheet
               Caption = 'ToolBars'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label4: TLabel
                 Left = 3
                 Top = 13
@@ -815,10 +799,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheetIDETabs: TTabSheet
               Caption = 'IDE Tabs'
               ImageIndex = 2
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label12: TLabel
                 Left = 8
                 Top = 60
@@ -1002,10 +982,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             object TabSheetHeaders: TTabSheet
               Caption = 'Headers'
               ImageIndex = 3
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Label27: TLabel
                 Left = 16
                 Top = 44
@@ -1160,6 +1136,99 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Max = 255
                 Position = 220
                 TabOrder = 2
+              end
+            end
+            object TabSheet1: TTabSheet
+              Caption = 'Fonts'
+              ImageIndex = 6
+              ExplicitLeft = 0
+              object Label33: TLabel
+                Left = 3
+                Top = 8
+                Width = 222
+                Height = 13
+                Caption = 'VirtualStringTree (Structure, Project Manager)'
+              end
+              object Label34: TLabel
+                Left = 3
+                Top = 24
+                Width = 27
+                Height = 13
+                Caption = 'Name'
+              end
+              object Label35: TLabel
+                Left = 154
+                Top = 27
+                Width = 22
+                Height = 13
+                Caption = 'Font'
+              end
+              object Label36: TLabel
+                Left = 305
+                Top = 24
+                Width = 19
+                Height = 13
+                Caption = 'Size'
+              end
+              object cbVirtualStringTreeFont: TComboBox
+                Left = 154
+                Top = 43
+                Width = 145
+                Height = 22
+                Style = csOwnerDrawVariable
+                TabOrder = 0
+                OnDrawItem = cbVirtualStringTreeFontDrawItem
+              end
+              object cbVirtualStringTreeFontSize: TComboBox
+                Left = 305
+                Top = 43
+                Width = 49
+                Height = 21
+                Style = csDropDownList
+                TabOrder = 1
+                Items.Strings = (
+                  '8'
+                  '9'
+                  '10'
+                  '11'
+                  '12'
+                  '14'
+                  '16'
+                  '18'
+                  '20'
+                  '22'
+                  '24'
+                  '26'
+                  '28'
+                  '36'
+                  '48'
+                  '72')
+              end
+              object CheckboxVirtualStringTreeFontDefault: TCheckBox
+                Left = 231
+                Top = 4
+                Width = 106
+                Height = 17
+                Caption = 'Use default fonts'
+                TabOrder = 2
+              end
+              object cbVirtualStringTree: TComboBox
+                Left = 3
+                Top = 43
+                Width = 145
+                Height = 21
+                Style = csDropDownList
+                TabOrder = 3
+                OnChange = cbVirtualStringTreeChange
+              end
+              object BtnApplyVirtualTreeFont: TButton
+                Left = 360
+                Top = 41
+                Width = 75
+                Height = 25
+                Caption = 'Save'
+                TabOrder = 4
+                OnClick = BtnApplyVirtualTreeFontClick
               end
             end
           end
@@ -2524,7 +2593,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 416
     Top = 304
     Bitmap = {
-      494C010108000D00080010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

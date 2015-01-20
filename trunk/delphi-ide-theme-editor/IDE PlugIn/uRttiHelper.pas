@@ -45,6 +45,7 @@ uses
       class procedure DumpTypeToFile(const QualifiedName, FileName:string);
       class procedure DumpAllTypes(const FileName:string);
       class procedure DumpObject(AObject: TObject; const FileName: string);
+      class procedure DumpRttiType(AType: TRttiType; const FileName: string);
       class procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
       class function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
       class procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
@@ -116,6 +117,18 @@ begin
   end;
 end;
 
+class procedure  TRttiUtils.DumpRttiType(AType: TRttiType; const FileName: string);
+var
+ LDumpInfo : TStrings;
+begin
+   LDumpInfo := TStringList.Create;
+  try
+   LDumpInfo.Text:=TRttiUtils.DumpTypeDefinition(AType.Handle);
+   LDumpInfo.SaveToFile(FileName);
+  finally
+   LDumpInfo.Free;
+  end;
+end;
 
 class function TRttiUtils.DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
 
@@ -151,6 +164,7 @@ var
   lField    : TRttiField;
   Definition: TObjectDictionary<string, TStringList>;
   i         : TMemberVisibility;
+  k : integer;
 begin
 
    Result:='No Rtti Information';
@@ -175,7 +189,20 @@ begin
        tkUnknown    : ;
        tkInteger    : ;
        tkChar       : ;
-       tkEnumeration: ;
+       tkEnumeration:
+                     begin
+                         Definition.Items[sType].Add(Format('%s%s=(',[sIndent,lType.Name]));
+
+                          for k := lType.AsOrdinal.MinValue to lType.AsOrdinal.MaxValue do
+                           if k<lType.AsOrdinal.MaxValue then
+                            Definition.Items[sType].Add(Format('%s%s,',[sIndent,GetEnumName(lType.Handle, k)]))
+                           else
+                            Definition.Items[sType].Add(Format('%s%s',[sIndent,GetEnumName(lType.Handle, k)]));
+
+
+                         Definition.Items[sType].Add(Format('%s)',[sIndent]));
+                     end;
+
        tkFloat      : ;
        tkString     : ;
        tkSet        : ;
@@ -194,7 +221,13 @@ begin
        tkLString    : ;
        tkWString    : ;
        tkVariant    : ;
-       tkArray      : ;
+       tkArray      : begin
+
+
+
+                      end;
+
+
        tkRecord     : begin
                        //get the main definition
                         Definition.Items[sType].Add(Format('%s%s=record',[sIndent,lType.Name]));
@@ -245,7 +278,9 @@ begin
       if Definition.Items[ArrVisibility[i]].Count>1 then
        Definition.Items[sType].AddStrings(Definition.Items[ArrVisibility[i]]);
 
-     Definition.Items[sType].Add(sIndent+'end;');
+     if lType.TypeKind<>tkEnumeration   then
+        Definition.Items[sType].Add(sIndent+'end;');
+
      Result:=Definition.Items[sType].Text;
    finally
     Definition.free;

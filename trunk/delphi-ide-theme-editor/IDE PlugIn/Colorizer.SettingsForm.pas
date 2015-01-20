@@ -198,6 +198,16 @@ type
     TabSheetContribute: TTabSheet;
     Image7: TImage;
     Label30: TLabel;
+    TabSheet1: TTabSheet;
+    cbVirtualStringTreeFont: TComboBox;
+    Label33: TLabel;
+    cbVirtualStringTreeFontSize: TComboBox;
+    CheckboxVirtualStringTreeFontDefault: TCheckBox;
+    cbVirtualStringTree: TComboBox;
+    Label34: TLabel;
+    Label35: TLabel;
+    Label36: TLabel;
+    BtnApplyVirtualTreeFont: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ListViewTypesChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -249,6 +259,10 @@ type
     procedure Image3Click(Sender: TObject);
     procedure Image1Click(Sender: TObject);
     procedure Image7Click(Sender: TObject);
+    procedure cbVirtualStringTreeFontDrawItem(Control: TWinControl;
+      Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure BtnApplyVirtualTreeFontClick(Sender: TObject);
+    procedure cbVirtualStringTreeChange(Sender: TObject);
   private
     { Private declarations }
 {$IFDEF DELPHIXE2_UP}
@@ -312,6 +326,16 @@ begin
     result := clBlack
   else
     result := clWhite;
+end;
+
+procedure TFormIDEColorizerSettings.BtnApplyVirtualTreeFontClick(
+  Sender: TObject);
+begin
+ if (cbVirtualStringTree.Text<>'') and (FSettings.VirtualStringTreeFontSettingsDict.ContainsKey(cbVirtualStringTree.Text)) then
+ begin
+   FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].FontName:=cbVirtualStringTreeFont.Text;
+   FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].Size    :=StrToInt(cbVirtualStringTreeFontSize.Text);
+ end;
 end;
 
 procedure TFormIDEColorizerSettings.BtnSelForColorClick(Sender: TObject);
@@ -437,6 +461,11 @@ begin
 
     FSettings.MenuTransparent       := CheckBoxTransparentMenus.Checked;
     FSettings.MenuTransLevel        := UpDownMenu.Position;
+
+//    FSettings.VirtualStringTreeFont:= cbVirtualStringTreeFont.Text;
+//    if cbVirtualStringTreeFontSize.Text<>'' then
+//     FSettings.VirtualStringTreeFontSize:=  StrToInt(cbVirtualStringTreeFontSize.Text);
+    FSettings.VirtualStringTreeFontDefault:= CheckboxVirtualStringTreeFontDefault.Checked;
 
     WriteSettings(FSettings, GetSettingsFolder);
 
@@ -828,6 +857,34 @@ begin
   end;
 end;
 
+procedure TFormIDEColorizerSettings.cbVirtualStringTreeChange(Sender: TObject);
+begin
+ if FSettings.VirtualStringTreeFontSettingsDict.ContainsKey(cbVirtualStringTree.Text) then
+ begin
+  if FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].FontName='' then
+  begin
+    cbVirtualStringTreeFont.ItemIndex:=cbVirtualStringTreeFont.Items.IndexOf(FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].DefaultFontName);
+    cbVirtualStringTreeFontSize.ItemIndex:= cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].DefaultSize));
+  end
+  else
+  begin
+    cbVirtualStringTreeFont.ItemIndex:=cbVirtualStringTreeFont.Items.IndexOf(FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].FontName);
+    cbVirtualStringTreeFontSize.ItemIndex:= cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].Size));
+  end;
+ end;
+end;
+
+procedure TFormIDEColorizerSettings.cbVirtualStringTreeFontDrawItem(
+  Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+begin
+  with (Control as TComboBox).Canvas do
+  begin
+    Font.Name := Screen.Fonts.Strings[Index];
+    FillRect(Rect) ;
+    TextOut(Rect.Left, Rect.Top, PChar(Screen.Fonts.Strings[Index]))
+  end;
+end;
+
 procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
 begin
 {$IFDEF DELPHIXE2_UP}
@@ -882,8 +939,8 @@ end;
 
 procedure TFormIDEColorizerSettings.FormCreate(Sender: TObject);
 var
-  sVersion : string;
-  //I: Integer;
+  s, sVersion : string;
+
 begin
   LoadDockIcons;
   sVersion:=uMisc.GetFileVersion(GetModuleLocation);
@@ -917,6 +974,10 @@ begin
   FPreview.BoundsRect := PanelPreview.ClientRect;
   {$ENDIF}
   FSettings:=TSettings.Create;
+
+  FSettings.VirtualStringTreeFontSettingsDict.Free;
+  FSettings.VirtualStringTreeFontSettingsDict := TFontSettingsDict.Create(TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict);
+
   //CheckBoxActivateDWM.Enabled:=DwmIsEnabled;
   {$IFDEF DELPHIXE2_UP}
   TabSheetVCLStyles.TabVisible  := True;//{$IFDEF DLLWIZARD}False{$ELSE}True{$ENDIF};
@@ -927,6 +988,13 @@ begin
   {$ENDIF}
   TabSheetHookedForms.TabVisible:=False;
   ListBoxFormsHooked.Items.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation))+'HookedWindows.dat');
+
+  for s in TColorizerLocalSettings.Settings.VirtualStringTreeFontSettingsDict.Keys do
+    cbVirtualStringTree.Items.Add(s);
+
+  cbVirtualStringTreeFont.Items := Screen.Fonts;
+  cbVirtualStringTree.ItemIndex:=0;
+  cbVirtualStringTreeChange(nil);
 end;
 
 
@@ -984,6 +1052,7 @@ begin
    end;
 end;
 {$ENDIF}
+
 procedure TFormIDEColorizerSettings.FormDestroy(Sender: TObject);
 begin
 {$IFDEF DELPHIXE2_UP}
@@ -1240,6 +1309,10 @@ begin
 {$IFDEF DELPHIXE2_UP}
   DrawSeletedVCLStyle;
 {$ENDIF}
+
+ //cbVirtualStringTreeFont.ItemIndex:= cbVirtualStringTreeFont.Items.IndexOf(FSettings.VirtualStringTreeFont);
+ //cbVirtualStringTreeFontSize.ItemIndex := cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSize));
+ CheckboxVirtualStringTreeFontDefault.Checked:=  FSettings.VirtualStringTreeFontDefault;
 end;
 
 procedure TFormIDEColorizerSettings.LoadThemes;

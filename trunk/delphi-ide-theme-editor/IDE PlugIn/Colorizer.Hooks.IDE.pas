@@ -81,9 +81,14 @@ uses
   Forms,
   Controls,
   PngImage,
+  Registry,
   GraphUtil,
   SysUtils,
   CaptionedDockTree,
+
+  JclDebug,
+  Dialogs,
+
   Graphics;
 
 type
@@ -1002,6 +1007,50 @@ const
  sPopupSearchForm_PaintCategoryNode = '@Popupsrchfrm@TPopupSearchForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
  sPopupSearchForm_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
 
+
+var
+ TrampolineOpenKey  : function (Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
+ TrampolineInternalLoadPropValues : procedure (Self: TObject);
+
+
+function DetourOpenKey(Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
+var
+   sCaller : string;
+   i : integer;
+begin
+ if pos('Hot Link', Key)>1  then
+ begin
+   for i:=1 to 5 do
+   begin
+       sCaller  := ProcByLevel(i);
+       AddLog2(Format('Level %d %s Key %s',[i, sCaller, Key]));
+   end;
+   AddLog2('');
+ end;
+
+
+ Result:= TrampolineOpenKey(Self, key, CanCreate);
+end;
+
+//@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv
+
+procedure DetourInternalLoadPropValues(Self: TObject);
+var
+   sCaller : string;
+   i : integer;
+begin
+// if pos('Hot Link', Key)>1  then
+ begin
+   for i:=1 to 5 do
+   begin
+       sCaller  := ProcByLevel(i);
+       AddLog2(Format('Level %d %s',[i, sCaller]));
+   end;
+   AddLog2('');
+ end;
+  TrampolineInternalLoadPropValues(Self);
+end;
+
 procedure InstallHooksIDE;
 var
 {$IFDEF DELPHIXE6_UP}
@@ -1012,6 +1061,11 @@ var
 begin
 
  ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
+
+
+//  TrampolineOpenKey := InterceptCreate(@TRegistry.OpenKey, @DetourOpenKey);
+
+
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
   begin
@@ -1032,6 +1086,7 @@ begin
   end;
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
+
   if VclIDEModule<>0 then
   begin
  //  pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
@@ -1039,6 +1094,10 @@ begin
  //   Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
     Trampoline_TListButton_Paint := InterceptCreate(sVclIDEModule, sListButtonPaint, @Detour_TListButton_Paint);
     Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(sVclIDEModule, sGetOutlineColor, @Detour_Gradientdrawer_GetOutlineColor);
+    TrampolineInternalLoadPropValues := InterceptCreate(sVclIDEModule, '@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv', @DetourInternalLoadPropValues);
+    if @TrampolineInternalLoadPropValues<>nil then
+      AddLog2('Hooked');
+
 //   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
 //   if Assigned(pOrgAddress) then
 //    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
@@ -1067,70 +1126,53 @@ begin
 end;
 
 Procedure RemoveHooksIDE;
+{$IFDEF DELPHIXE6_UP}
+var
+  Modules                     : TStrings;
+  ModernThemeLoaded           : Boolean;
+{$ENDIF}
 begin
-  if Assigned(Trampoline_CompilerMsgLine_Draw) then
+    //InterceptRemove(@TrampolineOpenKey);
+    InterceptRemove(@TrampolineInternalLoadPropValues);
+
+
     InterceptRemove(@Trampoline_CompilerMsgLine_Draw);
-
-  if Assigned(Trampoline_TitleLine_Draw) then
     InterceptRemove(@Trampoline_TitleLine_Draw);
-
-  if Assigned(Trampoline_TFileFindLine_Draw) then
     InterceptRemove(@Trampoline_TFileFindLine_Draw);
-
-  if Assigned(Trampoline_TPropertyInspector_DrawNamePair) then
     InterceptRemove(@Trampoline_TPropertyInspector_DrawNamePair);
-
 {$IFDEF DELPHIXE5_UP}
-  if Assigned(Trampoline_IDEInsight_DrawTreeDrawNode) then
     InterceptRemove(@Trampoline_IDEInsight_DrawTreeDrawNode);
-
-  if Assigned(Trampoline_IDEInsight_PaintCategoryNode) then
     InterceptRemove(@Trampoline_IDEInsight_PaintCategoryNode);
-
-  if Assigned(Trampoline_IDEInsight_PaintItemNode) then
     InterceptRemove(@Trampoline_IDEInsight_PaintItemNode);
 {$ENDIF}
-  if Assigned(Trampoline_TPopupSearchForm_DrawTreeDrawNode) then
     InterceptRemove(@Trampoline_TPopupSearchForm_DrawTreeDrawNode);
-
-  if Assigned(Trampoline_TPopupSearchForm_PaintCategoryNode) then
     InterceptRemove(@Trampoline_TPopupSearchForm_PaintCategoryNode);
-
-  if Assigned(Trampoline_TPopupSearchForm_PaintItemNode) then
     InterceptRemove(@Trampoline_TPopupSearchForm_PaintItemNode);
-
-  if Assigned(Trampoline_TFileFindLine_InternalCalcDraw) then
     InterceptRemove(@Trampoline_TFileFindLine_InternalCalcDraw);
-
-  if Assigned(Trampoline_TExpandableEvalView_FormCreate) then
     InterceptRemove(@Trampoline_TExpandableEvalView_FormCreate);
-
-  if Assigned(Trampoline_TBaseVirtualTree_PrepareBitmaps) then
     InterceptRemove(@Trampoline_TBaseVirtualTree_PrepareBitmaps);
-
-  if Assigned(Trampoline_TListButton_Paint) then
     InterceptRemove(@Trampoline_TListButton_Paint);
-
-  if Assigned(Trampoline_Gradientdrawer_GetOutlineColor) then
     InterceptRemove(@Trampoline_Gradientdrawer_GetOutlineColor);
-
-  if Assigned(Trampoline_TBaseVirtual_GetHintWindowClass) then
     InterceptRemove(@Trampoline_TBaseVirtual_GetHintWindowClass);
-
-  if Assigned(Trampoline_ProjectTree2PaintText) then
     InterceptRemove(@Trampoline_ProjectTree2PaintText);
-
-  if Assigned(Trampoline_TDockCaptionDrawer_DrawDockCaption) then
     InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);
-
 {$IFDEF DELPHIXE6_UP}
-  if Assigned(Trampoline_ModernDockCaptionDrawer_DrawDockCaption) then
+
+  Modules:=TStringList.Create;
+  try
+    GetLoadedModules(Modules, True);
+    ModernThemeLoaded:=Modules.IndexOf(sModernThemeModule)>=0;
+  finally
+    Modules.Free;
+  end;
+
+  if ModernThemeLoaded then //avoid to load the ModernTheme module
+  begin
     InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
-
-  if Assigned(Trampoline_TModernTheme_SetHotSingleColor) then
     InterceptRemove(@Trampoline_TModernTheme_SetHotSingleColor);
-{$ENDIF}
+  end;
 
+{$ENDIF}
    FreeAndNil(ListControlWrappers);
 end;
 
