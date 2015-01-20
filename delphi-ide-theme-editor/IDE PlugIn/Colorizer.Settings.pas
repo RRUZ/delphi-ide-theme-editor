@@ -24,7 +24,33 @@ unit Colorizer.Settings;
 interface
 {$I ..\Common\Jedi.inc}
 
+uses
+ Generics.Collections;
+
 type
+  TComponentFontSettings = class
+  private
+    FFontName  : string;
+    FDefaultNodeHeight: integer;
+    FSize: integer;
+    FNodeHeight: integer;
+    FDefaultFontName: string;
+    FDefaultSize: integer;
+    FUseDefaultFont: Boolean;
+  public
+    property  FontName : string read FFontName write FFontName;
+    property  Size  : integer  read FSize write FSize;
+    property  NodeHeight : integer  read FNodeHeight write FNodeHeight;
+
+    property  DefaultFontName : string read FDefaultFontName write FDefaultFontName;
+    property  DefaultSize  : integer  read FDefaultSize write FDefaultSize;
+    property  DefaultNodeHeight : integer  read FDefaultNodeHeight write FDefaultNodeHeight;
+    property  UseDefaultFont :  Boolean read FUseDefaultFont write FUseDefaultFont;
+    constructor Create(const ADefaultFontName: string; ADefaultSize, ADefaultNodeHeight  : integer);
+  end;
+
+  TFontSettingsDict = TObjectDictionary<string, TComponentFontSettings>;
+
   TSettings=class
   private
     //FEnableDWMColorization: boolean;
@@ -73,6 +99,10 @@ type
     FVCLStylesControls: boolean;
     FMenuTransLevel: Integer;
     FMenuTransparent: boolean;
+    FVirtualStringTreeFont: string;
+    FVirtualStringTreeFontDefault: Boolean;
+    FVirtualStringTreeFontSize: Integer;
+    FVirtualStringTreeFontSettingsDict: TFontSettingsDict;
     function GetThemeFileName: string;
 //    FStyleBarName: string;
 //    FColorMapName: string;
@@ -137,6 +167,12 @@ type
     property CheckUpdates    : boolean read FCheckUpdates write FCheckUpdates;
 
     property ThemeFileName   : string read GetThemeFileName;
+
+    property VirtualStringTreeFontDefault : Boolean read FVirtualStringTreeFontDefault write FVirtualStringTreeFontDefault;
+
+    property VirtualStringTreeFontSettingsDict : TFontSettingsDict read FVirtualStringTreeFontSettingsDict write FVirtualStringTreeFontSettingsDict;
+    constructor Create;
+    destructor Destroy; override;
   end;
 
   procedure ReadSettings(Settings: TSettings;Const Path:String);
@@ -148,12 +184,17 @@ implementation
 uses
   uMisc,
   SysUtils,
+  Classes,
+  StrUtils,
   IniFiles;
 
 
 procedure ReadSettings(Settings: TSettings;Const Path:String);
 var
   LIniFile: TIniFile;
+  LSections : TStrings;
+  i : integer;
+  s : string;
 begin
   LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
@@ -211,8 +252,31 @@ begin
     Settings.HeaderBorderColor       := LIniFile.ReadString('Global', 'HeaderBorderColor', 'clBlack');
 
 
+    Settings.VirtualStringTreeFontDefault:= LIniFile.ReadBool('Global', 'VirtualStringTreeFontDefault', True);
+    LSections:=TStringList.Create;
+    try
+      LIniFile.ReadSections(LSections);
+      for i := 0 to LSections.Count-1 do
+       if StartsText('VirtualStringTreeFont',LSections[i]) then
+       begin
+          s:=StringReplace(LSections[i], 'VirtualStringTreeFont', '', [rfReplaceAll]);
+          if not Settings.VirtualStringTreeFontSettingsDict.ContainsKey(s) then
+            Settings.VirtualStringTreeFontSettingsDict.Add(s, TComponentFontSettings.Create('', 0, 0));
+
+          Settings.VirtualStringTreeFontSettingsDict.Items[s].FontName  := LIniFile.ReadString(LSections[i], 'FontName', '');
+          Settings.VirtualStringTreeFontSettingsDict.Items[s].Size      := LIniFile.ReadInteger(LSections[i], 'Size', 0);
+          Settings.VirtualStringTreeFontSettingsDict.Items[s].NodeHeight:= LIniFile.ReadInteger(LSections[i], 'NodeHeight', 0);
+       end;
+    finally
+      LSections.Free;
+    end;
+
+//    Settings.VirtualStringTreeFont       := LIniFile.ReadString('Global', 'VirtualStringTreeFont', 'Tahoma');
+//    Settings.VirtualStringTreeFontSize   := LIniFile.ReadInteger('Global', 'VirtualStringTreeFontSize', 9);
+
     Settings.MenuTransparent         := LIniFile.ReadBool('Global', 'MenuTransparent', False);
     Settings.MenuTransLevel          := LIniFile.ReadInteger('Global', 'MenuTransLevel', 220);
+
 
     Settings.CheckUpdates         := LIniFile.ReadBool('Global', 'CheckUpdates', True);
   finally
@@ -223,6 +287,7 @@ end;
 procedure WriteSettings(Settings: TSettings;Const Path:String);
 var
   LIniFile: TIniFile;
+  s: string;
 begin
   LIniFile := TIniFile.Create(IncludeTrailingPathDelimiter(Path) + 'Settings.ini');
   try
@@ -280,6 +345,17 @@ begin
     LIniFile.WriteBool('Global', 'MenuTransparent', Settings.MenuTransparent);
     LIniFile.WriteInteger('Global', 'MenuTransLevel', Settings.MenuTransLevel);
     LIniFile.WriteBool('Global', 'CheckUpdates', Settings.CheckUpdates);
+
+    LIniFile.WriteBool('Global', 'VirtualStringTreeFontDefault', Settings.VirtualStringTreeFontDefault);
+
+    for s in Settings.VirtualStringTreeFontSettingsDict.Keys do
+    begin
+      LIniFile.WriteString ('VirtualStringTreeFont'+s, 'FontName', Settings.VirtualStringTreeFontSettingsDict.Items[s].FontName);
+      LIniFile.WriteInteger('VirtualStringTreeFont'+s, 'Size', Settings.VirtualStringTreeFontSettingsDict.Items[s].Size);
+      LIniFile.WriteInteger('VirtualStringTreeFont'+s, 'NodeHeight', Settings.VirtualStringTreeFontSettingsDict.Items[s].NodeHeight);
+    end;
+
+
   finally
     LIniFile.Free;
   end;
@@ -287,9 +363,31 @@ end;
 
 { TSettings }
 
+constructor TSettings.Create;
+begin
+  inherited;
+  VirtualStringTreeFontSettingsDict:=  TFontSettingsDict.Create([doOwnsValues]);
+end;
+
+destructor TSettings.Destroy;
+begin
+  VirtualStringTreeFontSettingsDict.Free;
+  inherited;
+end;
+
 function TSettings.GetThemeFileName: string;
 begin
  Result:=IncludeTrailingPathDelimiter(ExtractFilePath(GetModuleLocation()))+'Themes\'+FThemeName+'.idetheme';
+end;
+
+{ TComponentFontSettings }
+
+constructor TComponentFontSettings.Create(const ADefaultFontName: string; ADefaultSize, ADefaultNodeHeight  : integer);
+begin
+  inherited Create;
+  DefaultFontName:=ADefaultFontName;
+  DefaultSize:=ADefaultSize;
+  DefaultNodeHeight:=ADefaultNodeHeight;
 end;
 
 end.

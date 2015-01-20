@@ -97,6 +97,7 @@ uses
  {$ENDIF}
  {$IFDEF DELPHI2010_UP}
  Rtti,
+ TypInfo,
  {$ENDIF}
  Types,
  IOUtils,
@@ -314,9 +315,9 @@ begin
 //
 //    end;
 
-
-//    if SameText(AComponent.ClassName, 'TTBXToolbar') then
-//     TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
+//
+//    if SameText(AComponent.ClassName, 'TColorSpeedSetting') then
+//     TRttiUtils.DumpObject(AComponent, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
 
     if AComponent is TForm then
     begin
@@ -409,7 +410,7 @@ begin
 
     //process components
     for Index := 0 to AComponent.ComponentCount - 1 do
-     ProcessComponent(AColorMap, AStyle, AComponent.Components[Index], Restore);
+     ProcessComponent(AColorMap, AStyle, AComponent.Components[Index], Restore, Invalidate);
 
     //process dock clients
     if AComponent is TWinControl then
@@ -514,6 +515,7 @@ begin
 TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:ss.zzz', Now), Category, Message, sLineBreak]));
 {$ENDIF}
 end;
+
 
 initialization
 

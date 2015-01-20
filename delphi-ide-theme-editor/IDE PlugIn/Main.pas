@@ -20,15 +20,25 @@
 //**************************************************************************************************
 
 //TODO
+
+//scrollbar siempre
+
+
 {
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
   Scroll fails on XE in preview of source highligter
 
   Add support for TCheckbox, TRadiobutton (including fonts)
+
   Transparent system menus
   Fast vcl styles/themes switch
+  Improve overall performance
+  Fix refresh issue on Object Inspector Window when the theme is changed
+  Add option to change Font
+  DisAssember colors.
 
+  CNIDEWizards .... true integration
 }
 
 // DONE
@@ -253,12 +263,18 @@ begin
   //don't change unload order
   AddLog2('RemoveAllHooks', 'Init');
   RemoveColorizerHooks();
+  AddLog2('RemoveAllHooks', '1');
   RemoveHooksWinAPI();
+  AddLog2('RemoveAllHooks', '2');
   RemoveHooksUXTheme();
+  AddLog2('RemoveAllHooks', '3');
   RemoveFormsHook();
+  AddLog2('RemoveAllHooks', '4');
   RemoveHooksIDE();
+  AddLog2('RemoveAllHooks', '5');
   RemoveHooksGDI();
   {$IFDEF DELPHIXE2_UP}
+  AddLog2('RemoveAllHooks', '6');
   RemoveThemedActnCtrlsHooks();
   {$ENDIF}
   UnregisterFlatMenusHooks();
