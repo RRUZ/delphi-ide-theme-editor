@@ -259,6 +259,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 21
                 Style = csDropDownList
                 Color = clBtnFace
+                Sorted = True
                 TabOrder = 3
                 OnChange = cbThemeNameChange
               end
@@ -1138,10 +1139,10 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 TabOrder = 2
               end
             end
-            object TabSheet1: TTabSheet
+            object TabSheetFonts: TTabSheet
               Caption = 'Fonts'
               ImageIndex = 6
-              ExplicitLeft = 0
+              TabVisible = False
               object Label33: TLabel
                 Left = 3
                 Top = 8
@@ -1309,6 +1310,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Width = 414
           Height = 21
           Style = csDropDownList
+          Sorted = True
           TabOrder = 5
           OnChange = CbStylesChange
         end
@@ -2593,7 +2595,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 416
     Top = 304
     Bitmap = {
-      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D000C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

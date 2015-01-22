@@ -198,7 +198,7 @@ type
     TabSheetContribute: TTabSheet;
     Image7: TImage;
     Label30: TLabel;
-    TabSheet1: TTabSheet;
+    TabSheetFonts: TTabSheet;
     cbVirtualStringTreeFont: TComboBox;
     Label33: TLabel;
     cbVirtualStringTreeFontSize: TComboBox;

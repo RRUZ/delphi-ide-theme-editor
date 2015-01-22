@@ -373,10 +373,10 @@ begin
   sVersion:=uMisc.GetFileVersion(GetModuleLocation);
 
   if Assigned(SplashScreenServices) then
-    SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption+' '+sVersion, SplashBmp.Handle);
+    SplashScreenServices.AddPluginBitmap(SColorizerPluginCaption+' '+sVersion, SplashBmp.Handle, False, 'Freeware', 'Beta');
 
   if QuerySvcs(BorlandIDEServices, IOTAAboutBoxServices, LAboutBoxServices) then
-   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [sVersion]), AboutBmp.Handle, False, 'Freeware');
+   FPlugInInfo:=LAboutBoxServices.AddPluginInfo(SColorizerPluginCaption, Format(SColorizerPluginDescription, [sVersion]), AboutBmp.Handle, False, 'Freeware', 'Beta');
 end;
 
 

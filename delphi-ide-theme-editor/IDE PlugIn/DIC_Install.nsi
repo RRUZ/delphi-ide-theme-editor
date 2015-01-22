@@ -115,7 +115,7 @@ FunctionEnd
 
 !define MUI_ICON "Images\DIC.ico"
 !define MUI_UNICON "Images\DIC.ico"
-
+!define APPNAMEDIR "Delphi IDE Colorizer"
 !define MUI_ABORTWARNING
 
 !define MUI_WELCOMEPAGE_TITLE_3LINES
@@ -276,14 +276,15 @@ InitOk:
   ;File "..\..\License.*.txt"
   ;SetOutPath $INSTDIR\Themes
   ;File "Themes\*.idetheme"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayIcon" '"$INSTDIR\uninst.exe"'
-  ;WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayName" "${APPNAMEDIR}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "DisplayVersion" "${VERSION_STRING}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "HelpLink" "http://code.google.com/p/delphi-ide-theme-editor/"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "Publisher" "Rodrigo Ruz"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "URLInfoAbout" "http://code.google.com/p/delphi-ide-theme-editor/"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "URLUpdateInfo" "http://code.google.com/p/delphi-ide-theme-editor/"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC" "UninstallString" '"$INSTDIR\uninst.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "DisplayIcon" "$\"$INSTDIR\uninst.exe$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "DisplayName" "${APPNAMEDIR}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "DisplayVersion" "${VERSION_STRING}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "HelpLink" "http://code.google.com/p/delphi-ide-theme-editor/"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "Publisher" "The Road To Delphi"  
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "Contact" "theroadtodelphi@gmail.com"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "URLInfoAbout" "http://code.google.com/p/delphi-ide-theme-editor/"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "URLUpdateInfo" "http://code.google.com/p/delphi-ide-theme-editor/"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC" "UninstallString" "$\"$INSTDIR\uninst.exe$\""
   WriteRegDWORD HKCU "Software\The Road To Delphi\DIC\Option" "CurrentLangID" $LANGUAGE
   WriteUninstaller "$INSTDIR\uninst.exe"
 SectionEnd
@@ -594,7 +595,7 @@ Section "Uninstall"
   Delete "$INSTDIR\XE6\Themes\*.*"
   Delete "$INSTDIR\XE7\Images\dock_images\*.*"    
   Delete "$INSTDIR\XE7\Themes\*.*"
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\The Road To Delphi\DIC"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\DIC"
 
 !ifdef IDE_VERSION_DXE
   DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "DelphiIDEColorizer_XE"

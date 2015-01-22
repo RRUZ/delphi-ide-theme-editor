@@ -56,6 +56,7 @@ procedure GetLoadedModules(List : TStrings;Const OnlyNames:Boolean);
 procedure CropPNG(Source: TPngImage; Left, Top, Width, Height: Integer; out Target: TPngImage);
 procedure CheckForUpdates(Silent : Boolean);
 function  IsHighlightColor(Color: TColor): Boolean;
+function  GetFontHeight(const FontName : string; FontSize: Integer) : integer;
 
 implementation
 
@@ -86,7 +87,26 @@ Const
  DOMAIN_ALIAS_RID_GUESTS     = $00000222;
  DOMAIN_ALIAS_RID_POWER_USERS= $00000223;
 
+
+
+
 function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+
+function GetFontHeight(const FontName : string; FontSize: Integer) : integer;
+var
+  LBitmap : TBitmap;
+begin
+    LBitmap:=TBitmap.Create;
+    try
+      LBitmap.SetSize(32,32);
+      LBitmap.Canvas.Font.Name:=FontName;
+      LBitmap.Canvas.Font.Size:=FontSize;
+      Result:=LBitmap.Canvas.TextHeight('Wq');
+    finally
+      LBitmap.free;
+    end;
+end;
+
 
 function IsHighlightColor(Color: TColor): Boolean;
 var
