@@ -99,9 +99,9 @@ type
     FVCLStylesControls: boolean;
     FMenuTransLevel: Integer;
     FMenuTransparent: boolean;
-    FVirtualStringTreeFont: string;
+    //FVirtualStringTreeFont: string;
     FVirtualStringTreeFontDefault: Boolean;
-    FVirtualStringTreeFontSize: Integer;
+    //FVirtualStringTreeFontSize: Integer;
     FVirtualStringTreeFontSettingsDict: TFontSettingsDict;
     function GetThemeFileName: string;
 //    FStyleBarName: string;
