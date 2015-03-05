@@ -14,22 +14,19 @@
 // The Original Code is Main.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
 
 //TODO
 
-//scrollbar siempre
-
-
 {
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
-  Scroll fails on XE in preview of source highligter
 
-  Add support for TCheckbox, TRadiobutton (including fonts)
+  Add option to override event log colors.
+  add support for TBitBtn
 
   Transparent system menus
   Fast vcl styles/themes switch
@@ -43,6 +40,9 @@
 
 // DONE
 {
+  * Done - Add support for TCheckbox, TGroupBox, TRadiobutton (including fonts
+  * fixed - bug in call stack -> disassmbler window is not styled
+  * fixed - Scroll fails on XE in preview of source highligter - fixed with scrollbar all.
   * frame in buttons of TIDECategoryButtons   depending oh theme colors
   * Fix background for vcl styles controls (button, checkbox)
   * VCL Styles - when the IDE desktop is changed a white border is present in some forms (workaround resize the form)

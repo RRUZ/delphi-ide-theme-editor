@@ -14,7 +14,7 @@
 // The Original Code is Colorizer.Hooks.IDE.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -749,7 +749,7 @@ begin
     Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
 
     CaptionRect.Top := CaptionRect.Top + 1;
-   if not TColorizerLocalSettings.Settings.UseVCLStyles then
+   if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms) then
    begin
     if State.Focused then
     begin
@@ -1008,48 +1008,47 @@ const
  sPopupSearchForm_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
 
 
-var
- TrampolineOpenKey  : function (Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
- TrampolineInternalLoadPropValues : procedure (Self: TObject);
-
-
-function DetourOpenKey(Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
-var
-   sCaller : string;
-   i : integer;
-begin
- if pos('Hot Link', Key)>1  then
- begin
-   for i:=1 to 5 do
-   begin
-       sCaller  := ProcByLevel(i);
-       AddLog2(Format('Level %d %s Key %s',[i, sCaller, Key]));
-   end;
-   AddLog2('');
- end;
-
-
- Result:= TrampolineOpenKey(Self, key, CanCreate);
-end;
+//var
+// TrampolineOpenKey  : function (Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
+// TrampolineInternalLoadPropValues : procedure (Self: TObject);
+//
+//
+//function DetourOpenKey(Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
+//var
+//   sCaller : string;
+//   i : integer;
+//begin
+// if pos('Hot Link', Key)>1  then
+// begin
+//   for i:=1 to 5 do
+//   begin
+//       sCaller  := ProcByLevel(i);
+//       AddLog2(Format('Level %d %s Key %s',[i, sCaller, Key]));
+//   end;
+//   AddLog2('');
+// end;
+//
+// Result:= TrampolineOpenKey(Self, key, CanCreate);
+//end;
 
 //@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv
 
-procedure DetourInternalLoadPropValues(Self: TObject);
-var
-   sCaller : string;
-   i : integer;
-begin
-// if pos('Hot Link', Key)>1  then
- begin
-   for i:=1 to 5 do
-   begin
-       sCaller  := ProcByLevel(i);
-       AddLog2(Format('Level %d %s',[i, sCaller]));
-   end;
-   AddLog2('');
- end;
-  TrampolineInternalLoadPropValues(Self);
-end;
+//procedure DetourInternalLoadPropValues(Self: TObject);
+//var
+//   sCaller : string;
+//   i : integer;
+//begin
+//// if pos('Hot Link', Key)>1  then
+// begin
+//   for i:=1 to 5 do
+//   begin
+//       sCaller  := ProcByLevel(i);
+//       AddLog2(Format('Level %d %s',[i, sCaller]));
+//   end;
+//   AddLog2('');
+// end;
+//  TrampolineInternalLoadPropValues(Self);
+//end;
 
 procedure InstallHooksIDE;
 var
@@ -1061,10 +1060,7 @@ var
 begin
 
  ListControlWrappers := TObjectDictionary<TCustomControl, TRttiWrapper>.Create([doOwnsValues]);
-
-
 //  TrampolineOpenKey := InterceptCreate(@TRegistry.OpenKey, @DetourOpenKey);
-
 
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
@@ -1094,9 +1090,9 @@ begin
  //   Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
     Trampoline_TListButton_Paint := InterceptCreate(sVclIDEModule, sListButtonPaint, @Detour_TListButton_Paint);
     Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(sVclIDEModule, sGetOutlineColor, @Detour_Gradientdrawer_GetOutlineColor);
-    TrampolineInternalLoadPropValues := InterceptCreate(sVclIDEModule, '@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv', @DetourInternalLoadPropValues);
-    if @TrampolineInternalLoadPropValues<>nil then
-      AddLog2('Hooked');
+//    TrampolineInternalLoadPropValues := InterceptCreate(sVclIDEModule, '@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv', @DetourInternalLoadPropValues);
+//    if @TrampolineInternalLoadPropValues<>nil then
+//      AddLog2('Hooked');
 
 //   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
 //   if Assigned(pOrgAddress) then
@@ -1133,9 +1129,7 @@ var
 {$ENDIF}
 begin
     //InterceptRemove(@TrampolineOpenKey);
-    InterceptRemove(@TrampolineInternalLoadPropValues);
-
-
+    //InterceptRemove(@TrampolineInternalLoadPropValues);
     InterceptRemove(@Trampoline_CompilerMsgLine_Draw);
     InterceptRemove(@Trampoline_TitleLine_Draw);
     InterceptRemove(@Trampoline_TFileFindLine_Draw);

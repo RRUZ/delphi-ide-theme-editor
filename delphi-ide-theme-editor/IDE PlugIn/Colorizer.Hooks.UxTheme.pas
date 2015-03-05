@@ -14,7 +14,7 @@
 // The Original Code is Colorizer.Hooks.UxTheme.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -185,7 +185,7 @@ function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iS
 const
   sTVirtualTreeColumnsSignature = 'IDEVirtualTrees.TVirtualTreeColumns.PaintHeader';
 var
-  s, sCaller, sCaller2 : string;
+  sCaller{, sCaller2} : string;
   LCanvas : TCanvas;
   VCLClassName : string;
   ApplyHook  : Boolean;
@@ -608,6 +608,9 @@ begin
   else
   if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_SCROLLBAR) then
   begin
+
+    ApplyHook:=True; //improve overall perfomance . drawback : all the scrollbars are styled.
+    {
     ApplyHook:=False;
     sCaller :='';
     sCaller2:='';
@@ -672,7 +675,7 @@ begin
          ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
          if ApplyHook then break;
        end;
-
+                }
 //    AddLog('ScrollBar','LHWND '+IntToHex(LHWND, 8));
 //    if ApplyHook and (LHWND<>0) then
 //    begin
@@ -1001,6 +1004,136 @@ begin
            end;
         end;
        end;
+    end
+    else
+    if (iPartId = BP_RADIOBUTTON) then
+    begin
+      LSize.cx:= 13;
+      LSize.cy:= 13;
+      LHWND:=0;
+      if THThemesClasses.Windows.ContainsKey(THEME) then
+       LHWND:=THThemesClasses.Windows.Items[THEME];
+      if LHWND=0 then
+        LHWND:=WindowFromDC(dc);
+
+        LFoundControl := FindControl(LHWND);
+        if LFoundControl=nil then
+        begin
+          try
+            if Assigned(LastWinControl) then
+            begin
+              VCLClassName:=LastWinControl.ClassName;
+              LFoundControl:=LastWinControl;
+            end;
+          except
+            VCLClassName  := '';
+            LFoundControl := nil;
+          end;
+        end
+        else
+          sCaller := ProcByLevel(4);
+
+        if (LFoundControl<>nil) {or SameText('VCLEditors.DrawCheckbox', sCaller) or SameText('IDEVirtualTrees.TBaseVirtualTree.PaintCheckImage', sCaller)} then
+        begin
+           ApplyHook:=false;//SameText('VCLEditors.DrawCheckbox', sCaller);
+
+           if not ApplyHook then
+           begin
+             try
+               ApplyHook:= not (csDesigning in LFoundControl.ComponentState);
+               LParentForm:=GetParentForm(LFoundControl);
+               if (LParentForm<>nil) and ApplyHook then
+                 ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
+             except
+              ApplyHook:=False
+             end;
+           end;
+
+           if ApplyHook then
+           begin
+             {$IFDEF DELPHIXE2_UP}
+             if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+             begin
+               LStyleServices:= ColorizerStyleServices;
+
+               case iStateId of
+                  RBS_UNCHECKEDNORMAL  :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonUncheckedNormal);
+                  RBS_UNCHECKEDHOT     :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonUncheckedHot);
+                  RBS_UNCHECKEDPRESSED :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonUncheckedPressed);
+                  RBS_UNCHECKEDDISABLED:  LDetails := LStyleServices.GetElementDetails(tbRadioButtonUncheckedDisabled);
+                  RBS_CHECKEDNORMAL    :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonCheckedNormal);
+                  RBS_CHECKEDHOT       :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonCheckedHot);
+                  RBS_CHECKEDPRESSED   :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonCheckedPressed);
+                  RBS_CHECKEDDISABLED  :  LDetails := LStyleServices.GetElementDetails(tbRadioButtonCheckedDisabled);
+               end;
+
+               LBuffer:=TBitmap.Create;
+               try
+                 LBuffer.SetSize(LSize.cx, LSize.cy);
+                 LRect := Rect(0, 0, LSize.cx, LSize.cy);
+                 LBuffer.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+                 LBuffer.Canvas.FillRect(LRect);
+                 LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+                 RectCenter(LRect, pRect);
+                 BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+               finally
+                 LBuffer.Free;
+               end;
+               Exit(0);
+             end
+             else
+             {$ENDIF}
+             begin
+
+               case iStateId of
+
+                  RBS_UNCHECKEDNORMAL,
+                  RBS_UNCHECKEDHOT,
+                  RBS_UNCHECKEDPRESSED,
+                  RBS_UNCHECKEDDISABLED,
+
+                  RBS_CHECKEDNORMAL,
+                  RBS_CHECKEDHOT,
+                  RBS_CHECKEDPRESSED,
+                  RBS_CHECKEDDISABLED   : begin
+                                             LBuffer:=TBitmap.Create;
+                                             try
+                                               LBuffer.SetSize(LSize.cx, LSize.cy);
+                                               LRect := Rect(0, 0, LSize.cx, LSize.cy);
+
+
+                                               LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+                                               LBuffer.Canvas.FillRect(LRect);
+
+                                               if (iStateId= RBS_CHECKEDHOT) or (iStateId= RBS_UNCHECKEDHOT) then
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.SelectedColor
+                                               else
+                                                 LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+                                               LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+                                               LBuffer.Canvas.Ellipse(0, 0, LSize.cx, LSize.cy);
+
+                                                case iStateId of
+                                                    RBS_CHECKEDNORMAL,
+                                                    RBS_CHECKEDHOT,
+                                                    RBS_CHECKEDPRESSED,
+                                                    RBS_CHECKEDDISABLED   : begin
+                                                                              LBuffer.Canvas.Brush.Color:= LBuffer.Canvas.Pen.Color;
+                                                                              LBuffer.Canvas.Ellipse(3, 3, 3 + LSize.cx div 2 ,3 + LSize.cy div 2);
+                                                                            end;
+
+                                                end;
+                                               RectCenter(LRect, pRect);
+                                               BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+                                             finally
+                                               LBuffer.Free;
+                                             end;
+                                             Exit(0);
+                                          end;
+               end;
+             end;
+           end;
+        end;
+
     end;
   end
   ;

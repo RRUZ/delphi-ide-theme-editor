@@ -9,7 +9,10 @@ uses
   Classes,
   Forms,
   Vcl.Themes,
+  Vcl.StdCtrls,
+  Vcl.ComCtrls,
   System.UITypes,
+  System.Types,
   Graphics;
 
 
@@ -200,6 +203,46 @@ type
     property Handle;
   end;
 
+  TColorizerCheckBoxStyleHook = class(TColorizerMouseTrackControlStyleHook)
+  strict private
+    FPressed: Boolean;
+    procedure WMLButtonDown(var Message: TWMMouse); message WM_LBUTTONDOWN;
+    procedure WMLButtonUp(var Message: TWMMouse); message WM_LBUTTONUP;
+    procedure WMLButtonDblClk(var Message: TWMMouse); message WM_LBUTTONDBLCLK;
+    procedure WMKeyDown(var Message: TWMKeyDown); message WM_KEYDOWN;
+    procedure WMKeyUp(var Message: TWMKeyUp); message WM_KEYUP;
+    procedure BMSetCheck(var Message: TMessage); message BM_SETCHECK;
+    function RightAlignment: Boolean;
+  strict protected
+    function GetDrawState(State: TCheckBoxState): TThemedButton; virtual;
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure MouseEnter; override;
+    procedure MouseLeave; override;
+    procedure WndProc(var Message: TMessage); override;
+    property Pressed: Boolean read FPressed;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+  TColorizerRadioButtonStyleHook = class(TColorizerCheckBoxStyleHook)
+  strict protected
+    function GetDrawState(State: TCheckBoxState): TThemedButton; override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+
+  TColorizerStatusBarStyleHook = class(TColorizerStyleHook)
+  strict protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+
    procedure SetColorizerVCLStyle(const StyleName : string);
    function  ColorizerStyleServices: TCustomStyleServices;
 
@@ -207,18 +250,41 @@ implementation
 
 uses
   System.SysUtils,
-  Vcl.StdCtrls,
-  Vcl.ExtCtrls,
   System.TypInfo,
+  Vcl.GraphUtil,
+  Vcl.ExtCtrls,
   Colorizer.Utils,
   Winapi.CommCtrl;
 
 type
   TWinControlClass = class(TWinControl);
   TCustomFormClass = class(TCustomForm);
+  TCustomCheckBoxClass = class(TCustomCheckBox);
+  TRadioButtonClass = class(TRadioButton);
+
+  TCustomStatusBarHelper = class helper for TCustomStatusBar
+  private
+    function GetCanvasRW: TCanvas;
+    procedure SetCanvasRW(const Value: TCanvas);
+  public
+    procedure DoUpdatePanels(UpdateRects, UpdateText: Boolean);
+    property  CanvasRW : TCanvas read GetCanvasRW Write SetCanvasRW;
+   end;
+
 
 var
    CurrentStyleName : string ='';
+
+
+procedure _DrawControlText(Canvas: TCanvas; const S: string; var R: TRect; Flags: Cardinal; ThemeTextColor: TColor);
+var
+  TextFormat: TTextFormatFlags;
+begin
+  //Canvas.Font := TWinControlClass(Control).Font;
+  Canvas.Font.Color := ThemeTextColor;
+  TextFormat := TTextFormatFlags(Flags);
+   DrawText(Canvas.Handle, S,  Length(S), R, TTextFormatFlags(TextFormat));
+end;
 
 procedure SetColorizerVCLStyle(const StyleName : string);
 var
@@ -2360,6 +2426,610 @@ begin
     MM^.ptMinTrackSize.y := R.Top + R.Bottom;
     Handled := True;
   end;
+end;
+
+{ TColorizerCheckBoxStyleHook }
+
+procedure TColorizerCheckBoxStyleHook.BMSetCheck(var Message: TMessage);
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+  Invalidate;
+  Handled := True;
+end;
+
+constructor TColorizerCheckBoxStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverridePaint := True;
+  OverrideEraseBkgnd := True;
+  DoubleBuffered := True;
+end;
+
+
+function TColorizerCheckBoxStyleHook.GetDrawState(
+  State: TCheckBoxState): TThemedButton;
+begin
+  Result := tbButtonDontCare;
+
+  if not Control.Enabled then
+    case State of
+      cbUnChecked: Result := tbCheckBoxUncheckedDisabled;
+      cbChecked: Result := tbCheckBoxCheckedDisabled;
+      cbGrayed: Result := tbCheckBoxMixedDisabled;
+    end
+  else if Pressed and MouseInControl then
+    case State of
+      cbUnChecked: Result := tbCheckBoxUncheckedPressed;
+      cbChecked: Result := tbCheckBoxCheckedPressed;
+      cbGrayed: Result := tbCheckBoxMixedPressed;
+    end
+  else if MouseInControl then
+    case State of
+      cbUnChecked: Result := tbCheckBoxUncheckedHot;
+      cbChecked: Result := tbCheckBoxCheckedHot;
+      cbGrayed: Result := tbCheckBoxMixedHot;
+    end
+  else
+    case State of
+      cbUnChecked: Result := tbCheckBoxUncheckedNormal;
+      cbChecked: Result := tbCheckBoxCheckedNormal;
+      cbGrayed: Result := tbCheckBoxMixedNormal;
+    end;
+end;
+
+procedure TColorizerCheckBoxStyleHook.MouseEnter;
+begin
+  inherited;
+  Invalidate;
+  Handled := True;
+end;
+
+
+procedure TColorizerCheckBoxStyleHook.MouseLeave;
+begin
+  inherited;
+  Invalidate;
+  Handled := True;
+end;
+
+
+procedure TColorizerCheckBoxStyleHook.Paint(Canvas: TCanvas);
+var
+   State: TCheckBoxState;
+   Details: TThemedElementDetails;
+   R: TRect;
+   Spacing: Integer;
+   BoxSize: TSize;
+   LCaption: string;
+   FWordWrap: Boolean;
+   LRect: TRect;
+   ElementSize: TElementSize;
+
+   LBuffer : TBitmap;
+begin
+
+  if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls) then
+  begin
+     State := TCheckBoxState(SendMessage(Handle, BM_GETCHECK, 0, 0));
+     BoxSize.cx := 13;
+     BoxSize.cy := 13;
+
+    if Control is TCustomCheckBox then
+      FWordWrap :=  TCustomCheckBoxClass(Control).WordWrap
+    else
+    if Control is TRadioButton then
+      FWordWrap :=  TRadioButton(Control).WordWrap
+    else
+      FWordWrap := False;
+
+     R := Control.ClientRect;
+     R.Width  :=  BoxSize.cx;
+     R.Height :=  BoxSize.cy;
+
+    if Control is TCustomCheckBox then
+    begin
+     Canvas.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
+     Canvas.Pen.Color  := TColorizerLocalSettings.ColorMap.FontColor;
+     Canvas.Rectangle(R);
+
+     if State=cbChecked then
+       DrawCheck(Canvas, Point(R.Left+3, R.Top+6), 2, False);
+    end
+    else
+    if Control is TRadioButton then
+    begin
+       Canvas.Brush.Color:= TColorizerLocalSettings.ColorMap.WindowColor;
+       Canvas.Pen.Color  := TColorizerLocalSettings.ColorMap.FontColor;
+
+       LBuffer:=TBitmap.Create;
+       try
+         LBuffer.SetSize(BoxSize.cx, BoxSize.cy);
+         LRect := Rect(0, 0, BoxSize.cx, BoxSize.cy);
+         LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+         LBuffer.Canvas.FillRect(LRect);
+         LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+         LBuffer.Canvas.Ellipse(0, 0, BoxSize.cx, BoxSize.cy);
+
+         if State=cbChecked then
+         begin
+           LBuffer.Canvas.Brush.Color:= LBuffer.Canvas.Pen.Color;
+           LBuffer.Canvas.Ellipse(3, 3, 3 + BoxSize.cx div 2 ,3 + BoxSize.cy div 2);
+         end;
+
+         RectCenter(LRect, R);
+         BitBlt(Canvas.Handle, LRect.Left, LRect.Top, BoxSize.cx, BoxSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+       finally
+         LBuffer.Free;
+       end;
+     end;
+
+    Spacing := 3;
+    R := Rect(0, 0, Control.Width - BoxSize.cx - 10, Control.Height);
+    Canvas.Font := TWinControlClass(Control).Font;
+    LCaption := Text;
+    if FWordWrap then
+      DrawText(Canvas.Handle, PWideChar(LCaption), Length(LCaption), R,
+        Control.DrawTextBiDiModeFlags(DT_CALCRECT or DT_EXPANDTABS or DT_WORDBREAK))
+    else
+      DrawText(Canvas.Handle, PWideChar(LCaption), Length(LCaption), R,
+        Control.DrawTextBiDiModeFlags(DT_CALCRECT or DT_EXPANDTABS));
+
+     //AddLog2(Format('%s R.Left %d R.Top %d R.Width %d R.Height %d', ['1', R.Left, R.Top, R.Width, R.Height]));
+
+    if not RightAlignment then
+      RectVCenter(R, Rect(BoxSize.cx + Spacing, 0, Control.Width, Control.Height))
+    else
+     begin
+       if Control.BiDiMode <> bdRightToLeft then
+         RectVCenter(R, Rect(3, 0,
+           Control.Width - BoxSize.cx - Spacing, Control.Height))
+       else
+         RectVCenter(R, Rect(Control.Width - BoxSize.cx - Spacing - R.Right, 0,
+           Control.Width - BoxSize.cx - Spacing, Control.Height));
+     end;
+
+
+     //AddLog2(Format('%s R.Left %d R.Top %d R.Width %d R.Height %d', [LCaption, R.Left, R.Top, R.Width, R.Height]));
+    if FWordWrap then
+      _DrawControlText(Canvas, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS or DT_WORDBREAK), TColorizerLocalSettings.ColorMap.FontColor)
+    else
+      _DrawControlText(Canvas, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS), TColorizerLocalSettings.ColorMap.FontColor);
+
+
+    if Control.Focused then
+    begin
+      InflateRect(R, 2, 1);
+      if R.Top < 0 then
+        R.Top := 0;
+      if R.Bottom > Control.Height then
+        R.Bottom := Control.Height;
+      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.FontColor;
+      Canvas.DrawFocusRect(R);
+    end;
+  end
+  else
+  if ColorizerStyleServices.Available then
+  begin
+    State := TCheckBoxState(SendMessage(Handle, BM_GETCHECK, 0, 0));
+    Details := ColorizerStyleServices.GetElementDetails(GetDrawState(State));
+
+    if Control is TCustomCheckBox then
+      FWordWrap :=  TCustomCheckBoxClass(Control).WordWrap
+    else
+    if Control is TRadioButton then
+      FWordWrap :=  TRadioButton(Control).WordWrap
+    else
+      FWordWrap := False;
+
+    Spacing := 3;
+    LRect := System.Classes.Rect(0, 0, 20, 20);
+    ElementSize := esActual;
+    R := Control.ClientRect;
+    with ColorizerStyleServices do
+      if not GetElementSize(Canvas.Handle, GetElementDetails(tbCheckBoxCheckedNormal),
+         LRect, ElementSize, BoxSize) then
+      begin
+        BoxSize.cx := 13;
+        BoxSize.cy := 13;
+      end;
+    if not RightAlignment then
+    begin
+      R := Rect(0, 0, BoxSize.cx, BoxSize.cy);
+      RectVCenter(R, Rect(0, 0, Control.Width, Control.Height));
+    end
+    else
+    begin
+      R := Rect(Control.Width - BoxSize.cx - 1, 0, Control.Width, Control.Height);
+      RectVCenter(R, Rect(Control.Width - BoxSize.cy - 1, 0, Control.Width, Control.Height));
+    end;
+
+    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+    Canvas.Font := TWinControlClass(Control).Font;
+
+    R := Rect(0, 0, Control.Width - BoxSize.cx - 10, Control.Height);
+    LCaption := Text;
+    if FWordWrap then
+      DrawText(Canvas.Handle, PWideChar(LCaption), Length(LCaption), R,
+        Control.DrawTextBiDiModeFlags(DT_CALCRECT or DT_EXPANDTABS or DT_WORDBREAK))
+    else
+      DrawText(Canvas.Handle, PWideChar(LCaption), Length(LCaption), R,
+        Control.DrawTextBiDiModeFlags(DT_CALCRECT or DT_EXPANDTABS));
+
+    if not RightAlignment then
+      RectVCenter(R, Rect(BoxSize.cx + Spacing, 0, Control.Width, Control.Height))
+    else
+     begin
+       if Control.BiDiMode <> bdRightToLeft then
+         RectVCenter(R, Rect(3, 0,
+           Control.Width - BoxSize.cx - Spacing, Control.Height))
+       else
+         RectVCenter(R, Rect(Control.Width - BoxSize.cx - Spacing - R.Right, 0,
+           Control.Width - BoxSize.cx - Spacing, Control.Height));
+     end;
+
+    if FWordWrap then
+      DrawControlText(Canvas, Details, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS or DT_WORDBREAK))
+    else
+      DrawControlText(Canvas, Details, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS));
+
+    if Control.Focused then
+    begin
+      InflateRect(R, 2, 1);
+      if R.Top < 0 then
+        R.Top := 0;
+      if R.Bottom > Control.Height then
+        R.Bottom := Control.Height;
+      Canvas.Brush.Color := ColorizerStyleServices.GetSystemColor(clBtnFace);
+      Canvas.DrawFocusRect(R);
+    end;
+  end;
+end;
+
+procedure TColorizerCheckBoxStyleHook.PaintBackground(Canvas: TCanvas);
+var
+  Details:  TThemedElementDetails;
+begin
+  if ColorizerStyleServices.Available then
+  begin
+    Details.Element := teButton;
+    if ColorizerStyleServices.HasTransparentParts(Details) then
+        ColorizerStyleServices.DrawParentBackground(Handle, Canvas.Handle, Details, False);
+  end;
+end;
+
+function TColorizerCheckBoxStyleHook.RightAlignment: Boolean;
+begin
+  Result := (Control.BiDiMode = bdRightToLeft) or
+            (GetWindowLong(Handle, GWL_STYLE) and BS_RIGHTBUTTON = BS_RIGHTBUTTON);
+end;
+
+procedure TColorizerCheckBoxStyleHook.WMKeyDown(var Message: TWMKeyDown);
+begin
+  if Message.CharCode = VK_SPACE then
+    SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  if Message.CharCode = VK_SPACE then
+  begin
+    SetRedraw(True);
+    Invalidate;
+  end;
+  Handled := True;
+end;
+
+procedure TColorizerCheckBoxStyleHook.WMKeyUp(var Message: TWMKeyUp);
+begin
+  if Message.CharCode = VK_SPACE then
+    SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  if Message.CharCode = VK_SPACE then
+  begin
+    SetRedraw(True);
+    Invalidate;
+  end;
+  Handled := True;
+end;
+
+procedure TColorizerCheckBoxStyleHook.WMLButtonDblClk(var Message: TWMMouse);
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+  Invalidate;
+  Handled := True;
+end;
+
+
+procedure TColorizerCheckBoxStyleHook.WMLButtonDown(var Message: TWMMouse);
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+  FPressed := True;
+  Invalidate;
+  Handled := True;
+end;
+
+procedure TColorizerCheckBoxStyleHook.WMLButtonUp(var Message: TWMMouse);
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+  FPressed := False;
+  Invalidate;
+  Handled := True;
+end;
+
+
+procedure TColorizerCheckBoxStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
+{ TColorizerRadioButtonStyleHook }
+
+constructor TColorizerRadioButtonStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverridePaint := True;
+  OverrideEraseBkgnd := True;
+  DoubleBuffered := True;
+end;
+
+
+function TColorizerRadioButtonStyleHook.GetDrawState(
+  State: TCheckBoxState): TThemedButton;
+begin
+  Result := tbButtonDontCare;
+
+  if not Control.Enabled then
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedDisabled;
+      cbChecked: Result := tbRadioButtonCheckedDisabled;
+    end
+  else if Pressed and MouseInControl then
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedPressed;
+      cbChecked: Result := tbRadioButtonCheckedPressed;
+    end
+  else if MouseInControl then
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedHot;
+      cbChecked: Result := tbRadioButtonCheckedHot;
+    end
+  else
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedNormal;
+      cbChecked: Result := tbRadioButtonCheckedNormal;
+    end;
+end;
+
+procedure TColorizerRadioButtonStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
+{ TColorizerStatusBarStyleHook }
+
+constructor TColorizerStatusBarStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverridePaint := True;
+  DoubleBuffered := True;
+end;
+
+procedure TColorizerStatusBarStyleHook.Paint(Canvas: TCanvas);
+const
+  AlignStyles: array [TAlignment] of Integer = (DT_LEFT, DT_RIGHT, DT_CENTER);
+var
+  R, R1: TRect;
+  Res, Count, I: Integer;
+  Idx, Flags: Cardinal;
+  Details: TThemedElementDetails;
+  LText: string;
+  Borders: array [0..2] of Integer;
+  SaveCanvas: TCanvas;
+  LStyleServices : TCustomStyleServices;
+
+      procedure _DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+        const S: string; var R: TRect; Flags: Cardinal);
+      var
+        TextFormat: TTextFormatFlags;
+      begin
+        Canvas.Font := TWinControlClass(Control).Font;
+        TextFormat := TTextFormatFlags(Flags);
+        Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
+        LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+      end;
+
+begin
+  if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls) then
+  begin
+    LStyleServices:=StyleServices;
+    Count := TCustomStatusBar(Control).Panels.Count;
+    for I := 0 to Count - 1 do
+    begin
+      R := Rect(0, 0, 0, 0);
+      SendMessage(Control.Handle, SB_GETRECT, I, LParam(@R));
+      if IsRectEmpty(R) then
+        Exit;
+
+      Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+      //Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+      //Canvas.Rectangle(R);
+      Canvas.FillRect(R);
+
+      Details := LStyleServices.GetElementDetails(tsPane);
+      InflateRect(R, -1, -1);
+      if Control is TCustomStatusBar then
+        Flags := Control.DrawTextBiDiModeFlags(AlignStyles[TCustomStatusBar(Control).Panels[I].Alignment])
+      else
+        Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
+      Idx := I;
+      SetLength(LText, Word(SendMessage(Control.Handle, SB_GETTEXTLENGTH, Idx, 0)));
+      if Length(LText) > 0 then
+      begin
+        Res := SendMessage(Control.Handle, SB_GETTEXT, Idx, LParam(@LText[1]));
+        if (Res and SBT_OWNERDRAW = 0) then
+          DrawControlText(Canvas, Details, LText, R, Flags)
+        else
+        if (Control is TCustomStatusBar) and Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+        begin
+          SaveCanvas  := TCustomStatusBar(Control).Canvas;
+          TCustomStatusBar(Control).CanvasRW := Canvas;
+          try
+            TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control), TCustomStatusBar(Control).Panels[I], R);
+          finally
+            TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+          end;
+        end;
+      end
+      else if (Control is TCustomStatusBar) then
+       if (TCustomStatusBar(Control).Panels[I].Style <> psOwnerDraw) then
+         _DrawControlText(Canvas, Details, TCustomStatusBar(Control).Panels[I].Text, R, Flags)
+       else
+         if Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+         begin
+           SaveCanvas := TCustomStatusBar(Control).Canvas;
+           TCustomStatusBar(Control).CanvasRW := Canvas;
+           try
+             TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control), TCustomStatusBar(Control).Panels[I], R);
+           finally
+             TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+           end;
+         end;
+    end;
+
+  end
+  else
+  begin
+    if not ColorizerStyleServices.Available then
+      Exit;
+
+    Details := ColorizerStyleServices.GetElementDetails(tsStatusRoot);
+    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, Control.Width, Control.Height));
+
+    if SendMessage(Handle, SB_ISSIMPLE, 0, 0) > 0 then
+    begin
+      R := Control.ClientRect;
+      FillChar(Borders, SizeOf(Borders), 0);
+      SendMessage(Handle, SB_GETBORDERS, 0, IntPtr(@Borders));
+      R.Left := Borders[0] + Borders[2];
+      R.Top := Borders[1];
+      R.Bottom := R.Bottom - Borders[1];
+      R.Right := R.Right - Borders[2];
+
+      Details := ColorizerStyleServices.GetElementDetails(tsPane);
+      ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+
+      R1 := Control.ClientRect;
+      R1.Left := R1.Right - R.Height;
+      Details := ColorizerStyleServices.GetElementDetails(tsGripper);
+      ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R1);
+      Details := ColorizerStyleServices.GetElementDetails(tsPane);
+      SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, 0, 0)));
+      if Length(LText) > 0 then
+      begin
+       SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
+       Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
+       DrawControlText(Canvas, Details, LText, R, Flags);
+      end;
+    end
+    else
+    begin
+      if Control is TStatusBar then
+        Count := TStatusBar(Control).Panels.Count
+      else
+        Count := SendMessage(Handle, SB_GETPARTS, 0, 0);
+      for I := 0 to Count - 1 do
+      begin
+        R := Rect(0, 0, 0, 0);
+        SendMessage(Handle, SB_GETRECT, I, IntPtr(@R));
+        if IsRectEmpty(R) then
+          Exit;
+        Details := ColorizerStyleServices.GetElementDetails(tsPane);
+        ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+        if I = Count - 1 then
+        begin
+          R1 := Control.ClientRect;
+          R1.Left := R1.Right - R.Height;
+          Details := ColorizerStyleServices.GetElementDetails(tsGripper);
+          ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R1);
+        end;
+        Details := ColorizerStyleServices.GetElementDetails(tsPane);
+        InflateRect(R, -1, -1);
+        if Control is TCustomStatusBar then
+          Flags := Control.DrawTextBiDiModeFlags(AlignStyles[TCustomStatusBar(Control).Panels[I].Alignment])
+        else
+          Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
+        Idx := I;
+        SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, Idx, 0)));
+        if Length(LText) > 0 then
+        begin
+          Res := SendMessage(Handle, SB_GETTEXT, Idx, IntPtr(@LText[1]));
+          if (Res and SBT_OWNERDRAW = 0) then
+            DrawControlText(Canvas, Details, LText, R, Flags)
+          else
+          if (Control is TCustomStatusBar) and Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+          begin
+            SaveCanvas := TCustomStatusBar(Control).Canvas;
+            TCustomStatusBar(Control).CanvasRW := Canvas;
+            try
+              TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control),
+                TCustomStatusBar(Control).Panels[I], R);
+            finally
+              TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+            end;
+          end;
+        end
+        else if (Control is TCustomStatusBar) then
+         if (TCustomStatusBar(Control).Panels[I].Style <> psOwnerDraw) then
+           DrawControlText(Canvas, Details, TCustomStatusBar(Control).Panels[I].Text, R, Flags)
+         else
+           if Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+           begin
+             SaveCanvas := TCustomStatusBar(Control).Canvas;
+             TCustomStatusBar(Control).CanvasRW := Canvas;
+             try
+               TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control),
+                 TCustomStatusBar(Control).Panels[I], R);
+             finally
+               TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+             end;
+           end;
+      end;
+    end;
+  end;
+
+
+end;
+
+procedure TColorizerStatusBarStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
+{ TCustomStatusBarHelper }
+
+procedure TCustomStatusBarHelper.DoUpdatePanels(UpdateRects,
+  UpdateText: Boolean);
+begin
+  Self.UpdatePanels(UpdateRects, UpdateText);
+end;
+
+function TCustomStatusBarHelper.GetCanvasRW: TCanvas;
+begin
+ Result:= Self.FCanvas;
+
+end;
+
+procedure TCustomStatusBarHelper.SetCanvasRW(const Value: TCanvas);
+begin
+ Self.FCanvas:= Value;
 end;
 
 end.
