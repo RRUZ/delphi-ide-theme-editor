@@ -1,11 +1,13 @@
+
+
 BRCC32 VersionInfo.rc
-echo XE
-call "C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\bin\rsvars.bat"
-msbuild.exe "DelphiIDEColorizer_XE.dproj" /target:Clean;Build /p:Platform=Win32 /p:config=debug
-set BUILD_STATUS=%ERRORLEVEL%
-if %BUILD_STATUS%==0 GOTO XE2
-pause
-EXIT
+echo echo XE
+echo call "C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\bin\rsvars.bat"
+echo msbuild.exe "DelphiIDEColorizer_XE.dproj" /target:Clean;Build /p:Platform=Win32 /p:config=debug
+echo set BUILD_STATUS=%ERRORLEVEL%
+echo if %BUILD_STATUS%==0 GOTO XE2
+echo pause
+echo EXIT
 
 :XE2
 echo XE2

@@ -140,10 +140,25 @@ begin
    Exit(Trampoline_DrawEdge(hdc, qrc, edge, grfFlags));
 end;
 
-//hook for unthemed TCheckbox
+{$IF CompilerVersion >= 23}
+
+{$ELSE}
+function RectCenter(var R: TRect; const Bounds: TRect): TRect;
+begin
+  OffsetRect(R, -R.Left, -R.Top);
+  OffsetRect(R, (RectWidth(Bounds) - RectWidth(R)) div 2, (RectHeight(Bounds) - RectHeight(R)) div 2);
+  OffsetRect(R, Bounds.Left, Bounds.Top);
+  Result := R;
+end;
+{$IFEND}
+
+//hook for unthemed TCheckbox , TRadioButton  ***no longer used ...
 function Detour_WinApi_DrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
 var
  LCanvas : TCanvas;
+ LBuffer : TBitmap;
+ LRect : TRect;
+ LSize   : TSize;
  OrgHWND : HWND;
  LWinControl : TWinControl;
  LParentForm : TCustomForm;
@@ -154,7 +169,71 @@ var
 begin
    if( uType=DFC_BUTTON) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
    begin
+      if (DFCS_BUTTONRADIO and uState = DFCS_BUTTONRADIO) then
+      begin
+        LWinControl:=nil;
+        OrgHWND :=WindowFromDC(DC);
+        if OrgHWND<>0 then
+           LWinControl :=FindControl(OrgHWND);
 
+        if LWinControl<>nil then
+        begin
+          LParentForm:= GetParentForm(LWinControl);
+          if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+            Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
+        end;
+
+        LCanvas:=TCanvas.Create;
+        try
+          LCanvas.Handle:=DC;
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         begin
+           LStyleServices:= ColorizerStyleServices;
+           if (DFCS_CHECKED and uState = DFCS_CHECKED) then
+            LDetails := LStyleServices.GetElementDetails(tbRadioButtonCheckedNormal)
+           else
+            LDetails := LStyleServices.GetElementDetails(tbRadioButtonUncheckedNormal);
+
+          LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+          LCanvas.FillRect(Rect^);
+          LStyleServices.DrawElement(LCanvas.Handle, LDetails, Rect^);
+         end
+         else
+         {$ENDIF}
+         begin
+           LSize.cx:= 13;
+           LSize.cy:= 13;
+
+           LBuffer:=TBitmap.Create;
+           try
+             LBuffer.SetSize(LSize.cx, LSize.cy);
+             LRect := Types.Rect(0, 0, LSize.cx, LSize.cy);
+             LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+             LBuffer.Canvas.FillRect(LRect);
+             LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+             LBuffer.Canvas.Ellipse(0, 0, LSize.cx, LSize.cy);
+
+             if (DFCS_CHECKED and uState = DFCS_CHECKED) then
+             begin
+               LBuffer.Canvas.Brush.Color:= LBuffer.Canvas.Pen.Color;
+               LBuffer.Canvas.Ellipse(3, 3, 3 + LSize.cx div 2 ,3 + LSize.cy div 2);
+             end;
+
+             RectCenter(LRect, Rect^);
+             BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+           finally
+             LBuffer.Free;
+           end;
+         end;
+
+        finally
+          LCanvas.Handle:=0;
+          LCanvas.Free;
+        end;
+        Exit(True);
+      end
+      else
       if (DFCS_BUTTONCHECK and uState = DFCS_BUTTONCHECK) then
       begin
         LWinControl:=nil;
@@ -540,9 +619,9 @@ begin
  if Assigned(pOrgAddress) then
    Trampoline_GetSysColor    :=  InterceptCreate(pOrgAddress, @Detour_WinApi_GetSysColor);
 
- pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawFrameControl');
- if Assigned(pOrgAddress) then
-   Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawFrameControl);
+// pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawFrameControl');
+// if Assigned(pOrgAddress) then
+//   Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawFrameControl);
 
  pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
  if Assigned(pOrgAddress) then
@@ -551,23 +630,12 @@ end;
 
 procedure RemoveHooksWinAPI();
 begin
-  if Assigned(Trampoline_DrawText) then
-    InterceptRemove(@Trampoline_DrawText);
-
-  if Assigned(Trampoline_DrawTextEx) then
-    InterceptRemove(@Trampoline_DrawTextEx);
-
-  if Assigned(Trampoline_ExtTextOutW) then
-    InterceptRemove(@Trampoline_ExtTextOutW);
-
-  if Assigned(Trampoline_GetSysColor) then
-    InterceptRemove(@Trampoline_GetSysColor);
-
-  if Assigned(Trampoline_DrawFrameControl) then
-    InterceptRemove(@Trampoline_DrawFrameControl);
-
-  if Assigned(Trampoline_DrawEdge) then
-    InterceptRemove(@Trampoline_DrawEdge);
+  InterceptRemove(@Trampoline_DrawText);
+  InterceptRemove(@Trampoline_DrawTextEx);
+  InterceptRemove(@Trampoline_ExtTextOutW);
+  InterceptRemove(@Trampoline_GetSysColor);
+  //InterceptRemove(@Trampoline_DrawFrameControl);
+  InterceptRemove(@Trampoline_DrawEdge);
 end;
 
 end.

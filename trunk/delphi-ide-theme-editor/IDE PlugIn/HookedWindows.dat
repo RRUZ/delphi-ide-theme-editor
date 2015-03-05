@@ -49,3 +49,9 @@ TfmClipboardHistory
 TfmGrepResults
 TfmMacroLibrary
 TfmToDo
+TAddBP
+TSrchDialog
+TRplcDialog
+TGotoLineDialog
+TGetAddress
+TAddModuleForm

@@ -69,3 +69,4 @@ contains
   Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas';
 
 end.
+

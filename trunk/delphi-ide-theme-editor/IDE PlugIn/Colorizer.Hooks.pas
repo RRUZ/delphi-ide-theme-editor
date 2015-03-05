@@ -14,7 +14,7 @@
 // The Original Code is Colorizer.Hooks.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -51,6 +51,7 @@ uses
   TypInfo,
   Forms,
   ExtCtrls,
+  Buttons,
   Dialogs,
   ComCtrls,
   Windows,
@@ -98,6 +99,7 @@ type
  TBrushClass             = class(TBrush);
  TCustomListViewClass    = class(TCustomListView);
  TSplitterClass          = class(TSplitter);
+ TCustomGroupBoxClass    = class(TCustomGroupBox);
  TButtonControlClass     = class(TButtonControl);
  TCustomCheckBoxClass    = class(TCustomCheckBox);
  TRadioButtonClass       = class(TRadioButton);
@@ -118,10 +120,7 @@ var
 //  Trampoline_TCanvas_Polyline          : procedure (Self: TCanvas;const Points: array of TPoint) = nil;
 //  Trampoline_TFont_SetColor            : procedure (const Self:TFont; const Value: TColor) = nil;
 
-
   Trampoline_TWinControl_DefaultHandler : procedure (Self : TWinControl;var Message) = nil;
-  Trampoline_TCustomStatusBar_WMPAINT  : procedure (Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
-
   {$IFDEF DELPHIXE2_UP}
   //Trampoline_TStyleEngine_HandleMessage    : function (Self: TStyleEngine; Control: TWinControl; var Message: TMessage; DefWndProc: TWndMethod): Boolean = nil;
   Trampoline_TUxThemeStyle_DoDrawElement   : function (Self : TUxThemeStyle;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean = nil;
@@ -129,7 +128,6 @@ var
   Trampoline_TUxTheme_DrawElement          : procedure (Self : TThemeServices;DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: TRect);
   Trampoline_DrawThemeBackground           : function (hTheme: UxTheme.HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall = nil;
   {$ENDIF}
-  Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
 
   Trampoline_TCategoryButtons_DrawCategory : procedure(Self :TCategoryButtons; const Category: TButtonCategory; const Canvas: TCanvas; StartingPos: Integer) = nil;
   Trampoline_TCategoryButtons_DrawButton   : procedure(Self :TCategoryButtons;const Button: TButtonItem; Canvas: TCanvas; Rect: TRect; State: TButtonDrawState);
@@ -138,18 +136,18 @@ var
   Trampoline_TCustomPanel_Paint            : procedure (Self : TCustomPanelClass) = nil;
   Trampoline_TWinControl_WMNCPaint         : procedure (Self: TWinControlClass; var Message: TWMNCPaint);
   Trampoline_TSplitter_Paint               : procedure (Self : TSplitterClass) = nil;
+  Trampoline_TCustomGroupBox_Paint         : procedure (Self : TCustomGroupBoxClass) = nil;
+
   Trampoline_CustomComboBox_WMPaint        : procedure (Self: TCustomComboBox;var Message: TWMPaint) = nil;
   Trampoline_TCustomCombo_WndProc          : procedure (Self: TCustomCombo;var Message: TMessage) = nil;
-
   Trampoline_TButtonControl_WndProc        : procedure (Self:TButtonControlClass;var Message: TMessage) = nil;
-  Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
+  //Trampoline_TCustomStatusBar_WMPAINT      : procedure (Self: TCustomStatusBarClass; var Message: TWMPaint) = nil;
+  Trampoline_TCustomListView_HeaderWndProc : procedure (Self:TCustomListView;var Message: TMessage) = nil;
 
+  Trampoline_DoModernPainting              : procedure (Self : TTabSet) = nil;
   Trampoline_HintWindow_Paint              : procedure (Self : THintWindow) = nil;
   Trampoline_MessageHintWindow_Paint       : procedure (Self : THintWindow) = nil;
-
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
-
-
   Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect)=nil;
 
   //Trampoline_TCustomActionPopupMenu_CreateParams : procedure(Self: TCustomActionPopupMenu;var Params: TCreateParams) = nil;
@@ -378,12 +376,12 @@ begin
 //
 //  end;
 
-//  if SameText('TPopupListbox', Self.ClassName) then
-//  begin
-//    //AddLog('CustomDefaultHandler', Self.ClassName+' '+WM_To_String(TMessage(Message).Msg));
-//    if TMessage(Message).Msg=WM_PAINT then
-//      TListBox(Self).Color:=clRed;
-//  end;
+  if SameText('TDisassemblyView', Self.ClassName) then
+  begin
+    //AddLog2('CustomDefaultHandler', Self.ClassName+' '+WM_To_String(TMessage(Message).Msg));
+    if TMessage(Message).Msg=WM_SIZE then
+     Colorizer.Utils.ProcessComponent(TColorizerLocalSettings.ColorMap, TColorizerLocalSettings.ActionBarStyle, Self);
+  end;
 
   if not TColorizerLocalSettings.Unloading then
   begin
@@ -794,7 +792,7 @@ end;
 procedure Detour_TButtonControlClass_WndProc(Self : TButtonControlClass;var Message: TMessage);
 var
   LCanvas : TCanvas;
-  LBrush : TBrush;
+  //LBrush : TBrush;
   LParentForm : TCustomForm;
   LStyleServices : {$IFDEF DELPHIXE2_UP}  TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
   Details:  TThemedElementDetails;
@@ -897,31 +895,55 @@ var
       end;
 
 begin
-  if (TButtonControl(Self) is TCustomCheckBox) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
-  begin
-    LParentForm:= GetParentForm(Self);
-    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-    begin
-      Trampoline_TButtonControl_WndProc(Self, Message);
-      exit;
-    end;
-
-    case Message.Msg of
-        CN_CTLCOLORSTATIC:
-        begin
-          LBrush := Self.Brush;
-          LBrush.Color:=TColorizerLocalSettings.ColorMap.Color;
-
-          SetTextColor(Message.wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
-          SetBkColor(Message.wParam, ColorToRGB(LBrush.Color));
-          Message.Result := LRESULT(LBrush.Handle);
-          Exit;
-        end;
-    else
-       Trampoline_TButtonControl_WndProc(Self, Message);
-    end;
-  end
-  else
+//  if (TButtonControl(Self) is TCustomCheckBox) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
+//  begin
+//    LParentForm:= GetParentForm(Self);
+//    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+//    begin
+//      Trampoline_TButtonControl_WndProc(Self, Message);
+//      exit;
+//    end;
+//
+//    case Message.Msg of
+//        CN_CTLCOLORSTATIC:
+//        begin
+//          LBrush := Self.Brush;
+//          LBrush.Color:=TColorizerLocalSettings.ColorMap.Color;
+//
+//          SetTextColor(Message.wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+//          SetBkColor(Message.wParam, ColorToRGB(LBrush.Color));
+//          Message.Result := LRESULT(LBrush.Handle);
+//          Exit;
+//        end;
+//    else
+//       Trampoline_TButtonControl_WndProc(Self, Message);
+//    end;
+//  end
+//  else
+//  if (TButtonControl(Self) is TRadioButton) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
+//  begin
+//    LParentForm:= GetParentForm(Self);
+//    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+//    begin
+//      Trampoline_TButtonControl_WndProc(Self, Message);
+//      exit;
+//    end;
+//    case Message.Msg of
+//        CN_CTLCOLORSTATIC:
+//        begin
+//          LBrush := Self.Brush;
+//          LBrush.Color:=TColorizerLocalSettings.ColorMap.Color;
+//
+//          SetTextColor(Message.wParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+//          SetBkColor(Message.wParam, ColorToRGB(LBrush.Color));
+//          Message.Result := LRESULT(LBrush.Handle);
+//          Exit;
+//        end;
+//    else
+//       Trampoline_TButtonControl_WndProc(Self, Message);
+//    end;
+//  end
+//  else
   if (TButtonControl(Self) is TButton) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
   begin
 
@@ -1236,6 +1258,100 @@ begin
     Trampoline_TSplitter_Paint(Self);
 end;
 
+
+//hook for TCustomGroupBox
+procedure Detour_TCustomGroupBox_Paint(Self : TCustomGroupBoxClass);
+var
+  H: Integer;
+  R: TRect;
+  Flags: Longint;
+  LParentForm : TCustomForm;
+  {$IFDEF DELPHIXE2_UP}
+//  Box: TThemedButton;
+//  CaptionRect, OuterRect: TRect;
+//  Size: TSize;
+//  LStyle: TCustomStyleServices;
+//  Details: TThemedElementDetails;
+  {$ENDIF}
+begin
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and not (csDesigning in Self.ComponentState) then
+  begin
+    LParentForm:= GetParentForm(Self);
+    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+    begin
+      Trampoline_TCustomGroupBox_Paint(Self);
+      exit;
+    end;
+
+    Self.Canvas.Font := Self.Font;
+    {$IFDEF DELPHIXE2_UP}
+//    if ThemeControl(Self) and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+//    begin
+//       LStyle:= ColorizerStyleServices;
+//      if Self.Text <> '' then
+//      begin
+//        GetTextExtentPoint32(Self.Handle, Self.Text, Length(Self.Text), Size);
+//        CaptionRect := Rect(0, 0, Size.cx, Size.cy);
+//        if not Self.UseRightToLeftAlignment then
+//          OffsetRect(CaptionRect, 8, 0)
+//        else
+//          OffsetRect(CaptionRect, Self.Width - 8 - CaptionRect.Right, 0);
+//      end
+//      else
+//        CaptionRect := Rect(0, 0, 0, 0);
+//
+//      OuterRect := Self.ClientRect;
+//      OuterRect.Top := (CaptionRect.Bottom - CaptionRect.Top) div 2;
+//      with CaptionRect do
+//        ExcludeClipRect(Self.Handle, Left, Top, Right, Bottom);
+//      if Self.Enabled then
+//        Box := tbGroupBoxNormal
+//      else
+//        Box := tbGroupBoxDisabled;
+//
+//      Details := LStyle.GetElementDetails(Box);
+//      LStyle.DrawElement(Self.Handle, Details, OuterRect);
+//
+//      SelectClipRgn(Self.Handle, 0);
+//      Self.Canvas.Brush.Style := bsClear;
+//      if Self.Text <> '' then
+//        if Self.IsRightToLeft then
+//        begin
+//          Flags := Self.DrawTextBiDiModeFlags(DT_SINGLELINE);
+//          LStyle.DrawText(Self.Handle, Details, Self.Text, CaptionRect, Flags, 0);
+//        end
+//        else
+//          LStyle.DrawText(Self.Handle, Details, Self.Text, CaptionRect, [tfLeft]);
+//    end
+//    else
+  {$ENDIF}
+    begin
+      H := Self.Canvas.TextHeight('0');
+      R := Rect(0, H div 2 - 1, Self.Width, Self.Height);
+      Self.Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;//clWindowFrame;
+
+
+      Self.Canvas.FrameRect(R);
+
+      if Self.Text <> '' then
+      begin
+        if not Self.UseRightToLeftAlignment then
+          R := Rect(8, 0, 0, H)
+        else
+          R := Rect(R.Right - Self.Canvas.TextWidth(Self.Text) - 8, 0, 0, H);
+        Flags := Self.DrawTextBiDiModeFlags(DT_SINGLELINE);
+        DrawText(Self.Handle, Self.Text, Length(Self.Text), R, Flags or DT_CALCRECT);
+        Self.Canvas.Brush.Color := Self.Color;
+        DrawText(Self.Handle, Self.Text, Length(Self.Text), R, Flags);
+      end;
+
+    end;
+
+    //if Assigned(Self.OnPaint) then Self.OnPaint(Self);
+  end
+  else
+    Trampoline_TCustomGroupBox_Paint(Self);
+end;
 
 //Draw the bottom right corner when both scrollbars are active
 procedure DrawNCBorder(Self : TWinControl; EraseLRCorner: Boolean);
@@ -2637,184 +2753,6 @@ end;
 //end;
 {$ENDIF}
 
-//Hook for paint IDE TStatusBar
-procedure Detour_TStatusBar_WMPaint(Self: TCustomStatusBarClass; var Message: TWMPaint);
-var
-  DC: HDC;
-  LBuffer: TBitmap;
-  LCanvas: TCanvas;
-  LpPaint: TPaintStruct;
-  LStyleServices : {$IFDEF DELPHIXE2_UP}  TCustomStyleServices {$ELSE}TThemeServices{$ENDIF};
-  LParentForm : TCustomForm;
-
-      procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
-        const S: string; var R: TRect; Flags: Cardinal);
-      var
-        TextFormat: TTextFormatFlags;
-      begin
-        Canvas.Font := TWinControlClass(Self).Font;
-        TextFormat := TTextFormatFlags(Flags);
-        Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-      end;
-
-      procedure Paint(Canvas : TCanvas);
-      const
-        AlignStyles: array [TAlignment] of Integer = (DT_LEFT, DT_RIGHT, DT_CENTER);
-      var
-        R : TRect;
-        Res, Count, I: Integer;
-        Idx, Flags: Cardinal;
-        Details: TThemedElementDetails;
-        LText: string;
-        Borders: array [0..2] of Integer;
-        SaveCanvas: TCanvas;
-      begin
-
-        {$IFDEF DELPHIXE2_UP}
-        LStyleServices:=StyleServices;
-        {$ELSE}
-        LStyleServices :=ThemeServices
-        {$ENDIF};
-
-        if not {$IFDEF DELPHIXE2_UP}LStyleServices.Available{$ELSE}LStyleServices.ThemesAvailable{$ENDIF}then
-          Exit;
-
-        Details := LStyleServices.GetElementDetails(tsStatusRoot);
-        Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-        Canvas.FillRect(Rect(0, 0, Self.Width, Self.Height));
-
-
-        if SendMessage(Self.Handle, SB_ISSIMPLE, 0, 0) > 0 then
-        begin
-          R := Self.ClientRect;
-          FillChar(Borders, SizeOf(Borders), 0);
-          SendMessage(Self.Handle, SB_GETBORDERS, 0, LParam(@Borders));
-          R.Left := Borders[0] + Borders[2];
-          R.Top := Borders[1];
-          R.Bottom := R.Bottom - Borders[1];
-          R.Right := R.Right - Borders[2];
-
-          Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-          Canvas.FillRect(R);
-
-          {TODO : Add gripper}
-
-          Details := LStyleServices.GetElementDetails(tsPane);
-          SetLength(LText, Word(SendMessage(Self.Handle, SB_GETTEXTLENGTH, 0, 0)));
-          if Length(LText) > 0 then
-          begin
-           SendMessage(Self.Handle, SB_GETTEXT, 0, LParam(@LText[1]));
-           Flags := Self.DrawTextBiDiModeFlags(DT_LEFT);
-           DrawControlText(Canvas, Details, LText, R, Flags);
-          end;
-        end
-        else
-        begin
-          Count := Self.Panels.Count;
-          for I := 0 to Count - 1 do
-          begin
-            R := Rect(0, 0, 0, 0);
-            SendMessage(Self.Handle, SB_GETRECT, I, LParam(@R));
-            if IsRectEmpty(R) then
-              Exit;
-
-            Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.MenuColor;
-            //Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-            //Canvas.Rectangle(R);
-            Canvas.FillRect(R);
-
-            Details := LStyleServices.GetElementDetails(tsPane);
-            InflateRect(R, -1, -1);
-            if Self is TCustomStatusBar then
-              Flags := Self.DrawTextBiDiModeFlags(AlignStyles[TCustomStatusBar(Self).Panels[I].Alignment])
-            else
-              Flags := Self.DrawTextBiDiModeFlags(DT_LEFT);
-            Idx := I;
-            SetLength(LText, Word(SendMessage(Self.Handle, SB_GETTEXTLENGTH, Idx, 0)));
-            if Length(LText) > 0 then
-            begin
-              Res := SendMessage(Self.Handle, SB_GETTEXT, Idx, LParam(@LText[1]));
-              if (Res and SBT_OWNERDRAW = 0) then
-                DrawControlText(Canvas, Details, LText, R, Flags)
-              else
-              if (Self is TCustomStatusBar) and Assigned(TCustomStatusBar(Self).OnDrawPanel) then
-              begin
-                SaveCanvas  := Self.Canvas;
-                Self.CanvasRW := Canvas;
-                try
-                  Self.OnDrawPanel(TCustomStatusBar(Self), Self.Panels[I], R);
-                finally
-                  Self.CanvasRW := SaveCanvas;
-                end;
-              end;
-            end
-            else if (Self is TCustomStatusBar) then
-             if (TCustomStatusBar(Self).Panels[I].Style <> psOwnerDraw) then
-               DrawControlText(Canvas, Details, TCustomStatusBar(Self).Panels[I].Text, R, Flags)
-             else
-               if Assigned(TCustomStatusBar(Self).OnDrawPanel) then
-               begin
-                 SaveCanvas := TCustomStatusBar(Self).Canvas;
-                 TCustomStatusBar(Self).CanvasRW := Canvas;
-                 try
-                   TCustomStatusBar(Self).OnDrawPanel(TCustomStatusBar(Self), TCustomStatusBar(Self).Panels[I], R);
-                 finally
-                   TCustomStatusBar(Self).CanvasRW := SaveCanvas;
-                 end;
-               end;
-          end;
-        end;
-
-      end;
-
-begin
-    if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
-    begin
-     Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
-     exit;
-    end;
-
-    LParentForm:= GetParentForm(Self);
-    if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-    begin
-      Trampoline_TCustomStatusBar_WMPAINT(Self, Message);
-      exit;
-    end;
-
-    Self.DoUpdatePanels(False, True);
-    DC := HDC(Message.DC);
-    LCanvas := TCanvas.Create;
-    try
-        if DC <> 0 then
-          LCanvas.Handle := DC
-        else
-        LCanvas.Handle := BeginPaint(Self.Handle, LpPaint);
-        if (DC = 0) then
-        begin
-          LBuffer := TBitmap.Create;
-          try
-            LBuffer.SetSize(Self.Width, Self.Height);
-            LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-            LCanvas.FillRect(Self.ClientRect);
-            Paint(LBuffer.Canvas);
-
-            if Self is TWinControl then
-              TWinControlClass(Self).PaintControls(LBuffer.Canvas.Handle, nil);
-            LCanvas.Draw(0, 0, LBuffer);
-          finally
-            LBuffer.Free;
-          end;
-        end;
-
-      if DC = 0 then
-        EndPaint(Self.Handle, LpPaint);
-    finally
-      LCanvas.Handle := 0;
-      LCanvas.Free;
-    end;
-end;
-
 //Hook for the TCustomListView component
 procedure Detour_TCustomListView_WndProc(Self:TCustomListView;var Message: TMessage);
 var
@@ -3045,7 +2983,7 @@ begin
 //  Trampoline_TCanvas_Polygon      :=InterceptCreate(@TCanvas.Polygon, @Detour_TCanvas_Polygon);
 //  Trampoline_TCanvas_Polyline     :=InterceptCreate(@TCanvas.Polyline, @Detour_TCanvas_Polyline);
 
-  Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
+  //Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
@@ -3076,6 +3014,8 @@ begin
   Trampoline_DoModernPainting           := InterceptCreate(TTabSet(nil).DoModernPaintingAddress, @Detour_TTabSet_DoModernPainting);
 
   Trampoline_TSplitter_Paint            := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
+  Trampoline_TCustomGroupBox_Paint      := InterceptCreate(@TCustomGroupBoxClass.Paint, @Detour_TCustomGroupBox_Paint);
+
   Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
 // *******************************************
 
@@ -3112,7 +3052,7 @@ begin
    InterceptRemove(@Trampoline_DrawThemeBackground);
 {$ENDIF}
 
-   InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
+   //InterceptRemove(@Trampoline_TCustomStatusBar_WMPAINT);
    InterceptRemove(@Trampoline_TCustomListView_HeaderWndProc);
    InterceptRemove(@Trampoline_DoModernPainting);
    InterceptRemove(@Trampoline_TCategoryButtons_DrawCategory);
@@ -3121,6 +3061,7 @@ begin
    InterceptRemove(@Trampoline_TWinControl_WMNCPaint);
    InterceptRemove(@Trampoline_TButtonControl_WndProc);
    InterceptRemove(@Trampoline_TSplitter_Paint);
+   InterceptRemove(@Trampoline_TCustomGroupBox_Paint);
    InterceptRemove(@Trampoline_CustomComboBox_WMPaint);
    InterceptRemove(@Trampoline_TCustomCombo_WndProc);
 end;

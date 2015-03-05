@@ -48,6 +48,8 @@ uses
   Windows,
   SysUtils,
   Controls,
+  Vcl.ComCtrls,
+  StdCtrls,
   Messages,
 {$IFDEF DELPHIXE2_UP}
   Generics.Collections,
@@ -69,6 +71,8 @@ var
 {$ENDIF}
  Trampoline_TCustomForm_WndProc : procedure (Self : TCustomForm;var Message: TMessage) = nil;
  Trampoline_TCustomForm_DoCreate: procedure(Self : TCustomForm) = nil;
+
+ Trampoline_TWincontrol_WndProc : procedure (Self : TWinControlClass;var Message: TMessage) = nil;
 
 {$IFDEF DELPHIXE2_UP}
  HookedControls : TObjectDictionary<TWinControl, TColorizerStyleHook>;
@@ -131,15 +135,42 @@ function HandleColorizerStyleMessage(Self : TWinControl;var Message: TMessage; W
 var
   LHook: TColorizerStyleHook;
 begin
+  Result:=false;
+  LHook:=nil;
+
   if HookedControls.ContainsKey(Self) then
     LHook:=HookedControls[Self]
   else
   begin
-    HookedControls.Add(Self, TColorizerFormStyleHook.Create(Self));
-    LHook:=HookedControls[Self];
+    if Self is TCustomForm then
+    begin
+      HookedControls.Add(Self, TColorizerFormStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end
+    else
+    if Self is TCustomCheckBox then // try with TCustomCheckbox
+    begin
+      HookedControls.Add(Self, TColorizerCheckBoxStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end
+    else
+    if Self is TRadioButton then
+    begin
+      HookedControls.Add(Self, TColorizerRadioButtonStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end
+    else
+    if Self is TCustomStatusBar then
+    begin
+      HookedControls.Add(Self, TColorizerStatusBarStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end;
+
+
   end;
 
-  Result := LHook.HandleMessage(Message);
+  if LHook<>nil then
+   Result := LHook.HandleMessage(Message);
   //AddLog('HandleColorizerStyleMessage', Self.ClassName+' '+WM_To_String(Message.Msg));
 end;
 
@@ -170,6 +201,35 @@ end;
 //end;
 {$ENDIF}
 
+procedure Detour_TWinControl_WndProc(Self : TWinControlClass;var Message: TMessage);
+var
+  LWindowProc : TWndMethod;
+  LParentForm : TCustomForm;
+begin
+  if not (TWinControl(Self) is TCustomForm) then
+  begin
+    LParentForm:= GetParentForm(Self);
+    LWindowProc := Self.WindowProc;
+//    if TWinControl(Self) is TCustomCheckBox then
+//       AddLog2('Detour_TWinControl_WndProc '+Self.ClassName);
+
+    if Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)
+    and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
+      if (Self.WindowHandle <> 0) {HandleAllocated} and
+        //((sfHandleMessages) in TStyleManager.Flags) and
+         not (csDesigning in Self.ComponentState) and
+         not (csDestroying in Self.ComponentState) and
+         not (csDestroyingHandle in Self.ControlState) and
+         not (csOverrideStylePaint in Self.ControlStyle)
+         //and (Self.StyleElements <> [])
+         and HandleColorizerStyleMessage(Self, Message, LWindowProc)
+         then
+          Exit;
+  end;
+
+  Trampoline_TWincontrol_WndProc(Self, Message);
+end;
+
 procedure Detour_TCustomForm_WndProc(Self : TCustomForm;var Message: TMessage);
 {$IFDEF DELPHIXE2_UP}
 var
@@ -183,9 +243,10 @@ begin
 //  sClassName := GetWindowClassName(TWinControlClass(Self).WindowHandle);
  LWindowProc := Self.WindowProc;
   if not TColorizerLocalSettings.Unloading and
-     (sClassName<>'') and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms and (TColorizerLocalSettings.Settings.VCLStyleName<>'') and
-     (Self.Visible) and
-     Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(sClassName)>=0) and
+     (sClassName<>'') and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled)
+     and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms
+     and (TColorizerLocalSettings.Settings.VCLStyleName<>'') and (Self.Visible)
+     and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(sClassName)>=0) and
      (Self.Parent=nil) and (Self.HostDockSite=nil) and
      not (csDesigning in Self.ComponentState) and
      not (csDestroying in Self.ComponentState) and
@@ -206,9 +267,7 @@ begin
 
   WM_CLOSE  : if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (SameText(Self.ClassName, 'TAppBuilder')) then
               begin
-                //AddLog('WM_CLOSE', '0');
                 RestoreIDESettingsFast();
-                //AddLog('WM_CLOSE', '1');
               end;
  end;
 {$ENDIF}
@@ -225,13 +284,10 @@ end;
 
 
 function CBT_FUNC(nCode: Integer; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
-const
-  ClassNameBufferSize = 1024;
 var
  LHWND  : HWND;
  i      : Integer;
- RetVal : Integer;
- ClassNameBuffer: Array[0..ClassNameBufferSize-1] of Char;
+ sClassName : string;
  LWinControl : TWinControl;
  LParentForm : TCustomForm;
 begin
@@ -244,11 +300,11 @@ begin
        LHWND := HWND(wParam);
        if (Screen<>nil) and (LHWND>0) then
        begin
-          RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
-          if RetVal>0 then
+          sClassName:= GetWindowClassName(wParam);
+          if sClassName<>'' then
           begin
             //AddLog('Before HCBT_SETFOCUS '+ClassNameBuffer);
-            if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(ClassNameBuffer)>=0) then
+            if (TColorizerLocalSettings.HookedWindows.IndexOf(sClassName)>=0) or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(sClassName)>=0) then
             begin
               LWinControl:=FindControl(LHWND);   //use FindControl because some forms are not registered in the Screen.Forms list
 
@@ -265,18 +321,31 @@ begin
           end;
        end;
      end;
-
+ {
+     HCBT_MOVESIZE:
+     begin
+       LHWND := HWND(wParam);
+       if (Screen<>nil) and (LHWND>0) then
+       begin
+          RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
+          if RetVal>0 then
+          begin
+             AddLog2('Before HCBT_MOVESIZE '+ClassNameBuffer);
+          end;
+       end;
+     end;
+}
      HCBT_ACTIVATE:
      begin
        LHWND := HWND(wParam);
 
        if (Screen<>nil) and (LHWND>0) then
        begin
-          RetVal := GetClassName(wParam, ClassNameBuffer, SizeOf(ClassNameBuffer));
-          if RetVal>0 then
+          sClassName:= GetWindowClassName(wParam);
+          if sClassName<>'' then
           begin
-             //AddLog('Before HCBT_ACTIVATE '+ClassNameBuffer);
-            if (TColorizerLocalSettings.HookedWindows.IndexOf(ClassNameBuffer)>=0) then
+             //AddLog2('Before HCBT_ACTIVATE '+sClassName);
+            if (TColorizerLocalSettings.HookedWindows.IndexOf(sClassName)>=0) then
             for i := 0 to Screen.FormCount-1 do
              if (Screen.Forms[i].Handle=LHWND) and not (csDesigning in Screen.Forms[i].ComponentState) then
                begin
@@ -305,6 +374,8 @@ begin
 {$ENDIF}
   Trampoline_TCustomForm_DoCreate   := InterceptCreate(@TCustomFormClass.DoCreate, @Detour_TCustomForm_DoCreate);
   Trampoline_TCustomForm_WndProc    := InterceptCreate(@TCustomFormClass.WndProc, @Detour_TCustomForm_WndProc);
+
+  Trampoline_TWincontrol_WndProc    := InterceptCreate(@TWinControlClass.WndProc, @Detour_TWinControl_WndProc);
 end;
 
 Procedure RemoveFormsHook();
@@ -315,11 +386,9 @@ begin
     hhk:=0;
   end;
 
-  if Assigned(Trampoline_TCustomForm_DoCreate) then
-    InterceptRemove(@Trampoline_TCustomForm_DoCreate);
-
-  if Assigned(Trampoline_TCustomForm_WndProc) then
-    InterceptRemove(@Trampoline_TCustomForm_WndProc);
+  InterceptRemove(@Trampoline_TCustomForm_DoCreate);
+  InterceptRemove(@Trampoline_TCustomForm_WndProc);
+  InterceptRemove(@Trampoline_TWincontrol_WndProc);
 
 {$IFDEF DELPHIXE2_UP}
   SetColorizerVCLStyle('');

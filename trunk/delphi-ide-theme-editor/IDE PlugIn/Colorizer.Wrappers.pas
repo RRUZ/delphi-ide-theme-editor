@@ -296,7 +296,6 @@ type
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
 
-
    TWrapperGradientButton = class(TBaseWrapper)
    protected
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
@@ -308,6 +307,11 @@ type
    end;
 
    TWrapperCheckBox = class(TBaseWrapper)
+   protected
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
+   end;
+
+   TWrapperRadioButton = class(TBaseWrapper)
    protected
     procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
    end;
@@ -1326,6 +1330,31 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
+
+{ TWrapperRadioButton }
+
+procedure TWrapperRadioButton.SetProperties(AComponent: TComponent;
+  AColorMap: TColorizerColorMap);
+begin
+  inherited;
+  //necesary to allow use a hook with the DrawFrameControl and set color of font
+  //AddLog2('TWrapperRadioButton '+TRadioButton(AComponent).Caption);
+
+  if not Restore {and (GetWindowTheme(TWinControl(AComponent).Handle)<>0)} then
+  begin
+    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
+    //AddLog2('Themed removed');
+  end
+  else
+  if Restore and (GetWindowTheme(TWinControl(AComponent).Handle)=0) then
+  begin
+    SetWindowTheme(TWinControl(AComponent).Handle, VSCLASS_BUTTON, nil);
+    //AddLog2('Themed restored');
+  end;
+
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+end;
 { TWrapperListButton }
 
 procedure TWrapperListButton.SetProperties(AComponent: TComponent;
@@ -1429,6 +1458,7 @@ begin
 end;
 
 
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
@@ -1467,8 +1497,10 @@ initialization
   RegisterColorizerWrapper('TCloseButton',  TWrapperGradientButton);
   RegisterColorizerWrapper('TGradientButton',  TWrapperGradientButton);
 
-  RegisterColorizerWrapper('TPropCheckBox',  TWrapperCheckBox);
-  RegisterColorizerWrapper('TCheckBox',  TWrapperCheckBox);
+  //RegisterColorizerWrapper('TPropCheckBox',  TWrapperCheckBox);
+  //RegisterColorizerWrapper('TCheckBox',  TWrapperCheckBox);
+
+  //RegisterColorizerWrapper('TRadioButton',  TWrapperRadioButton);
 
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleEditControl);
   RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleEditControl);
@@ -1522,7 +1554,9 @@ initialization
   RegisterColorizerWrapper('TPropRadioGroup',  TWrapperGroupComponents);
   //TXTabControl  TTabControlStyleHook
   RegisterColorizerWrapper('TLabel',  TWrapperFontComponents);
-  RegisterColorizerWrapper('TCheckBox',  TWrapperFontComponents);
+  RegisterColorizerWrapper('TGridPanel',  TWrapperFontComponents);
+
+
   RegisterColorizerWrapper('TListButton',  TWrapperListButton);
 
 finalization
