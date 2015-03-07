@@ -25,6 +25,7 @@
   TVirtualMethodInterceptor for hooks
   TVirtualMethodInterceptorExt - > DDetours
 
+  improve performance in load of settings DIC form
   Add option to override event log colors.
   add support for TBitBtn
 
@@ -40,6 +41,7 @@
 
 // DONE
 {
+  * Done - improve performance in load of project options form
   * Done - Add support for TCheckbox, TGroupBox, TRadiobutton (including fonts
   * fixed - bug in call stack -> disassmbler window is not styled
   * fixed - Scroll fails on XE in preview of source highligter - fixed with scrollbar all.
@@ -119,7 +121,7 @@ Const
   'Delphi IDE Colorizer'+sLineBreak+
   'https://code.google.com/p/delphi-ide-theme-editor'+sLineBreak+
   'Version %s'+sLineBreak+
-  'Copyright: 2011-2014 Rodrigo Ruz V.'+sLineBreak+
+  'Copyright: 2011-2015 Rodrigo Ruz V.'+sLineBreak+
   'http://theroadtodelphi.wordpress.com/'+sLineBreak+
   'All rights reserved.'+sLineBreak+
   ''+sLineBreak+
@@ -263,19 +265,20 @@ begin
   //don't change unload order
   AddLog2('RemoveAllHooks', 'Init');
   RemoveColorizerHooks();
-  AddLog2('RemoveAllHooks', '1');
+  AddLog2('RemoveAllHooks', 'RemoveColorizerHooks');
   RemoveHooksWinAPI();
-  AddLog2('RemoveAllHooks', '2');
+  AddLog2('RemoveAllHooks', 'RemoveHooksWinAPI');
   RemoveHooksUXTheme();
-  AddLog2('RemoveAllHooks', '3');
+  AddLog2('RemoveAllHooks', 'RemoveHooksUXTheme');
   RemoveFormsHook();
-  AddLog2('RemoveAllHooks', '4');
+  AddLog2('RemoveAllHooks', 'RemoveFormsHook');
   RemoveHooksIDE();
-  AddLog2('RemoveAllHooks', '5');
+  AddLog2('RemoveAllHooks', 'RemoveHooksIDE');
   RemoveHooksGDI();
+  AddLog2('RemoveAllHooks', 'RemoveHooksGDI');
   {$IFDEF DELPHIXE2_UP}
-  AddLog2('RemoveAllHooks', '6');
   RemoveThemedActnCtrlsHooks();
+  AddLog2('RemoveAllHooks', 'RemoveThemedActnCtrlsHooks');
   {$ENDIF}
   UnregisterFlatMenusHooks();
   AddLog2('RemoveAllHooks', 'Done');
@@ -296,16 +299,15 @@ begin
   RestoreIDESettings();
 {$ENDIF}
 
-  AddLog2('FinalizeIDEColorizer', '1');
+  AddLog2('FinalizeIDEColorizer', 'RemoveAllHooks');
   RemoveAllHooks();
 
   UnRegisterPlugIn;
   IDEWizard.RemoveMenuItems;
-  AddLog2('FinalizeIDEColorizer', '2');
+  AddLog2('FinalizeIDEColorizer', 'RemoveMenuItems');
   FreeAndNil(SplashBmp);
   FreeAndNil(AboutBmp);
 
-  AddLog2('FinalizeIDEColorizer', '3');
   FreeAndNil(TColorizerLocalSettings.ActnStyleList);
   FreeAndNil(TColorizerLocalSettings.Settings);
   TColorizerLocalSettings.IDEData.Free;
@@ -315,17 +317,17 @@ begin
   FreeAndNil(TColorizerLocalSettings.WinAPIClasses);
 
   IDEWizard.FinalizeColorizer();
-  AddLog2('FinalizeIDEColorizer', '4');
+  AddLog2('FinalizeIDEColorizer', 'FinalizeColorizer');
 
 {$IFDEF DLLWIZARD}
   if FWizardIndex <> InvalidIndex then
   begin
-    AddLog2('FinalizeIDEColorizer', '5');
     Assert(Assigned(BorlandIDEServices));
     WizardServices := BorlandIDEServices as IOTAWizardServices;
     Assert(Assigned(WizardServices));
     WizardServices.RemoveWizard(FWizardIndex);
     FWizardIndex := InvalidIndex;
+    AddLog2('FinalizeIDEColorizer', 'WizardServices.RemoveWizard');
   end;
 {$ENDIF}
 end;

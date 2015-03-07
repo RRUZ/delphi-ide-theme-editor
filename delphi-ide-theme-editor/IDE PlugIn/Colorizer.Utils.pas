@@ -307,6 +307,7 @@ var
 begin
     if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
+    //AddLog2('ProcessComponent '+AComponent.Name);
 
     //cbDeviceSelector
 //    if SameText(AComponent.Name, 'cbDeviceSelector') and TComboBox(AComponent).im then

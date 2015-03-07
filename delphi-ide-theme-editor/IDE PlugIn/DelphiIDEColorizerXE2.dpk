@@ -66,7 +66,12 @@ contains
   Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',
   Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
   Colorizer.Hooks.UxTheme in 'Colorizer.Hooks.UxTheme.pas',
-  Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas';
+  Colorizer.Hooks.IDE in 'Colorizer.Hooks.IDE.pas',
+  Colorizer.Hooks.Windows in 'Colorizer.Hooks.Windows.pas',
+  Colorizer.Hooks.ThemedActnCtrls in 'Colorizer.Hooks.ThemedActnCtrls.pas',
+  Colorizer.Vcl.Styles in 'Colorizer.Vcl.Styles.pas',
+  Colorizer.VirtualTrees in 'Colorizer.VirtualTrees.pas',
+  Colorizer.XPStyleActnCtrls in 'Colorizer.XPStyleActnCtrls.pas';
 
 end.
 

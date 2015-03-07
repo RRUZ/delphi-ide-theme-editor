@@ -14,7 +14,7 @@
 // The Original Code is Colorizer.OptionsDlg.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -72,6 +72,7 @@ constructor TFrameColorizer.Create(AOwner: TComponent);
 var
   LForm : TFormIDEColorizerSettings;
 begin
+  //AddLog2('TFrameColorizer.Create');
   inherited  Create(AOwner);
   LForm := TFormIDEColorizerSettings.Create(AOwner);
   LForm.Name   := 'DelphiIDEColorizer_SettingsForm';

@@ -14,7 +14,7 @@
 // The Original Code is Colorizer.Hooks.Windows.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -538,8 +538,8 @@ end;
 function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
 const
   SystemColor = $FF000000;
-var
-  sCaller : string;
+//var
+//  sCaller : string;
 begin
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
    begin
@@ -592,13 +592,13 @@ begin
           Exit(Trampoline_GetSysColor(nIndex));
        end;
 
-       COLOR_BTNFACE :
-       if (TColor(SystemColor or Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.Color) then
-       begin
-         sCaller := ProcByLevel(2);
-         if SameText(sCaller, '') then
-           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
-       end;
+//       COLOR_BTNFACE :   don't need this for now
+//       if (TColor(SystemColor or Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.Color) then
+//       begin
+//         sCaller := ProcByLevel(2);
+//         if SameText(sCaller, '') then
+//           Exit(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
+//       end;
 
      end;
    end;
@@ -613,19 +613,21 @@ var
 begin
  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
- Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);
+ Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);  //OK
 
  pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
  if Assigned(pOrgAddress) then
    Trampoline_GetSysColor    :=  InterceptCreate(pOrgAddress, @Detour_WinApi_GetSysColor);
 
+ pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
+ if Assigned(pOrgAddress) then
+   Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
+//
+
 // pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawFrameControl');
 // if Assigned(pOrgAddress) then
 //   Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawFrameControl);
 
- pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
- if Assigned(pOrgAddress) then
-   Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
 end;
 
 procedure RemoveHooksWinAPI();
@@ -634,8 +636,8 @@ begin
   InterceptRemove(@Trampoline_DrawTextEx);
   InterceptRemove(@Trampoline_ExtTextOutW);
   InterceptRemove(@Trampoline_GetSysColor);
-  //InterceptRemove(@Trampoline_DrawFrameControl);
   InterceptRemove(@Trampoline_DrawEdge);
+  //InterceptRemove(@Trampoline_DrawFrameControl);
 end;
 
 end.
