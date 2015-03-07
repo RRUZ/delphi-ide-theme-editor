@@ -14,7 +14,7 @@
 // The Original Code is Colorizer.SettingsForm.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -69,7 +69,7 @@ type
     Label2: TLabel;
     CheckBoxGutterIcons: TCheckBox;
     PanelPreview: TPanel;
-    Image2: TImage;
+    ImageStyle: TImage;
     Button1: TButton;
     ColorBoxBase: TColorBox;
     Label3: TLabel;
@@ -181,22 +181,22 @@ type
     LabelVersion2: TLabel;
     LabelVersion3: TLabel;
     LinkLabel1: TLinkLabel;
-    Image1: TImage;
-    Image3: TImage;
+    ImageTwitter: TImage;
+    ImageGooglePlus: TImage;
     Label29: TLabel;
-    Image4: TImage;
-    Image5: TImage;
+    ImageLogo: TImage;
+    ImageVCLStyles: TImage;
     PageControl2: TPageControl;
     TabSheetTheme: TTabSheet;
     Panel3: TPanel;
-    Image6: TImage;
+    ImagePin: TImage;
     CheckBoxTransparentMenus: TCheckBox;
     Level: TLabel;
     EditMenuTransValue: TEdit;
     UpDownMenu: TUpDown;
     TabSheetMenu: TTabSheet;
     TabSheetContribute: TTabSheet;
-    Image7: TImage;
+    ImageContribute: TImage;
     Label30: TLabel;
     TabSheetFonts: TTabSheet;
     cbVirtualStringTreeFont: TComboBox;
@@ -218,7 +218,6 @@ type
     procedure cbThemeNameChange(Sender: TObject);
     procedure BtnApplyClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormShow(Sender: TObject);
     procedure CbStylesChange(Sender: TObject);
     procedure CheckBoxUseVClStylesClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -256,9 +255,9 @@ type
     procedure Button20Click(Sender: TObject);
     procedure Button22Click(Sender: TObject);
     procedure Button23Click(Sender: TObject);
-    procedure Image3Click(Sender: TObject);
-    procedure Image1Click(Sender: TObject);
-    procedure Image7Click(Sender: TObject);
+    procedure ImageGooglePlusClick(Sender: TObject);
+    procedure ImageTwitterClick(Sender: TObject);
+    procedure ImageContributeClick(Sender: TObject);
     procedure cbVirtualStringTreeFontDrawItem(Control: TWinControl;
       Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure BtnApplyVirtualTreeFontClick(Sender: TObject);
@@ -269,6 +268,8 @@ type
     FPreview:TVclStylesPreview;
 {$ENDIF}
     FSettings: TSettings;
+    FColorListItems: TStrings;
+    procedure FillColorsItems;
     procedure ColorListChange(Sender: TObject);
     procedure LoadThemes;
     //procedure LoadProperties(lType: TRttiType);
@@ -809,6 +810,7 @@ Var
  AColor   : TColor;
  OldIndex : Integer;
 begin
+  AddLog2('CbClrElementChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if ColorListBox1.ItemIndex>=0 then
  begin
    PropName:=ColorListBox1.Items[ColorListBox1.ItemIndex];
@@ -819,6 +821,7 @@ begin
     if OldIndex>=0 then
       ColorListBox1.ItemIndex:=OldIndex;
  end;
+  AddLog2('CbClrElementChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.ColorListChange(Sender: TObject);
@@ -826,12 +829,14 @@ Var
  PropName : string;
  AColor   : TColor;
 begin
+  AddLog2('ColorListChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if ColorListBox1.ItemIndex>=0 then
  begin
    PropName:= ColorListBox1.Items[ColorListBox1.ItemIndex];
    AColor  := GetOrdProp(ColorizerColorMap, PropName);
    CbClrElement.Selected:=AColor;
  end;
+  AddLog2('ColorListChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 
@@ -859,6 +864,7 @@ end;
 
 procedure TFormIDEColorizerSettings.cbVirtualStringTreeChange(Sender: TObject);
 begin
+  AddLog2('cbVirtualStringTreeChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if FSettings.VirtualStringTreeFontSettingsDict.ContainsKey(cbVirtualStringTree.Text) then
  begin
   if FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].FontName='' then
@@ -872,17 +878,20 @@ begin
     cbVirtualStringTreeFontSize.ItemIndex:= cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].Size));
   end;
  end;
+  AddLog2('cbVirtualStringTreeChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.cbVirtualStringTreeFontDrawItem(
   Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 begin
+  AddLog2('cbVirtualStringTreeFontDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
   with (Control as TComboBox).Canvas do
   begin
     Font.Name := Screen.Fonts.Strings[Index];
     FillRect(Rect) ;
     TextOut(Rect.Left, Rect.Top, PChar(Screen.Fonts.Strings[Index]))
   end;
+  AddLog2('cbVirtualStringTreeFontDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
@@ -895,21 +904,33 @@ end;
 
 procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
 begin
+  AddLog2('ColorBoxBaseChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if CheckBoxAutoColor.Checked then
  begin
    GenerateColorMap(ColorizerColorMap, ColorBoxBase.Selected, CalculateTextColor(ColorBoxBase.Selected));
    LoadColorsTheme();
    DrawPalette();
  end;
+  AddLog2('ColorBoxBaseChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.ColorBoxBaseGetColors(
   Sender: TCustomColorBox; Items: TStrings);
-Var
- Item : TIdentMapEntry;
+//Var
+// Item : TIdentMapEntry;
 begin
-  for Item in WebNamedColors do
-   Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]),TObject(Item.Value));
+  AddLog2('ColorBoxBaseGetColors', FormatDateTime('hh:nn:ss.zzz', Now));
+  FillColorsItems;
+  Items.AddStrings(FColorListItems);
+
+//  Items.BeginUpdate;
+//  try
+//  for Item in WebNamedColors do
+//   Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]), TObject(Item.Value));
+//  finally
+//    Items.EndUpdate;
+//  end;
+  AddLog2('ColorBoxBaseGetColors', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.ColorListBox1GetColors(
@@ -919,6 +940,7 @@ var
   Properties  : TPropList;
   PropName : string;
 begin
+  AddLog2('ColorListBox1GetColors', FormatDateTime('hh:nn:ss.zzz', Now));
   Count := GetPropList(TypeInfo(TColorizerColorMap), tkAny, @Properties);
     for Index := 0 to Pred(Count) do
      if SameText(string(Properties[Index]^.PropType^.Name),'TColor') then
@@ -929,6 +951,26 @@ begin
       else
        Items.AddObject(PropName, TObject(Integer(GetPropValue(ColorizerColorMap, PropName))));
      end;
+  AddLog2('ColorListBox1GetColors', FormatDateTime('hh:nn:ss.zzz', Now));
+end;
+
+procedure TFormIDEColorizerSettings.FillColorsItems;
+Var
+ Item : TIdentMapEntry;
+begin
+  if not Assigned(FColorListItems) then
+   FColorListItems:=TStringList.Create;
+
+  if FColorListItems.Count=0 then
+  begin
+    FColorListItems.BeginUpdate;
+    try
+    for Item in WebNamedColors do
+     FColorListItems.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]), TObject(Item.Value));
+    finally
+      FColorListItems.EndUpdate;
+    end;
+  end;
 end;
 
 procedure TFormIDEColorizerSettings.FormClose(Sender: TObject;
@@ -940,13 +982,13 @@ end;
 procedure TFormIDEColorizerSettings.FormCreate(Sender: TObject);
 var
   s, sVersion : string;
-
 begin
+  AddLog2('FormCreate', FormatDateTime('hh:nn:ss.zzz', Now));
   LoadDockIcons;
   sVersion:=uMisc.GetFileVersion(GetModuleLocation);
 
   LabelVersion.Caption :='Delphi IDE Colorizer '+sVersion;
-  LabelVersion2.Caption:='Copyright: 2011-2014 Rodrigo Ruz V. All rights reserved.';
+  LabelVersion2.Caption:='Copyright: 2011-2015 Rodrigo Ruz V. All rights reserved.';
   LabelVersion3.Caption:='blog http://theroadtodelphi.wordpress.com/';
   LinkLabel1.Caption   :='<a href="https://code.google.com/p/delphi-ide-theme-editor">site https://code.google.com/p/delphi-ide-theme-editor</a>';
 
@@ -995,6 +1037,7 @@ begin
   cbVirtualStringTreeFont.Items := Screen.Fonts;
   cbVirtualStringTree.ItemIndex:=0;
   cbVirtualStringTreeChange(nil);
+  AddLog2('FormCreate', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 
@@ -1002,6 +1045,7 @@ procedure TFormIDEColorizerSettings.DrawPalette;
 var
   LBitMap : TBitmap;
 begin
+  AddLog2('DrawPalette', FormatDateTime('hh:nn:ss.zzz', Now));
     LBitMap:=TBitmap.Create;
     try
      CreateArrayBitmap(ImagePalette.ClientWidth, ImagePalette.ClientHeight,[
@@ -1030,6 +1074,7 @@ begin
     finally
       LBitMap.Free;
     end;
+  AddLog2('DrawPalette', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 {$IFDEF DELPHIXE2_UP}
@@ -1041,6 +1086,7 @@ var
   StyleName : string;
   LStyle    : TCustomStyleServices;
 begin
+  AddLog2('DrawSeletedVCLStyle', FormatDateTime('hh:nn:ss.zzz', Now));
    StyleName:=CbStyles.Text;
    if (StyleName<>'') and (not SameText(StyleName, 'Windows')) then
    begin
@@ -1050,6 +1096,7 @@ begin
      FPreview.Style:=LStyle;
      TVclStylesPreviewClass(FPreview).Paint;
    end;
+  AddLog2('DrawSeletedVCLStyle', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 {$ENDIF}
 
@@ -1059,15 +1106,9 @@ begin
   FPreview.Free;
 {$ENDIF}
   FSettings.Free;
+  if Assigned(FColorListItems) then
+    FColorListItems.Free;
 end;
-
-procedure TFormIDEColorizerSettings.FormShow(Sender: TObject);
-begin
-  //LabelSetting.Caption:=Format('Settings for %s',[IDEData.Name]);
-  //BtnInstall.Enabled  :=not ExpertInstalled(DelphiIDEExpertsNames[IDEData.Version]+'.bpl',IDEData.Version);
-  //BtnUnInstall.Enabled:=not BtnInstall.Enabled;
-end;
-
 
 procedure TFormIDEColorizerSettings.GenerateIDEThemes(const Path: string);
 //Var
@@ -1115,17 +1156,17 @@ begin
   Result:=ExtractFilePath(GetModuleLocation());
 end;
 
-procedure TFormIDEColorizerSettings.Image1Click(Sender: TObject);
+procedure TFormIDEColorizerSettings.ImageTwitterClick(Sender: TObject);
 begin
   ShellExecute(0, 'open', 'https://twitter.com/RRUZ', '', '', SW_SHOWNORMAL);
 end;
 
-procedure TFormIDEColorizerSettings.Image3Click(Sender: TObject);
+procedure TFormIDEColorizerSettings.ImageGooglePlusClick(Sender: TObject);
 begin
   ShellExecute(0, 'open', 'https://plus.google.com/112937016948869859802', '', '', SW_SHOWNORMAL);
 end;
 
-procedure TFormIDEColorizerSettings.Image7Click(Sender: TObject);
+procedure TFormIDEColorizerSettings.ImageContributeClick(Sender: TObject);
 begin
   ShellExecute(0, 'open', 'https://code.google.com/p/delphi-ide-theme-editor/', '', '', SW_SHOWNORMAL);
 end;
@@ -1142,11 +1183,13 @@ procedure TFormIDEColorizerSettings.ListBoxDockImagesDrawItem(
 var
   CenterText : integer;
 begin
+  AddLog2('ListBoxDockImagesDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
   ListBoxDockImages.Canvas.FillRect(Rect);
   ImageListDock.Draw(ListBoxDockImages.Canvas, Rect.Left + 4, Rect.Top + 3, Index);
   CenterText := ( Rect.Bottom - Rect.Top - ListBoxDockImages.Canvas.TextHeight(Text)) div 2 ;
   ListBoxDockImages.Canvas.TextOut (Rect.left + ImageListDock.Width + 8 , Rect.Top + CenterText,
   ListBoxDockImages.Items.Strings[index]);
+  AddLog2('ListBoxDockImagesDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 
@@ -1201,10 +1244,12 @@ procedure TFormIDEColorizerSettings.LoadColorsTheme;
 var
   OldIndex : Integer;
 begin
+  AddLog2('LoadColorsTheme', FormatDateTime('hh:nn:ss.zzz', Now));
   OldIndex:=ColorListBox1.ItemIndex;
   ColorListBox1.PopulateList;
   if OldIndex>=0 then
     ColorListBox1.ItemIndex:=OldIndex;
+  AddLog2('LoadColorsTheme', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.LoadDockIcons;
@@ -1213,6 +1258,7 @@ var
   LBitMap   : TBitmap;
   LPngImage : TPngImage;
 begin
+  AddLog2('LoadDockIcons', FormatDateTime('hh:nn:ss.zzz', Now));
   ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
 
   for s in TDirectory.GetFiles(ImagesPath, '*.png') do
@@ -1234,11 +1280,13 @@ begin
 
     ListBoxDockImages.Items.Add(ChangeFileExt(ExtractFileName(s),''));
   end;
+  AddLog2('LoadDockIcons', FormatDateTime('hh:nn:ss.zzz', Now));
 
 end;
 
 procedure TFormIDEColorizerSettings.LoadSettings;
 begin
+  AddLog2('LoadSettings', FormatDateTime('hh:nn:ss.zzz', Now));
   ReadSettings(FSettings, GetSettingsFolder);
 
   CheckBoxUpdates.Checked  := FSettings.CheckUpdates;
@@ -1313,6 +1361,7 @@ begin
  //cbVirtualStringTreeFont.ItemIndex:= cbVirtualStringTreeFont.Items.IndexOf(FSettings.VirtualStringTreeFont);
  //cbVirtualStringTreeFontSize.ItemIndex := cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSize));
  CheckboxVirtualStringTreeFontDefault.Checked:=  FSettings.VirtualStringTreeFontDefault;
+  AddLog2('LoadSettings', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.LoadThemes;
@@ -1320,6 +1369,7 @@ var
  sValue, FileName : string;
  Files : TStringDynArray;
 begin
+  AddLog2('LoadThemes', FormatDateTime('hh:nn:ss.zzz', Now));
   cbThemeName.Items.Clear;
   Files:=TDirectory.GetFiles(GetIDEThemesFolder,'*.idetheme');
   if Length(Files)=0 then
@@ -1333,6 +1383,7 @@ begin
     FileName:=ChangeFileExt(ExtractFileName(sValue),'');
     cbThemeName.Items.Add(FileName);
   end;
+  AddLog2('LoadThemes', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 {$IFDEF DELPHIXE2_UP}
@@ -1340,6 +1391,7 @@ procedure TFormIDEColorizerSettings.LoadVClStylesList;
 var
  s : string;
 begin
+  AddLog2('LoadVClStylesList', FormatDateTime('hh:nn:ss.zzz', Now));
  if CheckBoxUseVClStyles.Checked then
  begin
   CbStyles.Items.Clear;
@@ -1350,6 +1402,7 @@ begin
 
    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
  end;
+  AddLog2('LoadVClStylesList', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 {$ENDIF}
 { TColorListBox }

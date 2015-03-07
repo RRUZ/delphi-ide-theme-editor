@@ -1,6 +1,6 @@
 object FormIDEColorizerSettings: TFormIDEColorizerSettings
-  Left = 509
-  Top = 252
+  Left = 838
+  Top = 188
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Delphi IDE Colorizer Settings'
@@ -20,7 +20,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object PanelMain: TPanel
@@ -67,7 +66,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 5
                 Shape = bsTopLine
               end
-              object Image2: TImage
+              object ImageStyle: TImage
                 Left = 0
                 Top = 0
                 Width = 32
@@ -307,7 +306,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
               end
               object ColorBoxBase: TColorBox
                 Left = 154
-                Top = 129
+                Top = 128
                 Width = 166
                 Height = 22
                 NoneColorColor = 16729138
@@ -401,7 +400,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
                 Height = 13
                 Caption = 'Border Color InActive'
               end
-              object Image6: TImage
+              object ImagePin: TImage
                 Left = 16
                 Top = 3
                 Width = 32
@@ -1252,7 +1251,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 10
           Shape = bsTopLine
         end
-        object Image5: TImage
+        object ImageVCLStyles: TImage
           Left = 0
           Top = 0
           Width = 32
@@ -1449,7 +1448,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Height = 13
           Caption = 'LabelVersion'
         end
-        object Image1: TImage
+        object ImageTwitter: TImage
           Left = 3
           Top = 104
           Width = 109
@@ -1529,9 +1528,9 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             AC59838B265EE48C9D9D9DA625517ABA46307C900493CED3242D1C4FAF658EFB
             91747AFDF8F163D3F23782E183B4DA8D1F3F1E91CDF7FB7783FF02C38A9515CF
             C47C450000000049454E44AE426082}
-          OnClick = Image1Click
+          OnClick = ImageTwitterClick
         end
-        object Image3: TImage
+        object ImageGooglePlus: TImage
           Left = 118
           Top = 104
           Width = 120
@@ -1599,7 +1598,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             0F0F2F664D56285E332C181F2045AF58B1C22C823F05886E90CBD27A0F6BCE96
             48DBB76F7761DD5AB29797570E2BDA41FF7F0B0BCC01FE34DABC79F3675F1704
             BBBABAF6313E8BD830FF1FF57BE525653BA73C0000000049454E44AE426082}
-          OnClick = Image3Click
+          OnClick = ImageGooglePlusClick
         end
         object Label29: TLabel
           Left = 3
@@ -1614,9 +1613,9 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
           Font.Style = [fsBold]
           ParentFont = False
         end
-        object Image4: TImage
+        object ImageLogo: TImage
           Left = 8
-          Top = 8
+          Top = 3
           Width = 32
           Height = 32
           AutoSize = True
@@ -1753,7 +1752,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       object TabSheetContribute: TTabSheet
         Caption = 'Contribute'
         ImageIndex = 4
-        object Image7: TImage
+        object ImageContribute: TImage
           Left = 3
           Top = 35
           Width = 417
@@ -2557,7 +2556,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             2D83523252105252CA8E7A168464BE7671DBA9F7DAF6DBA021393F90DFDA0D42
             5ED69BEFB5ECF0B0A63DC63499EDEEC9D065504A460A424A4AD9D1FF0F44710B
             17309093A20000000049454E44AE426082}
-          OnClick = Image7Click
+          OnClick = ImageContributeClick
         end
         object Label30: TLabel
           Left = 3
@@ -2595,7 +2594,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 416
     Top = 304
     Bitmap = {
-      494C010108000D000C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
