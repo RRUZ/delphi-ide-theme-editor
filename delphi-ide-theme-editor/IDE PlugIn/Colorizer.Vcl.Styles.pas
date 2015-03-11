@@ -2690,7 +2690,16 @@ end;
 procedure TColorizerCheckBoxStyleHook.PaintBackground(Canvas: TCanvas);
 var
   Details:  TThemedElementDetails;
+var
+  R: TRect;
 begin
+  if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls) then
+  begin
+   R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
+   Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+   Canvas.FillRect(R);
+  end
+  else
   if ColorizerStyleServices.Available then
   begin
     Details.Element := teButton;
@@ -2849,58 +2858,95 @@ begin
   if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls) then
   begin
     LStyleServices:=StyleServices;
-    Count := TCustomStatusBar(Control).Panels.Count;
-    for I := 0 to Count - 1 do
+
+    Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+    Canvas.FillRect(Rect(0, 0, Control.Width, Control.Height));
+
+    if SendMessage(Handle, SB_ISSIMPLE, 0, 0) > 0 then
     begin
-      R := Rect(0, 0, 0, 0);
-      SendMessage(Control.Handle, SB_GETRECT, I, LParam(@R));
-      if IsRectEmpty(R) then
-        Exit;
+      R := Control.ClientRect;
+      FillChar(Borders, SizeOf(Borders), 0);
+      SendMessage(Handle, SB_GETBORDERS, 0, IntPtr(@Borders));
+      R.Left := Borders[0] + Borders[2];
+      R.Top := Borders[1];
+      R.Bottom := R.Bottom - Borders[1];
+      R.Right := R.Right - Borders[2];
 
+      Details := ColorizerStyleServices.GetElementDetails(tsPane);
+      ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+
+      R1 := Control.ClientRect;
+      R1.Left := R1.Right - R.Height;
       Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-      //Canvas.Pen.Color   := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-      //Canvas.Rectangle(R);
-      Canvas.FillRect(R);
+      Canvas.FillRect(R1);
 
-      Details := LStyleServices.GetElementDetails(tsPane);
-      InflateRect(R, -1, -1);
-      if Control is TCustomStatusBar then
-        Flags := Control.DrawTextBiDiModeFlags(AlignStyles[TCustomStatusBar(Control).Panels[I].Alignment])
-      else
-        Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
-      Idx := I;
-      SetLength(LText, Word(SendMessage(Control.Handle, SB_GETTEXTLENGTH, Idx, 0)));
+      SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, 0, 0)));
       if Length(LText) > 0 then
       begin
-        Res := SendMessage(Control.Handle, SB_GETTEXT, Idx, LParam(@LText[1]));
-        if (Res and SBT_OWNERDRAW = 0) then
-          DrawControlText(Canvas, Details, LText, R, Flags)
+       SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
+       Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
+       _DrawControlText(Canvas, Details, LText, R, Flags);
+      end;
+    end
+    else
+    begin
+
+      if Control is TStatusBar then
+        Count := TStatusBar(Control).Panels.Count
+      else
+        Count := SendMessage(Handle, SB_GETPARTS, 0, 0);
+
+      for I := 0 to Count - 1 do
+      begin
+        R := Rect(0, 0, 0, 0);
+        SendMessage(Control.Handle, SB_GETRECT, I, LParam(@R));
+        if IsRectEmpty(R) then
+          Exit;
+
+        //AddLog2(Format('TColorizerStatusBarStyleHook.Paint R.Left %d R.Top %d R.Width %d R.Height %d', [R.Left, R.Top, R.Width, R.Height]));
+        Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+        Canvas.FillRect(R);
+
+        Details := LStyleServices.GetElementDetails(tsPane);
+        InflateRect(R, -1, -1);
+        if Control is TCustomStatusBar then
+          Flags := Control.DrawTextBiDiModeFlags(AlignStyles[TCustomStatusBar(Control).Panels[I].Alignment])
         else
-        if (Control is TCustomStatusBar) and Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+          Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
+        Idx := I;
+        SetLength(LText, Word(SendMessage(Control.Handle, SB_GETTEXTLENGTH, Idx, 0)));
+        if Length(LText) > 0 then
         begin
-          SaveCanvas  := TCustomStatusBar(Control).Canvas;
-          TCustomStatusBar(Control).CanvasRW := Canvas;
-          try
-            TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control), TCustomStatusBar(Control).Panels[I], R);
-          finally
-            TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+          Res := SendMessage(Control.Handle, SB_GETTEXT, Idx, LParam(@LText[1]));
+          if (Res and SBT_OWNERDRAW = 0) then
+            _DrawControlText(Canvas, Details, LText, R, Flags)
+          else
+          if (Control is TCustomStatusBar) and Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+          begin
+            SaveCanvas  := TCustomStatusBar(Control).Canvas;
+            TCustomStatusBar(Control).CanvasRW := Canvas;
+            try
+              TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control), TCustomStatusBar(Control).Panels[I], R);
+            finally
+              TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+            end;
           end;
-        end;
-      end
-      else if (Control is TCustomStatusBar) then
-       if (TCustomStatusBar(Control).Panels[I].Style <> psOwnerDraw) then
-         _DrawControlText(Canvas, Details, TCustomStatusBar(Control).Panels[I].Text, R, Flags)
-       else
-         if Assigned(TCustomStatusBar(Control).OnDrawPanel) then
-         begin
-           SaveCanvas := TCustomStatusBar(Control).Canvas;
-           TCustomStatusBar(Control).CanvasRW := Canvas;
-           try
-             TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control), TCustomStatusBar(Control).Panels[I], R);
-           finally
-             TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+        end
+        else if (Control is TCustomStatusBar) then
+         if (TCustomStatusBar(Control).Panels[I].Style <> psOwnerDraw) then
+           _DrawControlText(Canvas, Details, TCustomStatusBar(Control).Panels[I].Text, R, Flags)
+         else
+           if Assigned(TCustomStatusBar(Control).OnDrawPanel) then
+           begin
+             SaveCanvas := TCustomStatusBar(Control).Canvas;
+             TCustomStatusBar(Control).CanvasRW := Canvas;
+             try
+               TCustomStatusBar(Control).OnDrawPanel(TCustomStatusBar(Control), TCustomStatusBar(Control).Panels[I], R);
+             finally
+               TCustomStatusBar(Control).CanvasRW := SaveCanvas;
+             end;
            end;
-         end;
+      end;
     end;
 
   end
