@@ -1320,13 +1320,13 @@ procedure TWrapperCheckBox.SetProperties(AComponent: TComponent;
 begin
   inherited;
   //necesary to allow use a hook with the DrawFrameControl and set color of font
-  if not Restore and (GetWindowTheme(TWinControl(AComponent).Handle)<>0) then
-    SetWindowTheme(TWinControl(AComponent).Handle, '', '')
-  else
-  if Restore and (GetWindowTheme(TWinControl(AComponent).Handle)=0) then
-    SetWindowTheme(TWinControl(AComponent).Handle, VSCLASS_BUTTON, nil);
+//  if not Restore and (GetWindowTheme(TWinControl(AComponent).Handle)<>0) then
+//    SetWindowTheme(TWinControl(AComponent).Handle, '', '')
+//  else
+//  if Restore and (GetWindowTheme(TWinControl(AComponent).Handle)=0) then
+//    SetWindowTheme(TWinControl(AComponent).Handle, VSCLASS_BUTTON, nil);
 
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 
@@ -1339,20 +1339,19 @@ begin
   inherited;
   //necesary to allow use a hook with the DrawFrameControl and set color of font
   //AddLog2('TWrapperRadioButton '+TRadioButton(AComponent).Caption);
+//  if not Restore {and (GetWindowTheme(TWinControl(AComponent).Handle)<>0)} then
+//  begin
+//    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
+//    //AddLog2('Themed removed');
+//  end
+//  else
+//  if Restore and (GetWindowTheme(TWinControl(AComponent).Handle)=0) then
+//  begin
+//    SetWindowTheme(TWinControl(AComponent).Handle, VSCLASS_BUTTON, nil);
+//    //AddLog2('Themed restored');
+//  end;
 
-  if not Restore {and (GetWindowTheme(TWinControl(AComponent).Handle)<>0)} then
-  begin
-    SetWindowTheme(TWinControl(AComponent).Handle, '', '');
-    //AddLog2('Themed removed');
-  end
-  else
-  if Restore and (GetWindowTheme(TWinControl(AComponent).Handle)=0) then
-  begin
-    SetWindowTheme(TWinControl(AComponent).Handle, VSCLASS_BUTTON, nil);
-    //AddLog2('Themed restored');
-  end;
-
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.WindowColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
 end;
 { TWrapperListButton }
@@ -1497,9 +1496,8 @@ initialization
   RegisterColorizerWrapper('TCloseButton',  TWrapperGradientButton);
   RegisterColorizerWrapper('TGradientButton',  TWrapperGradientButton);
 
-  //RegisterColorizerWrapper('TPropCheckBox',  TWrapperCheckBox);
-  //RegisterColorizerWrapper('TCheckBox',  TWrapperCheckBox);
-
+  RegisterColorizerWrapper('TPropCheckBox',  TWrapperCheckBox);
+  RegisterColorizerWrapper('TCheckBox',  TWrapperCheckBox);
   //RegisterColorizerWrapper('TRadioButton',  TWrapperRadioButton);
 
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleEditControl);
