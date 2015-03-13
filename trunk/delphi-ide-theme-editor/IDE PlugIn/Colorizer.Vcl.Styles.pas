@@ -242,6 +242,20 @@ type
     constructor Create(AControl: TWinControl); override;
   end;
 
+  TColorizerEditStyleHook = class(TColorizerMouseTrackControlStyleHook)
+  strict private
+    procedure UpdateColors;
+    procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
+  strict protected
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+    procedure MouseEnter; override;
+    procedure MouseLeave; override;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+
 
    procedure SetColorizerVCLStyle(const StyleName : string);
    function  ColorizerStyleServices: TCustomStyleServices;
@@ -261,6 +275,7 @@ type
   TCustomFormClass = class(TCustomForm);
   TCustomCheckBoxClass = class(TCustomCheckBox);
   TRadioButtonClass = class(TRadioButton);
+  TCustomEditClass = class(TCustomEdit);
 
   TCustomStatusBarHelper = class helper for TCustomStatusBar
   private
@@ -2558,6 +2573,17 @@ begin
            LBuffer.Canvas.Ellipse(3, 3, 3 + BoxSize.cx div 2 ,3 + BoxSize.cy div 2);
          end;
 
+          if not RightAlignment then
+          begin
+            R := Rect(0, 0, BoxSize.cx, BoxSize.cy);
+            RectVCenter(R, Rect(0, 0, Control.Width, Control.Height));
+          end
+          else
+          begin
+            R := Rect(Control.Width - BoxSize.cx - 1, 0, Control.Width, Control.Height);
+            RectVCenter(R, Rect(Control.Width - BoxSize.cy - 1, 0, Control.Width, Control.Height));
+          end;
+
          RectCenter(LRect, R);
          BitBlt(Canvas.Handle, LRect.Left, LRect.Top, BoxSize.cx, BoxSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
        finally
@@ -3076,6 +3102,145 @@ end;
 procedure TCustomStatusBarHelper.SetCanvasRW(const Value: TCanvas);
 begin
  Self.FCanvas:= Value;
+end;
+
+{ TColorizerEditStyleHook }
+
+constructor TColorizerEditStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverridePaintNC := True;
+  OverrideEraseBkgnd := True;
+  UpdateColors;
+end;
+
+procedure TColorizerEditStyleHook.MouseEnter;
+begin
+  InvalidateNC;
+end;
+
+procedure TColorizerEditStyleHook.MouseLeave;
+begin
+  InvalidateNC;
+end;
+
+procedure TColorizerEditStyleHook.PaintNC(Canvas: TCanvas);
+var
+  Details: TThemedElementDetails;
+  R: TRect;
+begin
+  if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls) then
+  begin
+    R := Rect(0, 0, Control.Width, Control.Height);
+    InflateRect(R, -2, -2);
+    ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+    Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+    Canvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+    Canvas.Rectangle(Rect(0, 0, Control.Width, Control.Height));
+  end
+  else
+  if ColorizerStyleServices.Available and HasBorder then
+  begin
+    if Control.Focused then
+      Details := ColorizerStyleServices.GetElementDetails(teEditBorderNoScrollFocused)
+    else
+    if MouseInControl then
+      Details := ColorizerStyleServices.GetElementDetails(teEditBorderNoScrollHot)
+    else
+    if Control.Enabled then
+      Details := ColorizerStyleServices.GetElementDetails(teEditBorderNoScrollNormal)
+    else
+      Details := ColorizerStyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
+    R := Rect(0, 0, Control.Width, Control.Height);
+    InflateRect(R, -2, -2);
+    ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, Control.Width, Control.Height));
+  end;
+end;
+
+procedure TColorizerEditStyleHook.UpdateColors;
+const
+  ColorStates: array[Boolean] of TStyleColor = (scEditDisabled, scEdit);
+  FontColorStates: array[Boolean] of TStyleFont = (sfEditBoxTextDisabled, sfEditBoxTextNormal);
+var
+  LStyle: TCustomStyleServices;
+begin
+  if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls) then
+  begin
+    Brush.Color := TColorizerLocalSettings.ColorMap.WindowColor;
+    if Control.Enabled then
+     FontColor := TColorizerLocalSettings.ColorMap.FontColor
+    else
+     FontColor := TColorizerLocalSettings.ColorMap.DisabledFontColor;
+  end
+  else
+  begin
+    LStyle := ColorizerStyleServices;
+    Brush.Color := LStyle.GetStyleColor(ColorStates[Control.Enabled]);
+    {$IFDEF DELPHIXE3_UP}
+    if seFont in Control.StyleElements then
+    {$ENDIF}
+      FontColor := LStyle.GetStyleFontColor(FontColorStates[Control.Enabled])
+    {$IFDEF DELPHIXE3_UP}
+    else
+      FontColor := TWinControlClass(Control).Font.Color;
+    {$ENDIF}
+  end;
+end;
+
+procedure TColorizerEditStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
+var
+  Params: PNCCalcSizeParams;
+begin
+  if (Control is TCustomEdit) then
+  begin
+    if TCustomEditClass(Control).BevelKind <> bkNone then
+    begin
+      Params := Message.CalcSize_Params;
+      if HasBorder then
+        with Params^.rgrc[0] do
+        begin
+          Inc(Left, 2);
+          Inc(Top, 2);
+          Dec(Right, 2);
+          Dec(Bottom, 2);
+        end;
+      Handled := True;
+    end;
+  end;
+end;
+
+procedure TColorizerEditStyleHook.WndProc(var Message: TMessage);
+begin
+  case Message.Msg of
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+      begin
+        SetTextColor(Message.WParam, ColorToRGB(FontColor));
+        SetBkColor(Message.WParam, ColorToRGB(Brush.Color));
+        Message.Result := LRESULT(Brush.Handle);
+        Handled := True;
+      end;
+    CM_ENABLEDCHANGED:
+      begin
+        UpdateColors;
+        Handled := False; // Allow control to handle message
+      end
+  else
+    inherited WndProc(Message);
+  end;
+  case Message.Msg of
+    WM_SIZE:
+    begin
+    {$IFDEF DELPHIXE3_UP}
+      if seBorder in Control.StyleElements then
+    {$ENDIF}
+      InvalidateNC;
+      Handled := False;
+    end;
+    CM_FOCUSCHANGED:
+      if not TStyleManager.SystemStyle.Enabled then
+        InvalidateNC;
+  end;
 end;
 
 end.

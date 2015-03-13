@@ -316,8 +316,8 @@ begin
 //
 //    end;
 
-//
-//    if SameText(AComponent.ClassName, 'TColorSpeedSetting') then
+
+//    if SameText(AComponent.ClassName, 'TCheckoutDialog') then
 //     TRttiUtils.DumpObject(AComponent, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
 
     if AComponent is TForm then

@@ -55,3 +55,8 @@ TRplcDialog
 TGotoLineDialog
 TGetAddress
 TAddModuleForm
+TVersionControlSelect
+TCheckoutDialog
+TGitCheckoutDialog
+TUseUnitDialog
+TdlgRepoBrowser

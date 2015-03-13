@@ -20,27 +20,25 @@
 //**************************************************************************************************
 
 //TODO
+ {TODO -oRRUZ -cIssue :Fix refresh issue on Object Inspector Window when the theme is changed}
+ {TODO -oRRUZ -cPerformance : Improve overall performance}
+ {TODO -oRRUZ -cPerformance : improve performance in load of settings DIC form}
+ {TODO -oRRUZ -cHooks : add StyleHook for TTreeview}
+ {TODO -oRRUZ -cHooks : add StyleHook for TListview}
+ {TODO -oRRUZ -cHooks : add support for TBitBtn}
+ {TODO -oRRUZ -cFeature : Add option to override event log colors}
+ {TODO -oRRUZ -cFeature : Transparent system menus}
+ {TODO -oRRUZ -cFeature : Fast vcl styles/themes switch}
+ {TODO -oRRUZ -cFeature : Add option to change Font}
+ {TODO -oRRUZ -cFeature : Add option to change DisAssember colors}
+ {TODO -oRRUZ -cFeature : Add CNIDEWizards true integration
 
-{
-  TVirtualMethodInterceptor for hooks
-  TVirtualMethodInterceptorExt - > DDetours
-
-  improve performance in load of settings DIC form
-  Add option to override event log colors.
-  add support for TBitBtn
-
-  Transparent system menus
-  Fast vcl styles/themes switch
-  Improve overall performance
-  Fix refresh issue on Object Inspector Window when the theme is changed
-  Add option to change Font
-  DisAssember colors.
-
-  CNIDEWizards .... true integration
-}
 
 // DONE
 {
+  * fixed - Draw TEdit
+  * fixed - Draw TLabel disabled
+  * fixed - Draw TRadioButton in wrong Vert. position
   * Done - improve performance in load of project options form
   * Done - Add support for TCheckbox, TGroupBox, TRadiobutton (including fonts
   * fixed - bug in call stack -> disassmbler window is not styled
@@ -291,7 +289,7 @@ var
   WizardServices: IOTAWizardServices;
 {$ENDIF}
 begin
-  AddLog2('FinalizeIDEColorizer', '0');
+  AddLog2('FinalizeIDEColorizer', 'Init');
   IDEWizard.FTimerRefresher.Enabled:=False;
   IDEWizard.FTimerRefresher.Free;
 

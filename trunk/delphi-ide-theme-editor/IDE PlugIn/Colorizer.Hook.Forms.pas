@@ -164,6 +164,12 @@ begin
     begin
       HookedControls.Add(Self, TColorizerStatusBarStyleHook.Create(Self));
       LHook:=HookedControls[Self];
+    end
+    else
+    if Self is TEdit then
+    begin
+      HookedControls.Add(Self, TColorizerEditStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
     end;
 
 
