@@ -1498,7 +1498,7 @@ initialization
 
   RegisterColorizerWrapper('TPropCheckBox',  TWrapperCheckBox);
   RegisterColorizerWrapper('TCheckBox',  TWrapperCheckBox);
-  //RegisterColorizerWrapper('TRadioButton',  TWrapperRadioButton);
+  RegisterColorizerWrapper('TRadioButton',  TWrapperRadioButton);
 
   RegisterColorizerWrapper('TEdit',  TWrapperSimpleEditControl);
   RegisterColorizerWrapper('TButtonedEdit',  TWrapperSimpleEditControl);

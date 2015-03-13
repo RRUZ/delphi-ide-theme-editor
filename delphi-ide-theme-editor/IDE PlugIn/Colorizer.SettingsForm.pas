@@ -810,7 +810,6 @@ Var
  AColor   : TColor;
  OldIndex : Integer;
 begin
-  AddLog2('CbClrElementChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if ColorListBox1.ItemIndex>=0 then
  begin
    PropName:=ColorListBox1.Items[ColorListBox1.ItemIndex];
@@ -821,7 +820,6 @@ begin
     if OldIndex>=0 then
       ColorListBox1.ItemIndex:=OldIndex;
  end;
-  AddLog2('CbClrElementChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.ColorListChange(Sender: TObject);
@@ -829,14 +827,12 @@ Var
  PropName : string;
  AColor   : TColor;
 begin
-  AddLog2('ColorListChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if ColorListBox1.ItemIndex>=0 then
  begin
    PropName:= ColorListBox1.Items[ColorListBox1.ItemIndex];
    AColor  := GetOrdProp(ColorizerColorMap, PropName);
    CbClrElement.Selected:=AColor;
  end;
-  AddLog2('ColorListChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 
@@ -864,7 +860,6 @@ end;
 
 procedure TFormIDEColorizerSettings.cbVirtualStringTreeChange(Sender: TObject);
 begin
-  AddLog2('cbVirtualStringTreeChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if FSettings.VirtualStringTreeFontSettingsDict.ContainsKey(cbVirtualStringTree.Text) then
  begin
   if FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].FontName='' then
@@ -878,20 +873,17 @@ begin
     cbVirtualStringTreeFontSize.ItemIndex:= cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSettingsDict.Items[cbVirtualStringTree.Text].Size));
   end;
  end;
-  AddLog2('cbVirtualStringTreeChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.cbVirtualStringTreeFontDrawItem(
   Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 begin
-  AddLog2('cbVirtualStringTreeFontDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
   with (Control as TComboBox).Canvas do
   begin
     Font.Name := Screen.Fonts.Strings[Index];
     FillRect(Rect) ;
     TextOut(Rect.Left, Rect.Top, PChar(Screen.Fonts.Strings[Index]))
   end;
-  AddLog2('cbVirtualStringTreeFontDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
@@ -904,33 +896,19 @@ end;
 
 procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
 begin
-  AddLog2('ColorBoxBaseChange', FormatDateTime('hh:nn:ss.zzz', Now));
  if CheckBoxAutoColor.Checked then
  begin
    GenerateColorMap(ColorizerColorMap, ColorBoxBase.Selected, CalculateTextColor(ColorBoxBase.Selected));
    LoadColorsTheme();
    DrawPalette();
  end;
-  AddLog2('ColorBoxBaseChange', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.ColorBoxBaseGetColors(
   Sender: TCustomColorBox; Items: TStrings);
-//Var
-// Item : TIdentMapEntry;
 begin
-  AddLog2('ColorBoxBaseGetColors', FormatDateTime('hh:nn:ss.zzz', Now));
   FillColorsItems;
   Items.AddStrings(FColorListItems);
-
-//  Items.BeginUpdate;
-//  try
-//  for Item in WebNamedColors do
-//   Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]), TObject(Item.Value));
-//  finally
-//    Items.EndUpdate;
-//  end;
-  AddLog2('ColorBoxBaseGetColors', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.ColorListBox1GetColors(
@@ -940,7 +918,6 @@ var
   Properties  : TPropList;
   PropName : string;
 begin
-  AddLog2('ColorListBox1GetColors', FormatDateTime('hh:nn:ss.zzz', Now));
   Count := GetPropList(TypeInfo(TColorizerColorMap), tkAny, @Properties);
     for Index := 0 to Pred(Count) do
      if SameText(string(Properties[Index]^.PropType^.Name),'TColor') then
@@ -951,7 +928,6 @@ begin
       else
        Items.AddObject(PropName, TObject(Integer(GetPropValue(ColorizerColorMap, PropName))));
      end;
-  AddLog2('ColorListBox1GetColors', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.FillColorsItems;
@@ -983,7 +959,6 @@ procedure TFormIDEColorizerSettings.FormCreate(Sender: TObject);
 var
   s, sVersion : string;
 begin
-  AddLog2('FormCreate', FormatDateTime('hh:nn:ss.zzz', Now));
   LoadDockIcons;
   sVersion:=uMisc.GetFileVersion(GetModuleLocation);
 
@@ -1037,7 +1012,6 @@ begin
   cbVirtualStringTreeFont.Items := Screen.Fonts;
   cbVirtualStringTree.ItemIndex:=0;
   cbVirtualStringTreeChange(nil);
-  AddLog2('FormCreate', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 
@@ -1045,7 +1019,6 @@ procedure TFormIDEColorizerSettings.DrawPalette;
 var
   LBitMap : TBitmap;
 begin
-  AddLog2('DrawPalette', FormatDateTime('hh:nn:ss.zzz', Now));
     LBitMap:=TBitmap.Create;
     try
      CreateArrayBitmap(ImagePalette.ClientWidth, ImagePalette.ClientHeight,[
@@ -1074,7 +1047,6 @@ begin
     finally
       LBitMap.Free;
     end;
-  AddLog2('DrawPalette', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 {$IFDEF DELPHIXE2_UP}
@@ -1086,7 +1058,6 @@ var
   StyleName : string;
   LStyle    : TCustomStyleServices;
 begin
-  AddLog2('DrawSeletedVCLStyle', FormatDateTime('hh:nn:ss.zzz', Now));
    StyleName:=CbStyles.Text;
    if (StyleName<>'') and (not SameText(StyleName, 'Windows')) then
    begin
@@ -1096,7 +1067,6 @@ begin
      FPreview.Style:=LStyle;
      TVclStylesPreviewClass(FPreview).Paint;
    end;
-  AddLog2('DrawSeletedVCLStyle', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 {$ENDIF}
 
@@ -1183,13 +1153,11 @@ procedure TFormIDEColorizerSettings.ListBoxDockImagesDrawItem(
 var
   CenterText : integer;
 begin
-  AddLog2('ListBoxDockImagesDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
   ListBoxDockImages.Canvas.FillRect(Rect);
   ImageListDock.Draw(ListBoxDockImages.Canvas, Rect.Left + 4, Rect.Top + 3, Index);
   CenterText := ( Rect.Bottom - Rect.Top - ListBoxDockImages.Canvas.TextHeight(Text)) div 2 ;
   ListBoxDockImages.Canvas.TextOut (Rect.left + ImageListDock.Width + 8 , Rect.Top + CenterText,
   ListBoxDockImages.Items.Strings[index]);
-  AddLog2('ListBoxDockImagesDrawItem', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 
@@ -1244,12 +1212,10 @@ procedure TFormIDEColorizerSettings.LoadColorsTheme;
 var
   OldIndex : Integer;
 begin
-  AddLog2('LoadColorsTheme', FormatDateTime('hh:nn:ss.zzz', Now));
   OldIndex:=ColorListBox1.ItemIndex;
   ColorListBox1.PopulateList;
   if OldIndex>=0 then
     ColorListBox1.ItemIndex:=OldIndex;
-  AddLog2('LoadColorsTheme', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.LoadDockIcons;
@@ -1258,7 +1224,6 @@ var
   LBitMap   : TBitmap;
   LPngImage : TPngImage;
 begin
-  AddLog2('LoadDockIcons', FormatDateTime('hh:nn:ss.zzz', Now));
   ImagesPath:=ExtractFilePath(GetModuleLocation)+'images\dock_images';
 
   for s in TDirectory.GetFiles(ImagesPath, '*.png') do
@@ -1280,13 +1245,11 @@ begin
 
     ListBoxDockImages.Items.Add(ChangeFileExt(ExtractFileName(s),''));
   end;
-  AddLog2('LoadDockIcons', FormatDateTime('hh:nn:ss.zzz', Now));
 
 end;
 
 procedure TFormIDEColorizerSettings.LoadSettings;
 begin
-  AddLog2('LoadSettings', FormatDateTime('hh:nn:ss.zzz', Now));
   ReadSettings(FSettings, GetSettingsFolder);
 
   CheckBoxUpdates.Checked  := FSettings.CheckUpdates;
@@ -1361,7 +1324,6 @@ begin
  //cbVirtualStringTreeFont.ItemIndex:= cbVirtualStringTreeFont.Items.IndexOf(FSettings.VirtualStringTreeFont);
  //cbVirtualStringTreeFontSize.ItemIndex := cbVirtualStringTreeFontSize.Items.IndexOf(IntToStr(FSettings.VirtualStringTreeFontSize));
  CheckboxVirtualStringTreeFontDefault.Checked:=  FSettings.VirtualStringTreeFontDefault;
-  AddLog2('LoadSettings', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 procedure TFormIDEColorizerSettings.LoadThemes;
@@ -1369,7 +1331,6 @@ var
  sValue, FileName : string;
  Files : TStringDynArray;
 begin
-  AddLog2('LoadThemes', FormatDateTime('hh:nn:ss.zzz', Now));
   cbThemeName.Items.Clear;
   Files:=TDirectory.GetFiles(GetIDEThemesFolder,'*.idetheme');
   if Length(Files)=0 then
@@ -1383,7 +1344,6 @@ begin
     FileName:=ChangeFileExt(ExtractFileName(sValue),'');
     cbThemeName.Items.Add(FileName);
   end;
-  AddLog2('LoadThemes', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 
 {$IFDEF DELPHIXE2_UP}
@@ -1391,7 +1351,6 @@ procedure TFormIDEColorizerSettings.LoadVClStylesList;
 var
  s : string;
 begin
-  AddLog2('LoadVClStylesList', FormatDateTime('hh:nn:ss.zzz', Now));
  if CheckBoxUseVClStyles.Checked then
  begin
   CbStyles.Items.Clear;
@@ -1402,7 +1361,6 @@ begin
 
    CbStyles.ItemIndex:=CbStyles.Items.IndexOf(FSettings.VCLStyleName);
  end;
-  AddLog2('LoadVClStylesList', FormatDateTime('hh:nn:ss.zzz', Now));
 end;
 {$ENDIF}
 { TColorListBox }

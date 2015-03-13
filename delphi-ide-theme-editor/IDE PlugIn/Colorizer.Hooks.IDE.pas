@@ -85,10 +85,6 @@ uses
   GraphUtil,
   SysUtils,
   CaptionedDockTree,
-
-  JclDebug,
-  Dialogs,
-
   Graphics;
 
 type
@@ -749,7 +745,7 @@ begin
     Canvas.Pen.Color := TColorizerLocalSettings.ColorMap.FrameTopLeftInner;
 
     CaptionRect.Top := CaptionRect.Top + 1;
-   if not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms) then
+   if  TColorizerLocalSettings.Settings.DockCustomColors or not (TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesForms) then
    begin
     if State.Focused then
     begin
@@ -1006,49 +1002,6 @@ const
  sPopupSearchForm_DrawTreeDrawNode  = '@Popupsrchfrm@TPopupSearchForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
  sPopupSearchForm_PaintCategoryNode = '@Popupsrchfrm@TPopupSearchForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
  sPopupSearchForm_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
-
-
-//var
-// TrampolineOpenKey  : function (Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
-// TrampolineInternalLoadPropValues : procedure (Self: TObject);
-//
-//
-//function DetourOpenKey(Self: TObject;const Key: string; CanCreate: Boolean): Boolean;
-//var
-//   sCaller : string;
-//   i : integer;
-//begin
-// if pos('Hot Link', Key)>1  then
-// begin
-//   for i:=1 to 5 do
-//   begin
-//       sCaller  := ProcByLevel(i);
-//       AddLog2(Format('Level %d %s Key %s',[i, sCaller, Key]));
-//   end;
-//   AddLog2('');
-// end;
-//
-// Result:= TrampolineOpenKey(Self, key, CanCreate);
-//end;
-
-//@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv
-
-//procedure DetourInternalLoadPropValues(Self: TObject);
-//var
-//   sCaller : string;
-//   i : integer;
-//begin
-//// if pos('Hot Link', Key)>1  then
-// begin
-//   for i:=1 to 5 do
-//   begin
-//       sCaller  := ProcByLevel(i);
-//       AddLog2(Format('Level %d %s',[i, sCaller]));
-//   end;
-//   AddLog2('');
-// end;
-//  TrampolineInternalLoadPropValues(Self);
-//end;
 
 procedure InstallHooksIDE;
 var

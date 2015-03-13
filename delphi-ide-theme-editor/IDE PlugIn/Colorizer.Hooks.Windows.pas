@@ -314,7 +314,7 @@ begin
  RestoreColor:=False;
  sCaller:='';
 
- if (uFormat=2084) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+ if {(uFormat AND DT_CALCRECT = 0) and} (uFormat=2084) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
  begin
    OrgColor:=GetTextColor(hDC);
    LFontColor :=ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
@@ -405,7 +405,8 @@ begin
 {$IFDEF DELPHIXE6_UP}
  OrgColor:=0;
  RestoreColor:=False;
- if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+
+ if (dwDTFormat AND DT_CALCRECT = 0) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
  begin
   OrgColor:= GetTextColor(DC);
    if (TColor(OrgColor) = clWhite) or (TColor(OrgColor) = clBlack)  then

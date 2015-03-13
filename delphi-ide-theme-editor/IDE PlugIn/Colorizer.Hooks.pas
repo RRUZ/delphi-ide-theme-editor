@@ -48,6 +48,8 @@ uses
   Colorizer.uxThemeHelper,
 {$ENDIF}
   Messages,
+  System.Diagnostics,
+  System.TimeSpan,
   TypInfo,
   Forms,
   ExtCtrls,
@@ -109,6 +111,7 @@ type
  TCustomControlClass     = class(TCustomControl);
  TCustomControlBarClass  = class(TCustomControlBar);
  TCustomButtonClass      = class(TCustomButton);
+ TCustomLabelClass       = class(TCustomLabel);
 var
   {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
@@ -148,7 +151,9 @@ var
   Trampoline_HintWindow_Paint              : procedure (Self : THintWindow) = nil;
   Trampoline_MessageHintWindow_Paint       : procedure (Self : THintWindow) = nil;
   Trampoline_Bevel_Paint                   : procedure (Self : TBevel) = nil;
-  Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect)=nil;
+  Trampoline_TCustomControlBar_PaintControlFrame  : procedure (Self:TCustomControlBar; Canvas: TCanvas; AControl: TControl; var ARect: TRect) = nil;
+  Trampoline_TCustomLabel_DoDrawText       : procedure (Self : TCustomLabel;var Rect: TRect; Flags: Longint) = nil;
+
 
   //Trampoline_TCustomActionPopupMenu_CreateParams : procedure(Self: TCustomActionPopupMenu;var Params: TCreateParams) = nil;
 
@@ -223,6 +228,122 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
+
+
+procedure Detour_TCustomLabelClass_DoDrawText(Self : TCustomLabelClass;var Rect: TRect; Flags: Longint);
+const
+  EllipsisStr = '...';
+  Ellipsis: array[TEllipsisPosition] of Longint = (0, DT_PATH_ELLIPSIS,
+    DT_END_ELLIPSIS, DT_WORD_ELLIPSIS);
+var
+  LParentForm : TCustomForm;
+  LRect: TRect;
+  Height, Delim: Integer;
+  LText, DText: string;
+
+  procedure DrawStyledText(DC: HDC; const Text: UnicodeString; var TextRect: TRect; TextFlags: Cardinal);
+  const
+    CStates: array[Boolean] of TThemedTextLabel = (ttlTextLabelDisabled, ttlTextLabelNormal);
+  var
+    LFormat: TTextFormat;
+    LOptions: TStyleTextOptions;
+  begin
+    LFormat := TTextFormatFlags(TextFlags);
+    if csGlassPaint in Self.ControlState then
+      Include(LFormat, tfComposited);
+
+    LOptions.Flags := [stfTextColor, stfGlowSize];
+    LOptions.TextColor := Self.Canvas.Font.Color;
+    LOptions.GlowSize := Self.GlowSize;
+
+    ColorizerStyleServices.DrawText(DC,
+      ColorizerStyleServices.GetElementDetails(CStates[Self.Enabled]), Text, TextRect, LFormat, LOptions);
+  end;
+
+  procedure DrawNormalText(DC: HDC; const Text: UnicodeString; var TextRect: TRect; TextFlags: Cardinal);
+  begin
+    Windows.DrawTextW(DC, Text, Length(Text), TextRect, TextFlags);
+  end;
+
+begin
+  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
+  begin
+    Trampoline_TCustomLabel_DoDrawText(Self, Rect, Flags);
+    exit;
+  end;
+
+  LParentForm:= GetParentForm(Self);
+  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+  begin
+    Trampoline_TCustomLabel_DoDrawText(Self, Rect, Flags);
+    exit;
+  end;
+
+  if Self.Enabled then
+  begin
+    Trampoline_TCustomLabel_DoDrawText(Self, Rect, Flags);
+    exit;
+  end
+  else
+  begin
+    LText := Self.Caption;
+    if (Flags and DT_CALCRECT <> 0) and
+       ((LText = '') or Self.ShowAccelChar and (LText[1] = '&') and (Length(LText) = 1)) then
+      LText := LText + ' ';
+
+    if LText <> '' then
+    begin
+      if not Self.ShowAccelChar then Flags := Flags or DT_NOPREFIX;
+      Flags := Self.DrawTextBiDiModeFlags(Flags);
+      Self.Canvas.Font := Self.Font;
+      if (Self.EllipsisPosition <> epNone) and not Self.AutoSize then
+      begin
+        DText := LText;
+        Flags := Flags and not DT_EXPANDTABS;
+        Flags := Flags or Ellipsis[Self.EllipsisPosition];
+        if Self.WordWrap and (Self.EllipsisPosition in [epEndEllipsis, epWordEllipsis]) then
+        begin
+          repeat
+            LRect := Rect;
+            Dec(LRect.Right, Self.Canvas.TextWidth(EllipsisStr));
+
+            if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+             DrawStyledText(Self.Canvas.Handle, DText, LRect, Flags or DT_CALCRECT)
+            else
+             DrawNormalText(Self.Canvas.Handle, DText, LRect, Flags or DT_CALCRECT);
+
+            Height := LRect.Bottom - LRect.Top;
+            if (Height > Self.ClientHeight) and (Height > Self.Canvas.Font.Height) then
+            begin
+              Delim := LastDelimiter(' '#9, LText);
+              if Delim = 0 then
+                Delim := Length(LText);
+              Dec(Delim);
+              if ByteType(LText, Delim) = mbLeadByte then
+                Dec(Delim);
+              LText := Copy(LText, 1, Delim);
+              DText := LText + EllipsisStr;
+              if LText = '' then
+                Break;
+            end
+             else
+              Break;
+          until False;
+        end;
+        if LText <> '' then
+          LText := DText;
+      end;
+
+     if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+       DrawStyledText(Self.Canvas.Handle, LText, Rect, Flags)
+     else
+     begin
+       Self.Canvas.Font.Color:=TColorizerLocalSettings.ColorMap.DisabledFontColor;
+       DrawNormalText(Self.Canvas.Handle, LText, Rect, Flags);
+     end;
+    end;
+  end;
+end;
 
 procedure Detour_TCustomControlBar_PaintControlFrame(Self:TCustomControlBarClass; Canvas: TCanvas; AControl: TControl; var ARect: TRect);
 const
@@ -2526,12 +2647,18 @@ const
 var
   sCaller : string;
   OrgBrush : Integer; //don't use SaveDC
+//  Stopwatch: TStopwatch;
+//  Elapsed: TTimeSpan;
 begin
   OrgBrush:=Self.Brush.Color;
   try
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and  (OrgBrush=clBtnFace) then
    begin
+     //Stopwatch := TStopwatch.StartNew;
      sCaller := ProcByLevel(1);
+     //Elapsed := Stopwatch.Elapsed;
+     //AddLog2(Format('ProcByLevel(1) Elapsed %n ms ',[elapsed.TotalMilliseconds]));
+
      if SameText(sCaller, sEditorControlSignature) then
         Self.Brush.Color:=GetGutterBkColor
      else
@@ -3018,7 +3145,7 @@ begin
 
   Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
 // *******************************************
-
+   Trampoline_TCustomLabel_DoDrawText   := InterceptCreate(@TCustomLabelClass.DoDrawText, @Detour_TCustomLabelClass_DoDrawText);
 end;
 
 procedure RemoveColorizerHooks;
@@ -3064,6 +3191,7 @@ begin
    InterceptRemove(@Trampoline_TCustomGroupBox_Paint);
    InterceptRemove(@Trampoline_CustomComboBox_WMPaint);
    InterceptRemove(@Trampoline_TCustomCombo_WndProc);
+   InterceptRemove(@Trampoline_TCustomLabel_DoDrawText);
 end;
 
 end.
