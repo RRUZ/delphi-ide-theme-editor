@@ -2,7 +2,7 @@
 
 = Introduction =
 
- If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE-XE6. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found so far. 
+ If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE2-XE6. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found so far. 
 
   What I expect of this beta testing is found bugs, possible conflicts with third-party experts and components, add new suggested features and improve the overall performance of the Wizard.    
  
