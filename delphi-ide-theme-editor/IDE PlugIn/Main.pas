@@ -31,7 +31,9 @@
  {TODO -oRRUZ -cFeature : Fast vcl styles/themes switch}
  {TODO -oRRUZ -cFeature : Add option to change Font}
  {TODO -oRRUZ -cFeature : Add option to change DisAssember colors}
- {TODO -oRRUZ -cFeature : Add CNIDEWizards true integration
+ {TODO -oRRUZ -cFeature : Add CNIDEWizards true integration}
+
+ bds xe4 creash on exit 
 
 
 // DONE

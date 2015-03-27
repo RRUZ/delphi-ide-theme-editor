@@ -48,7 +48,8 @@ const
     '\ObjRepos\en',  //XE5
     '\ObjRepos\en',  //Appmethod
     '\ObjRepos\en',  //XE6
-    '\ObjRepos\en'   //XE7
+    '\ObjRepos\en',  //XE7
+    '\ObjRepos\en'   //XE8
     );
 
 
@@ -64,6 +65,7 @@ uses
   Vcl.Graphics,
   Vcl.GraphUtil,
   Vcl.Imaging.GIFImg,
+  Vcl.Dialogs,
   System.UITypes,
   System.SysUtils,
   System.Classes,
@@ -111,8 +113,9 @@ procedure ApplyThemeHelpInsight(const  ATheme : TIDETheme; IDEData   : TDelphiVe
 Var
   Css, TempCssFile ,CssFile, TempGifFile, GifFile : string;
   Color : TColor;
-  LBmp : TBitmap;
+  LBmp  : TBitmap;
   LGif  : TGIFImage;
+  RunElevated : Boolean;
 begin
   CssFile:=ExtractFileDir(ExtractFileDir(IDEData.Path))+HelpInsightPaths[IDEData.Version]+'\HelpInsight.css';
   if FileExists(CssFile) then
@@ -130,7 +133,8 @@ begin
     Color:=StringToColor(ATheme[TIDEHighlightElements.MarkedBlock].ForegroundColorNew);
     Css:=StringReplace(Css,HelpInsightCaptionColor,ColorToWebColorStr(Color),[rfReplaceAll]);
 
-    if (not IsUACEnabled) and CurrentUserIsAdmin then
+    RunElevated:=IsUACEnabled and not CurrentUserIsAdmin;
+    if not RunElevated then
      TFile.WriteAllText(CssFile, Css)
     else
     begin
@@ -156,11 +160,13 @@ begin
          GifFile:=ExtractFileDir(ExtractFileDir(IDEData.Path))+HelpInsightPaths[IDEData.Version]+'\HelpInsightGradient.gif';
 
          LGif.Assign(LBmp);
-         if (not IsUACEnabled)  and CurrentUserIsAdmin then
+         if not RunElevated then
            LGif.SaveToFile(GifFile)
          else
          begin
+
            LGif.SaveToFile(TempGifFile);
+           //RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s" & pause',[TempGifFile, GifFile]));
            RunAsAdmin('cmd.exe', Format('/c copy /Y "%s" "%s"',[TempGifFile, GifFile]));
          end;
        finally
