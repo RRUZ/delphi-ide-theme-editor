@@ -64,7 +64,6 @@ interface
  //   http://www.kolormodo.com
 
 
-
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, uColorPanel,
   Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter,uSupportedIDEs,  uColorSelector,

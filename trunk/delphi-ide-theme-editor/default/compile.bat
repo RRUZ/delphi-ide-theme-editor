@@ -1,1 +1,1 @@
-BRCC32 DefaultThemes.RC 
+"C:\Program Files (x86)\Embarcadero\Studio\15.0\bin\BRCC32.exe" DefaultThemes.RC 
