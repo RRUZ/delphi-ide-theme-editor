@@ -2869,8 +2869,7 @@ var
   SaveCanvas: TCanvas;
   LStyleServices : TCustomStyleServices;
 
-      procedure _DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
-        const S: string; var R: TRect; Flags: Cardinal);
+      procedure _DrawControlText(Canvas: TCanvas; const S: string; var R: TRect; Flags: Cardinal);
       var
         TextFormat: TTextFormatFlags;
       begin
@@ -2898,20 +2897,21 @@ begin
       R.Bottom := R.Bottom - Borders[1];
       R.Right := R.Right - Borders[2];
 
-      Details := ColorizerStyleServices.GetElementDetails(tsPane);
-      ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
-
       R1 := Control.ClientRect;
       R1.Left := R1.Right - R.Height;
       Canvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
       Canvas.FillRect(R1);
+      Details := LStyleServices.GetElementDetails(tsPane);//necesary for canvas colors.
 
       SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, 0, 0)));
       if Length(LText) > 0 then
       begin
        SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
        Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
-       _DrawControlText(Canvas, Details, LText, R, Flags);
+       //AddLog2(Format('TColorizerStatusBarStyleHook.Paint R.Left %d R.Top %d R.Width %d R.Height %d', [R.Left, R.Top, R.Width, R.Height]));
+       //AddLog2('LText '+LText);
+       //AddLog2('Flags '+IntToStr(Flags));
+       _DrawControlText(Canvas, LText, R, Flags);
       end;
     end
     else
@@ -2945,7 +2945,7 @@ begin
         begin
           Res := SendMessage(Control.Handle, SB_GETTEXT, Idx, LParam(@LText[1]));
           if (Res and SBT_OWNERDRAW = 0) then
-            _DrawControlText(Canvas, Details, LText, R, Flags)
+            _DrawControlText(Canvas, LText, R, Flags)
           else
           if (Control is TCustomStatusBar) and Assigned(TCustomStatusBar(Control).OnDrawPanel) then
           begin
@@ -2960,7 +2960,7 @@ begin
         end
         else if (Control is TCustomStatusBar) then
          if (TCustomStatusBar(Control).Panels[I].Style <> psOwnerDraw) then
-           _DrawControlText(Canvas, Details, TCustomStatusBar(Control).Panels[I].Text, R, Flags)
+           _DrawControlText(Canvas, TCustomStatusBar(Control).Panels[I].Text, R, Flags)
          else
            if Assigned(TCustomStatusBar(Control).OnDrawPanel) then
            begin
@@ -3002,11 +3002,13 @@ begin
       Details := ColorizerStyleServices.GetElementDetails(tsGripper);
       ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R1);
       Details := ColorizerStyleServices.GetElementDetails(tsPane);
+      //AddLog2(Format('* TColorizerStatusBarStyleHook.Paint R.Left %d R.Top %d R.Width %d R.Height %d', [R.Left, R.Top, R.Width, R.Height]));
       SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, 0, 0)));
       if Length(LText) > 0 then
       begin
        SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
        Flags := Control.DrawTextBiDiModeFlags(DT_LEFT);
+       //AddLog2('* Flags '+IntToStr(Flags));
        DrawControlText(Canvas, Details, LText, R, Flags);
       end;
     end
