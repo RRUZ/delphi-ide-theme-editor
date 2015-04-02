@@ -255,8 +255,6 @@ type
     constructor Create(AControl: TWinControl); override;
   end;
 
-
-
    procedure SetColorizerVCLStyle(const StyleName : string);
    function  ColorizerStyleServices: TCustomStyleServices;
 
@@ -269,6 +267,9 @@ uses
   Vcl.ExtCtrls,
   Colorizer.Utils,
   Winapi.CommCtrl;
+
+var
+   CurrentStyleName : string ='';
 
 type
   TWinControlClass = class(TWinControl);
@@ -286,10 +287,23 @@ type
     property  CanvasRW : TCanvas read GetCanvasRW Write SetCanvasRW;
    end;
 
+{ TCustomStatusBarHelper }
 
-var
-   CurrentStyleName : string ='';
+procedure TCustomStatusBarHelper.DoUpdatePanels(UpdateRects,
+  UpdateText: Boolean);
+begin
+  Self.UpdatePanels(UpdateRects, UpdateText);
+end;
 
+function TCustomStatusBarHelper.GetCanvasRW: TCanvas;
+begin
+ Result:= Self.FCanvas;
+end;
+
+procedure TCustomStatusBarHelper.SetCanvasRW(const Value: TCanvas);
+begin
+ Self.FCanvas:= Value;
+end;
 
 procedure _DrawControlText(Canvas: TCanvas; const S: string; var R: TRect; Flags: Cardinal; ThemeTextColor: TColor);
 var
@@ -3087,24 +3101,7 @@ begin
 
 end;
 
-{ TCustomStatusBarHelper }
 
-procedure TCustomStatusBarHelper.DoUpdatePanels(UpdateRects,
-  UpdateText: Boolean);
-begin
-  Self.UpdatePanels(UpdateRects, UpdateText);
-end;
-
-function TCustomStatusBarHelper.GetCanvasRW: TCanvas;
-begin
- Result:= Self.FCanvas;
-
-end;
-
-procedure TCustomStatusBarHelper.SetCanvasRW(const Value: TCanvas);
-begin
- Self.FCanvas:= Value;
-end;
 
 { TColorizerEditStyleHook }
 

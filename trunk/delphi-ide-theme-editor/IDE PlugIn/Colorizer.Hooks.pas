@@ -1981,7 +1981,7 @@ begin
       begin
         FillColor := TColorizerLocalSettings.ColorMap.Color;// Self.RegularButtonColor;
         if (bdsFocused in State) then
-          EdgeColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter //GetShadowColor(Self.SelectedButtonColor)
+          EdgeColor := TColorizerLocalSettings.ColorMap.HighlightColor //GetShadowColor(Self.SelectedButtonColor)
         else
           EdgeColor := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter; //GetShadowColor(FillColor);
         {$IFDEF DELPHIXE2_UP}
@@ -2285,11 +2285,7 @@ begin
 
     if (Self.SelectedItem <> Category) and (boGradientFill in Self.ButtonOptions) then
     begin
-      if Category.GradientColor <> clNone then
-        GradientColor := TColorizerLocalSettings.ColorMap.MenuColor//Category.GradientColor
-      else
-        GradientColor := TColorizerLocalSettings.ColorMap.MenuColor;//Self.Color;
-
+      GradientColor := TColorizerLocalSettings.ColorMap.MenuColor;
       GradientFillCanvas(Canvas, SourceColor, GradientColor, CategoryRealBounds, Self.GradientDirection);
     end
     else

@@ -838,9 +838,9 @@ end;
 
 procedure TFormIDEColorizerSettings.CbStylesChange(Sender: TObject);
 begin
-{$IFDEF DELPHIXE2_UP}
+{.$IFDEF DELPHIXE2_UP}
  DrawSeletedVCLStyle;
-{$ENDIF}
+{.$ENDIF}
 end;
 
 procedure TFormIDEColorizerSettings.cbThemeNameChange(Sender: TObject);
@@ -888,10 +888,9 @@ end;
 
 procedure TFormIDEColorizerSettings.CheckBoxUseVClStylesClick(Sender: TObject);
 begin
-{$IFDEF DELPHIXE2_UP}
+{.$IFDEF DELPHIXE2_UP}
   LoadVClStylesList;
-
-{$ENDIF}
+{.$ENDIF}
 end;
 
 procedure TFormIDEColorizerSettings.ColorBoxBaseChange(Sender: TObject);
@@ -1170,8 +1169,6 @@ end;
 procedure TFormIDEColorizerSettings.ListViewTypesChange(Sender: TObject;
   Item: TListItem; Change: TItemChange);
 begin
-  //if ListViewTypes.Selected<>nil then
-  //LoadProperties(TRttiType(ListViewTypes.Selected.Data));
 end;
 
 

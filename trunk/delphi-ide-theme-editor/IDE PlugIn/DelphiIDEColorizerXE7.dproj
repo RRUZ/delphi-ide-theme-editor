@@ -2,7 +2,7 @@
     <PropertyGroup>
         <ProjectGuid>{899118EB-3285-4D20-A91A-46C1A763C809}</ProjectGuid>
         <MainSource>DelphiIDEColorizerXE7.dpk</MainSource>
-        <ProjectVersion>16.0</ProjectVersion>
+        <ProjectVersion>16.1</ProjectVersion>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <AppType>Package</AppType>

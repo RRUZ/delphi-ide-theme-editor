@@ -634,25 +634,27 @@ var
         Y := CaptionRect.Top;
       end;
 
-      FormBitmap := nil;
       DestBitmap := TBitmap.Create;
       try
         FormBitmap := TBitmap.Create;
-        DestBitmap.Width :=  ImageSize;
-        DestBitmap.Height := ImageSize;
-        DestBitmap.Canvas.Brush.Color := clFuchsia;
-        DestBitmap.Canvas.FillRect(Rect(0, 0, DestBitmap.Width, DestBitmap.Height));
-        FormBitmap.Width := State.Icon.Width;
-        FormBitmap.Height := State.Icon.Height;
-        FormBitmap.Canvas.Draw(0, 0, State.Icon);
-        ScaleImage(FormBitmap, DestBitmap, DestBitmap.Width / FormBitmap.Width);
+        try
+          DestBitmap.Width :=  ImageSize;
+          DestBitmap.Height := ImageSize;
+          DestBitmap.Canvas.Brush.Color := clFuchsia;
+          DestBitmap.Canvas.FillRect(Rect(0, 0, DestBitmap.Width, DestBitmap.Height));
+          FormBitmap.Width := State.Icon.Width;
+          FormBitmap.Height := State.Icon.Height;
+          FormBitmap.Canvas.Draw(0, 0, State.Icon);
+          ScaleImage(FormBitmap, DestBitmap, DestBitmap.Width / FormBitmap.Width);
 
-        DestBitmap.TransparentColor := DestBitmap.Canvas.Pixels[0, DestBitmap.Height - 1];
-        DestBitmap.Transparent := True;
+          DestBitmap.TransparentColor := DestBitmap.Canvas.Pixels[0, DestBitmap.Height - 1];
+          DestBitmap.Transparent := True;
 
-        Canvas.Draw(X, Y, DestBitmap);
+          Canvas.Draw(X, Y, DestBitmap);
+        finally
+          FormBitmap.Free;
+        end;
       finally
-        FormBitmap.Free;
         DestBitmap.Free;
       end;
 

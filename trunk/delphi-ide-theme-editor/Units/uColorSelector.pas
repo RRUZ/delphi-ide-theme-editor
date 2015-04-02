@@ -69,7 +69,6 @@ type
     procedure mbDeskPickerButton1SelColorChange(Sender: TObject);
     procedure mbColorPalette1SelColorChange(Sender: TObject);
     procedure HSVColorPicker1Change(Sender: TObject);
-    procedure VColorPicker1Change(Sender: TObject);
     procedure HexaColorPicker1Change(Sender: TObject);
     procedure ButtonCancelClick(Sender: TObject);
     procedure BtnApplyClick(Sender: TObject);
@@ -207,21 +206,6 @@ begin
   end;
 end;
 
-
-
-procedure TDialogColorSelector.VColorPicker1Change(Sender: TObject);
-begin
-//  if not FInitializating then
-//  begin
-//   FRefreshHSVColorPicker:=False;
-//   try
-//     HSVColorPicker1.SelectedColor:=VColorPicker1.SelectedColor;
-//     RefreshColors(HSVColorPicker1.SelectedColor);
-//   finally
-//     FRefreshHSVColorPicker:=True;
-//   end;
-//  end;
-end;
 
 
 procedure TDialogColorSelector.mbColorPalette1SelColorChange(Sender: TObject);
