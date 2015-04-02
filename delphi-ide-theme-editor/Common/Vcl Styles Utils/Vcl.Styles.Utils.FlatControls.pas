@@ -262,7 +262,7 @@ end;
 
 destructor TColorizerStyleManager.Destroy;
 begin
-
+  inherited;
 end;
 
 class function TColorizerStyleManager.HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;

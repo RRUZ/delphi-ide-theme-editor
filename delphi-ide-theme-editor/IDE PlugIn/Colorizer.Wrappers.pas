@@ -52,15 +52,18 @@ type
 
   TBaseWrapperClass = class of TBaseWrapper;
   TRegisteredWrappers = class
+  private
+    class var FWrappers          : TDictionary<string, TBaseWrapperClass>;
+    class var FWrappersInstances : TObjectDictionary<string, TBaseWrapper>;
   public
-    class var Wrappers          : TDictionary<string, TBaseWrapperClass>;
-    class var WrappersInstances : TObjectDictionary<string, TBaseWrapper>;
+    class property Wrappers          : TDictionary<string, TBaseWrapperClass> read FWrappers write FWrappers;
+    class property WrappersInstances : TObjectDictionary<string, TBaseWrapper> read FWrappersInstances write FWrappersInstances;
   end;
 
   TRttiWrapper = class
   private
-    LContext : TRttiContext;
-    RootType : TRttiType;
+    FContext  : TRttiContext;
+    FRootType : TRttiType;
    public
     constructor Create(AObject : TObject);
     destructor Destroy; override;
@@ -351,7 +354,7 @@ begin
 //      TWinControl(AComponent).Invalidate();
     Result:=True;
   end
-  else
+  //else
    ;// AddLog('RunWrapper Igonored', AComponent.ClassName);
 //  if SameText(AComponent.ClassName, 'TListButton') then
 //     TRttiUtils.DumpObject(AComponent, 'C:\Delphi\google-code\DITE\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
@@ -1402,13 +1405,13 @@ end;
 constructor TRttiWrapper.Create(AObject : TObject);
 begin
   inherited Create;
-  LContext := TRttiContext.Create;
-  RootType := LContext.GetType(AObject.ClassInfo);
+  FContext := TRttiContext.Create;
+  FRootType := FContext.GetType(AObject.ClassInfo);
 end;
 
 destructor TRttiWrapper.Destroy;
 begin
-  LContext.Free;
+  FContext.Free;
   inherited;
 end;
 
@@ -1420,18 +1423,18 @@ begin
   FVirtualTree:=BaseVirtualTree;
 //  FHotMinusBM :=TBitmap(RootType.GetProperty('HotMinusBM').GetValue(FVirtualTree).AsObject);
 //  FHotPlusBM  :=RootType.GetProperty('HotPlusBM').GetValue(FVirtualTree).AsType<TBitmap>;
-  FMinusBM    :=RootType.GetField('FMinusBM').GetValue(FVirtualTree).AsType<TBitmap>;
-  FPlusBM     :=RootType.GetField('FPlusBM').GetValue(FVirtualTree).AsType<TBitmap>;
+  FMinusBM    :=FRootType.GetField('FMinusBM').GetValue(FVirtualTree).AsType<TBitmap>;
+  FPlusBM     :=FRootType.GetField('FPlusBM').GetValue(FVirtualTree).AsType<TBitmap>;
 end;
 
 function TRttiBaseVirtualTree.GetDottedBrush: HBRUSH;
 begin
-  Result:=RootType.GetField('FDottedBrush').GetValue(FVirtualTree).AsType<HBRUSH>;
+  Result:=FRootType.GetField('FDottedBrush').GetValue(FVirtualTree).AsType<HBRUSH>;
 end;
 
 procedure TRttiBaseVirtualTree.SetDottedBrush(const Value: HBRUSH);
 begin
- RootType.GetField('FDottedBrush').SetValue(FVirtualTree, TValue.From<HBRUSH>(Value));
+ FRootType.GetField('FDottedBrush').SetValue(FVirtualTree, TValue.From<HBRUSH>(Value));
 end;
 
 { TRttiListButton }
@@ -1445,15 +1448,15 @@ end;
 
 procedure TRttiListButton.LoadValues;
 begin
-  FPopupPanel   := RootType.GetProperty('PopupPanel').GetValue(FListButton).AsType<TCustomForm>;
-  FItems        := RootType.GetProperty('Items').GetValue(FListButton).AsType<TStrings>;
-  FListBox      := RootType.GetProperty('ListBox').GetValue(FListButton).AsType<TListBox>;
-  FMinListWidth := RootType.GetProperty('MinListWidth').GetValue(FListButton).AsInteger;
-  FMaxListWidth := RootType.GetProperty('MaxListWidth').GetValue(FListButton).AsInteger;
-  FItemIndex    := RootType.GetProperty('ItemIndex').GetValue(FListButton).AsInteger;
-  FListWidth    := RootType.GetProperty('ListWidth').GetValue(FListButton).AsInteger;
-  FItemCount    := RootType.GetProperty('ItemCount').GetValue(FListButton).AsInteger;
-  FSelectString := RootType.GetField('FSelectString').GetValue(FListButton).AsString;
+  FPopupPanel   := FRootType.GetProperty('PopupPanel').GetValue(FListButton).AsType<TCustomForm>;
+  FItems        := FRootType.GetProperty('Items').GetValue(FListButton).AsType<TStrings>;
+  FListBox      := FRootType.GetProperty('ListBox').GetValue(FListButton).AsType<TListBox>;
+  FMinListWidth := FRootType.GetProperty('MinListWidth').GetValue(FListButton).AsInteger;
+  FMaxListWidth := FRootType.GetProperty('MaxListWidth').GetValue(FListButton).AsInteger;
+  FItemIndex    := FRootType.GetProperty('ItemIndex').GetValue(FListButton).AsInteger;
+  FListWidth    := FRootType.GetProperty('ListWidth').GetValue(FListButton).AsInteger;
+  FItemCount    := FRootType.GetProperty('ItemCount').GetValue(FListButton).AsInteger;
+  FSelectString := FRootType.GetField('FSelectString').GetValue(FListButton).AsString;
 end;
 
 

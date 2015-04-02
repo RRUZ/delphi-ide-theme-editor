@@ -329,8 +329,8 @@ Section "RAD Studio XE2" SecDXE2
   File "Init\Settings.ini"  
   SetOverwrite on 
   File "DelphiIDEColorizer_XE2.dll"
-  SetOutPath $INSTDIR\XE2\Styles
-  File "Styles\*.vsf"    
+  ;SetOutPath $INSTDIR\XE2\Styles
+  ;File "Styles\*.vsf"    
   SetOutPath $INSTDIR\XE2\Themes
   File "Themes\*.idetheme"  
   SetOutPath $INSTDIR\XE2\Images\dock_images
@@ -354,8 +354,8 @@ Section "RAD Studio XE3" SecDXE3
   File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE3.dll"
-  SetOutPath $INSTDIR\XE3\Styles
-  File "Styles\*.vsf"      
+  ;SetOutPath $INSTDIR\XE3\Styles
+  ;File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE3\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE3\Images\dock_images
@@ -379,8 +379,8 @@ Section "RAD Studio XE4" SecDXE4
   File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE4.dll"
-  SetOutPath $INSTDIR\XE4\Styles
-  File "Styles\*.vsf"      
+  ;SetOutPath $INSTDIR\XE4\Styles
+  ;File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE4\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE4\Images\dock_images
@@ -404,8 +404,8 @@ Section "RAD Studio XE5" SecDXE5
   File "Init\Settings.ini"
   SetOverwrite on
   File "DelphiIDEColorizer_XE5.dll"
-  SetOutPath $INSTDIR\XE5\Styles
-  File "Styles\*.vsf"      
+  ;SetOutPath $INSTDIR\XE5\Styles
+  ;File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE5\Themes
   File "Themes\*.idetheme" 
   SetOutPath $INSTDIR\XE5\Images\dock_images
@@ -429,6 +429,7 @@ Section "RAD Studio XE6" SecDXE6
   File "Init\Settings.ini"
   SetOverwrite on  
   File "DelphiIDEColorizer_XE6.dll"
+  ;just for AppMethod
   SetOutPath $INSTDIR\XE6\Styles
   File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE6\Themes
@@ -455,6 +456,7 @@ Section "RAD Studio XE7" SecDXE7
   File "Init\Settings.ini"
   SetOverwrite on  
   File "DelphiIDEColorizer_XE7.dll"
+  ;just for AppMethod
   SetOutPath $INSTDIR\XE7\Styles
   File "Styles\*.vsf"      
   SetOutPath $INSTDIR\XE7\Themes

@@ -36,7 +36,7 @@ uses
  type
   TRttiUtils = class
    private
-     class var LocalContext: TRttiContext;
+     class var FLocalContext: TRttiContext;
      class constructor Create;
      class destructor Destroy;
    public
@@ -66,13 +66,13 @@ implementation
 
 class constructor TRttiUtils.Create;
 begin
-  LocalContext := TRttiContext.Create;
+  FLocalContext := TRttiContext.Create;
 end;
 
 
 class destructor TRttiUtils.Destroy;
 begin
-  LocalContext.Free;
+  FLocalContext.Free;
 end;
 
 class procedure TRttiUtils.DumpTypeToFile(const QualifiedName, FileName:string);
@@ -172,7 +172,7 @@ begin
    try
 
      if not Assigned(ATypeInfo) then exit;
-     lType:=LocalContext.GetType(ATypeInfo);
+     lType:=FLocalContext.GetType(ATypeInfo);
      if not Assigned(lType) then exit;
 
      Definition.Add(sType,TStringList.Create);
@@ -308,11 +308,11 @@ begin
 
     //search the first member in the properties list
     if MemberList.Count>0 then
-     LProperty := LocalContext.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
+     LProperty := FLocalContext.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
 
     //search the first member in the field list
     if not Assigned(LProperty) then
-     LField := LocalContext.GetType(Obj.ClassInfo).GetField(MemberList[0]);
+     LField := FLocalContext.GetType(Obj.ClassInfo).GetField(MemberList[0]);
 
     for i:=1 to MemberList.Count-1 do
      begin
@@ -330,19 +330,19 @@ begin
         begin
           RootProp  := LProperty;
           //search the current member in the properties list
-          LProperty := LocalContext.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
+          LProperty := FLocalContext.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-             LField := LocalContext.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
+             LField := FLocalContext.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
         end
         else
         if Assigned(LField) then
         begin
           //search the current member in the properties list
-          LProperty  := LocalContext.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
+          LProperty  := FLocalContext.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-              LField := LocalContext.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
+              LField := FLocalContext.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
         end;
      end;
 
@@ -375,11 +375,11 @@ begin
 
     //search the first member in the properties list
     if MemberList.Count>0 then
-     LProperty := LocalContext.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
+     LProperty := FLocalContext.GetType(Obj.ClassInfo).GetProperty(MemberList[0]);
 
     //search the first member in the field list
     if not Assigned(LProperty) then
-     LField := LocalContext.GetType(Obj.ClassInfo).GetField(MemberList[0]);
+     LField := FLocalContext.GetType(Obj.ClassInfo).GetField(MemberList[0]);
 
     for i:=1 to MemberList.Count-1 do
      begin
@@ -397,19 +397,19 @@ begin
         begin
           RootProp  := LProperty;
           //search the current member in the properties list
-          LProperty := LocalContext.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
+          LProperty := FLocalContext.GetType(LProperty.PropertyType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-             LField := LocalContext.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
+             LField := FLocalContext.GetType(RootProp.PropertyType.Handle).GetField(MemberList[i]);
         end
         else
         if Assigned(LField) then
         begin
           //search the current member in the properties list
-          LProperty  := LocalContext.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
+          LProperty  := FLocalContext.GetType(LField.FieldType.Handle).GetProperty(MemberList[i]);
            //search the current member in the field list
            if not Assigned(LProperty)  then
-              LField := LocalContext.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
+              LField := FLocalContext.GetType(LField.FieldType.Handle).GetField(MemberList[i]);
         end;
      end;
 
@@ -447,7 +447,7 @@ class procedure TRttiUtils.ExecMethodRtti(const Obj:  TObject;const Method:Strin
 var
   m : TRttiMethod;
 begin
-  m:=LocalContext.GetType(Obj.ClassInfo).GetMethod(Method);
+  m:=FLocalContext.GetType(Obj.ClassInfo).GetMethod(Method);
   if m<>nil then
     m.Invoke(Obj, []);
 end;
@@ -455,12 +455,12 @@ end;
 {$ELSE}
 class constructor TRttiUtils.Create;
 begin
-
+  inherited;
 end;
 
 class destructor TRttiUtils.Destroy;
 begin
-
+  inherited;
 end;
 
 class procedure TRttiUtils.SetRttiPropertyValue(const Obj:  TObject;const PropName:String;  Value:Variant);

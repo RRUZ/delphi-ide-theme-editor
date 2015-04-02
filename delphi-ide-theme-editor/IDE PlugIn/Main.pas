@@ -307,13 +307,13 @@ begin
   FreeAndNil(SplashBmp);
   FreeAndNil(AboutBmp);
 
-  FreeAndNil(TColorizerLocalSettings.ActnStyleList);
-  FreeAndNil(TColorizerLocalSettings.Settings);
+  FreeAndNil(TColorizerLocalSettings.FActnStyleList);
+  FreeAndNil(TColorizerLocalSettings.FSettings);
   TColorizerLocalSettings.IDEData.Free;
   TColorizerLocalSettings.DockImages.Free;
-  FreeAndNil(TColorizerLocalSettings.HookedWindows);
-  FreeAndNil(TColorizerLocalSettings.HookedScrollBars);
-  FreeAndNil(TColorizerLocalSettings.WinAPIClasses);
+  FreeAndNil(TColorizerLocalSettings.FHookedWindows);
+  FreeAndNil(TColorizerLocalSettings.FHookedScrollBars);
+  FreeAndNil(TColorizerLocalSettings.FWinAPIClasses);
 
   IDEWizard.FinalizeColorizer();
   AddLog2('FinalizeIDEColorizer', 'FinalizeColorizer');
@@ -443,7 +443,7 @@ end;
 
 procedure TIDEWizard.FinalizeColorizer;
 begin
-  FreeAndNil(TColorizerLocalSettings.ColorMap);
+  FreeAndNil(TColorizerLocalSettings.FColorMap);
   UnRegisterColorizerAddinOptions;
 end;
 

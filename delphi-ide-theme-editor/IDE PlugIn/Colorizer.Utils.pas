@@ -66,23 +66,36 @@ procedure RegisterVClStylesFiles;
 
  type
    TColorizerLocalSettings = class
-   public
-      {$IFDEF DELPHI2009_UP}
-      class var ActnStyleList : TList<TActionManager>;
-      {$ENDIF}
-      class var ColorMap       : TColorizerColorMap;
-      class var ActionBarStyle : TActionBarStyle;
-      class var HookedWindows     : TStringList;
-      class var HookedScrollBars  : TStringList;
-      class var WinAPIClasses     : TStringList;
-      class var HookedWindowsText    : string;
-      class var HookedScrollBarsText  : string;
-      class var VCLStylesPath  : string;
-      class var Settings       : TSettings;
-      class var ImagesGutterChanged : Boolean;
-      class var IDEData        : TDelphiVersionData;
-      class var DockImages     : TPngImage;
-      class var Unloading : Boolean;
+     public
+        class var FActnStyleList : TList<TActionManager>;
+        class var FColorMap       : TColorizerColorMap;
+        class var FActionBarStyle : TActionBarStyle;
+        class var FHookedWindows     : TStringList;
+        class var FHookedScrollBars  : TStringList;
+        class var FWinAPIClasses     : TStringList;
+        class var FHookedWindowsText    : string;
+        class var FHookedScrollBarsText  : string;
+        class var FVCLStylesPath  : string;
+        class var FSettings       : TSettings;
+        class var FImagesGutterChanged : Boolean;
+        class var FIDEData        : TDelphiVersionData;
+        class var FDockImages     : TPngImage;
+        class var FUnloading : Boolean;
+     public
+        class property ActnStyleList : TList<TActionManager> read  FActnStyleList write FActnStyleList;
+        class property ColorMap       : TColorizerColorMap read  FColorMap write FColorMap;
+        class property ActionBarStyle : TActionBarStyle read  FActionBarStyle write FActionBarStyle;
+        class property HookedWindows     : TStringList read  FHookedWindows write FHookedWindows;
+        class property HookedScrollBars  : TStringList read  FHookedScrollBars write FHookedScrollBars;
+        class property WinAPIClasses     : TStringList read  FWinAPIClasses write FWinAPIClasses;
+        class property HookedWindowsText    : string read  FHookedWindowsText write FHookedWindowsText;
+        class property HookedScrollBarsText  : string read  FHookedScrollBarsText write FHookedScrollBarsText;
+        class property VCLStylesPath  : string read  FVCLStylesPath write FVCLStylesPath;
+        class property Settings       : TSettings read  FSettings write FSettings;
+        class property ImagesGutterChanged : Boolean read  FImagesGutterChanged write FImagesGutterChanged;
+        class property IDEData        : TDelphiVersionData read  FIDEData write FIDEData;
+        class property DockImages     : TPngImage read  FDockImages write FDockImages;
+        class property Unloading : Boolean read  FUnloading write FUnloading;
     end;
 
 implementation
@@ -129,6 +142,7 @@ begin
   if SysUtils.DirectoryExists(sPath)  then
     LFiles := TDirectory.GetFiles(sPath, '*.vsf');
 
+  //Appmethod doesn't include VCL Styles files, so we need read the styles from the installation folder of the plugin
   if not SysUtils.DirectoryExists(sPath) or (Length(LFiles)=0)  then
   begin
     sPath:=ExtractFilePath(GetModuleLocation())+'Styles\';

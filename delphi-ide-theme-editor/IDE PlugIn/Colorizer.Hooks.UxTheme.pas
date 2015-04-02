@@ -63,9 +63,12 @@ uses
 
   type
     THThemesClasses = class
+    private
+     class var FClasses : TDictionary<HTHEME, String>;
+     class var FWindows : TDictionary<HTHEME, HWND>;
     public
-     class var Classes : TDictionary<HTHEME, String>;
-     class var Windows : TDictionary<HTHEME, HWND>;
+     class property Classes : TDictionary<HTHEME, String> read FClasses write FClasses;
+     class property Windows : TDictionary<HTHEME, HWND> read FWindows write FWindows;
     end;
 
   var
