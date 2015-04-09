@@ -160,6 +160,7 @@ type
     ImportcurrentIDEThemefromregistry1: TMenuItem;
     ActionSetDefaultTheme: TAction;
     SetdefaultthemevaluesforselectedIDE1: TMenuItem;
+    BtnAdditionalSettings: TButton;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -200,6 +201,7 @@ type
     procedure ActionImportThemeRegExecute(Sender: TObject);
     procedure ActionSetDefaultThemeUpdate(Sender: TObject);
     procedure ActionSetDefaultThemeExecute(Sender: TObject);
+    procedure BtnAdditionalSettingsClick(Sender: TObject);
   private
     FChanging     : boolean;
     FThemeChangued: boolean;
@@ -273,7 +275,7 @@ uses
   uSMSVersions,
   uLoadThemesImages,
   uHelpInsight,
-  uStdActionsPopMenu;
+  uStdActionsPopMenu, uAdditionalSettings;
 
 const
   InvalidBreakLine   = 9;
@@ -477,6 +479,19 @@ begin
    end;
 end;
 
+
+procedure TFrmMain.BtnAdditionalSettingsClick(Sender: TObject);
+var
+  LFrm : TFrmAdditionalSettings;
+begin
+  LFrm := TFrmAdditionalSettings.Create(Self);
+  try
+    LFrm.IDEData:=IDEData;
+    LFrm.ShowModal;
+  finally
+    LFrm.Free;
+  end;
+end;
 
 procedure TFrmMain.BtnApplyFontClick(Sender: TObject);
 var
@@ -1277,7 +1292,7 @@ begin
   try
     ZeroMemory(@LogFont, sizeof(LogFont));
     LogFont.lfCharset := DEFAULT_CHARSET;
-    EnumFontFamiliesEx(sDC, LogFont, @EnumFontsProc, Windows.LPARAM(CbIDEFonts.Items), 0);
+    EnumFontFamiliesEx(sDC, LogFont, @EnumFixedFontsProc, Windows.LPARAM(CbIDEFonts.Items), 0);
   finally
     ReleaseDC(0, sDC);
   end;
@@ -1526,6 +1541,9 @@ begin
      DelphiVersion := TDelphiVersions.DelphiXE; //if is lazarus, SMS or Appmethod use the Delphi XE elements
 
     //BtnIDEColorizer.Enabled:=FSettings.ActivateColorizer and (IDEData.IDEType=TSupportedIDEs.DelphiIDE) and  (IDEData.Version in [TDelphiVersions.DelphiXE, TDelphiVersions.DelphiXE2]);
+
+    BtnAdditionalSettings.Visible := DelphiVersion>=TDelphiVersions.DelphiXE8;
+
 
     FillListAvailableElements(DelphiVersion, CbElement.Items);
 
@@ -1841,8 +1859,8 @@ begin
  Inherited;
 end;
 
-initialization
-   TStyleManager.Engine.RegisterStyleHook(TComboBoxEx, TComboBoxExStyleHookFix);
+//initialization
+//   TStyleManager.Engine.RegisterStyleHook(TComboBoxEx, TComboBoxExStyleHookFix);
 
 
 

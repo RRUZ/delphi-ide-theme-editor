@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.Ext.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -27,15 +27,15 @@ interface
 
 
 Uses
-  Winapi.Windows,
-  Vcl.Themes,
-  Vcl.Styles,
-  Vcl.Forms,
+  System.Classes,
   System.Generics.Collections,
+  Winapi.Windows,
+  Vcl.Styles,
+  Vcl.Themes,
+  Vcl.Forms,
   Vcl.Graphics,
   Vcl.Controls,
-  Vcl.ExtCtrls,
-  System.Classes;
+  Vcl.ExtCtrls;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
@@ -237,6 +237,9 @@ implementation
 
 
 uses
+ System.Rtti,
+ System.Types,
+ System.Sysutils,
 {$IFDEF USE_VCL_STYLESAPI}
  System.ZLib,
  System.UITypes,
@@ -247,10 +250,7 @@ uses
  Vcl.Imaging.pngimage,
  Winapi.Messages,
 {$ENDIF}
- System.Rtti,
- System.Types,
- Vcl.Dialogs,
- System.Sysutils;
+ Vcl.Dialogs;
 
 
 {$IF (DEFINED (USE_VCL_STYLESAPI) and (CompilerVersion >=23))}

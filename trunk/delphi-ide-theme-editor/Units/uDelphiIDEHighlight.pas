@@ -228,6 +228,28 @@ const
   Msxml2_DOMDocument='Msxml2.DOMDocument.6.0';
 
 
+type
+   TModernTheme = class
+  private
+     FFontSize: Integer;
+     FFontName: string;
+     FMainToolBarColor: string;
+     FVersion: TDelphiVersions;
+    function GetHasDefaultValues: Boolean;
+    procedure LoadDefaults;
+   public
+     property FontName  : string read FFontName write FFontName;
+     property FontSize : Integer read FFontSize write FFontSize;
+     property MainToolBarColor : string read FMainToolBarColor write FMainToolBarColor;
+     property Version : TDelphiVersions read FVersion;
+     property HasDefaultValues : Boolean read  GetHasDefaultValues;
+     procedure LoadData;
+     procedure RestoreData;
+     procedure WriteData;
+     constructor Create(_Version : TDelphiVersions);
+     destructor Destroy; override;
+   end;
+
 function  GetForegroundColor(DelphiVersion:TDelphiVersions;Element:TIDEHighlightElements):string;
 function  GetBackgroundColor(DelphiVersion:TDelphiVersions;Element:TIDEHighlightElements):string;
 function  GetBoldValue(DelphiVersion:TDelphiVersions;Element:TIDEHighlightElements):Boolean;
@@ -257,6 +279,8 @@ function  GetDelphiIDEDefaultTheme(DelphiVersion:TDelphiVersions): TIDETheme;
 
 function  ExistDelphiIDEThemeToImport(DelphiVersion:TDelphiVersions): Boolean;
 function  IsValidDelphiIDETheme(ATheme : TIDETheme) : Boolean;
+
+
 
 
 implementation
@@ -839,19 +863,19 @@ end;
 
 function  GetDelphiIDEFontName(DelphiVersion:TDelphiVersions):string;
 begin
- if not RegReadStr(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Editor Font',Result,HKEY_CURRENT_USER) then
+ if not RegReadStr(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Editor Font', Result, HKEY_CURRENT_USER) then
   Result:='';
 end;
 
 function  GetDelphiIDEFontSize(DelphiVersion:TDelphiVersions):Integer;
 begin
- if not RegReadInt(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Font Size',Result,HKEY_CURRENT_USER) then
+ if not RegReadInt(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Font Size', Result, HKEY_CURRENT_USER) then
   Result:=0;
 end;
 
 function  GetDelphiIDEThemeName(DelphiVersion:TDelphiVersions):string;
 begin
- if not RegReadStr(Format('%s\Editor\DITE',[DelphiRegPaths[DelphiVersion]]),'ThemeName',Result,HKEY_CURRENT_USER) then
+ if not RegReadStr(Format('%s\Editor\DITE',[DelphiRegPaths[DelphiVersion]]),'ThemeName', Result, HKEY_CURRENT_USER) then
   Result:='';
 end;
 
@@ -862,6 +886,124 @@ begin
   RegWriteStr(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Editor Font',FontName,HKEY_CURRENT_USER)
   and
   RegWriteInt(Format('%s\Editor\Options',[DelphiRegPaths[DelphiVersion]]),'Font Size',FontSize,HKEY_CURRENT_USER);
+end;
+
+{ TModernTheme }
+//http://docwiki.embarcadero.com/RADStudio/XE8/en/System_Registry_Keys_for_IDE_Visual_Settings
+
+constructor TModernTheme.Create(_Version: TDelphiVersions);
+begin
+  FVersion:=_Version;
+  LoadDefaults();
+end;
+
+destructor TModernTheme.Destroy;
+begin
+
+  inherited;
+end;
+
+function TModernTheme.GetHasDefaultValues: Boolean;
+var
+  sKey : string;
+begin
+  sKey:= DelphiRegPaths[FVersion]+'\ModernTheme';
+  Result:=not RegKeyExists(sKey, HKEY_CURRENT_USER);
+end;
+
+procedure TModernTheme.LoadData;
+var
+  sKey : string;
+begin
+  sKey:= DelphiRegPaths[FVersion]+'\ModernTheme';
+  if RegKeyExists(sKey, HKEY_CURRENT_USER) then
+  begin
+    if not RegReadStr(sKey,'FontName', FFontName, HKEY_CURRENT_USER) then
+     FFontName:='Segoe UI';
+
+    if not RegReadStr(sKey,'MainToolBarColor', FMainToolBarColor, HKEY_CURRENT_USER) then
+     FMainToolBarColor:='clGradientActiveCaption';
+
+    if not RegReadInt(sKey,'FontSize', FFontSize, HKEY_CURRENT_USER) then
+     FFontSize:=10;
+
+  end;
+end;
+
+procedure TModernTheme.LoadDefaults;
+begin
+  FFontSize:=$0000000a;//10;
+  FFontName:='Segoe UI';
+  FMainToolBarColor:='clGradientActiveCaption';
+end;
+
+procedure TModernTheme.RestoreData;
+var
+  FileName, sKey : string;
+  RegFile : TStrings;
+begin
+  sKey:= DelphiRegPaths[FVersion]+'\ModernTheme';
+  if RegKeyExists(sKey, HKEY_CURRENT_USER) then
+   if IsUACEnabled or not CurrentUserIsAdmin then
+    begin
+      FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
+      if TFile.Exists(FileName) then
+        TFile.Delete(FileName);
+      RegFile:=TStringList.Create;
+      try
+        RegFile.Add('Windows Registry Editor Version 5.00');
+        RegFile.Add('');
+        RegFile.Add(Format('[-HKEY_CURRENT_USER%s]',[sKey]));
+        RegFile.Add('');
+        RegFile.SaveToFile(FileName);
+      finally
+        RegFile.Free;
+      end;
+      RunAndWait(0,'regedit.exe','/S "'+FileName+'"', True);
+    end
+   else
+    DeleteRegKey(sKey, HKEY_CURRENT_USER);
+end;
+
+
+
+//Windows Registry Editor Version 5.00
+//[HKEY_CURRENT_USER\Software\Embarcadero\BDS\16.0\ModernTheme]
+//"FontName"="Segoe UI"
+//"FontSize"=dword:0000000a
+//"MainToolBarColor"="clGradientActiveCaption"
+procedure TModernTheme.WriteData;
+var
+  FileName, sKey : string;
+  RegFile : TStrings;
+begin
+  sKey:= DelphiRegPaths[FVersion]+'\ModernTheme';
+   if IsUACEnabled or not CurrentUserIsAdmin then
+    begin
+      FileName := IncludeTrailingPathDelimiter(GetTempDirectory)+'Dummy.reg';
+      if TFile.Exists(FileName) then
+        TFile.Delete(FileName);
+      RegFile:=TStringList.Create;
+      try
+        RegFile.Add('Windows Registry Editor Version 5.00');
+        RegFile.Add('');
+        RegFile.Add(Format('[HKEY_CURRENT_USER%s]',[sKey]));
+         RegFile.Add(Format('"FontName"="%s"',[FFontName]));
+        RegFile.Add(Format('"FontSize"=dword:%x',[FFontSize]));
+        RegFile.Add(Format('"MainToolBarColor"="%s"',[FMainToolBarColor]));
+        RegFile.Add('');
+        RegFile.SaveToFile(FileName);
+      finally
+        RegFile.Free;
+      end;
+      RunAndWait(0,'regedit.exe','/S "'+FileName+'"', True);
+    end
+   else
+   begin
+      RegWriteStr(sKey, 'FontName', FFontName, HKEY_CURRENT_USER);
+      RegWriteStr(sKey, 'MainToolBarColor', FMainToolBarColor, HKEY_CURRENT_USER);
+      RegWriteInt(sKey, 'FontSize', FFontSize, HKEY_CURRENT_USER);
+   end;
 end;
 
 end.

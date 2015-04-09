@@ -48,7 +48,10 @@ uses
   InstDecode in 'Common\delphi-detours-library\InstDecode.pas',
   Vcl.Styles.FormStyleHooks in 'Common\Vcl Styles Utils\Vcl.Styles.FormStyleHooks.pas',
   Vcl.Styles.NC in 'Common\Vcl Styles Utils\Vcl.Styles.NC.pas',
-  Vcl.Styles.OwnerDrawFix in 'Common\Vcl Styles Utils\Vcl.Styles.OwnerDrawFix.pas';
+  Vcl.Styles.OwnerDrawFix in 'Common\Vcl Styles Utils\Vcl.Styles.OwnerDrawFix.pas',
+  uAdditionalSettings in 'Units\uAdditionalSettings.pas' {FrmAdditionalSettings},
+  Vcl.Styles.UxTheme in 'Common\Vcl Styles Utils\Vcl.Styles.UxTheme.pas',
+  Vcl.Styles.Utils.Graphics in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.Graphics.pas';
 
 {$R *.res}
 

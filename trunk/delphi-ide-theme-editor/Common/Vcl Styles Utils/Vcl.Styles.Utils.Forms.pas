@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -23,15 +23,15 @@ unit Vcl.Styles.Utils.Forms;
 interface
 
 uses
-  Winapi.Windows,
-  Winapi.Messages,
   System.Classes,
   System.Types,
+  System.SysUtils,
+  Winapi.Windows,
+  Winapi.Messages,
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Dialogs,
   Vcl.Graphics,
-  System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Forms,
   Vcl.GraphUtil,
@@ -64,7 +64,6 @@ type
     FNCMouseDown: Boolean;
     FAllowScrolling: Boolean;
     FLstPos: Integer;
-    function NormalizePoint(const P: TPoint): TPoint;
     function GetDefaultScrollBarSize: TSize;
     procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
@@ -95,6 +94,9 @@ type
     function IsHorzScrollDisabled: Boolean;
     function IsVertScrollDisabled: Boolean;
   protected
+    property LstPos : Integer read FLstPos write FLstPos;
+    property AllowScrolling : Boolean read FAllowScrolling write FAllowScrolling;
+    function NormalizePoint(const P: TPoint): TPoint;
     procedure Scroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer); virtual;
     procedure DoScroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer);
     procedure DrawHorzScroll(DC: HDC); virtual;
@@ -158,6 +160,7 @@ type
     procedure WMNCACTIVATE(var Message: TWMNCActivate); message WM_NCACTIVATE;
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
     procedure WMSIZE(var Message: TWMSize); message WM_SIZE;
+    procedure WMSetText(var Message: TMessage); message WM_SETTEXT;
     function GetCaptionRect: TRect;
     function GetBorderStyle: TFormBorderStyle;
     function GetBorderIcons: TBorderIcons;
@@ -188,6 +191,8 @@ type
     procedure Maximize; virtual;
     procedure Minimize; virtual;
     procedure Restore; virtual;
+    property  PressedButton: Integer read FPressedButton write FPressedButton;
+    property  HotButton: Integer read FHotButton write FHotButton;
   public
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
@@ -714,7 +719,7 @@ begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
     if not StyleServices.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
-    R := ButtonRect;
+    //R := ButtonRect;
     R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R, ButtonRect);
     Result := ButtonRect;
@@ -1161,7 +1166,6 @@ begin
       P := NormalizePoint(P);
 
       case Message.HitTest of
-
         HTCLOSE:
           if CloseButtonRect.Contains(P) then
             if Message.Result <> 0 then // only if the app doesn't processes this message
@@ -1217,6 +1221,38 @@ begin
   Handled := True;
 end;
 
+procedure TSysDialogStyleHook.WMSetText(var Message: TMessage);
+var
+  FRedraw: Boolean;
+  LBorderStyle : TFormBorderStyle;
+begin
+  LBorderStyle := BorderStyle;
+  if (LBorderStyle = bsNone) or (WindowState = wsMinimized) or (StyleServices.IsSystemStyle) then
+  begin
+    Handled := False;
+    Exit;
+  end;
+
+  FRedraw := True;
+
+  if  IsWindowVisible(Handle) then
+  begin
+    //Application.ProcessMessages;
+    FRedraw := False;
+    SetRedraw(False);
+  end;
+
+  CallDefaultProc(Message);
+
+  if not FRedraw then
+  begin
+    SetRedraw(True);
+    InvalidateNC;
+  end;
+  Handled := True;
+end;
+
+
 procedure TSysDialogStyleHook.WMSIZE(var Message: TWMSize);
 begin
   Handled := False;
@@ -1259,18 +1295,26 @@ begin
 
     WM_DESTROY:
       begin
-        { In some situation ..we can not get the ParentHandle
-          after processing the default WM_DESTROY message .
-          => Save the parent before calling the default message .
+        { In some situations ..we can not get the ParentHandle
+          after processing the default WM_DESTROY message.
+          => Save the parent before calling the default message.
         }
+        SysControl.Destroyed:=True;
+        //OutputDebugString(PChar(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)])));
         LParentHandle := ParentHandle;
-        Message.Result := CallDefaultProc(Message);
+
+        if  (LParentHandle>0) and (TSysStyleManager.SysStyleHookList.ContainsKey(LParentHandle)) and  TSysStyleManager.SysStyleHookList.Items[ParentHandle].SysControl.Destroyed  then
+         Message.Result :=0
+        else
+         Message.Result := CallDefaultProc(Message);
+
         if LParentHandle > 0 then
         begin
           { When destroying the child window ..
             the parent window must be repainted . }
           RedrawWindow(LParentHandle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INTERNALPAINT or RDW_INVALIDATE);
         end;
+
         Handled := True;
       end;
   end;
@@ -1472,7 +1516,7 @@ begin
       Detail := FBtnRightDetail;
       if (not SysControl.Enabled) or (HorzScrollDisabled) then
         Detail := tsArrowBtnRightDisabled;
-      R := HorzRightRect;
+      //R := HorzRightRect;
       R := Rect(B.Width - cx, 0, B.Width, cy);
       LDetails := StyleServices.GetElementDetails(Detail);
       StyleServices.DrawElement(BmpDC, LDetails, R);
@@ -1678,14 +1722,10 @@ var
   PosX: Integer;
 begin
   Result := Rect(0, 0, 0, 0);
-  with HorzScrollInfo do
-  begin
-    ThumbSize := GetHorzThumbSize;
-    PosX := MulDiv(nPos, HorzTrackRect.Width, nMax - nMin);
-    with HorzTrackRect do
-      Result := Rect(Left + PosX, Top, Left + PosX + ThumbSize, Bottom);
-  end;
-
+  ThumbSize := GetHorzThumbSize;
+  PosX := MulDiv(HorzScrollInfo.nPos, HorzTrackRect.Width, HorzScrollInfo.nMax - HorzScrollInfo.nMin);
+  with HorzTrackRect do
+    Result := Rect(Left + PosX, Top, Left + PosX + ThumbSize, Bottom);
 end;
 
 function TSysScrollingStyleHook.GetHorzThumbPosFromPos(const Pos: Integer): Integer;
@@ -1841,13 +1881,10 @@ var
   PosY: Integer;
 begin
   Result := Rect(0, 0, 0, 0);
-  with VertScrollInfo do
-  begin
-    ThumbSize := GetVertThumbSize;
-    PosY := MulDiv(nPos, VertTrackRect.Height, nMax - nMin);
-    with VertTrackRect do
-      Result := Rect(Left, Top + PosY, Right, Top + PosY + ThumbSize);
-  end;
+  ThumbSize := GetVertThumbSize;
+  PosY := MulDiv(VertScrollInfo.nPos, VertTrackRect.Height, VertScrollInfo.nMax - VertScrollInfo.nMin);
+  with VertTrackRect do
+    Result := Rect(Left, Top + PosY, Right, Top + PosY + ThumbSize);
 end;
 
 function TSysScrollingStyleHook.GetVertThumbPosFromPos(const Pos: Integer): Integer;
@@ -2308,6 +2345,10 @@ begin
     FDownDis := P.Y - VertSliderRect.Top;
     { The old ScrollBar Position }
     FPrevPos := VertScrollInfo.nPos;
+
+//    OutputDebugString(PChar(Format('TSysScrollingStyleHook.WMNCLButtonDown P.X %d P.Y %d VertSliderRect.Left %d VertSliderRect.Top %d VertSliderRect.Width %d VertSliderRect.Height %d',
+//    [P.X, P.Y, VertSliderRect.Left, VertSliderRect.Top, VertSliderRect.Width, VertSliderRect.Height])));
+
     if VertSliderRect.Contains(P) then
     begin
       { VertSliderButton pressed . }
@@ -2625,21 +2666,15 @@ initialization
 
 UseLatestCommonDialogs := False;
 
-if StyleServices.Available then
-begin
-  with TSysStyleManager do
+  if StyleServices.Available then
   begin
-    RegisterSysStyleHook('#32770', TSysDialogStyleHook);
-    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+    TSysStyleManager.RegisterSysStyleHook('#32770', TSysDialogStyleHook);
+    TSysStyleManager.RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
   end;
-end;
 
 finalization
 
-with TSysStyleManager do
-begin
-  UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
-  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-end;
+  TSysStyleManager.UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
+  TSysStyleManager.UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
 
 end.

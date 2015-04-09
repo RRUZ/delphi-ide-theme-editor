@@ -40,6 +40,7 @@ function  GetAppDataFolder: string;
 function  GetSpecialFolderLocation(nFolder: Integer): string;
 function  GetTempDirectory: string;
 procedure MsgBox(const Msg: string);
+function  EnumFixedFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
 function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
 procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var Bitmap : TBitmap);
 function  GetSpecialFolder(const CSIDL: integer) : string;
@@ -757,7 +758,7 @@ begin
   end;
 end;
 
-function EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
+function EnumFixedFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;
   FontType: integer; Data: Pointer): integer; stdcall;
 var
   List : TStrings;
@@ -771,6 +772,18 @@ begin
 
   Result := 1;
 end;
+
+function  EnumFontsProc(var LogFont: TLogFont; var TextMetric: TTextMetric;  FontType: integer; Data: Pointer): integer; stdcall;
+var
+  List : TStrings;
+begin
+   List := TStrings(Data);
+    if not StartsText('@', LogFont.lfFaceName) and
+      (List.IndexOf(LogFont.lfFaceName) < 0) then
+      List.Add(LogFont.lfFaceName);
+  Result := 1;
+end;
+
 
 procedure MsgBox(const Msg: string);
 begin
