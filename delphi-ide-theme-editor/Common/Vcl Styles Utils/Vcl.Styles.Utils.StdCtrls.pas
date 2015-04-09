@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -23,14 +23,14 @@ unit Vcl.Styles.Utils.StdCtrls;
 interface
 
 uses
+  System.Classes,
+  System.SysUtils,
+  System.Types,
   Winapi.Windows,
   Winapi.Messages,
-  System.Classes,
-  System.Types,
-  Vcl.Styles,
+  Winapi.CommCtrl,
   Vcl.Themes,
   Vcl.Graphics,
-  System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Forms,
   Vcl.StdCtrls,
@@ -59,6 +59,7 @@ type
     function IsGroupBox: Boolean;
     function IsPushButton: Boolean;
     function IsSplitButton: Boolean;
+    function IsCommandButton: Boolean;
     function GetTextAlign: TTextFormat;
     function GetShowText: Boolean;
     function GetCheckBoxState: TSysCheckBoxState;
@@ -84,6 +85,7 @@ type
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
     property CheckBox: Boolean read IsCheckBox;
+    property CommandButton: Boolean read IsCommandButton;
     property RadioButton: Boolean read IsRadioButton;
     property GroupBox: Boolean read IsGroupBox;
     property PushButton: Boolean read IsPushButton;
@@ -123,6 +125,7 @@ type
     function GetBorderSize: TRect; override;
     procedure WndProc(var Message: TMessage); override;
     procedure UpdateColors; override;
+    procedure PaintBackground(Canvas: TCanvas); override;
   public
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
@@ -236,6 +239,7 @@ type
   public
     constructor Create(AHandle: THandle); override;
   end;
+
 
 implementation
 
@@ -377,6 +381,7 @@ begin
   OverridePaintNC := True;
   OverrideFont := False;
 {$IFEND}
+  //OverrideEraseBkgnd:=True;
 end;
 
 destructor TSysListBoxStyleHook.Destroy;
@@ -392,12 +397,17 @@ begin
   begin
     Result := Rect(2, 2, 2, 2);
   end;
-  if SysControl.ControlClassName = 'ComboLBox' then
+  if SameText(SysControl.ControlClassName, 'ComboLBox') then
   begin
     if SysControl.Parent.Style and CBS_SIMPLE = CBS_SIMPLE then
       Exit;
     Result := Rect(0, 0, 0, 0);
   end;
+end;
+
+procedure TSysListBoxStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+  inherited;
 end;
 
 procedure TSysListBoxStyleHook.UpdateColors;
@@ -491,6 +501,12 @@ begin
       (Style and BS_AUTOCHECKBOX = BS_AUTOCHECKBOX);
 end;
 
+function TSysButtonStyleHook.IsCommandButton: Boolean;
+begin
+  Result := (SysControl.Style and BS_COMMANDLINK = BS_COMMANDLINK) or
+    (SysControl.Style and BS_DEFCOMMANDLINK = BS_DEFCOMMANDLINK);
+end;
+
 function TSysButtonStyleHook.IsGroupBox: Boolean;
 begin
   Result := (SysControl.Style and BS_GROUPBOX = BS_GROUPBOX);
@@ -505,7 +521,7 @@ function TSysButtonStyleHook.IsPushButton: Boolean;
 begin
   with SysControl do
     Result := (Style and BS_PUSHBUTTON = BS_PUSHBUTTON) or
-      (not CheckBox and not RadioButton and not GroupBox);
+      (not CheckBox and not RadioButton and not GroupBox and not CommandButton);
 end;
 
 function TSysButtonStyleHook.IsRadioButton: Boolean;
@@ -534,17 +550,24 @@ end;
 
 procedure TSysButtonStyleHook.Paint(Canvas: TCanvas);
 begin
-  if not GroupBox then
+  //OutputDebugString(PChar('Paint '+IntToHex(SysControl.Handle, 8)));
+  if not GroupBox or CommandButton then
     PaintBackground(Canvas)
   else
     Exit;
 
+  if CommandButton then
+    PaintButton(Canvas)
+  else
   if CheckBox then
     PaintCheckBox(Canvas)
-  else if RadioButton then
+  else
+  if RadioButton then
     PaintRadioButton(Canvas)
-  else if PushButton then
+  else
+  if PushButton then
     PaintButton(Canvas);
+
 end;
 
 procedure TSysButtonStyleHook.PaintBackground(Canvas: TCanvas);
@@ -559,8 +582,14 @@ var
   LRect: TRect;
   Detail: TThemedButton;
   X, Y, i: Integer;
+  IW, IH, IY: Integer;
   TextFormat: TTextFormat;
+  IL: BUTTON_IMAGELIST;
   LText: string;
+  DrawRect: TRect;
+  ThemeTextColor: TColor;
+  Buffer: string;
+  BufferLength: Integer;
 begin
   LText := SysControl.Text;
   LRect := SysControl.ClientRect;
@@ -569,16 +598,75 @@ begin
     Detail := tbPushButtonNormal
   else
     Detail := tbPushButtonDisabled;
+
   if MouseDown then
     Detail := tbPushButtonPressed
-  else if MouseInControl then
+  else
+  if MouseInControl then
     Detail := tbPushButtonHot
-  else if Focused then
+  else
+  if Focused then
     Detail := tbPushButtonDefaulted;
 
   LDetails := StyleServices.GetElementDetails(Detail);
+  DrawRect := SysControl.ClientRect;
   StyleServices.DrawElement(Canvas.Handle, LDetails, LRect);
 
+
+  if Button_GetImageList(handle, IL) and (IL.himl <> 0) and
+     ImageList_GetIconSize(IL.himl, IW, IH) then
+  begin
+    if (GetWindowLong(Handle, GWL_STYLE) and BS_COMMANDLINK) = BS_COMMANDLINK then
+      IY := DrawRect.Top + 15
+    else
+      IY := DrawRect.Top + (DrawRect.Height - IH) div 2;
+    ImageList_Draw(IL.himl, 0, Canvas.Handle, DrawRect.Left + 3, IY, ILD_NORMAL);
+    Inc(DrawRect.Left, IW + 3);
+  end;
+
+  if CommandButton then
+  begin
+      if IL.himl = 0 then
+        Inc(DrawRect.Left, 35);
+      Inc(DrawRect.Top, 15);
+      Inc(DrawRect.Left, 5);
+      Canvas.Font := SysControl.Font;
+      TextFormat := TTextFormatFlags(DT_LEFT);
+      if StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+         Canvas.Font.Color := ThemeTextColor;
+      StyleServices.DrawText(Canvas.Handle, LDetails, LText, DrawRect, TextFormat, Canvas.Font.Color);
+      SetLength(Buffer, Button_GetNoteLength(Handle) + 1);
+      if Length(Buffer) <> 0 then
+      begin
+        BufferLength := Length(Buffer);
+        if Button_GetNote(Handle, PChar(Buffer), BufferLength) then
+        begin
+          TextFormat := TTextFormatFlags(DT_LEFT or DT_WORDBREAK);
+          Inc(DrawRect.Top, Canvas.TextHeight('Wq') + 2);
+          Canvas.Font.Size := 8;
+          StyleServices.DrawText(Canvas.Handle, LDetails, Buffer, DrawRect,
+            TextFormat, Canvas.Font.Color);
+        end;
+      end;
+      if IL.himl = 0 then
+      begin
+        if MouseDown then
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphPressed)
+        else if MouseInControl then
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphHot)
+        else if SysControl.Enabled then
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphNormal)
+        else
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphDisabled);
+        DrawRect.Right := 35;
+        DrawRect.Left := 3;
+        DrawRect.Top := 10;
+        DrawRect.Bottom := DrawRect.Top + 32;
+        StyleServices.DrawElement(Canvas.Handle, LDetails, DrawRect);
+      end;
+
+  end
+  else
   if SplitButton then
     with Canvas, SysControl do
     begin
@@ -602,11 +690,17 @@ begin
         LineTo(X + i + 1, Y - i);
       end;
     end;
-  if ShowText then
+
+  if ShowText and not IsCommandButton then
   begin
     TextFormat := [tfCenter, tfVerticalCenter, tfSingleLine, tfHidePrefix];
     if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
+    begin
       Exclude(TextFormat, tfSingleLine);
+      include(TextFormat, tfWordBreak)
+    end;
+
+
     DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
   end;
 end;
@@ -1210,6 +1304,15 @@ end;
 
 function TSysComboBoxStyleHook.ListBoxVertScrollRect: TRect;
 begin
+  Result := ListBoxBoundsRect;
+  OffsetRect(Result, -Result.Left, -Result.Top);
+  InflateRect(Result, -1, -1);
+  OffsetRect(Result, 1, 1);
+  if SysControl.BiDiMode <> TBidiModeDirection.bmRightToLeft then
+    Result.Left := Result.Right - GetSystemMetrics(SM_CXVSCROLL)
+  else
+    Result.Right := Result.Left + GetSystemMetrics(SM_CXVSCROLL);
+  if ListBoxBoundsRect.Height > 30 then OffsetRect(Result, -1, -1);
 
 end;
 
@@ -2286,8 +2389,10 @@ end;
 function TSysStaticStyleHook.GetIsFrameOrLine: Boolean;
 begin
   with SysControl do
-    Result := (Style and SS_ETCHEDFRAME = SS_ETCHEDFRAME) or
+    Result :=
+      (Style and SS_ETCHEDFRAME = SS_ETCHEDFRAME) or
       (Style and SS_ETCHEDHORZ = SS_ETCHEDHORZ) or
+      (Style and SS_SUNKEN = SS_SUNKEN) or
       (Style and SS_ETCHEDVERT = SS_ETCHEDVERT);
 end;
 
@@ -2431,7 +2536,7 @@ begin
   end;
 end;
 
-{ TNewCheckBoxStyleHook }
+{ TSysCheckBoxStyleHook }
 function RectVCenter(var R: TRect; Bounds: TRect): TRect;
 begin
   OffsetRect(R, -R.Left, -R.Top);
@@ -2673,7 +2778,7 @@ begin
   inherited;
 end;
 
-{ TNewRadioButtonStyleHook }
+{ TSysRadioButtonStyleHook }
 
 constructor TSysRadioButtonStyleHook.Create(AHandle: THandle);
 begin

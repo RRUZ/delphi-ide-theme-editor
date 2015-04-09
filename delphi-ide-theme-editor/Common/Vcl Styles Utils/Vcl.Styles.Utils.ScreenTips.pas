@@ -23,14 +23,13 @@ unit Vcl.Styles.Utils.ScreenTips;
 interface
 
 uses
+  System.Classes,
+  System.SysUtils,
   Winapi.Windows,
   Winapi.Messages,
-  System.Classes,
-  Vcl.Styles,
   Vcl.Themes,
   Vcl.Graphics,
   Vcl.Controls,
-  System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Forms,
   Vcl.GraphUtil;

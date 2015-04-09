@@ -41,7 +41,7 @@ type
     procedure ListBoxDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure ListViewDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
     procedure ListViewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-  end;
+  end deprecated 'Use the Vcl.Styles.Hooks unit Instead';
 
 var
   VclStylesOwnerDrawFix : TVclStylesOwnerDrawFix;
@@ -125,6 +125,7 @@ var
   LColor    : TColor;
   ImageSize : Integer;
 begin
+  ImageSize:=0;
   LStyles:=StyleServices;
   if not LStyles.GetElementColor(LStyles.GetElementDetails(ttItemNormal), ecTextColor, LColor) or  (LColor = clNone) then
   LColor := LStyles.GetSystemColor(clWindowText);

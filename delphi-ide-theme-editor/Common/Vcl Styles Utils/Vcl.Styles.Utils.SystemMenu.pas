@@ -28,7 +28,6 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   Vcl.Themes,
-  Vcl.Styles,
   Vcl.Forms;
 
 

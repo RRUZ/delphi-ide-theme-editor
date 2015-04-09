@@ -361,7 +361,7 @@ object FrmMain: TFrmMain
     Images = ImageListDelphiVersion
   end
   object Button1: TButton
-    Left = 483
+    Left = 641
     Top = 79
     Width = 122
     Height = 25
@@ -398,6 +398,15 @@ object FrmMain: TFrmMain
     Caption = 'Background'
     TabOrder = 21
     OnClick = RadioButtonForeClick
+  end
+  object BtnAdditionalSettings: TButton
+    Left = 483
+    Top = 79
+    Width = 107
+    Height = 25
+    Caption = 'Additional Settings'
+    TabOrder = 22
+    OnClick = BtnAdditionalSettingsClick
   end
   object ImageListDelphiVersion: TImageList
     ColorDepth = cd32Bit
