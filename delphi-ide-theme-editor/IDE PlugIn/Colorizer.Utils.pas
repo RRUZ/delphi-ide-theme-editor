@@ -38,6 +38,7 @@ uses
  ComCtrls,
  StdCtrls,
  uDelphiVersions,
+ uDelphiIDEHighlight,
  ActnColorMaps,
  Windows,
  PngImage,
@@ -81,6 +82,7 @@ procedure RegisterVClStylesFiles;
         class var FIDEData        : TDelphiVersionData;
         class var FDockImages     : TPngImage;
         class var FUnloading : Boolean;
+        class var FModernTheme: TModernTheme;
      public
         class property ActnStyleList : TList<TActionManager> read  FActnStyleList write FActnStyleList;
         class property ColorMap       : TColorizerColorMap read  FColorMap write FColorMap;
@@ -94,6 +96,8 @@ procedure RegisterVClStylesFiles;
         class property Settings       : TSettings read  FSettings write FSettings;
         class property ImagesGutterChanged : Boolean read  FImagesGutterChanged write FImagesGutterChanged;
         class property IDEData        : TDelphiVersionData read  FIDEData write FIDEData;
+        class property ModernTheme : TModernTheme  read FModernTheme write FModernTheme;
+
         class property DockImages     : TPngImage read  FDockImages write FDockImages;
         class property Unloading : Boolean read  FUnloading write FUnloading;
     end;
@@ -331,7 +335,10 @@ begin
 //    end;
 
 
-//    if SameText(AComponent.ClassName, 'TCheckoutDialog') then
+//    if SameText(AComponent.ClassName, 'TCastaliaNavToolbar') then
+//     TRttiUtils.DumpObject(AComponent, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas')
+//    else
+//    if SameText(AComponent.ClassName, 'TCastaliaNavToolbarDropdown') then
 //     TRttiUtils.DumpObject(AComponent, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
 
     if AComponent is TForm then
@@ -533,6 +540,7 @@ end;
 
 
 initialization
+
 
 {$IFDEF ENABLELOG}
  sLogFileName:=ExtractFilePath(GetModuleLocation())+'log.txt';

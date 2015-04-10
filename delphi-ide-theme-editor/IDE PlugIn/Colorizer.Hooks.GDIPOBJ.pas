@@ -96,7 +96,7 @@ var
  sCaller : string;
  PenColor, LGPColor: TGPColor;
 begin
-  //AddLog('Detour_TGPGraphics_DrawPath', '1');
+  //AddLog2('Detour_TGPGraphics_DrawPath', '1');
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (pen<>nil) then
   begin
     pen.GetColor(PenColor);
@@ -106,6 +106,7 @@ begin
     if PenColor<>LGPColor then
     begin
      sCaller  := ProcByLevel(3);
+     //AddLog2('Detour_TGPGraphics_DrawPath sCaller', sCaller);
      if SameText(sTGradientTabSet, sCaller) then
       pen.SetColor(LGPColor);
     end;
@@ -123,10 +124,11 @@ var
  color1, color2: TGPColor;
  LActive  : Boolean;
 begin                                                                                                                                               //improve performance
-  //AddLog('Detour_TGPGraphics_FillPath', '1');
+  //AddLog2('Detour_TGPGraphics_FillPath', '1');
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.TabIDEOutLine and (brush is TGPLinearGradientBrush)  then
   begin
     sCaller  := ProcByLevel(3);
+    //AddLog2('Detour_TGPGraphics_FillPath sCaller', sCaller);
     if SameText(sTGradientTabSet, sCaller)  then
     begin
       TGPLinearGradientBrush(brush).GetLinearColors(color1, color2);

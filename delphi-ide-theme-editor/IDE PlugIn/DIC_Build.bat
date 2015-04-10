@@ -58,8 +58,16 @@ echo XE7
 call "C:\Program Files (x86)\Embarcadero\Studio\15.0\bin\rsvars.bat"
 msbuild.exe "DelphiIDEColorizer_XE7.dproj" /target:Clean;Build /p:Platform=Win32 /p:config=debug
 set BUILD_STATUS=%ERRORLEVEL%
-if %BUILD_STATUS%==0 GOTO DONE
+if %BUILD_STATUS%==0 GOTO XE8
 :DONE
 
+
+:XE8
+echo XE8
+call "C:\Program Files (x86)\Embarcadero\Studio\16.0\bin\rsvars.bat"
+msbuild.exe "DelphiIDEColorizer_XE8.dproj" /target:Clean;Build /p:Platform=Win32 /p:config=debug
+set BUILD_STATUS=%ERRORLEVEL%
+if %BUILD_STATUS%==0 GOTO DONE
+:DONE
 pause
 EXIT
