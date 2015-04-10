@@ -697,6 +697,7 @@ begin
   LPanel        := TPanel(AComponent);
   LPanel.Color  := AColorMap.Color;
   LPanel.Font.Color   := AColorMap.FontColor;
+  TRttiUtils.SetRttiPropertyValue(AComponent, 'Ctl3D', False);
 end;
 
 { TWrapperInspListBox }
@@ -1512,6 +1513,12 @@ initialization
   //RegisterColorizerWrapper('TPopupListBox',  TWrapperSimpleControl); not used
 
   RegisterColorizerWrapper('TPanel',  TWrapperPanel);
+  RegisterColorizerWrapper('TCastaliaNavToolbarDropdown',  TWrapperPanel);
+
+  RegisterColorizerWrapper('TSliderPanel',  TWrapperSimpleEditControl);
+  RegisterColorizerWrapper('TFlowPanel',  TWrapperPanel);
+
+
   RegisterColorizerWrapper('TInspListBox',  TWrapperInspListBox);
   RegisterColorizerWrapper('TStringGrid',  TWrapperStringGrid);
   RegisterColorizerWrapper('TRefactoringTree',  TWrapperRefactoringTree);
@@ -1524,6 +1531,7 @@ initialization
   RegisterColorizerWrapper('TCnExternalSrcEditorToolBar',  TWrapperToolBar);//cnwizards toolbar
   RegisterColorizerWrapper('TGXToolBar',  TWrapperToolBar);//gexperts toolbar
   RegisterColorizerWrapper('TMenuBar',  TWrapperToolBar);//gexperts TMenuBar(TToolBar)
+  RegisterColorizerWrapper('TCastaliaNavToolbar',  TWrapperToolBar);
 
   //RegisterColorizerWrapper('TTBXToolbar',  TWrapperTTBXToolbar);//MMX toolbar
 

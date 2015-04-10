@@ -60,3 +60,5 @@ TCheckoutDialog
 TGitCheckoutDialog
 TUseUnitDialog
 TdlgRepoBrowser
+TGetItPage
+TCastaliaSymbolSearchForm

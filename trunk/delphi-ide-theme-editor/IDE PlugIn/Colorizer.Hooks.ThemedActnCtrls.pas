@@ -108,6 +108,37 @@ type
     function  DoDrawTextAddress: Pointer;
   end;
 
+
+function DoDrawText(DC: HDC; Details: TThemedElementDetails;
+  const S: string; var R: TRect; Flags: TTextFormat; Options: TStyleTextOptions): Boolean;
+var
+  LFlags: Cardinal;
+  LColorRef: TColorRef;
+begin
+    LFlags := TTextFormatFlags(Flags);
+    LColorRef := SetTextColor(DC, Vcl.Graphics.ColorToRGB(Options.TextColor));
+    try
+      Windows.DrawText(DC, PChar(S), Length(S), R, LFlags);
+    finally
+      SetTextColor(DC, LColorRef);
+    end;
+    Result := True;
+end;
+
+function InternalDrawText(DC: HDC; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean;
+var
+  LOptions: TStyleTextOptions;
+begin
+  if Color <> clNone then
+  begin
+    LOptions.Flags := [stfTextColor];
+    LOptions.TextColor := Color;
+  end
+  else
+    LOptions.Flags := [];
+  Result := DoDrawText(DC, Details, S, R, Flags, LOptions);
+end;
+
 procedure Detour_TThemedMenuItem_DrawBackground(Self: TThemedMenuItemClass;var PaintRect: TRect);
 begin
   if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
@@ -164,13 +195,17 @@ begin
 
     if (Self.Parent is TCustomActionBar) and (not Self.ActionBar.PersistentHotkeys) then
       Text := Self.FNoPrefix;
+
     Self.Canvas.Font := Screen.MenuFont;
+
     if Self.ActionClient.Default then
       Self.Canvas.Font.Style := Self.Canvas.Font.Style + [fsBold];
     LRect := Self.PaintRectHelper;
     Self.DoDrawTextHelper(Self.Canvas.Handle, Text, LRect, Flags or DT_CALCRECT or DT_NOCLIP);
+
     OffsetRect(LRect, Rect.Left,
       ((Self.PaintRectHelper.Bottom - Self.PaintRectHelper.Top) - (LRect.Bottom - LRect.Top)) div 2);
+
     Self.DoDrawTextHelper(Self.Canvas.Handle, Text, LRect, Flags);
 
     if Self.ShowShortCut and ((Self.ActionClient <> nil) and not Self.ActionClient.HasItems) then
@@ -191,7 +226,7 @@ const
 var
   LCaption: string;
   LFormats: TTextFormat;
-  LColor: TColor;
+  LColor, LBackColor: TColor;
   LDetails: TThemedElementDetails;
 begin
   if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
@@ -209,7 +244,24 @@ begin
     if (tfCalcRect in LFormats) and ( (LCaption = '') or (LCaption[1] = cHotkeyPrefix) and (LCaption[2] = #0) ) then
       LCaption := LCaption + ' ';
 
-    ColorizerStyleServices.DrawText(DC, LDetails, LCaption, Rect, LFormats, LColor);
+    //ColorizerStyleServices.DrawText(DC, LDetails, LCaption, Rect, LFormats, LColor);
+
+
+    //if ColorizerStyleServices.GetElementColor(LDetails, ecGlowColor, LBackColor)  then
+
+    if Self.Selected and Self.Enabled then
+    begin
+      LBackColor:= ColorizerStyleServices.GetSystemColor(clHighlight);
+      Self.Canvas.Brush.Color := LBackColor;
+    end
+    else
+    if not Self.Enabled then
+    begin
+      LBackColor:= ColorizerStyleServices.GetSystemColor(clBtnFace);
+      Self.Canvas.Brush.Color := LBackColor;
+    end;
+
+    InternalDrawText (Self.Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
   end
   else
     Trampoline_TThemedMenuItem_DoDrawText(Self, DC, Text, Rect, Flags);
@@ -314,6 +366,8 @@ begin
 end;
 
 
+
+
 procedure Detour_TThemedMenuButton_DoDrawText(Self: TThemedMenuButtonClass;const Text: string; var Rect: TRect; Flags: Longint);
 const
   MenuStates: array[Boolean] of TThemedMenu = (tmMenuBarItemNormal, tmMenuBarItemHot);
@@ -346,7 +400,9 @@ begin
 
     if Self.Enabled then
       LDetails := ColorizerStyleServices.GetElementDetails(MenuStates[Self.Selected or Self.MouseInControl]);
-    ColorizerStyleServices.DrawText(Self.Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
+    //ColorizerStyleServices.DrawText(Self.Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
+    InternalDrawText(Self.Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
+
   end
   else
    Trampoline_TThemedMenuButton_DoDrawText(Self, Text, Rect, Flags);

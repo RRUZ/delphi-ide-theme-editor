@@ -28,6 +28,7 @@ uses
  SysUtils,
  Classes,
  ComCtrls,
+ UITypes,
  uDelphiVersions;
 
 {$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -235,12 +236,15 @@ type
      FFontName: string;
      FMainToolBarColor: string;
      FVersion: TDelphiVersions;
+     FMainToolBarTColor: TColor;
     function GetHasDefaultValues: Boolean;
     procedure LoadDefaults;
+    procedure SetMainToolBarColor(const Value: string);
    public
      property FontName  : string read FFontName write FFontName;
      property FontSize : Integer read FFontSize write FFontSize;
-     property MainToolBarColor : string read FMainToolBarColor write FMainToolBarColor;
+     property MainToolBarColor : string read FMainToolBarColor write SetMainToolBarColor;
+     property MainToolBarTColor : TColor read FMainToolBarTColor;
      property Version : TDelphiVersions read FVersion;
      property HasDefaultValues : Boolean read  GetHasDefaultValues;
      procedure LoadData;
@@ -913,7 +917,7 @@ end;
 
 procedure TModernTheme.LoadData;
 var
-  sKey : string;
+  s, sKey : string;
 begin
   sKey:= DelphiRegPaths[FVersion]+'\ModernTheme';
   if RegKeyExists(sKey, HKEY_CURRENT_USER) then
@@ -921,12 +925,13 @@ begin
     if not RegReadStr(sKey,'FontName', FFontName, HKEY_CURRENT_USER) then
      FFontName:='Segoe UI';
 
-    if not RegReadStr(sKey,'MainToolBarColor', FMainToolBarColor, HKEY_CURRENT_USER) then
-     FMainToolBarColor:='clGradientActiveCaption';
+    if RegReadStr(sKey,'MainToolBarColor', s, HKEY_CURRENT_USER) then
+      MainToolBarColor:=s
+    else
+      MainToolBarColor:='clGradientActiveCaption';
 
     if not RegReadInt(sKey,'FontSize', FFontSize, HKEY_CURRENT_USER) then
      FFontSize:=10;
-
   end;
 end;
 
@@ -934,7 +939,7 @@ procedure TModernTheme.LoadDefaults;
 begin
   FFontSize:=$0000000a;//10;
   FFontName:='Segoe UI';
-  FMainToolBarColor:='clGradientActiveCaption';
+  MainToolBarColor:='clGradientActiveCaption';
 end;
 
 procedure TModernTheme.RestoreData;
@@ -966,6 +971,12 @@ begin
 end;
 
 
+
+procedure TModernTheme.SetMainToolBarColor(const Value: string);
+begin
+  FMainToolBarColor := Value;
+  FMainToolBarTColor := StringToColor(Value);
+end;
 
 //Windows Registry Editor Version 5.00
 //[HKEY_CURRENT_USER\Software\Embarcadero\BDS\16.0\ModernTheme]

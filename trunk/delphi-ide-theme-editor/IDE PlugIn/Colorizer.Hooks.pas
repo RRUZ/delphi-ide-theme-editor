@@ -2647,13 +2647,15 @@ var
 //  Elapsed: TTimeSpan;
 begin
   OrgBrush:=Self.Brush.Color;
-  try
-   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and  (OrgBrush=clBtnFace) then
+  try                                                                                                                    //sGradientTabsSignature                                              //gutter
+   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  {$IFDEF DELPHIXE8_UP} and ((OrgBrush=TColorizerLocalSettings.ModernTheme.MainToolBarTColor) or (OrgBrush=clBtnFace) ) {$ELSE} and  (OrgBrush=clBtnFace) {$ENDIF} then
    begin
      //Stopwatch := TStopwatch.StartNew;
      sCaller := ProcByLevel(1);
      //Elapsed := Stopwatch.Elapsed;
      //AddLog2(Format('ProcByLevel(1) Elapsed %n ms ',[elapsed.TotalMilliseconds]));
+//      if SameText(sCaller, sGradientTabsSignature) then
+//        AddLog2(Format('ProcByLevel(1) sCaller %s OrgBrush %x  MainToolBarTColor %x',[sCaller, OrgBrush, TColorizerLocalSettings.ModernTheme.MainToolBarTColor]));
 
      if SameText(sCaller, sEditorControlSignature) then
         Self.Brush.Color:=GetGutterBkColor

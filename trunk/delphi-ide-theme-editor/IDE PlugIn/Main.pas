@@ -150,6 +150,7 @@ uses
  {$IFDEF DELPHI2009_UP}
  Generics.Collections,
  {$ENDIF}
+
  Classes,
  ActnMan,
  ActnList,
@@ -168,6 +169,9 @@ uses
  IOUtils,
  PngImage,
  uDelphiVersions,
+ {$IFDEF DELPHIXE8_UP}
+ uDelphiIDEHighlight,
+ {$ENDIF}
  Colorizer.Hooks,
  Colorizer.Hook.Forms,
  Colorizer.Hooks.GDIPOBJ,
@@ -310,6 +314,10 @@ begin
   FreeAndNil(TColorizerLocalSettings.FActnStyleList);
   FreeAndNil(TColorizerLocalSettings.FSettings);
   TColorizerLocalSettings.IDEData.Free;
+ {$IFDEF DELPHIXE8_UP}
+  TColorizerLocalSettings.ModernTheme.Free;
+{$ENDIF}
+
   TColorizerLocalSettings.DockImages.Free;
   FreeAndNil(TColorizerLocalSettings.FHookedWindows);
   FreeAndNil(TColorizerLocalSettings.FHookedScrollBars);
@@ -461,9 +469,12 @@ begin
     TColorizerLocalSettings.Unloading:=False;
     TColorizerLocalSettings.IDEData:= TDelphiVersionData.Create;
     FillCurrentDelphiVersion(TColorizerLocalSettings.IDEData);
+ {$IFDEF DELPHIXE8_UP}
+    TColorizerLocalSettings.ModernTheme:=TModernTheme.Create(TColorizerLocalSettings.IDEData.Version);
+    TColorizerLocalSettings.ModernTheme.LoadData();
+ {$ENDIF}
     TColorizerLocalSettings.VCLStylesPath:=GetVCLStylesFolder(TColorizerLocalSettings.IDEData.Version);
     TColorizerLocalSettings.ActnStyleList:= TList<TActionManager>.Create;
-
     TColorizerLocalSettings.ColorMap:=nil;
     TColorizerLocalSettings.Settings:=TSettings.Create;
     TColorizerLocalSettings.ImagesGutterChanged:=False;

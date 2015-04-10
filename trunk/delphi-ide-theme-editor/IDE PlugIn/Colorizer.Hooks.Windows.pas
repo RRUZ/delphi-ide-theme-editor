@@ -540,7 +540,7 @@ function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
 const
   SystemColor = $FF000000;
 //var
-  //sCaller : string;
+//  sCaller : string;
 begin
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
    begin
