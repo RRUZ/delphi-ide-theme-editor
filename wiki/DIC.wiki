@@ -2,7 +2,7 @@
 
 = Introduction =
 
- If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE2-XE7. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found so far. 
+ If you are reading this is because you want test the Delphi IDE Colorizer (DIC). Currently the wizard was tested in Windows 7 and 8.1 on Delphi XE2-XE8. with JVCL, JCL, GExperts and CNWizards installed on the IDE and not conflicts are found so far. 
 
   What I expect of this beta testing is found bugs, possible conflicts with third-party experts and components, add new suggested features and improve the overall performance of the Wizard.    
  
@@ -16,7 +16,7 @@
 
 == Which versions of Delphi (RAD Studio) supports DIC? ==
  
- Currently DIC supports RAD Studio XE2-X7 and Appmethod 1.14 and 1.15. 
+ Currently DIC supports RAD Studio XE2-X8 and Appmethod 1.14 and 1.15. 
 
 == DIC supports modify the syntax highlight colors? == 
 
@@ -43,6 +43,11 @@
  The files used by the DIC Wizard are stored in the %LOCALAPPDATA%\The Road To Delphi\DIC folder 
 
 == How I can Uninstall the plugin? ==
+
+ option 1)
+ go to the Unistall programs options and select the "Delphi IDE Colorizer"
+
+ option 2)
  go to the  *%LOCALAPPDATA%\The Road To Delphi\DIC*  folder and run the uninst.exe App.
 
 == How I must report a bug? ==
