@@ -21,6 +21,7 @@
 unit Colorizer.Hooks.Windows;
 
 interface
+
 {$I ..\Common\Jedi.inc}
 
 procedure InstallHooksWinAPI();
@@ -48,18 +49,26 @@ uses
 {$ENDIF}
  Colorizer.Hooks,
  Colorizer.Hooks.IDE,
+ System.SyncObjs,
+ System.Generics.Collections,
  Forms;
 
 type
  TCustomListBoxClass     = class(TCustomListBox);
+ TListStyleBrush = TObjectDictionary<Integer, HBRUSH>;
 
 var
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
   Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
   Trampoline_ExtTextOutW                   : function (DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall = nil;
+  TrampolineGetSysColorBrush               : function(nIndex: Integer): HBRUSH; stdcall;
   Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
   Trampoline_DrawFrameControl              : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
   Trampoline_DrawEdge                      : function (hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall = nil;
+
+var
+  VCLStylesBrush: TObjectDictionary<string, TListStyleBrush>;
+  VCLStylesLock: TCriticalSection = nil;
 
 //Hook DrawEdge WinApi function
 function Detour_WinApi_DrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
@@ -314,7 +323,7 @@ begin
  RestoreColor:=False;
  sCaller:='';
 
- if {(uFormat AND DT_CALCRECT = 0) and} (uFormat=2084) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+ if {(((uFormat AND DT_CALCRECT = 0) and EnableStockHook) or (uFormat=2084))} (uFormat=2084) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
  begin
    OrgColor:=GetTextColor(hDC);
    LFontColor :=ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
@@ -322,7 +331,7 @@ begin
    if (OrgColor=0) and (LFontColor<>OrgColor) then
    begin
     sCaller := ProcByLevel(2);
-    if SameText(sCaller, sVirtualTreeHintWindow) then
+    if {EnableStockHook or} SameText(sCaller, sVirtualTreeHintWindow) then
     begin
 //       AddLog('Detour_WinApi_DrawTextEx', sCaller);
 //       AddLog('Detour_WinApi_DrawText', 'uFormat ' + IntToStr(uFormat));
@@ -379,7 +388,7 @@ const
  //used to paint background of MultiView related combobox (2)
  //Note : If these combobox/views are styled the icons maintains the white background.
  //So for now these elements will not be styled. Only a patch id applied to avoid apply the current style font colors.
- sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
+ //sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
 {$ENDIF}
 
 {$IFDEF DELPHIXE6_UP}
@@ -389,7 +398,7 @@ var
   RestoreColor : Boolean;
 {$ENDIF}
 {$IFDEF DELPHIXE7_UP}
-  OrgColorBrush : Cardinal;
+  //OrgColorBrush : Cardinal;
 {$ENDIF}
   //i : integer;
 begin
@@ -430,21 +439,27 @@ begin
    end;
 
    {$IFDEF DELPHIXE7_UP}
-   OrgColorBrush:= GetBkColor(DC);
-   if (TColor(OrgColorBrush) = ColorToRGBTrampoline(clWindow)) then
-   begin
-     sCaller := ProcByLevel(3);
-     if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
-      SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
-       //SetBkColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.WindowColor));
-     else
-     begin
-       //Fix text color of the platform device selection ComboBox
-       sCaller := ProcByLevel(4);
-       if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
-        SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
-     end;
-   end;
+//   OrgColorBrush:= GetBkColor(DC);
+//   if (TColor(OrgColorBrush) = ColorToRGBTrampoline(clWindow)) then
+//   begin
+//     sCaller := ProcByLevel(3);
+//     if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
+//      SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
+//       //SetBkColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.WindowColor));
+//     else
+//     begin
+//       //Fix text color of the platform device selection ComboBox
+//       sCaller := ProcByLevel(4);
+//       if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
+//        SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
+//     end;
+//   end;
+//
+//   if EnableStockHook then
+//   begin
+//     SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
+//   end;
+
    {$ENDIF}
 
 
@@ -535,6 +550,44 @@ begin
    SetTextColor(DC, OrgColor);
 end;
 
+function InterceptGetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
+var
+  LCurrentStyleBrush: TListStyleBrush;
+  LBrush: HBRUSH;
+  LColor: TColor;
+begin
+  VCLStylesLock.Enter;
+  try
+    if not (Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap)) then
+      Exit(TrampolineGetSysColorBrush(nIndex))
+    else
+    begin
+      if VCLStylesBrush.ContainsKey(StyleServices.Name) then
+        LCurrentStyleBrush := VCLStylesBrush.Items[StyleServices.Name]
+      else
+      begin
+        VCLStylesBrush.Add(StyleServices.Name, TListStyleBrush.Create());
+        LCurrentStyleBrush := VCLStylesBrush.Items[StyleServices.Name];
+      end;
+      if Assigned(LCurrentStyleBrush) then
+      begin
+        if LCurrentStyleBrush.ContainsKey(nIndex) then
+          Exit(LCurrentStyleBrush[nIndex])
+        else
+        begin
+          LColor := ColorizerStyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
+          LBrush := CreateSolidBrush(LColor);
+          LCurrentStyleBrush.Add(nIndex, LBrush);
+          Exit(LBrush);
+        end;
+      end;
+      Exit(TrampolineGetSysColorBrush(nIndex));
+    end;
+  finally
+    VCLStylesLock.Leave;
+  end;
+end;
+
 //Hook to fix artifacts and undocumented painting methods ex: TClosableTabScroller background
 function Detour_WinApi_GetSysColor(nIndex: Integer): DWORD; stdcall;
 const
@@ -544,6 +597,16 @@ const
 begin
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
    begin
+
+//
+//    if nIndex = COLOR_HOTLIGHT then
+//      Result := DWORD(ColorizerStyleServices.GetSystemColor(clHighlight))
+//    else
+//      Result := DWORD(ColorizerStyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
+//
+//
+//   exit;
+
      case nIndex of
        COLOR_INFOTEXT:
        begin
@@ -616,9 +679,8 @@ begin
  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);  //OK
 
- pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
- if Assigned(pOrgAddress) then
-   Trampoline_GetSysColor    :=  InterceptCreate(pOrgAddress, @Detour_WinApi_GetSysColor);
+ Trampoline_GetSysColor      :=  InterceptCreate(user32, 'GetSysColor', @Detour_WinApi_GetSysColor);
+ //TrampolineGetSysColorBrush  := InterceptCreate(user32, 'GetSysColorBrush', @InterceptGetSysColorBrush);
 
  pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
  if Assigned(pOrgAddress) then
@@ -637,9 +699,20 @@ begin
   InterceptRemove(@Trampoline_DrawTextEx);
   InterceptRemove(@Trampoline_ExtTextOutW);
   InterceptRemove(@Trampoline_GetSysColor);
+  InterceptRemove(@TrampolineGetSysColorBrush);
   InterceptRemove(@Trampoline_DrawEdge);
   //InterceptRemove(@Trampoline_DrawFrameControl);
 end;
+
+
+initialization
+  VCLStylesLock  := TCriticalSection.Create;
+  VCLStylesBrush := TObjectDictionary<string, TListStyleBrush>.Create([doOwnsValues]);
+finalization
+VCLStylesBrush.Free;
+VCLStylesLock.Free;
+VCLStylesLock := nil;
+
 
 end.
 

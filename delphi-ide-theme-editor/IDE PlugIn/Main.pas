@@ -21,6 +21,7 @@
 
 //TODO
  {TODO -oRRUZ -cIssue :Fix refresh issue on Object Inspector Window when the theme is changed}
+ {TODO -oRRUZ -cIssue :Fix font color in Castalia (XE8) combobox}
  {TODO -oRRUZ -cPerformance : Improve overall performance}
  {TODO -oRRUZ -cPerformance : improve performance in load of settings DIC form}
  {TODO -oRRUZ -cHooks : add StyleHook for TTreeview}

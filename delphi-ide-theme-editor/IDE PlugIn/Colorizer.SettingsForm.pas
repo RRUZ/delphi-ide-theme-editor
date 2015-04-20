@@ -27,7 +27,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, pngimage, ExtCtrls, StdCtrls, Grids, ComCtrls, ImgList,
   ActnMan, ActnColorMaps, Colorizer.Settings, uDelphiVersions{$IF CompilerVersion >= 23}, Vcl.Styles.Ext{$IFEND}
-  ,Colorizer.XPStyleActnCtrls;
+  ,Colorizer.XPStyleActnCtrls{$IFDEF DELPHIXE8_UP}, System.ImageList {$ENDIF};
 
 type
   TColorListBox = class(ExtCtrls.TColorListBox)

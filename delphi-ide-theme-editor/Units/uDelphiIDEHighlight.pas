@@ -897,6 +897,7 @@ end;
 
 constructor TModernTheme.Create(_Version: TDelphiVersions);
 begin
+  inherited Create;
   FVersion:=_Version;
   LoadDefaults();
 end;

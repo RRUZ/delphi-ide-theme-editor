@@ -322,6 +322,7 @@ var
 //  ctx            : TRttiContext;
 //  LField         : TRttiField;
 //  found          : Boolean;
+// p : Pointer;
 begin
     if not Assigned(AComponent) or not Assigned(AColorMap) then  exit;
 
@@ -340,6 +341,19 @@ begin
 //    else
 //    if SameText(AComponent.ClassName, 'TCastaliaNavToolbarDropdown') then
 //     TRttiUtils.DumpObject(AComponent, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+AComponent.ClassName+'.pas');
+
+
+//    if SameText(AComponent.ClassName, 'TListBox') and SameText(AComponent.Name, 'ResultsList') then
+//    begin
+//       AddLog2(Format('Name %s',[AComponent.Name]));
+//       s:= GetPropValue(TListBox(AComponent), 'Style');
+//       AddLog2(Format('%s Value %s',['Style', s]));
+//
+////       p:=  @(TComboBox(AComponent).OnDrawItem);
+//       //csOwnerDrawVariable combobox
+//    end;
+//
+
 
     if AComponent is TForm then
     begin

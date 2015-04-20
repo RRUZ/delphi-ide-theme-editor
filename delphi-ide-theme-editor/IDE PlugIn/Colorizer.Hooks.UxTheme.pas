@@ -101,8 +101,8 @@ uses
     SetScrollRange
     ShowScrollBar
   }
-  TrampolineSetScrollPos              : function (hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall = nil;
-  TrampolineSetScrollInfo             : function (hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall = nil;
+//  TrampolineSetScrollPos              : function (hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall = nil;
+//  TrampolineSetScrollInfo             : function (hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall = nil;
 
 function Detour_UxTheme_DrawThemeText(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall;
 begin
@@ -110,27 +110,27 @@ begin
  Exit(Trampoline_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
 end;
 
-function Detour_WinApi_SetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
-begin
-  ColorizerLock.Enter;
-  try
-    LastScrollWinControl:=FindControl(hWnd);
-  finally
-    ColorizerLock.Leave;
-  end;
-  Exit(TrampolineSetScrollPos(hWnd, nBar, nPos, bRedraw));
-end;
-
-function Detour_WinApi_SetScrollInfo(hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall;
-begin
-  ColorizerLock.Enter;
-  try
-    LastScrollWinControl:=FindControl(hWnd);
-  finally
-    ColorizerLock.Leave;
-  end;
-  Exit(TrampolineSetScrollInfo(hWnd, BarFlag, ScrollInfo, Redraw));
-end;
+//function Detour_WinApi_SetScrollPos(hWnd: HWND; nBar, nPos: Integer; bRedraw: BOOL): Integer; stdcall;
+//begin
+//  ColorizerLock.Enter;
+//  try
+//    LastScrollWinControl:=FindControl(hWnd);
+//  finally
+//    ColorizerLock.Leave;
+//  end;
+//  Exit(TrampolineSetScrollPos(hWnd, nBar, nPos, bRedraw));
+//end;
+//
+//function Detour_WinApi_SetScrollInfo(hWnd: HWND; BarFlag: Integer; const ScrollInfo: TScrollInfo; Redraw: BOOL): Integer; stdcall;
+//begin
+//  ColorizerLock.Enter;
+//  try
+//    LastScrollWinControl:=FindControl(hWnd);
+//  finally
+//    ColorizerLock.Leave;
+//  end;
+//  Exit(TrampolineSetScrollInfo(hWnd, BarFlag, ScrollInfo, Redraw));
+//end;
 
 type
   TWinControlClass = class(TWinControl);
@@ -759,6 +759,10 @@ begin
              LSize.cy:=10;
              //LRect := Rect(0, 0, pRect.Width, pRect.Height);
              LRect := Rect(0, 0, LSize.Width, LSize.Height);
+
+             LBuffer.Canvas.Brush.Color:=LStyleServices.GetSystemColor(clWindow);
+             LBuffer.Canvas.FillRect(LRect);
+
              LBuffer.SetSize(LRect.Width, LRect.Height);
              LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
              BitBlt(dc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
@@ -832,6 +836,10 @@ begin
              LSize.cy:=10;
              //LRect := Rect(0, 0, pRect.Width, pRect.Height);
              LRect := Rect(0, 0, LSize.Width, LSize.Height);
+
+             LBuffer.Canvas.Brush.Color:=LStyleServices.GetSystemColor(clWindow);
+             LBuffer.Canvas.FillRect(LRect);
+
              LBuffer.SetSize(LRect.Width, LRect.Height);
              LStyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
              BitBlt(dc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
@@ -1181,8 +1189,8 @@ begin
     TrampolineOpenThemeData       := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
     TrampolineDrawThemeBackground := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
     TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(sVclIDEModule, sBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
-    TrampolineSetScrollPos  := InterceptCreate(user32,  'SetScrollPos', @Detour_WinApi_SetScrollPos);
-    TrampolineSetScrollInfo := InterceptCreate(user32, 'SetScrollInfo', @Detour_WinApi_SetScrollInfo);
+//    TrampolineSetScrollPos  := InterceptCreate(user32,  'SetScrollPos', @Detour_WinApi_SetScrollPos);
+//    TrampolineSetScrollInfo := InterceptCreate(user32, 'SetScrollInfo', @Detour_WinApi_SetScrollInfo);
   end;
 
 end;
@@ -1194,8 +1202,8 @@ begin
   InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
   InterceptRemove(@TrampolineDrawThemeBackground);
   InterceptRemove(@Trampoline_DrawThemeText);
-  InterceptRemove(@TrampolineSetScrollPos);
-  InterceptRemove(@TrampolineSetScrollInfo);
+//  InterceptRemove(@TrampolineSetScrollPos);
+//  InterceptRemove(@TrampolineSetScrollInfo);
 
   if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
