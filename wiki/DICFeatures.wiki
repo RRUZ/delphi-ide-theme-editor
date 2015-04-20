@@ -23,6 +23,10 @@ https://theroadtodelphi.files.wordpress.com/2014/07/rad_appmethod.png
 <wiki:video url="https://www.youtube.com/watch?v=DMTsIBceNWk"/>
 <wiki:video url="https://www.youtube.com/watch?v=_AYKSjI1CVg"/>
 
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/XE8_CodeEditor.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DIC/DIC%20Images/XE8_MobilView.png
+
 https://theroadtodelphi.files.wordpress.com/2014/07/dic_transparent_menus.png
 
 https://theroadtodelphi.files.wordpress.com/2014/07/yellowgreen_debug_layout_assembly.png
