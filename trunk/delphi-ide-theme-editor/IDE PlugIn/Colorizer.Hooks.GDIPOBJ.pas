@@ -160,8 +160,16 @@ begin                                                                           
       begin
         if LActive then
         begin
-          try color1  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, TColorizerLocalSettings.ColorMap.Color))); except   end;
-          try color2  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, TColorizerLocalSettings.ColorMap.SelectedColor))); except   end;
+          try
+            color1  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, TColorizerLocalSettings.ColorMap.Color)));
+          except
+            color1   :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
+          end;
+          try
+           color2  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEEndGradActive, TColorizerLocalSettings.ColorMap.SelectedColor)));
+          except
+           color2  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
+          end;
         end
         else
         begin

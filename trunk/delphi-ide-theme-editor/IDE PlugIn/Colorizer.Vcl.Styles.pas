@@ -3,8 +3,8 @@ unit Colorizer.Vcl.Styles;
 interface
 
 uses
-  Windows,
-  Messages,
+  Winapi.Windows,
+  Winapi.Messages,
   Controls,
   Classes,
   Forms,
@@ -255,8 +255,202 @@ type
     constructor Create(AControl: TWinControl); override;
   end;
 
-   procedure SetColorizerVCLStyle(const StyleName : string);
-   function  ColorizerStyleServices: TCustomStyleServices;
+  TColorizerScrollingStyleHook = class(TColorizerMouseTrackControlStyleHook)
+  strict private type
+    {$REGION 'TScrollWindow'}
+    TScrollWindow = class(TWinControl)
+    strict private
+      FStyleHook: TColorizerScrollingStyleHook;
+      FVertical: Boolean;
+      procedure WMNCHitTest(var Msg: TWMNCHitTest); message WM_NCHITTEST;
+      procedure WMEraseBkgnd(var Msg: TMessage); message WM_ERASEBKGND;
+      procedure WMPaint(var Msg: TWMPaint); message WM_PAINT;
+    strict protected
+      procedure CreateParams(var Params: TCreateParams); override;
+      procedure WndProc(var Message: TMessage); override;
+    public
+      constructor Create(AOwner: TComponent); override;
+      property StyleHook: TColorizerScrollingStyleHook read FStyleHook write FStyleHook;
+      property Vertical: Boolean read FVertical write FVertical;
+    end;
+    {$ENDREGION}
+  strict private
+    FHorzDownState: TThemedScrollBar;
+    FHorzScrollWnd: TScrollWindow;
+    FHorzSliderState: TThemedScrollBar;
+    FHorzUpState: TThemedScrollBar;
+    FLeftButtonDown: Boolean;
+    FListPos: Single;
+    FPrevScrollPos: Integer;
+    FScrollPos: Single;
+    FVertDownState: TThemedScrollBar;
+    FVertScrollWnd: TScrollWindow;
+    FVertSliderState: TThemedScrollBar;
+    FVertUpState: TThemedScrollBar;
+    FInitingScrollBars: Boolean;
+    function GetHorzDownButtonRect: TRect;
+    function GetHorzScrollRect: TRect;
+    function GetHorzSliderRect: TRect;
+    function GetHorzTrackRect: TRect;
+    function GetHorzUpButtonRect: TRect;
+    function GetParentBounds: TRect;
+    function GetVertDownButtonRect: TRect;
+    function GetVertScrollRect: TRect;
+    function GetVertSliderRect: TRect;
+    function GetVertTrackRect: TRect;
+    function GetVertUpButtonRect: TRect;
+    function IsPopupWindow: Boolean;
+    procedure InitScrollBars;
+    procedure InitScrollState;
+    procedure UpdateScroll;
+    procedure CMVisibleChanged(var Msg: TMessage); message CM_VISIBLECHANGED;
+    procedure WMKeyDown(var Msg: TMessage); message WM_KEYDOWN;
+    procedure WMKeyUp(var Msg: TMessage); message WM_KEYUP;
+    procedure WMLButtonDown(var Msg: TWMMouse); message WM_LBUTTONDOWN;
+    procedure WMLButtonUp(var Msg: TWMMouse); message WM_LBUTTONUP;
+    procedure WMNCLButtonDown(var Msg: TWMMouse); message WM_NCLBUTTONDOWN;
+    procedure WMNCMouseMove(var Msg: TWMMouse); message WM_NCMOUSEMOVE;
+    procedure WMNCLButtonUp(var Msg: TWMMouse); message WM_NCLBUTTONUP;
+    procedure WMMouseMove(var Msg: TWMMouse); message WM_MOUSEMOVE;
+    procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
+    procedure WMVScroll(var Msg: TMessage); message WM_VSCROLL;
+    procedure WMHScroll(var Msg: TMessage); message WM_HSCROLL;
+    procedure WMSize(var Msg: TMessage); message WM_SIZE;
+    procedure WMMove(var Msg: TMessage); message WM_MOVE;
+    procedure WMCaptureChanged(var Msg: TMessage); message WM_CAPTURECHANGED;
+    procedure WMNCLButtonDblClk(var Msg: TWMMouse); message WM_NCLBUTTONDBLCLK;
+    procedure WMWindowPosChanged(var Msg: TWMWindowPosChanged); message WM_WINDOWPOSCHANGED;
+    procedure WMShowWindow(var Msg: TWMShowWindow); message WM_SHOWWINDOW;
+    procedure WMClose(var Msg: TWMCLOSE); message WM_CLOSE;
+  strict protected
+    procedure DrawBorder; virtual;
+    procedure DrawHorzScroll(DC: HDC); virtual;
+    procedure DrawVertScroll(DC: HDC); virtual;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure PaintScroll; virtual;
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure MouseLeave; override;
+    procedure WndProc(var Message: TMessage); override;
+    property HorzDownButtonRect: TRect read GetHorzDownButtonRect;
+    property HorzDownState: TThemedScrollBar read FHorzDownState write FHorzDownState;
+    property HorzScrollRect: TRect read GetHorzScrollRect;
+    property HorzSliderRect: TRect read GetHorzSliderRect;
+    property HorzSliderState: TThemedScrollBar read FHorzSliderState write FHorzSliderState;
+    property HorzTrackRect: TRect read GetHorzTrackRect;
+    property HorzUpButtonRect: TRect read GetHorzUpButtonRect;
+    property HorzUpState: TThemedScrollBar read FHorzUpState write FHorzUpState;
+    property LeftButtonDown: Boolean read FLeftButtonDown;
+    property ListPos: Single read FListPos write FListPos;
+    property ParentBounds: TRect read GetParentBounds;
+    property PrevScrollPos: Integer read FPrevScrollPos write FPrevScrollPos;
+    property ScrollPos: Single read FScrollPos write FScrollPos;
+    property VertDownButtonRect: TRect read GetVertDownButtonRect;
+    property VertDownState: TThemedScrollBar read FVertDownState write FVertDownState;
+    property VertScrollRect: TRect read GetVertScrollRect;
+    property VertSliderRect: TRect read GetVertSliderRect;
+    property VertSliderState: TThemedScrollBar read FVertSliderState write FVertSliderState;
+    property VertTrackRect: TRect read GetVertTrackRect;
+    property VertUpButtonRect: TRect read GetVertUpButtonRect;
+    property VertUpState: TThemedScrollBar read FVertUpState write FVertUpState;
+  public
+    constructor Create(AControl: TWinControl); override;
+    destructor Destroy; override;
+  end;
+
+  TColorizerListBoxStyleHook = class(TColorizerScrollingStyleHook)
+  strict private
+    procedure UpdateColors;
+  strict protected
+    procedure WndProc(var Message: TMessage); override;
+    procedure WMSetFocus(var Message: TMessage); message WM_SETFOCUS;
+    procedure WMKillFocus(var Message: TMessage); message WM_KILLFOCUS;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+  TColorizerComboBoxStyleHook = class(TColorizerMouseTrackControlStyleHook)
+  strict private
+    FDownPos, FMovePos: TPoint;
+    FDownSliderPos: Integer;
+    FOldIdx, FInvsibleCount, FSliderSize: Integer;
+    FVSliderState, FVUpState, FVDownState: TThemedScrollBar;
+    FIgnoreStyleChanged: Boolean;
+    FMouseOnButton: Boolean;
+    FListHandle, FEditHandle: HWnd;
+    FListBoxInstance: Pointer;
+    FDefListBoxProc: Pointer;
+    FListBoxTimerCode: Integer;
+    FListBoxUpBtnDown, FListBoxDownBtnDown,
+    FListBoxTrackUpDown, FListBoxTrackDownDown: Boolean;
+    FTempItemIndex: Integer;
+    procedure DrawListBoxVertScroll(DC: HDC);
+    procedure DrawListBoxBorder;
+    function DroppedDown: Boolean;
+    function GetButtonRect: TRect;
+    function Style: TComboBoxStyle;
+    function ListBoxBoundsRect: TRect;
+    function ListBoxClientRect: TRect;
+    procedure ListBoxSetTimer(ATimerCode: Integer);
+    procedure ListBoxStopTimer;
+    function ListBoxVertScrollRect: TRect;
+    function ListBoxVertDownButtonRect: TRect;
+    function ListBoxVertUpButtonRect: TRect;
+    function ListBoxVertScrollArea: TRect;
+    function ListBoxVertSliderRect: TRect;
+    function ListBoxVertTrackRect: TRect;
+    function ListBoxVertTrackRectUp: TRect;
+    function ListBoxVertTrackRectDown: TRect;
+    procedure PaintListBoxBorder(Canvas: TCanvas; const R: TRect);
+    procedure UpdateColors;
+    procedure WMCommand(var Message: TWMCommand); message WM_COMMAND;
+    procedure CNCommand(var Message: TWMCommand); message CN_COMMAND;
+    procedure WMPaint(var Message: TMessage); message WM_PAINT;
+    procedure WMMouseMove(var Message: TWMMouse); message WM_MOUSEMOVE;
+    procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
+    procedure WMDrawItem(var Message: TWMDrawItem); message WM_DRAWITEM;
+    procedure WMParentNotify(var Message: TMessage); message WM_PARENTNOTIFY;
+  strict protected
+    function IsChildHandle(AHandle: HWnd): Boolean; override;
+    function AcceptMessage(var Message: TMessage): Boolean; override;
+    procedure DrawItem(Canvas: TCanvas; Index: Integer;
+      const R: TRect; Selected: Boolean); virtual;
+    procedure HookListBox(AListHandle: HWND);
+    property ListBoxInstance: Pointer read FListBoxInstance;
+    procedure ListBoxWndProc(var Msg: TMessage); virtual;
+    property ListHandle: HWND read FListHandle;
+    procedure MouseEnter; override;
+    procedure MouseLeave; override;
+    procedure PaintBorder(Canvas: TCanvas); virtual;
+    procedure WndProc(var Message: TMessage); override;
+    property ButtonRect: TRect read GetButtonRect;
+    property MouseOnButton: Boolean read FMouseOnButton write FMouseOnButton;
+  public
+    constructor Create(AControl: TWinControl); override;
+    destructor Destroy; override;
+  end;
+
+  TColorizerTrackBarStyleHook = class(TColorizerStyleHook)
+  strict private
+    FMouseOnThumb: Boolean;
+    FThumbPressed: Boolean;
+    procedure CNHScroll(var Message: TWMHScroll); message CN_HSCROLL;
+    procedure CNVScroll(var Message: TWMVScroll); message CN_VSCROLL;
+    procedure WMMouseMove(var Message: TWMMouse); message WM_MOUSEMOVE;
+    procedure WMLButtonUp(var Message: TWMMouse); message WM_LBUTTONUP;
+    procedure WMLButtonDown(var Message: TWMMouse); message WM_LBUTTONDOWN;
+  strict protected
+    function AcceptMessage(var Message: TMessage): Boolean; override;
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+
+  procedure SetColorizerVCLStyle(const StyleName : string);
+  function  ColorizerStyleServices: TCustomStyleServices;
 
 implementation
 
@@ -275,8 +469,10 @@ type
   TWinControlClass = class(TWinControl);
   TCustomFormClass = class(TCustomForm);
   TCustomCheckBoxClass = class(TCustomCheckBox);
+  TCustomComboBoxClass = class(TCustomComboBox);
   TRadioButtonClass = class(TRadioButton);
   TCustomEditClass = class(TCustomEdit);
+
 
   TCustomStatusBarHelper = class helper for TCustomStatusBar
   private
@@ -3239,6 +3435,2811 @@ begin
     CM_FOCUSCHANGED:
       if not TStyleManager.SystemStyle.Enabled then
         InvalidateNC;
+  end;
+end;
+
+{ TColorizerScrollingStyleHook }
+
+procedure TColorizerScrollingStyleHook.CMVisibleChanged(var Msg: TMessage);
+begin
+  if Control.HandleAllocated then
+  begin
+    if FVertScrollWnd <> nil then
+      if (Control.Visible) then
+        ShowWindow(FVertScrollWnd.Handle, SW_SHOW)
+      else
+        ShowWindow(FVertScrollWnd.Handle, SW_HIDE);
+
+    if FHorzScrollWnd <> nil then
+      if (Control.Visible) then
+        ShowWindow(FHorzScrollWnd.Handle, SW_SHOW)
+      else
+        ShowWindow(FHorzScrollWnd.Handle, SW_HIDE);
+  end;
+  Handled := False;
+end;
+
+
+constructor TColorizerScrollingStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverridePaintNC := True;
+  FVertScrollWnd := nil;
+  FHorzScrollWnd := nil;
+  FInitingScrollBars := False;
+end;
+
+destructor TColorizerScrollingStyleHook.Destroy;
+begin
+  FInitingScrollBars := True;
+  if FVertScrollWnd <> nil then
+  begin
+    FVertScrollWnd.StyleHook := nil;
+    FreeAndNil(FVertScrollWnd);
+  end;
+  if FHorzScrollWnd <> nil then
+  begin
+    FHorzScrollWnd.StyleHook := nil;
+    FreeAndNil(FHorzScrollWnd);
+  end;
+  FInitingScrollBars := False;
+  inherited;
+end;
+
+procedure TColorizerScrollingStyleHook.DrawBorder;
+begin
+  if ColorizerStyleServices.Available then
+    ColorizerStyleServices.PaintBorder(Control, True);
+end;
+
+procedure TColorizerScrollingStyleHook.DrawHorzScroll(DC: HDC);
+var
+  B: TBitmap;
+  Details: TThemedElementDetails;
+  R: TRect;
+begin
+  if Handle = 0 then Exit;
+  if DC = 0 then Exit;
+
+  if (HorzScrollRect.Height > 0) and (HorzScrollRect.Width > 0) then
+  begin
+    B := TBitmap.Create;
+    try
+      B.Width := HorzScrollRect.Width;
+      B.Height := HorzScrollRect.Height;
+      MoveWindowOrg(B.Canvas.Handle, -HorzScrollRect.Left, -HorzScrollRect.Top);
+      if ColorizerStyleServices.Available then
+      begin
+        R := HorzScrollRect;
+        R.Left := HorzUpButtonRect.Right;
+        R.Right := HorzDownButtonRect.Left;
+        if (R.Height > 0) and (R.Width > 0) then
+        begin
+          Details := ColorizerStyleServices.GetElementDetails(tsUpperTrackHorzNormal);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, R);
+        end;
+
+        if (HorzSliderRect.Height > 0) and (HorzSliderRect.Width > 0) then
+        begin
+          Details := ColorizerStyleServices.GetElementDetails(FHorzSliderState);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, HorzSliderRect);
+        end;
+
+        if HorzSliderRect.Height > 0 then
+          Details := ColorizerStyleServices.GetElementDetails(FHorzUpState)
+        else
+          Details := ColorizerStyleServices.GetElementDetails(tsArrowBtnLeftDisabled);
+        ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, HorzUpButtonRect);
+
+        if HorzSliderRect.Height > 0 then
+          Details := ColorizerStyleServices.GetElementDetails(FHorzDownState)
+        else
+          Details := ColorizerStyleServices.GetElementDetails(tsArrowBtnRightDisabled);
+        ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, HorzDownButtonRect);
+      end;
+      MoveWindowOrg(B.Canvas.Handle, HorzScrollRect.Left, HorzScrollRect.Top);
+      with HorzScrollRect do
+        BitBlt(DC, Left, Top, B.Width, B.Height,
+          B.Canvas.Handle, 0, 0, SRCCOPY);
+    finally
+      B.Free;
+    end;
+  end;
+end;
+procedure TColorizerScrollingStyleHook.DrawVertScroll(DC: HDC);
+var
+  B: TBitmap;
+  Details: TThemedElementDetails;
+  R: TRect;
+begin
+  if Handle = 0 then Exit;
+  if DC = 0 then Exit;
+
+  if (VertScrollRect.Width > 0) and (VertScrollRect.Height > 0) then
+  begin
+    B := TBitmap.Create;
+    try
+      B.Width := VertScrollRect.Width;
+      B.Height := VertScrollRect.Height;
+      MoveWindowOrg(B.Canvas.Handle, -VertScrollRect.Left, -VertScrollRect.Top);
+      if ColorizerStyleServices.Available then
+      begin
+        R := VertScrollRect;
+        R.Top := VertUpButtonRect.Bottom;
+        R.Bottom := VertDownButtonRect.Top;
+        if (R.Height > 0) and (R.Width > 0) then
+        begin
+          Details := ColorizerStyleServices.GetElementDetails(tsUpperTrackVertNormal);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, R);
+        end;
+
+        if (VertSliderRect.Height > 0) and (VertSliderRect.Width > 0) then
+        begin
+          Details := ColorizerStyleServices.GetElementDetails(VertSliderState);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, VertSliderRect);
+        end;
+
+        if VertSliderRect.Height <> 0 then
+          Details := ColorizerStyleServices.GetElementDetails(FVertUpState)
+        else
+          Details := ColorizerStyleServices.GetElementDetails(tsArrowBtnUpDisabled);
+        ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, VertUpButtonRect);
+
+        if VertSliderRect.Height <> 0 then
+          Details := ColorizerStyleServices.GetElementDetails(FVertDownState)
+        else
+          Details := ColorizerStyleServices.GetElementDetails(tsArrowBtnDownDisabled);
+        ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, VertDownButtonRect);
+      end;
+      MoveWindowOrg(B.Canvas.Handle, VertScrollRect.Left, VertScrollRect.Top);
+      with VertScrollRect do
+        BitBlt(DC, Left, Top, B.Width, B.Height, B.Canvas.Handle, 0, 0, SRCCOPY);
+    finally
+      B.Free;
+    end;
+  end;
+end;
+
+function TColorizerScrollingStyleHook.GetHorzDownButtonRect: TRect;
+begin
+  Result := HorzScrollRect;
+  if Result.Height > 0 then
+    Result.Left := Result.Right - GetSystemMetrics(SM_CXHTHUMB)
+  else
+    Result := Rect(0, 0, 0, 0);
+end;
+
+function TColorizerScrollingStyleHook.GetHorzScrollRect: TRect;
+var
+  P: TPoint;
+  BarInfo: TScrollBarInfo;
+begin
+  BarInfo.cbSize := SizeOf(BarInfo);
+  GetScrollBarInfo(Handle, Integer(OBJID_HSCROLL), BarInfo);
+  if STATE_SYSTEM_INVISIBLE and BarInfo.rgstate[0] <> 0 then
+    Result := Rect(0, 0, 0, 0)
+  else
+  begin
+    P := BarInfo.rcScrollBar.TopLeft;
+    ScreenToClient(Handle, P);
+    Result.TopLeft := P;
+    P := BarInfo.rcScrollBar.BottomRight;
+    ScreenToClient(Handle, P);
+    Result.BottomRight := P;
+    if HasBorder then
+      if HasClientEdge then
+        OffsetRect(Result, 2, 2)
+      else
+        OffsetRect(Result, 1, 1);
+  end;
+end;
+
+function TColorizerScrollingStyleHook.GetHorzSliderRect: TRect;
+var
+  P: TPoint;
+  BarInfo: TScrollBarInfo;
+begin
+  BarInfo.cbSize := SizeOf(BarInfo);
+  GetScrollBarInfo(Handle, Integer(OBJID_HSCROLL), BarInfo);
+  if (STATE_SYSTEM_INVISIBLE and BarInfo.rgstate[0] <> 0) or
+     (STATE_SYSTEM_UNAVAILABLE and BarInfo.rgstate[0] <> 0) then
+    Result := TRect.Create(0, 0, 0, 0)
+  else
+  begin
+    P := BarInfo.rcScrollBar.TopLeft;
+    ScreenToClient(Handle, P);
+    Result.TopLeft := P;
+    P := BarInfo.rcScrollBar.BottomRight;
+    ScreenToClient(Handle, P);
+    Result.BottomRight := P;
+    Result.Left := BarInfo.xyThumbTop + 0;
+    Result.Right := BarInfo.xyThumbBottom + 0;
+    if HasBorder then
+      if HasClientEdge then
+        OffsetRect(Result, 2, 2)
+      else
+        OffsetRect(Result, 1, 1);
+  end;
+end;
+
+function TColorizerScrollingStyleHook.GetHorzTrackRect: TRect;
+begin
+  Result := HorzScrollRect;
+  if Result.Width > 0 then
+  begin
+    Result.Left := Result.Left + GetSystemMetrics(SM_CXHTHUMB);
+    Result.Right := Result.Right - GetSystemMetrics(SM_CXHTHUMB);
+  end
+  else
+    Result := Rect(0, 0, 0, 0);
+end;
+
+
+function TColorizerScrollingStyleHook.GetHorzUpButtonRect: TRect;
+begin
+  Result := HorzScrollRect;
+  if Result.Height > 0 then
+  begin
+    Result.Right := Result.Left + GetSystemMetrics(SM_CXHTHUMB);
+  end
+  else
+    Result := Rect(0, 0, 0, 0);
+end;
+
+
+function TColorizerScrollingStyleHook.GetParentBounds: TRect;
+begin
+  if (Control <> nil) and (Control.Parent <> nil) then
+    Result := Control.Parent.BoundsRect
+  else if Handle <> 0 then
+    GetWindowRect(Control.ParentWindow, Result)
+  else
+    Result := TRect.Empty;
+end;
+
+function TColorizerScrollingStyleHook.GetVertDownButtonRect: TRect;
+begin
+  Result := VertScrollRect;
+  if Result.Width > 0 then
+    Result.Top := Result.Bottom - GetSystemMetrics(SM_CYVTHUMB)
+  else
+    Result := Rect(0, 0, 0, 0);
+end;
+
+
+function TColorizerScrollingStyleHook.GetVertScrollRect: TRect;
+var
+  P: TPoint;
+  BarInfo: TScrollBarInfo;
+begin
+  BarInfo.cbSize := SizeOf(BarInfo);
+  GetScrollBarInfo(Handle, Integer(OBJID_VSCROLL), BarInfo);
+  if STATE_SYSTEM_INVISIBLE and BarInfo.rgstate[0] <> 0 then
+    Result := Rect(0, 0, 0, 0)
+  else
+  begin
+    P := BarInfo.rcScrollBar.TopLeft;
+    ScreenToClient(Handle, P);
+    Result.TopLeft := P;
+    P := BarInfo.rcScrollBar.BottomRight;
+    ScreenToClient(Handle, P);
+    Result.BottomRight := P;
+    if HasBorder then
+      if HasClientEdge then
+         OffsetRect(Result, 2, 2)
+       else
+         OffsetRect(Result, 1, 1);
+  end;
+end;
+
+function TColorizerScrollingStyleHook.GetVertSliderRect: TRect;
+var
+  P: TPoint;
+  BarInfo: TScrollBarInfo;
+begin
+  BarInfo.cbSize := SizeOf(BarInfo);
+  GetScrollBarInfo(Handle, Integer(OBJID_VSCROLL), BarInfo);
+  if (STATE_SYSTEM_INVISIBLE and BarInfo.rgstate[0] <> 0) or
+     (STATE_SYSTEM_UNAVAILABLE and BarInfo.rgstate[0] <> 0) then
+    Result := Rect(0, 0, 0, 0)
+  else
+  begin
+    P := BarInfo.rcScrollBar.TopLeft;
+    ScreenToClient(Handle, P);
+    Result.TopLeft := P;
+    P := BarInfo.rcScrollBar.BottomRight;
+    ScreenToClient(Handle, P);
+    Result.BottomRight := P;
+    Result.Top := BarInfo.xyThumbTop + 0;
+    Result.Bottom := BarInfo.xyThumbBottom + 0;
+    if HasBorder then
+      if HasClientEdge then
+        OffsetRect(Result, 2, 2)
+      else
+        OffsetRect(Result, 1, 1);
+  end;
+end;
+
+function TColorizerScrollingStyleHook.GetVertTrackRect: TRect;
+begin
+  Result := VertScrollRect;
+  if Result.Width > 0 then
+  begin
+    Result.Top := Result.Top + GetSystemMetrics(SM_CYVTHUMB);
+    Result.Bottom := Result.Bottom - GetSystemMetrics(SM_CYVTHUMB);
+  end
+  else
+    Result := Rect(0, 0, 0, 0);
+end;
+
+function TColorizerScrollingStyleHook.GetVertUpButtonRect: TRect;
+begin
+  Result := VertScrollRect;
+  if Result.Width > 0 then
+    Result.Bottom := Result.Top + GetSystemMetrics(SM_CYVTHUMB)
+  else
+    Result := Rect(0, 0, 0, 0);
+end;
+
+
+procedure TColorizerScrollingStyleHook.InitScrollBars;
+var
+  R: TRect;
+begin
+  if FInitingScrollBars then Exit;
+
+  FInitingScrollBars := True;
+
+  InitScrollState;
+
+  FVertScrollWnd := TScrollWindow.CreateParented(GetParent(Control.Handle));
+  FVertScrollWnd.StyleHook := Self;
+  FVertScrollWnd.Vertical := True;
+  R := VertScrollRect;
+  if (Control.BiDiMode = bdRightToLeft) and not IsRectEmpty(R) then
+  begin
+    OffsetRect(R, -R.Left, 0);
+    if HasBorder then
+      if HasClientEdge then
+        OffsetRect(R, 2, 0)
+      else
+        OffsetRect(R, 1, 0);
+  end;
+  with R do
+   if IsPopupWindow then
+     SetWindowPos(FVertScrollWnd.Handle, HWND_TOPMOST,
+       Control.Left + Left, Control.Top + Top,
+         Right - Left, Bottom - Top, SWP_NOREDRAW)
+   else
+     SetWindowPos(FVertScrollWnd.Handle, HWND_TOP, Control.Left + Left, Control.Top + Top,
+       Right - Left, Bottom - Top, SWP_NOREDRAW);
+
+  if IsRectEmpty(VertScrollRect) then
+    ShowWindow(FVertScrollWnd.Handle, SW_HIDE)
+  else
+    ShowWindow(FVertScrollWnd.Handle, SW_SHOW);
+
+  FHorzScrollWnd := TScrollWindow.CreateParented(GetParent(Control.Handle));
+  FHorzScrollWnd.StyleHook := Self;
+  FHorzScrollWnd.Vertical := False;
+
+  R := HorzScrollRect;
+  if (Control.BiDiMode = bdRightToLeft) and not IsRectEmpty(VertScrollRect) then
+    OffsetRect(R, VertScrollRect.Width, 0);
+  with R do
+    if IsPopupWindow then
+      SetWindowPos(FHorzScrollWnd.Handle, HWND_TOPMOST,
+        Control.Left + Left, Control.Top + Top,
+          Right - Left, Bottom - Top, SWP_NOREDRAW)
+    else
+      SetWindowPos(FHorzScrollWnd.Handle, HWND_TOP, Control.Left + Left, Control.Top + Top,
+        Right - Left, Bottom - Top, SWP_NOREDRAW);
+
+  if IsRectEmpty(HorzScrollRect) then
+    ShowWindow(FHorzScrollWnd.Handle, SW_HIDE)
+  else
+    ShowWindow(FHorzScrollWnd.Handle, SW_SHOW);
+
+  FInitingScrollBars := False;
+end;
+
+procedure TColorizerScrollingStyleHook.InitScrollState;
+begin
+  FVertSliderState := tsThumbBtnVertNormal;
+  FVertUpState := tsArrowBtnUpNormal;
+  FVertDownState := tsArrowBtnDownNormal;
+  FHorzSliderState := tsThumbBtnHorzNormal;
+  FHorzUpState := tsArrowBtnLeftNormal;
+  FHorzDownState := tsArrowBtnRightNormal;
+end;
+
+
+function TColorizerScrollingStyleHook.IsPopupWindow: Boolean;
+begin
+  Result := (GetWindowLong(Handle, GWL_EXSTYLE) and WS_EX_TOOLWINDOW = WS_EX_TOOLWINDOW) or
+            (GetWindowLong(Handle, GWL_STYLE) and WS_POPUP = WS_POPUP);
+end;
+
+procedure TColorizerScrollingStyleHook.MouseLeave;
+begin
+  inherited;
+  if VertSliderState = tsThumbBtnVertHot then
+    FVertSliderState := tsThumbBtnVertNormal;
+
+  if FHorzSliderState = tsThumbBtnHorzHot then
+    FHorzSliderState := tsThumbBtnHorzNormal;
+
+  if FVertUpState = tsArrowBtnUpHot then
+    FVertUpState := tsArrowBtnUpNormal;
+
+  if FVertDownState = tsArrowBtnDownHot then
+    FVertDownState := tsArrowBtnDownNormal;
+
+  if FHorzUpState = tsArrowBtnLeftHot then
+    FHorzUpState := tsArrowBtnLeftNormal;
+
+  if FHorzDownState = tsArrowBtnRightHot then
+    FHorzDownState := tsArrowBtnRightNormal;
+
+  PaintScroll;
+end;
+
+
+procedure TColorizerScrollingStyleHook.Paint(Canvas: TCanvas);
+begin
+  PaintScroll;
+end;
+
+
+procedure TColorizerScrollingStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+  inherited PaintBackground(Canvas);
+  PaintScroll;
+end;
+
+procedure TColorizerScrollingStyleHook.PaintNC(Canvas: TCanvas);
+begin
+  if FInitingScrollBars then Exit;
+  inherited;
+  DrawBorder;
+  if FVertScrollWnd = nil then
+    InitScrollBars;
+  UpdateScroll;
+  PaintScroll;
+end;
+
+procedure TColorizerScrollingStyleHook.PaintScroll;
+begin
+  if FInitingScrollBars then Exit;
+  if FVertScrollWnd <> nil then
+    FVertScrollWnd.Repaint;
+  if FHorzScrollWnd <> nil then
+    FHorzScrollWnd.Repaint;
+end;
+
+procedure TColorizerScrollingStyleHook.UpdateScroll;
+var
+  R: TRect;
+begin
+  if (FVertScrollWnd <> nil) and (FVertScrollWnd.HandleAllocated) then
+  begin
+    R := VertScrollRect;
+    if (Control.BiDiMode = bdRightToLeft) and not IsRectEmpty(R) then
+    begin
+      OffsetRect(R, -R.Left, 0);
+      if HasBorder then
+        if HasClientEdge then
+          OffsetRect(R, 2, 0)
+        else
+          OffsetRect(R, 1, 0);
+    end;
+
+    if IsRectEmpty(R) then
+      ShowWindow(FVertScrollWnd.Handle, SW_HIDE)
+    else
+    begin
+      ShowWindow(FVertScrollWnd.Handle, SW_SHOW);
+      with R do
+        if IsPopupWindow then
+          SetWindowPos(FVertScrollWnd.Handle, HWND_TOPMOST,
+            Control.Left + Left, Control.Top + Top,
+              Right - Left, Bottom - Top, SWP_SHOWWINDOW)
+        else
+          SetWindowPos(FVertScrollWnd.Handle, HWND_TOP, Control.Left + Left,
+           Control.Top + Top, Right - Left, Bottom - Top, SWP_SHOWWINDOW);
+    end
+  end;
+  if (FHorzScrollWnd <> nil) and (FHorzScrollWnd.HandleAllocated) then
+  begin
+    R := HorzScrollRect;
+    if (Control.BiDiMode = bdRightToLeft) and not IsRectEmpty(VertScrollRect) then
+      OffsetRect(R, VertScrollRect.Width, 0);
+    if IsRectEmpty(R) then
+      ShowWindow(FHorzScrollWnd.Handle, SW_HIDE)
+    else
+    begin
+      ShowWindow(FHorzScrollWnd.Handle, SW_SHOW);
+      with R do
+        if IsPopupWindow then
+        begin
+          SetWindowPos(FHorzScrollWnd.Handle, HWND_TOPMOST, Control.Left + Left,
+            Control.Top + Top, Right - Left, Bottom - Top, SWP_SHOWWINDOW)
+        end
+        else
+          SetWindowPos(FHorzScrollWnd.Handle, HWND_TOP, Control.Left + Left,
+            Control.Top + Top, Right - Left, Bottom - Top, SWP_SHOWWINDOW);
+    end;
+  end;
+end;
+
+procedure TColorizerScrollingStyleHook.WMCaptureChanged(var Msg: TMessage);
+begin
+  if FVertUpState = tsArrowBtnUpPressed then
+  begin
+    FVertUpState := tsArrowBtnUpNormal;
+    PaintScroll;
+  end;
+
+  if FVertDownState = tsArrowBtnDownPressed then
+  begin
+    FVertDownState := tsArrowBtnDownNormal;
+    PaintScroll;
+  end;
+
+  if FHorzUpState = tsArrowBtnLeftPressed then
+  begin
+    FHorzUpState := tsArrowBtnLeftNormal;
+    PaintScroll;
+  end;
+
+  if FHorzDownState = tsArrowBtnRightPressed then
+  begin
+    FHorzDownState := tsArrowBtnRightNormal;
+    PaintScroll;
+  end;
+
+  CallDefaultProc(TMessage(Msg));
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMClose(var Msg: TWMCLOSE);
+begin
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMHScroll(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  PaintScroll;
+  Handled := True;
+end;
+
+
+procedure TColorizerScrollingStyleHook.WMKeyDown(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMKeyUp(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMLButtonDown(var Msg: TWMMouse);
+begin
+  CallDefaultProc(TMessage(Msg));
+  PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMLButtonUp(var Msg: TWMMouse);
+begin
+  if VertSliderState = tsThumbBtnVertPressed then
+  begin
+    PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_THUMBPOSITION, Round(FScrollPos))), 0);
+    FLeftButtonDown := False;
+    FVertSliderState := tsThumbBtnVertNormal;
+    PaintScroll;
+    Handled := True;
+    ReleaseCapture;
+    PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_ENDSCROLL, 0)), 0);
+    Exit;
+  end;
+
+  if FHorzSliderState = tsThumbBtnHorzPressed then
+  begin
+    PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_THUMBPOSITION, Round(FScrollPos))), 0);
+    FLeftButtonDown := False;
+    FHorzSliderState := tsThumbBtnHorzNormal;
+    PaintScroll;
+    Handled := True;
+    ReleaseCapture;
+    PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_ENDSCROLL, 0)), 0);
+    Exit;
+  end;
+
+  if FVertUpState = tsArrowBtnUpPressed then
+    FVertUpState := tsArrowBtnUpNormal;
+
+  if FVertDownState = tsArrowBtnDownPressed then
+    FVertDownState := tsArrowBtnDownNormal;
+
+  if FHorzUpState = tsArrowBtnLeftPressed then
+    FHorzUpState := tsArrowBtnLeftNormal;
+
+  if FHorzDownState = tsArrowBtnRightPressed then
+    FHorzDownState := tsArrowBtnRightNormal;
+
+  FLeftButtonDown := False;
+  PaintScroll;
+end;
+
+procedure TColorizerScrollingStyleHook.WMMouseMove(var Msg: TWMMouse);
+var
+  SF: TScrollInfo;
+begin
+  inherited;
+
+  if VertSliderState = tsThumbBtnVertPressed then
+  begin
+    SF.fMask := SIF_ALL;
+    SF.cbSize := SizeOf(SF);
+    GetScrollInfo(Handle, SB_VERT, SF);
+    if SF.nPos <> Round(FScrollPos) then FScrollPos := SF.nPos;
+
+    FScrollPos := FScrollPos + (SF.nMax - SF.nMin) * ((Mouse.CursorPos.Y - FPrevScrollPos) / VertTrackRect.Height);
+    if FScrollPos < SF.nMin then FScrollPos := SF.nMin;
+    if FScrollPos > SF.nMax then FScrollPos := SF.nMax;
+    if SF.nPage <> 0 then
+      if Round(FScrollPos) > SF.nMax - Integer(SF.nPage) + 1 then
+        FScrollPos := SF.nMax - Integer(SF.nPage) + 1;
+    FPrevScrollPos := Mouse.CursorPos.Y;
+    SF.nPos := Round(FScrollPos);
+
+    SetScrollInfo(Handle, SB_VERT, SF, False);
+    PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_THUMBTRACK, Round(FScrollPos))), 0);
+
+    PaintScroll;
+    Handled := True;
+    Exit;
+  end;
+
+  if FHorzSliderState = tsThumbBtnHorzPressed then
+  begin
+    SF.fMask := SIF_ALL;
+    SF.cbSize := SizeOf(SF);
+    GetScrollInfo(Handle, SB_HORZ, SF);
+    if SF.nPos <> Round(FScrollPos) then FScrollPos := SF.nPos;
+
+    FScrollPos := FScrollPos + (SF.nMax - SF.nMin) * ((Mouse.CursorPos.X - FPrevScrollPos) / HorzTrackRect.Width);
+    if FScrollPos < SF.nMin then FScrollPos := SF.nMin;
+    if FScrollPos > SF.nMax then FScrollPos := SF.nMax;
+    if SF.nPage <> 0 then
+      if Round(FScrollPos) > SF.nMax - Integer(SF.nPage) + 1 then
+        FScrollPos := SF.nMax - Integer(SF.nPage) + 1;
+    FPrevScrollPos := Mouse.CursorPos.X;
+    SF.nPos := Round(FScrollPos);
+
+    SetScrollInfo(Handle, SB_HORZ, SF, False);
+    PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_THUMBTRACK, Round(FScrollPos))), 0);
+
+    PaintScroll;
+    Handled := True;
+    Exit;
+  end;
+
+  if (FHorzSliderState <> tsThumbBtnHorzPressed) and (FHorzSliderState = tsThumbBtnHorzHot) then
+  begin
+    FHorzSliderState := tsThumbBtnHorzNormal;
+    PaintScroll;
+  end;
+
+  if (VertSliderState <> tsThumbBtnVertPressed) and (VertSliderState = tsThumbBtnVertHot) then
+  begin
+    FVertSliderState := tsThumbBtnVertNormal;
+    PaintScroll;
+  end;
+
+  if (FHorzUpState <> tsArrowBtnLeftPressed) and (FHorzUpState = tsArrowBtnLeftHot) then
+  begin
+    FHorzUpState := tsArrowBtnLeftNormal;
+    PaintScroll;
+  end;
+
+  if (FHorzDownState <> tsArrowBtnRightPressed) and (FHorzDownState =tsArrowBtnRightHot) then
+  begin
+    FHorzDownState := tsArrowBtnRightNormal;
+    PaintScroll;
+  end;
+
+  if (FVertUpState <> tsArrowBtnUpPressed) and (FVertUpState = tsArrowBtnUpHot) then
+  begin
+    FVertUpState := tsArrowBtnUpNormal;
+    PaintScroll;
+  end;
+
+  if (FVertDownState <> tsArrowBtnDownPressed) and (FVertDownState = tsArrowBtnDownHot) then
+  begin
+    FVertDownState := tsArrowBtnDownNormal;
+    PaintScroll;
+  end;
+
+  CallDefaultProc(TMessage(Msg));
+  if FLeftButtonDown then
+    PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMMouseWheel(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMMove(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  if (FVertScrollWnd <> nil) or (FHorzScrollWnd <> nil) then
+    SetWindowPos(Handle, 0,0,0,0,0, SWP_FRAMECHANGED or SWP_NOACTIVATE or
+      SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER);
+  UpdateScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMNCLButtonDblClk(var Msg: TWMMouse);
+begin
+  WMNCLButtonDown(Msg);
+end;
+
+
+procedure TColorizerScrollingStyleHook.WMNCLButtonDown(var Msg: TWMMouse);
+var
+  P: TPoint;
+  SF: TScrollInfo;
+begin
+
+  P := Point(Msg.XPos, Msg.YPos);
+  ScreenToClient(Handle, P);
+
+  if HasBorder then
+    if HasClientEdge then
+    begin
+      P.X := P.X + 2;
+      P.Y := P.Y + 2;
+    end
+    else
+    begin
+      P.X := P.X + 1;
+      P.Y := P.Y + 1;
+    end;
+
+  if VertSliderRect.Contains(P) then
+  begin
+    FLeftButtonDown := True;
+    SF.fMask := SIF_ALL;
+    SF.cbSize := SizeOf(SF);
+    GetScrollInfo(Handle, SB_VERT, SF);
+    FListPos := SF.nPos;
+    FScrollPos := SF.nPos;
+    FPrevScrollPos := Mouse.CursorPos.Y;
+    FVertSliderState := tsThumbBtnVertPressed;
+    PaintScroll;
+    SetCapture(Handle);
+    Handled := True;
+    Exit;
+  end;
+
+  if HorzSliderRect.Contains(P) then
+  begin
+    FLeftButtonDown := True;
+    SF.fMask := SIF_ALL;
+    SF.cbSize := SizeOf(SF);
+    GetScrollInfo(Handle, SB_HORZ, SF);
+    FListPos := SF.nPos;
+    FScrollPos := SF.nPos;
+    FPrevScrollPos := Mouse.CursorPos.X;
+    FHorzSliderState :=  tsThumbBtnHorzPressed;
+    PaintScroll;
+    SetCapture(Handle);
+    Handled := True;
+    Exit;
+  end;
+
+  if VertDownButtonRect.Contains(P) and (VertSliderRect.Height > 0) then
+    FVertDownState := tsArrowBtnDownPressed;
+
+  if VertUpButtonRect.Contains(P) and (VertSliderRect.Height > 0) then
+    FVertUpState := tsArrowBtnUpPressed;
+
+  if HorzDownButtonRect.Contains(P) and (HorzSliderRect.Width > 0)  then
+    FHorzDownState := tsArrowBtnRightPressed;
+
+  if HorzUpButtonRect.Contains(P) and (HorzSliderRect.Width > 0) then
+    FHorzUpState := tsArrowBtnLeftPressed;
+
+  PaintScroll;
+end;
+
+procedure TColorizerScrollingStyleHook.WMNCLButtonUp(var Msg: TWMMouse);
+var
+  P: TPoint;
+begin
+  P := Point(Msg.XPos, Msg.YPos);
+  ScreenToClient(Handle, P);
+
+  if HasBorder then
+    if HasClientEdge then
+    begin
+      P.X := P.X + 2;
+      P.Y := P.Y + 2;
+    end
+    else
+    begin
+      P.X := P.X + 1;
+      P.Y := P.Y + 1;
+    end;
+
+  if VertSliderState =  tsThumbBtnVertPressed then
+  begin
+    FLeftButtonDown := False;
+    FVertSliderState := tsThumbBtnVertNormal;
+    PaintScroll;
+    Handled := True;
+    Exit;
+  end;
+
+  if FHorzSliderState = tsThumbBtnHorzPressed then
+  begin
+    FLeftButtonDown := False;
+    FHorzSliderState := tsThumbBtnHorzNormal;
+    PaintScroll;
+    Handled := True;
+    Exit;
+  end;
+
+  if VertSliderRect.Height > 0 then
+    if VertDownButtonRect.Contains(P) then
+      FVertDownState := tsArrowBtnDownHot
+    else
+      FVertDownState := tsArrowBtnDownNormal;
+
+  if VertSliderRect.Height > 0 then
+    if VertUpButtonRect.Contains(P) then
+      FVertUpState := tsArrowBtnUpHot
+    else
+      FVertUpState := tsArrowBtnUpNormal;
+
+  if HorzSliderRect.Width > 0 then
+    if HorzDownButtonRect.Contains(P) then
+      FHorzDownState := tsArrowBtnRightHot
+    else
+      FHorzDownState := tsArrowBtnRightNormal;
+
+  if HorzSliderRect.Width > 0 then
+    if HorzUpButtonRect.Contains(P) then
+      FHorzUpState := tsArrowBtnLeftHot
+    else
+      FHorzUpState := tsArrowBtnLeftNormal;
+
+  CallDefaultProc(TMessage(Msg));
+  if (HorzSliderRect.Width > 0) or (VertSliderRect.Height > 0) then
+    PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMNCMouseMove(var Msg: TWMMouse);
+var
+  P: TPoint;
+  MustUpdateScroll: Boolean;
+begin
+  inherited;
+  P := Point(Msg.XPos, Msg.YPos);
+  ScreenToClient(Handle, P);
+
+  if HasBorder then
+    if HasClientEdge then
+    begin
+      P.X := P.X + 2;
+      P.Y := P.Y + 2;
+    end
+    else
+    begin
+      P.X := P.X + 1;
+      P.Y := P.Y + 1;
+    end;
+
+  MustUpdateScroll := False;
+
+  if VertSliderRect.Height > 0 then
+  if VertSliderRect.Contains(P) and (VertSliderState = tsThumbBtnVertNormal) then
+  begin
+    FVertSliderState := tsThumbBtnVertHot;
+    MustUpdateScroll := True;
+  end
+  else
+    if not VertSliderRect.Contains(P) and (VertSliderState = tsThumbBtnVertHot) then
+    begin
+      FVertSliderState := tsThumbBtnVertNormal;
+      MustUpdateScroll := True;
+    end;
+
+  if HorzSliderRect.Width > 0 then
+    if HorzSliderRect.Contains(P) and (FHorzSliderState = tsThumbBtnHorzNormal) then
+    begin
+      FHorzSliderState := tsThumbBtnHorzHot;
+      MustUpdateScroll := True;
+    end
+    else
+      if not HorzSliderRect.Contains(P) and (FHorzSliderState = tsThumbBtnHorzHot) then
+      begin
+        FHorzSliderState := tsThumbBtnHorzNormal;
+        MustUpdateScroll := True;
+      end;
+
+  if VertSliderRect.Height > 0 then
+    if VertDownButtonRect.Contains(P) and (FVertDownState = tsArrowBtnDownNormal) then
+    begin
+      FVertDownState := tsArrowBtnDownHot;
+      MustUpdateScroll := True;
+    end
+    else
+      if not VertDownButtonRect.Contains(P) and (FVertDownState = tsArrowBtnDownHot) then
+      begin
+        FVertDownState := tsArrowBtnDownNormal;
+        MustUpdateScroll := True;
+      end;
+
+  if VertSliderRect.Height > 0 then
+    if VertUpButtonRect.Contains(P) and (FVertUpState = tsArrowBtnUpNormal) then
+    begin
+      FVertUpState := tsArrowBtnUpHot;
+      MustUpdateScroll := True;
+    end
+    else if not VertUpButtonRect.Contains(P) and (FVertUpState = tsArrowBtnUpHot) then
+    begin
+      FVertUpState := tsArrowBtnUpNormal;
+      MustUpdateScroll := True;
+    end;
+
+  if HorzSliderRect.Width > 0 then
+    if HorzDownButtonRect.Contains(P) and (FHorzDownState = tsArrowBtnRightNormal) then
+    begin
+      FHorzDownState := tsArrowBtnRightHot;
+      MustUpdateScroll := True;
+    end
+    else if not HorzDownButtonRect.Contains(P) and (FHorzDownState = tsArrowBtnRightHot) then
+    begin
+      FHorzDownState := tsArrowBtnRightNormal;
+      MustUpdateScroll := True;
+    end;
+
+  if HorzSliderRect.Width > 0 then
+    if HorzUpButtonRect.Contains(P) and (FHorzUpState = tsArrowBtnLeftNormal) then
+    begin
+      FHorzUpState := tsArrowBtnLeftHot;
+      MustUpdateScroll := True;
+    end
+    else if not HorzUpButtonRect.Contains(P) and (FHorzUpState = tsArrowBtnLeftHot) then
+    begin
+      FHorzUpState := tsArrowBtnLeftNormal;
+      MustUpdateScroll := True;
+    end;
+
+  if MustUpdateScroll then
+    PaintScroll;
+end;
+
+
+procedure TColorizerScrollingStyleHook.WMShowWindow(var Msg: TWMShowWindow);
+begin
+  CallDefaultProc(TMessage(Msg));
+
+  if (FVertScrollWnd <> nil) and FVertScrollWnd.HandleAllocated then
+    if Msg.Show then
+      ShowWindow(FVertScrollWnd.Handle, SW_SHOW)
+    else
+      ShowWindow(FVertScrollWnd.Handle, SW_HIDE);
+
+  if (FHorzScrollWnd <> nil) and FHorzScrollWnd.HandleAllocated then
+    if Msg.Show then
+      ShowWindow(FHorzScrollWnd.Handle, SW_SHOW)
+    else
+      ShowWindow(FHorzScrollWnd.Handle, SW_HIDE);
+
+  Handled := True;
+end;
+
+
+procedure TColorizerScrollingStyleHook.WMSize(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  UpdateScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMVScroll(var Msg: TMessage);
+begin
+  CallDefaultProc(TMessage(Msg));
+  PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WMWindowPosChanged(
+  var Msg: TWMWindowPosChanged);
+begin
+  CallDefaultProc(TMessage(Msg));
+  if Msg.WindowPos.Flags and SWP_HIDEWINDOW = SWP_HIDEWINDOW then
+  begin
+    if FVertScrollWnd <> nil then
+      ShowWindow(FVertScrollWnd.Handle, SW_HIDE);
+    if FHorzScrollWnd <> nil then
+      ShowWindow(FHorzScrollWnd.Handle, SW_HIDE);
+  end
+  else
+    if IsWindowVisible(Control.Handle) then
+      UpdateScroll;
+  Handled := True;
+end;
+
+procedure TColorizerScrollingStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
+{ TColorizerScrollingStyleHook.TScrollWindow }
+
+constructor TColorizerScrollingStyleHook.TScrollWindow.Create(
+  AOwner: TComponent);
+begin
+  inherited;
+  ControlStyle := ControlStyle + [csOverrideStylePaint];
+  FStyleHook := nil;
+end;
+
+
+procedure TColorizerScrollingStyleHook.TScrollWindow.CreateParams(
+  var Params: TCreateParams);
+begin
+  inherited;
+  Params.Style := Params.Style or WS_CHILDWINDOW or WS_CLIPCHILDREN or WS_CLIPSIBLINGS;
+  Params.ExStyle := Params.ExStyle or WS_EX_NOPARENTNOTIFY;
+  Params.WindowClass.style := Params.WindowClass.style;
+  if (FStyleHook <> nil) and FStyleHook.IsPopupWindow then
+    Params.ExStyle := Params.ExStyle or WS_EX_TOOLWINDOW or WS_EX_TOPMOST;
+end;
+
+procedure TColorizerScrollingStyleHook.TScrollWindow.WMEraseBkgnd(
+  var Msg: TMessage);
+begin
+  Msg.Result := 1;
+end;
+
+procedure TColorizerScrollingStyleHook.TScrollWindow.WMNCHitTest(
+  var Msg: TWMNCHitTest);
+begin
+  Msg.Result := HTTRANSPARENT;
+end;
+
+procedure TColorizerScrollingStyleHook.TScrollWindow.WMPaint(var Msg: TWMPaint);
+var
+  PS: TPaintStruct;
+  DC: HDC;
+begin
+  BeginPaint(Handle, PS);
+  try
+    if (FStyleHook <> nil) and
+       (FStyleHook.Control.Width > 0) and
+       (FStyleHook.Control.Height > 0) then
+    begin
+      DC := GetWindowDC(Handle);
+      try
+        if FVertical then
+        begin
+          with FStyleHook.VertScrollRect do
+            MoveWindowOrg(DC, -Left, -Top);
+          FStyleHook.DrawVertScroll(DC);
+        end
+        else
+        begin
+          with FStyleHook.HorzScrollRect do
+            MoveWindowOrg(DC, -Left, -Top);
+          FStyleHook.DrawHorzScroll(DC);
+        end;
+      finally
+        ReleaseDC(Handle, DC);
+      end;
+    end;
+  finally
+    EndPaint(Handle, PS);
+  end;
+end;
+
+procedure TColorizerScrollingStyleHook.TScrollWindow.WndProc(
+  var Message: TMessage);
+begin
+  inherited;
+
+end;
+
+{ TColorizerListBoxStyleHook }
+
+constructor TColorizerListBoxStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverrideEraseBkgnd := True;
+  UpdateColors;
+end;
+
+procedure TColorizerListBoxStyleHook.UpdateColors;
+const
+  ColorStates: array[Boolean] of TStyleColor = (scListBoxDisabled, scListBox);
+  FontColorStates: array[Boolean] of TStyleFont = (sfListItemTextDisabled, sfListItemTextNormal);
+var
+  LStyle: TCustomStyleServices;
+begin
+  LStyle := ColorizerStyleServices;
+  Brush.Color := LStyle.GetStyleColor(ColorStates[Control.Enabled]);
+  FontColor := LStyle.GetStyleFontColor(FontColorStates[Control.Enabled])
+end;
+
+procedure TColorizerListBoxStyleHook.WMKillFocus(var Message: TMessage);
+begin
+  inherited;
+  CallDefaultProc(Message);
+  RedrawWindow(Handle, nil, 0, RDW_INVALIDATE or RDW_UPDATENOW);
+  Handled := True;
+end;
+
+procedure TColorizerListBoxStyleHook.WMSetFocus(var Message: TMessage);
+begin
+  inherited;
+  CallDefaultProc(Message);
+  RedrawWindow(Handle, nil, 0, RDW_INVALIDATE or RDW_UPDATENOW);
+  Handled := True;
+end;
+
+
+procedure TColorizerListBoxStyleHook.WndProc(var Message: TMessage);
+begin
+  case Message.Msg of
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+      begin
+        SetTextColor(Message.WParam, ColorToRGB(FontColor));
+        SetBkColor(Message.WParam, ColorToRGB(Brush.Color));
+        Message.Result := LRESULT(Brush.Handle);
+        Handled := True;
+      end;
+    CM_ENABLEDCHANGED:
+      begin
+        UpdateColors;
+        Handled := False; // Allow control to handle message
+      end
+  else
+    inherited WndProc(Message);
+  end;
+end;
+
+
+{ TColorizerComboBoxStyleHook }
+
+constructor TColorizerComboBoxStyleHook.Create;
+begin
+  inherited;
+  if Style = csSimple then
+    OverrideEraseBkgnd := True;
+  FMouseOnButton := False;
+  FEditHandle := 0;
+  FListHandle := 0;
+  FListBoxInstance := nil;
+  FIgnoreStyleChanged := False;
+  FVSliderState := tsThumbBtnVertNormal;
+  FVUpState := tsArrowBtnUpNormal;
+  FVDownState := tsArrowBtnDownNormal;
+  FSliderSize := 0;
+  FListBoxTimerCode := 0;
+  FListBoxUpBtnDown := False;
+  FListBoxDownBtnDown := False;
+  FListBoxTrackUpDown := False;
+  FListBoxTrackDownDown := False;
+  FTempItemIndex := -1;
+  UpdateColors;
+end;
+
+destructor TColorizerComboBoxStyleHook.Destroy;
+begin
+  if (FListHandle <> 0) and (FListBoxInstance <> nil) then
+  begin
+    SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FDefListBoxProc));
+    FreeObjectInstance(FListBoxInstance);
+    FListBoxInstance := nil;
+  end;
+  if FListBoxTimerCode <> 0 then
+    ListBoxStopTimer;
+  inherited;
+end;
+
+function TColorizerComboBoxStyleHook.IsChildHandle(AHandle: HWnd): Boolean;
+begin
+  Result := (FEditHandle <> 0) and (FEditHandle = AHandle);
+end;
+
+function TColorizerComboBoxStyleHook.AcceptMessage(var Message: TMessage): Boolean;
+begin
+  Result := {$IFDEF DELPHIXE3_UP}seBorder in Control.StyleElements {$ELSE} True {$ENDIF};
+end;
+
+procedure TColorizerComboBoxStyleHook.ListBoxSetTimer(ATimerCode: Integer);
+begin
+  if FListBoxTimerCode <> 0 then ListBoxStopTimer;
+  FListBoxTimerCode := ATimerCode;
+  if ATimerCode < 4 then
+    SetTimer(FListHandle, 1, 300, nil)
+  else
+    SetTimer(FListHandle, 1, 50, nil);
+end;
+
+procedure TColorizerComboBoxStyleHook.ListBoxStopTimer;
+begin
+  FListBoxTimerCode := -1;
+  KillTimer(FListHandle, 1);
+end;
+
+function TColorizerComboBoxStyleHook.DroppedDown: Boolean;
+begin
+  if (Control <> nil) and (Control is TCustomComboBox) then
+    Result := TCustomComboBox(Control).DroppedDown
+  else if Handle <> 0 then
+    Result := LongBool(SendMessage(Handle, CB_GETDROPPEDSTATE, 0, 0))
+  else
+    Result := False;
+end;
+
+function TColorizerComboBoxStyleHook.GetButtonRect: TRect;
+begin
+  Result := Control.ClientRect;
+  InflateRect(Result, -2, -2);
+  if Control.BiDiMode <> bdRightToLeft then
+    Result.Left := Result.Right - GetSystemMetrics(SM_CXVSCROLL) + 1
+  else
+    Result.Right := Result.Left + GetSystemMetrics(SM_CXVSCROLL) - 1;
+end;
+
+function TColorizerComboBoxStyleHook.Style: TComboBoxStyle;
+const
+  ComboBoxStyles: array[TComboBoxStyle] of DWORD = (
+    CBS_DROPDOWN, CBS_SIMPLE, CBS_DROPDOWNLIST,
+    CBS_DROPDOWNLIST or CBS_OWNERDRAWFIXED,
+    CBS_DROPDOWNLIST or CBS_OWNERDRAWVARIABLE);
+var
+  LStyle: Cardinal;
+begin
+  if (Control <> nil) and (Control is TCustomComboBox) then
+    Result := TCustomComboBoxClass(Control).Style
+  else if Handle <> 0 then
+  begin
+    LStyle := GetWindowLong(Handle, GWL_STYLE);
+    Result := csDropDown;
+    if LStyle and ComboBoxStyles[csDropDown] = ComboBoxStyles[csDropDown] then
+      Result := csDropDown;
+    if LStyle and ComboBoxStyles[csSimple] = ComboBoxStyles[csSimple] then
+      Result := csSimple;
+    if LStyle and ComboBoxStyles[csDropDownList] = ComboBoxStyles[csDropDownList] then
+      Result := csDropDownList;
+    if LStyle and ComboBoxStyles[csOwnerDrawFixed] = ComboBoxStyles[csOwnerDrawFixed] then
+      Result := csOwnerDrawFixed;
+    if LStyle and ComboBoxStyles[csOwnerDrawVariable] = ComboBoxStyles[csOwnerDrawVariable] then
+      Result := csOwnerDrawVariable;
+  end
+  else
+    Result := csDropDown;
+end;
+
+procedure TColorizerComboBoxStyleHook.UpdateColors;
+const
+  ColorStates: array[Boolean] of TStyleColor = (scComboBoxDisabled, scComboBox);
+  FontColorStates: array[Boolean] of TStyleFont = (sfComboBoxItemDisabled, sfComboBoxItemNormal);
+var
+  LStyle: TCustomStyleServices;
+begin
+  LStyle := ColorizerStyleServices;
+  Brush.Color := LStyle.GetStyleColor(ColorStates[Control.Enabled]);
+  FontColor := LStyle.GetStyleFontColor(FontColorStates[Control.Enabled]);
+end;
+
+procedure TColorizerComboBoxStyleHook.PaintBorder(Canvas: TCanvas);
+var
+  R, ControlRect, EditRect, ListRect: TRect;
+  DrawState: TThemedComboBox;
+  BtnDrawState: TThemedComboBox;
+  Details: TThemedElementDetails;
+  Buffer: TBitmap;
+begin
+  if not ColorizerStyleServices.Available then Exit;
+
+  if not Control.Enabled then
+    BtnDrawState := tcDropDownButtonDisabled
+  else if DroppedDown then
+    BtnDrawState := tcDropDownButtonPressed
+  else if FMouseOnButton then
+    BtnDrawState := tcDropDownButtonHot
+  else
+    BtnDrawState := tcDropDownButtonNormal;
+
+  if not Control.Enabled then
+    DrawState := tcBorderDisabled
+  else
+  if Control.Focused then
+    DrawState := tcBorderFocused
+  else if MouseInControl then
+    DrawState := tcBorderHot
+  else
+    DrawState := tcBorderNormal;
+
+  Buffer := TBitMap.Create;
+  Buffer.SetSize(Control.Width, Control.Height);
+  try
+    R := Rect(0, 0, Buffer.Width, Buffer.Height);
+    // draw border + client in buffer
+    Details := ColorizerStyleServices.GetElementDetails(DrawState);
+    if (Style = csSimple) and (FListHandle <> 0) then
+    begin
+      GetWindowRect(FListHandle, ListRect);
+      GetWindowRect(Handle, ControlRect);
+      R.Bottom := ListRect.Top - ControlRect.Top;
+      ColorizerStyleServices.DrawElement(Buffer.Canvas.Handle, Details, R);
+      R := Rect(0, Control.Height - (ControlRect.Bottom - ListRect.Bottom),
+        Control.Width, Control.Height);
+      with Buffer.Canvas do
+      begin
+        Brush.Style := bsSolid;
+        Brush.Color := ColorizerStyleServices.GetSystemColor(clBtnFace);
+        FillRect(R);
+      end;
+      R := Rect(0, 0, Buffer.Width, Buffer.Height);
+      R.Bottom := ListRect.Top - ControlRect.Top;
+    end
+    else
+      ColorizerStyleServices.DrawElement(Buffer.Canvas.Handle, Details, R);
+
+    if {$IFDEF DELPHIXE3_UP}not (seClient in Control.StyleElements) and {$ENDIF} (FEditHandle = 0) then
+    begin
+      R := Control.ClientRect;
+      InflateRect(R, -3, -3);
+      R.Right := ButtonRect.Left - 2;
+      with Buffer.Canvas do
+      begin
+        Brush.Color := TWinControlClass(Control).Color;
+        FillRect(R);
+      end;
+    end;
+    // draw button in buffer
+    if Style <> csSimple then
+    begin
+      Details := ColorizerStyleServices.GetElementDetails(BtnDrawState);
+      ColorizerStyleServices.DrawElement(Buffer.Canvas.Handle, Details, ButtonRect);
+    end;
+    // calculation of exclude area for drawing buffer
+    if (SendMessage(Handle, CB_GETCURSEL, 0, 0) >= 0) and (FEditHandle = 0) then
+    begin
+      R := Control.ClientRect;
+      InflateRect(R, -3, -3);
+      R.Right := ButtonRect.Left - 2;
+      ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+    end
+    else
+    if FEditHandle <> 0 then
+    begin
+      GetWindowRect(Handle, R);
+      GetWindowRect(FEditHandle, EditRect);
+      OffsetRect(EditRect, -R.Left, -R.Top);
+      with EditRect do
+        ExcludeClipRect(Canvas.Handle, Left, Top, Right, Bottom);
+    end;
+    // draw buffer
+    Canvas.Draw(0, 0, Buffer);
+  finally
+    Buffer.Free;
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.DrawItem(Canvas: TCanvas;
+  Index: Integer; const R: TRect; Selected: Boolean);
+var
+  DIS: TDrawItemStruct;
+begin
+  FillChar(DIS, SizeOf(DIS), 0);
+  DIS.CtlType := ODT_COMBOBOX;
+  DIS.CtlID := GetDlgCtrlID(Handle);
+  DIS.itemAction := ODA_DRAWENTIRE;
+  DIS.hDC := Canvas.Handle;
+  DIS.hwndItem := Handle;
+  DIS.rcItem := R;
+  DIS.itemID := Index;
+  DIS.itemData := SendMessage(FListHandle, LB_GETITEMDATA, 0, 0);
+  if Selected then
+    DIS.itemState := DIS.itemState or ODS_FOCUS or ODS_SELECTED;
+
+  SendMessage(Handle, WM_DRAWITEM, Handle, LPARAM(@DIS));
+end;
+
+procedure TColorizerComboBoxStyleHook.WMParentNotify(var Message: TMessage);
+begin
+  if (FListHandle = 0) and (LoWord(Message.WParam) = WM_CREATE) then
+  begin
+    if (Message.LParam <> 0) and (FListBoxInstance = nil) then
+      HookListBox(Message.LParam);
+  end
+  else if (FEditHandle = 0) and (LoWord(Message.WParam) = WM_CREATE) then
+    FEditHandle := Message.LParam;
+end;
+
+procedure TColorizerComboBoxStyleHook.WndProc(var Message: TMessage);
+const
+  States: array[Boolean] of TStyleColor = (scEditDisabled, scComboBox);
+begin
+  case Message.Msg of
+    WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC,
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+      begin
+        SetTextColor(Message.WParam, ColorToRGB(FontColor));
+        Brush.Color := ColorizerStyleServices.GetStyleColor(States[Control.Enabled]);
+//        if seClient in Control.StyleElements then
+//          Brush.Color := ColorizerStyleServices.GetStyleColor(States[Control.Enabled])
+//        else
+//          Brush.Color := TWinControlClass(Control).Color;
+        SetBkColor(Message.WParam, ColorToRGB(Brush.Color));
+        Message.Result := LRESULT(Brush.Handle);
+        Handled := True;
+      end;
+    CM_ENABLEDCHANGED:
+      begin
+        UpdateColors;
+        Handled := False; // Allow control to handle message
+      end;
+    CM_FOCUSCHANGED:
+      begin
+        Invalidate;
+        Handled := False; // Allow control to handle message
+      end;
+  else
+    inherited WndProc(Message);
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.MouseEnter;
+begin
+  inherited;
+  Invalidate;
+end;
+
+procedure TColorizerComboBoxStyleHook.MouseLeave;
+begin
+  inherited;
+  if not DroppedDown and FMouseOnButton then
+    FMouseOnButton := False;
+  Invalidate;
+end;
+
+procedure TColorizerComboBoxStyleHook.WMMouseMove(var Message: TWMMouse);
+var
+  P: TPoint;
+  R: TRect;
+  FOldMouseOnButton: Boolean;
+begin
+  CallDefaultProc(TMessage(Message));
+  inherited;
+
+  P := Point(Message.XPos, Message.YPos);
+  FOldMouseOnButton := FMouseOnButton;
+  R := ButtonRect;
+  if R.Contains(P) then
+    FMouseOnButton := True
+  else
+    FMouseOnButton := False;
+
+  if FOldMouseOnButton <> FMouseOnButton then
+    InvalidateRect(Handle, @R, False);
+
+  Handled := True;
+end;
+
+procedure TColorizerComboBoxStyleHook.CNDrawItem(var Message: TWMDrawItem);
+begin
+  WMDrawItem(Message);
+  Handled := True;
+end;
+
+procedure TColorizerComboBoxStyleHook.WMDrawItem(var Message: TWMDrawItem);
+begin
+  CallDefaultProc(TMessage(Message));
+  Handled := True;
+end;
+
+procedure TColorizerComboBoxStyleHook.WMPaint(var Message: TMessage);
+var
+  R: TRect;
+  Canvas: TCanvas;
+  PS: TPaintStruct;
+  SaveIndex: Integer;
+  DC: HDC;
+//  LDetails: TThemedElementDetails;
+//  LCaption: string;
+begin
+  DC := Message.WParam;
+  Canvas := TCanvas.Create;
+  try
+    if DC = 0 then
+      Canvas.Handle := BeginPaint(Handle, PS)
+    else
+      Canvas.Handle := DC;
+
+    SaveIndex := SaveDC(Canvas.Handle);
+    try
+      PaintBorder(Canvas);
+    finally
+      RestoreDC(Canvas.Handle, SaveIndex);
+    end;
+
+    if (Style <> csSimple) and (FEditHandle = 0) then
+    begin
+      R := Control.ClientRect;
+      InflateRect(R, -3, -3);
+      if Control.BiDiMode <> bdRightToLeft then
+        R.Right := ButtonRect.Left - 1
+      else
+        R.Left := ButtonRect.Right + 1;
+      SaveIndex := SaveDC(Canvas.Handle);
+      try
+        IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+        if not DroppedDown then
+          DrawItem(Canvas, TComboBox(Control).ItemIndex, R, Focused)
+        else
+          DrawItem(Canvas, FTempItemIndex, R, Focused)
+      finally
+        RestoreDC(Canvas.Handle, SaveIndex);
+      end;
+
+
+//      R := Control.ClientRect;
+//      InflateRect(R, -3, -3);
+//      if Control.BiDiMode <> bdRightToLeft then
+//        R.Right := ButtonRect.Left - 1
+//      else
+//        R.Left := ButtonRect.Right + 1;
+//      SaveIndex := SaveDC(Canvas.Handle);
+//      try
+//        IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+//        //LItemIndex := UINT(SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0));
+//        Canvas.Brush.Color := clgreen;//StyleServices.GetSystemColor(clWindow);
+//        Canvas.FillRect(R);
+//
+//        LCaption:='';
+//        AddLog2('csOwnerDrawVariable ItemIndex '+IntToStr(TCustomComboBoxClass(Control).ItemIndex));
+//        if TCustomComboBoxClass(Control).ItemIndex>=0 then
+//          LCaption:=TCustomComboBoxClass(Control).Items[TCustomComboBoxClass(Control).ItemIndex];
+//        AddLog2('csOwnerDrawVariable LCaption '+LCaption);
+//
+//        if (Style = csOwnerDrawFixed) or
+//          (Style = csOwnerDrawVariable)
+//        then
+//        begin
+//          //DrawItem(Canvas, LItemIndex, R, Focused);
+//          LDetails := ColorizerStyleServices.GetElementDetails
+//            (TThemedComboBox.tcComboBoxDontCare);
+//         // _DrawControlText(Canvas, TCustomComboBoxClass(Control).Text, R, [tfLeft, tfVerticalCenter, tfSingleLine], StyleServices.GetSystemColor(clWindowText));
+//          _DrawControlText(Canvas, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS), clRed); //TColorizerLocalSettings.ColorMap.FontColor
+//        end
+//        else
+//        begin
+//          LDetails := ColorizerStyleServices.GetElementDetails
+//            (TThemedComboBox.tcComboBoxDontCare);
+//         // _DrawControlText(Canvas.Handle, LDetails, Control.Text, R, [tfLeft, tfVerticalCenter, tfSingleLine]);
+//          _DrawControlText(Canvas, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS), TColorizerLocalSettings.ColorMap.FontColor);
+//        end;
+//
+//      finally
+//        RestoreDC(Canvas.Handle, SaveIndex);
+//      end;
+
+    end;
+
+  finally
+    Canvas.Handle := 0;
+    Canvas.Free;
+    if DC = 0 then
+      EndPaint(Handle, PS);
+  end;
+
+  Handled := True;
+end;
+
+procedure TColorizerComboBoxStyleHook.WMCommand(var Message: TWMCommand);
+begin
+  if (Message.NotifyCode = CBN_SELENDCANCEL) or (Message.NotifyCode = CBN_SELENDOK) or
+     (Message.NotifyCode = CBN_CLOSEUP) or (Message.NotifyCode = CBN_DROPDOWN) or
+     (Message.NotifyCode = CBN_SELCHANGE) then
+  begin
+    if (Message.NotifyCode = CBN_DROPDOWN) or (Message.NotifyCode = CBN_SELCHANGE) then
+      FTempItemIndex := TComboBox(Control).ItemIndex;
+
+    if FListBoxTimerCode <> 0 then
+      ListBoxStopTimer;
+    FMouseOnButton := False;
+    Invalidate;
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.CNCommand(var Message: TWMCommand);
+begin
+  if (Message.NotifyCode = CBN_SELENDCANCEL) or (Message.NotifyCode = CBN_SELENDOK) or
+     (Message.NotifyCode = CBN_CLOSEUP) or (Message.NotifyCode = CBN_DROPDOWN) or
+     (Message.NotifyCode = CBN_SELCHANGE)  then
+  begin
+    if (Message.NotifyCode = CBN_DROPDOWN) or (Message.NotifyCode = CBN_SELCHANGE) then
+      FTempItemIndex := TComboBox(Control).ItemIndex;
+
+    if FListBoxTimerCode <> 0 then ListBoxStopTimer;
+    FMouseOnButton := False;
+    Invalidate;
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.HookListBox(AListHandle: HWND);
+begin
+  if (AListHandle <> 0) and (FListBoxInstance = nil) then
+  begin
+    FListHandle := AListHandle;
+    FListBoxInstance := MakeObjectInstance(ListBoxWndProc);
+    FDefListBoxProc := Pointer(GetWindowLong(FListHandle, GWL_WNDPROC));
+    SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FListBoxInstance));
+  end;
+end;
+
+
+function TColorizerComboBoxStyleHook.ListBoxBoundsRect: TRect;
+begin
+  GetWindowRect(FListHandle, Result);
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxClientRect: TRect;
+begin
+   GetClientRect(FListHandle, Result);
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertScrollRect: TRect;
+begin
+  Result := ListBoxBoundsRect;
+  OffsetRect(Result, -Result.Left, -Result.Top);
+  InflateRect(Result, -1, -1);
+  OffsetRect(Result, 1, 1);
+  if Control.BiDiMode <> bdRightToLeft then
+    Result.Left := Result.Right - GetSystemMetrics(SM_CXVSCROLL)
+  else
+    Result.Right := Result.Left + GetSystemMetrics(SM_CXVSCROLL);
+  if ListBoxBoundsRect.Height > 30 then OffsetRect(Result, -1, -1);
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertDownButtonRect: TRect;
+begin
+  Result := ListBoxVertScrollRect;
+  if Result.Width > 0 then
+    Result.Top := Result.Bottom - GetSystemMetrics(SM_CYVTHUMB)
+  else
+    Result := TRect.Empty;
+ end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertUpButtonRect: TRect;
+begin
+  Result := ListBoxVertScrollRect;
+  if Result.Width > 0 then
+    Result.Bottom := Result.Top + GetSystemMetrics(SM_CYVTHUMB)
+  else
+    Result := TRect.Empty;
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertScrollArea: TRect;
+begin
+  if GetWindowLong(FListHandle, GWL_STYLE) and WS_VSCROLL = 0 then
+  begin
+    Result := TRect.Empty;
+    Exit;
+  end;
+  Result := ListBoxBoundsRect;
+  OffsetRect(Result, -Result.Left, -Result.Top);
+  if Control.BiDiMode <> bdRightToLeft then
+     Result.Left := Result.Right - GetSystemMetrics(SM_CYVSCROLL) - 1
+   else
+     Result.Right := Result.Left + GetSystemMetrics(SM_CYVSCROLL);
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertSliderRect: TRect;
+var
+  I, LVisibleHeight, LTotalHeight, LSize, LTotalSize,
+  LFinalHeight, LItemHeight, LBoundsHeight, LBorderHeight,
+  LTopIndex, LItemCount: Integer;
+begin
+  Result := ListBoxVertScrollRect;
+  Result.Top := ListBoxVertUpButtonRect.Bottom;
+  Result.Bottom := ListBoxVertDownButtonRect.Top;
+  LSize := Result.Bottom - Result.Top;
+  LTopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
+  LItemCount := SendMessage(FListHandle, LB_GETCOUNT, 0, 0);
+  LTotalSize := LItemCount * LSize;
+
+  if LTotalSize = 0 then
+    Exit;
+
+  Result.Top := Result.Top + Round(LTopIndex / LItemCount * LSize);
+
+  LTotalHeight := 1;
+  FInvsibleCount := 0;
+  LBoundsHeight := ListBoxBoundsRect.Height;
+  LItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+  for I := 0 to LItemCount - 1 do
+  begin
+    LTotalHeight := LTotalHeight + LItemHeight;
+    if (LTotalHeight > LBoundsHeight) and (FInvsibleCount = 0) then
+      FInvsibleCount := LItemCount - I;
+  end;
+
+  LVisibleHeight := 0;
+  for I := LTopIndex to LItemCount - 1 do
+  begin
+    LVisibleHeight := LVisibleHeight + LItemHeight;
+    if Style <> csSimple then LBorderHeight := 2 else
+      LBorderHeight := 4;
+    if LVisibleHeight >= ListBoxBoundsRect.Height - LBorderHeight then
+      Break;
+  end;
+
+  Result.Bottom := Result.Top + Round(LVisibleHeight / LTotalHeight * LSize);
+  if Result.Height < 8 then
+  begin
+    Dec(LSize, 8 - Result.Height + 1);
+    Result.Top := ListBoxVertUpButtonRect.Bottom +
+      Round(LTopIndex / LItemCount * LSize);
+    Result.Bottom := Result.Top + 8;
+  end;
+
+  if (I = LItemCount - 1) and
+     (Result.Bottom <> ListBoxVertDownButtonRect.Top) then
+  begin
+    LFinalHeight := Result.Height;
+    Result.Bottom := ListBoxVertDownButtonRect.Top;
+    Result.Top := Result.Bottom - LFinalHeight;
+  end;
+  FSliderSize := Result.Height;
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertTrackRect: TRect;
+begin
+  Result := ListBoxVertScrollRect;
+  if Result.Width > 0 then
+  begin
+    Result.Top := Result.Top + GetSystemMetrics(SM_CYVTHUMB);
+    Result.Bottom := Result.Bottom - GetSystemMetrics(SM_CYVTHUMB);
+  end
+  else
+    Result := TRect.Empty;
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertTrackRectUp: TRect;
+begin
+  Result := ListBoxVertTrackRect;
+  if (Result.Width > 0) and (ListBoxVertSliderRect.Height > 0) then
+    Result.Bottom := ListBoxVertSliderRect.Top;
+end;
+
+function TColorizerComboBoxStyleHook.ListBoxVertTrackRectDown: TRect;
+begin
+  Result := ListBoxVertTrackRect;
+  if (Result.Width > 0) and (ListBoxVertSliderRect.Height > 0) then
+    Result.Top := ListBoxVertSliderRect.Bottom;
+end;
+
+procedure TColorizerComboBoxStyleHook.PaintListBoxBorder(Canvas: TCanvas; const R: TRect);
+begin
+  with Canvas do
+  begin
+    Brush.Color := ColorizerStyleServices.GetSystemColor(clWindowFrame);
+    FillRect(R);
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.DrawListBoxVertScroll(DC: HDC);
+var
+  B: TBitmap;
+  Details: TThemedElementDetails;
+  Canvas: TCanvas;
+  R: TRect;
+begin
+  if GetWindowLong(FListHandle, GWL_STYLE) and WS_VSCROLL = 0 then
+    Exit;
+  Canvas := TCanvas.Create;
+  try
+    if DC <> 0 then
+      Canvas.Handle := DC
+    else
+      Canvas.Handle := GetWindowDC(FListHandle);
+    if ListBoxVertScrollRect.Width > 0 then
+    begin
+      B := TBitmap.Create;
+      try
+        B.Width := ListBoxVertScrollRect.Width;
+        B.Height := ListBoxVertScrollRect.Height;
+        MoveWindowOrg(B.Canvas.Handle, -ListBoxVertScrollRect.Left, -ListBoxVertScrollRect.Top);
+
+        if ColorizerStyleServices.Available then
+        begin
+          R := ListBoxVertScrollRect;
+          R.Top := ListBoxVertUpButtonRect.Bottom;
+          R.Bottom := ListBoxVertDownButtonRect.Top;
+          if R.Height > 0 then
+          begin
+            Details := ColorizerStyleServices.GetElementDetails(tsUpperTrackVertNormal);
+            ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, R);
+          end;
+          Details := ColorizerStyleServices.GetElementDetails(FVSliderState);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, ListBoxVertSliderRect);
+          Details := ColorizerStyleServices.GetElementDetails(FVUpState);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, ListBoxVertUpButtonRect);
+          Details := ColorizerStyleServices.GetElementDetails(FVDownState);
+          ColorizerStyleServices.DrawElement(B.Canvas.Handle, Details, ListBoxVertDownButtonRect);
+        end;
+
+        MoveWindowOrg(B.Canvas.Handle, ListBoxVertScrollRect.Left, ListBoxVertScrollRect.Top);
+        Canvas.Draw(ListBoxVertScrollRect.Left, ListBoxVertScrollRect.Top,  B);
+      finally
+        B.Free;
+      end;
+    end;
+  finally
+    if DC <> 0 then
+      Canvas.Handle := 0
+    else
+    begin
+      ReleaseDC(FListHandle, Canvas.Handle);
+      Canvas.Handle := 0;
+    end;
+    Canvas.Free;
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.DrawListBoxBorder;
+var
+  R: TRect;
+  Canvas: TCanvas;
+  SaveIdx: Integer;
+  P: TPoint;
+begin
+  Canvas := TCanvas.Create;
+  try
+    Canvas.Handle := GetWindowDC(FListHandle);
+    P := Point(0, 0);
+    ClientToScreen(FListHandle, P);
+    GetWindowRect(FListHandle, R);
+    P.X := P.X - R.Left;
+    P.Y := P.Y - R.Top;
+    if (R.Width < 5000) and (R.Height < 5000) then
+    begin
+      GetClientRect(FListHandle, R);
+      ExcludeClipRect(Canvas.Handle, P.X, P.Y, R.Right - R.Left + P.X, R.Bottom - R.Top + P.Y);
+      GetWindowRect(FListHandle, R);
+      OffsetRect(R, -R.Left, -R.Top);
+      SaveIdx := SaveDC(Canvas.Handle);
+      try
+        PaintListBoxBorder(Canvas, R);
+      finally
+        RestoreDC(Canvas.Handle, SaveIdx);
+      end;
+      DrawListBoxVertScroll(Canvas.Handle);
+    end;
+  finally
+    ReleaseDC(FListHandle, Canvas.Handle);
+    Canvas.Handle := 0;
+    Canvas.Free;
+  end;
+end;
+
+procedure TColorizerComboBoxStyleHook.ListBoxWndProc(var Msg: TMessage);
+var
+  MsgHandled: Boolean;
+
+  procedure WMNCCalcSize(var Msg: TWMNCCalcSize);
+  var
+    LCalcSizeParams: PNCCalcSizeParams;
+    LWindowPos: PWindowPos;
+    LLeft, LRight, LTop, LBottom: Integer;
+    LStyle, LNewStyle: Integer;
+  begin
+    LStyle := GetWindowLong(FListHandle, GWL_STYLE);
+    if ((LStyle and WS_VSCROLL = WS_VSCROLL) or (LStyle and WS_HSCROLL = WS_HSCROLL)) then
+    begin
+      LNewStyle := LStyle and not WS_VSCROLL and not WS_HSCROLL;
+      FIgnoreStyleChanged := True;
+      SetWindowLong(FListHandle, GWL_STYLE, LNewStyle);
+      Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
+        TMessage(Msg).Msg, TMessage(Msg).WParam, TMessage(Msg).LParam);
+      SetWindowLong(FListHandle, GWL_STYLE, LStyle);
+      FIgnoreStyleChanged := False;
+    end
+    else
+      Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
+       TMessage(Msg).Msg, TMessage(Msg).WParam, TMessage(Msg).LParam);
+
+    if (Msg.CalcValidRects) then
+    begin
+      LCalcSizeParams := Msg.CalcSize_Params;
+      if Control.BiDiMode <> bdRightToLeft then
+      begin
+        LLeft := 1;
+         if LStyle and WS_VSCROLL = WS_VSCROLL then
+           LRight := ListBoxVertScrollRect.Width + 1
+         else
+          LRight := 1;
+        end
+      else
+      begin
+        LRight := 1;
+        if LStyle and WS_VSCROLL = WS_VSCROLL then
+         LLeft := ListBoxVertScrollRect.Width + 1
+       else
+         LLeft := 1;
+      end;
+
+      LTop := 1;
+      LBottom := 1;
+      LWindowPos := LCalcSizeParams.lppos;
+      with LCalcSizeParams^.rgrc[0] do
+      begin
+        left := LWindowPos^.x;
+        top := LWindowPos^.y;
+        right := LWindowPos^.x + LWindowPos^.cx;
+        bottom := LWindowPos^.y + LWindowPos^.cy;
+        left := left + LLeft;
+        top := top + LTop;
+        right := right - LRight;
+        bottom := bottom - LBottom;
+      end;
+      LCalcSizeParams^.rgrc[1] := LCalcSizeParams^.rgrc[0];
+      Msg.CalcSize_Params := LCalcSizeParams;
+      Msg.Result := WVR_VALIDRECTS;
+    end;
+    Msg.Result := 0;
+    MsgHandled := True;
+  end;
+
+  procedure WMMouseWheel(var Msg: TWMMouseWheel);
+  var
+    Index: Integer;
+    R: TRect;
+  begin
+    SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+    Index := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
+    if Msg.WheelDelta < 0 then
+      Inc(Index)
+    else
+      Dec(Index);
+    SendMessage(FListHandle, LB_SETTOPINDEX, Index, 0);
+    SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+    R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+    RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+    DrawListBoxVertScroll(0);
+    MsgHandled := True;
+  end;
+
+  procedure WMNCLButtonDblClk(var Msg: TWMMouse);
+  var
+    R: TRect;
+    P: TPoint;
+  begin
+    P := Point(Msg.XPos, Msg.YPos);
+    if ListBoxVertScrollArea.Contains(P) then
+    begin
+      if ListBoxVertUpButtonRect.Contains(Point(Msg.XPos, Msg.YPos)) then
+      begin
+        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - 1, 0);
+        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+        DrawListBoxVertScroll(0);
+        Exit;
+      end;
+
+      if ListBoxVertDownButtonRect.Contains(Point(Msg.XPos, Msg.YPos)) then
+      begin
+        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + 1, 0);
+        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+        DrawListBoxVertScroll(0);
+        Exit;
+      end;
+    end;
+    MsgHandled := True;
+  end;
+
+  procedure WMLButtonDown(var Msg: TWMMouse);
+  var
+    P: TPoint;
+    R: TRect;
+    ItemHeight, VisibleCount, TopIndex: Integer;
+  begin
+    MsgHandled := False;
+    P := Point(Msg.XPos, Msg.YPos);
+    if Control.BiDiMode = bdRightToLeft then P.X := - P.X;
+    FDownPos := P;
+    if ListBoxVertScrollArea.Contains(P) then
+    begin
+      if Style = csSimple then
+        SetCapture(FListHandle);
+      FDownPos := P;
+      if ListBoxVertTrackRectUp.Contains(P) then
+      begin
+        ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+        if ItemHeight > 0 then
+          VisibleCount := ListBoxClientRect.Height div ItemHeight
+        else
+          VisibleCount := 0;
+        TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - VisibleCount + 1;
+        if TopIndex < 0 then TopIndex := 0;
+        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+        SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
+        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+        DrawListBoxVertScroll(0);
+        ListBoxSetTimer(3);
+      end
+      else if ListBoxVertTrackRectDown.Contains(P) then
+      begin
+        ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+        if ItemHeight > 0 then
+          VisibleCount := ListBoxClientRect.Height div ItemHeight
+        else
+          VisibleCount := 0;
+        TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + VisibleCount - 1;
+        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+        SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
+        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+        DrawListBoxVertScroll(0);
+        ListBoxSetTimer(4);
+      end
+      else if ListBoxVertSliderRect.Contains(P) then
+      begin
+        FVSliderState := tsThumbBtnVertPressed;
+        FDownSliderPos := FDownPos.Y - ListBoxVertSliderRect.Top;
+        DrawListBoxVertScroll(0);
+      end
+      else if ListBoxVertDownButtonRect.Contains(P) then
+      begin
+        FListBoxDownBtnDown := True;
+        FVDownState := tsArrowBtnDownPressed;
+        DrawListBoxVertScroll(0);
+
+        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + 1, 0);
+        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+
+        ListBoxSetTimer(2);
+      end
+      else if ListBoxVertUpButtonRect.Contains(P) then
+      begin
+        FListBoxUpBtnDown := True;
+        FVUpState := tsArrowBtnUpPressed;
+        DrawListBoxVertScroll(0);
+
+        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - 1, 0);
+        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+
+        ListBoxSetTimer(1);
+      end;
+      MsgHandled := True;
+    end
+    else
+    begin
+      if (FVSliderState <> tsThumbBtnVertNormal) or
+         (FVUpState <> tsArrowBtnUpNormal) or (FVDownState <> tsArrowBtnDownNormal) then
+      begin
+        FVSliderState := tsArrowBtnUpNormal;
+        FVUpState := tsArrowBtnUpNormal;
+        FVDownState := tsArrowBtnDownNormal;
+        DrawListBoxVertScroll(0);
+      end;
+    end;
+    FOldIdx := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
+  end;
+
+  procedure WMMouseMove(var Msg: TWMMouse);
+  var
+    P: TPoint;
+    NewIndex, Index: Integer;
+    Dist: Integer;
+    R: TRect;
+  begin
+    P := Point(Msg.XPos, Msg.YPos);
+    if Control.BiDiMode = bdRightToLeft then
+      P.X := - P.X;
+
+    FMovePos := P;
+    if (FVSliderState = tsThumbBtnVertPressed) then
+    begin
+      Index := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
+      Dist := (ListBoxVertScrollRect.Height - ListBoxVertUpButtonRect.Height - ListBoxVertDownButtonRect.Height - ListBoxVertSliderRect.Height);
+      if Dist > 0 then
+      begin
+        NewIndex := round((((FMovePos.y - FDownSliderPos - ListBoxVertUpButtonRect.Bottom) / Dist) * FInvsibleCount));
+        if NewIndex <> Index then
+        begin
+          if NewIndex < 0 then NewIndex := 0;
+          if NewIndex >= SendMessage(FListHandle, LB_GETCOUNT, 0, 0) then NewIndex := SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - 1;
+          SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+          SendMessage(FListHandle, LB_SETTOPINDEX, NewIndex, 0);
+          SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+          R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+          RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+          DrawListBoxVertScroll(0);
+        end;
+      end;
+      MsgHandled := True;
+      Exit;
+    end;
+
+    if FListBoxUpBtnDown and not ListBoxVertUpButtonRect.Contains(P) and (FVUpState = tsArrowBtnUpPressed)
+    then
+    begin
+      FVUpState := tsArrowBtnUpNormal;
+      DrawListBoxVertScroll(0);
+      ListBoxStopTimer;
+      Exit;
+    end;
+
+    if FListBoxUpBtnDown and ListBoxVertUpButtonRect.Contains(P) and (FVUpState = tsArrowBtnUpNormal)
+    then
+    begin
+      FVUpState := tsArrowBtnUpPressed;
+      DrawListBoxVertScroll(0);
+      ListBoxSetTimer(5);
+      Exit;
+    end;
+
+    if FListBoxDownBtnDown and not ListBoxVertDownButtonRect.Contains(P) and (FVDownState = tsArrowBtnDownPressed)
+    then
+    begin
+      FVDownState := tsArrowBtnDownNormal;
+      DrawListBoxVertScroll(0);
+      ListBoxStopTimer;
+      Exit;
+    end;
+
+    if FListBoxDownBtnDown and ListBoxVertDownButtonRect.Contains(P) and (FVDownState = tsArrowBtnDownNormal)
+    then
+    begin
+      FVDownState := tsArrowBtnDownPressed;
+      DrawListBoxVertScroll(0);
+      ListBoxSetTimer(6);
+      Exit;
+    end;
+
+    if ListBoxVertScrollArea.Contains(P) then
+    begin
+      if ListBoxVertSliderRect.Contains(P) and (FVSliderState = tsThumbBtnVertNormal) then
+      begin
+        FVSliderState := tsThumbBtnVertHot;
+        DrawListBoxVertScroll(0);
+      end
+      else if not ListBoxVertSliderRect.Contains(P) and (FVSliderState = tsThumbBtnVertHot) then
+      begin
+        FVSliderState := tsThumbBtnVertNormal;
+        DrawListBoxVertScroll(0);
+      end
+      else if ListBoxVertUpButtonRect.Contains(P) and (FVUpState = tsArrowBtnUpNormal) then
+      begin
+        FVUpState := tsArrowBtnUpHot;
+        DrawListBoxVertScroll(0);
+      end
+      else if not ListBoxVertUpButtonRect.Contains(P) and (FVUpState = tsArrowBtnUpHot) then
+      begin
+        FVUpState := tsArrowBtnUpNormal;
+        DrawListBoxVertScroll(0);
+      end
+      else if ListBoxVertDownButtonRect.Contains(P) and (FVDownState = tsArrowBtnDownNormal) then
+      begin
+        FVDownState :=  tsArrowBtnDownHot;
+        DrawListBoxVertScroll(0);
+      end
+      else if not ListBoxVertDownButtonRect.Contains(P) and (FVDownState =  tsArrowBtnDownHot) then
+      begin
+        FVDownState :=  tsArrowBtnDownNormal;
+        DrawListBoxVertScroll(0);
+      end;
+      MsgHandled := True;
+    end
+    else
+    begin
+      if (FVSliderState <> tsThumbBtnVertNormal) or (FVUpState <> tsArrowBtnUpNormal) or
+         (FVUpState <> tsArrowBtnDownNormal) then
+      begin
+        if FListBoxTimerCode <> 0 then ListBoxStopTimer;
+        FVSliderState := tsThumbBtnVertNormal;
+        FVUpState := tsArrowBtnUpNormal;
+        FVDownState := tsArrowBtnDownNormal;
+        DrawListBoxVertScroll(0);
+      end;
+    end;
+  end;
+
+  procedure WMLButtonUp(var Msg: TWMMouse);
+  var
+    P: TPoint;
+  begin
+    FListBoxUpBtnDown := False;
+    FListBoxDownBtnDown := False;
+    FListBoxTrackUpDown := False;
+    FListBoxTrackDownDown := False;
+
+    P := Point(Msg.XPos, Msg.YPos);
+    if Control.BiDiMode = bdRightToLeft then P.X := - P.X;
+
+    if (Style = csSimple) and ListBoxVertScrollArea.Contains(FDownPos)
+    then
+      ReleaseCapture;
+
+
+    if ListBoxVertSliderRect.Contains(P) then
+      FVSliderState := tsThumbBtnVertHot
+    else
+      FVSliderState := tsThumbBtnVertNormal;
+
+    if ListBoxVertUpButtonRect.Contains(P) then
+      FVUpState := tsArrowBtnUpHot
+    else
+      FVUpState := tsArrowBtnUpNormal;
+
+    if ListBoxVertDownButtonRect.Contains(P) then
+      FVDownState := tsArrowBtnDownHot
+    else
+      FVDownState := tsArrowBtnDownNormal;
+
+    DrawListBoxVertScroll(0);
+
+    if FListBoxTimerCode <> 0 then
+      ListBoxStopTimer;
+
+    MsgHandled := ListBoxVertScrollArea.Contains(P);
+  end;
+
+  procedure WMNCLButtonDown(var Msg: TWMMouse);
+  var
+    P: TPoint;
+  begin
+    if Style <> csSimple then
+      SetCapture(FListHandle);
+    P := Point(Msg.XPos, Msg.YPos);
+    ScreenToClient(FListHandle, P);
+    with P do
+    begin
+      Msg.XPos := X;
+      Msg.YPos := Y;
+    end;
+    WMLButtonDown(Msg);
+    MsgHandled := True;
+  end;
+
+  procedure WMPrint(var Msg: TMessage);
+  var
+    SaveIndex: Integer;
+    Canvas: TCanvas;
+    R: TRect;
+  begin
+    Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle, Msg.Msg, Msg.WParam, Msg.LParam);
+
+    if (Msg.LParam and PRF_NONCLIENT = PRF_NONCLIENT) and
+       (Msg.wParam > 0) then
+    begin
+      SaveIndex := 0;
+      Canvas := TCanvas.Create;
+      try
+        SaveIndex := SaveDC(Msg.WParam);
+        Canvas.Handle := Msg.WParam;
+        GetWindowRect(FListHandle, R);
+        OffsetRect(R, -R.Left, -R.Top);
+        ExcludeClipRect(Canvas.Handle, R.Left + 2, R.Top + 2, R.Right - 2, R.Bottom - 2);
+        PaintListBoxBorder(Canvas, R);
+      finally
+        if SaveIndex <> 0 then
+          RestoreDC(Canvas.Handle, SaveIndex);
+        Canvas.Handle := 0;
+        Canvas.Free;
+      end;
+      DrawListBoxVertScroll(Msg.wParam);
+    end;
+    MsgHandled := True;
+  end;
+
+  procedure WMTimer(var Msg: TMessage);
+  var
+    R: TRect;
+    ItemHeight, VisibleCount, TopIndex: Integer;
+  begin
+    case FListBoxTimerCode of
+      1: ListBoxSetTimer(5);
+      2: ListBoxSetTimer(6);
+      3: ListBoxSetTimer(7);
+      4: ListBoxSetTimer(8);
+      5:
+        begin
+          SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+          SendMessage(FListHandle, LB_SETTOPINDEX,
+            SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - 1, 0);
+          SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+          R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+          RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+          DrawListBoxVertScroll(0);
+        end;
+      6:
+        begin
+          SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+          SendMessage(FListHandle, LB_SETTOPINDEX,
+            SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + 1, 0);
+          SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+          R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+          RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+          DrawListBoxVertScroll(0);
+        end;
+      7:
+        begin
+          if ListBoxVertSliderRect.Contains(FMovePos) or (FMovePos.Y > ListBoxVertSliderRect.Bottom) then
+          begin
+            ListBoxStopTimer;
+            Exit;
+          end;
+          ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+          if ItemHeight > 0 then
+            VisibleCount := ListBoxClientRect.Height div ItemHeight
+          else
+            VisibleCount := 0;
+          TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - VisibleCount + 1;
+          if TopIndex < 0 then TopIndex := 0;
+          SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+          SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
+          SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+          R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+          RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+          DrawListBoxVertScroll(0);
+        end;
+      8:
+        begin
+          if ListBoxVertSliderRect.Contains(FMovePos) or (FMovePos.Y < ListBoxVertSliderRect.Top) then
+          begin
+            ListBoxStopTimer;
+            Exit;
+          end;
+          ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+          if ItemHeight > 0 then
+            VisibleCount := ListBoxClientRect.Height div ItemHeight
+          else
+            VisibleCount := 0;
+          TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + VisibleCount - 1;
+          SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+          SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
+          SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+          R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+          RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+          DrawListBoxVertScroll(0);
+        end;
+    end;
+  end;
+
+begin
+  MsgHandled := False;
+  if ListBoxVertScrollArea.Height = 0 then
+  begin
+    case Msg.Msg of
+      WM_NCCALCSIZE:
+        WMNCCalcSize(TWMNCCalcSize(Msg));
+      WM_NCPAINT:
+         begin
+           DrawListBoxBorder;
+           MsgHandled := True;
+         end;
+    end;
+  end
+  else
+    case Msg.Msg of
+      WM_NCHITTEST:
+        if Style = csSimple then
+        begin
+          Msg.Result := HTCLIENT;
+          MsgHandled := True;
+        end;
+      WM_MOUSELEAVE, WM_NCMOUSELEAVE:
+        if Style = csSimple then
+        begin
+          FVSliderState := tsThumbBtnVertNormal;
+          FVUpState := tsArrowBtnUpNormal;
+          FVDownState := tsArrowBtnDownNormal;
+          DrawListBoxVertScroll(0);
+        end;
+      WM_TIMER: WMTimer(Msg);
+      WM_UpdateUIState: MsgHandled := True;
+      WM_NCCALCSIZE: WMNCCalcSize(TWMNCCalcSize(Msg));
+      WM_MOUSEWHEEL: WMMouseWheel(TWMMouseWheel(Msg));
+      WM_NCLButtonDblClk: WMNCLButtonDblClk(TWMMouse(Msg));
+      WM_LButtonDown: WMLButtonDown(TWMMouse(Msg));
+      WM_MOUSEMOVE: WMMouseMove(TWMMouse(Msg));
+      WM_LBUTTONUP: WMLButtonUp(TWMMouse(Msg));
+      WM_NCLButtonDown: WMNCLButtonDown(TWMMouse(Msg));
+      WM_NCLButtonUp, WM_NCMouseMove: MsgHandled := True;
+      WM_PRINT: WMPrint(Msg);
+      WM_KEYDOWN, WM_KEYUP:
+        begin
+          Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
+            Msg.Msg, Msg.WParam, Msg.LParam);
+          DrawListBoxVertScroll(0);
+          MsgHandled := True;
+        end;
+      WM_NCPAINT:
+       begin
+         DrawListBoxBorder;
+         DrawListBoxVertScroll(0);
+         MsgHandled := True;
+       end;
+      LB_SETTOPINDEX:
+        begin
+          Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
+            Msg.Msg, Msg.WParam, Msg.LParam);
+          DrawListBoxVertScroll(0);
+          MsgHandled := True;
+        end;
+      WM_STYLECHANGED, WM_STYLECHANGING:
+       if FIgnoreStyleChanged then
+       begin
+         Msg.Result := 0;
+         MsgHandled := True;
+       end;
+    end;
+  if not MsgHandled then
+    Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
+      Msg.Msg, Msg.WParam, Msg.LParam);
+end;
+
+{ TColorizerTrackBarStyleHook }
+
+function TColorizerTrackBarStyleHook.AcceptMessage(
+  var Message: TMessage): Boolean;
+begin
+  Result := {$IFDEF DELPHIXE3_UP}seClient in Control.StyleElements{$ELSE}True{$ENDIF};
+end;
+
+procedure TColorizerTrackBarStyleHook.CNHScroll(var Message: TWMHScroll);
+begin
+  Invalidate;
+end;
+
+procedure TColorizerTrackBarStyleHook.CNVScroll(var Message: TWMVScroll);
+begin
+  Invalidate;
+end;
+
+constructor TColorizerTrackBarStyleHook.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverridePaint := True;
+  DoubleBuffered := True;
+  FThumbPressed := False;
+end;
+
+procedure TColorizerTrackBarStyleHook.Paint(Canvas: TCanvas);
+var
+  R, R1, ThumbRect: TRect;
+  WinStyle: Cardinal;
+  Thumb: TThemedTrackBar;
+  I, TickCount, TickStart, TickEnd, TickPos: Integer;
+  Details: TThemedElementDetails;
+begin
+  if not ColorizerStyleServices.Available then Exit;
+
+  Thumb := ttbTrackBarDontCare;
+  { Track }
+  WinStyle := GetWindowLong(Handle, GWL_STYLE);
+  SendMessage(Handle, TBM_GETCHANNELRECT, 0, IntPtr(@R));
+  if WinStyle and TBS_VERT = 0 then
+  begin
+    Details := ColorizerStyleServices.GetElementDetails(ttbTrack);
+    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+  end
+  else
+  begin
+    R1 := R;
+    R.Left := R1.Top;
+    R.Top := R1.Left;
+    R.Right := R1.Bottom;
+    R.Bottom := R1.Right;
+    Details := ColorizerStyleServices.GetElementDetails(ttbTrackVert);
+    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
+
+  SendMessage(Handle, TBM_GETCHANNELRECT, 0, IntPtr(@R));
+  SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@ThumbRect));
+
+  // Ticks
+  if WinStyle and TBS_NOTICKS = 0 then
+  begin
+    TickCount := SendMessage(Handle, TBM_GETNUMTICS, 0, 0);
+
+    Canvas.Pen.Color := ColorizerStyleServices.GetSystemColor(clBtnText);
+
+    // First
+    if WinStyle and TBS_VERT = 0 then
+    begin
+      TickPos := R.Left + ThumbRect.Width div 2;
+      if (WinStyle and TBS_TOP = TBS_TOP) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(TickPos, R.Top - 7);
+        Canvas.LineTo(TickPos, R.Top - 3);
+      end;
+      if (WinStyle and TBS_TOP = 0) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(TickPos, R.Bottom + 3);
+        Canvas.LineTo(TickPos, R.Bottom + 7);
+      end;
+      TickStart := TickPos;
+    end
+    else
+    begin
+      TickPos := R.Left + ThumbRect.Height div 2;
+      if (WinStyle and TBS_TOP = TBS_TOP) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(R.Top - 7, TickPos);
+        Canvas.LineTo(R.Top - 3, TickPos);
+      end;
+      if (WinStyle and TBS_TOP = 0) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(R.Bottom + 3, TickPos);
+        Canvas.LineTo(R.Bottom + 7, TickPos);
+      end;
+      TickStart := TickPos;
+    end;
+    // last
+    if WinStyle and TBS_VERT = 0 then
+    begin
+      TickPos := R.Right - ThumbRect.Width div 2;
+      if (WinStyle and TBS_TOP = TBS_TOP) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(TickPos, R.Top - 7);
+        Canvas.LineTo(TickPos, R.Top - 3);
+      end;
+      if (WinStyle and TBS_TOP = 0) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(TickPos, R.Bottom + 3);
+        Canvas.LineTo(TickPos, R.Bottom + 7);
+      end;
+      TickEnd := TickPos;
+    end
+    else
+    begin
+      TickPos := R.Right - ThumbRect.Height div 2;
+      if (WinStyle and TBS_TOP = TBS_TOP) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(R.Top - 7, TickPos);
+        Canvas.LineTo(R.Top - 3, TickPos);
+      end;
+      if (WinStyle and TBS_TOP = 0) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+      begin
+        Canvas.MoveTo(R.Bottom + 3, TickPos);
+        Canvas.LineTo(R.Bottom + 7, TickPos);
+      end;
+      TickEnd := TickPos;
+    end;
+    //ticks
+    for I := 1 to TickCount - 1 do
+    begin
+      TickPos := TickStart + Round((TickEnd - TickStart) * (I/(TickCount-1)));
+      if WinStyle and TBS_VERT = 0 then
+      begin
+        if (WinStyle and TBS_TOP = TBS_TOP) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+        begin
+          Canvas.MoveTo(TickPos, R.Top - 6);
+          Canvas.LineTo(TickPos, R.Top - 3);
+        end;
+        if (WinStyle and TBS_TOP = 0) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+        begin
+          Canvas.MoveTo(TickPos, R.Bottom + 3);
+          Canvas.LineTo(TickPos, R.Bottom + 6);
+        end;
+      end
+      else
+      begin
+        if (WinStyle and TBS_TOP = TBS_TOP) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+        begin
+          Canvas.MoveTo(R.Top - 6, TickPos);
+          Canvas.LineTo(R.Top - 3, TickPos);
+        end;
+        if (WinStyle and TBS_TOP = 0) or (WinStyle and TBS_BOTH = TBS_BOTH) then
+        begin
+          Canvas.MoveTo(R.Bottom + 3, TickPos);
+          Canvas.LineTo(R.Bottom + 6, TickPos);
+        end;
+      end;
+    end;
+  end;
+
+  // Thumb
+  if WinStyle and TBS_NOTHUMB = 0 then
+  begin
+    SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@R));
+    if not Control.Enabled then
+    begin
+      if WinStyle and TBS_VERT = 0 then
+      begin
+       if WinStyle and TBS_BOTH = TBS_BOTH then
+          Thumb := ttbThumbDisabled
+        else
+        if WinStyle and TBS_TOP = TBS_TOP then
+          Thumb := ttbThumbTopDisabled
+        else
+        if WinStyle and TBS_BOTTOM = TBS_BOTTOM then
+          Thumb := ttbThumbBottomDisabled;
+      end
+      else
+      begin
+        Thumb := ttbThumbRightDisabled;
+        if WinStyle and TBS_TOP = TBS_TOP then
+        Thumb := ttbThumbLeftDisabled else
+        if WinStyle and TBS_BOTH = TBS_BOTH then
+         Thumb := ttbThumbVertDisabled;
+      end;
+    end
+    else if FThumbPressed then
+    begin
+      if WinStyle and TBS_VERT = 0 then
+      begin
+        if WinStyle and TBS_BOTH = TBS_BOTH then
+          Thumb := ttbThumbPressed
+        else
+        if WinStyle and TBS_TOP = TBS_TOP then
+          Thumb := ttbThumbTopPressed
+        else
+        if WinStyle and TBS_BOTTOM = TBS_BOTTOM then
+          Thumb := ttbThumbBottomPressed;
+      end
+      else
+      begin
+        Thumb := ttbThumbRightPressed;
+        if WinStyle and TBS_TOP = TBS_TOP then
+        Thumb := ttbThumbLeftPressed else
+        if WinStyle and TBS_BOTH = TBS_BOTH then
+         Thumb := ttbThumbVertPressed;
+      end;
+    end
+    else if FMouseOnThumb then
+    begin
+      if WinStyle and TBS_VERT = 0 then
+      begin
+        if WinStyle and TBS_BOTH = TBS_BOTH then
+          Thumb := ttbThumbHot
+        else
+        if WinStyle and TBS_TOP = TBS_TOP then
+          Thumb := ttbThumbTopHot
+        else
+        if WinStyle and TBS_BOTTOM = TBS_BOTTOM then
+          Thumb := ttbThumbBottomHot;
+      end
+      else
+      begin
+        Thumb := ttbThumbRightHot;
+        if WinStyle and TBS_TOP = TBS_TOP then
+        Thumb := ttbThumbLeftHot else
+        if WinStyle and TBS_BOTH = TBS_BOTH then
+         Thumb := ttbThumbVertHot;
+      end;
+    end
+    else
+    begin
+      if WinStyle and TBS_VERT = 0 then
+      begin
+         if WinStyle and TBS_BOTH = TBS_BOTH then
+          Thumb := ttbThumbNormal
+        else
+        if WinStyle and TBS_TOP = TBS_TOP then
+          Thumb := ttbThumbTopNormal
+        else
+        if WinStyle and TBS_BOTTOM = TBS_BOTTOM then
+          Thumb := ttbThumbBottomNormal;
+      end
+      else
+      begin
+        Thumb := ttbThumbRightNormal;
+        if WinStyle and TBS_TOP = TBS_TOP then
+        Thumb := ttbThumbLeftNormal else
+        if WinStyle and TBS_BOTH = TBS_BOTH then
+         Thumb := ttbThumbVertNormal;
+      end;
+    end;
+
+    Details := ColorizerStyleServices.GetElementDetails(Thumb);
+    ColorizerStyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
+
+  if Focused then
+    Canvas.DrawFocusRect(Rect(0, 0, Control.Width, Control.Height));
+end;
+
+
+procedure TColorizerTrackBarStyleHook.PaintBackground(Canvas: TCanvas);
+var
+  Details:  TThemedElementDetails;
+begin
+  if ColorizerStyleServices.Available then
+  begin
+    Details.Element := teTrackBar;
+    ColorizerStyleServices.DrawParentBackground(Handle, Canvas.Handle, Details, False);
+  end;
+end;
+
+
+procedure TColorizerTrackBarStyleHook.WMLButtonDown(var Message: TWMMouse);
+var
+  R: TRect;
+begin
+  if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
+  begin
+    SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@R));
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FThumbPressed := True;
+    Invalidate;
+  end;
+end;
+
+procedure TColorizerTrackBarStyleHook.WMLButtonUp(var Message: TWMMouse);
+begin
+  if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
+  begin
+    FThumbPressed := False;
+    Invalidate;
+  end;
+end;
+
+procedure TColorizerTrackBarStyleHook.WMMouseMove(var Message: TWMMouse);
+var
+  R: TRect;
+  NewValue: Boolean;
+begin
+  if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
+  begin
+    SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@R));
+    NewValue := R.Contains(Point(Message.XPos, Message.YPos));
+    if NewValue <> FMouseOnThumb then
+    begin
+      FMouseOnThumb := NewValue;
+      Invalidate;
+    end;
+  end;
+end;
+
+procedure TColorizerTrackBarStyleHook.WndProc(var Message: TMessage);
+begin
+  // Reserved for potential updates
+  inherited;
+  case Message.Msg  of
+    TBM_SETPOS:
+      Invalidate;
   end;
 end;
 

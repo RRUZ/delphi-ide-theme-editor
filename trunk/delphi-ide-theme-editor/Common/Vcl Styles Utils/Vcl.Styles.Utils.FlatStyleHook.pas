@@ -297,6 +297,7 @@ end;
 
 constructor TSysControl.Create(AHandle: THandle);
 begin
+  inherited Create;
   FFont := nil;
   FParent := nil;
   Handle := AHandle;
@@ -1035,17 +1036,17 @@ function TSysStyleHook.CheckIfParentBkGndPainted: Boolean;
 var
   Test: Integer;
   PTest: PInteger;
-  ParentHandle: HWND;
+  LParentHandle: HWND;
 begin
   Test := $93;
   PTest := @Test;
   Result := False;
-  ParentHandle := GetParent(Handle);
-  if ParentHandle > 0 then
+  LParentHandle := GetParent(Handle);
+  if LParentHandle > 0 then
   begin
-    if not IsControlHooked(ParentHandle) then
+    if not IsControlHooked(LParentHandle) then
       Exit(False);
-    SendMessage(ParentHandle, WM_ERASEBKGND, 0, lParam(PTest));
+    SendMessage(LParentHandle, WM_ERASEBKGND, 0, lParam(PTest));
     Result := (PTest^ = $11);
   end;
 end;

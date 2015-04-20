@@ -170,8 +170,26 @@ begin
     begin
       HookedControls.Add(Self, TColorizerEditStyleHook.Create(Self));
       LHook:=HookedControls[Self];
-    end;
-
+    end
+    else
+    if Self is TListBox then
+    begin
+      HookedControls.Add(Self, TColorizerListBoxStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end
+    else
+    if Self is TTrackBar then
+    begin
+      HookedControls.Add(Self, TColorizerTrackBarStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end
+//    else
+//    if (Self is TComboBox) or (Self is TCustomComboBox) then
+//    begin
+//      HookedControls.Add(Self, TColorizerComboBoxStyleHook.Create(Self));
+//      LHook:=HookedControls[Self];
+//    end
+//    ;
 
   end;
 

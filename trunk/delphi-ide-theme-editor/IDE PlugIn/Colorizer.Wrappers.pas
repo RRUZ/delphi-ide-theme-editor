@@ -1513,10 +1513,10 @@ initialization
   //RegisterColorizerWrapper('TPopupListBox',  TWrapperSimpleControl); not used
 
   RegisterColorizerWrapper('TPanel',  TWrapperPanel);
-  RegisterColorizerWrapper('TCastaliaNavToolbarDropdown',  TWrapperPanel);
 
-  RegisterColorizerWrapper('TSliderPanel',  TWrapperSimpleEditControl);
-  RegisterColorizerWrapper('TFlowPanel',  TWrapperPanel);
+  //RegisterColorizerWrapper('TSliderPanel',  TWrapperSimpleEditControl);
+  //RegisterColorizerWrapper('TFlowPanel',  TWrapperPanel);
+  RegisterColorizerWrapper('TCastaliaNavToolbarDropdown',  TWrapperPanel);
 
 
   RegisterColorizerWrapper('TInspListBox',  TWrapperInspListBox);

@@ -25,15 +25,21 @@ interface
 {$I ..\Common\Jedi.inc}
 
 uses
+  SyncObjs,
   Controls;
+
  procedure InstallColorizerHooks;
  procedure RemoveColorizerHooks;
  procedure DrawNCBorder(Self : TWinControl; EraseLRCorner: Boolean);
 
 var
-  LastScrollWinControl  : TWinControl = nil;
+  //LastScrollWinControl  : TWinControl = nil;
   LastWinControl        : TWinControl = nil;
   DrawNamePair          : Boolean     = False;
+{$IFDEF DELPHIXE7_UP}
+  EnableStockHook  : Boolean     = False;
+  HooksLock  : TCriticalSection = nil;
+{$ENDIF}
 
 implementation
 
@@ -99,6 +105,7 @@ type
  TUxThemeStyleClass      = class(TUxThemeStyle);
 {$ENDIF}
  TBrushClass             = class(TBrush);
+ TFontClass              = class(TFont);
  TCustomListViewClass    = class(TCustomListView);
  TSplitterClass          = class(TSplitter);
  TCustomGroupBoxClass    = class(TCustomGroupBox);
@@ -106,6 +113,8 @@ type
  TCustomCheckBoxClass    = class(TCustomCheckBox);
  TRadioButtonClass       = class(TRadioButton);
  TCustomComboClass       = class(TCustomCombo);
+ TCustomComboBoxClass    = class(TCustomComboBox);
+ TCustomListBoxClass     = class(TCustomListBox);
  TBevelClass             = class(TBevel);
  TCustomActionPopupMenuClass = class(TCustomActionPopupMenu);
  TCustomControlClass     = class(TCustomControl);
@@ -113,15 +122,12 @@ type
  TCustomButtonClass      = class(TCustomButton);
  TCustomLabelClass       = class(TCustomLabel);
 var
-  {$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw     : procedure (Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean) = nil;
-  {$IFEND}
   Trampoline_TCanvas_FillRect          : procedure (Self: TCanvas;const Rect: TRect) = nil;
   Trampoline_TCanvas_LineTo            : procedure (Self: TCanvas; X, Y: Integer) = nil;
   Trampoline_TCanvas_Rectangle         : procedure (Self: TCanvas; X1, Y1, X2, Y2: Integer) = nil;
 //  Trampoline_TCanvas_Polygon           : procedure (Self: TCanvas;const Points: array of TPoint) = nil;
 //  Trampoline_TCanvas_Polyline          : procedure (Self: TCanvas;const Points: array of TPoint) = nil;
-//  Trampoline_TFont_SetColor            : procedure (const Self:TFont; const Value: TColor) = nil;
 
   Trampoline_TWinControl_DefaultHandler : procedure (Self : TWinControl;var Message) = nil;
   {$IFDEF DELPHIXE2_UP}
@@ -141,6 +147,13 @@ var
   Trampoline_TSplitter_Paint               : procedure (Self : TSplitterClass) = nil;
   Trampoline_TCustomGroupBox_Paint         : procedure (Self : TCustomGroupBoxClass) = nil;
 
+
+
+  {$IFDEF DELPHIXE7_UP}
+  Trampoline_TCustomComboBox_DrawItem      :  procedure(Self: TCustomComboBox;Index: Integer; Rect: TRect; State: TOwnerDrawState);
+  Trampoline_TCustomListBox_DrawItem       :  procedure(Self : TCustomListBox; Index: Integer; Rect: TRect;  State: TOwnerDrawState);
+  {$ENDIF}
+
   Trampoline_CustomComboBox_WMPaint        : procedure (Self: TCustomComboBox;var Message: TWMPaint) = nil;
   Trampoline_TCustomCombo_WndProc          : procedure (Self: TCustomCombo;var Message: TMessage) = nil;
   Trampoline_TButtonControl_WndProc        : procedure (Self:TButtonControlClass;var Message: TMessage) = nil;
@@ -156,6 +169,10 @@ var
 
 
   //Trampoline_TCustomActionPopupMenu_CreateParams : procedure(Self: TCustomActionPopupMenu;var Params: TCreateParams) = nil;
+  {$IFDEF DELPHIXE7_UP}
+  Trampoline_TBrush_SetColor   : procedure (Self: TBrush; Value: TColor);
+  Trampoline_TFont_SetColor    : procedure (Self: TFont; const Value: TColor);
+  {$ENDIF}
 
 
   FGutterBkColor : TColor = clNone;
@@ -463,7 +480,7 @@ var
 //  LType       : TRttiType;
 //  LMethod     : TRttiMethod;
 begin
-  LastScrollWinControl:=Self;
+  //LastScrollWinControl:=Self;
   LastWinControl      :=Self;
 
 //  if SameText('TMessageHintWindow', Self.ClassName) then
@@ -497,7 +514,7 @@ begin
 //
 //  end;
 
-  if SameText('TDisassemblyView', Self.ClassName) then
+  if SameText('TDisassemblyView', Self.ClassName) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
   begin
     //AddLog2('CustomDefaultHandler', Self.ClassName+' '+WM_To_String(TMessage(Message).Msg));
     if TMessage(Message).Msg=WM_SIZE then
@@ -1095,8 +1112,6 @@ begin
 end;
 
 
-type
-  TCustomComboBoxClass = class(TCustomComboBox);
 //Hook for combobox
 procedure Detour_TCustomComboBox_WMPaint(Self: TCustomComboBoxClass;var Message: TWMPaint);
 var
@@ -2506,7 +2521,6 @@ begin
   Trampoline_TCategoryButtons_DrawCategory(Self, Category, Canvas, StartingPos);
 end;
 
-{$IF CompilerVersion<27} //XE6
 
 function GetRGBColor(Value: TColor): DWORD;
 begin
@@ -2539,20 +2553,75 @@ end;
 procedure Detour_TCustomImageList_DoDraw(Self: TObject; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
 var
   LImageList : TCustomImageListClass;
+{$IFDEF DELPHIXE7_UP}
+  LMask : TBitmap;
+  LImage : TBitmap;
+
+    procedure GetImages(Index: Integer; Image, Mask: TBitmap);
+    var
+      R: TRect;
+    begin
+      R := Rect(0, 0, LImageList.Width, LImageList.Height);
+      with Image.Canvas do
+      begin
+        Brush.Color := TColorizerLocalSettings.ColorMap.WindowColor;
+        FillRect(R);
+        ImageList_Draw(LImageList.Handle, Index, Handle, 0, 0, ILD_NORMAL);
+      end;
+      with Mask.Canvas do
+      begin
+        Brush.Color := clWhite;
+        FillRect(R);
+        ImageList_Draw(LImageList.Handle, Index, Handle, 0, 0, ILD_MASK);
+      end;
+    end;
+
+{$ENDIF}
+
+
 begin
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw then
+
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
     begin
       LImageList:=TCustomImageListClass(Self);
       if not LImageList.HandleAllocated then Exit;
-      if Enabled then
-        ImageList_DrawEx(LImageList.Handle, Index, Canvas.Handle, X, Y, 0, 0, GetRGBColor(LImageList.BkColor), GetRGBColor(LImageList.BlendColor), Style)
+      if Enabled  then
+      begin
+        {$IFDEF DELPHIXE7_UP}
+        if not EnableStockHook then
+          TrampolineCustomImageList_DoDraw(Self, Index, Canvas, X, Y, Style, Enabled)
+        else
+        begin
+            LImage := TBitmap.Create;
+            try
+              LMask := TBitmap.Create;
+              try
+                LImage.SetSize(LImageList.Width, LImageList.Height);
+                LMask.SetSize(LImageList.Width, LImageList.Height);
+                GetImages(Index, LImage, LMask);
+                BitBlt(Canvas.Handle, X, Y, LImageList.Width, LImageList.Height, LImage.Canvas.Handle, 0, 0, SRCCOPY);
+              finally
+                LMask.Free;
+              end;
+            finally
+              LImage.Free;
+            end;
+        end;
+        {$ELSE}
+         TrampolineCustomImageList_DoDraw(Self, Index, Canvas, X, Y, Style, Enabled);
+        {$ENDIF}
+      end
       else
-        DoDrawGrayImage(Canvas.Handle, LImageList.Handle, Index, X, Y);
+      begin
+        if TColorizerLocalSettings.Settings.FixIDEDisabledIconsDraw  then
+         DoDrawGrayImage(Canvas.Handle, LImageList.Handle, Index, X, Y)
+        else
+         TrampolineCustomImageList_DoDraw(Self, Index, Canvas, X, Y, Style, Enabled);
+      end;
     end
   else
     TrampolineCustomImageList_DoDraw(Self, Index, Canvas, X, Y, Style, Enabled);
 end;
-{$IFEND}
 
 //Retuns the current Gutter color , using the background of the current syntax highlighter
 function GetGutterBkColor : TColor;
@@ -2638,7 +2707,7 @@ const
 
 {$IFDEF DELPHIXE7_UP}
  //used to paint background of MultiView related combobox (2)
- sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
+ //sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
 {$ENDIF}
 var
   sCaller : string;
@@ -2695,11 +2764,7 @@ begin
   end;
 end;
 
-//procedure Detour_TFont_SetColor(const Self:TFont; const Value: TColor);
-//begin
-//  Trampoline_TFont_SetColor(Self, Value);
-//end;
-//
+
 
 //Hook for paint the header of the TVirtualStringTree component
 {$IFDEF DELPHIXE2_UP}
@@ -3075,6 +3140,69 @@ begin
   Trampoline_TCustomListView_HeaderWndProc(Self, Message);
 end;
 
+{$IFDEF DELPHIXE7_UP}
+procedure   Detour_TCustomComboBox_DrawItem(Self: TCustomComboBox;Index: Integer; Rect: TRect; State: TOwnerDrawState);
+begin
+                                                                                         //Galileo Ownerdraw
+  if  (TCustomComboBoxClass(Self).Style in [csOwnerDrawFixed, csOwnerDrawVariable]) and  MatchText(Self.Name, ['cbPlatforms', 'cbDevices', 'cbStyleSelector', 'cbDeviceSelector']) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
+  begin
+    EnableStockHook:=True;
+    //AddLog2('Detour_TCustomComboBox_DrawItem');
+  end;
+
+  Trampoline_TCustomComboBox_DrawItem(Self, Index, Rect, State);
+  EnableStockHook:=False;
+end;
+
+
+procedure  Detour_TCustomListBox_DrawItem(Self : TCustomListBox; Index: Integer; Rect: TRect;  State: TOwnerDrawState);
+begin
+                          //CASTALIA
+  if (TCustomListBoxClass(Self).Style = lbOwnerDrawVariable) and MatchText(Self.Name, ['ResultsList']) then
+  begin
+    EnableStockHook:=True;
+    //AddLog2('Detour_TCustomListBox_DrawItem');
+  end;
+
+  Trampoline_TCustomListBox_DrawItem(Self, Index, Rect, State);
+  EnableStockHook:=False;
+end;
+
+procedure  Detour_TBrush_SetColor(Self: TBrush; Value: TColor);
+begin
+  HooksLock.Enter;
+  try
+    if EnableStockHook and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
+    begin
+      case Value of
+       clWindow     : Value := TColorizerLocalSettings.ColorMap.WindowColor;
+       clBtnFace    : Value := TColorizerLocalSettings.ColorMap.Color;
+      end;
+    end;
+    Trampoline_TBrush_SetColor(Self, Value);
+  finally
+    HooksLock.Leave;
+  end;
+end;
+
+procedure  Detour_TFont_SetColor(const Self: TFont;const Value: TColor);
+var
+  LValue : TColor;
+begin
+//    AddLog2('Detour_TFont_SetColor 1');
+    LValue:=Value;
+    if EnableStockHook and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
+    begin
+//      AddLog2('Detour_TFont_SetColor 2');
+      case LValue of
+       clWindowText : LValue := TColorizerLocalSettings.ColorMap.FontColor;
+      end;
+    end;
+    Trampoline_TFont_SetColor(Self, LValue);
+//    AddLog2('Detour_TFont_SetColor 3');
+end;
+{$ENDIF}
+
 
 {$IFNDEF DELPHIXE2_UP}
 type
@@ -3097,20 +3225,25 @@ begin
   Trampoline_HintWindow_Paint := InterceptCreate(@THintWindowClass.Paint, @Detour_THintWindow_Paint);
   Trampoline_Bevel_Paint      := InterceptCreate(@TBevelClass.Paint, @Detour_TBevel_Paint);
 
-{$IF CompilerVersion<27} //XE6
   TrampolineCustomImageList_DoDraw:=InterceptCreate(@TCustomImageListClass.DoDraw, @Detour_TCustomImageList_DoDraw);
-{$IFEND}
   Trampoline_TCanvas_FillRect     :=InterceptCreate(@TCanvas.FillRect, @Detour_TCanvas_FillRect);
   Trampoline_TCanvas_LineTo       :=InterceptCreate(@TCanvas.LineTo, @Detour_TCanvas_LineTo);
   Trampoline_TCanvas_Rectangle    :=InterceptCreate(@TCanvas.Rectangle, @Detour_TCanvas_Rectangle);
-  //Trampoline_TFont_SetColor       :=InterceptCreate(@TFontClass.SetColor, @Detour_TFont_SetColor);
 
 //  Trampoline_TCanvas_Polygon      :=InterceptCreate(@TCanvas.Polygon, @Detour_TCanvas_Polygon);
 //  Trampoline_TCanvas_Polyline     :=InterceptCreate(@TCanvas.Polyline, @Detour_TCanvas_Polyline);
 
   //Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
+
+
+  //hoy
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
+
+  {$IFDEF DELPHIXE7_UP}
+  Trampoline_TCustomComboBox_DrawItem       := InterceptCreate(@TCustomComboBoxClass.DrawItem,   @Detour_TCustomComboBox_DrawItem);
+  Trampoline_TCustomListBox_DrawItem        := InterceptCreate(@TCustomListBoxClass.DrawItem,   @Detour_TCustomListBox_DrawItem);
+  {$ENDIF}
  //Trampoline_TBitmap_SetSize := InterceptCreate(@TBitmap.SetSize,   @CustomSetSize);
 //************************************************
 {$IFDEF DELPHIXE2_UP}
@@ -3143,7 +3276,13 @@ begin
 
   Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
 // *******************************************
-   Trampoline_TCustomLabel_DoDrawText   := InterceptCreate(@TCustomLabelClass.DoDrawText, @Detour_TCustomLabelClass_DoDrawText);
+  Trampoline_TCustomLabel_DoDrawText   := InterceptCreate(@TCustomLabelClass.DoDrawText, @Detour_TCustomLabelClass_DoDrawText);
+
+  {$IFDEF DELPHIXE7_UP}
+  Trampoline_TBrush_SetColor           := InterceptCreate(@TBrushClass.SetColor, @Detour_TBrush_SetColor);
+  //Trampoline_TFont_SetColor            := InterceptCreate(@TFontClass.SetColor, @Detour_TFont_SetColor);
+  {$ENDIF}
+
 end;
 
 procedure RemoveColorizerHooks;
@@ -3153,7 +3292,7 @@ begin
    InterceptRemove(@Trampoline_TWinControl_DefaultHandler);
    InterceptRemove(@Trampoline_Bevel_Paint);
 
-{$IF CompilerVersion<27} //XE6
+{$IF CompilerVersion<37} //XE6
    InterceptRemove(@TrampolineCustomImageList_DoDraw);
 {$IFEND}
    InterceptRemove(@Trampoline_TCanvas_FillRect);
@@ -3187,10 +3326,30 @@ begin
    InterceptRemove(@Trampoline_TButtonControl_WndProc);
    InterceptRemove(@Trampoline_TSplitter_Paint);
    InterceptRemove(@Trampoline_TCustomGroupBox_Paint);
+
    InterceptRemove(@Trampoline_CustomComboBox_WMPaint);
+{$IFDEF DELPHIXE7_UP}
+   InterceptRemove(@Trampoline_TCustomComboBox_DrawItem);
+   InterceptRemove(@Trampoline_TCustomListBox_DrawItem);
+{$ENDIF}
+
    InterceptRemove(@Trampoline_TCustomCombo_WndProc);
+
+
    InterceptRemove(@Trampoline_TCustomLabel_DoDrawText);
+{$IFDEF DELPHIXE7_UP}
+   InterceptRemove(@Trampoline_TBrush_SetColor);
+   InterceptRemove(@Trampoline_TFont_SetColor);
+{$ENDIF}
 end;
 
+{$IFDEF DELPHIXE7_UP}
+initialization
+  HooksLock  := TCriticalSection.Create;
+
+finalization
+  HooksLock.Free;
+  HooksLock := nil;
+{$ENDIF}
 end.
 

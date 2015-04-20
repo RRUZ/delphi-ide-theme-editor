@@ -3371,10 +3371,6 @@ object DialogColorSelector: TDialogColorSelector
     TabOrder = 1
     object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object HexaColorPicker1: THexaColorPicker
         Left = 0
         Top = 0
@@ -3399,7 +3395,7 @@ object DialogColorSelector: TDialogColorSelector
       object mbColorPalette1: TmbColorPalette
         Left = 0
         Top = 0
-        Width = 140
+        Width = 126
         Height = 184
         Align = alClient
         Colors.Strings = (
@@ -3930,7 +3926,7 @@ object DialogColorSelector: TDialogColorSelector
     Left = 184
     Top = 191
     Bitmap = {
-      494C010101000500040018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010005000C0018001800FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       00000000000000000000000000000000000000000000000000010000000A0000
       001C0000001E0000001000000001000000000000000000000000000000000000

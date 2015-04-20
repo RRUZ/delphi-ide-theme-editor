@@ -1287,6 +1287,7 @@ end;
 
 constructor TColorizerPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook: TColorizerPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU);
 begin
+  inherited Create;
   FSysPopupStyleHook := SysPopupStyleHook;
   FMenu := Menu;
   FHandle := SysParent.Handle;

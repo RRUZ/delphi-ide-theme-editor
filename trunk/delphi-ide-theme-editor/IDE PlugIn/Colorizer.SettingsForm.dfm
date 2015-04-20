@@ -40,10 +40,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
       TabOrder = 0
       object TabSheetMain: TTabSheet
         Caption = 'Theme Settings'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel3: TPanel
           Left = 0
           Top = 0
@@ -63,10 +59,6 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
             TabOrder = 0
             object TabSheetTheme: TTabSheet
               Caption = 'Theme'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object Bevel1: TBevel
                 Left = 3
                 Top = 320
@@ -2642,7 +2634,7 @@ object FormIDEColorizerSettings: TFormIDEColorizerSettings
     Left = 416
     Top = 304
     Bitmap = {
-      494C010108000D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00180010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

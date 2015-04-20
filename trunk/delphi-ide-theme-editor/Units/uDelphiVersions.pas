@@ -298,6 +298,8 @@ begin
 {$ENDIF}
 end;
 
+
+//C:\Users\Public\Documents\Embarcadero\Studio\16.0\Styles
 function  GetVCLStylesFolder(DelphiVersion:TDelphiVersions) : string;
 var
   List :TObjectList<TDelphiVersionData>;
@@ -394,6 +396,7 @@ end;
 
 constructor TDelphiVersionData.Create;
 begin
+  inherited;
   FIcon:=nil;
 end;
 
