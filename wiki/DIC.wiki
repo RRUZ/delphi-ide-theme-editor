@@ -45,7 +45,7 @@
 == How I can Uninstall the plugin? ==
 
  option 1)
- go to the Unistall programs options and select the "Delphi IDE Colorizer"
+ go to the Uninstall programs options and select the "Delphi IDE Colorizer"
 
  option 2)
  go to the  *%LOCALAPPDATA%\The Road To Delphi\DIC*  folder and run the uninst.exe App.
