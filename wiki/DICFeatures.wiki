@@ -9,7 +9,7 @@ https://theroadtodelphi.files.wordpress.com/2014/07/rad_appmethod.png
 
 = Features =
 
- * DIC is compatible with <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> XE2, XE3, XE4, XE5, XE6, XE7 and <a href="http://www.appmethod.com/">Appmethod</a> 1.14
+ * DIC is compatible with <a href="http://www.embarcadero.com/kr/products/delphi">RAD Studio</a> XE2-XE8 and <a href="http://www.appmethod.com/">Appmethod</a> 1.14, 1.15
  * Support for VCL Styles 
  * Transparent menus.
  * Allow to change the icons, set the colors, and gradient direction of the title bar for the docked windows.
