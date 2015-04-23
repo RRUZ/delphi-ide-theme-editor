@@ -47,6 +47,7 @@ uses
   DDetours,
   Windows,
   SysUtils,
+  StrUtils,
   Controls,
   Vcl.ComCtrls,
   StdCtrls,
@@ -184,12 +185,12 @@ begin
       LHook:=HookedControls[Self];
     end
 //    else
-//    if (Self is TComboBox) or (Self is TCustomComboBox) then
+//    if (Self is TComboBox) or (Self is TCustomComboBox) or (MatchText(Self.ClassName, ['TDesktopComboBox', 'THistoryPropComboBox'])) then  //
 //    begin
 //      HookedControls.Add(Self, TColorizerComboBoxStyleHook.Create(Self));
 //      LHook:=HookedControls[Self];
 //    end
-//    ;
+    ;
 
   end;
 

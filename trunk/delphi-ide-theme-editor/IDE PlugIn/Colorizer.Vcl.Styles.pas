@@ -457,6 +457,7 @@ implementation
 uses
   System.SysUtils,
   System.TypInfo,
+  Buttons,
   Vcl.GraphUtil,
   Vcl.ExtCtrls,
   Colorizer.Utils,
@@ -736,7 +737,7 @@ var
   Canvas: TCanvas;
   PS: TPaintStruct;
 begin
-  if FOverridePaint then
+  if FOverridePaint  then
   begin
     DC := HDC(Message.WParam);
     Canvas := TCanvas.Create;
@@ -4887,13 +4888,12 @@ begin
     WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC,
     CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
       begin
-        SetTextColor(Message.WParam, ColorToRGB(FontColor));
-        Brush.Color := ColorizerStyleServices.GetStyleColor(States[Control.Enabled]);
-//        if seClient in Control.StyleElements then
-//          Brush.Color := ColorizerStyleServices.GetStyleColor(States[Control.Enabled])
-//        else
-//          Brush.Color := TWinControlClass(Control).Color;
+//        SetTextColor(Message.WParam, ColorToRGB(FontColor));
+//        Brush.Color := ColorizerStyleServices.GetStyleColor(States[Control.Enabled]);
+          SetTextColor(Message.WParam, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor));
+          Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
         SetBkColor(Message.WParam, ColorToRGB(Brush.Color));
+
         Message.Result := LRESULT(Brush.Handle);
         Handled := True;
       end;
@@ -4968,8 +4968,6 @@ var
   PS: TPaintStruct;
   SaveIndex: Integer;
   DC: HDC;
-//  LDetails: TThemedElementDetails;
-//  LCaption: string;
 begin
   DC := Message.WParam;
   Canvas := TCanvas.Create;
@@ -4986,7 +4984,7 @@ begin
       RestoreDC(Canvas.Handle, SaveIndex);
     end;
 
-    if (Style <> csSimple) and (FEditHandle = 0) then
+    if (Style <> csSimple) and (FEditHandle = 0)  then
     begin
       R := Control.ClientRect;
       InflateRect(R, -3, -3);
@@ -5004,49 +5002,6 @@ begin
       finally
         RestoreDC(Canvas.Handle, SaveIndex);
       end;
-
-
-//      R := Control.ClientRect;
-//      InflateRect(R, -3, -3);
-//      if Control.BiDiMode <> bdRightToLeft then
-//        R.Right := ButtonRect.Left - 1
-//      else
-//        R.Left := ButtonRect.Right + 1;
-//      SaveIndex := SaveDC(Canvas.Handle);
-//      try
-//        IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
-//        //LItemIndex := UINT(SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0));
-//        Canvas.Brush.Color := clgreen;//StyleServices.GetSystemColor(clWindow);
-//        Canvas.FillRect(R);
-//
-//        LCaption:='';
-//        AddLog2('csOwnerDrawVariable ItemIndex '+IntToStr(TCustomComboBoxClass(Control).ItemIndex));
-//        if TCustomComboBoxClass(Control).ItemIndex>=0 then
-//          LCaption:=TCustomComboBoxClass(Control).Items[TCustomComboBoxClass(Control).ItemIndex];
-//        AddLog2('csOwnerDrawVariable LCaption '+LCaption);
-//
-//        if (Style = csOwnerDrawFixed) or
-//          (Style = csOwnerDrawVariable)
-//        then
-//        begin
-//          //DrawItem(Canvas, LItemIndex, R, Focused);
-//          LDetails := ColorizerStyleServices.GetElementDetails
-//            (TThemedComboBox.tcComboBoxDontCare);
-//         // _DrawControlText(Canvas, TCustomComboBoxClass(Control).Text, R, [tfLeft, tfVerticalCenter, tfSingleLine], StyleServices.GetSystemColor(clWindowText));
-//          _DrawControlText(Canvas, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS), clRed); //TColorizerLocalSettings.ColorMap.FontColor
-//        end
-//        else
-//        begin
-//          LDetails := ColorizerStyleServices.GetElementDetails
-//            (TThemedComboBox.tcComboBoxDontCare);
-//         // _DrawControlText(Canvas.Handle, LDetails, Control.Text, R, [tfLeft, tfVerticalCenter, tfSingleLine]);
-//          _DrawControlText(Canvas, LCaption, R, Control.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS), TColorizerLocalSettings.ColorMap.FontColor);
-//        end;
-//
-//      finally
-//        RestoreDC(Canvas.Handle, SaveIndex);
-//      end;
-
     end;
 
   finally
@@ -6242,5 +6197,7 @@ begin
       Invalidate;
   end;
 end;
+
+
 
 end.
