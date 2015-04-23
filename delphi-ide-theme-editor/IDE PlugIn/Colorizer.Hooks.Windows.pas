@@ -176,8 +176,96 @@ var
  LStyleServices: TCustomStyleServices;
 {$ENDIF}
 begin
+   AddLog2(Format('Detour_WinApi_DrawFrameControl uType %d State %d', [uType, uState]));
+
+   if( uType=DFC_SCROLL) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
+   begin
+
+        LWinControl:=nil;
+        OrgHWND :=WindowFromDC(DC);
+        if OrgHWND<>0 then
+           LWinControl :=FindControl(OrgHWND);
+
+        if LWinControl<>nil then
+        begin
+          LParentForm:= GetParentForm(LWinControl);
+          if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
+            Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
+        end;
+
+        LCanvas:=TCanvas.Create;
+        try
+          LCanvas.Handle:=DC;
+         {$IFDEF DELPHIXE2_UP}
+         if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+         begin
+           LStyleServices:= ColorizerStyleServices;
+
+
+           if (DFCS_SCROLLUP and uState = DFCS_SCROLLUP) then
+            LDetails := LStyleServices.GetElementDetails(tsArrowBtnUpNormal)
+           else
+           if (DFCS_SCROLLDOWN and uState = DFCS_SCROLLDOWN) then
+            LDetails := LStyleServices.GetElementDetails(tsArrowBtnDownNormal)
+            else
+           if (DFCS_SCROLLLEFT and uState = DFCS_SCROLLLEFT) then
+            LDetails := LStyleServices.GetElementDetails(tsArrowBtnLeftNormal)
+           else
+           if (DFCS_SCROLLRIGHT and uState = DFCS_SCROLLRIGHT) then
+            LDetails := LStyleServices.GetElementDetails(tsArrowBtnRightNormal)
+           else
+           if (DFCS_SCROLLSIZEGRIP and uState = DFCS_SCROLLSIZEGRIP) then
+            LDetails := LStyleServices.GetElementDetails(tsSizeBoxLeftAlign)
+           else
+           if (DFCS_SCROLLSIZEGRIPRIGHT and uState = DFCS_SCROLLSIZEGRIPRIGHT) then
+            LDetails := LStyleServices.GetElementDetails(tsSizeBoxRightAlign)
+           else
+            Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
+
+          LCanvas.Brush.Color := TColorizerLocalSettings.ColorMap.Color;
+          LCanvas.FillRect(Rect^);
+          LStyleServices.DrawElement(LCanvas.Handle, LDetails, Rect^);
+         end
+         else
+         {$ENDIF}
+         begin
+           LSize.cx:= 13;
+           LSize.cy:= 13;
+
+           LBuffer:=TBitmap.Create;
+           try
+             LBuffer.SetSize(LSize.cx, LSize.cy);
+             LRect := Types.Rect(0, 0, LSize.cx, LSize.cy);
+             LBuffer.Canvas.Brush.Color:=TColorizerLocalSettings.ColorMap.WindowColor;
+             LBuffer.Canvas.FillRect(LRect);
+             LBuffer.Canvas.Pen.Color  :=TColorizerLocalSettings.ColorMap.FontColor;
+             LBuffer.Canvas.Ellipse(0, 0, LSize.cx, LSize.cy);
+
+             if (DFCS_CHECKED and uState = DFCS_CHECKED) then
+             begin
+               LBuffer.Canvas.Brush.Color:= LBuffer.Canvas.Pen.Color;
+               LBuffer.Canvas.Ellipse(3, 3, 3 + LSize.cx div 2 ,3 + LSize.cy div 2);
+             end;
+
+             RectCenter(LRect, Rect^);
+             BitBlt(dc, LRect.Left, LRect.Top, LSize.cx, LSize.cy, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+           finally
+             LBuffer.Free;
+           end;
+         end;
+
+        finally
+          LCanvas.Handle:=0;
+          LCanvas.Free;
+        end;
+        Exit(True);
+
+   end
+   else
    if( uType=DFC_BUTTON) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
    begin
+      AddLog2(Format('DFC_BUTTON State %d', [uState]));
+
       if (DFCS_BUTTONRADIO and uState = DFCS_BUTTONRADIO) then
       begin
         LWinControl:=nil;
@@ -672,25 +760,14 @@ end;
 
 
 procedure InstallHooksWinAPI();
-var
-  pOrgAddress : Pointer;
 begin
  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);  //OK
-
  Trampoline_GetSysColor      :=  InterceptCreate(user32, 'GetSysColor', @Detour_WinApi_GetSysColor);
  //TrampolineGetSysColorBrush  := InterceptCreate(user32, 'GetSysColorBrush', @InterceptGetSysColorBrush);
-
- pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawEdge');
- if Assigned(pOrgAddress) then
-   Trampoline_DrawEdge :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawEdge);
-//
-
-// pOrgAddress     := GetProcAddress(GetModuleHandle(user32), 'DrawFrameControl');
-// if Assigned(pOrgAddress) then
-//   Trampoline_DrawFrameControl :=  InterceptCreate(pOrgAddress, @Detour_WinApi_DrawFrameControl);
-
+  Trampoline_DrawEdge :=  InterceptCreate(user32, 'DrawEdge', @Detour_WinApi_DrawEdge);
+ //Trampoline_DrawFrameControl :=  InterceptCreate(user32, 'DrawFrameControl', @Detour_WinApi_DrawFrameControl);
 end;
 
 procedure RemoveHooksWinAPI();
@@ -701,7 +778,7 @@ begin
   InterceptRemove(@Trampoline_GetSysColor);
   InterceptRemove(@TrampolineGetSysColorBrush);
   InterceptRemove(@Trampoline_DrawEdge);
-  //InterceptRemove(@Trampoline_DrawFrameControl);
+  InterceptRemove(@Trampoline_DrawFrameControl);
 end;
 
 

@@ -214,10 +214,10 @@ type
    end;
 
 
-//   TWrapperTTBXToolbar = class(TBaseWrapper)
-//   protected
-//    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
-//   end;
+   TWrapperTGridPanel = class(TBaseWrapper)
+   protected
+    procedure SetProperties(AComponent : TComponent; AColorMap:TColorizerColorMap); override;
+   end;
 
    TWrapperComponentToolbarFrame = class(TBaseWrapper)
    protected
@@ -1201,7 +1201,8 @@ procedure TWrapperGroupComponents.SetProperties(AComponent: TComponent;
   AColorMap: TColorizerColorMap);
 begin
   inherited;
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.HighlightColor);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
   TRttiUtils.SetRttiPropertyValue(AComponent,'ParentBackGround', True);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
@@ -1462,6 +1463,17 @@ end;
 
 
 
+{ TWrapperTGridPanel }
+
+procedure TWrapperTGridPanel.SetProperties(AComponent: TComponent;
+  AColorMap: TColorizerColorMap);
+begin
+  inherited;
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Color', AColorMap.Color);
+  //TRttiUtils.SetRttiPropertyValue(AComponent,'Ctl3D', False);
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
+end;
+
 initialization
   TRegisteredWrappers.Wrappers:=TDictionary<string, TBaseWrapperClass>.Create;
   TRegisteredWrappers.WrappersInstances:=TObjectDictionary<string, TBaseWrapper>.Create([doOwnsValues]);
@@ -1563,7 +1575,8 @@ initialization
   RegisterColorizerWrapper('TPropRadioGroup',  TWrapperGroupComponents);
   //TXTabControl  TTabControlStyleHook
   RegisterColorizerWrapper('TLabel',  TWrapperFontComponents);
-  RegisterColorizerWrapper('TGridPanel',  TWrapperFontComponents);
+
+  RegisterColorizerWrapper('TGridPanel',  TWrapperTGridPanel);
 
 
   RegisterColorizerWrapper('TListButton',  TWrapperListButton);

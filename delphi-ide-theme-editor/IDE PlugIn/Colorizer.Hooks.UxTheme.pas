@@ -157,7 +157,7 @@ begin
   ColorizerLock.Enter;
   try
     Result := TrampolineOpenThemeData(hwnd, pszClassList);
-    //AddLog('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
+    //AddLog2('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
 
     if THThemesClasses.Classes.ContainsKey(Result) then
       THThemesClasses.Classes.Remove(Result);
@@ -209,6 +209,7 @@ var
   var
     LScrollDetails: TThemedScrollBar;
   begin
+    AddLog2('DrawScrollBarVCLStyles');
     LStyleServices := ColorizerStyleServices;
     LScrollDetails := tsScrollBarRoot;
     LDetails.Element := TThemedElement.teScrollBar;
@@ -581,8 +582,10 @@ var
   end;
 
 begin
+  //  AddLog2('TrampolineDrawThemeBackground 1');
   if not (THThemesClasses.Classes.ContainsKey(THEME) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+ //   AddLog2('TrampolineDrawThemeBackground 2');
 
   if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_TOOLTIP) then
   begin
@@ -1174,18 +1177,18 @@ const
   themelib = 'uxtheme.dll';
   sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
 begin
-  if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
+  THThemesClasses.Classes := TDictionary<HTHEME, String>.Create();
+  THThemesClasses.Windows := TDictionary<HTHEME, HWND>.Create();
+  if {$IFDEF DELPHIXE2_UP}StyleServices.Available {and StyleServices.Enabled}  {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
-    THThemesClasses.Classes := TDictionary<HTHEME, String>.Create();
-    THThemesClasses.Windows := TDictionary<HTHEME, HWND>.Create();
-    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
-    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
-    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
-    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
+//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
+//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
+//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
 
     TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
     if Assigned(DrawThemeText) then
-      Trampoline_DrawThemeText            := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
+      Trampoline_DrawThemeText    := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
     TrampolineOpenThemeData       := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
     TrampolineDrawThemeBackground := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
     TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(sVclIDEModule, sBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
@@ -1205,11 +1208,8 @@ begin
 //  InterceptRemove(@TrampolineSetScrollPos);
 //  InterceptRemove(@TrampolineSetScrollInfo);
 
-  if {$IFDEF DELPHIXE2_UP}StyleServices.Available {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
-  begin
-    THThemesClasses.Classes.Free;
-    THThemesClasses.Windows.Free;
-  end;
+  THThemesClasses.Classes.Free;
+  THThemesClasses.Windows.Free;
 end;
 
 

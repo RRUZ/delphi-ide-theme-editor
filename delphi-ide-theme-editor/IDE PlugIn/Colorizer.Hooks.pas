@@ -36,6 +36,7 @@ var
   //LastScrollWinControl  : TWinControl = nil;
   LastWinControl        : TWinControl = nil;
   DrawNamePair          : Boolean     = False;
+  EnableHookTBitBtn     : Boolean     = False;
 {$IFDEF DELPHIXE7_UP}
   EnableStockHook  : Boolean     = False;
   HooksLock  : TCriticalSection = nil;
@@ -57,11 +58,11 @@ uses
   System.Diagnostics,
   System.TimeSpan,
   TypInfo,
-  Forms,
-  ExtCtrls,
-  Buttons,
-  Dialogs,
-  ComCtrls,
+  Vcl.Forms,
+  Vcl.ExtCtrls,
+  Vcl.Buttons,
+  Vcl.Dialogs,
+  Vcl.ComCtrls,
   Windows,
   Classes,
  {$IFDEF DELPHI2009_UP}
@@ -83,13 +84,13 @@ uses
   Colorizer.Hooks.UxTheme,
   Colorizer.Hooks.IDE,
   CaptionedDockTree,
-  GraphUtil,
-  CategoryButtons,
-  ActnPopup,
-  ActnMan,
-  StdCtrls,
-  ActnMenus,
-  Tabs,
+  Vcl.GraphUtil,
+  Vcl.CategoryButtons,
+  Vcl.ActnPopup,
+  Vcl.ActnMan,
+  Vcl.StdCtrls,
+  Vcl.ActnMenus,
+  Vcl.Tabs,
   uRttiHelper,
   Rtti,
   Types,
@@ -108,6 +109,7 @@ type
  TFontClass              = class(TFont);
  TCustomListViewClass    = class(TCustomListView);
  TSplitterClass          = class(TSplitter);
+ TBitBtnClass            = class(TBitBtn);
  TCustomGroupBoxClass    = class(TCustomGroupBox);
  TButtonControlClass     = class(TButtonControl);
  TCustomCheckBoxClass    = class(TCustomCheckBox);
@@ -147,7 +149,7 @@ var
   Trampoline_TSplitter_Paint               : procedure (Self : TSplitterClass) = nil;
   Trampoline_TCustomGroupBox_Paint         : procedure (Self : TCustomGroupBoxClass) = nil;
 
-
+  Trampoline_TBitBtn_DrawItem              : procedure (Self: TBitBtn;const DrawItemStruct: TDrawItemStruct);
 
   {$IFDEF DELPHIXE7_UP}
   Trampoline_TCustomComboBox_DrawItem      :  procedure(Self: TCustomComboBox;Index: Integer; Rect: TRect; State: TOwnerDrawState);
@@ -177,6 +179,11 @@ var
 
   FGutterBkColor : TColor = clNone;
 type
+
+  TBitBtnHelper = class helper for TBitBtn
+    function  DrawItemAddress: Pointer;
+  end;
+
   TCustomStatusBarHelper = class helper for TCustomStatusBar
   private
     function GetCanvasRW: TCanvas;
@@ -245,6 +252,27 @@ type
   {$ENDIF}
   end;
 {$ENDIF}
+
+
+
+//Hook used to style the TBitBtn,
+procedure Detour_TBitBtn_DrawItem(Self: TBitBtn;const DrawItemStruct: TDrawItemStruct);
+var
+  LParentForm : TCustomForm;
+begin
+
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (not (csDesigning in Self.ComponentState)) and Assigned(TColorizerLocalSettings.ColorMap) and
+      TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+  begin
+    LParentForm:= GetParentForm(Self);
+    if Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0) then
+      EnableHookTBitBtn:=True;
+  end;
+
+  Trampoline_TBitBtn_DrawItem(Self, DrawItemStruct);
+  if EnableHookTBitBtn then
+  EnableHookTBitBtn:=False;
+end;
 
 
 procedure Detour_TCustomLabelClass_DoDrawText(Self : TCustomLabelClass;var Rect: TRect; Flags: Longint);
@@ -1752,6 +1780,15 @@ begin
    Trampoline_TCustomPanel_Paint(Self);
 end;
 
+{ TBitBtnHelper }
+
+function TBitBtnHelper.DrawItemAddress: Pointer;
+var
+  MethodAddr: procedure(const DrawItemStruct: TDrawItemStruct) of object;
+begin
+  MethodAddr := Self.DrawItem;
+  Result     := TMethod(MethodAddr).Code;
+end;
 
 { TCustomStatusBarHelper }
 
@@ -2782,6 +2819,11 @@ var
   LDetails : TThemedElementDetails;
   {$ENDIF}
 begin
+   if EnableHookTBitBtn then
+   begin
+    Exit(ColorizerStyleServices.DrawElement(DC, Details, R, ClipRect));
+   end
+   else
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
    begin
     sCaller := ProcByLevel(2);
@@ -3145,10 +3187,7 @@ procedure   Detour_TCustomComboBox_DrawItem(Self: TCustomComboBox;Index: Integer
 begin
                                                                                          //Galileo Ownerdraw
   if  (TCustomComboBoxClass(Self).Style in [csOwnerDrawFixed, csOwnerDrawVariable]) and  MatchText(Self.Name, ['cbPlatforms', 'cbDevices', 'cbStyleSelector', 'cbDeviceSelector']) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled then
-  begin
     EnableStockHook:=True;
-    //AddLog2('Detour_TCustomComboBox_DrawItem');
-  end;
 
   Trampoline_TCustomComboBox_DrawItem(Self, Index, Rect, State);
   EnableStockHook:=False;
@@ -3159,10 +3198,7 @@ procedure  Detour_TCustomListBox_DrawItem(Self : TCustomListBox; Index: Integer;
 begin
                           //CASTALIA
   if (TCustomListBoxClass(Self).Style = lbOwnerDrawVariable) and MatchText(Self.Name, ['ResultsList']) then
-  begin
     EnableStockHook:=True;
-    //AddLog2('Detour_TCustomListBox_DrawItem');
-  end;
 
   Trampoline_TCustomListBox_DrawItem(Self, Index, Rect, State);
   EnableStockHook:=False;
@@ -3236,6 +3272,8 @@ begin
   //Trampoline_TCustomStatusBar_WMPAINT   := InterceptCreate(TCustomStatusBarClass(nil).WMPaintAddress,   @Detour_TStatusBar_WMPaint);
 
 
+  Trampoline_TBitBtn_DrawItem    := InterceptCreate(TBitBtnClass(nil).DrawItemAddress,  @Detour_TBitBtn_DrawItem);
+
   //hoy
   Trampoline_CustomComboBox_WMPaint     := InterceptCreate(TCustomComboBox(nil).WMPaintAddress,   @Detour_TCustomComboBox_WMPaint);
   Trampoline_TCustomCombo_WndProc       := InterceptCreate(@TCustomComboClass.WndProc,   @Detour_TCustomCombo_WndProc);
@@ -3274,6 +3312,7 @@ begin
   Trampoline_TSplitter_Paint            := InterceptCreate(@TSplitterClass.Paint, @Detour_TSplitter_Paint);
   Trampoline_TCustomGroupBox_Paint      := InterceptCreate(@TCustomGroupBoxClass.Paint, @Detour_TCustomGroupBox_Paint);
 
+  //***********************
   Trampoline_TButtonControl_WndProc     := InterceptCreate(@TButtonControlClass.WndProc, @Detour_TButtonControlClass_WndProc);
 // *******************************************
   Trampoline_TCustomLabel_DoDrawText   := InterceptCreate(@TCustomLabelClass.DoDrawText, @Detour_TCustomLabelClass_DoDrawText);
@@ -3303,6 +3342,8 @@ begin
 //    InterceptRemove(@Trampoline_TCustomActionPopupMenu_CreateParams);
 
    InterceptRemove(@Trampoline_TCustomControlBar_PaintControlFrame);
+
+   InterceptRemove(@Trampoline_TBitBtn_DrawItem);
 
 //  if Assigned(Trampoline_TCanvas_Polyline) then
 //    InterceptRemove(@Trampoline_TCanvas_Polyline);
@@ -3351,5 +3392,7 @@ finalization
   HooksLock.Free;
   HooksLock := nil;
 {$ENDIF}
+
+
 end.
 

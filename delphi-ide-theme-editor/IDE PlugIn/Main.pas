@@ -26,7 +26,7 @@
  {TODO -oRRUZ -cPerformance : improve performance in load of settings DIC form}
  {TODO -oRRUZ -cHooks : add StyleHook for TTreeview}
  {TODO -oRRUZ -cHooks : add StyleHook for TListview}
- {TODO -oRRUZ -cHooks : add support for TBitBtn}
+ {DONE -oRRUZ -cHooks : add support for TBitBtn}
  {TODO -oRRUZ -cFeature : Add option to override event log colors}
  {TODO -oRRUZ -cFeature : Transparent system menus}
  {TODO -oRRUZ -cFeature : Fast vcl styles/themes switch}
@@ -250,16 +250,23 @@ end;
 
 procedure InstallAllHooks;
 begin
-  AddLog2('InstallAllHooks', 'Init');
+  AddLog2('InstallAllHooks', 'InstallHooksWinAPI');
   InstallHooksWinAPI();
+  AddLog2('InstallAllHooks', 'InstallHooksUXTheme');
   InstallHooksUXTheme();
+  AddLog2('InstallAllHooks', 'InstallFormsHook');
   InstallFormsHook();
+  AddLog2('InstallAllHooks', 'InstallHooksIDE');
   InstallHooksIDE();
+  AddLog2('InstallAllHooks', 'InstallHooksGDI');
   InstallHooksGDI();
+  AddLog2('InstallAllHooks', 'InstallColorizerHooks');
   InstallColorizerHooks();
   {$IFDEF DELPHIXE2_UP}
+  AddLog2('InstallAllHooks', 'InstallThemedActnCtrlsHooks');
   InstallThemedActnCtrlsHooks();
   {$ENDIF}
+  AddLog2('InstallAllHooks', 'RegisterFlatMenusHooks');
   RegisterFlatMenusHooks();
   AddLog2('InstallAllHooks', 'Done');
 end;
