@@ -144,9 +144,11 @@ begin
   if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
   begin
     Self.PaintRectHelper := PaintRect;
-    if ColorizerStyleServices.IsSystemStyle then
-      ColorizerStyleServices.DrawElement(Self.Canvas.Handle, StyleServices.GetElementDetails(tmPopupBackground), Self.PaintRectHelper);
-    ColorizerStyleServices.DrawElement(Self.Canvas.Handle, StyleServices.GetElementDetails(tmPopupGutter), Self.GutterRectHelper);
+//    if ColorizerStyleServices.IsSystemStyle then
+//      ColorizerStyleServices.DrawElement(Self.Canvas.Handle, StyleServices.GetElementDetails(tmPopupBackground), Self.PaintRectHelper);
+//    ColorizerStyleServices.DrawElement(Self.Canvas.Handle, StyleServices.GetElementDetails(tmPopupGutter), Self.GutterRectHelper);
+//    ColorizerStyleServices.DrawElement(Self.Canvas.Handle, ColorizerStyleServices.GetElementDetails(tmPopupBackground), Self.PaintRectHelper);
+    ColorizerStyleServices.DrawElement(Self.Canvas.Handle, ColorizerStyleServices.GetElementDetails(tmPopupGutter), Self.GutterRectHelper);
   end
   else
     Trampoline_TThemedMenuItem_DrawBackground(Self, PaintRect);
@@ -257,7 +259,7 @@ begin
     else
     if not Self.Enabled then
     begin
-      LBackColor:= ColorizerStyleServices.GetSystemColor(clBtnFace);
+      LBackColor:=  TColorizerLocalSettings.ColorMap.MenuColor;//ColorizerStyleServices.GetSystemColor(clBtnFace);
       Self.Canvas.Brush.Color := LBackColor;
     end;
 
@@ -312,23 +314,6 @@ begin
    Trampoline_TThemedPopupMenu_NCPaint(Self, DC);
 end;
 
-//procedure Detour_TWinControl_CreateWnd(Self : TWinControl);
-//var
-//  AStyle : NativeInt;
-//begin
-//  Trampoline_TWinControl_CreateWnd(Self);
-//  if TColorizerLocalSettings.Settings.Enabled then
-//  begin
-//    if (Self is TCustomActionPopupMenu) {or (Self is TThemedPopupMenu) or (Self is TXPStylePopupMenu)} then
-//    begin
-//     AStyle := GetWindowLong(Self.Handle, GWL_EXSTYLE);
-//      if (AStyle and WS_EX_LAYERED) = 0 then
-//        SetWindowLong(Self.Handle, GWL_EXSTYLE, AStyle or WS_EX_LAYERED);
-//     SetLayeredWindowAttributes(Self.Handle, 0, 220, LWA_ALPHA);
-//    end;
-//  end;
-//end;
-
 procedure Detour_TCustomActionPopupMenu_CMVisibleChanged(Self : TCustomActionPopupMenuClass;var Message: TMessage);
 var
   AStyle : NativeInt;
@@ -342,18 +327,6 @@ begin
   end;
   Trampoline_TCustomActionPopupMenu_CMVisibleChanged(Self, Message);
 end;
-
-//procedure  Detour_TCustomActionPopupMenu_CreateParams(Self : TCustomActionPopupMenuClass; var Params: TCreateParams);
-//begin
-//  if TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesMenusColors then
-//  begin
-//    with Params do
-//      if (ExStyle and WS_EX_LAYERED) = 0 then
-//         ExStyle := ExStyle or WS_EX_LAYERED;
-//  end;
-//  Trampoline_TCustomActionPopupMenu_CreateParams(Self, Params);
-//end;
-
 
 procedure Detour_TCustomActionPopupMenu_DrawBackground(Self : TCustomActionPopupMenuClass);
 begin
@@ -546,9 +519,7 @@ begin
   Trampoline_TThemedPopupMenu_NCPaint         := InterceptCreate(@TThemedPopupMenuClass.NCPaint, @Detour_TThemedPopupMenu_NCPaint);
 
   Trampoline_TCustomActionPopupMenu_DrawBackground  := InterceptCreate(@TCustomActionPopupMenuClass.DrawBackground, @Detour_TCustomActionPopupMenu_DrawBackground);
-  //Trampoline_TCustomActionPopupMenu_CreateParams    := InterceptCreate(@TCustomActionPopupMenuClass.CreateParams, @Detour_TCustomActionPopupMenu_CreateParams);
   Trampoline_TCustomActionPopupMenu_CMVisibleChanged  := InterceptCreate(@TCustomActionPopupMenuClass.CMVisibleChanged, @Detour_TCustomActionPopupMenu_CMVisibleChanged);
-  //Trampoline_TWinControl_CreateWnd                  := InterceptCreate(@TWinControlClass.CreateWnd, @Detour_TWinControl_CreateWnd);
 
   Trampoline_TThemedMenuButton_DoDrawText     := InterceptCreate(TThemedMenuButton(nil).DoDrawTextAddress, @Detour_TThemedMenuButton_DoDrawText);
   Trampoline_TThemedMenuButton_DrawBackground := InterceptCreate(@TThemedMenuButtonClass.DrawBackground, @Detour_TThemedMenuButton_DrawBackground);
@@ -557,44 +528,18 @@ end;
 
 procedure RemoveThemedActnCtrlsHooks;
 begin
-  if Assigned(Trampoline_TThemedMenuItem_DrawBackground) then
-    InterceptRemove(@Trampoline_TThemedMenuItem_DrawBackground);
-
-  if Assigned(Trampoline_TThemedMenuItem_DrawSeparator) then
-    InterceptRemove(@Trampoline_TThemedMenuItem_DrawSeparator);
-
-  if Assigned(Trampoline_TThemedMenuItem_DrawSubMenuGlyph) then
-    InterceptRemove(@Trampoline_TThemedMenuItem_DrawSubMenuGlyph);
-
-  if Assigned(Trampoline_TThemedMenuItem_DrawText) then
-    InterceptRemove(@Trampoline_TThemedMenuItem_DrawText);
-
-  if Assigned(Trampoline_TThemedMenuItem_DoDrawText) then
-    InterceptRemove(@Trampoline_TThemedMenuItem_DoDrawText);
-
-  if Assigned(Trampoline_TThemedMenuItem_DoDrawMenuCheck) then
-    InterceptRemove(@Trampoline_TThemedMenuItem_DoDrawMenuCheck);
-
-  if Assigned(Trampoline_TThemedPopupMenu_NCPaint) then
-    InterceptRemove(@Trampoline_TThemedPopupMenu_NCPaint);
-
-  if Assigned(Trampoline_TCustomActionPopupMenu_DrawBackground) then
-    InterceptRemove(@Trampoline_TCustomActionPopupMenu_DrawBackground);
-
-  if Assigned(Trampoline_TCustomActionPopupMenu_CMVisibleChanged) then
-    InterceptRemove(@Trampoline_TCustomActionPopupMenu_CMVisibleChanged);
-
-//  if Assigned(Trampoline_TWinControl_CreateWnd) then
-//    InterceptRemove(@Trampoline_TWinControl_CreateWnd);
-
-  if Assigned(Trampoline_TThemedMenuButton_DoDrawText) then
-    InterceptRemove(@Trampoline_TThemedMenuButton_DoDrawText);
-
-  if Assigned(Trampoline_TThemedMenuButton_DrawBackground) then
-    InterceptRemove(@Trampoline_TThemedMenuButton_DrawBackground);
-
-  if Assigned(Trampoline_TXPStylePopupMenu_NCPaint) then
-    InterceptRemove(@Trampoline_TXPStylePopupMenu_NCPaint);
+  InterceptRemove(@Trampoline_TThemedMenuItem_DrawBackground);
+  InterceptRemove(@Trampoline_TThemedMenuItem_DrawSeparator);
+  InterceptRemove(@Trampoline_TThemedMenuItem_DrawSubMenuGlyph);
+  InterceptRemove(@Trampoline_TThemedMenuItem_DrawText);
+  InterceptRemove(@Trampoline_TThemedMenuItem_DoDrawText);
+  InterceptRemove(@Trampoline_TThemedMenuItem_DoDrawMenuCheck);
+  InterceptRemove(@Trampoline_TThemedPopupMenu_NCPaint);
+  InterceptRemove(@Trampoline_TCustomActionPopupMenu_DrawBackground);
+  InterceptRemove(@Trampoline_TCustomActionPopupMenu_CMVisibleChanged);
+  InterceptRemove(@Trampoline_TThemedMenuButton_DoDrawText);
+  InterceptRemove(@Trampoline_TThemedMenuButton_DrawBackground);
+  InterceptRemove(@Trampoline_TXPStylePopupMenu_NCPaint);
 end;
 
 end.

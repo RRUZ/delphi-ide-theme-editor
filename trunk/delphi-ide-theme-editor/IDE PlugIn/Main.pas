@@ -27,7 +27,7 @@
  {TODO -oRRUZ -cHooks : add StyleHook for TTreeview}
  {TODO -oRRUZ -cHooks : add StyleHook for TListview}
  {DONE -oRRUZ -cHooks : add support for TBitBtn}
- {TODO -oRRUZ -cFeature : Add option to override event log colors}
+ {DONE -oRRUZ -cFeature : Add option to override event log colors}
  {TODO -oRRUZ -cFeature : Transparent system menus}
  {TODO -oRRUZ -cFeature : Fast vcl styles/themes switch}
  {TODO -oRRUZ -cFeature : Add option to change Font}

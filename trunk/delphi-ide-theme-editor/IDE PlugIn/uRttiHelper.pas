@@ -41,7 +41,7 @@ uses
      class destructor Destroy;
    public
       {$IF CompilerVersion > 20}
-      class function DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+      class function DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=True) : string;
       class procedure DumpTypeToFile(const QualifiedName, FileName:string);
       class procedure DumpAllTypes(const FileName:string);
       class procedure DumpObject(AObject: TObject; const FileName: string);
@@ -130,7 +130,7 @@ begin
   end;
 end;
 
-class function TRttiUtils.DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=False) : string;
+class function TRttiUtils.DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=True) : string;
 
   //add and format a field
   procedure AddField(List:TStrings;lField : TRttiField);
