@@ -71,7 +71,8 @@ contains
   Colorizer.VirtualTrees in 'Colorizer.VirtualTrees.pas',
   Colorizer.Hook.Forms in 'Colorizer.Hook.Forms.pas',
   Colorizer.Vcl.Styles in 'Colorizer.Vcl.Styles.pas',
-  Colorizer.Hooks.ThemedActnCtrls in 'Colorizer.Hooks.ThemedActnCtrls.pas';
+  Colorizer.Hooks.ThemedActnCtrls in 'Colorizer.Hooks.ThemedActnCtrls.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Graphics.pas';
 
 end.
 

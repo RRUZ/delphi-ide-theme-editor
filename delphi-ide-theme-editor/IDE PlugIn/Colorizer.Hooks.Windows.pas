@@ -176,7 +176,7 @@ var
  LStyleServices: TCustomStyleServices;
 {$ENDIF}
 begin
-   AddLog2(Format('Detour_WinApi_DrawFrameControl uType %d State %d', [uType, uState]));
+   //AddLog2(Format('Detour_WinApi_DrawFrameControl uType %d State %d', [uType, uState]));
 
    if( uType=DFC_SCROLL) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
    begin
@@ -264,7 +264,7 @@ begin
    else
    if( uType=DFC_BUTTON) and (Rect<>nil) and Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
    begin
-      AddLog2(Format('DFC_BUTTON State %d', [uState]));
+      //AddLog2(Format('DFC_BUTTON State %d', [uState]));
 
       if (DFCS_BUTTONRADIO and uState = DFCS_BUTTONRADIO) then
       begin

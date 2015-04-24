@@ -41,6 +41,7 @@ uses
   Vcl.Styles,
   Vcl.Themes,
   Colorizer.Vcl.Styles,
+  //Vcl.Styles.Utils.Graphics,
 {$ELSE}
   Types,
   Themes,
@@ -60,6 +61,12 @@ uses
   Colorizer.Hooks.IDE,
   Dialogs,
   DDetours;
+
+const
+  VSCLASS_ITEMSVIEW_LISTVIEW             = 'ItemsView::ListView';
+  VSCLASS_ITEMSVIEW_HEADER               = 'ItemsView::Header';
+  VSCLASS_EXPLORER_LISTVIEW              = 'Explorer::ListView';
+
 
   type
     THThemesClasses = class
@@ -157,7 +164,7 @@ begin
   ColorizerLock.Enter;
   try
     Result := TrampolineOpenThemeData(hwnd, pszClassList);
-    //AddLog2('Detour_UxTheme_OpenThemeData', 'pszClassList '+string(pszClassList));
+    //AddLog2('Detour_UxTheme_OpenThemeData', 'htheme '+IntToStr(Result) +' pszClassList '+string(pszClassList));
 
     if THThemesClasses.Classes.ContainsKey(Result) then
       THThemesClasses.Classes.Remove(Result);
@@ -203,13 +210,15 @@ var
   LStyleServices: TCustomStyleServices;
   LDetails: TThemedElementDetails;
   {$ENDIF}
+  LThemeClass : string;
+//  LColor : TColor;
 
 {$IFDEF DELPHIXE2_UP}
   function DrawScrollBarVCLStyles : HRESULT;
   var
     LScrollDetails: TThemedScrollBar;
   begin
-    AddLog2('DrawScrollBarVCLStyles');
+    //AddLog2('DrawScrollBarVCLStyles');
     LStyleServices := ColorizerStyleServices;
     LScrollDetails := tsScrollBarRoot;
     LDetails.Element := TThemedElement.teScrollBar;
@@ -582,12 +591,60 @@ var
   end;
 
 begin
-  //  AddLog2('TrampolineDrawThemeBackground 1');
   if not (THThemesClasses.Classes.ContainsKey(THEME) and Assigned(TColorizerLocalSettings.ColorMap) and Assigned(TColorizerLocalSettings.Settings)  and TColorizerLocalSettings.Settings.Enabled) then
+  begin
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
- //   AddLog2('TrampolineDrawThemeBackground 2');
+   //AddLog2(PChar(Format('DrawThemeBackground  class %s hTheme %d iPartId %d iStateId %d', ['Ignored', Theme, iPartId, iStateId])));
+  end;
 
-  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_TOOLTIP) then
+   LThemeClass:=THThemesClasses.Classes.Items[THEME];
+
+   //AddLog2(PChar(Format('DrawThemeBackground  class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, Theme, iPartId, iStateId])));
+
+
+//   if  (SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW)) then
+//   begin
+//        case iPartId of
+//          LVP_LISTITEM       :
+//                              begin
+//                                  case iStateId of
+//                                      LIS_HOT,
+//                                      LISS_HOTSELECTED,
+//                                      LIS_SELECTEDNOTFOCUS,
+//                                      LIS_SELECTED          :
+//                                                              begin
+//                                                                //AddLog2('AlphaBlendFillCanvas');
+//                                                                LColor :=ColorizerStyleServices.GetSystemColor(clHighlight);
+//                                                                LCanvas:=TCanvas.Create;
+//                                                                SavedIndex := SaveDC(dc);
+//                                                                try
+//                                                                  LCanvas.Handle:=dc;
+//                                                                  if iStateId=LISS_HOTSELECTED then
+//                                                                    AlphaBlendFillCanvas(LCanvas, LColor, pRect, 96)
+//                                                                  else
+//                                                                    AlphaBlendFillCanvas(LCanvas, LColor, pRect, 50);
+//                                                                  LCanvas.Pen.Color:=LColor;
+//                                                                  LCanvas.Brush.Style:=bsClear;
+//                                                                  LRect:=pRect;
+//                                                                  LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+//                                                                finally
+//                                                                  LCanvas.Handle:=0;
+//                                                                  LCanvas.Free;
+//                                                                  RestoreDC(dc, SavedIndex);
+//                                                                end;
+//                                                                Result:=S_OK;
+//                                                              end;
+//                                  else
+//                                       Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+//                                  end;
+//                              end;
+//
+//        else
+//            Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+//        end;
+//  end
+//  else
+  if SameText(LThemeClass, VSCLASS_TOOLTIP) then
   begin
       case iPartId  of
        TTP_STANDARD :
@@ -612,7 +669,7 @@ begin
    Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
   end
   else
-  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_SCROLLBAR) then
+  if SameText(LThemeClass, VSCLASS_SCROLLBAR) then
   begin
 
     ApplyHook:=True; //improve overall perfomance . drawback : all the scrollbars are styled.
@@ -715,14 +772,16 @@ begin
     end;
   end
   else
-  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_TREEVIEW) then
+  if SameText(LThemeClass, VSCLASS_TREEVIEW) then
   begin
            //deshabilitar en treeeview
     if (iPartId = TVP_GLYPH) and (iStateId=GLPS_OPENED) and ((pRect.Right-pRect.Left)=9) then
     begin
       sCaller  := ProcByLevel(4);
+      //AddLog2('GLPS_OPENED  sCaller '+sCaller);
+
                    //VirtualTreeView           //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
-      ApplyHook:= (sCaller = '') or (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller));
+      ApplyHook:=  (sCaller = '') or (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller));
       if not ApplyHook then
       begin
         //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
@@ -877,7 +936,7 @@ begin
 //      AddLog('THThemesClasses.TreeView','Ignored '+sCaller);
   end
   else
-  if SameText(THThemesClasses.Classes.Items[THEME], VSCLASS_BUTTON) then
+  if SameText(LThemeClass, VSCLASS_BUTTON) then
   begin
     if (iPartId = BP_CHECKBOX) then
     begin
@@ -1181,10 +1240,14 @@ begin
   THThemesClasses.Windows := TDictionary<HTHEME, HWND>.Create();
   if {$IFDEF DELPHIXE2_UP}StyleServices.Available {and StyleServices.Enabled}  {$ELSE} ThemeServices.ThemesAvailable {$ENDIF} then
   begin
-//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
-//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
-//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
-//    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
+   if StyleServices.Enabled then
+   begin
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teListView], VSCLASS_LISTVIEW);
+   end;
 
     TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
     if Assigned(DrawThemeText) then

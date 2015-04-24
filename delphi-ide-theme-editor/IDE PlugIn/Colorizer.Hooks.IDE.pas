@@ -54,6 +54,7 @@ const
 {$IFDEF DELPHIXE8} sCoreIDEModule =  'coreide220.bpl';{$ENDIF}
 
 {$IFDEF DELPHIXE6} sModernThemeModule =  'ModernTheme200.bpl';{$ENDIF}
+
 {$IFDEF DELPHIXE7} sModernThemeModule =  'ModernTheme210.bpl';{$ENDIF}
 {$IFDEF DELPHIXE7} sdesignideModule   =  'designide210.bpl';{$ENDIF}
 
@@ -88,6 +89,8 @@ uses
   GraphUtil,
   SysUtils,
   CaptionedDockTree,
+  uRttiHelper,
+  ToolsAPI,
   Graphics;
 
 type
@@ -157,6 +160,47 @@ var
     Rect: TRect; State: TOwnerDrawState) of object;
 
 }
+
+
+{
+    0035C454 13161 1DEA Debugmgropts::TLogColors::
+    00360384 13091 1DEB __fastcall Debugmgropts::TLogColors::TLogColors()
+    0036088C 13090 1DEC __fastcall Debugmgropts::TLogColors::~TLogColors()
+    0036034C 13092 1DED __fastcall Debugmgropts::TLogColors::Assign(Debugmgropts::TLogColors *)
+    003608CC 13089 1DEE __fastcall Debugmgropts::TLogColors::GetColor(Toolsapi::TLogItemType)
+}
+
+ Trampoline_coreide_TLogColors_GetColor  :  function(Self: TObject; Index: TLogItemType): TObject;
+
+
+function Detour_coreide_TLogColors_GetColor(Self: TObject; Index: TLogItemType): TObject;
+begin
+  //AddLog2('Detour_coreide_TLogColors_GetColor');
+  // property ForegroundColor: TColor;
+  // property BackgroundColor: TColor;
+
+  Result:=Trampoline_coreide_TLogColors_GetColor(Self, Index);
+  if (Result<>nil) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+  begin
+     case Index of
+       litLogBreakEval,
+       litBreakpointMessage,
+       litSourceBreakpoint : begin
+                               TRttiUtils.SetRttiPropertyValue(Result, 'BackgroundColor', TColorizerLocalSettings.ColorMap.WindowColor);
+                               TRttiUtils.SetRttiPropertyValue(Result, 'ForegroundColor', TColorizerLocalSettings.ColorMap.HotFontColor);
+                             end;
+
+       else
+       begin
+           TRttiUtils.SetRttiPropertyValue(Result, 'BackgroundColor', TColorizerLocalSettings.ColorMap.WindowColor);
+           TRttiUtils.SetRttiPropertyValue(Result, 'ForegroundColor', TColorizerLocalSettings.ColorMap.FontColor);
+       end;
+     end;
+
+  end;
+end;
+
+
 procedure CustomProjectTree2PaintText(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType});
 begin
   //TargetCanvas.Font.Color:=clRed;
@@ -1023,6 +1067,8 @@ begin
   CoreIDEModule := LoadLibrary(sCoreIDEModule);
   if CoreIDEModule<>0 then
   begin
+    Trampoline_coreide_TLogColors_GetColor:= InterceptCreate(sCoreIDEModule, '@Debugmgropts@TLogColors@GetColor$qqr21Toolsapi@TLogItemType', @Detour_coreide_TLogColors_GetColor);
+
     Trampoline_CompilerMsgLine_Draw := InterceptCreate(sCoreIDEModule, sCompilerMsgLineDraw, @Detour_TCompilerMsgLine_Draw);
     Trampoline_TitleLine_Draw       := InterceptCreate(sCoreIDEModule, sTitleLineDraw, @Detour_TTitleLine_Draw);
     Trampoline_TFileFindLine_Draw   := InterceptCreate(sCoreIDEModule, sFileFindLineDraw, @Detour_TFileFindLine_Draw);
@@ -1088,6 +1134,9 @@ var
 begin
     //InterceptRemove(@TrampolineOpenKey);
     //InterceptRemove(@TrampolineInternalLoadPropValues);
+
+
+    InterceptRemove(@Trampoline_coreide_TLogColors_GetColor);
     InterceptRemove(@Trampoline_CompilerMsgLine_Draw);
     InterceptRemove(@Trampoline_TitleLine_Draw);
     InterceptRemove(@Trampoline_TFileFindLine_Draw);

@@ -40,6 +40,7 @@ uses
  uDelphiVersions,
  uDelphiIDEHighlight,
  ActnColorMaps,
+ StrUtils,
  Windows,
  PngImage,
  Graphics,
@@ -129,8 +130,6 @@ uses
  uRttiHelper;
 
 {$IFDEF ENABLELOG}
-var
-  LogFile : TStrings = nil;
 {$ENDIF}
 
 //var
@@ -217,10 +216,6 @@ procedure RefreshIDETheme(AColorMap:TColorizerColorMap;AStyle: TActionBarStyle;R
 var
   Index     : Integer;
 begin
- {
-  if GlobalSettings.EnableDWMColorization and DwmIsEnabled then
-   SetCompositionColor(AColorMap.Color);
- }
   for Index := 0 to Screen.FormCount-1 do
   if TColorizerLocalSettings.HookedWindows.IndexOf(Screen.Forms[Index].ClassName)>=0 then
    if not (csDesigning in Screen.Forms[Index].ComponentState) then
@@ -460,7 +455,33 @@ begin
      end;
 end;
 
+
 procedure RestoreActnManagerStyles;
+var
+  LActionManager : TActionManager;
+begin
+  try
+    if (TColorizerLocalSettings.ActnStyleList.Count>0)  and Assigned(ActionBarStyles) then
+    begin
+      for LActionManager in TColorizerLocalSettings.ActnStyleList{.Keys} do
+      begin
+         //LActionManager.Style:= ActnStyleList.Items[LActionManager];//ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+        if ActionBarStyles.IndexOf(DefaultActnBarStyle)>=0 then
+        begin
+         if Assigned(LActionManager.Style) and Assigned(ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)]) then
+         begin
+           //AddLog('ActionBarStyles '+ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)].GetStyleName);
+           LActionManager.Style:= ActionBarStyles.Style[ActionBarStyles.IndexOf(DefaultActnBarStyle)];
+         end;
+        end;
+      end;
+    end;
+  except on e: exception do //sometimes the references to the objects contained in ActionBarStyles are lost when the IDE is closed.
+    AddLog2('', Format(' LActionManager.Style exception RestoreActnManagerStyles Message %s Trace %s ',[e.Message, e.StackTrace]));
+  end;
+end;
+
+procedure RestoreActnManagerStylesBackup;
 {$IFNDEF DLLWIZARD}
 var
   LActionManager : TActionManager;
@@ -553,19 +574,37 @@ TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:
 end;
 
 
+procedure DumpTypes;
+var
+  LCtx : TRttiContext;
+  LType : TRttiType;
+begin
+  LCtx:=TRttiContext.Create;
+  try
+    for LType in LCtx.GetTypes do
+     if StartsText('DebugMgrOpts', LType.QualifiedName) then
+     //if SameText('DebugMgrOpts.TLogColors', LType.QualifiedName) then
+     begin
+       AddLog2(LType.QualifiedName);
+       TRttiUtils.DumpRttiType(LType, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+LType.QualifiedName+'.pas');
+       //break;
+     end;
+  finally
+    LCtx.Free;
+  end;
+end;
+
 initialization
 
 
 {$IFDEF ENABLELOG}
  sLogFileName:=ExtractFilePath(GetModuleLocation())+'log.txt';
- LogFile:=TStringList.Create;
  ShowMessage('Log enabled');
 {$ENDIF}
- //LFieldsComponents := TObjectDictionary<string,TStringList>.Create([doOwnsValues]);
+
+// DumpTypes;
 finalization
+
 {$IFDEF ENABLELOG}
-  //LogFile.SaveToFile(sLogFileName);
-  LogFile.Free;
 {$ENDIF}
- //LFieldsComponents.Free;
 end.

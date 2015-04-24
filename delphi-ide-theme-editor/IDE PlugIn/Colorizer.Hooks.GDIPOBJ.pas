@@ -30,7 +30,11 @@ interface
 implementation
 
 uses
+    Vcl.Styles,
+    Vcl.Themes,
     Colorizer.Utils,
+    Colorizer.Vcl.Styles,
+    System.Types,
     JclDebug,
     DDetours,
     Graphics,
@@ -89,13 +93,28 @@ var
    Trampoline_TGPGraphics_DrawPath : function (Self : TGPGraphics; pen: TGPPen; path: TGPGraphicsPath): TStatus = nil;
    Trampoline_TGPGraphics_FillPath : function (Self : TGPGraphics; brush: TGPBrush; path: TGPGraphicsPath): TStatus = nil;
 
+function MakeTRect(const Rect: TGPRectF): TRect;
+begin
+  Result.Left := Trunc(rect.X);
+  Result.Top := Trunc(Rect.Y);
+  Result.Width := Trunc(Rect.Width);
+  Result.Height:= Trunc(Rect.Height);
+end;
+
+
 function Detour_TGPGraphics_DrawPath(Self : TGPGraphics; pen: TGPPen; path: TGPGraphicsPath): TStatus;
 const
  sTGradientTabSet= 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
 var
  sCaller : string;
  PenColor, LGPColor: TGPColor;
+// Hooked : BooleaN;
+// bounds: TGPRectF;
+// LRect  : TRect;
+// LDetails: TThemedElementDetails;
 begin
+//   AddLog2('Detour_TGPGraphics_DrawPath ');
+ // Hooked:=False;
   //AddLog2('Detour_TGPGraphics_DrawPath', '1');
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (pen<>nil) then
   begin
@@ -108,11 +127,25 @@ begin
      sCaller  := ProcByLevel(3);
      //AddLog2('Detour_TGPGraphics_DrawPath sCaller', sCaller);
      if SameText(sTGradientTabSet, sCaller) then
+     begin
+      //Hooked:=True;
       pen.SetColor(LGPColor);
+     end;
     end;
   end;
 
-  Result:=Trampoline_TGPGraphics_DrawPath(Self, pen, path);
+//  if 1=1  then
+//  begin
+//   AddLog2('Detour_TGPGraphics_DrawPath Hooked');
+//   path.GetBounds(bounds);
+//   MakeTRect(bounds);
+//
+//      LDetails := StyleServices.GetElementDetails(ttTabItemNormal);
+//      ColorizerStyleServices.DrawParentBackground(Self.FromHDC ,  Self.GetHDC, LDetails, False);
+//      result:=TStatus.Ok;
+//  end
+//  else
+    Result:=Trampoline_TGPGraphics_DrawPath(Self, pen, path);
   //AddLog('Detour_TGPGraphics_DrawPath', '2');
 end;
 

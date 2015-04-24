@@ -261,8 +261,7 @@ var
   LParentForm : TCustomForm;
 begin
 
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (not (csDesigning in Self.ComponentState)) and Assigned(TColorizerLocalSettings.ColorMap) and
-      TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (not (csDesigning in Self.ComponentState)) and Assigned(TColorizerLocalSettings.ColorMap) then
   begin
     LParentForm:= GetParentForm(Self);
     if Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0) then
@@ -937,7 +936,7 @@ begin
       if (LRect.Right - LRect.Left >= MinRect) or
           (TextWidth(sText) <= (LRect.Right - LRect.Left)) then
       begin
-        Self.GetMemBitmap.Canvas.Font.Color := Self.Font.Color;
+        Self.GetMemBitmap.Canvas.Font.Color := TColorizerLocalSettings.ColorMap.FontColor;//Self.Font.Color;
         TextRect(LRect, sText, [tfEndEllipsis, tfNoClip]);
       end;
     end;
@@ -1517,6 +1516,8 @@ begin
     Trampoline_TCustomGroupBox_Paint(Self);
 end;
 
+
+
 //Draw the bottom right corner when both scrollbars are active
 procedure DrawNCBorder(Self : TWinControl; EraseLRCorner: Boolean);
 var
@@ -1544,6 +1545,7 @@ begin
             ScrollWidth := GetSystemMetrics(SM_CXVSCROLL);
             ScrollHeight := GetSystemMetrics(SM_CYHSCROLL);
             InflateRect(EmptyRect, -1, -1);
+            //InflateRect(EmptyRect, -2, -2);
             with EmptyRect do
               if Self.UseRightToLeftScrollBar then
                 EmptyRect := Rect(Left, Bottom - ScrollHeight, Left + ScrollWidth, Bottom)
@@ -1567,8 +1569,13 @@ begin
         LCanvas:=TCanvas.Create;
         try
           LCanvas.Handle:=DC;
-          LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-          LCanvas.FillRect(DrawRect);
+
+          LCanvas.Brush.Style:=bsClear;
+          LCanvas.Pen.Color :=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+          LCanvas.Rectangle(DrawRect);
+
+          //LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+          //LCanvas.FillRect(DrawRect);
         finally
           LCanvas.Handle:=0;
           LCanvas.Free;
@@ -2821,7 +2828,24 @@ var
 begin
    if EnableHookTBitBtn then
    begin
-    Exit(ColorizerStyleServices.DrawElement(DC, Details, R, ClipRect));
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesControls then
+      Exit(ColorizerStyleServices.DrawElement(DC, Details, R, ClipRect))
+    else
+    begin
+       SaveIndex := SaveDC(DC);
+       LCanvas:=TCanvas.Create;
+       try
+         LCanvas.Handle:=DC;
+         LCanvas.Brush.Color:=TColorizerLocalSettings.ColorMap.Color;
+         LCanvas.Pen.Color:=TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+         LCanvas.Rectangle(R);
+       finally
+          LCanvas.Handle:=0;
+          LCanvas.Free;
+          RestoreDC(DC, SaveIndex);
+       end;
+       Exit(True);
+    end;
    end
    else
    if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) and (Details.Element = teHeader) {and (Details.Part=HP_HEADERITEMRIGHT) } then
