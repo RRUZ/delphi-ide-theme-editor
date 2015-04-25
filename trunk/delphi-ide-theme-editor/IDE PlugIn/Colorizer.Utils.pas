@@ -574,37 +574,77 @@ TFile.AppendAllText(sLogFileName, Format('%s %s : %s %s',[FormatDateTime('hh:nn:
 end;
 
 
-procedure DumpTypes;
-var
-  LCtx : TRttiContext;
-  LType : TRttiType;
-begin
-  LCtx:=TRttiContext.Create;
-  try
-    for LType in LCtx.GetTypes do
-     if StartsText('DebugMgrOpts', LType.QualifiedName) then
-     //if SameText('DebugMgrOpts.TLogColors', LType.QualifiedName) then
-     begin
-       AddLog2(LType.QualifiedName);
-       TRttiUtils.DumpRttiType(LType, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+LType.QualifiedName+'.pas');
-       //break;
-     end;
-  finally
-    LCtx.Free;
-  end;
-end;
+//procedure DumpTypes;
+//var
+//  LCtx : TRttiContext;
+//  LType : TRttiType;
+//begin
+//  LCtx:=TRttiContext.Create;
+//  try
+//    for LType in LCtx.GetTypes do
+//
+//
+//
+//     if StartsText('Gdiplus', LType.QualifiedName) then
+//     //if SameText('DebugMgrOpts.TLogColors', LType.QualifiedName) then
+//     begin
+//       AddLog2(LType.QualifiedName);
+//       TRttiUtils.DumpRttiType(LType, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+LType.QualifiedName+'.pas');
+//     end;
+//
+//  finally
+//    LCtx.Free;
+//  end;
+//end;
+//
+//
+//procedure DumpUnits;
+//var
+//  LCtx : TRttiContext;
+//  LType : TRttiType;
+//  LUnits : TStrings;
+//  LUnitName : string;
+//  p : integer;
+//begin
+//  LUnits:=TStringList.Create;
+//  try
+//    LCtx:=TRttiContext.Create;
+//    try
+//      for LType in LCtx.GetTypes do
+//      begin
+//       LUnitName :=  LType.QualifiedName;
+//       p:= LastDelimiter('.', LUnitName);
+//       if (p>0) and (Pos('<', LUnitName)=0) then
+//       begin
+//         LUnitName := Copy(LType.QualifiedName, 1, p-1);
+//         if (LUnitName<>'') and (not StartsText('Data', LUnitName)) and (not StartsText('Bind', LUnitName)) and (not StartsText('Agent', LUnitName))
+//         and (not StartsText('id', LUnitName)) and (not StartsText('FIREDAC.', LUnitName)) and (not StartsText('Datasnap.', LUnitName))
+//         and (not StartsText('FMX', LUnitName)) and (not StartsText('System.', LUnitName)) and (not StartsText('WinApi.', LUnitName))
+//         and (not StartsText('Castalia', LUnitName)) and (not StartsText('Vcl.', LUnitName)) and (LUnits.IndexOf(LUnitName)<0) then
+//         begin
+//           AddLog2('Dumping '+LUnitName);
+//           LUnits.Add(LUnitName);
+//           TRttiUtils.DumpUnit(LUnitName, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\units\'+LUnitName+'.pas');
+//         end;
+//       end;
+//      end;
+//    finally
+//      LCtx.Free;
+//    end;
+//  finally
+//    LUnits.Free;
+//  end;
+//end;
+
 
 initialization
-
-
 {$IFDEF ENABLELOG}
  sLogFileName:=ExtractFilePath(GetModuleLocation())+'log.txt';
  ShowMessage('Log enabled');
 {$ENDIF}
 
-// DumpTypes;
+//DumpTypes;
+//DumpUnits;
 finalization
 
-{$IFDEF ENABLELOG}
-{$ENDIF}
 end.

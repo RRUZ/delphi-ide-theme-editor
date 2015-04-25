@@ -88,6 +88,8 @@ const
   TrampolineOpenThemeData             : function(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall = nil;
   //TrampolineCloseThemeData            : function(hTheme: HTHEME): HRESULT; stdcall = nil;
   TrampolineDrawThemeBackground       : function(HTHEME: HTHEME; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall = nil;
+  TrampolineDrawThemeBackgroundEx     : function(HTHEME: HTHEME; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; pOptions: PDTBGOPTS) : HRESULT; stdcall = nil;
+
   Trampoline_DrawThemeText              : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
 
   TrampolineTWinControl_WMNCPaint     : procedure (Self : TWinControl;var Message: TWMNCPaint) = nil;
@@ -190,6 +192,14 @@ begin
   Result := R;
 end;
 {$IFEND}
+
+
+function Detour_UxTheme_DrawThemeBackgroundEx(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect;  pOptions: PDTBGOPTS) : HRESULT; stdcall;
+begin
+  //AddLog2(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', ['Ignored', Theme, iPartId, iStateId])));
+  Exit(TrampolineDrawThemeBackgroundEx(THEME, dc, iPartId, iStateId, pRect, pOptions));
+end;
+
 
 function Detour_UxTheme_DrawThemeBackground(THEME: HTHEME; dc: HDC;  iPartId, iStateId: Integer; const pRect: TRect; pClipRect: pRect) : HRESULT; stdcall;
 const
@@ -1254,6 +1264,9 @@ begin
       Trampoline_DrawThemeText    := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
     TrampolineOpenThemeData       := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
     TrampolineDrawThemeBackground := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
+    TrampolineDrawThemeBackgroundEx := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
+
+
     TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(sVclIDEModule, sBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
 //    TrampolineSetScrollPos  := InterceptCreate(user32,  'SetScrollPos', @Detour_WinApi_SetScrollPos);
 //    TrampolineSetScrollInfo := InterceptCreate(user32, 'SetScrollInfo', @Detour_WinApi_SetScrollInfo);
@@ -1267,6 +1280,7 @@ begin
   InterceptRemove(@TrampolineOpenThemeData);
   InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
   InterceptRemove(@TrampolineDrawThemeBackground);
+  InterceptRemove(@TrampolineDrawThemeBackgroundEx);
   InterceptRemove(@Trampoline_DrawThemeText);
 //  InterceptRemove(@TrampolineSetScrollPos);
 //  InterceptRemove(@TrampolineSetScrollInfo);

@@ -26,8 +26,10 @@ interface
 uses
 {$IF CompilerVersion > 20}
   Rtti,
+  IOUtils,
   Generics.Collections,
 {$IFEND}
+  StrUtils,
   Variants,
   TypInfo,
   Classes,
@@ -46,6 +48,7 @@ uses
       class procedure DumpAllTypes(const FileName:string);
       class procedure DumpObject(AObject: TObject; const FileName: string);
       class procedure DumpRttiType(AType: TRttiType; const FileName: string);
+      class procedure DumpUnit(const UnitName, FileName: string);
       class procedure  SetRttiPropertyValue(const Obj:  TObject;const PropName:String; AValue:TValue);
       class function   GetRttiPropertyValue(const Obj:  TObject;const PropName:String): TValue;
       class procedure  SetRttiMemberValue(const Obj:  TObject;const MemberName:String; AValue:TValue; IsProp : Boolean);
@@ -130,6 +133,27 @@ begin
   end;
 end;
 
+class procedure TRttiUtils.DumpUnit(const UnitName, FileName: string);
+var
+ Ctx : TRttiContext;
+ LType : TRttiType;
+begin
+   Ctx := TRttiContext.Create.Create;
+  try
+   if TFile.Exists(FileName) then
+     TFile.Delete(FileName);
+   for LType in Ctx.GetTypes do
+     if StartsText(UnitName, LType.QualifiedName) then
+       try
+        TFile.AppendAllText(FileName, TRttiUtils.DumpTypeDefinition(LType.Handle)+sLineBreak);
+        except
+        end;
+  finally
+   Ctx.Free;
+  end;
+end;
+
+
 class function TRttiUtils.DumpTypeDefinition(ATypeInfo: Pointer;OnlyDeclarated:Boolean=True) : string;
 
   //add and format a field
@@ -191,13 +215,13 @@ begin
        tkChar       : ;
        tkEnumeration:
                      begin
-                         Definition.Items[sType].Add(Format('%s%s=(',[sIndent,lType.Name]));
+                         Definition.Items[sType].Add(Format('%s%s=(',[sIndent, lType.Name]));
 
                           for k := lType.AsOrdinal.MinValue to lType.AsOrdinal.MaxValue do
                            if k<lType.AsOrdinal.MaxValue then
-                            Definition.Items[sType].Add(Format('%s%s,',[sIndent,GetEnumName(lType.Handle, k)]))
+                            Definition.Items[sType].Add(Format('%s%s,',[sIndent, GetEnumName(lType.Handle, k)]))
                            else
-                            Definition.Items[sType].Add(Format('%s%s',[sIndent,GetEnumName(lType.Handle, k)]));
+                            Definition.Items[sType].Add(Format('%s%s',[sIndent, GetEnumName(lType.Handle, k)]));
 
 
                          Definition.Items[sType].Add(Format('%s)',[sIndent]));
@@ -212,9 +236,9 @@ begin
                        //Definition.Items[sType].Add('//Unit Name '+lType.QualifiedName);
 
                        if Assigned(lType.BaseType) then
-                        Definition.Items[sType].Add(Format('%s%s=class(%s)',[sIndent,lType.Name,lType.BaseType.Name]))
+                        Definition.Items[sType].Add(Format('%s%s=class(%s)',[sIndent, lType.Name, lType.BaseType.Name]))
                        else
-                        Definition.Items[sType].Add(Format('%s%s=class',[sIndent,lType.Name]));
+                        Definition.Items[sType].Add(Format('%s%s=class',[sIndent, lType.Name]));
                      end;
        tkMethod     : ;
        tkWChar      : ;
@@ -230,16 +254,16 @@ begin
 
        tkRecord     : begin
                        //get the main definition
-                        Definition.Items[sType].Add(Format('%s%s=record',[sIndent,lType.Name]));
+                        Definition.Items[sType].Add(Format('%s%s=record',[sIndent, lType.Name]));
                       end;
 
        tkInterface  :
                      begin
                        //get the main definition
                        if Assigned(lType.BaseType) then
-                        Definition.Items[sType].Add(Format('%s%s=Interface(%s)',[sIndent,lType.Name,lType.BaseType.Name]))
+                        Definition.Items[sType].Add(Format('%s%s=Interface(%s)',[sIndent, lType.Name, lType.BaseType.Name]))
                        else
-                        Definition.Items[sType].Add(Format('%s%s=Interface',[sIndent,lType.Name]));
+                        Definition.Items[sType].Add(Format('%s%s=Interface',[sIndent, lType.Name]));
 
                      end;
        tkInt64      : ;
@@ -250,29 +274,33 @@ begin
        tkProcedure  : ;
      end;
 
-       //add the fields
-       if OnlyDeclarated then
-         for lField in lType.GetDeclaredFields do
-           AddField(Definition.Items[ArrVisibility[lField.Visibility]],lField)
-       else
-         for lField in lType.GetFields do
-           AddField(Definition.Items[ArrVisibility[lField.Visibility]],lField);
+       if (lType.TypeKind = tkClass) or (lType.TypeKind = tkRecord) or (lType.TypeKind = tkInterface)  then
+       begin
+
+         //add the fields
+         if OnlyDeclarated then
+           for lField in lType.GetDeclaredFields do
+             AddField(Definition.Items[ArrVisibility[lField.Visibility]], lField)
+         else
+           for lField in lType.GetFields do
+             AddField(Definition.Items[ArrVisibility[lField.Visibility]], lField);
 
        //add the methods
-       if OnlyDeclarated then
-         for lMethod in lType.GetDeclaredMethods do
-           AddMethod(Definition.Items[ArrVisibility[lMethod.Visibility]],lMethod)
-       else
-         for lMethod in lType.GetMethods do
-           AddMethod(Definition.Items[ArrVisibility[lMethod.Visibility]],lMethod);
+         if OnlyDeclarated then
+           for lMethod in lType.GetDeclaredMethods do
+             AddMethod(Definition.Items[ArrVisibility[lMethod.Visibility]], lMethod)
+         else
+           for lMethod in lType.GetMethods do
+             AddMethod(Definition.Items[ArrVisibility[lMethod.Visibility]], lMethod);
 
-       //add the Properties
-       if OnlyDeclarated then
-         for lProperty in lType.GetDeclaredProperties do
-           AddProperty(Definition.Items[ArrVisibility[lProperty.Visibility]],lProperty)
-       else
-         for lProperty in lType.GetProperties do
-           AddProperty(Definition.Items[ArrVisibility[lProperty.Visibility]],lProperty);
+         //add the Properties
+         if OnlyDeclarated then
+           for lProperty in lType.GetDeclaredProperties do
+             AddProperty(Definition.Items[ArrVisibility[lProperty.Visibility]], lProperty)
+         else
+           for lProperty in lType.GetProperties do
+             AddProperty(Definition.Items[ArrVisibility[lProperty.Visibility]], lProperty);
+       end;
 
      for i:=Low(TMemberVisibility) to High(TMemberVisibility) do
       if Definition.Items[ArrVisibility[i]].Count>1 then
