@@ -33,7 +33,6 @@ uses
  Colorizer.Utils,
  uMIsc,
  DDetours,
- JclDebug,
  Windows,
  Graphics,
  Controls,
@@ -59,7 +58,9 @@ type
 
 var
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
+  {$IFDEF DELPHIXE6_UP}
   Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
+  {$eNDIF}
   Trampoline_ExtTextOutW                   : function (DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall = nil;
   TrampolineGetSysColorBrush               : function(nIndex: Integer): HBRUSH; stdcall;
   Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
@@ -397,54 +398,20 @@ end;
 
 //Hook for allow change font color in TProjectManagerForm.TCustomVirtualStringTree.PaintNormalText (font color in project manager window) ,
 //because this component is not using the colors set via RTTI
-//Note  : This is a temporal workaround.
 function Detour_WinApi_DrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
-const
- sCustomVirtualStringTreeSignature  = 'IDEVirtualTrees.TCustomVirtualStringTree.PaintNormalText';
- sVirtualTreeHintWindow             = 'IDEVirtualTrees.TVirtualTreeHintWindow.AnimationCallback';
 var
-  sCaller : string;
   OrgColor, LFontColor: Cardinal;
   RestoreColor : Boolean;
 begin
  OrgColor:=0;
  RestoreColor:=False;
- sCaller:='';
 
- if {(((uFormat AND DT_CALCRECT = 0) and EnableStockHook) or (uFormat=2084))} (uFormat=2084) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
- begin
-   OrgColor:=GetTextColor(hDC);
-   LFontColor :=ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
-
-   if (OrgColor=0) and (LFontColor<>OrgColor) then
-   begin
-    sCaller := ProcByLevel(2);
-    if {EnableStockHook or} SameText(sCaller, sVirtualTreeHintWindow) then
-    begin
-//       AddLog('Detour_WinApi_DrawTextEx', sCaller);
-//       AddLog('Detour_WinApi_DrawText', 'uFormat ' + IntToStr(uFormat));
-//       if LastWinControl<>nil then
-//         AddLog('Detour_WinApi_DrawText', 'ClassName ' + LastWinControl.ClassName);
-       RestoreColor:=True;
-       SetTextColor(hDC, LFontColor);
-    end;
-   end;
-
-  if not RestoreColor and (LFontColor<>OrgColor) and (OrgColor = GetSysColor(COLOR_WINDOWTEXT)) then
+  if (uFormat=2084) and HookVTPaintNormalText then
   begin
-   if sCaller<>'' then
-     sCaller := ProcByLevel(2);
-    if SameText(sCaller, sCustomVirtualStringTreeSignature) then
-    begin
-//       AddLog('Detour_WinApi_DrawTextEx', sCaller);
-//       AddLog('Detour_WinApi_DrawText', 'uFormat ' + IntToStr(uFormat));
-//       if LastWinControl<>nil then
-//         AddLog('Detour_WinApi_DrawText', 'ClassName ' + LastWinControl.ClassName);
-       RestoreColor:=True;
-       SetTextColor(hDC, LFontColor);
-    end;
+   LFontColor :=ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor);
+   RestoreColor:=True;
+   OrgColor:=SetTextColor(hDC, LFontColor);
   end;
- end;
 
   //SetTextColor(hDC, ColorToRGB(clRed));
   Result:=Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
@@ -453,63 +420,12 @@ begin
 end;
 
 
-{.$IFDEF DELPHIXE7_UP}
-function ColorToRGBTrampoline(Color: TColor): Longint;
-begin
-  if Color < 0 then
-    Result := Trampoline_GetSysColor(Color and $000000FF) else
-    Result := Color;
-end;
-{.$ENDIF}
-
-
-//Hook for allow change font color in TVirtualTreeHintWindow.InternalPaint (font color in hint window) ,
-//Note  : This is a temporal workaround.
+{$IFDEF DELPHIXE6_UP}
 function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
- //sVirtualTreeHintWindowInternalPaint = 'IDEVirtualTrees.TVirtualTreeHintWindow.InternalPaint';
-{$IFDEF DELPHIXE6_UP}
-const
- sDrawActiveTab                      =  'GDIPlus.GradientDrawer.TGradientTabDrawer.DrawActiveTab';
- sDrawInactiveTab                    =  'GDIPlus.GradientDrawer.TGradientTabDrawer.DrawInactiveTab';
-{$ENDIF}
-{$IFDEF DELPHIXE7_UP}
- //used to paint background of MultiView related combobox (2)
- //Note : If these combobox/views are styled the icons maintains the white background.
- //So for now these elements will not be styled. Only a patch id applied to avoid apply the current style font colors.
- //sTCustomComboBoxDrawItemSignature   = 'Vcl.StdCtrls.TCustomComboBox.DrawItem';
-{$ENDIF}
-
-{$IFDEF DELPHIXE6_UP}
-var
-  sCaller : string;
-  OrgColor : Cardinal;
-  RestoreColor : Boolean;
-{$ENDIF}
-{$IFDEF DELPHIXE7_UP}
-  //OrgColorBrush : Cardinal;
-{$ENDIF}
-  //i : integer;
 begin
-
-// if SameText(lpchText, '32-bit Windows') then
-// for i:=1 to 5 do
-// begin
-//     sCaller := ProcByLevel(i);
-//     AddLog2(Format('Level %d %s',[i, sCaller]));
-// end;
-
-
-{$IFDEF DELPHIXE6_UP}
- OrgColor:=0;
- RestoreColor:=False;
-
- if (dwDTFormat AND DT_CALCRECT = 0) and Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and Assigned(TColorizerLocalSettings.ColorMap) then
+ if (dwDTFormat AND DT_CALCRECT = 0) and (HookDrawActiveTab or HookDrawInActiveTab) then
  begin
-  OrgColor:= GetTextColor(DC);
-   if (TColor(OrgColor) = clWhite) or (TColor(OrgColor) = clBlack)  then
-   begin
-     sCaller := ProcByLevel(4);
-     if SameText(sCaller, sDrawActiveTab) then
+     if HookDrawActiveTab then
      begin
        if not TColorizerLocalSettings.Settings.TabIDECustom then
         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
@@ -517,49 +433,18 @@ begin
         SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
      end
      else
-     if SameText(sCaller, sDrawInactiveTab) then
+     if HookDrawInActiveTab then
      begin
        if not TColorizerLocalSettings.Settings.TabIDECustom then
         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
        else
         SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
      end;
-   end;
-
-   {$IFDEF DELPHIXE7_UP}
-//   OrgColorBrush:= GetBkColor(DC);
-//   if (TColor(OrgColorBrush) = ColorToRGBTrampoline(clWindow)) then
-//   begin
-//     sCaller := ProcByLevel(3);
-//     if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
-//      SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
-//       //SetBkColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.WindowColor));
-//     else
-//     begin
-//       //Fix text color of the platform device selection ComboBox
-//       sCaller := ProcByLevel(4);
-//       if SameText(sCaller, sTCustomComboBoxDrawItemSignature) then
-//        SetTextColor(DC, ColorToRGBTrampoline(clWindowText))
-//     end;
-//   end;
-//
-//   if EnableStockHook then
-//   begin
-//     SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
-//   end;
-
-   {$ENDIF}
-
-
  end;
-{$ENDIF}
- //SetTextColor(DC, ColorToRGB(clRed));
  Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
-{$IFDEF DELPHIXE6_UP}
- if RestoreColor then
-   SetTextColor(DC, OrgColor);
-{$ENDIF}
 end;
+{$ENDIF}
+
 
 //Hook for allow change font color in IDE Insight Window and TPopupListBox (TInspListBox)
 function Detour_WinApi_ExtTextOutW(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall;
@@ -762,7 +647,9 @@ end;
 procedure InstallHooksWinAPI();
 begin
  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
+{$IFDEF DELPHIXE6_UP}
  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
+{$ENDIF}
  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);  //OK
  Trampoline_GetSysColor      :=  InterceptCreate(user32, 'GetSysColor', @Detour_WinApi_GetSysColor);
  //TrampolineGetSysColorBrush  := InterceptCreate(user32, 'GetSysColorBrush', @InterceptGetSysColorBrush);
@@ -773,7 +660,9 @@ end;
 procedure RemoveHooksWinAPI();
 begin
   InterceptRemove(@Trampoline_DrawText);
+{$IFDEF DELPHIXE6_UP}
   InterceptRemove(@Trampoline_DrawTextEx);
+{$ENDIF}
   InterceptRemove(@Trampoline_ExtTextOutW);
   InterceptRemove(@Trampoline_GetSysColor);
   InterceptRemove(@TrampolineGetSysColorBrush);

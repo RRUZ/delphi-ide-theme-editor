@@ -107,7 +107,7 @@
         <DCCReference Include="Main.pas"/>
         <DCCReference Include="Colorizer.Utils.pas"/>
         <DCCReference Include="Colorizer.Settings.pas"/>
-        <DCCReference Include="Colorizer.HookForms.pas"/>
+        <DCCReference Include="Colorizer.Hook.Forms.pas"/>
         <DCCReference Include="Colorizer.Hooks.pas"/>
         <DCCReference Include="Colorizer.StoreColorMap.pas"/>
         <DCCReference Include="Colorizer.OptionsDlg.pas">

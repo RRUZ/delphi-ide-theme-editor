@@ -30,9 +30,12 @@ var
   DrawItemSelPopupSearchForm : Boolean     = False;
   DrawItemIDEInsight         : Boolean     = False;
   DrawItemSelIDEInsight      : Boolean     = False;
-  {$IFDEF DELPHIXE5_UP}
-  {$ELSE}
+  HookGDIPGradienttabs       : Boolean     = False;
+  {$IFDEF DELPHIXE6_UP}
+  HookDrawActiveTab          : Boolean     = False;
+  HookDrawInActiveTab        : Boolean     = False;
   {$ENDIF}
+  HookVTPaintNormalText      : Boolean     = false;
 
 const
 {$IFDEF DELPHIXE}  sVclIDEModule =  'vclide150.bpl';{$ENDIF}
@@ -132,7 +135,7 @@ var
   Trampoline_TPopupSearchForm_PaintItemNode    : procedure (Self: TObject; VirtualNode : TVirtualNode; Canvas : TCanvas; Rect:TRect; Item : TObject; Flag: Boolean) = nil;
 
   //000E6D74 4639 1D48 __fastcall Idevirtualtrees::TBaseVirtualTree::PrepareBitmaps(bool, bool)
-  Trampoline_TBaseVirtualTree_PrepareBitmaps : procedure (Self : TCustomControl;NeedButtons, NeedLines: Boolean) = nil;
+  //Trampoline_TBaseVirtualTree_PrepareBitmaps : procedure (Self : TCustomControl;NeedButtons, NeedLines: Boolean) = nil;
 
   //0005B7F4 1682 0BCA __fastcall Idelistbtns::TListButton::Paint()
   Trampoline_TListButton_Paint : procedure (Self : TCustomControl) = nil;
@@ -140,14 +143,30 @@ var
   Trampoline_TBaseVirtual_GetHintWindowClass : function (Self : TCustomControl) : THintWindowClass = nil;
   Trampoline_TExpandableEvalView_FormCreate : procedure(Self: TForm; Sender: TObject);
 
+  //Gdiplus::Gradienttabs::TGradientTabSet::DrawTabsToMemoryBitmap()
+  //@Gdiplus@Gradienttabs@TGradientTabSet@DrawTabsToMemoryBitmap$qqrv
+  Trampoline_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap : procedure (Self : TCustomControl);
   Trampoline_Gradientdrawer_GetOutlineColor : function() : TColor = nil;
 
   {$IFDEF DELPHIXE6_UP}
   Trampoline_ModernDockCaptionDrawer_DrawDockCaption : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
+  {
+  @Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawActiveTab$qqrxixix17System@WideStringxixi
+  @Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawInactiveTab$qqrxixix17System@WideStringxixi
+  }
+  Trampoline_TGradientTabDrawer_DrawActiveTab     : procedure (Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
+  Trampoline_TGradientTabDrawer_DrawInactiveTab   : procedure (Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
   {$ENDIF}
+
   Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
 
-{
+  //0010E960 4391 1E73 __fastcall Idevirtualtrees::TCustomVirtualStringTree::PaintNormalText(Idevirtualtrees::TVTPaintInfo&, int, System::WideString)
+  //000EC7FC 5053 1F69 __fastcall Idevirtualtrees::TVirtualTreeHintWindow::AnimationCallback(int, int, void *)
+  Trampoline_TCustomVirtualStringTree_PaintNormalText : procedure (Self : TObject; var PaintInfo: TVTPaintInfo; TextOutFlags: Integer; Text: string);
+  Trampoline_TVirtualTreeHintWindow_AnimationCallback : function (Self : TObject; Step, StepSize: Integer; Data: Pointer): Boolean;
+
+
+  {
 @Viewselector@TViewSelectorFrame@cbStyleSelectorDrawItem$qqrp24Vcl@Controls@TWinControlirx18System@Types@TRect60System@%Set$32Winapi@Windows@Winapi_Windows__1t1$i0$t1$i12$%
 @Viewselector@TViewSelectorFrame@cbStyleSelectorChange$qqrp14System@TObject
 @Viewselector@TViewSelectorFrame@cbDeviceSelectorDrawItem$qqrp24Vcl@Controls@TWinControlirx18System@Types@TRect60System@%Set$32Winapi@Windows@Winapi_Windows__1t1$i0$t1$i12$%
@@ -158,8 +177,7 @@ var
 
   TDrawItemEvent = procedure(Control: TWinControl; Index: Integer;
     Rect: TRect; State: TOwnerDrawState) of object;
-
-}
+  }
 
 
 {
@@ -200,6 +218,48 @@ begin
   end;
 end;
 
+//Hook for allow change font color in TProjectManagerForm.TCustomVirtualStringTree.PaintNormalText (font color in project manager window) ,
+//because this component is not using the colors set via RTTI
+
+procedure Detour_TCustomVirtualStringTree_PaintNormalText(Self : TObject; var PaintInfo: TVTPaintInfo; TextOutFlags: Integer; Text: string);
+begin
+ HookVTPaintNormalText := True;
+ Trampoline_TCustomVirtualStringTree_PaintNormalText(Self, PaintInfo, TextOutFlags, Text);
+ HookVTPaintNormalText := False;
+end;
+
+function Detour_TVirtualTreeHintWindow_AnimationCallback(Self : TObject; Step, StepSize: Integer; Data: Pointer): Boolean;
+begin
+ HookVTPaintNormalText := True;
+ Result:=Trampoline_TVirtualTreeHintWindow_AnimationCallback(Self, Step, StepSize, Data);
+ HookVTPaintNormalText := False;
+end;
+
+
+{$IFDEF DELPHIXE6_UP}
+procedure Detour_TGradientTabDrawer_DrawActiveTab(Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
+begin
+ HookDrawActiveTab:=True;
+ Trampoline_TGradientTabDrawer_DrawActiveTab(Self, TabLeft, TabWidth, Caption, ImageIndex, OverlayIndex);
+ HookDrawActiveTab:=False;
+end;
+
+procedure Detour_TGradientTabDrawer_DrawInactiveTab(Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
+begin
+ HookDrawInActiveTab:=True;
+ Trampoline_TGradientTabDrawer_DrawInactiveTab(Self, TabLeft, TabWidth, Caption, ImageIndex, OverlayIndex);
+ HookDrawInActiveTab:=False;
+end;
+{$ENDIF}
+
+
+//Hook to change the colors of the  TGradientTabSet (IDE) component
+procedure  Detour_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap(Self : TCustomControl);
+begin
+ HookGDIPGradienttabs:=True;
+ Trampoline_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap(Self);
+ HookGDIPGradienttabs:=False;
+end;
 
 procedure CustomProjectTree2PaintText(Self : TObject; Sender: TObject{TBaseVirtualTree}; const TargetCanvas: TCanvas; Node: {PVirtualNode}Pointer; Column: Integer{TColumnIndex}; TextType: Byte {TVSTTextType});
 begin
@@ -324,92 +384,6 @@ begin
     end;
   end;
 end;
-
-//Detour for TBaseVirtualTree.PrepareBitmaps
-procedure Detour_TBaseVirtualTree_PrepareBitmaps(Self : TCustomControl;NeedButtons, NeedLines: Boolean);
-const
-  LineBitsDotted: array [0..8] of Word = ($55, $AA, $55, $AA, $55, $AA, $55, $AA, $55);
-var
-  PatternBitmap: HBITMAP;
-  Bits: Pointer;
-  Size: TSize;
-
-  procedure FillBitmap(ABitmap: TBitmap);
-  begin
-    if Assigned(ABitmap) then
-    with ABitmap, Canvas do
-    begin
-      Width := Size.cx;
-      Height := Size.cy;
-      Brush.Color := TColorizerLocalSettings.ColorMap.Color;
-      FillRect(Rect(0, 0, Width, Height));
-    end;
-  end;
-
-var
-  LRttiBaseVirtualTree : TRttiBaseVirtualTree;
-  LParentForm          : TCustomForm;
-begin
-
-  if (Assigned(TColorizerLocalSettings.Settings) and not TColorizerLocalSettings.Settings.Enabled) or (csDesigning in Self.ComponentState) or (not Assigned(TColorizerLocalSettings.ColorMap)) then
-  begin
-    Trampoline_TBaseVirtualTree_PrepareBitmaps(Self, NeedButtons, NeedLines);
-    exit;
-  end;
-
-  LParentForm:= GetParentForm(Self);
-  if not (Assigned(LParentForm) and Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0)) then
-  begin
-    Trampoline_TBaseVirtualTree_PrepareBitmaps(Self, NeedButtons, NeedLines);
-    exit;
-  end;
-
-    if not ListControlWrappers.ContainsKey(Self) then
-     ListControlWrappers.Add(Self, TRttiBaseVirtualTree.Create(Self));
-    LRttiBaseVirtualTree := TRttiBaseVirtualTree(ListControlWrappers.Items[Self]);
-
-    Size.cx := 9;
-    Size.cy := 9;
-
-    if NeedButtons then
-    begin
-       if Assigned(LRttiBaseVirtualTree.MinusBM) then
-       with LRttiBaseVirtualTree.MinusBM, Canvas do
-       begin
-        FillBitmap(LRttiBaseVirtualTree.MinusBM);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        Rectangle(0, 0, Width, Height);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        MoveTo(2, Width div 2);
-        LineTo(Width - 2, Width div 2);
-       end;
-
-      if Assigned(LRttiBaseVirtualTree.PlusBM) then
-      with LRttiBaseVirtualTree.PlusBM, Canvas do
-      begin
-        FillBitmap(LRttiBaseVirtualTree.PlusBM);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        Rectangle(0, 0, Width, Height);
-        Pen.Color := TColorizerLocalSettings.ColorMap.FontColor;
-        MoveTo(2, Width div 2);
-        LineTo(Width - 2, Width div 2);
-        MoveTo(Width div 2, 2);
-        LineTo(Width div 2, Width - 2);
-      end;
-    end;
-
-    if NeedLines then
-    begin
-      if LRttiBaseVirtualTree.DottedBrush <> 0 then
-        DeleteObject(LRttiBaseVirtualTree.DottedBrush);
-
-      Bits := @LineBitsDotted;
-      PatternBitmap := CreateBitmap(8, 8, 1, 1, Bits);
-      LRttiBaseVirtualTree.DottedBrush := CreatePatternBrush(PatternBitmap);
-      DeleteObject(PatternBitmap);
-    end;
-end;
-
 
 {
     002B4B34 10661 2EDB Msglines::TCompilerMsgLine::
@@ -1086,23 +1060,18 @@ begin
   end;
 
   VclIDEModule := LoadLibrary(sVclIDEModule);
-
   if VclIDEModule<>0 then
   begin
- //  pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreePrepareBitmaps);
-//   if Assigned(pOrgAddress) then
- //   Trampoline_TBaseVirtualTree_PrepareBitmaps := InterceptCreate(pOrgAddress, @Detour_TBaseVirtualTree_PrepareBitmaps);
     Trampoline_TListButton_Paint := InterceptCreate(sVclIDEModule, sListButtonPaint, @Detour_TListButton_Paint);
     Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(sVclIDEModule, sGetOutlineColor, @Detour_Gradientdrawer_GetOutlineColor);
-//    TrampolineInternalLoadPropValues := InterceptCreate(sVclIDEModule, '@Idereginipropset@TRegistryPropSet@InternalLoadPropValues$qqrv', @DetourInternalLoadPropValues);
-//    if @TrampolineInternalLoadPropValues<>nil then
-//      AddLog2('Hooked');
-
-//   pOrgAddress := GetProcAddress(VclIDEModule, sBaseVirtualTreeGetHintWindowClass);
-//   if Assigned(pOrgAddress) then
-//    Trampoline_TBaseVirtual_GetHintWindowClass := InterceptCreate(pOrgAddress, @Detour_TBaseVirtual_GetHintWindowClass);
+    Trampoline_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap:= InterceptCreate(sVclIDEModule, '@Gdiplus@Gradienttabs@TGradientTabSet@DrawTabsToMemoryBitmap$qqrv', @Detour_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap);
+    {$IFDEF DELPHIXE6_UP}
+    Trampoline_TGradientTabDrawer_DrawActiveTab     :=InterceptCreate(sVclIDEModule, '@Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawActiveTab$qqrxixix17System@WideStringxixi', @Detour_TGradientTabDrawer_DrawActiveTab);
+    Trampoline_TGradientTabDrawer_DrawInactiveTab   :=InterceptCreate(sVclIDEModule, '@Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawInactiveTab$qqrxixix17System@WideStringxixi', @Detour_TGradientTabDrawer_DrawInActiveTab);
+    {$ENDIF}
+    Trampoline_TCustomVirtualStringTree_PaintNormalText     :=InterceptCreate(sVclIDEModule, '@Idevirtualtrees@TCustomVirtualStringTree@PaintNormalText$qqrr28Idevirtualtrees@TVTPaintInfoi17System@WideString', @Detour_TCustomVirtualStringTree_PaintNormalText);
+    Trampoline_TVirtualTreeHintWindow_AnimationCallback   :=InterceptCreate(sVclIDEModule, '@Idevirtualtrees@TVirtualTreeHintWindow@AnimationCallback$qqriipv', @Detour_TVirtualTreeHintWindow_AnimationCallback);
   end;
-//   *******************************************
 
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
 
@@ -1141,39 +1110,48 @@ begin
     InterceptRemove(@Trampoline_TitleLine_Draw);
     InterceptRemove(@Trampoline_TFileFindLine_Draw);
     InterceptRemove(@Trampoline_TPropertyInspector_DrawNamePair);
-{$IFDEF DELPHIXE5_UP}
+    {$IFDEF DELPHIXE5_UP}
     InterceptRemove(@Trampoline_IDEInsight_DrawTreeDrawNode);
     InterceptRemove(@Trampoline_IDEInsight_PaintCategoryNode);
     InterceptRemove(@Trampoline_IDEInsight_PaintItemNode);
-{$ENDIF}
+    {$ENDIF}
     InterceptRemove(@Trampoline_TPopupSearchForm_DrawTreeDrawNode);
     InterceptRemove(@Trampoline_TPopupSearchForm_PaintCategoryNode);
     InterceptRemove(@Trampoline_TPopupSearchForm_PaintItemNode);
     InterceptRemove(@Trampoline_TFileFindLine_InternalCalcDraw);
     InterceptRemove(@Trampoline_TExpandableEvalView_FormCreate);
-    InterceptRemove(@Trampoline_TBaseVirtualTree_PrepareBitmaps);
+
+    InterceptRemove(@Trampoline_TCustomVirtualStringTree_PaintNormalText);
+    InterceptRemove(@Trampoline_TVirtualTreeHintWindow_AnimationCallback);
+
     InterceptRemove(@Trampoline_TListButton_Paint);
     InterceptRemove(@Trampoline_Gradientdrawer_GetOutlineColor);
+    InterceptRemove(@Trampoline_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap);
+    {$IFDEF DELPHIXE6_UP}
+    InterceptRemove(@Trampoline_TGradientTabDrawer_DrawActiveTab);
+    InterceptRemove(@Trampoline_TGradientTabDrawer_DrawInActiveTab);
+    {$ENDIF}
     InterceptRemove(@Trampoline_TBaseVirtual_GetHintWindowClass);
     InterceptRemove(@Trampoline_ProjectTree2PaintText);
     InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);
-{$IFDEF DELPHIXE6_UP}
 
-  Modules:=TStringList.Create;
-  try
-    GetLoadedModules(Modules, True);
-    ModernThemeLoaded:=Modules.IndexOf(sModernThemeModule)>=0;
-  finally
-    Modules.Free;
-  end;
 
-  if ModernThemeLoaded then //avoid to load the ModernTheme module
-  begin
-    InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
-    InterceptRemove(@Trampoline_TModernTheme_SetHotSingleColor);
-  end;
+    {$IFDEF DELPHIXE6_UP}
+    Modules:=TStringList.Create;
+    try
+      GetLoadedModules(Modules, True);
+      ModernThemeLoaded:=Modules.IndexOf(sModernThemeModule)>=0;
+    finally
+      Modules.Free;
+    end;
 
-{$ENDIF}
+    if ModernThemeLoaded then //avoid to load the ModernTheme module
+    begin
+      InterceptRemove(@Trampoline_ModernDockCaptionDrawer_DrawDockCaption);
+      InterceptRemove(@Trampoline_TModernTheme_SetHotSingleColor);
+    end;
+    {$ENDIF}
+
    FreeAndNil(ListControlWrappers);
 end;
 

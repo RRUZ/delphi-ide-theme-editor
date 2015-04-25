@@ -1,0 +1,5 @@
+type
+  TScrollerButtonStyle=(
+  sbsLeft,
+  sbsRight
+  )

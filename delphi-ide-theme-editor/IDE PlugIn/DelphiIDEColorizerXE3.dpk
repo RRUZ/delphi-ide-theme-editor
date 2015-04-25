@@ -42,7 +42,7 @@ contains
   Main in 'Main.pas',
   Colorizer.Utils in 'Colorizer.Utils.pas',
   Colorizer.Settings in 'Colorizer.Settings.pas',
-  Colorizer.HookForms in 'Colorizer.HookForms.pas',
+  Colorizer.Hook.Forms in 'Colorizer.Hook.Forms.pas',
   Colorizer.Hooks in 'Colorizer.Hooks.pas',
   Colorizer.StoreColorMap in 'Colorizer.StoreColorMap.pas',
   Colorizer.OptionsDlg in 'Colorizer.OptionsDlg.pas' {FrameColorizer: TFrame},

@@ -30,18 +30,18 @@ interface
 implementation
 
 uses
+    System.Types,
+    System.SysUtils,
+    Winapi.GDIPAPI,
+    Winapi.GDIPOBJ,
     Vcl.Styles,
     Vcl.Themes,
+    Vcl.Graphics,
     Colorizer.Utils,
     Colorizer.Vcl.Styles,
-    System.Types,
-    JclDebug,
+    Colorizer.Hooks.IDE,
     DDetours,
-    Graphics,
-    SysUtils,
-    uMisc,
-    GDIPAPI,
-    GDIPOBJ;
+    uMisc;
 
 {
     __fastcall Winapi::Gdipobj::initialization()
@@ -101,69 +101,30 @@ begin
   Result.Height:= Trunc(Rect.Height);
 end;
 
-
 function Detour_TGPGraphics_DrawPath(Self : TGPGraphics; pen: TGPPen; path: TGPGraphicsPath): TStatus;
-const
- sTGradientTabSet= 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
 var
- sCaller : string;
  PenColor, LGPColor: TGPColor;
-// Hooked : BooleaN;
-// bounds: TGPRectF;
-// LRect  : TRect;
-// LDetails: TThemedElementDetails;
 begin
-//   AddLog2('Detour_TGPGraphics_DrawPath ');
- // Hooked:=False;
-  //AddLog2('Detour_TGPGraphics_DrawPath', '1');
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and (pen<>nil) then
+  if HookGDIPGradienttabs and (pen<>nil) then
   begin
     pen.GetColor(PenColor);
     LGPColor := ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.FrameTopLeftOuter));
     if TColorizerLocalSettings.Settings.TabIDECustom then
     LGPColor  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)));
     if PenColor<>LGPColor then
-    begin
-     sCaller  := ProcByLevel(3);
-     //AddLog2('Detour_TGPGraphics_DrawPath sCaller', sCaller);
-     if SameText(sTGradientTabSet, sCaller) then
-     begin
-      //Hooked:=True;
       pen.SetColor(LGPColor);
-     end;
-    end;
   end;
-
-//  if 1=1  then
-//  begin
-//   AddLog2('Detour_TGPGraphics_DrawPath Hooked');
-//   path.GetBounds(bounds);
-//   MakeTRect(bounds);
-//
-//      LDetails := StyleServices.GetElementDetails(ttTabItemNormal);
-//      ColorizerStyleServices.DrawParentBackground(Self.FromHDC ,  Self.GetHDC, LDetails, False);
-//      result:=TStatus.Ok;
-//  end
-//  else
-    Result:=Trampoline_TGPGraphics_DrawPath(Self, pen, path);
-  //AddLog('Detour_TGPGraphics_DrawPath', '2');
+  Result:=Trampoline_TGPGraphics_DrawPath(Self, pen, path);
 end;
 
+
 function Detour_TGPGraphics_FillPath(Self : TGPGraphics; brush: TGPBrush; path: TGPGraphicsPath): TStatus;
-const
- sTGradientTabSet= 'GDIPlus.GradientTabs.TGradientTabSet.DrawTabsToMemoryBitmap';
 var
- sCaller : string;
  color1, color2: TGPColor;
  LActive  : Boolean;
 begin                                                                                                                                               //improve performance
-  //AddLog2('Detour_TGPGraphics_FillPath', '1');
-  if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled and TColorizerLocalSettings.Settings.TabIDEOutLine and (brush is TGPLinearGradientBrush)  then
+  if HookGDIPGradienttabs and (brush is TGPLinearGradientBrush)  then
   begin
-    sCaller  := ProcByLevel(3);
-    //AddLog2('Detour_TGPGraphics_FillPath sCaller', sCaller);
-    if SameText(sTGradientTabSet, sCaller)  then
-    begin
       TGPLinearGradientBrush(brush).GetLinearColors(color1, color2);
       //use colors from tabs to determine when tab is active
       {
@@ -212,12 +173,9 @@ begin                                                                           
       end;
 
       TGPLinearGradientBrush(brush).SetLinearColors(color1, color2);
-    end;
   end;
   Result:=Trampoline_TGPGraphics_FillPath(Self, brush, path);
-  //AddLog('Detour_TGPGraphics_FillPath', '2');
 end;
-
 
 procedure InstallHooksGDI;
 begin
