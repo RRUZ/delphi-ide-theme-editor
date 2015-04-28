@@ -108,9 +108,9 @@ begin
   if HookGDIPGradienttabs and (pen<>nil) then
   begin
     pen.GetColor(PenColor);
-    LGPColor := ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.FrameTopLeftOuter));
+    LGPColor := ColorRefToARGB(ColorToRGB({$IFDEF DELPHIXE6_UP}TColorizerLocalSettings.ColorMap.SelectedColor{$ELSE}TColorizerLocalSettings.ColorMap.FrameTopLeftOuter  {$ENDIF}));
     if TColorizerLocalSettings.Settings.TabIDECustom then
-    LGPColor  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter)));
+    LGPColor  :=  ColorRefToARGB(ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.SelectedColor)));
     if PenColor<>LGPColor then
       pen.SetColor(LGPColor);
   end;
@@ -122,32 +122,26 @@ function Detour_TGPGraphics_FillPath(Self : TGPGraphics; brush: TGPBrush; path: 
 var
  color1, color2: TGPColor;
  LActive  : Boolean;
-begin                                                                                                                                               //improve performance
+begin
   if HookGDIPGradienttabs and (brush is TGPLinearGradientBrush)  then
   begin
       TGPLinearGradientBrush(brush).GetLinearColors(color1, color2);
-      //use colors from tabs to determine when tab is active
-      {
-        TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveStart', AColorMap.Color);
-        TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.ActiveEnd', AColorMap.Color);
-        TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveStart', AColorMap.MenuColor);
-        TRttiUtils.SetRttiPropertyValue(AComponent,'TabColors.InActiveEnd', AColorMap.MenuColor);
-      }
-      //AddLog('Detour_TGPGraphics_FillPath', Format('Original Color1 %s Color2 %s', [ColorToString(TColor(ARGBToColorRef(color1))), ColorToString(TColor(ARGBToColorRef(color2)))]));
-      if not TColorizerLocalSettings.Settings.TabIDECustom then
-       LActive :=  (TColor(ARGBToColorRef(color1)) =  TColorizerLocalSettings.ColorMap.Color)
-      else
-       LActive :=  (TColor(ARGBToColorRef(color1)) =  TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, clNone));
+
+      LActive:= HookDrawActiveTab;
 
       if LActive then
       begin
-        color1  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
+//        color1  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
+//        color2  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
+        color1  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
         color2  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
       end
       else
       begin
-        color1  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.MenuColor));
-        color2  :=  ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
+//        color1  := ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.MenuColor));
+//        color2  := ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedColor));
+        color1  := ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
+        color2  := ColorRefToARGB(ColorToRGB(TColorizerLocalSettings.ColorMap.Color));
       end;
 
       if TColorizerLocalSettings.Settings.TabIDECustom then

@@ -286,19 +286,23 @@ begin
   Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
 
   AColorMap.FontColor             :=ThemeTextColor;//Style.GetStyleFontColor(sfButtonTextNormal);
-
-  AColorMap.MenuColor             :=Style.GetStyleColor(scPanel);
+  AColorMap.MenuColor             :=Style.GetSystemColor(clMenu);
   AColorMap.WindowColor           :=Style.GetStyleColor(scWindow);
 
-  AColorMap.HighlightColor        :=Style.GetStyleColor(scButtonHot);
-  AColorMap.HotColor              :=Style.GetStyleColor(scButtonHot);
-  AColorMap.BtnSelectedColor      :=Style.GetStyleColor(scButtonHot);
-  AColorMap.SelectedColor         :=Style.GetStyleColor(scButtonHot);
+  AColorMap.HighlightColor        :=Style.GetSystemColor(clHighlight);
+  AColorMap.HotColor              :=AColorMap.HighlightColor;//Style.GetStyleColor(scButtonHot);
+  AColorMap.BtnSelectedColor      :=AColorMap.HighlightColor;//Style.GetStyleColor(scButtonHot);
+  AColorMap.SelectedColor         :=AColorMap.HighlightColor;//Style.GetStyleColor(scButtonHot);
 
-  AColorMap.BtnSelectedFont       :=Style.GetStyleFontColor(sfButtonTextHot);
-  AColorMap.SelectedFontColor     :=Style.GetStyleFontColor(sfButtonTextHot);
+  AColorMap.DisabledColor         :=Style.GetStyleColor(scButtonDisabled);
+  AColorMap.DisabledFontColor     :=Style.GetStyleFontColor(sfButtonTextDisabled);
 
-  AColorMap.BtnFrameColor         :=StyleServices.GetSystemColor(clBtnShadow);
+
+  AColorMap.BtnSelectedFont       :=Style.GetSystemColor(clHighlightText);//Style.GetStyleFontColor(sfButtonTextHot);
+  AColorMap.SelectedFontColor     :=Style.GetSystemColor(clHighlightText);//Style.GetStyleFontColor(sfButtonTextHot);
+  AColorMap.HotFontColor          :=Style.GetSystemColor(clHighlightText);//Style.GetStyleFontColor(sfButtonTextHot);
+
+  AColorMap.BtnFrameColor         :=Style.GetSystemColor(clBtnShadow);
 
   AColorMap.FrameTopLeftInner     :=Style.GetStyleColor(scBorder);
   AColorMap.FrameTopLeftOuter     :=AColorMap.FrameTopLeftInner;
@@ -583,10 +587,9 @@ end;
 //  try
 //    for LType in LCtx.GetTypes do
 //
-//
-//
-//     if StartsText('Gdiplus', LType.QualifiedName) then
+//     //if StartsText('Gdiplus', LType.QualifiedName) then
 //     //if SameText('DebugMgrOpts.TLogColors', LType.QualifiedName) then
+//     if ContainsText(LType.QualifiedName, 'TInspListBox') then
 //     begin
 //       AddLog2(LType.QualifiedName);
 //       TRttiUtils.DumpRttiType(LType, 'C:\Dephi\google-code\delphi-ide-theme-editor\IDE PlugIn\Galileo\'+LType.QualifiedName+'.pas');
@@ -596,7 +599,7 @@ end;
 //    LCtx.Free;
 //  end;
 //end;
-//
+
 //
 //procedure DumpUnits;
 //var

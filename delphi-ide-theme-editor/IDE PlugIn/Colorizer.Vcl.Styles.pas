@@ -5,15 +5,16 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
-  Controls,
-  Classes,
-  Forms,
+  Winapi.CommCtrl,
+  System.Classes,
+  Vcl.Controls,
+  Vcl.Forms,
   Vcl.Themes,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
   System.UITypes,
   System.Types,
-  Graphics;
+  Vcl.Graphics;
 
 
 type
@@ -448,6 +449,18 @@ type
     constructor Create(AControl: TWinControl); override;
   end;
 
+  TColorizerTreeViewStyleHook = class(TColorizerScrollingStyleHook)
+  strict private
+    procedure TVMSetBkColor(var Message: TMessage); message TVM_SETBKCOLOR;
+    procedure TVMSetTextColor(var Message: TMessage); message TVM_SETTEXTCOLOR;
+    procedure WMMouseMove(var Msg: TWMMouse); message WM_MOUSEMOVE;
+  strict protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+
+
 
   procedure SetColorizerVCLStyle(const StyleName : string);
   function  ColorizerStyleServices: TCustomStyleServices;
@@ -460,8 +473,7 @@ uses
   Buttons,
   Vcl.GraphUtil,
   Vcl.ExtCtrls,
-  Colorizer.Utils,
-  Winapi.CommCtrl;
+  Colorizer.Utils;
 
 var
    CurrentStyleName : string ='';
@@ -6199,5 +6211,141 @@ begin
 end;
 
 
+
+{ TColorizerTreeViewStyleHook }
+
+constructor TColorizerTreeViewStyleHook.Create(AControl: TWinControl);
+var
+  LColor: TColor;
+begin
+  inherited;
+  OverrideEraseBkgnd := True;
+  with ColorizerStyleServices do
+  begin
+    if not GetElementColor(GetElementDetails(ttItemNormal), ecTextColor, LColor) or
+       (LColor = clNone) then
+      LColor :=  GetSystemColor(clWindowText);
+  end;
+  FontColor := LColor;
+  Brush.Color := ColorizerStyleServices.GetStyleColor(scTreeView);
+end;
+
+procedure TColorizerTreeViewStyleHook.TVMSetBkColor(var Message: TMessage);
+begin
+  Message.LParam := LPARAM(ColorToRGB(Brush.Color));
+  Handled := False;
+end;
+
+
+procedure TColorizerTreeViewStyleHook.TVMSetTextColor(var Message: TMessage);
+begin
+  Message.LParam := LPARAM(ColorToRGB(FontColor));
+  Handled := False;
+end;
+
+procedure TColorizerTreeViewStyleHook.WMMouseMove(var Msg: TWMMouse);
+var
+  SF: TScrollInfo;
+begin
+  if VertSliderState = tsThumbBtnVertPressed then
+  begin
+    SF.fMask := SIF_ALL;
+    SF.cbSize := SizeOf(SF);
+    GetScrollInfo(Handle, SB_VERT, SF);
+    ScrollPos := ScrollPos + (SF.nMax - SF.nMin) * ((Mouse.CursorPos.Y - PrevScrollPos) / VertTrackRect.Height);
+    if ScrollPos < SF.nMin then
+      ScrollPos := SF.nMin;
+    if ScrollPos > SF.nMax then
+      ScrollPos := SF.nMax;
+
+    PrevScrollPos := Mouse.CursorPos.Y;
+    if Control is TCustomTreeView then
+    begin
+      PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_THUMBTRACK, Round(ScrollPos))), 0);
+      SF.nPos := Round(ScrollPos);
+      SF.nTrackPos := Round(ScrollPos);
+      SetScrollInfo(Handle, SB_VERT, SF, True);
+    end
+    else
+      PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_THUMBPOSITION, Round(ScrollPos))), 0);
+    PaintScroll;
+    Handled := True;
+    Exit;
+  end;
+
+  if HorzSliderState = tsThumbBtnHorzPressed then
+  begin
+    SF.fMask := SIF_ALL;
+    SF.cbSize := SizeOf(SF);
+    GetScrollInfo(Handle, SB_HORZ, SF);
+    ScrollPos := ScrollPos + (SF.nMax - SF.nMin) * ((Mouse.CursorPos.X - PrevScrollPos) / HorzTrackRect.Width);
+    if ScrollPos < SF.nMin then
+      ScrollPos := SF.nMin;
+    if ScrollPos > SF.nMax then
+      ScrollPos := SF.nMax;
+
+    PrevScrollPos := Mouse.CursorPos.X;
+
+    if Control is TCustomTreeView then
+    begin
+      PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_THUMBTRACK, Round(ScrollPos))), 0);
+      SF.nPos := Round(ScrollPos);
+      SF.nTrackPos := Round(ScrollPos);
+      SetScrollInfo(Handle, SB_HORZ, SF, True);
+    end
+    else
+      PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_THUMBPOSITION, Round(ScrollPos))), 0);
+    PaintScroll;
+    Handled := True;
+    Exit;
+  end;
+
+  if (HorzSliderState <> tsThumbBtnHorzPressed) and (HorzSliderState = tsThumbBtnHorzHot) then
+  begin
+    HorzSliderState := tsThumbBtnHorzNormal;
+    PaintScroll;
+  end;
+
+  if (VertSliderState <> tsThumbBtnVertPressed) and (VertSliderState = tsThumbBtnVertHot) then
+  begin
+    VertSliderState := tsThumbBtnVertNormal;
+    PaintScroll;
+  end;
+
+  if (HorzUpState <> tsArrowBtnLeftPressed) and (HorzUpState = tsArrowBtnLeftHot) then
+  begin
+    HorzUpState := tsArrowBtnLeftNormal;
+    PaintScroll;
+  end;
+
+  if (HorzDownState <> tsArrowBtnRightPressed) and (HorzDownState =tsArrowBtnRightHot) then
+  begin
+    HorzDownState := tsArrowBtnRightNormal;
+    PaintScroll;
+  end;
+
+  if (VertUpState <> tsArrowBtnUpPressed) and (VertUpState = tsArrowBtnUpHot) then
+  begin
+    VertUpState := tsArrowBtnUpNormal;
+    PaintScroll;
+  end;
+
+  if (VertDownState <> tsArrowBtnDownPressed) and (VertDownState = tsArrowBtnDownHot) then
+  begin
+    VertDownState := tsArrowBtnDownNormal;
+    PaintScroll;
+  end;
+
+  CallDefaultProc(TMessage(Msg));
+  if LeftButtonDown then
+    PaintScroll;
+  Handled := True;
+end;
+
+procedure TColorizerTreeViewStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
 
 end.

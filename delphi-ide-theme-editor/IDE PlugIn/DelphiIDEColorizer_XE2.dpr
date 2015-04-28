@@ -22,11 +22,11 @@ uses
   uStackTrace in '..\Units\uStackTrace.pas',
   Colorizer.Wrappers in 'Colorizer.Wrappers.pas',
   uColorSelector in '..\Units\uColorSelector.pas',
-  Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',  
+  Colorizer.Hooks.GDIPOBJ in 'Colorizer.Hooks.GDIPOBJ.pas',
   Vcl.Styles.Utils.FlatControls in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas',
   Vcl.Styles.Utils.FlatStyleHook in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas',
-  Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas';
-
+  Vcl.Styles.Utils.FlatMenus in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Graphics.pas';
 
 {$R *.res}
 {$R VersionInfo.res}

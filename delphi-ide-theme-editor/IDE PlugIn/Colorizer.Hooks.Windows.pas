@@ -58,14 +58,15 @@ type
 
 var
   Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
-  {$IFDEF DELPHIXE6_UP}
+  {.$IFDEF DELPHIXE6_UP}
   Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
-  {$eNDIF}
+  {.$eNDIF}
   Trampoline_ExtTextOutW                   : function (DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall = nil;
   TrampolineGetSysColorBrush               : function(nIndex: Integer): HBRUSH; stdcall;
   Trampoline_GetSysColor                   : function (nIndex: Integer): DWORD; stdcall = nil;
   Trampoline_DrawFrameControl              : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
   Trampoline_DrawEdge                      : function (hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall = nil;
+  TrampolineFillRect                       : function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
 
 var
   VCLStylesBrush: TObjectDictionary<string, TListStyleBrush>;
@@ -420,7 +421,7 @@ begin
 end;
 
 
-{$IFDEF DELPHIXE6_UP}
+{.$IFDEF DELPHIXE6_UP}
 function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
 begin
  if (dwDTFormat AND DT_CALCRECT = 0) and (HookDrawActiveTab or HookDrawInActiveTab) then
@@ -428,7 +429,7 @@ begin
      if HookDrawActiveTab then
      begin
        if not TColorizerLocalSettings.Settings.TabIDECustom then
-        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
+        SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.SelectedFontColor))
        else
         SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
      end
@@ -437,13 +438,13 @@ begin
      begin
        if not TColorizerLocalSettings.Settings.TabIDECustom then
         SetTextColor(DC, ColorToRGB(TColorizerLocalSettings.ColorMap.FontColor))
-       else
+       else                                                                      //Add inactive
         SetTextColor(DC, ColorToRGB(TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, TColorizerLocalSettings.ColorMap.FontColor)));
      end;
  end;
  Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
 end;
-{$ENDIF}
+{.$ENDIF}
 
 
 //Hook for allow change font color in IDE Insight Window and TPopupListBox (TInspListBox)
@@ -571,7 +572,7 @@ begin
    if  Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap) then
    begin
 
-//
+
 //    if nIndex = COLOR_HOTLIGHT then
 //      Result := DWORD(ColorizerStyleServices.GetSystemColor(clHighlight))
 //    else
@@ -613,6 +614,7 @@ begin
           Exit(Trampoline_GetSysColor(nIndex));
        end;
 
+       COLOR_HOTLIGHT,
        COLOR_HIGHLIGHT :
        begin
          if TColorizerLocalSettings.Settings.HookSystemColors and (TColor(SystemColor or  Cardinal(nIndex))<>TColorizerLocalSettings.ColorMap.SelectedColor) then
@@ -643,29 +645,40 @@ begin
    Exit(Trampoline_GetSysColor(nIndex));
 end;
 
+function InterceptFillRect(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
+begin
+   if not (Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) and Assigned(TColorizerLocalSettings.ColorMap)) then
+    Exit(TrampolineFillRect(hDC, lprc, hbr))
+  else if (hbr > 0) and (hbr < COLOR_ENDCOLORS + 1) then
+    Exit(TrampolineFillRect(hDC, lprc, GetSysColorBrush(hbr - 1)))
+  else
+    Exit(TrampolineFillRect(hDC, lprc, hbr));
+end;
 
 procedure InstallHooksWinAPI();
 begin
  Trampoline_DrawText                       := InterceptCreate(@Windows.DrawTextW, @Detour_WinApi_DrawText);
-{$IFDEF DELPHIXE6_UP}
+{.$IFDEF DELPHIXE6_UP}
  Trampoline_DrawTextEx                     := InterceptCreate(@Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
-{$ENDIF}
+{.$ENDIF}
  Trampoline_ExtTextOutW                    := InterceptCreate(@Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);  //OK
  Trampoline_GetSysColor      :=  InterceptCreate(user32, 'GetSysColor', @Detour_WinApi_GetSysColor);
  //TrampolineGetSysColorBrush  := InterceptCreate(user32, 'GetSysColorBrush', @InterceptGetSysColorBrush);
-  Trampoline_DrawEdge :=  InterceptCreate(user32, 'DrawEdge', @Detour_WinApi_DrawEdge);
+ Trampoline_DrawEdge :=  InterceptCreate(user32, 'DrawEdge', @Detour_WinApi_DrawEdge);
  //Trampoline_DrawFrameControl :=  InterceptCreate(user32, 'DrawFrameControl', @Detour_WinApi_DrawFrameControl);
+ //TrampolineFillRect := InterceptCreate(user32, 'FillRect', @InterceptFillRect);
 end;
 
 procedure RemoveHooksWinAPI();
 begin
   InterceptRemove(@Trampoline_DrawText);
-{$IFDEF DELPHIXE6_UP}
+{.$IFDEF DELPHIXE6_UP}
   InterceptRemove(@Trampoline_DrawTextEx);
-{$ENDIF}
+{.$ENDIF}
   InterceptRemove(@Trampoline_ExtTextOutW);
   InterceptRemove(@Trampoline_GetSysColor);
   InterceptRemove(@TrampolineGetSysColorBrush);
+  InterceptRemove(@TrampolineFillRect);
   InterceptRemove(@Trampoline_DrawEdge);
   InterceptRemove(@Trampoline_DrawFrameControl);
 end;

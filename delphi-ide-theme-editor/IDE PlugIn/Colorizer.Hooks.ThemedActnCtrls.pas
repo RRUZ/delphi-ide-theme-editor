@@ -257,13 +257,21 @@ begin
       Self.Canvas.Brush.Color := LBackColor;
     end
     else
-    if not Self.Enabled then
+    if not Self.Enabled and not Self.Selected  then
     begin
+      Self.Canvas.Brush.Style:= bsClear;
+    end
+    else
+    if not Self.Enabled and Self.Selected  then
+    begin
+      //Self.Canvas.Brush.Style:= bsSolid;
+      Self.Canvas.Brush.Style:= bsClear;
       LBackColor:=  TColorizerLocalSettings.ColorMap.MenuColor;//ColorizerStyleServices.GetSystemColor(clBtnFace);
       Self.Canvas.Brush.Color := LBackColor;
     end;
 
-    InternalDrawText (Self.Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
+
+    InternalDrawText(Self.Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
   end
   else
     Trampoline_TThemedMenuItem_DoDrawText(Self, DC, Text, Rect, Flags);

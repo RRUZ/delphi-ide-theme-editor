@@ -1,5 +1,5 @@
 1 VERSIONINFO 
- FILEVERSION 0,7,8,5
+ FILEVERSION 0,7,9,1
  PRODUCTVERSION 1   
  FILEOS VOS__WINDOWS32   
  FILETYPE VFT_DLL   
@@ -10,7 +10,7 @@
      BEGIN   
        VALUE "CompanyName","The Road To Delphi\000"   
        VALUE "FileDescription","Delphi Wizard \000"   
-       VALUE "FileVersion","0.7.8.5\000"   
+       VALUE "FileVersion","0.7.9.1\000"   
        VALUE "InternalName","Delphi IDE Colorizer\000"   
        VALUE "LegalCopyright","The Road To Delphi Copyright 2014-2015\000"   
        VALUE "LegalTrademarks","The Road To Delphi\000"   

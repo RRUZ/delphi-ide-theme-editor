@@ -31,11 +31,12 @@ var
   DrawItemIDEInsight         : Boolean     = False;
   DrawItemSelIDEInsight      : Boolean     = False;
   HookGDIPGradienttabs       : Boolean     = False;
-  {$IFDEF DELPHIXE6_UP}
+  {.$IFDEF DELPHIXE6_UP}
   HookDrawActiveTab          : Boolean     = False;
   HookDrawInActiveTab        : Boolean     = False;
-  {$ENDIF}
+  {.$ENDIF}
   HookVTPaintNormalText      : Boolean     = false;
+  HookPropListBox_DrawPropItem : Boolean   = false;
 
 const
 {$IFDEF DELPHIXE}  sVclIDEModule =  'vclide150.bpl';{$ENDIF}
@@ -80,6 +81,7 @@ uses
   Colorizer.VirtualTrees,
   Colorizer.Wrappers,
   Colorizer.Utils,
+  Colorizer.Hooks,
   Generics.Collections,
   Classes,
   Windows,
@@ -99,6 +101,7 @@ uses
 type
  TCustomControlClass     = class(TCustomControl);
  TDockCaptionDrawerClass = class(TDockCaptionDrawer);
+ TWinControlClass        = class(TWinControl);
 
 var
    ListControlWrappers  : TObjectDictionary<TCustomControl, TRttiWrapper>;
@@ -141,6 +144,7 @@ var
   Trampoline_TListButton_Paint : procedure (Self : TCustomControl) = nil;
   //000F1DD0 4400 1CD1 __fastcall Idevirtualtrees::TBaseVirtualTree::GetHintWindowClass()
   Trampoline_TBaseVirtual_GetHintWindowClass : function (Self : TCustomControl) : THintWindowClass = nil;
+  Trampoline_TBaseVirtualTreeOriginal_WMNCPaint : procedure (Self : TCustomControl;DC: HDC) = nil;
   Trampoline_TExpandableEvalView_FormCreate : procedure(Self: TForm; Sender: TObject);
 
   //Gdiplus::Gradienttabs::TGradientTabSet::DrawTabsToMemoryBitmap()
@@ -154,9 +158,11 @@ var
   @Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawActiveTab$qqrxixix17System@WideStringxixi
   @Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawInactiveTab$qqrxixix17System@WideStringxixi
   }
+  {$ENDIF}
+  {.$IFDEF DELPHIXE6_UP}
   Trampoline_TGradientTabDrawer_DrawActiveTab     : procedure (Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
   Trampoline_TGradientTabDrawer_DrawInactiveTab   : procedure (Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
-  {$ENDIF}
+  {.$ENDIF}
 
   Trampoline_TDockCaptionDrawer_DrawDockCaption      : function (Self : TDockCaptionDrawerClass;const Canvas: TCanvas; CaptionRect: TRect; State: TParentFormState): TDockCaptionHitTest =nil;
 
@@ -190,6 +196,19 @@ var
 
  Trampoline_coreide_TLogColors_GetColor  :  function(Self: TObject; Index: TLogItemType): TObject;
 
+ {
+ @Propbox@TCustomPropListBox@DrawPropItem$qqrip17Propbox@TPropItemp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo
+ Propbox::TCustomPropListBox::DrawPropItem(int, Propbox::TPropItem *, Vcl::Graphics::TCanvas *, System::Types::TRect&, bool, bool)
+ }
+ Trampoline_TCustomPropListBox_DrawPropItem : procedure (Self:  TObject; Index : Integer; PropItem : TObject; Canvas  : TCanvas; var ARect : TRect;  Bool1, Bool2 : Boolean);
+
+procedure Detour_TCustomPropListBox_DrawPropItem (Self:  TObject; Index : Integer; PropItem : TObject; Canvas  : TCanvas; var ARect : TRect;  Bool1, Bool2 : Boolean);
+begin
+ //AddLog2('Detour_TCustomPropListBox_DrawPropItem');
+ HookPropListBox_DrawPropItem:=True;
+ Trampoline_TCustomPropListBox_DrawPropItem(Self, Index, PropItem, Canvas, ARect, Bool1, Bool2);
+ HookPropListBox_DrawPropItem:=False;
+end;
 
 function Detour_coreide_TLogColors_GetColor(Self: TObject; Index: TLogItemType): TObject;
 begin
@@ -236,21 +255,25 @@ begin
 end;
 
 
-{$IFDEF DELPHIXE6_UP}
+{.$IFDEF DELPHIXE6_UP}
 procedure Detour_TGradientTabDrawer_DrawActiveTab(Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
 begin
+ //AddLog2('Detour_TGradientTabDrawer_DrawActiveTab');
  HookDrawActiveTab:=True;
  Trampoline_TGradientTabDrawer_DrawActiveTab(Self, TabLeft, TabWidth, Caption, ImageIndex, OverlayIndex);
  HookDrawActiveTab:=False;
+ //AddLog2('Detour_TGradientTabDrawer_DrawActiveTab', 'End');
 end;
 
 procedure Detour_TGradientTabDrawer_DrawInactiveTab(Self : TObject;const TabLeft: Integer; const TabWidth: Integer; const Caption: WideString; const ImageIndex: Integer; const OverlayIndex: Integer);
 begin
+ //AddLog2('Detour_TGradientTabDrawer_DrawInactiveTab');
  HookDrawInActiveTab:=True;
  Trampoline_TGradientTabDrawer_DrawInactiveTab(Self, TabLeft, TabWidth, Caption, ImageIndex, OverlayIndex);
  HookDrawInActiveTab:=False;
+ //AddLog2('Detour_TGradientTabDrawer_DrawInactiveTab', 'End');
 end;
-{$ENDIF}
+{.$ENDIF}
 
 
 //Hook to change the colors of the  TGradientTabSet (IDE) component
@@ -620,9 +643,10 @@ function Detour_Gradientdrawer_GetOutlineColor : TColor;
 begin
   if Assigned(TColorizerLocalSettings.Settings) and TColorizerLocalSettings.Settings.Enabled  then
   begin
-    Result := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
-    if TColorizerLocalSettings.Settings.TabIDECustom then
-      Result := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter);
+    Result := TColorizerLocalSettings.ColorMap.SelectedColor;
+//    Result := TColorizerLocalSettings.ColorMap.FrameTopLeftOuter;
+//    if TColorizerLocalSettings.Settings.TabIDECustom then
+//      Result := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEOutLineColor, TColorizerLocalSettings.ColorMap.FrameTopLeftOuter);
     Exit;
   end;
   Exit(Trampoline_Gradientdrawer_GetOutlineColor);
@@ -984,6 +1008,16 @@ begin
 end;
 
 
+procedure  Detour_TBaseVirtualTree_OriginalWMNCPaint(Self : TCustomControl;DC: HDC);
+begin
+   Trampoline_TBaseVirtualTreeOriginal_WMNCPaint(Self, DC);
+   if csDesigning in Self.ComponentState then  exit;
+  //Draw the bottom right corner when both scrollbars are active in the TBaseVirtualTree
+   if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
+     DrawNCBorder(TWinControlClass(Self), True);
+end;
+
+
 const
 {$IFDEF DELPHIXE}
   sCompilerMsgLineDraw           = '@Msglines@TCompilerMsgLine@Draw$qqrp16Graphics@TCanvasrx11Types@TRecto';
@@ -1025,6 +1059,7 @@ const
  sPopupSearchForm_DrawTreeDrawNode  = '@Popupsrchfrm@TPopupSearchForm@DrawTreeDrawNode$qqrp32Idevirtualtrees@TBaseVirtualTreerx28Idevirtualtrees@TVTPaintInfo';
  sPopupSearchForm_PaintCategoryNode = '@Popupsrchfrm@TPopupSearchForm@PaintCategoryNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp33Ideinsightmgr@TIDEInsightCategoryo';
  sPopupSearchForm_PaintItemNode     = '@Popupsrchfrm@TPopupSearchForm@PaintItemNode$qqrp28Idevirtualtrees@TVirtualNodep20Vcl@Graphics@TCanvasr18System@Types@TRectp29Ideinsightmgr@TIDEInsightItemo';
+ sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
 
 procedure InstallHooksIDE;
 var
@@ -1065,12 +1100,15 @@ begin
     Trampoline_TListButton_Paint := InterceptCreate(sVclIDEModule, sListButtonPaint, @Detour_TListButton_Paint);
     Trampoline_Gradientdrawer_GetOutlineColor := InterceptCreate(sVclIDEModule, sGetOutlineColor, @Detour_Gradientdrawer_GetOutlineColor);
     Trampoline_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap:= InterceptCreate(sVclIDEModule, '@Gdiplus@Gradienttabs@TGradientTabSet@DrawTabsToMemoryBitmap$qqrv', @Detour_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap);
-    {$IFDEF DELPHIXE6_UP}
+    {.$IFDEF DELPHIXE6_UP}
     Trampoline_TGradientTabDrawer_DrawActiveTab     :=InterceptCreate(sVclIDEModule, '@Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawActiveTab$qqrxixix17System@WideStringxixi', @Detour_TGradientTabDrawer_DrawActiveTab);
     Trampoline_TGradientTabDrawer_DrawInactiveTab   :=InterceptCreate(sVclIDEModule, '@Gdiplus@Gradientdrawer@TGradientTabDrawer@DrawInactiveTab$qqrxixix17System@WideStringxixi', @Detour_TGradientTabDrawer_DrawInActiveTab);
-    {$ENDIF}
+    {.$ENDIF}
     Trampoline_TCustomVirtualStringTree_PaintNormalText     :=InterceptCreate(sVclIDEModule, '@Idevirtualtrees@TCustomVirtualStringTree@PaintNormalText$qqrr28Idevirtualtrees@TVTPaintInfoi17System@WideString', @Detour_TCustomVirtualStringTree_PaintNormalText);
     Trampoline_TVirtualTreeHintWindow_AnimationCallback   :=InterceptCreate(sVclIDEModule, '@Idevirtualtrees@TVirtualTreeHintWindow@AnimationCallback$qqriipv', @Detour_TVirtualTreeHintWindow_AnimationCallback);
+
+    Trampoline_TCustomPropListBox_DrawPropItem   :=InterceptCreate(sVclIDEModule, '@Propbox@TCustomPropListBox@DrawPropItem$qqrip17Propbox@TPropItemp20Vcl@Graphics@TCanvasrx18System@Types@TRectoo', @Detour_TCustomPropListBox_DrawPropItem);
+    Trampoline_TBaseVirtualTreeOriginal_WMNCPaint := InterceptCreate(sVclIDEModule, sBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
   end;
 
   Trampoline_TDockCaptionDrawer_DrawDockCaption  := InterceptCreate(@TDockCaptionDrawer.DrawDockCaption,   @Detour_TDockCaptionDrawer_DrawDockCaption);
@@ -1123,14 +1161,16 @@ begin
 
     InterceptRemove(@Trampoline_TCustomVirtualStringTree_PaintNormalText);
     InterceptRemove(@Trampoline_TVirtualTreeHintWindow_AnimationCallback);
+    InterceptRemove(@Trampoline_TCustomPropListBox_DrawPropItem);
+  InterceptRemove(@Trampoline_TBaseVirtualTreeOriginal_WMNCPaint);
 
     InterceptRemove(@Trampoline_TListButton_Paint);
     InterceptRemove(@Trampoline_Gradientdrawer_GetOutlineColor);
     InterceptRemove(@Trampoline_Gdiplus_Gradienttabs_TGradientTabSet_DrawTabsToMemoryBitmap);
-    {$IFDEF DELPHIXE6_UP}
+    {.$IFDEF DELPHIXE6_UP}
     InterceptRemove(@Trampoline_TGradientTabDrawer_DrawActiveTab);
     InterceptRemove(@Trampoline_TGradientTabDrawer_DrawInActiveTab);
-    {$ENDIF}
+    {.$ENDIF}
     InterceptRemove(@Trampoline_TBaseVirtual_GetHintWindowClass);
     InterceptRemove(@Trampoline_ProjectTree2PaintText);
     InterceptRemove(@Trampoline_TDockCaptionDrawer_DrawDockCaption);

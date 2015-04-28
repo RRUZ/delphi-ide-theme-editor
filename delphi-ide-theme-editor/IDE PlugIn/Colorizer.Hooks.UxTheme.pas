@@ -41,7 +41,7 @@ uses
   Vcl.Styles,
   Vcl.Themes,
   Colorizer.Vcl.Styles,
-  //Vcl.Styles.Utils.Graphics,
+  Vcl.Styles.Utils.Graphics,
 {$ELSE}
   Types,
   Themes,
@@ -92,8 +92,6 @@ const
 
   Trampoline_DrawThemeText              : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
 
-  TrampolineTWinControl_WMNCPaint     : procedure (Self : TWinControl;var Message: TWMNCPaint) = nil;
-  TrampolineBaseVirtualTreeOriginalWMNCPaint : procedure (Self : TCustomControl;DC: HDC) = nil;
   //Scroll Bar Functions http://msdn.microsoft.com/en-us/library/windows/desktop/ff486021%28v=vs.85%29.aspx
   {
 
@@ -141,25 +139,6 @@ end;
 //  Exit(TrampolineSetScrollInfo(hWnd, BarFlag, ScrollInfo, Redraw));
 //end;
 
-type
-  TWinControlClass = class(TWinControl);
-
-procedure Detour_TWinControl_WMNCPaint(Self : TWinControlClass;var Message: TWMNCPaint);
-begin
-  TrampolineTWinControl_WMNCPaint(Self, Message);
-  if csDesigning in Self.ComponentState then  exit;
-  if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
-    DrawNCBorder(Self, True);
-end;
-
-procedure  Detour_TBaseVirtualTree_OriginalWMNCPaint(Self : TCustomControl;DC: HDC);
-begin
-   TrampolineBaseVirtualTreeOriginalWMNCPaint(Self, DC);
-   if csDesigning in Self.ComponentState then  exit;
-  //Draw the bottom right corner when both scrollbars are active in the TBaseVirtualTree
-   if Assigned(TColorizerLocalSettings.Settings) and (TColorizerLocalSettings.Settings.Enabled) then
-     DrawNCBorder(TWinControlClass(Self), True);
-end;
 
 function Detour_UxTheme_OpenThemeData(hwnd: hwnd; pszClassList: LPCWSTR) : HTHEME; stdcall;
 begin
@@ -221,7 +200,7 @@ var
   LDetails: TThemedElementDetails;
   {$ENDIF}
   LThemeClass : string;
-//  LColor : TColor;
+  LColor, LStartColor : TColor;
 
 {$IFDEF DELPHIXE2_UP}
   function DrawScrollBarVCLStyles : HRESULT;
@@ -608,52 +587,50 @@ begin
   end;
 
    LThemeClass:=THThemesClasses.Classes.Items[THEME];
-
    //AddLog2(PChar(Format('DrawThemeBackground  class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, Theme, iPartId, iStateId])));
 
+   if  (SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW)) then
+   begin
+        case iPartId of
+          LVP_LISTITEM       :
+                              begin
+                                  case iStateId of
+                                      LIS_HOT,
+                                      LISS_HOTSELECTED,
+                                      LIS_SELECTEDNOTFOCUS,
+                                      LIS_SELECTED          :
+                                                              begin
+                                                                //AddLog2('AlphaBlendFillCanvas');
+                                                                LColor := TColorizerLocalSettings.ColorMap.HighlightColor;//ColorizerStyleServices.GetSystemColor(clHighlight);
+                                                                LCanvas:=TCanvas.Create;
+                                                                SavedIndex := SaveDC(dc);
+                                                                try
+                                                                  LCanvas.Handle:=dc;
+                                                                  if iStateId=LISS_HOTSELECTED then
+                                                                    AlphaBlendFillCanvas(LCanvas, LColor, pRect, 96)
+                                                                  else
+                                                                    AlphaBlendFillCanvas(LCanvas, LColor, pRect, 50);
+                                                                  LCanvas.Pen.Color:=LColor;
+                                                                  LCanvas.Brush.Style:=bsClear;
+                                                                  LRect:=pRect;
+                                                                  LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+                                                                finally
+                                                                  LCanvas.Handle:=0;
+                                                                  LCanvas.Free;
+                                                                  RestoreDC(dc, SavedIndex);
+                                                                end;
+                                                                Exit(S_OK);
+                                                              end;
+                                  else
+                                       Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+                                  end;
+                              end;
 
-//   if  (SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW)) then
-//   begin
-//        case iPartId of
-//          LVP_LISTITEM       :
-//                              begin
-//                                  case iStateId of
-//                                      LIS_HOT,
-//                                      LISS_HOTSELECTED,
-//                                      LIS_SELECTEDNOTFOCUS,
-//                                      LIS_SELECTED          :
-//                                                              begin
-//                                                                //AddLog2('AlphaBlendFillCanvas');
-//                                                                LColor :=ColorizerStyleServices.GetSystemColor(clHighlight);
-//                                                                LCanvas:=TCanvas.Create;
-//                                                                SavedIndex := SaveDC(dc);
-//                                                                try
-//                                                                  LCanvas.Handle:=dc;
-//                                                                  if iStateId=LISS_HOTSELECTED then
-//                                                                    AlphaBlendFillCanvas(LCanvas, LColor, pRect, 96)
-//                                                                  else
-//                                                                    AlphaBlendFillCanvas(LCanvas, LColor, pRect, 50);
-//                                                                  LCanvas.Pen.Color:=LColor;
-//                                                                  LCanvas.Brush.Style:=bsClear;
-//                                                                  LRect:=pRect;
-//                                                                  LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-//                                                                finally
-//                                                                  LCanvas.Handle:=0;
-//                                                                  LCanvas.Free;
-//                                                                  RestoreDC(dc, SavedIndex);
-//                                                                end;
-//                                                                Result:=S_OK;
-//                                                              end;
-//                                  else
-//                                       Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-//                                  end;
-//                              end;
-//
-//        else
-//            Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-//        end;
-//  end
-//  else
+        else
+            Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+        end;
+  end
+  else
   if SameText(LThemeClass, VSCLASS_TOOLTIP) then
   begin
       case iPartId  of
@@ -681,120 +658,58 @@ begin
   else
   if SameText(LThemeClass, VSCLASS_SCROLLBAR) then
   begin
-
-    ApplyHook:=True; //improve overall perfomance . drawback : all the scrollbars are styled.
-    {
-    ApplyHook:=False;
-    sCaller :='';
-    sCaller2:='';
-    VCLClassName:='';
-    LFoundControl:=nil;
-
-    try
-      if Assigned(LastScrollWinControl) then
-        VCLClassName:=LastScrollWinControl.ClassName;
-    except
-      VCLClassName := '';
-    end;
-    //LastScrollWinControl:=nil;
-
-     LHWND:=0;
-    if THThemesClasses.Windows.ContainsKey(THEME) then
-     LHWND:=THThemesClasses.Windows.Items[THEME];
-
-    if LHWND=0 then
-     LHWND:=WindowFromDC(dc);
-
-    if LHWND<>0 then
-     begin
-      LFoundControl := FindControl(LHWND);
-      if LFoundControl<>nil then
-        VCLClassName:= LFoundControl.ClassName;
-     end;
-
-    if LFoundControl<>nil then
-    begin
-       try
-         ApplyHook:= not (csDesigning in LFoundControl.ComponentState) and (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-         LParentForm:=GetParentForm(LFoundControl);
-         if (LParentForm<>nil) and ApplyHook then
-           ApplyHook:= Assigned(TColorizerLocalSettings.HookedWindows) and (TColorizerLocalSettings.HookedWindows.IndexOf(LParentForm.ClassName)>=0);
-       except
-        ApplyHook:=False
-       end;
-    end;
-
-    if not ApplyHook then
-    begin
-      sCaller := ProcByLevel(1);
-      if sCaller<>'' then
-        sCaller2 := ProcByLevel(2);
-
-      ApplyHook:= (sCaller='') or  (TColorizerLocalSettings.HookedScrollBars.IndexOf(VCLClassName)>=0) or  (TColorizerLocalSettings.HookedWindows.IndexOf(VCLClassName)>=0);
-    end;
-
-    //look for hooked controls in the caller level 1
-    if not ApplyHook and (sCaller<>'') then
-       for s in SplitString(sCaller,'.') do
-       begin
-         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
-         if ApplyHook then break;
-       end;
-
-    //look for hooked controls in the caller level 2
-    if not ApplyHook and (sCaller2<>'') then
-       for s in SplitString(sCaller2,'.') do
-       begin
-         ApplyHook:= SameText(s, 'IDEVirtualTrees') or StartsText('T', s) and ( (TColorizerLocalSettings.HookedWindows.IndexOf(s)>=0) or (TColorizerLocalSettings.HookedScrollBars.IndexOf(s)>=0) );
-         if ApplyHook then break;
-       end;
-                }
-//    AddLog('ScrollBar','LHWND '+IntToHex(LHWND, 8));
-//    if ApplyHook and (LHWND<>0) then
-//    begin
-//      WClassName := GetWindowClassName(LHWND);
-//      ApplyHook:= not ((WClassName<>'') and (TColorizerLocalSettings.WinAPIClasses.IndexOf(WClassName)>=0));
-//      AddLog('ScrollBar','WClassName '+WClassName);
-//    end;
-
-    if ApplyHook then
-    begin
-      {$IFDEF DELPHIXE2_UP}
-      if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesScrollBars then
-        Exit(DrawScrollBarVCLStyles())
-      else
-      {$ENDIF}
-        Exit(DrawScrollBarFlat());
-    end
+    //improve overall perfomance . drawback : all the scrollbars are styled.
+    {$IFDEF DELPHIXE2_UP}
+    if TColorizerLocalSettings.Settings.UseVCLStyles and TColorizerLocalSettings.Settings.VCLStylesScrollBars then
+      Exit(DrawScrollBarVCLStyles())
     else
-    begin
-//      if THThemesClasses.ScrollBars.ContainsKey(THEME) then
-//      begin
-//         for i :=1 to 5 do
-//         begin
-//           sCaller := ProcByLevel(i);
-//           AddLog('Scrollbar Ignored', Format(' %d %s %s',[i, VCLClassName, sCaller]));
-//         end;
-//           AddLog('Scrollbar Ignored', Format('%s',['------------------------------------------------']));
-//      end;
-
-      Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
-    end;
+    {$ENDIF}
+      Exit(DrawScrollBarFlat());
   end
   else
   if SameText(LThemeClass, VSCLASS_TREEVIEW) then
   begin
+    if iPartId=TVP_TREEITEM then
+    begin
+        case iStateId of
+          TREIS_HOT,
+          TREIS_SELECTED,
+          TREIS_SELECTEDNOTFOCUS,
+          TREIS_HOTSELECTED
+                            :
+                             begin
+                                SavedIndex := SaveDC(dc);
+                                LCanvas:=TCanvas.Create;
+                                try
+                                  LCanvas.Handle:=dc;
+                                  LStartColor:=  TColorizerLocalSettings.ColorMap.HighlightColor; //ColorizerStyleServices.GetSystemColor(clHighlight);
+                                  AlphaBlendFillCanvas(LCanvas, LStartColor, pRect, 96);
+                                  LCanvas.Pen.Color:=LStartColor;
+                                  LCanvas.Brush.Style:=bsClear;
+                                  LRect:=pRect;
+                                  LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+                                finally
+                                  LCanvas.Handle:=0;
+                                  LCanvas.Free;
+                                  RestoreDC(dc, SavedIndex);
+                                end;
+                                Exit(S_OK);
+                             end;
+        else
+            Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
+        end;
+    end
+    else
            //deshabilitar en treeeview
-    if (iPartId = TVP_GLYPH) and (iStateId=GLPS_OPENED) and ((pRect.Right-pRect.Left)=9) then
+    if ((iPartId = TVP_GLYPH) or (iPartId=TVP_HOTGLYPH)) and (iStateId=GLPS_OPENED) {and ((pRect.Right-pRect.Left)=9)} then
     begin
       sCaller  := ProcByLevel(4);
       //AddLog2('GLPS_OPENED  sCaller '+sCaller);
 
                    //VirtualTreeView           //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
-      ApplyHook:=  (sCaller = '') or (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller));
+      ApplyHook:=  (sCaller = '') or HookPropListBox_DrawPropItem{ (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller))};
       if not ApplyHook then
       begin
-        //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
         begin
             LHWND:=0;
             if THThemesClasses.Windows.ContainsKey(THEME) then
@@ -864,14 +779,13 @@ begin
       end;
     end
     else
-    if (iPartId = TVP_GLYPH) and (iStateId=GLPS_CLOSED) and ((pRect.Right-pRect.Left)=9) then
+    if  ((iPartId = TVP_GLYPH) or (iPartId=TVP_HOTGLYPH)) and (iStateId=GLPS_CLOSED) {and ((pRect.Right-pRect.Left)=9)} then
     begin
       sCaller  := ProcByLevel(4);
                    //VirtualTreeView           //Fix CustomPropListBox, because LFoundControl is nil sometimes (ex : scroll)
-      ApplyHook:= (sCaller = '') or (SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller));
+      ApplyHook:= (sCaller = '') or HookPropListBox_DrawPropItem {(SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller))};
       if not ApplyHook then
       begin
-        //if SameText('PropBox.TCustomPropListBox.DrawPropItem', sCaller) then
         begin
              LHWND:=0;
             if THThemesClasses.Windows.ContainsKey(THEME) then
@@ -1224,27 +1138,9 @@ begin
   Exit(TrampolineDrawThemeBackground(THEME, dc, iPartId, iStateId, pRect, pClipRect));
 end;
 
-type
-  TWinControlHelper = class helper for TWinControl
-  public
-    function GetWMNCPaintAddr : Pointer;
-  end;
-
-
-{ TWinControlHelper }
-
-function TWinControlHelper.GetWMNCPaintAddr: Pointer;
-var
-  MethodAddr: procedure(var Message: TWMNCPaint) of object;
-begin
-  MethodAddr := Self.WMNCPaint;
-  Result     := TMethod(MethodAddr).Code;
-end;
-
 procedure InstallHooksUXTheme;
 const
   themelib = 'uxtheme.dll';
-  sBaseVirtualTreeOriginalWMNCPaint = '@Idevirtualtrees@TBaseVirtualTree@OriginalWMNCPaint$qqrp5HDC__';
 begin
   THThemesClasses.Classes := TDictionary<HTHEME, String>.Create();
   THThemesClasses.Windows := TDictionary<HTHEME, HWND>.Create();
@@ -1253,21 +1149,17 @@ begin
    if StyleServices.Enabled then
    begin
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teScrollBar], VSCLASS_SCROLLBAR);
-    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[tebutton], VSCLASS_BUTTON);
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teToolTip], VSCLASS_TOOLTIP);
     THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teListView], VSCLASS_LISTVIEW);
+    THThemesClasses.Classes.Add({$IFDEF DELPHIXE2_UP}StyleServices{$ELSE}ThemeServices{$ENDIF}.Theme[teTreeview], VSCLASS_TREEVIEW);
    end;
 
-    TrampolineTWinControl_WMNCPaint     :=InterceptCreate(TWinControl(nil).GetWMNCPaintAddr, @Detour_TWinControl_WMNCPaint);
     if Assigned(DrawThemeText) then
       Trampoline_DrawThemeText    := InterceptCreate(@DrawThemeText,   @Detour_UxTheme_DrawThemeText);
     TrampolineOpenThemeData       := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
     TrampolineDrawThemeBackground := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
     TrampolineDrawThemeBackgroundEx := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
-
-
-    TrampolineBaseVirtualTreeOriginalWMNCPaint := InterceptCreate(sVclIDEModule, sBaseVirtualTreeOriginalWMNCPaint, @Detour_TBaseVirtualTree_OriginalWMNCPaint);
 //    TrampolineSetScrollPos  := InterceptCreate(user32,  'SetScrollPos', @Detour_WinApi_SetScrollPos);
 //    TrampolineSetScrollInfo := InterceptCreate(user32, 'SetScrollInfo', @Detour_WinApi_SetScrollInfo);
   end;
@@ -1276,15 +1168,12 @@ end;
 
 procedure RemoveHooksUXTheme;
 begin
-  InterceptRemove(@TrampolineTWinControl_WMNCPaint);
   InterceptRemove(@TrampolineOpenThemeData);
-  InterceptRemove(@TrampolineBaseVirtualTreeOriginalWMNCPaint);
   InterceptRemove(@TrampolineDrawThemeBackground);
   InterceptRemove(@TrampolineDrawThemeBackgroundEx);
   InterceptRemove(@Trampoline_DrawThemeText);
 //  InterceptRemove(@TrampolineSetScrollPos);
 //  InterceptRemove(@TrampolineSetScrollInfo);
-
   THThemesClasses.Classes.Free;
   THThemesClasses.Windows.Free;
 end;
