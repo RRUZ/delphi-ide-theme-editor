@@ -398,7 +398,7 @@ begin
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.SelectionRectangleBlendColor', AColorMap.SelectedColor);
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.SelectionRectangleBorderColor', AColorMap.FrameTopLeftInner);
 
-  TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.FocusedSelectionColor', AColorMap.SelectedColor);   //ok
+  TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.FocusedSelectionColor', AColorMap.MenuColor);//AColorMap.SelectedColor);   //ok
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.FocusedSelectionBorderColor', AColorMap.FrameTopLeftInner);  //ok
 
   TRttiUtils.SetRttiPropertyValue(AComponent,'Colors.UnfocusedSelectionColor', AColorMap.DisabledColor);   //ok
@@ -581,14 +581,14 @@ begin
   LCategoryButtons:= TCategoryButtons(AComponent);
   LCategoryButtons.BorderStyle:=bsNone;
   LCategoryButtons.ButtonOptions      := LCategoryButtons.ButtonOptions + [boGradientFill];
-  LCategoryButtons.Color              := AColorMap.MenuColor;
-  LCategoryButtons.BackgroundGradientColor:= AColorMap.MenuColor;
+  LCategoryButtons.Color              := AColorMap.Color;
+  LCategoryButtons.BackgroundGradientColor:= AColorMap.Color;
   LCategoryButtons.HotButtonColor     := AColorMap.HighlightColor;
-  LCategoryButtons.RegularButtonColor := AColorMap.MenuColor;
+  LCategoryButtons.RegularButtonColor := AColorMap.Color;
   LCategoryButtons.SelectedButtonColor:= AColorMap.SelectedColor;
   for i := 0 to LCategoryButtons.Categories.Count-1 do
    begin
-     LCategoryButtons.Categories[i].GradientColor := AColorMap.MenuColor;
+     LCategoryButtons.Categories[i].GradientColor := AColorMap.Color;
     LCategoryButtons.Categories[i].Color := AColorMap.Color;
     LCategoryButtons.Categories[i].TextColor := AColorMap.FontColor;
    end;
@@ -730,7 +730,7 @@ begin
     TRttiUtils.SetRttiPropertyValue(AComponent,'EditValueColor', AColorMap.FontColor); //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'CategoryColor', AColorMap.FontColor); //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'GutterColor', AColorMap.Color);
-    TRttiUtils.SetRttiPropertyValue(AComponent,'GutterEdgeColor', AColorMap.FrameTopLeftInner); //*
+    TRttiUtils.SetRttiPropertyValue(AComponent,'GutterEdgeColor', AColorMap.FrameTopLeftOuter); //*
     TRttiUtils.SetRttiPropertyValue(AComponent,'ReferenceColor', AColorMap.FontColor);//*
 
     TRttiUtils.SetRttiPropertyValue(AComponent,'SubPropColor', AColorMap.FontColor);//*
@@ -857,9 +857,9 @@ begin
   end
   else
   begin
-    TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'UnselectedColor', AColorMap.DisabledColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'SelectedColor', AColorMap.Color);
-    TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.MenuColor);
+    TRttiUtils.SetRttiPropertyValue(AComponent,'BackgroundColor', AColorMap.DisabledColor);
     TRttiUtils.SetRttiPropertyValue(AComponent,'Font.Color', AColorMap.FontColor);
   end;
 end;
@@ -876,15 +876,16 @@ begin
     begin
       BackgroundColor:= TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradInActive, AColorMap.Color);
       SelectedColor  := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEStartGradActive, AColorMap.Color);
-      UnselectedColor:= AColorMap.MenuColor;
+      UnselectedColor:= AColorMap.DisabledColor;
       Font.Color     := TryStrToColor(TColorizerLocalSettings.Settings.TabIDEActiveFontColor, AColorMap.FontColor);
     end
     else
     begin
-      BackgroundColor:= AColorMap.MenuColor;
+      BackgroundColor:= AColorMap.DisabledColor;
       SelectedColor  := AColorMap.Color;
-      UnselectedColor:= AColorMap.MenuColor;
+      UnselectedColor:= AColorMap.DisabledColor;
       Font.Color     := AColorMap.FontColor;
+      SoftTop:=True;
     end;
     Style            := tsModernTabs; //necessary for allow use the TTabset hook
   end

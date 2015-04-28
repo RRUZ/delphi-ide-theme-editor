@@ -184,6 +184,12 @@ begin
       HookedControls.Add(Self, TColorizerTrackBarStyleHook.Create(Self));
       LHook:=HookedControls[Self];
     end
+    else
+    if Self is TTreeView then
+    begin
+      HookedControls.Add(Self, TColorizerTreeViewStyleHook.Create(Self));
+      LHook:=HookedControls[Self];
+    end
 //    else
 //    if (Self is TComboBox) or (Self is TCustomComboBox) or (MatchText(Self.ClassName, ['TDesktopComboBox', 'THistoryPropComboBox'])) then  //
 //    begin

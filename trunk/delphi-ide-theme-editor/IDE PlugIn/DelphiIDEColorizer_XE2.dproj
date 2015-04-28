@@ -96,10 +96,9 @@
 			<DCCReference Include="Main.pas"/>
 			<DCCReference Include="Colorizer.Utils.pas"/>
 			<DCCReference Include="Colorizer.Settings.pas"/>
-			<DCCReference Include="Colorizer.HookForms.pas"/>
+			<DCCReference Include="Colorizer.Hook.Forms.pas"/>
 			<DCCReference Include="Colorizer.Hooks.pas"/>
 			<DCCReference Include="Colorizer.StoreColorMap.pas"/>
-			<DCCReference Include="ColorXPStyleActnCtrls.pas"/>
 			<DCCReference Include="Colorizer.OptionsDlg.pas">
 				<Form>FrameColorizer</Form>
 				<DesignClass>TFrame</DesignClass>
@@ -112,13 +111,18 @@
 			<DCCReference Include="..\Units\uMisc.pas"/>
 			<DCCReference Include="..\Units\uRegistry.pas"/>
 			<DCCReference Include="uRttiHelper.pas"/>
-			<DCCReference Include="uIDEExpertUtils.pas"/>
 			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Ext.pas"/>
-			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas"/>
-			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas"/>
-			<DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
 			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
 			<DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
+			<DCCReference Include="..\Units\uDelphiIDEHighlight.pas"/>
+			<DCCReference Include="..\Units\uStackTrace.pas"/>
+			<DCCReference Include="Colorizer.Wrappers.pas"/>
+			<DCCReference Include="..\Units\uColorSelector.pas"/>
+			<DCCReference Include="Colorizer.Hooks.GDIPOBJ.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatControls.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatStyleHook.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.FlatMenus.pas"/>
+			<DCCReference Include="..\Common\Vcl Styles Utils\Vcl.Styles.Utils.Graphics.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -199,3 +203,11 @@
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
 		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
 	</Project>
+
+<!-- EurekaLog First Line
+[Exception Log]
+EurekaLog Version=7001
+Activate=0
+DeleteMapAfterCompile=1
+Encrypt Password=""
+EurekaLog Last Line -->
