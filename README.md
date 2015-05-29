@@ -10,7 +10,7 @@ DITE supports Delphi 5-7, 2005-2010, XE-XE8, Appmethod 1.13-1.15, Lazarus v1.0.1
 
 ![](https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/IDE%20Logos/output_mlFJ2D.gif)
 
-### Downloads ###
+## Downloads ##
 [Installer of the  Delphi IDE Theme Editor - Mirror 1](https://goo.gl/KLJSWZ)
 
 [Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNOGZfWjJpZjFtelE)
