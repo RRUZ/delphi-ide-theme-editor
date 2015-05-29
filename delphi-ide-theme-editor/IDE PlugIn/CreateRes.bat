@@ -1,1 +1,0 @@
-"C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\bin\BRCC32.exe" "DelphiIDEColorizer.RC" 

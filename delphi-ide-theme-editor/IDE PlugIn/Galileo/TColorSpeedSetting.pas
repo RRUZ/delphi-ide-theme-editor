@@ -1,9 +1,0 @@
-type
-  TColorSpeedSetting=(
-  csDefault,
-  csClassic,
-  csTwilight,
-  csOcean,
-  csVisualStudio,
-  csInvalid
-  )
