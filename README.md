@@ -13,16 +13,10 @@ DITE supports Delphi 5-7, 2005-2010, XE-XE8, Appmethod 1.13-1.15, Lazarus v1.0.1
 **Note** : If you want add styling support to the RAD Studio IDE try the [Delphi IDE Colorizer](https://github.com/RRUZ/Delphi-IDE-Colorizer) project
 
 ## Downloads ##
-[Installer of the  Delphi IDE Theme Editor - Mirror 1](https://goo.gl/KLJSWZ)
-
-[Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNOGZfWjJpZjFtelE)
-
-[Themes Megapack 1 (+560 Visual Studio themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_VS_Megapack_Themes.zip)
-
-[Themes MegaPack 2 (+1700 Eclipse IDE themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_Eclipse_Megapack_Themes.zip)
-
-[50+ Lazarus Color Schemes](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Themes%20Lazarus.zip)
-
-[Lazarus Color Schemes Mega Pack 1 (+550 themes ready to use in your Lazarus IDE)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/ThemesLazarus_MegaPack1.zip)
-
-[Lazarus Color Schemes Mega Pack 2 (+1700 themes ready to use in your Lazarus IDE)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/ThemesLazarus_MegaPack2.zip)
+* [Installer of the  Delphi IDE Theme Editor - Mirror 1](https://goo.gl/KLJSWZ)
+* [Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNOGZfWjJpZjFtelE)
+* [Themes Megapack 1 (+560 Visual Studio themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_VS_Megapack_Themes.zip)
+* [Themes MegaPack 2 (+1700 Eclipse IDE themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_Eclipse_Megapack_Themes.zip)
+* [50+ Lazarus Color Schemes](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Themes%20Lazarus.zip)
+* [Lazarus Color Schemes Mega Pack 1 (+550 themes ready to use in your Lazarus IDE)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/ThemesLazarus_MegaPack1.zip)
+* [Lazarus Color Schemes Mega Pack 2 (+1700 themes ready to use in your Lazarus IDE)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/ThemesLazarus_MegaPack2.zip)
