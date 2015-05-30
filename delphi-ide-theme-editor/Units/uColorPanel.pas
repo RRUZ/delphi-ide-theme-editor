@@ -211,24 +211,24 @@ const
   HLSMAX = 240;            // H,L, and S vary over 0-HLSMAX
 var
   Value : Integer;
-  Hue, Luminance, Saturation: Word;
+  LHue, Luminance, Saturation: Word;
 begin
  if TEdit(Sender).Text='' then
   TEdit(Sender).Text:='0';
 
- if TryStrToInt(TEdit(Sender).Text,Value) and (Value>HLSMAX) then
+ if TryStrToInt(TEdit(Sender).Text, Value) and (Value>HLSMAX) then
    TEdit(Sender).Text:=IntToStr(HLSMAX);
 
-  Hue        := StrToInt(Self.Hue.Text);
+  LHue        := StrToInt(Self.Hue.Text);
   Luminance  := StrToInt(Lum.Text);
   Saturation := StrToInt(Sat.Text);
 
-  RefreshColors(ColorHLSToRGB(Hue, Luminance, Saturation));
+  RefreshColors(ColorHLSToRGB(LHue, Luminance, Saturation));
 end;
 
 procedure TColorPanel.RefreshColors(Acolor: TColor);
 var
-  Hue, Luminance, Saturation: Word;
+  LHue, Luminance, Saturation: Word;
 begin
   mbColorPreview1.Color:=Acolor;
   mbColorPreview2.Color:=Acolor;
@@ -236,8 +236,9 @@ begin
   Green.Text:=IntToStr(GetGValue(Acolor));
   Blue.Text :=IntToStr(GetBValue(Acolor));
 
-  ColorRGBToHLS(ColorToRGB(Acolor),Hue,Luminance,Saturation);
-  Self.Hue.Text   :=IntToStr(Hue);
+  ColorRGBToHLS(ColorToRGB(Acolor), LHue, Luminance, Saturation);
+
+  Self.Hue.Text   :=IntToStr(LHue);
   Self.Lum.Text   :=IntToStr(Luminance);
   Self.Sat.Text   :=IntToStr(Saturation);
 

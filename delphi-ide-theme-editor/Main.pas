@@ -14,7 +14,7 @@
 // The Original Code is Main.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -86,7 +86,8 @@ type
   end;
 
 
-  TPopupMenu=class(Vcl.ActnPopup.TPopupActionBar);
+//  TPopupMenu=class(Vcl.ActnPopup.TPopupActionBar);
+
 
 
   TFrmMain = class(TForm)
@@ -214,7 +215,6 @@ type
     NCControls: TNCControls;
 
     ActionImages : TObjectDictionary<string, TCompPngImages>;
-    procedure LoadActionImages;
     procedure LoadThemes;
     procedure LoadFixedWidthFonts;
     procedure LoadValuesElements;
@@ -955,8 +955,8 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 Var
-  IDEData  : TDelphiVersionData;
-  Index    : Integer;
+  LIDEData  : TDelphiVersionData;
+  Index     : Integer;
 begin
  NCControls:=TNCControls.Create(Self);
  NCControls.ShowSystemMenu:=False;
@@ -1032,14 +1032,13 @@ begin
 
   for Index:=0 to IDEsList.Count-1 do
   begin
-    IDEData:=IDEsList[Index];
-    ImageList_AddIcon(ImageListDelphiVersion.Handle, IDEData.Icon.Handle);
-    ComboBoxExIDEs.ItemsEx.AddItem(IDEData.Name,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,0, IDEsList[Index]);
+    LIDEData:=IDEsList[Index];
+    ImageList_AddIcon(ImageListDelphiVersion.Handle, LIDEData.Icon.Handle);
+    ComboBoxExIDEs.ItemsEx.AddItem(LIDEData.Name,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,ImageListDelphiVersion.Count-1,0, IDEsList[Index]);
   end;
 
 
   ActionImages:=TObjectDictionary<string,TCompPngImages>.Create([doOwnsValues]);
-  LoadActionImages;
 
   FillPopupActionBar(PopupActionBar1);
   AssignStdActionsPopUpMenu(Self, PopupActionBar1);
@@ -1181,7 +1180,7 @@ end;
 
 procedure TFrmMain.ImageBugClick(Sender: TObject);
 begin
-  ShellExecute(Handle, 'open', 'http://code.google.com/p/delphi-ide-theme-editor/issues/list',nil,nil, SW_SHOWNORMAL) ;
+  ShellExecute(Handle, 'open', 'https://github.com/RRUZ/delphi-ide-theme-editor/issues',nil,nil, SW_SHOWNORMAL) ;
 end;
 
 procedure TFrmMain.ImageBugMouseEnter(Sender: TObject);
@@ -1255,32 +1254,6 @@ begin
  CheckForUpdates(False);
 end;
 
-procedure TFrmMain.LoadActionImages;
-{
- procedure AddImage(Image:TImage;Const Normal, BN:string);
-  Var
-   Png : TPngImage;
- begin
-  ActionImages.Add(Image.Name,TCompPngImages.Create);
-  ActionImages.Items[Image.Name].Normal:=TPngImage.Create;
-  Png:=ActionImages.Items[Image.Name].Normal;
-  Png.LoadFromFile(Normal);
-
-  ActionImages.Items[Image.Name].BN:=TPngImage.Create;
-  Png:=ActionImages.Items[Image.Name].BN;
-  Png.LoadFromFile(BN);
-  Image.Picture.Assign(ActionImages.Items[Image.Name].BN);
- end;
-}
-
-begin
-{
-  AddImage(ImageBug,ExtractFilePath(ParamStr(0))+'images\Bug.png',ExtractFilePath(ParamStr(0))+'images\BugBN.png');
-  AddImage(ImageUpdate,ExtractFilePath(ParamStr(0))+'images\Update.png',ExtractFilePath(ParamStr(0))+'images\UpdateBN.png');
-  AddImage(ImageHue,ExtractFilePath(ParamStr(0))+'images\Hue.png',ExtractFilePath(ParamStr(0))+'images\HueBN.png');
-  AddImage(ImageConf,ExtractFilePath(ParamStr(0))+'images\Conf.png',ExtractFilePath(ParamStr(0))+'images\ConfBN.png');
-}
-end;
 
 procedure TFrmMain.LoadFixedWidthFonts;
 var
@@ -1501,21 +1474,21 @@ begin
   LvThemes.OnDrawItem :=nil;
   LvThemes.OnMouseDown:=nil;
 
-  if not TStyleManager.ActiveStyle.IsSystemStyle then
-  begin
-    CbElement.Style:=csOwnerDrawFixed;
-    CbElement.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
-
-    CbIDEFonts.Style:=csOwnerDrawFixed;
-    CbIDEFonts.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+//  if not TStyleManager.ActiveStyle.IsSystemStyle then
+//  begin
+//    CbElement.Style:=csOwnerDrawFixed;
+//    CbElement.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+//
+//    CbIDEFonts.Style:=csOwnerDrawFixed;
+//    CbIDEFonts.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
 
 //    CbIDEThemeImport.Style:=csOwnerDrawFixed;
 //    CbIDEThemeImport.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
 
-    LvThemes.OwnerDraw  :=True;
-    LvThemes.OnDrawItem :=VclStylesOwnerDrawFix.ListViewDrawItem;
-    LvThemes.OnMouseDown:=VclStylesOwnerDrawFix.ListViewMouseDown;
-  end;
+//    LvThemes.OwnerDraw  :=True;
+//    LvThemes.OnDrawItem :=VclStylesOwnerDrawFix.ListViewDrawItem;
+//    LvThemes.OnMouseDown:=VclStylesOwnerDrawFix.ListViewMouseDown;
+//  end;
 
 
   {
@@ -1858,10 +1831,5 @@ begin
 
  Inherited;
 end;
-
-//initialization
-//   TStyleManager.Engine.RegisterStyleHook(TComboBoxEx, TComboBoxExStyleHookFix);
-
-
 
 end.
