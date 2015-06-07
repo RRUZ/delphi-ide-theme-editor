@@ -1889,9 +1889,7 @@ Source: Styles\lilac.vsf; DestDir: {app}\Styles\
 Source: Styles\MetroBlack.vsf; DestDir: {app}\Styles\
 Source: Styles\MetroBlue.vsf; DestDir: {app}\Styles\
 Source: Styles\MetroGreen.vsf; DestDir: {app}\Styles\
-Source: Styles\Orange.vsf; DestDir: {app}\Styles\
 Source: Styles\OrangeGraphite.vsf; DestDir: {app}\Styles\
-Source: Styles\Pink.vsf; DestDir: {app}\Styles\
 Source: Styles\RubyGraphite.vsf; DestDir: {app}\Styles\
 Source: Styles\SapphireKamri.vsf; DestDir: {app}\Styles\
 Source: Styles\sepia.vsf; DestDir: {app}\Styles\
@@ -1993,7 +1991,7 @@ procedure BitmapImageOnClick(Sender: TObject);
 var
   ErrorCode : Integer;
 begin
-  ShellExec('open', 'http://code.google.com/p/delphi-ide-theme-editor/', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+  ShellExec('open', 'https://github.com/RRUZ/delphi-ide-theme-editor/', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
 end;
 
 procedure CreateWizardPages;
@@ -2007,7 +2005,7 @@ begin
 
   { TBitmapImage }
   Page := CreateCustomPage(wpInstalling, 'Contributions',
-  'If you want show your appreciation for this project. Go to the code google page, login with you google account and star the project.');
+  'If you want show your appreciation for this project. Go to the github page, login with you github account and star the project.');
 
   BitmapImage := TBitmapImage.Create(Page);
   BitmapImage.AutoSize := True;
