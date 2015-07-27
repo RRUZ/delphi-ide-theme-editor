@@ -2,7 +2,7 @@
 //
 // Unit Vcl.Styles.Ext
 // unit for the VCL Styles Utils
-// http://code.google.com/p/vcl-styles-utils/
+// https://github.com/RRUZ/vcl-styles-utils/
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.Ext.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -123,12 +123,13 @@ type
    ///	<summary>Force to reload a modified vcl style
    ///	</summary>
    {$ENDREGION}
-   class procedure ReloadStyle(const Name: string);
+   class procedure ReloadStyle(const StyleName : string);
    {$REGION 'Documentation'}
    ///	<summary>remove a vcl style
    ///	</summary>
    {$ENDREGION}
-   class procedure RemoveStyle(const Name: string);
+   class procedure RemoveStyle(const StyleName : string);
+   class function  StyleLoaded(const StyleName : string) : Boolean;
    end;
 
 const
@@ -382,52 +383,58 @@ begin
 end;
 
 
-class procedure TStyleManagerHelper.ReloadStyle(const Name: string);
+class procedure TStyleManagerHelper.ReloadStyle(const StyleName : string);
 var
   LStyle: TCustomStyleServices;
   t     : TPair<string, TStyleManager.TSourceInfo>;
 begin
 
- if SameText(Name, ActiveStyle.Name, loUserLocale) then
+ if SameText(StyleName, ActiveStyle.Name, loUserLocale) then
    SetStyle(SystemStyle);
 
  for LStyle in Styles do
-  if SameText(Name, LStyle.Name, loUserLocale) then
+  if SameText(StyleName, LStyle.Name, loUserLocale) then
   begin
     LStyle.Free;
     Styles.Remove(LStyle);
   end;
 
   for t in Self.FRegisteredStyles do
-    if SameText(Name, t.Key, loUserLocale) then
+    if SameText(StyleName, t.Key, loUserLocale) then
      if (t.Value.Data<>nil) then
      begin
        TStream(t.Value.Data).Position:=0;
        break;
      end;
 
- SetStyle(Name);
+ SetStyle(StyleName);
 end;
 
-class procedure TStyleManagerHelper.RemoveStyle(const Name: string);
+class procedure TStyleManagerHelper.RemoveStyle(const StyleName: string);
 var
   LStyle: TCustomStyleServices;
   t     : TPair<string, TStyleManager.TSourceInfo>;
 begin
- if SameText(Name, ActiveStyle.Name, loUserLocale) then
+ if SameText(StyleName, ActiveStyle.Name, loUserLocale) then
    SetStyle(SystemStyle);
 
  for LStyle in Styles do
-  if SameText(Name, LStyle.Name, loUserLocale) then
+  if SameText(StyleName, LStyle.Name, loUserLocale) then
   begin
     LStyle.Free;
     Styles.Remove(LStyle);
   end;
 
   for t in Self.FRegisteredStyles do
-    if SameText(Name, t.Key, loUserLocale) then
+    if SameText(StyleName, t.Key, loUserLocale) then
      Self.FRegisteredStyles.Remove(t.Key);
 
+end;
+
+class function TStyleManagerHelper.StyleLoaded(
+  const StyleName: string): Boolean;
+begin
+   Result := TStyleManager.Style[StyleName] <> nil;
 end;
 
 class function TStyleManagerHelper._GetStyles: TList<TCustomStyleServices>;

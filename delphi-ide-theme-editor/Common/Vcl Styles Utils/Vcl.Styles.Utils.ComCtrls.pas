@@ -1,8 +1,8 @@
-// **************************************************************************************************
+//**************************************************************************************************
 //
 // Unit Vcl.Styles.Utils.ComCtrls
 // unit for the VCL Styles Utils
-// http://code.google.com/p/vcl-styles-utils/
+// https://github.com/RRUZ/vcl-styles-utils/
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -17,8 +17,11 @@
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-// ************************************************************************************************
+//************************************************************************************************
 unit Vcl.Styles.Utils.ComCtrls;
+
+
+{$DEFINE USE_Vcl.Styles.Hooks}
 
 interface
 
@@ -33,6 +36,9 @@ uses
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Graphics,
+  {$IFDEF USE_Vcl.Styles.Hooks}
+  Vcl.Styles.Hooks,
+  {$ENDIF}
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Styles.Utils.StdCtrls,
   Vcl.Forms,
@@ -669,6 +675,7 @@ end;
 
 constructor TSysListViewStyleHook.TSysHeaderStyleHook.TSysSection.Create(SysParent: TSysControl; Index: Integer);
 begin
+  inherited Create;
   FTextFormat := [];
   FIndex := Index;
   FText := '';
@@ -738,14 +745,15 @@ end;
 
 { TSysTreeViewStyleHook }
 
+
 constructor TSysTreeViewStyleHook.Create(AHandle: THandle);
 begin
   inherited;
 {$IF CompilerVersion > 23}
-  StyleElements := [seFont, seBorder];
+  StyleElements := [seFont{, seBorder}];  //Allow to the Vcl.Styles.Hook handle the NC and scroll paint
 {$ELSE}
   OverrideFont := True;
-  OverridePaintNC := True;
+  OverridePaintNC := False; //Allow to the Vcl.Styles.Hook handle the NC and scroll paint
 {$IFEND}
   OverrideEraseBkgnd := True;
 end;
@@ -2764,11 +2772,13 @@ if StyleServices.Available then
 begin
   with TSysStyleManager do
   begin
-    RegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-    RegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-    RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-    RegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-    RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+    RegisterSysStyleHook(TOOLBARCLASSNAME, TSysToolbarStyleHook);
+    RegisterSysStyleHook(WC_LISTVIEW, TSysListViewStyleHook);
+    RegisterSysStyleHook(WC_TABCONTROL, TSysTabControlStyleHook);
+    RegisterSysStyleHook(WC_TREEVIEW, TSysTreeViewStyleHook);
+    {$IFNDEF USE_Vcl.Styles.Hooks}
+    RegisterSysStyleHook(PROGRESS_CLASS, TSysProgressBarStyleHook);
+    {$ENDIF}
     RegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit30A', TSysRichEditStyleHook);
@@ -2777,10 +2787,10 @@ begin
     RegisterSysStyleHook('RichEdit41W', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit50A', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit50W', TSysRichEditStyleHook);
-    RegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
-    RegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
-    RegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
-    RegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
+    RegisterSysStyleHook(REBARCLASSNAME, TSysReBarStyleHook);
+    RegisterSysStyleHook(STATUSCLASSNAME, TSysStatusBarStyleHook);
+    RegisterSysStyleHook(TRACKBAR_CLASS, TSysTrackBarStyleHook);
+    RegisterSysStyleHook(UPDOWN_CLASS, TSysUpDownStyleHook);
   end;
 end;
 
@@ -2788,11 +2798,14 @@ finalization
 
 with TSysStyleManager do
 begin
-  UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-  UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-  UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-  UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-  UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+  UnRegisterSysStyleHook(TOOLBARCLASSNAME, TSysToolbarStyleHook);
+  UnRegisterSysStyleHook(WC_LISTVIEW, TSysListViewStyleHook);
+  UnRegisterSysStyleHook(WC_TABCONTROL, TSysTabControlStyleHook);
+  UnRegisterSysStyleHook(WC_TREEVIEW, TSysTreeViewStyleHook);
+  {$IFNDEF USE_Vcl.Styles.Hooks}
+  UnRegisterSysStyleHook(PROGRESS_CLASS, TSysProgressBarStyleHook);
+  {$ENDIF}
+
   UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
   UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
   UnRegisterSysStyleHook('RichEdit30A', TSysRichEditStyleHook);
@@ -2801,10 +2814,10 @@ begin
   UnRegisterSysStyleHook('RichEdit41W', TSysRichEditStyleHook);
   UnRegisterSysStyleHook('RichEdit50A', TSysRichEditStyleHook);
   UnRegisterSysStyleHook('RichEdit50W', TSysRichEditStyleHook);
-  UnRegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
-  UnRegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
-  UnRegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
-  UnRegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
+  UnRegisterSysStyleHook(REBARCLASSNAME, TSysReBarStyleHook);
+  UnRegisterSysStyleHook(STATUSCLASSNAME, TSysStatusBarStyleHook);
+  UnRegisterSysStyleHook(TRACKBAR_CLASS, TSysTrackBarStyleHook);
+  UnRegisterSysStyleHook(UPDOWN_CLASS, TSysUpDownStyleHook);
 end;
 
 end.

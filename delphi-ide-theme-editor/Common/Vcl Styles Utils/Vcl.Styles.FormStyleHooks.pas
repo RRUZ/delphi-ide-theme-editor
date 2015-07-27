@@ -2,7 +2,7 @@
 //
 // Unit Vcl.Styles.FormStyleHooks
 // unit for the VCL Styles Utils
-// http://code.google.com/p/vcl-styles-utils/
+// https://github.com/RRUZ/vcl-styles-utils/
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.FormStyleHooks.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -134,6 +134,7 @@ type
     procedure SetFChangeSizeCalled(const Value: Boolean);
     function GetFRegion: HRGN;
     procedure SetFRegion(const Value: HRGN);
+    function GetForm: TCustomForm;
   public
     property _FCloseButtonRect : TRect read GetFCloseButtonRect Write SetFCloseButtonRect;
     property _FMaxButtonRect : TRect read GetFMaxButtonRect Write SetFMaxButtonRect;
@@ -151,11 +152,15 @@ type
     property _FPressedButton: Integer read GetFPressedButton;
     property _FHotButton: Integer read GetFHotButton;
     property _FRegion: HRGN read GetFRegion write SetFRegion;
+    property _Form : TCustomForm read GetForm;
     procedure MainMenuBarHookPaint(Canvas: TCanvas);
     function _GetIconFast: TIcon;
     procedure _ChangeSize;
     function _NormalizePoint(P: TPoint): TPoint;
     function _GetHitTest(P: TPoint): Integer;
+    function _GetBorderSizeAddr : Pointer;
+    function _GetRegionAddr : Pointer;
+
   end;
 
   function RectVCenter(var R: TRect; Bounds: TRect): TRect;
@@ -1291,6 +1296,11 @@ begin
  result:=Self.FMinButtonRect;
 end;
 
+function TFormStyleHookHelper.GetForm: TCustomForm;
+begin
+ Result:=Self.Form;
+end;
+
 function TFormStyleHookHelper.GetFPressedButton: Integer;
 begin
  Result:=Self.FPressedButton;
@@ -1392,6 +1402,15 @@ begin
   Result:=Self.GetBorderSize;
 end;
 
+function TFormStyleHookHelper._GetBorderSizeAddr: Pointer;
+var
+  MethodAddr: function : TRect of object;
+begin
+  MethodAddr := Self.GetBorderSize;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
+
 function TFormStyleHookHelper._GetHitTest(P: TPoint): Integer;
 begin
  result:= Self.GetHitTest(P);
@@ -1401,6 +1420,15 @@ function TFormStyleHookHelper._GetIconFast: TIcon;
 begin
   Result:=Self.GetIconFast;
 end;
+
+function TFormStyleHookHelper._GetRegionAddr: Pointer;
+var
+  MethodAddr: function : HRgn of object;
+begin
+  MethodAddr := Self.GetRegion;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
 
 function TFormStyleHookHelper._NormalizePoint(P: TPoint): TPoint;
 begin

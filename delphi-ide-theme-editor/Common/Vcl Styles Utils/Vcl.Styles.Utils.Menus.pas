@@ -2,7 +2,7 @@
 //
 // Unit Vcl.Styles.Utils.Menus
 // unit for the VCL Styles Utils
-// http://code.google.com/p/vcl-styles-utils/
+// https://github.com/RRUZ/vcl-styles-utils/
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -24,7 +24,7 @@ interface
 
 {$DEFINE UseVCLStyleUtilsMenu}
 // {$IF CompilerVersion >= 27}    // uncomment these lines if you want to use the VCL Styles Menus Hooks
-// {$UNDEF UseVCLStyleUtilsMenu}  // included on XE6 and XE7  (Embarcadero Version)
+// {$UNDEF UseVCLStyleUtilsMenu}  // included on XE6-XE8  (Embarcadero Version)
 // {$IFEND}                       //
 
 uses
@@ -120,6 +120,7 @@ type
 {$ENDREGION}
 
   var
+    FOffset : Integer;
     FItemsPainted: Boolean;
     FParentSubItemPainted: Boolean;
     FPreviousHotItemIndex: integer;
@@ -129,6 +130,7 @@ type
     FCount: integer;
     FMenu: HMENU;
     FVCLMenuItems: TMenuItem;
+    FNCRect : TRect;
     function GetMenuFromHandle(AHandle: HWND): HMENU;
     function GetItemsCount: integer;
     procedure MNSELECTITEM(var Message: TMessage); message MN_SELECTITEM;
@@ -160,7 +162,9 @@ implementation
 }
 {$R-,WARN IMPLICIT_STRING_CAST_LOSS OFF}
 
-uses Vcl.Styles.Utils.SysControls;
+uses
+  Vcl.Styles.Utils.SysControls,
+  Vcl.Styles.Utils.Graphics;
 
 type
   TControlClass = Class(TControl);
@@ -214,48 +218,6 @@ begin
   Result := Icon;
 end;
 
-procedure RotateBitmap(Bmp: TBitmap; Rads: Single; AdjustSize: Boolean; BkColor: TColor = clNone);
-var
-  C: Single;
-  S: Single;
-  XForm: tagXFORM;
-  Tmp: TBitmap;
-begin
-  C := Cos(Rads);
-  S := Sin(Rads);
-  XForm.eM11 := C;
-  XForm.eM12 := S;
-  XForm.eM21 := -S;
-  XForm.eM22 := C;
-  Tmp := TBitmap.Create;
-  try
-    Tmp.TransparentColor := Bmp.TransparentColor;
-    Tmp.TransparentMode := Bmp.TransparentMode;
-    Tmp.Transparent := Bmp.Transparent;
-    Tmp.Canvas.Brush.Color := BkColor;
-    if AdjustSize then
-    begin
-      Tmp.Width := Round(Bmp.Width * Abs(C) + Bmp.Height * Abs(S));
-      Tmp.Height := Round(Bmp.Width * Abs(S) + Bmp.Height * Abs(C));
-      XForm.eDx := (Tmp.Width - Bmp.Width * C + Bmp.Height * S) / 2;
-      XForm.eDy := (Tmp.Height - Bmp.Width * S - Bmp.Height * C) / 2;
-    end
-    else
-    begin
-      Tmp.Width := Bmp.Width;
-      Tmp.Height := Bmp.Height;
-      XForm.eDx := (Bmp.Width - Bmp.Width * C + Bmp.Height * S) / 2;
-      XForm.eDy := (Bmp.Height - Bmp.Width * S - Bmp.Height * C) / 2;
-    end;
-    SetGraphicsMode(Tmp.Canvas.Handle, GM_ADVANCED);
-    SetWorldTransform(Tmp.Canvas.Handle, XForm);
-    BitBlt(Tmp.Canvas.Handle, 0, 0, Tmp.Width, Tmp.Height, Bmp.Canvas.Handle, 0, 0, SRCCOPY);
-    Bmp.Assign(Tmp);
-  finally
-    Tmp.Free;
-  end;
-end;
-
 function GetMenuItemPos(Menu: HMENU; ID: integer): integer;
 var
   i: integer;
@@ -291,6 +253,8 @@ begin
   FItemsPainted := False;
   FSysPopupItem := nil;
   FVCLMenuItems := nil;
+  FOffset := 0;
+
   // Font := Screen.MenuFont;
 end;
 
@@ -303,7 +267,7 @@ end;
 
 procedure TSysPopupStyleHook.DoDrawItem(Canvas: TCanvas; const Index: integer);
 var
-  LItemRect: TRect;
+  LRect, LRect2, LItemRect: TRect;
   P: TPoint;
   State: TSysPopupItemState;
   Style: TSysPopupItemStyle;
@@ -313,11 +277,32 @@ var
 begin
   if (Index < 0) or (Index > Count - 1) then
     Exit;
+
   Item := Items[Index];
   LItemRect := Item.ItemRect;
   P := Point(LItemRect.Left, LItemRect.Top);
   ScreenToClient(Handle, P);
+
+ GetMenuItemRect(0, FMenu, Index, LRect);
+ //OutputDebugString(PChar(Format('Index %d  Width %d Height %d Left %d Top %d', [Index, LRect.Width, LRect.Height, LRect.Left, LRect.Top])));
+
+ if SysControl.ClientRect.Height>LRect.Height then
+ begin
+   //GetWindowRect(SysControl.Handle, LRect2);
+   LRect2:= SysControl.ClientRect;
+   LRect2.Height:=  LRect2.Height - LRect.Height;
+ end
+ else
+   LRect2:= SysControl.ClientRect;
+
+  //prevent draw  not visible items on larger menus
+  if not PtInRect (LRect2, P) then
+   Exit;
+
+
   LItemRect := Rect(P.X, P.Y, P.X + LItemRect.Width, P.Y + LItemRect.Height);
+
+
   if LItemRect.Left < 2 then
     LItemRect.Left := 2;
   inc(LItemRect.Right, 4);
@@ -551,6 +536,7 @@ begin
           LImageWidth := Bmp.Width;
           LImageRect := Rect(0, 0, Bmp.Width, Bmp.Height);
           RectVCenter(LImageRect, ItemRect);
+
           if not RightToLeft then
             OffsetRect(LImageRect, 4, 0)
           else
@@ -562,6 +548,7 @@ begin
           Canvas.Draw(LImageRect.Left, LImageRect.Top, Bmp)
         end
         else
+        if (Bmp.Width > 0) and (Bmp.Height > 0) then
         begin
           LImageWidth := 16;
           LImageRect := Rect(0, 0, 16, 16);
@@ -574,6 +561,15 @@ begin
             LImageRect.Right := ItemRect.Right;
           end;
 
+          if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+          begin
+           R:=LImageRect;
+           InflateRect(R, 2, 2);
+           Canvas.Brush.Style:=bsClear;
+           Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+           Canvas.Rectangle(R);
+          end;
+
           Canvas.StretchDraw(LImageRect, Bmp);
         end;
 
@@ -584,6 +580,7 @@ begin
         DisplayCheckedGlyph := False;
         LImageRect := Rect(0, 0, Images.Width, Images.Height);
         RectVCenter(LImageRect, ItemRect);
+
         if not RightToLeft then
           OffsetRect(LImageRect, 4, 0)
         else
@@ -591,6 +588,16 @@ begin
           LImageRect.Left := ItemRect.Right - Images.Width - 4;
           LImageRect.Right := ItemRect.Right;
         end;
+
+        if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+        begin
+         R:=LImageRect;
+         InflateRect(R, 2, 2);
+         Canvas.Brush.Style:=bsClear;
+         Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+         Canvas.Rectangle(R);
+        end;
+
         Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
       end;
     end;
@@ -647,9 +654,20 @@ begin
           LImageRect.Left := ItemRect.Right - BmpWidth - 4;
           LImageRect.Right := ItemRect.Right;
         end;
+
         Icon := BmpToIcon(hBmp);
         if Icon <> 0 then
         begin
+
+          if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+          begin
+           R:=LImageRect;
+           InflateRect(R, 2, 2);
+           Canvas.Brush.Style:=bsClear;
+           Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+           Canvas.Rectangle(R);
+          end;
+
           DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth, BmpHeight, 0, 0, DI_NORMAL);
           DeleteObject(Icon);
         end;
@@ -657,7 +675,7 @@ begin
     end;
   end;
 
-  if (SysItem.Checked) and (DisplayCheckedGlyph) then
+  if (SysItem.Checked)  then
   begin
     Detail := TThemedMenu(integer(tmPopupCheckNormal) + integer(SysItem.Disabled));
     if SysItem.RadioCheck then
@@ -665,15 +683,19 @@ begin
     LDetails := StyleServices.GetElementDetails(Detail);
     StyleServices.GetElementSize(DC, LDetails, esActual, LSize);
     LImageRect := Rect(0, 0, LSize.Width, LSize.Height);
+
     RectVCenter(LImageRect, ItemRect);
-    if not RightToLeft then
-      OffsetRect(LImageRect, 4, 0)
-    else
+    if DisplayCheckedGlyph then
     begin
-      LImageRect.Left := ItemRect.Right - LSize.Width - 4;
-      LImageRect.Right := ItemRect.Right;
+      if not RightToLeft then
+        OffsetRect(LImageRect, 4, 0)
+      else
+      begin
+        LImageRect.Left := ItemRect.Right - LSize.Width - 4;
+        LImageRect.Right := ItemRect.Right;
+      end;
+      StyleServices.DrawElement(DC, LDetails, LImageRect);
     end;
-    StyleServices.DrawElement(DC, LDetails, LImageRect);
   end;
 
   { Draw Text }
@@ -811,11 +833,8 @@ begin
 end;
 
 procedure TSysPopupStyleHook.PaintBackground(Canvas: TCanvas);
-var
-  LDetails: TThemedElementDetails;
 begin
-  LDetails := StyleServices.GetElementDetails(tmPopupBorders);
-  StyleServices.DrawElement(Canvas.Handle, LDetails, SysControl.ClientRect);
+  StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(tmPopupBorders), SysControl.ClientRect);
 end;
 
 procedure TSysPopupStyleHook.UpdateColors;
@@ -848,7 +867,7 @@ begin
   { The undocumented MN_SELECTITEM Message:
     This is the most importants message ,
     Windows sends this message every time when the user
-    select an item (not clicking,only select) ...
+    select an item (not clicking, only select) ...
     wParam=Current Item Index .
     lparam= may be it's unused (not sure).
   }
@@ -862,6 +881,9 @@ begin
     DC := GetDC(Handle);
     Canvas.Handle := DC;
     Index := integer(Message.WParam);
+
+    //OutputDebugString(PChar(Format('MNSELECTITEM Index %d', [Index])));
+
     if Assigned(Font) then
       Canvas.Font := Font;
     { Out of index . }
@@ -984,7 +1006,6 @@ var
   i: integer;
   Canvas: TCanvas;
 begin
-
   FMenu := GetMenuFromHandle(Handle);
   FCount := GetItemsCount;
 
@@ -1006,7 +1027,16 @@ begin
 
   if Count > -1 then
   begin
-    for i := 0 to Count - 1 do
+    //exit;
+    //FCount:=48;
+
+//    for i := 0 to Count - 1 do
+//    begin
+//     GetMenuItemRect(0, FMenu, i, LRect);
+//     OutputDebugString(PChar(Format('Index %d  Width %d Height %d Left %d Top %d', [i, LRect.Width, LRect.Height, LRect.Left, LRect.Top])));
+//    end;
+
+    for i := 0 + FOffset to Count - 1 do
       PostMessage(Handle, MN_SELECTITEM, i, 0);
   end;
   Handled := True;
@@ -1034,8 +1064,19 @@ var
   TopWin: HWND;
   TopCntrl: TControl;
 begin
-  // AddToLog(Message);
+//  AddToLog(Message);
+//  Message.Result := CallDefaultProc(Message);
+//  Exit;
+
   case Message.Msg of
+//
+//    MN_BUTTONDOWN:
+//      begin
+//        AddToLog(Message);
+//        Message.Result := CallDefaultProc(Message);
+//        Exit;
+//      end;
+
 
     MN_SELECTITEM, WM_PRINT:
       begin
@@ -1087,7 +1128,11 @@ begin
 
     MN_BUTTONDOWN:
       begin
+        Inc(FOffset);
+        //AddToLog(Message);
+        //AddToLog('Index '+IntToStr(UINT(Message.WParamLo)));
         SetRedraw(False);
+        //SendMessage(Handle, WM_PRINT, 0, 0);
         Message.Result := CallDefaultProc(Message);
         SetRedraw(True);
       end;
@@ -1177,6 +1222,17 @@ begin
 
     WM_NCCALCSIZE, WM_NCPAINT:
       begin
+        if Message.Msg= WM_NCCALCSIZE then
+        begin
+          if TWMNCCalcSize(Message).CalcValidRects then
+          begin
+            FNCRect := TWMNCCalcSize(Message).CalcSize_Params.rgrc[0];
+            //Message.Result := CallDefaultProc(Message);
+            //LRect := TWMNCCalcSize(Message).CalcSize_Params.rgrc0;
+            //OutputDebugString(PChar(Format('LRect.Height %d WParam %d', [FNCRect.Height, Message.WParam])));
+          end;
+        end;
+
         if (not OverridePaint) or (not OverridePaintNC) then
         begin
           Message.Result := CallDefaultProc(Message);
@@ -1234,6 +1290,7 @@ end;
 
 constructor TSysPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook: TSysPopupStyleHook; SysParent: TSysControl; const Index: integer; const Menu: HMENU);
 begin
+  inherited Create;
   FSysPopupStyleHook := SysPopupStyleHook;
   FMenu := Menu;
   FHandle := SysParent.Handle;
@@ -1296,13 +1353,14 @@ begin
 
   Result := '';
 
-  FillChar(pMenuItemInfo, sizeof(MENUITEMINFO), Char(0));
-  pMenuItemInfo.cbSize := sizeof(MENUITEMINFO);
+  FillChar(pMenuItemInfo, SizeOf(MENUITEMINFO), Char(0));
+  pMenuItemInfo.cbSize := SizeOf(MENUITEMINFO);
   pMenuItemInfo.fMask := MIIM_STRING or MIIM_FTYPE;
   pMenuItemInfo.dwTypeData := nil;
   if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
   begin
-    if not(pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
+     //Fix for shell menus on W10
+    if (VCLMenuItems=nil) or (not (pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW)) then
     begin
       { The Size needed for the Buffer . }
       StrSize := pMenuItemInfo.cch * 2 + 2;

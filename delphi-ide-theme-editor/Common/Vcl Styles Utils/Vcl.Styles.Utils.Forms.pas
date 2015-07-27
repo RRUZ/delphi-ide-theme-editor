@@ -2,7 +2,7 @@
 //
 // Unit Vcl.Styles.Utils.Forms
 // unit for the VCL Styles Utils
-// http://code.google.com/p/vcl-styles-utils/
+// https://github.com/RRUZ/vcl-styles-utils/
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -20,6 +20,9 @@
 // **************************************************************************************************
 unit Vcl.Styles.Utils.Forms;
 
+
+{$DEFINE USE_Vcl.Styles.Hooks}
+
 interface
 
 uses
@@ -33,6 +36,9 @@ uses
   Vcl.Dialogs,
   Vcl.Graphics,
   Vcl.Styles.Utils.SysStyleHook,
+  {$IFDEF USE_Vcl.Styles.Hooks}
+  Vcl.Styles.Hooks,
+  {$ENDIF}
   Vcl.Forms,
   Vcl.GraphUtil,
   Vcl.ExtCtrls,
@@ -803,7 +809,7 @@ var
   TextFormat: TTextFormat;
   LText: String;
   nPos: Integer;
-  SysMenu: HMENU;
+  LSysMenu: HMENU;
   ItemDisabled: Boolean;
 begin
   LBorderStyle := BorderStyle;
@@ -859,9 +865,9 @@ begin
     Inc(TextRect.Left, 7);
 
   { Draw buttons }
-  SysMenu := GetSystemMenu(Handle, False);
-  nPos := GetMenuItemPos(SysMenu, SC_CLOSE);
-  ItemDisabled := IsItemDisabled(SysMenu, nPos);
+  LSysMenu := GetSystemMenu(Handle, False);
+  nPos := GetMenuItemPos(LSysMenu, SC_CLOSE);
+  ItemDisabled := IsItemDisabled(LSysMenu, nPos);
   if (biSystemMenu in LBorderIcons) and (not ItemDisabled) then
   begin
     if not UseSmallBorder then
@@ -1270,7 +1276,7 @@ end;
 procedure TSysDialogStyleHook.WndProc(var Message: TMessage);
 var
   DFBW: Integer;
-  BorderSize: TRect;
+  LBorderSize: TRect;
   LParentHandle: HWND;
 begin
   // Addlog(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
@@ -1287,8 +1293,8 @@ begin
         { DFBW =Default Frame Border Width }
         DFBW := GetSystemMetrics(SM_CXBORDER);
         Inc(DFBW);
-        BorderSize := GetBorderSize;
-        if (SysControl.Width > BorderSize.Left) and (SysControl.Width > BorderSize.Right) then
+        LBorderSize := GetBorderSize;
+        if (SysControl.Width > LBorderSize.Left) and (SysControl.Width > LBorderSize.Right) then
           SetWindowPos(Handle, 0, 0, 0, SysControl.Width + DFBW, SysControl.Height + DFBW + 1, SWP_NOMOVE or SWP_NOZORDER or SWP_FRAMECHANGED);
         Exit;
       end;
@@ -2664,7 +2670,9 @@ end;
 
 initialization
 
-UseLatestCommonDialogs := False;
+ {$IFNDEF USE_Vcl.Styles.Hooks}
+ //UseLatestCommonDialogs := False;
+ {$ENDIF}
 
   if StyleServices.Available then
   begin
@@ -2673,8 +2681,6 @@ UseLatestCommonDialogs := False;
   end;
 
 finalization
-
   TSysStyleManager.UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
   TSysStyleManager.UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-
 end.

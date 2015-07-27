@@ -2,7 +2,7 @@
 //
 // Unit Vcl.Styles.Utils.StdCtrls
 // unit for the VCL Styles Utils
-// http://code.google.com/p/vcl-styles-utils/
+// https://github.com/RRUZ/vcl-styles-utils/
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -529,6 +529,9 @@ begin
   with SysControl do
     Result := (Style and BS_RADIOBUTTON = BS_RADIOBUTTON) or
       (Style and BS_AUTORADIOBUTTON = BS_AUTORADIOBUTTON);
+
+ if Result then
+      Result:= not IsSplitButton;
 end;
 
 function TSysButtonStyleHook.IsSplitButton: Boolean;
@@ -2834,12 +2837,12 @@ if StyleServices.Available then
 begin
   with TSysStyleManager do
   begin
-    RegisterSysStyleHook('Button', TSysButtonStyleHook);
-    RegisterSysStyleHook('Edit', TSysEditStyleHook);
+    RegisterSysStyleHook(WC_BUTTON, TSysButtonStyleHook);
+    RegisterSysStyleHook(WC_EDIT, TSysEditStyleHook);
     RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
-    RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('Static', TSysStaticStyleHook);
+    RegisterSysStyleHook(WC_COMBOBOX, TSysComboBoxStyleHook);
+    RegisterSysStyleHook( 'ListBox', TSysListBoxStyleHook);
+    RegisterSysStyleHook( 'Static', TSysStaticStyleHook);
   end;
 end;
 
@@ -2847,10 +2850,10 @@ finalization
 
 with TSysStyleManager do
 begin
-  UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
-  UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
+  UnRegisterSysStyleHook(WC_BUTTON, TSysButtonStyleHook);
+  UnRegisterSysStyleHook(WC_EDIT, TSysEditStyleHook);
   UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-  UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
+  UnRegisterSysStyleHook(WC_COMBOBOX, TSysComboBoxStyleHook);
   UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
   UnRegisterSysStyleHook('Static', TSysStaticStyleHook);
 end;
