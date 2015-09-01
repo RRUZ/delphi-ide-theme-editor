@@ -28,10 +28,10 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.Types,
-  System.UITypes,
   Winapi.Windows,
   Winapi.Messages,
   Vcl.ImgList,
+  System.UITypes,
   Vcl.Graphics,
   Vcl.Themes,
   Vcl.Styles,
@@ -82,6 +82,8 @@ type
     procedure SetImages(const Value: TCustomImageList);
     procedure SetShowSystemMenu(const Value: Boolean);
     procedure SetShowCaption(const Value: Boolean);
+    function GetActiveTabButtonIndex: Integer;
+    procedure SetActiveTabButtonIndex(const Value: Integer);
     property FormBorderSize : TRect read FFormBorderSize write FFormBorderSize;
     property Form : TCustomForm read FForm;
   public
@@ -93,6 +95,9 @@ type
     constructor Create(AOwner: TComponent);override;
     destructor Destroy; override;
   published
+
+    property ActiveTabButtonIndex : Integer read GetActiveTabButtonIndex write SetActiveTabButtonIndex;
+
     property ButtonsList : TListNCButtons read FButtons;
     property Visible : Boolean read FVisible write SetVisible default True;
     property Images: TCustomImageList read FImages write SetImages;
@@ -166,7 +171,6 @@ type
     procedure SetShowHint(const Value: Boolean);
     procedure SetName(const Value: TComponentName);
     procedure SetUseFontAwesome(const Value: Boolean);
-    property TabIndex : Integer read GetTabIndex;
   protected
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); virtual;
   public
@@ -179,6 +183,7 @@ type
     property Height: Integer read FHeight write SetHeight;
     property NCControls: TNCControls read FNCControls;
     property BoundsRect: TRect read GetBoundsRect write SetBoundsRect;
+    property TabIndex : Integer read GetTabIndex;
   published
     property Style: TNCButtonStyle read FStyle write SetStyle;
 
@@ -208,6 +213,7 @@ type
     property ShowHint: Boolean read FShowHint write SetShowHint;
     property Name: TComponentName read FName write SetName stored False;
     property Tag: NativeInt read FTag write FTag default 0;
+
 
     property UseFontAwesome : Boolean read FUseFontAwesome write SetUseFontAwesome;
 
@@ -331,9 +337,14 @@ begin
 end;
 
 
+function TNCControls.GetActiveTabButtonIndex: Integer;
+begin
+ Result:= FActiveTabButtonIndex;
+end;
+
 function TNCControls.GetButton(index: Integer): TNCButton;
 begin
-  Result:=FButtons[Index];
+  Result:= FButtons[Index];
 end;
 
 function TNCControls.GetCount: Integer;
@@ -352,6 +363,30 @@ procedure TNCControls.Invalidate;
 begin
  if FForm.HandleAllocated then
    SendMessage(FForm.Handle, WM_NCPAINT, 0, 0);
+end;
+
+procedure TNCControls.SetActiveTabButtonIndex(const Value: Integer);
+
+ function GetMaxTabIndex : Integer;
+ var
+   i : integer;
+ begin
+    Result:=-1;
+    For i:=0 to FButtons.Count-1 do
+     if FButtons[i].Style=nsTab then
+      Inc(Result);
+ end;
+
+var
+  lmax, i : Integer;
+begin
+   lmax:=GetMaxTabIndex;
+   if (Value<>FActiveTabButtonIndex) and (Value>=0) and (lmax>=0) and (Value<=lmax) then
+   begin
+     FActiveTabButtonIndex:=Value;
+     Invalidate;
+   end;
+
 end;
 
 procedure TNCControls.SetImages(const Value: TCustomImageList);

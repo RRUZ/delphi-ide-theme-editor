@@ -89,14 +89,14 @@ begin
   { Draw Tooltips Face }
   GradientFillCanvas(Canvas, GradientStartColor, GradientEndColor, SysControl.ClientRect, gdVertical);
   { Draw Tooltips Border }
-  Brush := CreateSolidBrush(BkColor);
+  Brush := CreateSolidBrush(ColorToRGB(BkColor));
   FrameRect(DC, SysControl.ClientRect, Brush);
   DeleteObject(Brush);
   { Use default font for Tooltips text }
   SelectObject(DC, Screen.HintFont.Handle);
   { Draw Tooltips Text }
   SetBkMode(DC, TRANSPARENT);
-  SetTextColor(DC, TextColor);
+  SetTextColor(DC, ColorToRGB(TextColor));
   AText := PChar(SysControl.Text);
   Winapi.Windows.DrawText(DC, AText, -1, TextRect, DT_LEFT);
 end;

@@ -37,9 +37,10 @@ uses
   Vcl.ExtCtrls,
   Vcl.Graphics;
 
-{$IF CompilerVersion = 23.0}
+{$IF CompilerVersion >= 23.0}
 type
   /// <summary> The <c>TButtonStyleHookFix</c> vcl style hook fix these QC #103708, #107764 for Delphi XE2
+  /// and the https://quality.embarcadero.com/browse/RSP-11619 issue present in X2-XE8
   /// </summary>
   /// <remarks>
   /// Use this hook in this way
@@ -103,6 +104,7 @@ implementation
 uses
   Winapi.CommCtrl,
   Vcl.Themes,
+  Vcl.Forms,
   System.Classes,
   System.UITypes,
   System.Types;
@@ -111,7 +113,7 @@ type
   TCustomButtonClass = class(TCustomButton);
   TWinControlClass = class(TWinControl);
 
-{$IF CompilerVersion = 23.0}
+{$IF CompilerVersion >= 23.0}
 
   // we need this helper to access some strict private fields
   TButtonStyleHookHelper = class Helper for TButtonStyleHook
@@ -133,7 +135,7 @@ type
   end;
 {$IFEND}
 
-{$IF CompilerVersion = 23.0}
+{$IF CompilerVersion >= 23.0}
 
 procedure TButtonStyleHookFix.Paint(Canvas: TCanvas);
 const
@@ -154,55 +156,42 @@ var
   BufferLength: Integer;
   SaveIndex: Integer;
   X, Y, I: Integer;
+  IsDefault: Boolean;
   BCaption: String;
   LImageIndex: Integer;
 begin
-  // LImageIndex:=PBS_NORMAL;
+  LImageIndex:=PBS_NORMAL;
+  IsDefault := (Control is TCustomButton) and (TCustomButton(Control).Default);
 
   if StyleServices.Available then
   begin
     BCaption := Text;
+
+    if not Control.Enabled then
+    begin
+      LDetails := StyleServices.GetElementDetails(tbPushButtonDisabled);
+      LImageIndex := PBS_DISABLED;
+    end
+    else
     if Pressed then
     begin
       LDetails := StyleServices.GetElementDetails(tbPushButtonPressed);
       LImageIndex := PBS_PRESSED;
     end
-    else if MouseInControl then
+    else
+    if MouseInControl then
     begin
       LDetails := StyleServices.GetElementDetails(tbPushButtonHot);
       LImageIndex := PBS_HOT;
     end
-    else if Focused then
+    else
+    if Focused or (IsDefault and (Screen.ActiveControl<>nil) and not (Screen.ActiveControl is TCustomButton) ) then
     begin
-      if not Control.Enabled then
-      begin
-        LDetails := StyleServices.GetElementDetails(tbPushButtonDisabled);
-        LImageIndex := PBS_DISABLED;
-      end
-      else
-      begin
-        // if MouseInControl then
-        begin
-          LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted);
-          LImageIndex := PBS_DEFAULTED;
-        end;
-        (* else
-          begin
-          LDetails := StyleServices.GetElementDetails(tbPushButtonNormal);
-          LImageIndex := PBS_NORMAL;
-          end; *)
-      end;
+      LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted);
+      LImageIndex := PBS_DEFAULTED;
     end
     else if Control.Enabled then
-    begin
       LDetails := StyleServices.GetElementDetails(tbPushButtonNormal);
-      LImageIndex := PBS_NORMAL;
-    end
-    else
-    begin
-      LDetails := StyleServices.GetElementDetails(tbPushButtonDisabled);
-      LImageIndex := PBS_DISABLED;
-    end;
 
     DrawRect := Control.ClientRect;
     StyleServices.DrawElement(Canvas.Handle, LDetails, DrawRect);

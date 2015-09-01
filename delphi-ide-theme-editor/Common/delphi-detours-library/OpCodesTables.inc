@@ -1,6 +1,6 @@
 // **************************************************************************************************
-// This file (OpCodesTables.inc) is a part of the InstDecode Library .
-// File OpCodesTables
+// Part of Delphi Instruction Decode Library [InstDecode]
+// 
 // http://code.google.com/p/delphi-detours-library/
 
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -11,751 +11,1148 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is OpCodesTables.inc .
+// The Original Code is OpCodesTables.inc.
 //
 // The Initial Developer of the Original Code is Mahdi Safsafi [SMP3].
-// Portions created by Mahdi Safsafi . are Copyright (C) 2013-2014 Mahdi Safsafi .
+// Portions created by Mahdi Safsafi . are Copyright (C) 2013-2015 Mahdi Safsafi .
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
-{
-  Reference : ref.x86asm.net
-
+{ Reference :
+	-sandpile.org
+	-Intel® 64 and IA-32 Architectures Software Developer’s Manual Vol 2
 }
-const
-  { OpCode Flags }
-  Opf_NONE = $0;
-  Opf_W = $1; // bit w (bit index 0, operand size) is present.
-  Opf_D = $2; // bit d (bit index 1, Direction) is present.
-  Opf_S = $4; // bit s (bit index 1, Sign-extend) is present.
-  Opf_L = $8; // Instruction can use lock prefix .
-  Opf_ModRM = $10; // Instruction use ModRM .
-  Opf_ModRMExt = Opf_ModRM or $20; // Instruction use ModRMExt.
-  Opf_Jump = $40;
-  { ------------------->Operand Flags <------------------ }
-  {
-    A  =  Direct address. The instruction has no ModR/M byte; the address of the operand is encoded in the instruction; no base register, index register, or scaling factor can be applied (for example, far JMP (EA)).
-    E  =  ModR/M specifies the operand (general-purpose register or a memory address) .
-    G  =  general-purpose register .
-    J  = The instruction contains a relative offset to be added to the instruction pointer register (for example, JMP ).
-    M  =  The ModR/M byte may refer only to memory: mod <> 11bin .
-    O  =  The instruction has no ModR/M byte; the offset of the operand is coded as a word, double word or quad word (depending on address size attribute) in the instruction. No base register, index register, or scaling factor can be applied (only MOV  (A0, A1, A2, A3)).
-    S  =  The reg field of the ModR/M byte selects a segment register (only MOV (8C, 8E)).
-    U  =  The R/M field of the ModR/M byte selects a 128-bit XMM register.
-    D  =  The reg field of the ModR/M byte selects a debug register (only MOV (0F21, 0F23)).
-    R  =  The mod field of the ModR/M byte may refer only to a general register .
-    T  =  The reg field of the ModR/M byte selects a test register (only MOV (0F24, 0F26)).
-    Z  =  The instruction has no ModR/M byte; the three least-significant bits of the opcode byte selects a general-purpose register .
 
-    a  =  Two one-word operands in memory or two double-word operands in memory, depending on operand-size attribute (only BOUND).
-    b  =  BYTE .
-    bs =  Byte, sign-extended to the size of the destination operand.
-    bss = Byte, sign-extended to the size of the stack pointer (for example, PUSH (6A)).
-    w  =  WORD .
-    d  =  DWORD .
-    q  =  QUADWORD .
-    v  =  Word or Dword or Quadword (64 bit).
-    p  =  32-bit or 48-bit pointer, depending on operand-size attribute (for example, CALLF (9A).
-    dr =  Double-real. Only x87 FPU instructions (for example, FADD).
-    di =  DoubleWord-integer. Only x87 FPU instructions (for example, FIADD).
-    wi =  Word-integer. Only x87 FPU instructions (for example, FIADD).
-    ps =  128-bit packed single-precision floating-point data.
-    psq =  64-bit packed single-precision floating-point data.
+{ ============================================
+			Index -> DecoderProc
+  ============================================ }
+{ 00 = Decode_InvalidOpCode}
+{ 01 = Decode_NA_ModRm}
+{ 02 = Decode_NA_Ib}
+{ 03 = Decode_NA_Iz}
+{ 04 = Decode_NA_I64}
+{ 05 = Decode_Escape_2_Byte}
+{ 06 = Decode_ES_Prefix}
+{ 07 = Decode_CS_Prefix}
+{ 08 = Decode_SS_Prefix}
+{ 09 = Decode_DS_Prefix}
+{ 10 = Decode_REX_Prefix}
+{ 11 = Decode_NA_D64}
+{ 12 = Decode_NA_ModRm_I64}
+{ 13 = Decode_FS_Prefix}
+{ 14 = Decode_GS_Prefix}
+{ 15 = Decode_OPSIZE_Prefix}
+{ 16 = Decode_ADSIZE_Prefix}
+{ 17 = Decode_NA_Iz_D64}
+{ 18 = Decode_NA_ModRm_Iz}
+{ 19 = Decode_NA_Ib_D64}
+{ 20 = Decode_NA_ModRm_Ib}
+{ 21 = Decode_NA}
+{ 22 = Decode_NA_Jb_Df64}
+{ 23 = Decode_Group_1}
+{ 24 = Decode_Group_1A}
+{ 25 = Decode_NA_CALL_Ap_I64}
+{ 26 = Decode_NA_OfstV}
+{ 27 = Decode_NA_Iv}
+{ 28 = Decode_Group_2}
+{ 29 = Decode_NA_RET_Iw_Df64}
+{ 30 = Decode_NA_RET_Df64}
+{ 31 = Decode_VEX3_Prefix}
+{ 32 = Decode_VEX2_Prefix}
+{ 33 = Decode_Group_11}
+{ 34 = Decode_NA_Iw_Ib_D64}
+{ 35 = Decode_NA_RET_Iw}
+{ 36 = Decode_NA_RET}
+{ 37 = Decode_NA_Ib_I64}
+{ 38 = Decode_Escape_FPU_D8}
+{ 39 = Decode_Escape_FPU_D9}
+{ 40 = Decode_Escape_FPU_DA}
+{ 41 = Decode_Escape_FPU_DB}
+{ 42 = Decode_Escape_FPU_DC}
+{ 43 = Decode_Escape_FPU_DD}
+{ 44 = Decode_Escape_FPU_DE}
+{ 45 = Decode_Escape_FPU_DF}
+{ 46 = Decode_NA_CALL_Jz_Df64}
+{ 47 = Decode_NA_JMP_Jz_Df64}
+{ 48 = Decode_NA_JMP_Ap_I64}
+{ 49 = Decode_NA_JMP_Jb_Df64}
+{ 50 = Decode_LOCK_Prefix}
+{ 51 = Decode_REPNE_Prefix}
+{ 52 = Decode_REPE_Prefix}
+{ 53 = Decode_Group_3}
+{ 54 = Decode_Group_4_INC_DEC}
+{ 55 = Decode_Group_5_INC_DEC}
+{ 56 = Decode_Group_6}
+{ 57 = Decode_Group_7}
+{ 58 = Decode_NA_CALL}
+{ 59 = Decode_NA_66_F2_F3_ModRm}
+{ 60 = Decode_NA_66_ModRm}
+{ 61 = Decode_NA_66_F3_ModRm}
+{ 62 = Decode_Group_16}
+{ 63 = Decode_NA_ModRm_F64}
+{ 64 = Decode_Escape_3_Byte}
+{ 65 = Decode_NA_F3_ModRm}
+{ 66 = Decode_66_ModRm}
+{ 67 = Decode_NA_66_F2_F3_ModRm_Ib}
+{ 68 = Decode_Group_12}
+{ 69 = Decode_Group_13}
+{ 70 = Decode_Group_14}
+{ 71 = Decode_66_F2_ModRm}
+{ 72 = Decode_NA_Jz_Df64}
+{ 73 = Decode_Group_15}
+{ 74 = Decode_F3_ModRm}
+{ 75 = Decode_Group_10_UD2}
+{ 76 = Decode_Group_8}
+{ 77 = Decode_NA_66_ModRm_Ib}
+{ 78 = Decode_Group_9}
+{ 79 = Decode_66_F2_F3_ModRm}
+{ 80 = Decode_F2_ModRm}
+{ 81 = Decode_SP_T38_F0_F7}
+{ 82 = Decode_66_ModRm_Ib}
+{ 83 = Decode_F2_ModRm_Ib}
 
-  }
-
-  Op_NONE = 0; // Operand is not used.
-
-  Op_b = $1;
-  Op_w = $2;
-  Op_d = $4;
-  Op_q = $8;
-  Op_v = Op_w or Op_d;
-  Op_vqp = Op_v or Op_q;
-  Op_SignExt = $10;
-  Op_bs = Op_b or Op_SignExt;
-  Op_Stack = $20;
-
-  { One Byte Reg }
-  Op_Regb = $1;
-  Op_AH = Op_Regb;
-  Op_AL = Op_Regb;
-  Op_CL = Op_Regb;
-
-  { 2 Bytes Reg }
-  Op_Regw = $2;
-  Op_AX = Op_Regw;
-  Op_CX = Op_Regw;
-  Op_DX = Op_Regw;
-  Op_DI = Op_Regw;
-
-  { DWORD Reg }
-  Op_Regd = $4;
-  Op_eAX = Op_Regd;
-  Op_eCX = Op_Regd;
-  Op_eBP = Op_Regd;
-  Op_EBX = Op_Regd;
-
-  { x64 Reg }
-  Op_Regq = $8;
-  Op_rAX = Op_Regq;
-  Op_rCX = Op_Regq;
-
-  { EFLAGS Reg }
-  Op_Regf = $2;
-  Op_Regef = $4;
-  Op_Flags = Op_Regf; // 2 Bytes reg .
-  Op_eFlags = Op_Regef; // 4 Bytes reg .
-
-  { Segment Registers }
-  Op_Segr = $40;
-  Op_SS = Op_Segr; // stack segment .
-  Op_ES = Op_Segr; // extra segment .
-  Op_CS = Op_Segr; // code segment .
-  Op_DS = Op_Segr; // data segment .
-  Op_FS = Op_Segr;
-  Op_GS = Op_Segr;
-
-  Op_Sw = $80 or Op_w; // ModRM select Segment Registers + Word .e.g : MOV WORD PTR SS:[EBP+55],DS .
-  Op_ESsr = $80; // ModR/M byte selects a segment register
-  Op_SS_rSP = $80; // SS:[rSP]
-  Op_ES_DI = $80; // ES:[DI]
-  Op_DS_SI = $80; // DS:[SI]
-  Op_DS_rSI = $80; // (DS):[rSI]
-  Op_ES_rDI = $80; // (ES:)[rDI]
-  Op_DS_rBX_AL = $80; // (DS:)[rBX+AL]
-  Op_DS_rDI = $80;
-
-  Op_E = $100;
-  Op_G = $200; // general-purpose register .
-  Op_Eb = Op_E or Op_b; // general-purpose register (AL,BL,..) or memory address .
-  Op_Ew = Op_E or Op_w; // general-purpose register (AX,BX,..) or memory address .
-  Op_Ed = Op_E or Op_d;
-  Op_Ev = Op_E or Op_v; // eneral-purpose register (EAX,AX,..) or memory address .
-  Op_Evqp = Op_E or Op_vqp; // eneral-purpose register (RAX,EAX,AX,..) or memory address .
-  Op_Gb = Op_G or Op_b; // eneral-purpose register (AL,BL,..).
-  Op_Gw = Op_G or Op_w; // general-purpose register (AX,BX,..).
-  Op_Gd = Op_G or Op_d;
-  Op_Gv = Op_G or Op_v; // general-purpose register Word or Dword (EAX,EBX,AX,BX,..).
-  Op_Gvqp = Op_G or Op_vqp; // eneral-purpose register (RAX,EAX,AX,..).
-  Op_Z = $400; // no ModR/M ; Registers are used .
-  Op_Zb = Op_Z or Op_b; // no ModR/M ; Registers are used => Byte Reg (AL,BL,..)
-  Op_Zv = Op_Z or Op_b;
-  Op_Zvqp = Op_Z or Op_vqp;
-
-  { Immediate }
-  Op_Imm = $800;
-  Op_Ib = Op_Imm or Op_b; // size of immediate = Byte .
-  Op_Ibs = Op_Ib or Op_bs; // Byte, sign-extended to the size of the destination operand.
-  Op_Ibss = Op_Ibs or Op_Stack; // Byte, sign-extended to the size of the stack pointer (for example, PUSH (6A)). eg: PUSH -5 .
-  Op_Iw = Op_Imm or Op_w; // size of immediate = Word .
-  Op_Ivs = Op_Imm or Op_v or Op_SignExt; // Word or doubleword sign extended to the size of the stack pointer (for example, PUSH (68)).
-  Op_Ivqp = Op_Imm or Op_vqp; // Word or doubleword, depending on operand-size attribute, or quadword, promoted by REX.W in 64-bit mode.
-  Op_Ivds = Op_Imm or Op_v or Op_SignExt;
-
-  Op_Ap = $1000; // Direct address ; No ModRM .
-
-  Op_M = $2000; // The ModR/M byte may refer only to memory.
-  Op_Ma = Op_M or 1; // Two one-word operands in memory or two double-word operands in memory  .
-  Op_Mdr = Op_M or 2; // Mem=Double-real.
-  Op_Mwi = Op_M or 4; // Mem=Word-integer.
-  Op_Mp = Op_M or 8; // Mem=32-bit or 48-bit pointer.
-  Op_Mdi = Op_M or $10; // Mem=DWORD-integer.
-  Op_Mw = Op_M or $20; // Mem=Word Memory . e.g : MOV EAX,WORD PRT DS:[EBX].
-  Op_Msr = Op_M or $40; // Mem = Segment Registers .
-
-  op_vds = Op_v or $4000;
-  Op_J = $8000;
-  Op_Jbs = Op_J or Op_bs; // relative offset;sign-extended .e.g : JO -5 .
-
-  Op_O = $10000;
-  Op_Ob = Op_O or Op_b;
-  Op_Ovqp = Op_O or Op_vqp;
-  Op_Jvds = Op_J or op_vds;
-
-  Op_1 = $20000;
-  Op_3 = $40000;
-  Op_ST = $80000;
-  Op_TwoByte = $100000;
-
-  Op_XMM = $200000;
-  Op_U = Op_XMM;
-  Op_2V = Op_XMM;
-  Op_2W = Op_XMM or Op_E;
-  Op_p = $400000;
-  Op_ps = $800000;
-  Op_2D = Op_G;
-  Op_2ss = $1000000; // Scalar element of a 128-bit packed single-precision floating data.
-  Op_psq = Op_ps or Op_q;
-  Op_LDTR = 0;
-  Op_GDTR = 0;
-  Op_Ms = 0;
-  Op_Mq = Op_M or Op_q;
-  Op_Uq = Op_U or Op_q;
-  Op_CR0 = 0;
-  Op_Vps = Op_2V or Op_ps;
-  Op_Wq = Op_2W or Op_q;
-  Op_Wps = Op_2W or Op_ps;
-  Op_Vq = Op_2V or Op_q;
-  Op_Dd = Op_2D or Op_d;
-  Op_Td = 0;
-  Op_Rd = Op_G or Op_d;
-  Op_Cd = 0;
-  Op_Qpi = 0;
-  Op_Mps = Op_M or Op_ps;
-  Op_Ppi = 0;
-  Op_Wpsq = Op_2W or Op_psq;
-  Op_Vss = Op_2V or Op_2ss;
-  Op_Wss = Op_2W or Op_2ss;
-  Op_PMC = 0;
-  Op_Nq = 0;
-  Op_Pq = 0;
-  Op_Qd = 0;
-  Op_Qq = 0;
-  Op_Gdqp = 0;
-  Op_Ups = Op_U or Op_ps;
-  Op_Vpd = Op_2V or Op_p or Op_d;
-  Op_Wdq = Op_2W or Op_d or Op_q;
-  Op_Mdq = Op_M or Op_d or Op_q;
-  Op_Vdq = Op_2V or Op_d or Op_q;
-  Op_Wpd = Op_2W or Op_p or Op_d;
-  Op_Mstx = 0;
-  Op_ST1 = 0;
-  Op_Mptp = 0;
-  Op_Mdqp = 0;
-  Op_Rdqp = 0;
-  Op_IA32_BIOS_SIGN_ID = 0;
-  Op_IA32_SYSENTER_CS = 0;
-  Op_IA32_SYSENTER_ESP = 0;
-  Op_IA32_TIME_STAMP_COUNTER = 0;
-
-type
-  TOpCodeEntryInfo = packed record
-    Flags: Byte;
-    Op1: DWORD;
-    Op2: DWORD;
-    Op3: DWORD;
-    Op4: DWORD;
-  end;
-
-const
-  { 50-58;58-59;59-60;90-98;B80-B8;B8-C0 }
-  OneByteOpCodesEntry: array [0 .. $FF] of TOpCodeEntryInfo = (
-    { 00 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 01 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 02 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 03 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 04 } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 05 } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 06 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_ES; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 07 } (Flags: Opf_NONE; Op1: Op_ES; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 08 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { OR } ,
-    { 09 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { OR } ,
-    { 0A } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { OR } ,
-    { 0B } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { OR } ,
-    { 0C } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { OR } ,
-    { 0D } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { OR } ,
-    { 0E } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_CS; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 0F } (Flags: Opf_NONE; Op1: Op_CS; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 10 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { ADC } ,
-    { 11 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { ADC } ,
-    { 12 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { ADC } ,
-    { 13 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { ADC } ,
-    { 14 } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { ADC } ,
-    { 15 } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { ADC } ,
-    { 16 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_SS; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 17 } (Flags: Opf_NONE; Op1: Op_SS; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 18 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { SBB } ,
-    { 19 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { SBB } ,
-    { 1A } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { SBB } ,
-    { 1B } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { SBB } ,
-    { 1C } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { SBB } ,
-    { 1D } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { SBB } ,
-    { 1E } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_DS; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 1F } (Flags: Opf_NONE; Op1: Op_DS; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 20 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { AND } ,
-    { 21 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { AND } ,
-    { 22 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { AND } ,
-    { 23 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { AND } ,
-    { 24 } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { AND } ,
-    { 25 } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { AND } ,
-    { 26 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_ES; Op3: Op_NONE; Op4: Op_NONE) { ES } ,
-    { 27 } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { DAA } ,
-    { 28 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { SUB } ,
-    { 29 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { SUB } ,
-    { 2A } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { SUB } ,
-    { 2B } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { SUB } ,
-    { 2C } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { SUB } ,
-    { 2D } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { SUB } ,
-    { 2E } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_CS; Op3: Op_NONE; Op4: Op_NONE) { CS } ,
-    { 2F } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { DAS } ,
-    { 30 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { XOR } ,
-    { 31 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { XOR } ,
-    { 32 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { XOR } ,
-    { 33 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { XOR } ,
-    { 34 } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { XOR } ,
-    { 35 } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { XOR } ,
-    { 36 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_SS; Op3: Op_NONE; Op4: Op_NONE) { SS } ,
-    { 37 } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { AAA } ,
-    { 38 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_NONE; Op2: Op_Eb; Op3: Op_Gb; Op4: Op_NONE) { CMP } ,
-    { 39 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_NONE; Op2: Op_Evqp; Op3: Op_Gvqp; Op4: Op_NONE) { CMP } ,
-    { 3A } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_NONE; Op2: Op_Gb; Op3: Op_Eb; Op4: Op_NONE) { CMP } ,
-    { 3B } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_NONE; Op2: Op_Gvqp; Op3: Op_Evqp; Op4: Op_NONE) { CMP } ,
-    { 3C } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_AL; Op3: Op_Ib; Op4: Op_NONE) { CMP } ,
-    { 3D } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_rAX; Op3: Op_Ivds; Op4: Op_NONE) { CMP } ,
-    { 3E } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_DS; Op3: Op_NONE; Op4: Op_NONE) { DS } ,
-    { 3F } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { AAS } ,
-    { 40 } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { INC } ,
-    { 41 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.B } ,
-    { 42 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.X } ,
-    { 43 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.XB } ,
-    { 44 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.R } ,
-    { 45 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.RB } ,
-    { 46 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.RX } ,
-    { 47 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.RXB } ,
-    { 48 } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { DEC } ,
-    { 49 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WB } ,
-    { 4A } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WX } ,
-    { 4B } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WXB } ,
-    { 4C } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WR } ,
-    { 4D } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WRB } ,
-    { 4E } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WRX } ,
-    { 4F } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REX.WRXB } ,
-    { 50 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 51 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 52 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 53 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 54 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 55 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 56 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 57 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Zv; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 58 } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 59 } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 5A } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 5B } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 5C } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 5D } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 5E } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 5F } (Flags: Opf_NONE; Op1: Op_Zv; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 60 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_AX; Op3: Op_CX; Op4: Op_NONE) { PUSHA } ,
-    { 61 } (Flags: Opf_NONE; Op1: Op_DI; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POPA } ,
-    { 62 } (Flags: Opf_D or Opf_ModRM; Op1: Op_SS_rSP; Op2: Op_Gv; Op3: Op_Ma; Op4: Op_NONE) { BOUND } ,
-    { 63 } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Ew; Op3: Op_Gw; Op4: Op_NONE) { ARPL } ,
-    { 64 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_FS; Op3: Op_NONE; Op4: Op_NONE) { FS } ,
-    { 65 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_GS; Op3: Op_NONE; Op4: Op_NONE) { GS } ,
-    { 66 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { } ,
-    { 67 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { } ,
-    { 68 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Ivs; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 69 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_Ivds; Op4: Op_NONE) { IMUL } ,
-    { 6A } (Flags: Opf_S; Op1: Op_SS_rSP; Op2: Op_Ibss; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { 6B } (Flags: Opf_ModRM or Opf_S; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_Ibs; Op4: Op_NONE) { IMUL } ,
-    { 6C } (Flags: Opf_W; Op1: Op_ES_rDI; Op2: Op_DX; Op3: Op_NONE; Op4: Op_NONE) { INS } ,
-    { 6D } (Flags: Opf_W; Op1: Op_ES_DI; Op2: Op_DX; Op3: Op_NONE; Op4: Op_NONE) { INS } ,
-    { 6E } (Flags: Opf_W; Op1: Op_DX; Op2: Op_DS_rSI; Op3: Op_NONE; Op4: Op_NONE) { OUTS } ,
-    { 6F } (Flags: Opf_W; Op1: Op_DX; Op2: Op_DS_SI; Op3: Op_NONE; Op4: Op_NONE) { OUTS } ,
-    { 70 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JO } ,
-    { 71 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNO } ,
-    { 72 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JB } ,
-    { 73 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNB } ,
-    { 74 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JZ } ,
-    { 75 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNZ } ,
-    { 76 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JBE } ,
-    { 77 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNBE } ,
-    { 78 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JS } ,
-    { 79 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNS } ,
-    { 7A } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JP } ,
-    { 7B } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNP } ,
-    { 7C } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JL } ,
-    { 7D } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNL } ,
-    { 7E } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JLE } ,
-    { 7F } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JNLE } ,
-    { 80 } (Flags: Opf_W or Opf_L or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 81 } (Flags: Opf_W or Opf_L or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 82 } (Flags: Opf_W or Opf_L or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 83 } (Flags: Opf_W or Opf_L or Opf_S or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_Ibs; Op3: Op_NONE; Op4: Op_NONE) { ADD } ,
-    { 84 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_NONE; Op2: Op_Eb; Op3: Op_Gb; Op4: Op_NONE) { TEST } ,
-    { 85 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_NONE; Op2: Op_Evqp; Op3: Op_Gvqp; Op4: Op_NONE) { TEST } ,
-    { 86 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Gb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 87 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Gvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 88 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 89 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 8A } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gb; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 8B } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 8C } (Flags: Opf_D or Opf_ModRM; Op1: Op_Mw; Op2: Op_Sw; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 8D } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_M; Op3: Op_NONE; Op4: Op_NONE) { LEA } ,
-    { 8E } (Flags: Opf_D or Opf_ModRM; Op1: Op_Sw; Op2: Op_Ew; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 8F } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Ev; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { 90 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 91 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 92 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 93 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 94 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 95 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 96 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 97 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XCHG } ,
-    { 98 } (Flags: Opf_NONE; Op1: Op_AX; Op2: Op_AL; Op3: Op_NONE; Op4: Op_NONE) { CBW } ,
-    { 99 } (Flags: Opf_NONE; Op1: Op_DX; Op2: Op_AX; Op3: Op_NONE; Op4: Op_NONE) { CWD } ,
-    { 9A } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Ap; Op3: Op_NONE; Op4: Op_NONE) { CALLF } ,
-    { 9B } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { FWAIT } ,
-    { 9C } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Flags; Op3: Op_NONE; Op4: Op_NONE) { PUSHF } ,
-    { 9D } (Flags: Opf_NONE; Op1: Op_Flags; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POPF } ,
-    { 9E } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_AH; Op3: Op_NONE; Op4: Op_NONE) { SAHF } ,
-    { 9F } (Flags: Opf_NONE; Op1: Op_AH; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { LAHF } ,
-    { A0 } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ob; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { A1 } (Flags: Opf_W; Op1: Op_rAX; Op2: Op_Ovqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { A2 } (Flags: Opf_W; Op1: Op_Ob; Op2: Op_AL; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { A3 } (Flags: Opf_W; Op1: Op_Ovqp; Op2: Op_rAX; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { A4 } (Flags: Opf_W; Op1: Op_ES_rDI; Op2: Op_DS_rSI; Op3: Op_NONE; Op4: Op_NONE) { MOVS } ,
-    { A5 } (Flags: Opf_W; Op1: Op_ES_DI; Op2: Op_DS_SI; Op3: Op_NONE; Op4: Op_NONE) { MOVS } ,
-    { A6 } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_ES_rDI; Op3: Op_NONE; Op4: Op_NONE) { CMPS } ,
-    { A7 } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_ES_DI; Op3: Op_NONE; Op4: Op_NONE) { CMPS } ,
-    { A8 } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_AL; Op3: Op_Ib; Op4: Op_NONE) { TEST } ,
-    { A9 } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_rAX; Op3: Op_Ivds; Op4: Op_NONE) { TEST } ,
-    { AA } (Flags: Opf_W; Op1: Op_ES_rDI; Op2: Op_AL; Op3: Op_NONE; Op4: Op_NONE) { STOS } ,
-    { AB } (Flags: Opf_W; Op1: Op_ES_DI; Op2: Op_AX; Op3: Op_NONE; Op4: Op_NONE) { STOS } ,
-    { AC } (Flags: Opf_W; Op1: Op_AL; Op2: Op_DS_rSI; Op3: Op_NONE; Op4: Op_NONE) { LODS } ,
-    { AD } (Flags: Opf_W; Op1: Op_AX; Op2: Op_DS_SI; Op3: Op_NONE; Op4: Op_NONE) { LODS } ,
-    { AE } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_ES_rDI; Op3: Op_AL; Op4: Op_NONE) { SCAS } ,
-    { AF } (Flags: Opf_W; Op1: Op_NONE; Op2: Op_ES_DI; Op3: Op_NONE; Op4: Op_NONE) { SCAS } ,
-    { B0 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B1 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B2 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B3 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B4 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B5 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B6 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B7 } (Flags: Opf_NONE; Op1: Op_Zb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B8 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { B9 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { BA } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { BB } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { BC } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { BD } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { BE } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { BF } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_Ivqp; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { C0 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { ROL } ,
-    { C1 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { ROL } ,
-    { C2 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { RETN } ,
-    { C3 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { RETN } ,
-    { C4 } (Flags: Opf_ModRM; Op1: Op_ES; Op2: Op_Mp; Op3: Op_NONE; Op4: Op_NONE) { LES } ,
-    { C5 } (Flags: Opf_ModRM; Op1: Op_DS; Op2: Op_Mp; Op3: Op_NONE; Op4: Op_NONE) { LDS } ,
-    { C6 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { C7 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_Ivds; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { C8 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Iw; Op3: Op_Ib; Op4: Op_NONE) { ENTER } ,
-    { C9 } (Flags: Opf_NONE; Op1: Op_eBP; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { LEAVE } ,
-    { CA } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Iw; Op3: Op_SS_rSP; Op4: Op_NONE) { RETF } ,
-    { CB } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { RETF } ,
-    { CC } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_3; Op3: Op_eFlags; Op4: Op_NONE) { INT } ,
-    { CD } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_Ib; Op3: Op_eFlags; Op4: Op_NONE) { INT } ,
-    { CE } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_eFlags; Op3: Op_NONE; Op4: Op_NONE) { INTO } ,
-    { CF } (Flags: Opf_NONE; Op1: Op_Flags; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { IRET } ,
-    { D0 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_1; Op3: Op_NONE; Op4: Op_NONE) { ROL } ,
-    { D1 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_1; Op3: Op_NONE; Op4: Op_NONE) { ROL } ,
-    { D2 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_CL; Op3: Op_NONE; Op4: Op_NONE) { ROL } ,
-    { D3 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_CL; Op3: Op_NONE; Op4: Op_NONE) { ROL } ,
-    { D4 } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { AAM } ,
-    { D5 } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { AAD } ,
-    { D6 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { } ,
-    { D7 } (Flags: Opf_NONE; Op1: Op_AL; Op2: Op_DS_rBX_AL; Op3: Op_NONE; Op4: Op_NONE) { XLAT } ,
-    { D8 } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Msr; Op3: Op_NONE; Op4: Op_NONE) { FADD } ,
-    { D9 } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_ESsr; Op3: Op_NONE; Op4: Op_NONE) { FLD } ,
-    { DA } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Mdi; Op3: Op_NONE; Op4: Op_NONE) { FIADD } ,
-    { DB } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Mdi; Op3: Op_NONE; Op4: Op_NONE) { FILD } ,
-    { DC } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Mdr; Op3: Op_NONE; Op4: Op_NONE) { FADD } ,
-    { DD } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Mdr; Op3: Op_NONE; Op4: Op_NONE) { FLD } ,
-    { DE } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Mwi; Op3: Op_NONE; Op4: Op_NONE) { FIADD } ,
-    { DF } (Flags: Opf_ModRMExt; Op1: Op_ST; Op2: Op_Mwi; Op3: Op_NONE; Op4: Op_NONE) { FILD } ,
-    { E0 } (Flags: Opf_Jump; Op1: Op_eCX; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { LOOPNZ } ,
-    { E1 } (Flags: Opf_Jump; Op1: Op_eCX; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { LOOPZ } ,
-    { E2 } (Flags: Opf_Jump; Op1: Op_eCX; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { LOOP } ,
-    { E3 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_CX; Op4: Op_NONE) { JCXZ } ,
-    { E4 } (Flags: Opf_W; Op1: Op_AL; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { IN } ,
-    { E5 } (Flags: Opf_W; Op1: Op_eAX; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { IN } ,
-    { E6 } (Flags: Opf_W; Op1: Op_Ib; Op2: Op_AL; Op3: Op_NONE; Op4: Op_NONE) { OUT } ,
-    { E7 } (Flags: Opf_W; Op1: Op_Ib; Op2: Op_eAX; Op3: Op_NONE; Op4: Op_NONE) { OUT } ,
-    { E8 } (Flags: Opf_Jump; Op1: Op_SS_rSP; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { CALL } ,
-    { E9 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JMP } ,
-    { EA } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Ap; Op3: Op_NONE; Op4: Op_NONE) { JMPF } ,
-    { EB } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jbs; Op3: Op_NONE; Op4: Op_NONE) { JMP } ,
-    { EC } (Flags: Opf_W; Op1: Op_AL; Op2: Op_DX; Op3: Op_NONE; Op4: Op_NONE) { IN } ,
-    { ED } (Flags: Opf_W; Op1: Op_eAX; Op2: Op_DX; Op3: Op_NONE; Op4: Op_NONE) { IN } ,
-    { EE } (Flags: Opf_W; Op1: Op_DX; Op2: Op_AL; Op3: Op_NONE; Op4: Op_NONE) { OUT } ,
-    { EF } (Flags: Opf_W; Op1: Op_DX; Op2: Op_eAX; Op3: Op_NONE; Op4: Op_NONE) { OUT } ,
-    { F0 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { LOCK } ,
-    { F1 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { } ,
-    { F2 } (Flags: Opf_NONE; Op1: Op_eCX; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REPNZ } ,
-    { F3 } (Flags: Opf_NONE; Op1: Op_eCX; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { REPZ } ,
-    { F4 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { HLT } ,
-    { F5 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { CMC } ,
-    { F6 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_NONE; Op2: Op_Eb; Op3: Op_Ib; Op4: Op_NONE) { TEST } ,
-    { F7 } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_NONE; Op2: Op_Evqp; Op3: Op_Ivqp; Op4: Op_NONE) { TEST } ,
-    { F8 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { CLC } ,
-    { F9 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { STC } ,
-    { FA } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { CLI } ,
-    { FB } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { STI } ,
-    { FC } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { CLD } ,
-    { FD } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { STD } ,
-    { FE } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { INC } ,
-    { FF } (Flags: Opf_W or Opf_ModRMExt; Op1: Op_Evqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { INC }
-    );
-
-  { TwoByteOpCodesEntry }
-  TwoByteOpCodesEntry: array [0 .. $FF] of TOpCodeEntryInfo = (
-    { 00 } (Flags: Opf_ModRMExt; Op1: Op_Mw; Op2: Op_LDTR; Op3: Op_NONE; Op4: Op_NONE) { SLDT } ,
-    { 01 } (Flags: Opf_ModRMExt; Op1: Op_Ms; Op2: Op_GDTR; Op3: Op_NONE; Op4: Op_NONE) { SGDT } ,
-    { 02 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Mw; Op3: Op_NONE; Op4: Op_NONE) { LAR } ,
-    { 03 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Mw; Op3: Op_NONE; Op4: Op_NONE) { LSL } ,
-    { 04 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Mw; Op3: Op_NONE; Op4: Op_NONE) { LSL } ,
-    { 05 } (Flags: Opf_NONE; Op1: Op_AX; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { LOADALL } ,
-    { 06 } (Flags: Opf_NONE; Op1: Op_CR0; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { CLTS } ,
-    { 07 } (Flags: Opf_NONE; Op1: Op_eAX; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { LOADALL } ,
-    { 08 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { INVD } ,
-    { 09 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { WBINVD } ,
-    { 0A } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { WBINVD } ,
-    { 0B } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { UD2 } ,
-    { 0C } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { UD2 } ,
-    { 0D } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { NOP } ,
-    { 0E } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { NOP } ,
-    { 0F } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { NOP } ,
-    { 10 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { MOVUPS } ,
-    { 11 } (Flags: Opf_ModRM; Op1: Op_Wps; Op2: Op_Vps; Op3: Op_NONE; Op4: Op_NONE) { MOVUPS } ,
-    { 12 } (Flags: Opf_ModRM; Op1: Op_Vq; Op2: Op_Uq; Op3: Op_NONE; Op4: Op_NONE) { MOVHLPS } ,
-    { 13 } (Flags: Opf_ModRM; Op1: Op_Mq; Op2: Op_Vq; Op3: Op_NONE; Op4: Op_NONE) { MOVLPS } ,
-    { 14 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wq; Op3: Op_NONE; Op4: Op_NONE) { UNPCKLPS } ,
-    { 15 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wq; Op3: Op_NONE; Op4: Op_NONE) { UNPCKHPS } ,
-    { 16 } (Flags: Opf_ModRM; Op1: Op_Vq; Op2: Op_Uq; Op3: Op_NONE; Op4: Op_NONE) { MOVLHPS } ,
-    { 17 } (Flags: Opf_ModRM; Op1: Op_Mq; Op2: Op_Vq; Op3: Op_NONE; Op4: Op_NONE) { MOVHPS } ,
-    { 18 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 19 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 1A } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 1B } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 1C } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 1D } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 1E } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 1F } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_Ev; Op3: Op_NONE; Op4: Op_NONE) { HINT_NOP } ,
-    { 20 } (Flags: Opf_ModRM; Op1: Op_Rd; Op2: Op_Cd; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 21 } (Flags: Opf_ModRM; Op1: Op_Rd; Op2: Op_Dd; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 22 } (Flags: Opf_ModRM; Op1: Op_Cd; Op2: Op_Rd; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 23 } (Flags: Opf_ModRM; Op1: Op_Dd; Op2: Op_Rd; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 24 } (Flags: Opf_ModRM; Op1: Op_Rd; Op2: Op_Td; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 25 } (Flags: Opf_ModRM; Op1: Op_Rd; Op2: Op_Td; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 26 } (Flags: Opf_ModRM; Op1: Op_Td; Op2: Op_Rd; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 27 } (Flags: Opf_ModRM; Op1: Op_Td; Op2: Op_Rd; Op3: Op_NONE; Op4: Op_NONE) { MOV } ,
-    { 28 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { MOVAPS } ,
-    { 29 } (Flags: Opf_ModRM; Op1: Op_Wps; Op2: Op_Vps; Op3: Op_NONE; Op4: Op_NONE) { MOVAPS } ,
-    { 2A } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Qpi; Op3: Op_NONE; Op4: Op_NONE) { CVTPI2PS } ,
-    { 2B } (Flags: Opf_ModRM; Op1: Op_Mps; Op2: Op_Vps; Op3: Op_NONE; Op4: Op_NONE) { MOVNTPS } ,
-    { 2C } (Flags: Opf_ModRM; Op1: Op_Ppi; Op2: Op_Wpsq; Op3: Op_NONE; Op4: Op_NONE) { CVTTPS2PI } ,
-    { 2D } (Flags: Opf_ModRM; Op1: Op_Ppi; Op2: Op_Wpsq; Op3: Op_NONE; Op4: Op_NONE) { CVTPS2PI } ,
-    { 2E } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Vss; Op3: Op_Wss; Op4: Op_NONE) { UCOMISS } ,
-    { 2F } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Vss; Op3: Op_Wss; Op4: Op_NONE) { COMISS } ,
-    { 30 } (Flags: Opf_NONE; Op1: Op_Msr; Op2: Op_rCX; Op3: Op_rAX; Op4: Op_NONE) { WRMSR } ,
-    { 31 } (Flags: Opf_NONE; Op1: Op_eAX; Op2: Op_IA32_TIME_STAMP_COUNTER; Op3: Op_NONE; Op4: Op_NONE) { RDTSC } ,
-    { 32 } (Flags: Opf_NONE; Op1: Op_rAX; Op2: Op_rCX; Op3: Op_Msr; Op4: Op_NONE) { RDMSR } ,
-    { 33 } (Flags: Opf_NONE; Op1: Op_eAX; Op2: Op_PMC; Op3: Op_NONE; Op4: Op_NONE) { RDPMC } ,
-    { 34 } (Flags: Opf_NONE; Op1: Op_SS; Op2: Op_IA32_SYSENTER_CS; Op3: Op_IA32_SYSENTER_ESP; Op4: Op_NONE) { SYSENTER } ,
-    { 35 } (Flags: Opf_NONE; Op1: Op_SS; Op2: Op_IA32_SYSENTER_CS; Op3: Op_rCX; Op4: Op_NONE) { SYSEXIT } ,
-    { 36 } (Flags: Opf_NONE; Op1: Op_SS; Op2: Op_IA32_SYSENTER_CS; Op3: Op_rCX; Op4: Op_NONE) { SYSEXIT } ,
-    { 37 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_eAX; Op3: Op_NONE; Op4: Op_NONE) { GETSEC } ,
-    { 38 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSHUFB } ,
-    { 39 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSHUFB } ,
-    { 3A } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { ROUNDPS } ,
-    { 3B } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { ROUNDPS } ,
-    { 3C } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { ROUNDPS } ,
-    { 3D } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { ROUNDPS } ,
-    { 3E } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { ROUNDPS } ,
-    { 3F } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { ROUNDPS } ,
-    { 40 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVO } ,
-    { 41 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNO } ,
-    { 42 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVB } ,
-    { 43 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNB } ,
-    { 44 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVZ } ,
-    { 45 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNZ } ,
-    { 46 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVBE } ,
-    { 47 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNBE } ,
-    { 48 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVS } ,
-    { 49 } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNS } ,
-    { 4A } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVP } ,
-    { 4B } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNP } ,
-    { 4C } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVL } ,
-    { 4D } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNL } ,
-    { 4E } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVLE } ,
-    { 4F } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { CMOVNLE } ,
-    { 50 } (Flags: Opf_ModRM; Op1: Op_Gdqp; Op2: Op_Ups; Op3: Op_NONE; Op4: Op_NONE) { MOVMSKPS } ,
-    { 51 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { SQRTPS } ,
-    { 52 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { RSQRTPS } ,
-    { 53 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { RCPPS } ,
-    { 54 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { ANDPS } ,
-    { 55 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { ANDNPS } ,
-    { 56 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { ORPS } ,
-    { 57 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { XORPS } ,
-    { 58 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { ADDPS } ,
-    { 59 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { MULPS } ,
-    { 5A } (Flags: Opf_ModRM; Op1: Op_Vpd; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { CVTPS2PD } ,
-    { 5B } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wdq; Op3: Op_NONE; Op4: Op_NONE) { CVTDQ2PS } ,
-    { 5C } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { SUBPS } ,
-    { 5D } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { MINPS } ,
-    { 5E } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { DIVPS } ,
-    { 5F } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_NONE; Op4: Op_NONE) { MAXPS } ,
-    { 60 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKLBW } ,
-    { 61 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKLWD } ,
-    { 62 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKLDQ } ,
-    { 63 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PACKSSWB } ,
-    { 64 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PCMPGTB } ,
-    { 65 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PCMPGTW } ,
-    { 66 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PCMPGTD } ,
-    { 67 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PACKUSWB } ,
-    { 68 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKHBW } ,
-    { 69 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKHWD } ,
-    { 6A } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKHDQ } ,
-    { 6B } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PACKSSDW } ,
-    { 6C } (Flags: Opf_ModRM; Op1: Op_Vdq; Op2: Op_Wdq; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKLQDQ } ,
-    { 6D } (Flags: Opf_ModRM; Op1: Op_Vdq; Op2: Op_Wdq; Op3: Op_NONE; Op4: Op_NONE) { PUNPCKHQDQ } ,
-    { 6E } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Ed; Op3: Op_NONE; Op4: Op_NONE) { MOVD } ,
-    { 6F } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { MOVQ } ,
-    { 70 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_Ib; Op4: Op_NONE) { PSHUFW } ,
-    { 71 } (Flags: Opf_ModRMExt; Op1: Op_Nq; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { PSRLW } ,
-    { 72 } (Flags: Opf_ModRMExt; Op1: Op_Nq; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { PSRLD } ,
-    { 73 } (Flags: Opf_ModRMExt; Op1: Op_Nq; Op2: Op_Ib; Op3: Op_NONE; Op4: Op_NONE) { PSRLQ } ,
-    { 74 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PCMPEQB } ,
-    { 75 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PCMPEQW } ,
-    { 76 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PCMPEQD } ,
-    { 77 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { EMMS } ,
-    { 78 } (Flags: Opf_ModRM; Op1: Op_Ed; Op2: Op_Gd; Op3: Op_NONE; Op4: Op_NONE) { VMREAD } ,
-    { 79 } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Gd; Op3: Op_Ed; Op4: Op_NONE) { VMWRITE } ,
-    { 7A } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Gd; Op3: Op_Ed; Op4: Op_NONE) { VMWRITE } ,
-    { 7B } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Gd; Op3: Op_Ed; Op4: Op_NONE) { VMWRITE } ,
-    { 7C } (Flags: Opf_ModRM; Op1: Op_Vpd; Op2: Op_Wpd; Op3: Op_NONE; Op4: Op_NONE) { HADDPD } ,
-    { 7D } (Flags: Opf_ModRM; Op1: Op_Vpd; Op2: Op_Wpd; Op3: Op_NONE; Op4: Op_NONE) { HSUBPD } ,
-    { 7E } (Flags: Opf_ModRM; Op1: Op_Ed; Op2: Op_Pq; Op3: Op_NONE; Op4: Op_NONE) { MOVD } ,
-    { 7F } (Flags: Opf_ModRM; Op1: Op_Qq; Op2: Op_Pq; Op3: Op_NONE; Op4: Op_NONE) { MOVQ } ,
-    { 80 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JO } ,
-    { 81 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNO } ,
-    { 82 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JB } ,
-    { 83 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNB } ,
-    { 84 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JZ } ,
-    { 85 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNZ } ,
-    { 86 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JBE } ,
-    { 87 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNBE } ,
-    { 88 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JS } ,
-    { 89 } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNS } ,
-    { 8A } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JP } ,
-    { 8B } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNP } ,
-    { 8C } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JL } ,
-    { 8D } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNL } ,
-    { 8E } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JLE } ,
-    { 8F } (Flags: Opf_Jump; Op1: Op_NONE; Op2: Op_Jvds; Op3: Op_NONE; Op4: Op_NONE) { JNLE } ,
-    { 90 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETO } ,
-    { 91 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNO } ,
-    { 92 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETB } ,
-    { 93 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNB } ,
-    { 94 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETZ } ,
-    { 95 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNZ } ,
-    { 96 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETBE } ,
-    { 97 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNBE } ,
-    { 98 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETS } ,
-    { 99 } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNS } ,
-    { 9A } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETP } ,
-    { 9B } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNP } ,
-    { 9C } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETL } ,
-    { 9D } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNL } ,
-    { 9E } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETLE } ,
-    { 9F } (Flags: Opf_ModRMExt; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { SETNLE } ,
-    { A0 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_FS; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { A1 } (Flags: Opf_NONE; Op1: Op_FS; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { A2 } (Flags: Opf_NONE; Op1: Op_IA32_BIOS_SIGN_ID; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { CPUID } ,
-    { A3 } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_Evqp; Op3: Op_Gvqp; Op4: Op_NONE) { BT } ,
-    { A4 } (Flags: Opf_D or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_Ib; Op4: Op_NONE) { SHLD } ,
-    { A5 } (Flags: Opf_D or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_CL; Op4: Op_NONE) { SHLD } ,
-    { A6 } (Flags: Opf_D or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_CL; Op4: Op_NONE) { SHLD } ,
-    { A7 } (Flags: Opf_D or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_CL; Op4: Op_NONE) { SHLD } ,
-    { A8 } (Flags: Opf_NONE; Op1: Op_SS_rSP; Op2: Op_GS; Op3: Op_NONE; Op4: Op_NONE) { PUSH } ,
-    { A9 } (Flags: Opf_NONE; Op1: Op_GS; Op2: Op_SS_rSP; Op3: Op_NONE; Op4: Op_NONE) { POP } ,
-    { AA } (Flags: Opf_NONE; Op1: Op_Flags; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { RSM } ,
-    { AB } (Flags: Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { BTS } ,
-    { AC } (Flags: Opf_D or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_Ib; Op4: Op_NONE) { SHRD } ,
-    { AD } (Flags: Opf_D or Opf_ModRM; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_CL; Op4: Op_NONE) { SHRD } ,
-    { AE } (Flags: Opf_ModRMExt; Op1: Op_Mstx; Op2: Op_ST; Op3: Op_ST1; Op4: Op_NONE) { FXSAVE } ,
-    { AF } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { IMUL } ,
-    { B0 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_Gb; Op3: Op_NONE; Op4: Op_NONE) { CMPXCHG } ,
-    { B1 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { CMPXCHG } ,
-    { B2 } (Flags: Opf_ModRM; Op1: Op_SS; Op2: Op_Mptp; Op3: Op_NONE; Op4: Op_NONE) { LSS } ,
-    { B3 } (Flags: Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { BTR } ,
-    { B4 } (Flags: Opf_ModRM; Op1: Op_FS; Op2: Op_Mptp; Op3: Op_NONE; Op4: Op_NONE) { LFS } ,
-    { B5 } (Flags: Opf_ModRM; Op1: Op_GS; Op2: Op_Mptp; Op3: Op_NONE; Op4: Op_NONE) { LGS } ,
-    { B6 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { MOVZX } ,
-    { B7 } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Ew; Op3: Op_NONE; Op4: Op_NONE) { MOVZX } ,
-    { B8 } (Flags: Opf_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { JMPE } ,
-    { B9 } (Flags: Opf_ModRM; Op1: Op_NONE; Op2: Op_G; Op3: Op_E; Op4: Op_NONE) { UD } ,
-    { BA } (Flags: Opf_ModRMExt; Op1: Op_NONE; Op2: Op_Evqp; Op3: Op_Ib; Op4: Op_NONE) { BT } ,
-    { BB } (Flags: Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_Gvqp; Op3: Op_NONE; Op4: Op_NONE) { BTC } ,
-    { BC } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { BSF } ,
-    { BD } (Flags: Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Evqp; Op3: Op_NONE; Op4: Op_NONE) { BSR } ,
-    { BE } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Eb; Op3: Op_NONE; Op4: Op_NONE) { MOVSX } ,
-    { BF } (Flags: Opf_D or Opf_W or Opf_ModRM; Op1: Op_Gvqp; Op2: Op_Ew; Op3: Op_NONE; Op4: Op_NONE) { MOVSX } ,
-    { C0 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Eb; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XADD } ,
-    { C1 } (Flags: Opf_D or Opf_W or Opf_ModRM or Opf_L; Op1: Op_Evqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { XADD } ,
-    { C2 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { CMPPS } ,
-    { C3 } (Flags: Opf_ModRM; Op1: Op_Mdqp; Op2: Op_Gdqp; Op3: Op_NONE; Op4: Op_NONE) { MOVNTI } ,
-    { C4 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Rdqp; Op3: Op_Ib; Op4: Op_NONE) { PINSRW } ,
-    { C5 } (Flags: Opf_ModRM; Op1: Op_Gdqp; Op2: Op_Nq; Op3: Op_Ib; Op4: Op_NONE) { PEXTRW } ,
-    { C6 } (Flags: Opf_ModRM; Op1: Op_Vps; Op2: Op_Wps; Op3: Op_Ib; Op4: Op_NONE) { SHUFPS } ,
-    { C7 } (Flags: Opf_L or Opf_ModRMExt; Op1: Op_Mq; Op2: Op_EBX; Op3: Op_eCX; Op4: Op_NONE) { CMPXCHG8B } ,
-    { C8 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { C9 } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { CA } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { CB } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { CC } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { CD } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { CE } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { CF } (Flags: Opf_NONE; Op1: Op_Zvqp; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { BSWAP } ,
-    { D0 } (Flags: Opf_ModRM; Op1: Op_Vpd; Op2: Op_Wpd; Op3: Op_NONE; Op4: Op_NONE) { ADDSUBPD } ,
-    { D1 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSRLW } ,
-    { D2 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSRLD } ,
-    { D3 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSRLQ } ,
-    { D4 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDQ } ,
-    { D5 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMULLW } ,
-    { D6 } (Flags: Opf_ModRM; Op1: Op_Wq; Op2: Op_Vq; Op3: Op_NONE; Op4: Op_NONE) { MOVQ } ,
-    { D7 } (Flags: Opf_ModRM; Op1: Op_Gdqp; Op2: Op_Nq; Op3: Op_NONE; Op4: Op_NONE) { PMOVMSKB } ,
-    { D8 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBUSB } ,
-    { D9 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBUSW } ,
-    { DA } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMINUB } ,
-    { DB } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PAND } ,
-    { DC } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDUSB } ,
-    { DD } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDUSW } ,
-    { DE } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMAXUB } ,
-    { DF } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PANDN } ,
-    { E0 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PAVGB } ,
-    { E1 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSRAW } ,
-    { E2 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSRAD } ,
-    { E3 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PAVGW } ,
-    { E4 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMULHUW } ,
-    { E5 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMULHW } ,
-    { E6 } (Flags: Opf_ModRM; Op1: Op_Vdq; Op2: Op_Wpd; Op3: Op_NONE; Op4: Op_NONE) { CVTPD2DQ } ,
-    { E7 } (Flags: Opf_ModRM; Op1: Op_Mq; Op2: Op_Pq; Op3: Op_NONE; Op4: Op_NONE) { MOVNTQ } ,
-    { E8 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBSB } ,
-    { E9 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBSW } ,
-    { EA } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMINSW } ,
-    { EB } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { POR } ,
-    { EC } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDSB } ,
-    { ED } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDSW } ,
-    { EE } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMAXSW } ,
-    { EF } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PXOR } ,
-    { F0 } (Flags: Opf_ModRM; Op1: Op_Vdq; Op2: Op_Mdq; Op3: Op_NONE; Op4: Op_NONE) { LDDQU } ,
-    { F1 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSLLW } ,
-    { F2 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSLLD } ,
-    { F3 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSLLQ } ,
-    { F4 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PMULUDQ } ,
-    { F5 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qd; Op3: Op_NONE; Op4: Op_NONE) { PMADDWD } ,
-    { F6 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSADBW } ,
-    { F7 } (Flags: Opf_ModRM; Op1: Op_DS_rDI; Op2: Op_Nq; Op3: Op_NONE; Op4: Op_NONE) { MASKMOVQ } ,
-    { F8 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBB } ,
-    { F9 } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBW } ,
-    { FA } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBD } ,
-    { FB } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PSUBQ } ,
-    { FC } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDB } ,
-    { FD } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDW } ,
-    { FE } (Flags: Opf_ModRM; Op1: Op_Pq; Op2: Op_Qq; Op3: Op_NONE; Op4: Op_NONE) { PADDD } ,
-    { FF } (Flags: Op_NONE; Op1: Op_NONE; Op2: Op_NONE; Op3: Op_NONE; Op4: Op_NONE) { Invalid }
-    );
+{============================================
+                  OneByteTable                    
+============================================}
+const OneByteTable : array[Byte] of Byte =(//
+{0x00} 01, {ADD}
+{0x01} 01, {ADD}
+{0x02} 01, {ADD}
+{0x03} 01, {ADD}
+{0x04} 02, {ADD}
+{0x05} 03, {ADD}
+{0x06} 04, {PUSH}
+{0x07} 04, {POP}
+{0x08} 01, {OR}
+{0x09} 01, {OR}
+{0x0A} 01, {OR}
+{0x0B} 01, {OR}
+{0x0C} 02, {OR}
+{0x0D} 03, {OR}
+{0x0E} 04, {PUSH}
+{0x0F} 05, {Escape_2_Byte}
+{0x10} 01, {ADC}
+{0x11} 01, {ADC}
+{0x12} 01, {ADC}
+{0x13} 01, {ADC}
+{0x14} 02, {ADC}
+{0x15} 03, {ADC}
+{0x16} 04, {PUSH}
+{0x17} 04, {POP}
+{0x18} 01, {SBB}
+{0x19} 01, {SBB}
+{0x1A} 01, {SBB}
+{0x1B} 01, {SBB}
+{0x1C} 02, {SBB}
+{0x1D} 03, {SBB}
+{0x1E} 04, {PUSH}
+{0x1F} 04, {POP}
+{0x20} 01, {AND}
+{0x21} 01, {AND}
+{0x22} 01, {AND}
+{0x23} 01, {AND}
+{0x24} 02, {AND}
+{0x25} 03, {AND}
+{0x26} 06, {ES_Prefix}
+{0x27} 04, {DAA}
+{0x28} 01, {SUB}
+{0x29} 01, {SUB}
+{0x2A} 01, {SUB}
+{0x2B} 01, {SUB}
+{0x2C} 02, {SUB}
+{0x2D} 03, {SUB}
+{0x2E} 07, {CS_Prefix}
+{0x2F} 04, {DAS}
+{0x30} 01, {XOR}
+{0x31} 01, {XOR}
+{0x32} 01, {XOR}
+{0x33} 01, {XOR}
+{0x34} 02, {XOR}
+{0x35} 03, {XOR}
+{0x36} 08, {SS_Prefix}
+{0x37} 04, {AAA}
+{0x38} 01, {CMP}
+{0x39} 01, {CMP}
+{0x3A} 01, {CMP}
+{0x3B} 01, {CMP}
+{0x3C} 02, {CMP}
+{0x3D} 03, {CMP}
+{0x3E} 09, {DS_Prefix}
+{0x3F} 04, {AAS}
+{0x40} 10, {INC/REX_Prefix}
+{0x41} 10, {INC/REX_Prefix}
+{0x42} 10, {INC/REX_Prefix}
+{0x43} 10, {INC/REX_Prefix}
+{0x44} 10, {INC/REX_Prefix}
+{0x45} 10, {INC/REX_Prefix}
+{0x46} 10, {INC/REX_Prefix}
+{0x47} 10, {INC/REX_Prefix}
+{0x48} 10, {DEC/REX_Prefix}
+{0x49} 10, {DEC/REX_Prefix}
+{0x4A} 10, {DEC/REX_Prefix}
+{0x4B} 10, {DEC/REX_Prefix}
+{0x4C} 10, {DEC/REX_Prefix}
+{0x4D} 10, {DEC/REX_Prefix}
+{0x4E} 10, {DEC/REX_Prefix}
+{0x4F} 10, {DEC/REX_Prefix}
+{0x50} 11, {PUSH}
+{0x51} 11, {PUSH}
+{0x52} 11, {PUSH}
+{0x53} 11, {PUSH}
+{0x54} 11, {PUSH}
+{0x55} 11, {PUSH}
+{0x56} 11, {PUSH}
+{0x57} 11, {PUSH}
+{0x58} 11, {POP}
+{0x59} 11, {POP}
+{0x5A} 11, {POP}
+{0x5B} 11, {POP}
+{0x5C} 11, {POP}
+{0x5D} 11, {POP}
+{0x5E} 11, {POP}
+{0x5F} 11, {POP}
+{0x60} 04, {PUSHAD/PUSHA}
+{0x61} 04, {POPAD/POPA}
+{0x62} 12, {BOUND}
+{0x63} 01, {ARPL/MOVSXD}
+{0x64} 13, {FS_Prefix}
+{0x65} 14, {GS_Prefix}
+{0x66} 15, {OPSIZE_Prefix}
+{0x67} 16, {ADSIZE_Prefix}
+{0x68} 17, {PUSH}
+{0x69} 18, {IMUL}
+{0x6A} 19, {PUSH}
+{0x6B} 20, {IMUL}
+{0x6C} 21, {INS}
+{0x6D} 21, {INS}
+{0x6E} 21, {OUTS}
+{0x6F} 21, {OUTS}
+{0x70} 22, {JO}
+{0x71} 22, {JNO}
+{0x72} 22, {JB}
+{0x73} 22, {JNB}
+{0x74} 22, {JZ}
+{0x75} 22, {JNZ}
+{0x76} 22, {JBE}
+{0x77} 22, {JNBE}
+{0x78} 22, {JS}
+{0x79} 22, {JNS}
+{0x7A} 22, {JP}
+{0x7B} 22, {JNP}
+{0x7C} 22, {JL}
+{0x7D} 22, {JNL}
+{0x7E} 22, {JLE}
+{0x7F} 22, {JNLE}
+{0x80} 23, {group_1}
+{0x81} 23, {group_1}
+{0x82} 23, {group_1*}
+{0x83} 23, {group_1}
+{0x84} 01, {TEST}
+{0x85} 01, {TEST}
+{0x86} 01, {XCHG}
+{0x87} 01, {XCHG}
+{0x88} 01, {MOV}
+{0x89} 01, {MOV}
+{0x8A} 01, {MOV}
+{0x8B} 01, {MOV}
+{0x8C} 01, {MOV}
+{0x8D} 01, {LEA}
+{0x8E} 01, {MOV}
+{0x8F} 24, {group_1A}
+{0x90} 21, {PAUSE/NOP}
+{0x91} 21, {XCHG}
+{0x92} 21, {XCHG}
+{0x93} 21, {XCHG}
+{0x94} 21, {XCHG}
+{0x95} 21, {XCHG}
+{0x96} 21, {XCHG}
+{0x97} 21, {XCHG}
+{0x98} 21, {CWDE/CBW/CDQE}
+{0x99} 21, {CDQ/CWD/CQO}
+{0x9A} 25, {CALL}
+{0x9B} 21, {WAIT}
+{0x9C} 11, {PUSHF}
+{0x9D} 11, {POPF}
+{0x9E} 21, {SAHF}
+{0x9F} 21, {LAHF}
+{0xA0} 26, {MOV}
+{0xA1} 26, {MOV}
+{0xA2} 26, {MOV}
+{0xA3} 26, {MOV}
+{0xA4} 21, {MOVS}
+{0xA5} 21, {MOVS}
+{0xA6} 21, {CMPS}
+{0xA7} 21, {CMPS}
+{0xA8} 02, {TEST}
+{0xA9} 03, {TEST}
+{0xAA} 21, {STOS}
+{0xAB} 21, {STOS}
+{0xAC} 21, {LODS}
+{0xAD} 21, {LODS}
+{0xAE} 21, {SCAS}
+{0xAF} 21, {SCAS}
+{0xB0} 02, {MOV}
+{0xB1} 02, {MOV}
+{0xB2} 02, {MOV}
+{0xB3} 02, {MOV}
+{0xB4} 02, {MOV}
+{0xB5} 02, {MOV}
+{0xB6} 02, {MOV}
+{0xB7} 02, {MOV}
+{0xB8} 27, {MOV}
+{0xB9} 27, {MOV}
+{0xBA} 27, {MOV}
+{0xBB} 27, {MOV}
+{0xBC} 27, {MOV}
+{0xBD} 27, {MOV}
+{0xBE} 27, {MOV}
+{0xBF} 27, {MOV}
+{0xC0} 28, {group_2}
+{0xC1} 28, {group_2}
+{0xC2} 29, {RET}
+{0xC3} 30, {RET}
+{0xC4} 31, {LES/VEX3_Prefix}
+{0xC5} 32, {LDS/VEX2_Prefix}
+{0xC6} 33, {group_11}
+{0xC7} 33, {group_11}
+{0xC8} 34, {ENTER}
+{0xC9} 11, {LEAVE}
+{0xCA} 35, {RET}
+{0xCB} 36, {RET}
+{0xCC} 21, {INT3}
+{0xCD} 02, {INT}
+{0xCE} 04, {INTO}
+{0xCF} 36, {IRET}
+{0xD0} 28, {group_2}
+{0xD1} 28, {group_2}
+{0xD2} 28, {group_2}
+{0xD3} 28, {group_2}
+{0xD4} 37, {AAM}
+{0xD5} 37, {AAD}
+{0xD6} 04, {SETALC}
+{0xD7} 21, {XLAT}
+{0xD8} 38, {Escape_FPU_D8}
+{0xD9} 39, {Escape_FPU_D9}
+{0xDA} 40, {Escape_FPU_DA}
+{0xDB} 41, {Escape_FPU_DB}
+{0xDC} 42, {Escape_FPU_DC}
+{0xDD} 43, {Escape_FPU_DD}
+{0xDE} 44, {Escape_FPU_DE}
+{0xDF} 45, {Escape_FPU_DF}
+{0xE0} 22, {LOOPNZ/LOOPNE}
+{0xE1} 22, {LOOPZ/LOOPE}
+{0xE2} 22, {LOOP}
+{0xE3} 22, {JRCX/JECX/JCXZ}
+{0xE4} 02, {IN}
+{0xE5} 02, {IN}
+{0xE6} 02, {OUT}
+{0xE7} 02, {OUT}
+{0xE8} 46, {CALL}
+{0xE9} 47, {JMP}
+{0xEA} 48, {JMP}
+{0xEB} 49, {JMP}
+{0xEC} 21, {IN}
+{0xED} 21, {IN}
+{0xEE} 21, {OUT}
+{0xEF} 21, {OUT}
+{0xF0} 50, {LOCK_Prefix}
+{0xF1} 21, {INT1}
+{0xF2} 51, {REPNE_Prefix}
+{0xF3} 52, {REPE_Prefix}
+{0xF4} 21, {HLT}
+{0xF5} 21, {CMC}
+{0xF6} 53, {group_3}
+{0xF7} 53, {group_3}
+{0xF8} 21, {CLC}
+{0xF9} 21, {STC}
+{0xFA} 21, {CLI}
+{0xFB} 21, {STI}
+{0xFC} 21, {CLD}
+{0xFD} 21, {STD}
+{0xFE} 54, {group_4_INC_DEC}
+{0xFF} 55 {group_5_INC_DEC}
+);
+{============================================
+                  TwoByteTable                    
+============================================}
+const TwoByteTable : array[Byte] of Byte =(//
+{0x00} 56, {group_6}
+{0x01} 57, {group_7}
+{0x02} 01, {LAR}
+{0x03} 01, {LSL}
+{0x04} 21, {LOADALL?/RESET?/HANG?}
+{0x05} 58, {LOADALL/SYSCALL}
+{0x06} 21, {CLTS}
+{0x07} 36, {LOADALL/SYSRET}
+{0x08} 21, {INVD}
+{0x09} 21, {WBINVD}
+{0x0A} 21, {CL1INVMB}
+{0x0B} 21, {UD1}
+{0x0C} 00, {InvalidOpCode}
+{0x0D} 21, {3DNow}
+{0x0E} 21, {3DNow}
+{0x0F} 21, {3DNow}
+{0x10} 59, {VMOVUPD/VMOVSD/VMOVSS/VMOVUPS}
+{0x11} 59, {VMOVUPD/VMOVSD/VMOVSS/VMOVUPS}
+{0x12} 59, {VMOVLPD/VMOVDDUP/VMOVSLDUP/VMOVLPS/VMOVHLPS}
+{0x13} 60, {InvalidOpCode/VMOVLPD/VMOVLPS}
+{0x14} 60, {InvalidOpCode/VUNPCKLPD/VUNPCKLPS}
+{0x15} 60, {InvalidOpCode/VUNPCKHPD/VUNPCKHPS}
+{0x16} 61, {InvalidOpCode/VMOVHPD/VMOVSHDUP/VMOVLHPS/VMOVHPS}
+{0x17} 60, {InvalidOpCode/VMOVHPD/VMOVHPS}
+{0x18} 62, {group_16}
+{0x19} 62, {group_16}
+{0x1A} 62, {group_16}
+{0x1B} 62, {group_16}
+{0x1C} 62, {group_16}
+{0x1D} 62, {group_16}
+{0x1E} 62, {group_16}
+{0x1F} 62, {group_16}
+{0x20} 63, {MOV}
+{0x21} 63, {MOV}
+{0x22} 63, {MOV}
+{0x23} 63, {MOV}
+{0x24} 63, {MOV}
+{0x25} 00, {InvalidOpCode}
+{0x26} 63, {MOV}
+{0x27} 00, {InvalidOpCode}
+{0x28} 60, {InvalidOpCode/VMOVAPD/VMOVAPS}
+{0x29} 60, {InvalidOpCode/VMOVAPD/VMOVAPS}
+{0x2A} 59, {VCVTSI2SD/CVTPI2PD/VCVTSI2SS/CVTPI2PS}
+{0x2B} 59, {MOVNTSD/MOVNTSS/VMOVNTPD/VMOVNTPS}
+{0x2C} 59, {CVTTPD2PI/VCVTTSD2SI/CVTTPS2PI/VCVTTSS2SI}
+{0x2D} 59, {CVTPD2PI/VCVTSD2SI/CVTPS2PI/VCVTSS2SI}
+{0x2E} 60, {InvalidOpCode/VUCOMISD/VUCOMISS}
+{0x2F} 60, {InvalidOpCode/VCOMISD/VCOMISS}
+{0x30} 21, {WRMSR}
+{0x31} 21, {RDTSC}
+{0x32} 21, {RDMSR}
+{0x33} 21, {RDPMC}
+{0x34} 21, {SYSENTER}
+{0x35} 21, {SYSEXIT}
+{0x36} 00, {InvalidOpCode}
+{0x37} 21, {GETSEC}
+{0x38} 64, {Escape_3_Byte}
+{0x39} 00, {InvalidOpCode}
+{0x3A} 64, {Escape_3_Byte}
+{0x3B} 00, {InvalidOpCode}
+{0x3C} 00, {InvalidOpCode}
+{0x3D} 00, {InvalidOpCode}
+{0x3E} 00, {InvalidOpCode}
+{0x3F} 00, {InvalidOpCode}
+{0x40} 01, {CMOVO}
+{0x41} 01, {CMOVNO}
+{0x42} 01, {CMOVB}
+{0x43} 01, {CMOVNB}
+{0x44} 01, {CMOVZ}
+{0x45} 01, {CMOVNZ}
+{0x46} 01, {CMOVBE}
+{0x47} 01, {CMOVNBE}
+{0x48} 01, {CMOVS}
+{0x49} 01, {CMOVNS}
+{0x4A} 01, {CMOVP}
+{0x4B} 01, {CMOVNP}
+{0x4C} 01, {CMOVL}
+{0x4D} 01, {CMOVNL}
+{0x4E} 01, {CMOVLE}
+{0x4F} 01, {CMOVNLE}
+{0x50} 60, {InvalidOpCode/VMOVMSKPD/VMOVMSKPS}
+{0x51} 59, {VSQRTPD/VSQRTSD/VSQRTSS/VSQRTPS}
+{0x52} 65, {InvalidOpCode/VRSQRTSS/VRSQRTPS}
+{0x53} 65, {InvalidOpCode/VRCPSS/VRCPPS}
+{0x54} 60, {InvalidOpCode/VANDPD/VANDPS}
+{0x55} 60, {InvalidOpCode/VANDNPD/VANDNPS}
+{0x56} 60, {InvalidOpCode/VORPD/VORPS}
+{0x57} 60, {InvalidOpCode/VXORPD/VXORPS}
+{0x58} 59, {VADDPD/VADDSD/VADDSS/VADDPS}
+{0x59} 59, {VMULPD/VMULSD/VMULSS/VMULPS}
+{0x5A} 59, {VCVTPD2PS/VCVTSD2SS/VCVTSS2SD/VCVTPS2PD}
+{0x5B} 61, {InvalidOpCode/VCVTPS2DQ/VCVTTPS2DQ/VCVTDQ2PS}
+{0x5C} 59, {VSUBPD/VSUBSD/VSUBSS/VSUBPS}
+{0x5D} 59, {VMINPD/VMINSD/VMINSS/VMINPS}
+{0x5E} 59, {VDIVPD/VDIVSD/VDIVSS/VDIVPS}
+{0x5F} 59, {VMAXPD/VMAXSD/VMAXSS/VMAXPS}
+{0x60} 60, {PUNPCKLBW/VPUNPCKLBW}
+{0x61} 60, {PUNPCKLWD/VPUNPCKLWD}
+{0x62} 60, {PUNPCKLDQ/VPUNPCKLDQ}
+{0x63} 60, {PACKSSWB/VPACKSSWB}
+{0x64} 60, {PCMPGTB/VPCMPGTB}
+{0x65} 60, {PCMPGTW/VPCMPGTW}
+{0x66} 60, {PCMPGTD/VPCMPGTD}
+{0x67} 60, {PACKUSWB/VPACKUSWB}
+{0x68} 60, {PUNPCKHBW/InvalidOpCode/VPUNPCKHBW}
+{0x69} 60, {PUNPCKHWD/InvalidOpCode/VPUNPCKHWD}
+{0x6A} 60, {PUNPCKHDQ/InvalidOpCode/VPUNPCKHDQ}
+{0x6B} 60, {PACKSSDW/InvalidOpCode/VPACKSSDW}
+{0x6C} 66, {InvalidOpCode/VPUNPCKLQDQ}
+{0x6D} 66, {InvalidOpCode/VPUNPCKHQDQ}
+{0x6E} 60, {MOVDQ/InvalidOpCode/VMOVDQ}
+{0x6F} 61, {MOVQ/InvalidOpCode/VMOVDQA/VMOVDQU}
+{0x70} 67, {VPSHUFD/VPSHUFLW/VPSHUFHW/PSHUFW}
+{0x71} 68, {group_12}
+{0x72} 69, {group_13}
+{0x73} 70, {group_14}
+{0x74} 60, {PCMPEQB/InvalidOpCode/VPCMPEQB}
+{0x75} 60, {PCMPEQW/InvalidOpCode/VPCMPEQW}
+{0x76} 60, {PCMPEQD/InvalidOpCode/VPCMPEQD}
+{0x77} 21, {EMMS/VZEROUPPER/VZEROALL/InvalidOpCode}
+{0x78} 01, {VMREAD/InvalidOpCode}
+{0x79} 01, {VMWRITE/InvalidOpCode}
+{0x7A} 21, {SSE5A/InvalidOpCode}
+{0x7B} 21, {SSE5A/InvalidOpCode}
+{0x7C} 71, {InvalidOpCode/VHADDPD/VHADDPS}
+{0x7D} 71, {InvalidOpCode/VHSUBPD/VHSUBPS}
+{0x7E} 61, {MOVDQ/InvalidOpCode/VMOVDQ/VMOVQ}
+{0x7F} 61, {MOVQ/InvalidOpCode/VMOVDQA/VMOVDQU}
+{0x80} 72, {JO}
+{0x81} 72, {JNO}
+{0x82} 72, {JB}
+{0x83} 72, {JNB}
+{0x84} 72, {JZ}
+{0x85} 72, {JNZ}
+{0x86} 72, {JBE}
+{0x87} 72, {JNBE}
+{0x88} 72, {JS}
+{0x89} 72, {JNS}
+{0x8A} 72, {JP}
+{0x8B} 72, {JNP}
+{0x8C} 72, {JL}
+{0x8D} 72, {JNL}
+{0x8E} 72, {JLE}
+{0x8F} 72, {JNLE}
+{0x90} 01, {SETO}
+{0x91} 01, {SETNO}
+{0x92} 01, {SETB}
+{0x93} 01, {SETNB}
+{0x94} 01, {SETZ}
+{0x95} 01, {SETNZ}
+{0x96} 01, {SETBE}
+{0x97} 01, {SETNBE}
+{0x98} 01, {SETS}
+{0x99} 01, {SETNS}
+{0x9A} 01, {SETP}
+{0x9B} 01, {SETNP}
+{0x9C} 01, {SETL}
+{0x9D} 01, {SETNL}
+{0x9E} 01, {SETLE}
+{0x9F} 01, {SETNLE}
+{0xA0} 11, {PUSH}
+{0xA1} 11, {POP}
+{0xA2} 21, {CPUID}
+{0xA3} 01, {BT}
+{0xA4} 20, {SHLD}
+{0xA5} 01, {SHLD}
+{0xA6} 00, {InvalidOpCode}
+{0xA7} 00, {InvalidOpCode}
+{0xA8} 11, {PUSH}
+{0xA9} 11, {POP}
+{0xAA} 21, {RSM}
+{0xAB} 01, {BTS}
+{0xAC} 20, {SHRD}
+{0xAD} 01, {SHRD}
+{0xAE} 73, {group_15}
+{0xAF} 01, {IMUL}
+{0xB0} 01, {CMPXCHG}
+{0xB1} 01, {CMPXCHG}
+{0xB2} 01, {LSS}
+{0xB3} 01, {BTR}
+{0xB4} 01, {LFS}
+{0xB5} 01, {LGS}
+{0xB6} 01, {MOVZX}
+{0xB7} 01, {MOVZX}
+{0xB8} 74, {POPCNT/InvalidOpCode}
+{0xB9} 75, {group_10_UD2/InvalidOpCode}
+{0xBA} 76, {group_8/InvalidOpCode}
+{0xBB} 01, {BTC/InvalidOpCode}
+{0xBC} 65, {BSF/TZCNT}
+{0xBD} 65, {BSR/LZCNT}
+{0xBE} 01, {MOVSX/InvalidOpCode}
+{0xBF} 01, {MOVSX/InvalidOpCode}
+{0xC0} 59, {XADD}
+{0xC1} 59, {XADD}
+{0xC2} 67, {VCMPccPD/VCMPccSD/VCMPccSS/VCMPccPS}
+{0xC3} 01, {InvalidOpCode/MOVNTI}
+{0xC4} 77, {InvalidOpCode/VPINSRW/PINSRW}
+{0xC5} 77, {InvalidOpCode/VPEXTRW/PEXTRW}
+{0xC6} 77, {InvalidOpCode/VSHUFPD/VSHUFPS}
+{0xC7} 78, {group_9}
+{0xC8} 21, {BSWAP}
+{0xC9} 21, {BSWAP}
+{0xCA} 21, {BSWAP}
+{0xCB} 21, {BSWAP}
+{0xCC} 21, {BSWAP}
+{0xCD} 21, {BSWAP}
+{0xCE} 21, {BSWAP}
+{0xCF} 21, {BSWAP}
+{0xD0} 71, {InvalidOpCode/VADDSUBPD/VADDSUBPS}
+{0xD1} 60, {PSRLW/InvalidOpCode/VPSRLW}
+{0xD2} 60, {PSRLD/InvalidOpCode/VPSRLD}
+{0xD3} 60, {PSRLQ/InvalidOpCode/VPSRLQ}
+{0xD4} 60, {InvalidOpCode/VPADDQ/PADDQ}
+{0xD5} 60, {PMULLW/InvalidOpCode/VPMULLW}
+{0xD6} 79, {InvalidOpCode/MOVDQ2Q/MOVQ2DQ/VMOVQ}
+{0xD7} 60, {InvalidOpCode/VPMOVMSKB/PMOVMSKB}
+{0xD8} 60, {PSUBUSB/VPSUBUSB}
+{0xD9} 60, {PSUBUSW/VPSUBUSW}
+{0xDA} 60, {VPMINUB/PMINUB}
+{0xDB} 60, {PAND/VPAND}
+{0xDC} 60, {PADDUSB/VPADDUSB}
+{0xDD} 60, {PADDUSW/VPADDUSW}
+{0xDE} 60, {VPMAXUB/PMAXUB}
+{0xDF} 60, {PANDN/VPANDN}
+{0xE0} 60, {InvalidOpCode/VPAVGB/PAVGB}
+{0xE1} 60, {PSRAW/InvalidOpCode/VPSRAW}
+{0xE2} 60, {PSRAD/InvalidOpCode/VPSRAD}
+{0xE3} 60, {InvalidOpCode/VPAVGW/PAVGW}
+{0xE4} 60, {InvalidOpCode/VPMULHUW/PMULHUW}
+{0xE5} 60, {PMULHW/InvalidOpCode/VPMULHW}
+{0xE6} 79, {InvalidOpCode/VCVTTPD2DQ/VCVTPD2DQ/VCVTDQ2PD}
+{0xE7} 60, {InvalidOpCode/VMOVNTDQ/MOVNTQ}
+{0xE8} 60, {PSUBSB/VPSUBSB}
+{0xE9} 60, {PSUBSW/VPSUBSW}
+{0xEA} 60, {VPMINSW/PMINSW}
+{0xEB} 60, {POR/VPOR}
+{0xEC} 60, {PADDSB/VPADDSB}
+{0xED} 60, {PADDSW/VPADDSW}
+{0xEE} 60, {VPMAXSW/PMAXSW}
+{0xEF} 60, {PXOR/VPXOR}
+{0xF0} 80, {InvalidOpCode/VLDDQU}
+{0xF1} 60, {PSLLW/InvalidOpCode/VPSLLW}
+{0xF2} 60, {PSLLD/InvalidOpCode/VPSLLD}
+{0xF3} 60, {PSLLQ/InvalidOpCode/VPSLLQ}
+{0xF4} 60, {InvalidOpCode/VPMULUDQ/PMULUDQ}
+{0xF5} 60, {PMADDWD/InvalidOpCode/VPMADDWD}
+{0xF6} 60, {InvalidOpCode/VPSADBW/PSADBW}
+{0xF7} 60, {InvalidOpCode/VMASKMOVDQU/MASKMOVQ}
+{0xF8} 60, {PSUBB/VPSUBB}
+{0xF9} 60, {PSUBW/VPSUBW}
+{0xFA} 60, {PSUBD/VPSUBD}
+{0xFB} 60, {VPSUBQ/PSUBQ}
+{0xFC} 60, {PADDB/VPADDB}
+{0xFD} 60, {PADDW/VPADDW}
+{0xFE} 60, {PADDD/VPADDD}
+{0xFF} 00 {InvalidOpCode}
+);
+{============================================
+                  ThreeByteTable38                    
+============================================}
+const ThreeByteTable38 : array[Byte] of Byte =(//
+{0x00} 60, {VPSHUFB/PSHUFB}
+{0x01} 60, {VPHADDW/PHADDW}
+{0x02} 60, {VPHADDD/PHADDD}
+{0x03} 60, {VPHADDSW/PHADDSW}
+{0x04} 60, {VPMADDUBSW/PMADDUBSW}
+{0x05} 60, {VPHSUBW/PHSUBW}
+{0x06} 60, {VPHSUBD/PHSUBD}
+{0x07} 60, {VPHSUBSW/PHSUBSW}
+{0x08} 60, {VPSIGNB/PSIGNB}
+{0x09} 60, {VPSIGNW/PSIGNW}
+{0x0A} 60, {VPSIGND/PSIGND}
+{0x0B} 60, {VPMULHRSW/PMULHRSW}
+{0x0C} 66, {VPERMILPS/InvalidOpCode}
+{0x0D} 66, {VPERMILPD/InvalidOpCode}
+{0x0E} 66, {VTESTPS/InvalidOpCode}
+{0x0F} 66, {VTESTPD/InvalidOpCode}
+{0x10} 66, {InvalidOpCode/PBLENDVB}
+{0x11} 00, {InvalidOpCode}
+{0x12} 00, {InvalidOpCode}
+{0x13} 66, {VCVTPH2PS/InvalidOpCode}
+{0x14} 66, {InvalidOpCode/BLENDVPS}
+{0x15} 66, {InvalidOpCode/BLENDVPD}
+{0x16} 66, {VPERMPS/InvalidOpCode}
+{0x17} 66, {InvalidOpCode/VPTEST}
+{0x18} 66, {VBROADCASTSS/InvalidOpCode}
+{0x19} 66, {VBROADCASTSD/InvalidOpCode}
+{0x1A} 66, {VBROADCASTF128/InvalidOpCode}
+{0x1B} 00, {InvalidOpCode}
+{0x1C} 60, {VPABSB/PABSB}
+{0x1D} 60, {VPABSW/PABSW}
+{0x1E} 60, {VPABSD/PABSD}
+{0x1F} 00, {InvalidOpCode}
+{0x20} 66, {InvalidOpCode/VPMOVSXBW}
+{0x21} 66, {InvalidOpCode/VPMOVSXBD}
+{0x22} 66, {InvalidOpCode/VPMOVSXBQ}
+{0x23} 66, {InvalidOpCode/VPMOVSXWD}
+{0x24} 66, {InvalidOpCode/VPMOVSXWQ}
+{0x25} 66, {InvalidOpCode/VPMOVSXDQ}
+{0x26} 00, {InvalidOpCode}
+{0x27} 00, {InvalidOpCode}
+{0x28} 66, {InvalidOpCode/VPMULDQ}
+{0x29} 66, {InvalidOpCode/VPCMPEQQ}
+{0x2A} 66, {InvalidOpCode/VMOVNTDQA}
+{0x2B} 66, {InvalidOpCode/VPACKUSDW}
+{0x2C} 66, {VMASKMOVPS/InvalidOpCode}
+{0x2D} 66, {VMASKMOVPD/InvalidOpCode}
+{0x2E} 66, {VMASKMOVPS/InvalidOpCode}
+{0x2F} 66, {VMASKMOVPD/InvalidOpCode}
+{0x30} 66, {InvalidOpCode/VPMOVZXBW}
+{0x31} 66, {InvalidOpCode/VPMOVZXBD}
+{0x32} 66, {InvalidOpCode/VPMOVZXBQ}
+{0x33} 66, {InvalidOpCode/VPMOVZXWD}
+{0x34} 66, {InvalidOpCode/VPMOVZXWQ}
+{0x35} 66, {InvalidOpCode/VPMOVZXDQ}
+{0x36} 66, {VPERMD/InvalidOpCode}
+{0x37} 66, {InvalidOpCode/VPCMPGTQ}
+{0x38} 66, {InvalidOpCode/VPMINSB}
+{0x39} 66, {InvalidOpCode/VPMINSD}
+{0x3A} 66, {InvalidOpCode/VPMINUW}
+{0x3B} 66, {InvalidOpCode/VPMINUD}
+{0x3C} 66, {InvalidOpCode/VPMAXSB}
+{0x3D} 66, {InvalidOpCode/VPMAXSD}
+{0x3E} 66, {InvalidOpCode/VPMAXUW}
+{0x3F} 66, {InvalidOpCode/VPMAXUD}
+{0x40} 66, {InvalidOpCode/VPMULLD}
+{0x41} 66, {InvalidOpCode/VPHMINPOSUW}
+{0x42} 00, {InvalidOpCode}
+{0x43} 00, {InvalidOpCode}
+{0x44} 00, {InvalidOpCode}
+{0x45} 66, {VPSRLVQ/InvalidOpCode}
+{0x46} 66, {VPSRAVD/InvalidOpCode}
+{0x47} 66, {VPSLLVQ/VPSLLVD/InvalidOpCode}
+{0x48} 00, {InvalidOpCode}
+{0x49} 00, {InvalidOpCode}
+{0x4A} 00, {InvalidOpCode}
+{0x4B} 00, {InvalidOpCode}
+{0x4C} 00, {InvalidOpCode}
+{0x4D} 00, {InvalidOpCode}
+{0x4E} 00, {InvalidOpCode}
+{0x4F} 00, {InvalidOpCode}
+{0x50} 00, {InvalidOpCode}
+{0x51} 00, {InvalidOpCode}
+{0x52} 00, {InvalidOpCode}
+{0x53} 00, {InvalidOpCode}
+{0x54} 00, {InvalidOpCode}
+{0x55} 00, {InvalidOpCode}
+{0x56} 00, {InvalidOpCode}
+{0x57} 00, {InvalidOpCode}
+{0x58} 66, {VPBROADCASTD/InvalidOpCode}
+{0x59} 66, {VPBROADCASTQ/InvalidOpCode}
+{0x5A} 66, {VBROADCASTI128/InvalidOpCode}
+{0x5B} 00, {InvalidOpCode}
+{0x5C} 00, {InvalidOpCode}
+{0x5D} 00, {InvalidOpCode}
+{0x5E} 00, {InvalidOpCode}
+{0x5F} 00, {InvalidOpCode}
+{0x60} 00, {InvalidOpCode}
+{0x61} 00, {InvalidOpCode}
+{0x62} 00, {InvalidOpCode}
+{0x63} 00, {InvalidOpCode}
+{0x64} 00, {InvalidOpCode}
+{0x65} 00, {InvalidOpCode}
+{0x66} 00, {InvalidOpCode}
+{0x67} 00, {InvalidOpCode}
+{0x68} 00, {InvalidOpCode}
+{0x69} 00, {InvalidOpCode}
+{0x6A} 00, {InvalidOpCode}
+{0x6B} 00, {InvalidOpCode}
+{0x6C} 00, {InvalidOpCode}
+{0x6D} 00, {InvalidOpCode}
+{0x6E} 00, {InvalidOpCode}
+{0x6F} 00, {InvalidOpCode}
+{0x70} 00, {InvalidOpCode}
+{0x71} 00, {InvalidOpCode}
+{0x72} 00, {InvalidOpCode}
+{0x73} 00, {InvalidOpCode}
+{0x74} 00, {InvalidOpCode}
+{0x75} 00, {InvalidOpCode}
+{0x76} 00, {InvalidOpCode}
+{0x77} 00, {InvalidOpCode}
+{0x78} 66, {VPBROADCASTB/InvalidOpCode}
+{0x79} 66, {VPBROADCASTW/InvalidOpCode}
+{0x7A} 00, {InvalidOpCode}
+{0x7B} 00, {InvalidOpCode}
+{0x7C} 00, {InvalidOpCode}
+{0x7D} 00, {InvalidOpCode}
+{0x7E} 00, {InvalidOpCode}
+{0x7F} 00, {InvalidOpCode}
+{0x80} 66, {INVPCID}
+{0x81} 66, {INVVPID}
+{0x82} 66, {INVPCID}
+{0x83} 00, {InvalidOpCode}
+{0x84} 00, {InvalidOpCode}
+{0x85} 00, {InvalidOpCode}
+{0x86} 00, {InvalidOpCode}
+{0x87} 00, {InvalidOpCode}
+{0x88} 00, {InvalidOpCode}
+{0x89} 00, {InvalidOpCode}
+{0x8A} 00, {InvalidOpCode}
+{0x8B} 00, {InvalidOpCode}
+{0x8C} 66, {VPMASKMOVD/VPMASKMOVQ/InvalidOpCode}
+{0x8D} 00, {InvalidOpCode}
+{0x8E} 66, {VPMASKMOVD/VPMASKMOVQ/InvalidOpCode}
+{0x8F} 00, {InvalidOpCode}
+{0x90} 66, {VPGATHERDD/VPGATHERDQ}
+{0x91} 66, {VPGATHERQD/VPGATHERQQ}
+{0x92} 66, {VGATHERDPS/VGATHERDPD}
+{0x93} 66, {VGATHERQPS/VGATHERQPD}
+{0x94} 00, {InvalidOpCode}
+{0x95} 00, {InvalidOpCode}
+{0x96} 66, {VFMADDSUB132PS/VFMADDSUB132PD}
+{0x97} 66, {VFMSUBADD132PS/VFMSUBADD132PD}
+{0x98} 66, {VFMADD132PS/VFMADD132PD}
+{0x99} 66, {VFMADD132SS/VFMADD132SD}
+{0x9A} 66, {VFMSUB132PS/VFMSUB132PD}
+{0x9B} 66, {VFMSUB132SS/VFMSUB132SD}
+{0x9C} 66, {VFNMADD132PS/VFNMADD132PD}
+{0x9D} 66, {VFNMADD132SS/VFNMADD132SD}
+{0x9E} 66, {VFNMSUB132PS/VFNMSUB132PD}
+{0x9F} 66, {VFNMSUB132SS/VFNMSUB132SD}
+{0xA0} 00, {InvalidOpCode}
+{0xA1} 00, {InvalidOpCode}
+{0xA2} 00, {InvalidOpCode}
+{0xA3} 00, {InvalidOpCode}
+{0xA4} 00, {InvalidOpCode}
+{0xA5} 00, {InvalidOpCode}
+{0xA6} 66, {VFMADDSUB213PS/VFMADDSUB213PD}
+{0xA7} 66, {VFMSUBADD213PS/VFMSUBADD213PD}
+{0xA8} 66, {VFMADD213PS/VFMADD213PD}
+{0xA9} 66, {VFMADD213SS/VFMADD213SD}
+{0xAA} 66, {VFMSUB213PS/VFMSUB213PD}
+{0xAB} 66, {VFMSUB213SS/VFMSUB213SD}
+{0xAC} 66, {VFNMADD213PS/VFNMADD213PD}
+{0xAD} 66, {VFNMADD213SS/VFNMADD213SD}
+{0xAE} 66, {VFNMSUB213PS/VFNMSUB213PD}
+{0xAF} 66, {VFNMSUB213SS/VFNMSUB213SD}
+{0xB0} 00, {InvalidOpCode}
+{0xB1} 00, {InvalidOpCode}
+{0xB2} 00, {InvalidOpCode}
+{0xB3} 00, {InvalidOpCode}
+{0xB4} 00, {InvalidOpCode}
+{0xB5} 00, {InvalidOpCode}
+{0xB6} 66, {VFMADDSUB231PS/VFMADDSUB231PD}
+{0xB7} 66, {VFMSUBADD231PS/VFMSUBADD231PD}
+{0xB8} 66, {VFMADD231PS/VFMADD231PD}
+{0xB9} 66, {VFMADD231SS/VFMADD231SD}
+{0xBA} 66, {VFMSUB231PS/VFMSUB231PD}
+{0xBB} 66, {VFMSUB231SS/VFMSUB231SD}
+{0xBC} 66, {VFNMADD231PS/VFNMADD231PD}
+{0xBD} 66, {VFNMADD231SS/VFNMADD231SD}
+{0xBE} 66, {VFNMSUB231PS/VFNMSUB231PD}
+{0xBF} 66, {VFNMSUB231SS/VFNMSUB231SD}
+{0xC0} 00, {InvalidOpCode}
+{0xC1} 00, {InvalidOpCode}
+{0xC2} 00, {InvalidOpCode}
+{0xC3} 00, {InvalidOpCode}
+{0xC4} 00, {InvalidOpCode}
+{0xC5} 00, {InvalidOpCode}
+{0xC6} 00, {InvalidOpCode}
+{0xC7} 00, {InvalidOpCode}
+{0xC8} 01, {SHA1NEXTE}
+{0xC9} 01, {SHA1MSG1}
+{0xCA} 01, {SHA1MSG2}
+{0xCB} 01, {SHA256RNDS2}
+{0xCC} 01, {SHA256MSG1}
+{0xCD} 01, {SHA256MSG2}
+{0xCE} 00, {InvalidOpCode}
+{0xCF} 00, {InvalidOpCode}
+{0xD0} 00, {InvalidOpCode}
+{0xD1} 00, {InvalidOpCode}
+{0xD2} 00, {InvalidOpCode}
+{0xD3} 00, {InvalidOpCode}
+{0xD4} 00, {InvalidOpCode}
+{0xD5} 00, {InvalidOpCode}
+{0xD6} 00, {InvalidOpCode}
+{0xD7} 00, {InvalidOpCode}
+{0xD8} 00, {InvalidOpCode}
+{0xD9} 00, {InvalidOpCode}
+{0xDA} 00, {InvalidOpCode}
+{0xDB} 66, {VAESIMC}
+{0xDC} 66, {VAESENC}
+{0xDD} 66, {VAESENCLAST}
+{0xDE} 66, {VAESDEC}
+{0xDF} 66, {VAESDECLAST}
+{0xE0} 00, {InvalidOpCode}
+{0xE1} 00, {InvalidOpCode}
+{0xE2} 00, {InvalidOpCode}
+{0xE3} 00, {InvalidOpCode}
+{0xE4} 00, {InvalidOpCode}
+{0xE5} 00, {InvalidOpCode}
+{0xE6} 00, {InvalidOpCode}
+{0xE7} 00, {InvalidOpCode}
+{0xE8} 00, {InvalidOpCode}
+{0xE9} 00, {InvalidOpCode}
+{0xEA} 00, {InvalidOpCode}
+{0xEB} 00, {InvalidOpCode}
+{0xEC} 00, {InvalidOpCode}
+{0xED} 00, {InvalidOpCode}
+{0xEE} 00, {InvalidOpCode}
+{0xEF} 00, {InvalidOpCode}
+{0xF0} 81, {MOVBE/InvalidOpCode/CRC32}
+{0xF1} 81, {MOVBE/InvalidOpCode/CRC32}
+{0xF2} 81, {ANDNv/InvalidOpCode}
+{0xF3} 81, {group_17}
+{0xF4} 81, {InvalidOpCode}
+{0xF5} 81, {PDEPv/PEXTv/BZHIv/InvalidOpCode}
+{0xF6} 81, {MULXv/ADCX/ADOX/InvalidOpCode}
+{0xF7} 81, {SHLXv/SHRXv/SARXv/BEXTRv/InvalidOpCode}
+{0xF8} 00, {InvalidOpCode}
+{0xF9} 00, {InvalidOpCode}
+{0xFA} 00, {InvalidOpCode}
+{0xFB} 00, {InvalidOpCode}
+{0xFC} 00, {InvalidOpCode}
+{0xFD} 00, {InvalidOpCode}
+{0xFE} 00, {InvalidOpCode}
+{0xFF} 00 {InvalidOpCode}
+);
+{============================================
+                  ThreeByteTable3A                    
+============================================}
+const ThreeByteTable3A : array[Byte] of Byte =(//
+{0x00} 82, {VPERMQ/InvalidOpCode}
+{0x01} 82, {VPERMPD/InvalidOpCode}
+{0x02} 82, {VPBLENDD/InvalidOpCode}
+{0x03} 00, {InvalidOpCode}
+{0x04} 82, {VPERMILPS/InvalidOpCode}
+{0x05} 82, {VPERMILPD/InvalidOpCode}
+{0x06} 82, {VPERM2F128/InvalidOpCode}
+{0x07} 00, {InvalidOpCode}
+{0x08} 82, {InvalidOpCode/VROUNDPS}
+{0x09} 82, {InvalidOpCode/VROUNDPD}
+{0x0A} 82, {InvalidOpCode/VROUNDSS}
+{0x0B} 82, {InvalidOpCode/VROUNDSD}
+{0x0C} 82, {InvalidOpCode/VBLENDPS}
+{0x0D} 82, {InvalidOpCode/VBLENDPD}
+{0x0E} 82, {InvalidOpCode/VPBLENDW}
+{0x0F} 77, {VPALIGNR/PALIGNR}
+{0x10} 00, {InvalidOpCode}
+{0x11} 00, {InvalidOpCode}
+{0x12} 00, {InvalidOpCode}
+{0x13} 00, {InvalidOpCode}
+{0x14} 82, {InvalidOpCode/VPEXTRB}
+{0x15} 82, {InvalidOpCode/VPEXTRW}
+{0x16} 82, {InvalidOpCode/VPEXTRD}
+{0x17} 82, {InvalidOpCode/VEXTRACTPS}
+{0x18} 82, {VINSERTF128/InvalidOpCode}
+{0x19} 82, {VEXTRACTF128/InvalidOpCode}
+{0x1A} 00, {InvalidOpCode}
+{0x1B} 00, {InvalidOpCode}
+{0x1C} 00, {InvalidOpCode}
+{0x1D} 82, {VCVTPS2PH/InvalidOpCode}
+{0x1E} 00, {InvalidOpCode}
+{0x1F} 00, {InvalidOpCode}
+{0x20} 82, {InvalidOpCode/VINSERTPS}
+{0x21} 82, {InvalidOpCode/VPINSRD}
+{0x22} 00, {InvalidOpCode}
+{0x23} 00, {InvalidOpCode}
+{0x24} 00, {InvalidOpCode}
+{0x25} 00, {InvalidOpCode}
+{0x26} 00, {InvalidOpCode}
+{0x27} 00, {InvalidOpCode}
+{0x28} 00, {InvalidOpCode}
+{0x29} 00, {InvalidOpCode}
+{0x2A} 00, {InvalidOpCode}
+{0x2B} 00, {InvalidOpCode}
+{0x2C} 00, {InvalidOpCode}
+{0x2D} 00, {InvalidOpCode}
+{0x2E} 00, {InvalidOpCode}
+{0x2F} 00, {InvalidOpCode}
+{0x30} 00, {InvalidOpCode}
+{0x31} 00, {InvalidOpCode}
+{0x32} 00, {InvalidOpCode}
+{0x33} 00, {InvalidOpCode}
+{0x34} 00, {InvalidOpCode}
+{0x35} 00, {InvalidOpCode}
+{0x36} 00, {InvalidOpCode}
+{0x37} 00, {InvalidOpCode}
+{0x38} 82, {VINSERTI128/InvalidOpCode}
+{0x39} 82, {VEXTRACTI128/InvalidOpCode}
+{0x3A} 00, {InvalidOpCode}
+{0x3B} 00, {InvalidOpCode}
+{0x3C} 00, {InvalidOpCode}
+{0x3D} 00, {InvalidOpCode}
+{0x3E} 00, {InvalidOpCode}
+{0x3F} 00, {InvalidOpCode}
+{0x40} 82, {InvalidOpCode/VDPPS}
+{0x41} 82, {InvalidOpCode/VDPPD}
+{0x42} 82, {InvalidOpCode/VMPSADBW}
+{0x43} 00, {InvalidOpCode}
+{0x44} 82, {InvalidOpCode/VPCLMULQDQ}
+{0x45} 00, {InvalidOpCode}
+{0x46} 82, {VPERM2I128/InvalidOpCode}
+{0x47} 00, {InvalidOpCode}
+{0x48} 82, {VPERMILzz2PS/InvalidOpCode}
+{0x49} 82, {VPERMILzz2PD/InvalidOpCode}
+{0x4A} 66, {VBLENDVPS/InvalidOpCode}
+{0x4B} 66, {VBLENDVPD/InvalidOpCode}
+{0x4C} 66, {VPBLENDVB/InvalidOpCode}
+{0x4D} 00, {InvalidOpCode}
+{0x4E} 00, {InvalidOpCode}
+{0x4F} 00, {InvalidOpCode}
+{0x50} 00, {InvalidOpCode}
+{0x51} 00, {InvalidOpCode}
+{0x52} 00, {InvalidOpCode}
+{0x53} 00, {InvalidOpCode}
+{0x54} 00, {InvalidOpCode}
+{0x55} 00, {InvalidOpCode}
+{0x56} 00, {InvalidOpCode}
+{0x57} 00, {InvalidOpCode}
+{0x58} 00, {InvalidOpCode}
+{0x59} 00, {InvalidOpCode}
+{0x5A} 00, {InvalidOpCode}
+{0x5B} 00, {InvalidOpCode}
+{0x5C} 66, {VFMADDSUBPS/InvalidOpCode}
+{0x5D} 66, {VFMADDSUBPD/InvalidOpCode}
+{0x5E} 66, {VFMSUBADDPS/InvalidOpCode}
+{0x5F} 66, {VFMSUBADDPD/InvalidOpCode}
+{0x60} 82, {InvalidOpCode/VPCMPESTRM}
+{0x61} 82, {InvalidOpCode/VPCMPESTRI}
+{0x62} 82, {InvalidOpCode/VPCMPISTRM}
+{0x63} 82, {InvalidOpCode/VPCMPISTRI}
+{0x64} 00, {InvalidOpCode}
+{0x65} 00, {InvalidOpCode}
+{0x66} 00, {InvalidOpCode}
+{0x67} 00, {InvalidOpCode}
+{0x68} 66, {VFMADDPS/InvalidOpCode}
+{0x69} 66, {VFMADDPD/InvalidOpCode}
+{0x6A} 66, {VFMADDSS/InvalidOpCode}
+{0x6B} 66, {VFMADDSD/InvalidOpCode}
+{0x6C} 66, {VFMSUBPS/InvalidOpCode}
+{0x6D} 66, {VFMSUBPD/InvalidOpCode}
+{0x6E} 66, {VFMSUBSS/InvalidOpCode}
+{0x6F} 66, {VFMSUBSD/InvalidOpCode}
+{0x70} 00, {InvalidOpCode}
+{0x71} 00, {InvalidOpCode}
+{0x72} 00, {InvalidOpCode}
+{0x73} 00, {InvalidOpCode}
+{0x74} 00, {InvalidOpCode}
+{0x75} 00, {InvalidOpCode}
+{0x76} 00, {InvalidOpCode}
+{0x77} 00, {InvalidOpCode}
+{0x78} 66, {VFNMADDPS/InvalidOpCode}
+{0x79} 66, {VFNMADDPD/InvalidOpCode}
+{0x7A} 66, {VFNMADDSS/InvalidOpCode}
+{0x7B} 66, {VFNMADDSD/InvalidOpCode}
+{0x7C} 66, {VFNMSUBPS/InvalidOpCode}
+{0x7D} 66, {VFNMSUBPD/InvalidOpCode}
+{0x7E} 66, {VFNMSUBSS/InvalidOpCode}
+{0x7F} 66, {VFNMSUBSD/InvalidOpCode}
+{0x80} 00, {InvalidOpCode}
+{0x81} 00, {InvalidOpCode}
+{0x82} 00, {InvalidOpCode}
+{0x83} 00, {InvalidOpCode}
+{0x84} 00, {InvalidOpCode}
+{0x85} 00, {InvalidOpCode}
+{0x86} 00, {InvalidOpCode}
+{0x87} 00, {InvalidOpCode}
+{0x88} 00, {InvalidOpCode}
+{0x89} 00, {InvalidOpCode}
+{0x8A} 00, {InvalidOpCode}
+{0x8B} 00, {InvalidOpCode}
+{0x8C} 00, {InvalidOpCode}
+{0x8D} 00, {InvalidOpCode}
+{0x8E} 00, {InvalidOpCode}
+{0x8F} 00, {InvalidOpCode}
+{0x90} 00, {InvalidOpCode}
+{0x91} 00, {InvalidOpCode}
+{0x92} 00, {InvalidOpCode}
+{0x93} 00, {InvalidOpCode}
+{0x94} 00, {InvalidOpCode}
+{0x95} 00, {InvalidOpCode}
+{0x96} 00, {InvalidOpCode}
+{0x97} 00, {InvalidOpCode}
+{0x98} 00, {InvalidOpCode}
+{0x99} 00, {InvalidOpCode}
+{0x9A} 00, {InvalidOpCode}
+{0x9B} 00, {InvalidOpCode}
+{0x9C} 00, {InvalidOpCode}
+{0x9D} 00, {InvalidOpCode}
+{0x9E} 00, {InvalidOpCode}
+{0x9F} 00, {InvalidOpCode}
+{0xA0} 00, {InvalidOpCode}
+{0xA1} 00, {InvalidOpCode}
+{0xA2} 00, {InvalidOpCode}
+{0xA3} 00, {InvalidOpCode}
+{0xA4} 00, {InvalidOpCode}
+{0xA5} 00, {InvalidOpCode}
+{0xA6} 00, {InvalidOpCode}
+{0xA7} 00, {InvalidOpCode}
+{0xA8} 00, {InvalidOpCode}
+{0xA9} 00, {InvalidOpCode}
+{0xAA} 00, {InvalidOpCode}
+{0xAB} 00, {InvalidOpCode}
+{0xAC} 00, {InvalidOpCode}
+{0xAD} 00, {InvalidOpCode}
+{0xAE} 00, {InvalidOpCode}
+{0xAF} 00, {InvalidOpCode}
+{0xB0} 00, {InvalidOpCode}
+{0xB1} 00, {InvalidOpCode}
+{0xB2} 00, {InvalidOpCode}
+{0xB3} 00, {InvalidOpCode}
+{0xB4} 00, {InvalidOpCode}
+{0xB5} 00, {InvalidOpCode}
+{0xB6} 00, {InvalidOpCode}
+{0xB7} 00, {InvalidOpCode}
+{0xB8} 00, {InvalidOpCode}
+{0xB9} 00, {InvalidOpCode}
+{0xBA} 00, {InvalidOpCode}
+{0xBB} 00, {InvalidOpCode}
+{0xBC} 00, {InvalidOpCode}
+{0xBD} 00, {InvalidOpCode}
+{0xBE} 00, {InvalidOpCode}
+{0xBF} 00, {InvalidOpCode}
+{0xC0} 00, {InvalidOpCode}
+{0xC1} 00, {InvalidOpCode}
+{0xC2} 00, {InvalidOpCode}
+{0xC3} 00, {InvalidOpCode}
+{0xC4} 00, {InvalidOpCode}
+{0xC5} 00, {InvalidOpCode}
+{0xC6} 00, {InvalidOpCode}
+{0xC7} 00, {InvalidOpCode}
+{0xC8} 00, {InvalidOpCode}
+{0xC9} 00, {InvalidOpCode}
+{0xCA} 00, {InvalidOpCode}
+{0xCB} 00, {InvalidOpCode}
+{0xCC} 20, {SHA1RNDS4}
+{0xCD} 00, {InvalidOpCode}
+{0xCE} 00, {InvalidOpCode}
+{0xCF} 00, {InvalidOpCode}
+{0xD0} 00, {InvalidOpCode}
+{0xD1} 00, {InvalidOpCode}
+{0xD2} 00, {InvalidOpCode}
+{0xD3} 00, {InvalidOpCode}
+{0xD4} 00, {InvalidOpCode}
+{0xD5} 00, {InvalidOpCode}
+{0xD6} 00, {InvalidOpCode}
+{0xD7} 00, {InvalidOpCode}
+{0xD8} 00, {InvalidOpCode}
+{0xD9} 00, {InvalidOpCode}
+{0xDA} 00, {InvalidOpCode}
+{0xDB} 00, {InvalidOpCode}
+{0xDC} 00, {InvalidOpCode}
+{0xDD} 00, {InvalidOpCode}
+{0xDE} 00, {InvalidOpCode}
+{0xDF} 82, {VAESKEYGENASSIST}
+{0xE0} 00, {InvalidOpCode}
+{0xE1} 00, {InvalidOpCode}
+{0xE2} 00, {InvalidOpCode}
+{0xE3} 00, {InvalidOpCode}
+{0xE4} 00, {InvalidOpCode}
+{0xE5} 00, {InvalidOpCode}
+{0xE6} 00, {InvalidOpCode}
+{0xE7} 00, {InvalidOpCode}
+{0xE8} 00, {InvalidOpCode}
+{0xE9} 00, {InvalidOpCode}
+{0xEA} 00, {InvalidOpCode}
+{0xEB} 00, {InvalidOpCode}
+{0xEC} 00, {InvalidOpCode}
+{0xED} 00, {InvalidOpCode}
+{0xEE} 00, {InvalidOpCode}
+{0xEF} 00, {InvalidOpCode}
+{0xF0} 83, {RORXv}
+{0xF1} 00, {InvalidOpCode}
+{0xF2} 00, {InvalidOpCode}
+{0xF3} 00, {InvalidOpCode}
+{0xF4} 00, {InvalidOpCode}
+{0xF5} 00, {InvalidOpCode}
+{0xF6} 00, {InvalidOpCode}
+{0xF7} 00, {InvalidOpCode}
+{0xF8} 00, {InvalidOpCode}
+{0xF9} 00, {InvalidOpCode}
+{0xFA} 00, {InvalidOpCode}
+{0xFB} 00, {InvalidOpCode}
+{0xFC} 00, {InvalidOpCode}
+{0xFD} 00, {InvalidOpCode}
+{0xFE} 00, {InvalidOpCode}
+{0xFF} 00 {InvalidOpCode}
+);

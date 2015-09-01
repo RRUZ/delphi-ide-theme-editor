@@ -580,6 +580,7 @@ type
     procedure DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor : TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft); overload;
     procedure DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor : TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft); overload;
     function  GetIcon(const ACode: Word; Width, Height : Integer; AColor, ABackColor : TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft) : HICON; overload;
+    function  GetIcon(const ACode: Word; Width, Height, CharX, CharY : Integer; AColor, ABackColor : TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft) : HICON; overload;
   end;
 
 
@@ -2769,7 +2770,9 @@ begin
   DrawChar(DC, Chr(ACode), DestRect, AColor, Orientation, ImageAlignment);
 end;
 
-function TAwesomeFont.GetIcon(const ACode: Word; Width, Height: Integer; AColor, ABackColor: TColor; Orientation: Integer = 0; ImageAlignment: TImageAlignment = iaLeft): HICON;
+function TAwesomeFont.GetIcon(const ACode: Word; Width, Height, CharX,
+  CharY: Integer; AColor, ABackColor: TColor; Orientation: Integer;
+  ImageAlignment: TImageAlignment): HICON;
 var
   LIconInfo : TIconInfo;
   LBitmap, LMask : TBitmap;
@@ -2783,7 +2786,8 @@ begin
     //LBitmap.Canvas.FillRect(Rect(0, 0, LBitmap.Width, LBitmap.Height));
     //Bitmap32_SetAlphaAndColor(LBitmap, 255, clFuchsia);
 
-    DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, LBitmap.Width, LBitmap.Height), AColor, Orientation, ImageAlignment);
+    //DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, LBitmap.Width, LBitmap.Height), AColor, Orientation, ImageAlignment);
+    DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, CharX, CharY), AColor, Orientation, ImageAlignment);
     Bitmap32_SetAlphaExceptColor(LBitmap, 255, ABackColor);
     LBitmap.AlphaFormat := afDefined;
 
@@ -2807,6 +2811,12 @@ begin
   finally
     LBitmap.Free;
   end;
+end;
+
+
+function TAwesomeFont.GetIcon(const ACode: Word; Width, Height: Integer; AColor, ABackColor: TColor; Orientation: Integer = 0; ImageAlignment: TImageAlignment = iaLeft): HICON;
+begin
+  Result:=GetIcon(ACode, Width, Height, Width, Height, AColor, ABackColor, Orientation, ImageAlignment);
 end;
 procedure TAwesomeFont.DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor: TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft);
 var

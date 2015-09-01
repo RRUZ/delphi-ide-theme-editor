@@ -436,14 +436,14 @@ var
     LogFont.lfFaceName := 'Marlett';
 
     if Disabled then
-      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
+      oldColor := ColorToRGB(StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled))
     else
     begin
-      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+      oldColor := ColorToRGB(StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal));
       if isHot in State then
-        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextHot);
+        oldColor := ColorToRGB(StyleServices.GetStyleFontColor(sfPopupMenuItemTextHot));
       if isDisabled in State then
-        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled);
+        oldColor := ColorToRGB(StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled));
     end;
 
     AFont := CreateFontIndirect(LogFont);

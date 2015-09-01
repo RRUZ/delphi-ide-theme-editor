@@ -415,14 +415,14 @@ begin
   if OverrideEraseBkgnd then
     Color := StyleServices.GetStyleColor(scListView)
   else
-    Color := clWhite;
+    Color := clWindow;
   if OverrideFont then
     FontColor := StyleServices.GetSystemColor(clWindowText)
   else
     FontColor := clWindowText;
 
-  ListView_SetBkColor(Handle, Color);
-  ListView_SetTextBkColor(Handle, Color);
+  ListView_SetBkColor(Handle, ColorToRGB(Color));
+  ListView_SetTextBkColor(Handle, ColorToRGB(Color));
   ListView_SetTextColor(Handle, ColorToRGB(FontColor));
 
 end;
@@ -828,8 +828,8 @@ begin
         if (TreeView_GetBkColor(Handle) <> COLORREF(Color)) then
         begin
           // SetWindowTheme(Handle, '', '');
-          TreeView_SetBkColor(Handle, Color);
-          TreeView_SetTextColor(Handle, FontColor);
+          TreeView_SetBkColor(Handle, ColorToRGB(Color));
+          TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
         end;
         Message.Result := CallDefaultProc(Message);
         Exit;

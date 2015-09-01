@@ -257,6 +257,8 @@ begin
     Result := StyleServices.GetSystemColor(clHighlight);
 end;
 
+
+
 function GetStyleBtnTextColor : TColor;
 begin
   if not StyleServices.GetElementColor(StyleServices.GetElementDetails(tbPushButtonNormal), ecTextColor, Result) then
@@ -549,7 +551,7 @@ begin
           DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clWindow));
           //Windows Vista - W7
           if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
-            SetTextColor(hdc, StyleServices.GetSystemColor(clWindowText));
+            SetTextColor(hdc, ColorToRGB(StyleServices.GetSystemColor(clWindowText)));
           Exit(S_OK);
          end;
    end;
@@ -963,7 +965,6 @@ end;
 function UxTheme_DatePicker(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
-  SaveIndex : Integer;
   LRect : TRect;
   LColor : TColor;
 begin
@@ -996,40 +997,31 @@ begin
           case iStateId of
             DPSCBR_NORMAL   :
                              begin
-                               LDetails:=StyleServices.GetElementDetails(ttbButtonNormal);//StyleServices.GetElementDetails(tcDropDownButtonNormal);
-                               LColor:=StyleServices.GetSystemColor(clBtnText);
+                               LColor:=StyleServices.GetSystemColor(clWindowText);
                              end;
 
             DPSCBR_HOT      :
                              begin
-                               LDetails:=StyleServices.GetElementDetails(ttbButtonHot);//StyleServices.GetElementDetails(tcDropDownButtonNormal);
-                               LColor:=GetStyleHighLightColor;
+                               LColor:= GetStyleHighLightColor;
                              end;
 
             DPSCBR_PRESSED  :
                              begin
-                               LDetails:=StyleServices.GetElementDetails(ttbButtonPressed);//StyleServices.GetElementDetails(tcDropDownButtonNormal);
-                               LColor:=GetStyleHighLightColor;
+                               LColor:= GetStyleHighLightColor;
                              end;
 
             DPSCBR_DISABLED :
                              begin
-                               LDetails:=StyleServices.GetElementDetails(ttbButtonDisabled);//StyleServices.GetElementDetails(tcDropDownButtonNormal);
                                LColor:=StyleServices.GetSystemColor(clGrayText);
                              end;
 
-            else
-              LColor:=StyleServices.GetSystemColor(clBtnText);
+          else
+              LColor:=StyleServices.GetSystemColor(clWindowText);
           end;
 
-          SaveIndex := SaveDC(hdc);
-          try
-           LRect:=pRect;
-           InflateRect(LRect, -1, -1);
-           StyleServices.DrawElement(hdc, LDetails, LRect, nil);
-          finally
-            RestoreDC(hdc, SaveIndex);
-          end;
+          LRect:=pRect;
+          InflateRect(LRect, -2, -2);
+          DrawStyleFillRect(hdc, LRect, StyleServices.GetStyleColor(TStyleColor.scEdit));
 
           LRect:=Rect(0, 0, 14, 14);
           RectVCenter(LRect, pRect);
@@ -1185,7 +1177,7 @@ begin
                                                         try
                                                           LCanvas.Handle:=hdc;
                                                           LRect:=pRect;
-                                                          GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetSystemColor(clWindow),
+                                                          GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetStyleColor(TStyleColor.scEdit){StyleServices.GetSystemColor(clWindow)},
                                                           LRect, TGradientDirection.gdHorizontal);
                                                         finally
                                                           LCanvas.Handle:=0;
@@ -1207,7 +1199,7 @@ begin
                                                         try
                                                           LCanvas.Handle:=hdc;
                                                           LRect:=pRect;
-                                                          GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetSystemColor(clWindow),
+                                                          GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetStyleColor(TStyleColor.scEdit),
                                                           LRect, TGradientDirection.gdHorizontal);
                                                         finally
                                                           LCanvas.Handle:=0;
@@ -1326,6 +1318,8 @@ begin
 end;
 
 function UxTheme_ComboBox(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
+var
+  LRect : TRect;
 begin
    case iPartId of
       CP_BORDER :
@@ -1340,11 +1334,13 @@ begin
 
       CP_DROPDOWNBUTTONRIGHT :
         begin
+          LRect:=pRect;
+          InflateRect(LRect, -2, -2);
           case iStateId of
-            CBXSR_NORMAL   : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonNormal), pRect);  Exit(S_OK); end;
-            CBXSR_HOT      : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonHot), pRect);  Exit(S_OK); end;
-            CBXSR_PRESSED  : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonPressed), pRect);  Exit(S_OK); end;
-            CBXSR_DISABLED : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonDisabled), pRect);  Exit(S_OK); end;
+            CBXSR_NORMAL   : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonNormal), LRect);  Exit(S_OK); end;
+            CBXSR_HOT      : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonHot), LRect);  Exit(S_OK); end;
+            CBXSR_PRESSED  : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonPressed), LRect);  Exit(S_OK); end;
+            CBXSR_DISABLED : begin DrawStyleElement(hdc, StyleServices.GetElementDetails(tcDropDownButtonDisabled), LRect);  Exit(S_OK); end;
           end;
         end;
    end;
@@ -2129,9 +2125,9 @@ end;
     LogFont.lfFaceName := 'Marlett';
 
     if Disabled then
-      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
+      oldColor := ColorToRGB(StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled))
     else
-      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+      oldColor := ColorToRGB(StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal));
 
     AFont := CreateFontIndirect(LogFont);
     if AFont <> 0 then

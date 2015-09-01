@@ -637,16 +637,16 @@ function TSysStyleHook.DrawText(DC: HDC; Details: TThemedElementDetails; S: Stri
 var
   DrawFlags: Cardinal;
   SaveIndex: Integer;
-  sColor: TColor;
+  LColor: TColor;
 begin
   SaveIndex := SaveDC(DC);
   try
     SetBkMode(DC, TRANSPARENT);
-    if not StyleServices.GetElementColor(Details, ecTextColor, sColor) then
-      sColor := FontColor;
+    if not StyleServices.GetElementColor(Details, ecTextColor, LColor) then
+      LColor := FontColor;
     if not OverrideFont then
-      sColor := FontColor;
-    SetTextColor(DC, sColor);
+      LColor := FontColor;
+    SetTextColor(DC, ColorToRGB(LColor));
     DrawFlags := TTextFormatFlags(Flags);
     Result := Winapi.Windows.DrawText(DC, S, -1, R, DrawFlags);
   finally
@@ -660,16 +660,16 @@ var
   DrawFlags: Cardinal;
   DrawParams: TDrawTextParams;
   SaveIndex: Integer;
-  sColor: TColor;
+  LColor: TColor;
 begin
   SaveIndex := SaveDC(DC);
   try
     SetBkMode(DC, TRANSPARENT);
-    if not StyleServices.GetElementColor(Details, ecTextColor, sColor) then
-      sColor := FontColor;
+    if not StyleServices.GetElementColor(Details, ecTextColor, LColor) then
+      LColor := FontColor;
     if not OverrideFont then
-      sColor := FontColor;
-    SetTextColor(DC, sColor);
+      LColor := FontColor;
+    SetTextColor(DC, ColorToRGB(LColor));
     DrawRect := R;
     DrawFlags := DT_END_ELLIPSIS or DT_WORDBREAK or DT_EDITCONTROL or DT_CENTER;
     if DrawFlags <> 0 then

@@ -263,7 +263,6 @@ uses
   CommCtrl,
   Vcl.Styles,
   Vcl.Themes,
-  Vcl.Styles.OwnerDrawFix,
   uVclStylesFix,
   uHueSat,
   EclipseThemes,
@@ -960,63 +959,59 @@ Var
 begin
  NCControls:=TNCControls.Create(Self);
  NCControls.ShowSystemMenu:=False;
- NCControls.List.Add(TNCButton.Create(NCControls));
- NCControls.List[0].Style := nsSplitButton;
- NCControls.List[0].ImageStyle := isGrayHot;
- NCControls.List[0].Images := ImageList2;
- NCControls.List[0].ImageIndex := 0;
- NCControls.List[0].BoundsRect := Rect(5,5,75,25);
- NCControls.List[0].Caption := 'Menu';
- NCControls.List[0].DropDownMenu:= PopupMenuThemes;
- //NCControls.List[0].OnClick := ButtonNCClick;
+ NCControls.Images  := ImageList2;
+ NCControls.ButtonsList.Add;
+ NCControls[0].Style := nsSplitButton;
+ NCControls[0].ImageStyle := isGrayHot;
+ NCControls[0].ImageIndex := 0;
+ NCControls[0].BoundsRect := Rect(5,5,75,25);
+ NCControls[0].Caption := 'Menu';
+ NCControls[0].DropDownMenu:= PopupMenuThemes;
+ //NCControls[0].OnClick := ButtonNCClick;
 
- NCControls.List.Add(TNCButton.Create(NCControls));
- NCControls.List[1].Style := nsTranparent;
- NCControls.List[1].ImageStyle := isGrayHot;
- NCControls.List[1].Images := ImageList2;
- NCControls.List[1].ImageIndex := 3;
- NCControls.List[1].BoundsRect := Rect(78,5,98,25);
- NCControls.List[1].Name       := 'NCHue';
- NCControls.List[1].ShowHint   := True;
- NCControls.List[1].Hint       := 'Change Hue/Saturation';
- NCControls.List[1].Caption := '';
- NCControls.List[1].OnClick := ImageHueClick;
+ NCControls.ButtonsList.Add;
+ NCControls[1].Style := nsTranparent;
+ NCControls[1].ImageStyle := isGrayHot;
+ NCControls[1].ImageIndex := 3;
+ NCControls[1].BoundsRect := Rect(78,5,98,25);
+ NCControls[1].Name       := 'NCHue';
+ NCControls[1].ShowHint   := True;
+ NCControls[1].Hint       := 'Change Hue/Saturation';
+ NCControls[1].Caption := '';
+ NCControls[1].OnClick := ImageHueClick;
 
- NCControls.List.Add(TNCButton.Create(NCControls));
- NCControls.List[2].Style := nsTranparent;
- NCControls.List[2].ImageStyle := isGrayHot;
- NCControls.List[2].Images := ImageList2;
- NCControls.List[2].ImageIndex := 2;
- NCControls.List[2].BoundsRect := Rect(101,5,121,25);
- NCControls.List[2].Name       := 'NCConf';
- NCControls.List[2].ShowHint   := True;
- NCControls.List[2].Hint       := 'Settings';
- NCControls.List[2].Caption := '';
- NCControls.List[2].OnClick := ImageConfClick;
+ NCControls.ButtonsList.Add;
+ NCControls[2].Style := nsTranparent;
+ NCControls[2].ImageStyle := isGrayHot;
+ NCControls[2].ImageIndex := 2;
+ NCControls[2].BoundsRect := Rect(101,5,121,25);
+ NCControls[2].Name       := 'NCConf';
+ NCControls[2].ShowHint   := True;
+ NCControls[2].Hint       := 'Settings';
+ NCControls[2].Caption := '';
+ NCControls[2].OnClick := ImageConfClick;
 
- NCControls.List.Add(TNCButton.Create(NCControls));
- NCControls.List[3].Style := nsTranparent;
- NCControls.List[3].ImageStyle := isGrayHot;
- NCControls.List[3].Images := ImageList2;
- NCControls.List[3].ImageIndex := 1;
- NCControls.List[3].BoundsRect := Rect(124,5,144,25);
- NCControls.List[3].Name       := 'NCBug';
- NCControls.List[3].ShowHint   := True;
- NCControls.List[3].Hint       := 'Report Bugs';
- NCControls.List[3].Caption := '';
- NCControls.List[3].OnClick := ImageBugClick;
+ NCControls.ButtonsList.Add;
+ NCControls[3].Style := nsTranparent;
+ NCControls[3].ImageStyle := isGrayHot;
+ NCControls[3].ImageIndex := 1;
+ NCControls[3].BoundsRect := Rect(124,5,144,25);
+ NCControls[3].Name       := 'NCBug';
+ NCControls[3].ShowHint   := True;
+ NCControls[3].Hint       := 'Report Bugs';
+ NCControls[3].Caption := '';
+ NCControls[3].OnClick := ImageBugClick;
 
- NCControls.List.Add(TNCButton.Create(NCControls));
- NCControls.List[4].Style := nsTranparent;
- NCControls.List[4].ImageStyle := isGrayHot;
- NCControls.List[4].Images := ImageList2;
- NCControls.List[4].ImageIndex := 4;
- NCControls.List[4].BoundsRect := Rect(147,5,167,25);
- NCControls.List[4].Name       := 'NCUpdate';
- NCControls.List[4].ShowHint   := True;
- NCControls.List[4].Hint       := 'Check for updates';
- NCControls.List[4].Caption    := '';
- NCControls.List[4].OnClick := ImageUpdateClick;
+ NCControls.ButtonsList.Add;
+ NCControls[4].Style := nsTranparent;
+ NCControls[4].ImageStyle := isGrayHot;
+ NCControls[4].ImageIndex := 4;
+ NCControls[4].BoundsRect := Rect(147,5,167,25);
+ NCControls[4].Name       := 'NCUpdate';
+ NCControls[4].ShowHint   := True;
+ NCControls[4].Hint       := 'Check for updates';
+ NCControls[4].Caption    := '';
+ NCControls[4].OnClick := ImageUpdateClick;
 
 
   IDEsList:=TList<TDelphiVersionData>.Create;
@@ -1486,8 +1481,8 @@ begin
 //    CbIDEThemeImport.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
 
 //    LvThemes.OwnerDraw  :=True;
-//    LvThemes.OnDrawItem :=VclStylesOwnerDrawFix.ListViewDrawItem;
-//    LvThemes.OnMouseDown:=VclStylesOwnerDrawFix.ListViewMouseDown;
+//    LvThemes.OnDrawItem :=VclStylesOwnerDrawFixViewDrawItem;
+//    LvThemes.OnMouseDown:=VclStylesOwnerDrawFixViewMouseDown;
 //  end;
 
 

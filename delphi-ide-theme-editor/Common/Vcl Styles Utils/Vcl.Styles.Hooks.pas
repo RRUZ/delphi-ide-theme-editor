@@ -534,7 +534,8 @@ begin
              :
               begin
                 //OutputDebugString(PChar('GetModuleName '+GetModuleName(hInst)));
-                Exit(AwesomeFont.GetIcon(fa_check_square_o, 16, 16, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
+                Exit(AwesomeFont.GetIcon(fa_thumb_tack, 16, 16, 12, 12, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
+                //Exit(AwesomeFont.GetIcon(fa_check_square_o, 16, 16, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
               end;
      end;
 
