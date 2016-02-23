@@ -133,7 +133,7 @@ uses
   TimeSpan,
   IdURI,
   IdSSLOpenSSL,
-  ComObj,
+  System.Win.ComObj,
   IdHTTP,
   ShellAPI,
   //System.UITypes,

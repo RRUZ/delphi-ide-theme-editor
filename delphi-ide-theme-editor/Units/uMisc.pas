@@ -67,7 +67,7 @@ uses
   ShlObj,
   PsAPI,
   tlhelp32,
-  ComObj,
+  System.Win.ComObj,
   CommCtrl,
   StrUtils,
   ShellAPI,
@@ -77,7 +77,7 @@ uses
   System.UITypes,
  {$ENDIF}
   SHFolder,
-  Registry,
+  System.Win.Registry,
   SysUtils;
 
 Const
