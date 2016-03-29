@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit uHueSat
 // unit uHueSat  for the Delphi IDE Theme Editor
@@ -14,11 +14,10 @@
 // The Original Code is uHueSat.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
-
+// **************************************************************************************************
 
 unit uHueSat;
 
@@ -38,21 +37,21 @@ uses
 
 type
   TFrmHueSat = class(TForm)
-    BtnApply:    TButton;
-    Bevel1:      TBevel;
+    BtnApply: TButton;
+    Bevel1: TBevel;
     TrackBarHue: TTrackBar;
     ButtonLightness: TButton;
     TrackBarLightness: TTrackBar;
     ButtonSaturation: TButton;
     TrackBarSaturation: TTrackBar;
-    ButtonHue:   TButton;
-    Bevel3:      TBevel;
-    Label3:      TLabel;
-    Bevel2:      TBevel;
-    Label2:      TLabel;
-    Bevel4:      TBevel;
-    Label1:      TLabel;
-    BtnSaveAs:   TButton;
+    ButtonHue: TButton;
+    Bevel3: TBevel;
+    Label3: TLabel;
+    Bevel2: TBevel;
+    Label2: TLabel;
+    Bevel4: TBevel;
+    Label1: TLabel;
+    BtnSaveAs: TButton;
     UpDownHue: TUpDown;
     EditHue: TEdit;
     ImageList1: TImageList;
@@ -84,7 +83,7 @@ type
     FSettings: TSettings;
     FDelphiVersion: TDelphiVersions;
     FTheme: TIDETheme;
-    FReloadThemes: boolean;
+    FReloadThemes: Boolean;
     procedure Saturation(Value: integer);
     procedure Lightness(Value: integer);
     procedure Hue(Value: integer);
@@ -95,11 +94,9 @@ type
     property ThemeName: string Read FThemeName Write FThemeName;
     property Theme: TIDETheme Read FTheme Write SetTheme;
     property Settings: TSettings Read FSettings Write FSettings;
-    property Reloadthemes: boolean Read FReloadThemes;
+    property Reloadthemes: Boolean Read FReloadThemes;
     procedure init;
   end;
-
-
 
 implementation
 
@@ -108,28 +105,25 @@ uses
 
 {$R *.dfm}
 
-
-procedure ApplyHueSaturationToIDETheme(var ATheme: TIDETheme;
-  Hue, Saturation, Lightness: integer);
+procedure ApplyHueSaturationToIDETheme(var ATheme: TIDETheme; Hue, Saturation, Lightness: integer);
 var
-  Element:   TIDEHighlightElements;
+  Element: TIDEHighlightElements;
   ColorList: TColorList;
 begin
 
   ColorList := TColorList.Create;
   try
 
-     {
-     InvalidBreakLine   : Done:=SetCbElement(TIDEHighlightElements.InvalidBreak);
-     ExecutionPointLine : Done:=SetCbElement(TIDEHighlightElements.ExecutionPoint);
-     EnabledBreakLine   : Done:=SetCbElement(TIDEHighlightElements.EnabledBreak);
-     DisabledBreakLine  : Done:=SetCbElement(TIDEHighlightElements.DisabledBreak);
-     ErrorLineLine      : Done:=SetCbElement(TIDEHighlightElements.ErrorLine);
-     }
+    {
+      InvalidBreakLine   : Done:=SetCbElement(TIDEHighlightElements.InvalidBreak);
+      ExecutionPointLine : Done:=SetCbElement(TIDEHighlightElements.ExecutionPoint);
+      EnabledBreakLine   : Done:=SetCbElement(TIDEHighlightElements.EnabledBreak);
+      DisabledBreakLine  : Done:=SetCbElement(TIDEHighlightElements.DisabledBreak);
+      ErrorLineLine      : Done:=SetCbElement(TIDEHighlightElements.ErrorLine);
+    }
 
-    for Element in [Low(TIDEHighlightElements)..High(TIDEHighlightElements)] do
-      if not (Element in [InvalidBreak, ExecutionPoint, EnabledBreak,
-        DisabledBreak, ErrorLine]) then
+    for Element in [Low(TIDEHighlightElements) .. High(TIDEHighlightElements)] do
+      if not(Element in [InvalidBreak, ExecutionPoint, EnabledBreak, DisabledBreak, ErrorLine]) then
       begin
         ColorList.Clear;
         ColorList.Add(StringToColor(ATheme[Element].ForegroundColorNew));
@@ -137,10 +131,8 @@ begin
 
         if Hue >= 0 then
           _Hue(ColorList, Hue)
-        else
-        if Hue < 0 then
+        else if Hue < 0 then
           _Hue(ColorList, 360 - Abs(Hue));
-
 
         if Saturation <> 0 then
           _Saturation(ColorList, (255 - ((Saturation * 255) div MaxSat)));
@@ -160,8 +152,6 @@ begin
     ColorList.Free;
   end;
 end;
-
-
 
 procedure GetColorsSynEdit(SynEditor: TSynEdit; ColorList: TColorList);
 
@@ -200,14 +190,13 @@ begin
   AddColorSynAttr(TSynPasSyn(SynEditor.Highlighter).SymbolAttri);
 end;
 
-
 procedure SetColorsSynEdit(SynEditor: TSynEdit; OldColorList, NewColorList: TColorList);
 var
   index: integer;
 
   function GetColor(OldColor: TColor): TColor;
   begin
-    //Result:=NewColorList[OldColorList.IndexOf(OldColor)];
+    // Result:=NewColorList[OldColorList.IndexOf(OldColor)];
     Result := NewColorList[Index];
     Inc(index);
   end;
@@ -244,58 +233,51 @@ end;
 procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
 begin
   try
-    if MessageDlg(
-      Format(
-      'Do you want overwrite the current theme "%s" with the changes made to hue/saturation?',
-      [FThemeName]), mtConfirmation, [mbYes, mbNo], 0) = mrYes  then
+    if MessageDlg(Format('Do you want overwrite the current theme "%s" with the changes made to hue/saturation?', [FThemeName]),
+      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
     begin
-      ApplyHueSaturationToIDETheme(FTheme, Trunc(UpDownHue.Position),
-        Trunc(UpDownSat.Position), Trunc(UpDownLight.Position));
-      //SaveDelphiIDEThemeToXmlFile(DelphiVersion, FTheme, FSettings.ThemePath, FThemeName);
+      ApplyHueSaturationToIDETheme(FTheme, Trunc(UpDownHue.Position), Trunc(UpDownSat.Position), Trunc(UpDownLight.Position));
+      // SaveDelphiIDEThemeToXmlFile(DelphiVersion, FTheme, FSettings.ThemePath, FThemeName);
       SaveDelphiIDEThemeToXmlFile(FTheme, FSettings.ThemePath, FThemeName);
       ShowMessage(Format('Changes saved to the theme "%s"', [FThemeName]));
     end;
   except
     on E: Exception do
-      ShowMessage(Format('Error saving theme - Message : %s : Trace %s',
-        [E.Message, E.StackTrace]));
+      ShowMessage(Format('Error saving theme - Message : %s : Trace %s', [E.Message, E.StackTrace]));
   end;
 end;
 
 procedure TFrmHueSat.BtnSaveAsClick(Sender: TObject);
 var
   NewThemeName: string;
-  NewTheme:     TIDETheme;
+  NewTheme: TIDETheme;
 begin
   try
-    NewThemeName := InputBox('Create New Delphi IDE Theme',
-      'Enter the name for the new theme', '');
+    NewThemeName := InputBox('Create New Delphi IDE Theme', 'Enter the name for the new theme', '');
     if NewThemeName <> '' then
     begin
       NewTheme := FTheme;
-      ApplyHueSaturationToIDETheme(NewTheme, Trunc(UpDownHue.Position),
-        Trunc(UpDownSat.Position), Trunc(UpDownLight.Position));
-      //SaveDelphiIDEThemeToXmlFile(DelphiVersion, NewTheme, FSettings.ThemePath, NewThemeName);
+      ApplyHueSaturationToIDETheme(NewTheme, Trunc(UpDownHue.Position), Trunc(UpDownSat.Position), Trunc(UpDownLight.Position));
+      // SaveDelphiIDEThemeToXmlFile(DelphiVersion, NewTheme, FSettings.ThemePath, NewThemeName);
       SaveDelphiIDEThemeToXmlFile(NewTheme, FSettings.ThemePath, NewThemeName);
       ShowMessage(Format('The theme "%s" was created', [NewThemeName]));
       FReloadThemes := True;
     end;
   except
     on E: Exception do
-      ShowMessage(Format('Error creating new theme - Message : %s : Trace %s',
-        [E.Message, E.StackTrace]));
+      ShowMessage(Format('Error creating new theme - Message : %s : Trace %s', [E.Message, E.StackTrace]));
   end;
 end;
 
 procedure TFrmHueSat.ButtonHueClick(Sender: TObject);
 begin
-  UpDownHue.Position   := DefHue;
+  UpDownHue.Position := DefHue;
   TrackBarHue.Position := DefHue;
 end;
 
 procedure TFrmHueSat.ButtonLightnessClick(Sender: TObject);
 begin
-  UpDownLight.Position       := DefLig;
+  UpDownLight.Position := DefLig;
   TrackBarLightness.Position := DefLig;
 end;
 
@@ -307,61 +289,56 @@ end;
 
 procedure TFrmHueSat.EditHueExit(Sender: TObject);
 Var
-  Value : Integer;
-  Allow : Boolean;
+  Value: integer;
+  Allow: Boolean;
 begin
   if TryStrToInt(EditHue.Text, Value) then
   begin
-    if Value< UpDownHue.Min then
-     EditHue.Text:=IntToStr(UpDownHue.Min)
-    else
-    if Value> UpDownHue.Max then
-     EditHue.Text:=IntToStr(UpDownHue.Max);
+    if Value < UpDownHue.Min then
+      EditHue.Text := IntToStr(UpDownHue.Min)
+    else if Value > UpDownHue.Max then
+      EditHue.Text := IntToStr(UpDownHue.Max);
 
-     UpDownHueChanging(nil, Allow);
+    UpDownHueChanging(nil, Allow);
   end;
 end;
 
 procedure TFrmHueSat.EditLightExit(Sender: TObject);
 Var
-  Value : Integer;
-  Allow : Boolean;
+  Value: integer;
+  Allow: Boolean;
 begin
   if TryStrToInt(EditLight.Text, Value) then
   begin
-    if Value< UpDownLight.Min then
-     EditLight.Text:=IntToStr(UpDownLight.Min)
-    else
-    if Value> UpDownLight.Max then
-     EditLight.Text:=IntToStr(UpDownLight.Max);
+    if Value < UpDownLight.Min then
+      EditLight.Text := IntToStr(UpDownLight.Min)
+    else if Value > UpDownLight.Max then
+      EditLight.Text := IntToStr(UpDownLight.Max);
 
     UpDownLightChanging(nil, Allow);
   end;
 end;
 
-
 procedure TFrmHueSat.EditSatExit(Sender: TObject);
 Var
-  Value : Integer;
-  Allow : Boolean;
+  Value: integer;
+  Allow: Boolean;
 begin
   if TryStrToInt(EditSat.Text, Value) then
   begin
-    if Value< UpDownSat.Min then
-     EditSat.Text:=IntToStr(UpDownSat.Min)
-    else
-    if Value> UpDownSat.Max then
-     EditSat.Text:=IntToStr(UpDownSat.Max);
+    if Value < UpDownSat.Min then
+      EditSat.Text := IntToStr(UpDownSat.Min)
+    else if Value > UpDownSat.Max then
+      EditSat.Text := IntToStr(UpDownSat.Max);
 
     UpDownSatChanging(nil, Allow);
   end;
 end;
 
-
 procedure TFrmHueSat.FormCreate(Sender: TObject);
 begin
   FReloadThemes := False;
-  FColorList    := TColorList.Create;
+  FColorList := TColorList.Create;
   FHueColorList := TColorList.Create;
 end;
 
@@ -380,8 +357,7 @@ begin
     Colors.AddRange(FColorList);
     if Value >= 0 then
       _Hue(Colors, Value)
-    else
-    if Value < 0 then
+    else if Value < 0 then
       _Hue(Colors, 360 - Abs(Value));
 
     SetColorsSynEdit(SynEditor, FHueColorList, Colors);
@@ -446,8 +422,8 @@ end;
 
 procedure TFrmHueSat.TrackBarHueChange(Sender: TObject);
 begin
-  //JvSpinEditHue.Value := TrackBarHue.Position;
-  //Hue(Trunc(JvSpinEditHue.Value));
+  // JvSpinEditHue.Value := TrackBarHue.Position;
+  // Hue(Trunc(JvSpinEditHue.Value));
   UpDownHue.Position := TrackBarHue.Position;
   Hue(Trunc(UpDownHue.Position));
 
@@ -470,25 +446,22 @@ begin
   Saturation(Trunc(UpDownSat.Position));
 end;
 
-procedure TFrmHueSat.UpDownHueChanging(Sender: TObject;
-  var AllowChange: Boolean);
+procedure TFrmHueSat.UpDownHueChanging(Sender: TObject; var AllowChange: Boolean);
 begin
   TrackBarHue.Position := UpDownHue.Position;
-  AllowChange:=True;
+  AllowChange := True;
 end;
 
-procedure TFrmHueSat.UpDownLightChanging(Sender: TObject;
-  var AllowChange: Boolean);
+procedure TFrmHueSat.UpDownLightChanging(Sender: TObject; var AllowChange: Boolean);
 begin
   TrackBarLightness.Position := UpDownLight.Position;
-  AllowChange:=True;
+  AllowChange := True;
 end;
 
-procedure TFrmHueSat.UpDownSatChanging(Sender: TObject;
-  var AllowChange: Boolean);
+procedure TFrmHueSat.UpDownSatChanging(Sender: TObject; var AllowChange: Boolean);
 begin
   TrackBarSaturation.Position := UpDownSat.Position;
-  AllowChange:=True;
+  AllowChange := True;
 end;
 
 end.

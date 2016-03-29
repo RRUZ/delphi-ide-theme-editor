@@ -316,7 +316,7 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 begin
-  FSilent   := (ParamCount>1) and (SameText(ParamStr(2),'-Silent'));
+  FSilent   := (ParamCount>1) and (FindCmdLineSwitch('silent', true));
   FRemoteVersion:='';
   FErrorUpdate  :=False;
   FCheckExternal:=False;

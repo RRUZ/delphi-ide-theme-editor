@@ -20,8 +20,7 @@
 //************************************************************************************************
 unit Vcl.Styles.Utils.ComCtrls;
 
-
-{$DEFINE USE_Vcl.Styles.Hooks}
+{$I VCL.Styles.Utils.inc}
 
 interface
 
@@ -813,6 +812,7 @@ begin
     Color := StyleServices.GetStyleColor(scTreeView)
   else
     Color := clWhite;
+
   if OverrideFont then
     FontColor := StyleServices.GetSystemColor(clWindowText)
   else
@@ -825,12 +825,13 @@ begin
     WM_ERASEBKGND:
       begin
         UpdateColors;
-        if (TreeView_GetBkColor(Handle) <> COLORREF(Color)) then
-        begin
-          // SetWindowTheme(Handle, '', '');
+
+        if (Longint(TreeView_GetBkColor(Handle))<>ColorToRGB(Color)) then
           TreeView_SetBkColor(Handle, ColorToRGB(Color));
-          TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
-        end;
+
+        if (Longint(TreeView_GetTextColor(Handle))<>ColorToRGB(FontColor)) then
+         TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
+
         Message.Result := CallDefaultProc(Message);
         Exit;
       end;

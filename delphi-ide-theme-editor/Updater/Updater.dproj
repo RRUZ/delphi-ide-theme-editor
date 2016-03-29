@@ -4,7 +4,7 @@
         <ProjectVersion>14.6</ProjectVersion>
         <MainSource>Updater.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <AppType>Application</AppType>
         <FrameworkType>VCL</FrameworkType>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -46,7 +46,7 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>C:\Delphi\Remote  Desktop\Client\Win32\Debug\MultiplePlus.exe</Debugger_RunParams>
+        <Debugger_RunParams>&quot;C:\Delphi\Remote  Desktop\Client\Win32\Debug\MultiplePlus.exe&quot; -silent -style:&quot;C:\Dephi\github\delphi-ide-theme-editor\delphi-ide-theme-editor\Styles\glossy.vsf&quot;</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>

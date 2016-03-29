@@ -378,7 +378,7 @@ procedure TNCControls.SetActiveTabButtonIndex(const Value: Integer);
  end;
 
 var
-  lmax, i : Integer;
+  lmax : Integer;
 begin
    lmax:=GetMaxTabIndex;
    if (Value<>FActiveTabButtonIndex) and (Value>=0) and (lmax>=0) and (Value<=lmax) then
@@ -556,13 +556,113 @@ end;
 procedure TNCButton.DrawButton(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
 var
   Details:  TThemedElementDetails;
-  DrawRect, LRect, LRectAwesome : TRect;
+  ButtonRect, DrawRect, LRect, LRectAwesome : TRect;
   IW, IH, IX, IY: Integer;
   SaveIndex: Integer;
   X, Y, I, LImgIndex: Integer;
   BCaption: String;
   LStyleServices : TCustomStyleServices;
   LColor, LColor1, LColor2, ThemeTextColor : TColor;
+
+  function GetBorderSize: TRect;
+  var
+    Size: TSize;
+    Details: TThemedElementDetails;
+    Detail: TThemedWindow;
+  begin
+    Result := Rect(0, 0, 0, 0);
+    if NCControls.Form.BorderStyle = bsNone then Exit;
+
+    if not LStyleServices.Available then Exit;
+    {caption height}
+    if (NCControls.Form.BorderStyle <> bsToolWindow) and
+       (NCControls.Form.BorderStyle <> bsSizeToolWin) then
+      Detail := twCaptionActive
+    else
+      Detail := twSmallCaptionActive;
+    Details := LStyleServices.GetElementDetails(Detail);
+    LStyleServices.GetElementSize(0, Details, esActual, Size);
+    Result.Top := Size.cy;
+    {left border width}
+    if (NCControls.Form.BorderStyle <> bsToolWindow) and
+       (NCControls.Form.BorderStyle <> bsSizeToolWin) then
+      Detail := twFrameLeftActive
+    else
+      Detail := twSmallFrameLeftActive;
+    Details := LStyleServices.GetElementDetails(Detail);
+    LStyleServices.GetElementSize(0, Details, esActual, Size);
+    Result.Left := Size.cx;
+    {right border width}
+    if (NCControls.Form.BorderStyle <> bsToolWindow) and
+       (NCControls.Form.BorderStyle <> bsSizeToolWin) then
+      Detail := twFrameRightActive
+    else
+      Detail := twSmallFrameRightActive;
+    Details := LStyleServices.GetElementDetails(Detail);
+    LStyleServices.GetElementSize(0, Details, esActual, Size);
+    Result.Right := Size.cx;
+    {bottom border height}
+    if (FNCControls.Form.BorderStyle <> bsToolWindow) and
+       (NCControls.Form.BorderStyle <> bsSizeToolWin) then
+      Detail := twFrameBottomActive
+    else
+      Detail := twSmallFrameBottomActive;
+    Details := LStyleServices.GetElementDetails(Detail);
+    LStyleServices.GetElementSize(0, Details, esActual, Size);
+    Result.Bottom := Size.cy;
+  end;
+
+  function GetTopOffset: Integer;
+  var
+    P: TPoint;
+  begin
+    P.X := NCControls.Form.Left + NCControls.Form.Width div 2;
+    P.Y := NCControls.Form.Top + NCControls.Form.Height div 2;
+    Result := Screen.MonitorFromPoint(P).WorkareaRect.Top;
+    if NCControls.Form.Top < Result then Result := Result - NCControls.Form.Top else Result := 0;
+  end;
+
+  procedure CorrectRightButtonRect(var AButtonRect: TRect);
+  var
+    TopOffset, RightOffset: Integer;
+    BS: TRect;
+  begin
+    if (NCControls.Form.WindowState = wsMaximized) and (TCustomFormClass(NCControls.Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
+    begin
+      BS := GetBorderSize;
+      TopOffset := GetTopOffset;
+      RightOffset := -BS.Right;
+      if ButtonRect.Top < TopOffset then
+      begin
+        TopOffset := TopOffset - ButtonRect.Top;
+        OffsetRect(ButtonRect, RightOffset, TopOffset);
+        TopOffset := ButtonRect.Bottom - BS.Top;
+        if TopOffset > 0 then
+          OffsetRect(ButtonRect, 0, -TopOffset);
+      end;
+    end;
+  end;
+
+  procedure CorrectLeftButtonRect(var AButtonRect: TRect);
+  var
+    TopOffset, LeftOffset: Integer;
+    BS: TRect;
+  begin
+    if (NCControls.Form.WindowState = wsMaximized) and (TCustomFormClass(NCControls.Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
+    begin
+      BS := GetBorderSize;
+      TopOffset := GetTopOffset;
+      LeftOffset := BS.Left;
+      if ButtonRect.Top < TopOffset then
+      begin
+        TopOffset := TopOffset - ButtonRect.Top;
+        OffsetRect(ButtonRect, LeftOffset, TopOffset);
+        TopOffset := ButtonRect.Bottom - BS.Top;
+        if TopOffset > 0 then
+          OffsetRect(ButtonRect, 0, -TopOffset);
+      end;
+    end;
+  end;
 
 begin
 
@@ -594,13 +694,21 @@ begin
     Details := LStyleServices.GetElementDetails(tbPushButtonNormal);
 
   DrawRect := BoundsRect;//ClientRect;
+
   if FStyle=nsTab then
+  if (NCControls.Form.WindowState = wsMaximized) and (TCustomFormClass(NCControls.Form).FormStyle <> fsMDIChild) then
+  else
     DrawRect.Height := NCControls.FormBorderSize.Top- DrawRect.Top;
 
   if FStyle=nsAlpha then
   begin
     LColor := ACanvas.Pen.Color;
     try
+
+      ButtonRect := DrawRect;
+      {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+        CorrectLeftButtonRect(ButtonRect);
+      DrawRect := ButtonRect;
 
       if AMouseInControl then
       begin
@@ -617,12 +725,13 @@ begin
         ACanvas.Pen.Color:=FAlphaColor;
       end;
 
-      //OutputDebugString(PChar(Format('%s ACanvas.Pen.Color %s',[formatDateTime('hh:nn:ss.zzz', Now), ColorToString(ACanvas.Pen.Color)])));
 
+
+      //OutputDebugString(PChar(Format('%s ACanvas.Pen.Color %s',[formatDateTime('hh:nn:ss.zzz', Now), ColorToString(ACanvas.Pen.Color)])));
       LRect:=DrawRect;
+
       ACanvas.Brush.Style:=bsSolid;
       ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-
     finally
       ACanvas.Pen.Color:=LColor;
     end;
@@ -632,6 +741,13 @@ begin
   begin
     LColor := ACanvas.Pen.Color;
     try
+
+      ButtonRect := DrawRect;
+      {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+        CorrectLeftButtonRect(ButtonRect);
+      DrawRect := ButtonRect;
+
+
       if AMouseInControl then
         GradientFillCanvas(ACanvas, FEndColor, FStartColor, DrawRect, FDirection)
       else
@@ -643,6 +759,8 @@ begin
        ACanvas.Pen.Color:=FStartColor;
 
       ACanvas.Brush.Style:=bsClear;
+
+
       LRect:=DrawRect;
       ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
     finally
@@ -663,16 +781,32 @@ begin
     else
      Details := LStyleServices.GetElementDetails(ttTabItemNormal);
 
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+    DrawRect := ButtonRect;
+
     LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
   end
   else
   if FStyle=nsEdge then
   begin
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+    DrawRect := ButtonRect;
+
     LStyleServices.DrawElement(ACanvas.Handle, LStyleServices.GetElementDetails(tbGroupBoxNormal), DrawRect);
   end
   else
   if FStyle=nsFrame then
   begin
+
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+    DrawRect := ButtonRect;
+
       LColor1 := LStyleServices.GetSystemColor(clBtnShadow);
       LColor2 := LStyleServices.GetSystemColor(clBtnHighlight);
 
@@ -691,19 +825,36 @@ begin
   else
   if Enabled and (FStyle in [nsTranparent, nsSplitTrans]) and AMouseInControl then
   begin
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+    DrawRect := ButtonRect;
+
     Details := LStyleServices.GetElementDetails(tmMenuBarItemHot);
     LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
   end
   else
   if (FStyle<>nsTranparent) and (FStyle<>nsSplitTrans) then
-    LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
+  begin
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+    DrawRect := ButtonRect;
 
+    LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
+  end;
 
   if FUseFontAwesome and (LImgIndex>=0) then
   begin
 
     IW:= 16;
     IH:= 16;
+
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+
+    DrawRect := ButtonRect;
 
     IX := DrawRect.Left + (DrawRect.Width  - IW) div 2;
     IY := DrawRect.Top  + (DrawRect.Height - IH) div 2;
@@ -758,6 +909,12 @@ begin
   if (LImgIndex>=0) and (NCControls.FImages<>nil) and (NCControls.FImages.Handle <> 0) and
      ImageList_GetIconSize(NCControls.FImages.Handle, IW, IH) then
   begin
+
+    ButtonRect := DrawRect;
+    {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+      CorrectLeftButtonRect(ButtonRect);
+
+    DrawRect := ButtonRect;
 
     IX := DrawRect.Left + (DrawRect.Width  - IW) div 2;
     IY := DrawRect.Top  + (DrawRect.Height - IH) div 2;
@@ -823,11 +980,17 @@ begin
       else
        ThemeTextColor:=clNone;
 
+        ButtonRect := DrawRect;
+        {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+          CorrectLeftButtonRect(ButtonRect);
+        DrawRect := ButtonRect;
+
        DrawControlText(ACanvas, Details, BCaption, DrawRect, DT_VCENTER or DT_CENTER, ThemeTextColor);
        if FUseFontAwesome and (FImageIndex>=0) then
        begin
          if ThemeTextColor=clNone then
            LStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
+
          AwesomeFont.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, ThemeTextColor, 0, FImageAlignment);
        end;
 
@@ -838,6 +1001,12 @@ begin
         try
           IntersectClipRect(ACanvas.Handle, Width - 15, 0, Width, Height);
           DrawRect := Rect(Width - 30, 0, Width, Height);
+
+          ButtonRect := DrawRect;
+          {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+            CorrectLeftButtonRect(ButtonRect);
+          DrawRect := ButtonRect;
+
           LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
         finally
           RestoreDC(ACanvas.Handle, SaveIndex);
@@ -899,12 +1068,19 @@ begin
       else
        ThemeTextColor:=clNone;
 
+//      ButtonRect := DrawRect;
+//      if not StyleServices.HasElementFixedPosition(Details) then
+//        CorrectLeftButtonRect(ButtonRect);
+//      DrawRect := ButtonRect;
+
       DrawControlText(ACanvas, Details, BCaption, DrawRect, DT_VCENTER or DT_CENTER or DT_WORDBREAK, ThemeTextColor);
 
      if FUseFontAwesome and (FImageIndex>=0) then
      begin
          if ThemeTextColor=clNone then
            LStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
+
+       //InflateRect(LRectAwesome, 2, 2);
        AwesomeFont.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, ThemeTextColor, 0, FImageAlignment);
      end;
     end;
@@ -1140,14 +1316,17 @@ var
   LCurrent : Integer;
   LNCButton : TNCButton;
 begin
-
-  if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) and (NCControls.Form.Visible) and (NCControls.ButtonsList.UpdateCount=0) then
+  if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) {and (NCControls.Form.Visible)} and (NCControls.ButtonsList.UpdateCount=0) then
    for LCurrent:=0 to NCControls.ButtonsCount-1 do
    begin
     LNCButton:=NCControls.ButtonsList[LCurrent];
-    if LNCButton.Visible and (LNCButton.BoundsRect.Right<= ARect.Right) then
+    if LNCButton.Visible and (LNCButton.BoundsRect.Right<=ARect.Right) then
+    begin
      LNCButton.DrawButton(Canvas, FHotNCBtnIndex=LCurrent, FPressedNCBtnIndex=LCurrent);
-   end;
+    end;
+   end
+  else
+    ;
 end;
 
 
@@ -1287,7 +1466,11 @@ begin
           LNCButtton.FDropDownMenu.Popup(Form.Left + LNCButtton.BoundsRect.Left, Form.Top + LNCButtton.BoundsRect.Bottom)
         else
         if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnClick) then
+        begin
+            if LNCButtton.ShowHint then
+              LNCButtton.HideHintWindow();
             LNCButtton.FOnClick(LNCButtton);
+        end;
       end;
     end;
 
@@ -1355,6 +1538,61 @@ var
   TextFormat: TTextFormat;
   LText: string;
   LStyleServices :  TCustomStyleServices;
+  TextTopOffset: Integer;
+
+  function GetTopOffset: Integer;
+  var
+    P: TPoint;
+  begin
+    P.X := Form.Left + Form.Width div 2;
+    P.Y := Form.Top + Form.Height div 2;
+    Result := Screen.MonitorFromPoint(P).WorkareaRect.Top;
+    if Form.Top < Result then Result := Result - Form.Top else Result := 0;
+  end;
+
+  procedure CorrectRightButtonRect(var AButtonRect: TRect);
+  var
+    TopOffset, RightOffset: Integer;
+    BS: TRect;
+  begin
+    if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
+    begin
+      BS := _GetBorderSize;
+      TopOffset := GetTopOffset;
+      RightOffset := -BS.Right;
+      if ButtonRect.Top < TopOffset then
+      begin
+        TopOffset := TopOffset - ButtonRect.Top;
+        OffsetRect(ButtonRect, RightOffset, TopOffset);
+        TopOffset := ButtonRect.Bottom - BS.Top;
+        if TopOffset > 0 then
+          OffsetRect(ButtonRect, 0, -TopOffset);
+      end;
+    end;
+  end;
+
+  procedure CorrectLeftButtonRect(var AButtonRect: TRect);
+  var
+    TopOffset, LeftOffset: Integer;
+    BS: TRect;
+  begin
+    if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
+    begin
+      BS := _GetBorderSize;
+      TopOffset := GetTopOffset;
+      LeftOffset := BS.Left;
+      if ButtonRect.Top < TopOffset then
+      begin
+        TopOffset := TopOffset - ButtonRect.Top;
+        OffsetRect(ButtonRect, LeftOffset, TopOffset);
+        TopOffset := ButtonRect.Bottom - BS.Top;
+        if TopOffset > 0 then
+          OffsetRect(ButtonRect, 0, -TopOffset);
+      end;
+    end;
+  end;
+
+
 begin
   if Form.BorderStyle = bsNone then
   begin
@@ -1404,6 +1642,7 @@ begin
       LStyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, DrawRect);
       TextRect := DrawRect;
       CaptionDetails := Details;
+      TextTopOffset := 3;
 
       //icon
       if ((NCControls<>nil) and NCControls.ShowSystemMenu)  and
@@ -1415,12 +1654,28 @@ begin
         IconDetails := LStyleServices.GetElementDetails(twSysButtonNormal);
         if not LStyleServices.GetElementContentRect(0, IconDetails, DrawRect, ButtonRect) then
           ButtonRect := Rect(0, 0, 0, 0);
-        R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
-        RectVCenter(R1, ButtonRect);
-        if ButtonRect.Width > 0 then
-          DrawIconEx(CaptionBuffer.Canvas.Handle, R1.Left, R1.Top, _GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
-        Inc(TextRect.Left, ButtonRect.Width + 5);
-        _FSysMenuButtonRect := ButtonRect;
+
+          R1 := ButtonRect;
+
+          {$IF CompilerVersion > 23}
+          if not StyleServices.HasElementFixedPosition(Details) then
+          begin
+          {$IFEND}
+            CorrectLeftButtonRect(ButtonRect);
+            TextTopOffset := Abs(R1.Top - ButtonRect.Top);
+            if TextTopOffset > R.Top then TextTopOffset := 3;
+          {$IF CompilerVersion > 23}
+          end
+          else
+            TextTopOffset := 0;
+          {$IFEND}
+
+          R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+          RectVCenter(R1, ButtonRect);
+          if ButtonRect.Width > 0 then
+            DrawIconEx(CaptionBuffer.Canvas.Handle, R1.Left, R1.Top, _GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
+          Inc(TextRect.Left, ButtonRect.Width + 5);
+          _FSysMenuButtonRect := ButtonRect;
       end
       else
         Inc(TextRect.Left, R.Left);
@@ -1458,6 +1713,9 @@ begin
         Details := LStyleServices.GetElementDetails(FButtonState);
         if not LStyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
           ButtonRect := Rect(0, 0, 0, 0);
+
+          {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+          CorrectRightButtonRect(ButtonRect);
 
         LStyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
 
@@ -1504,6 +1762,10 @@ begin
 
         if not LStyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
           ButtonRect := Rect(0, 0, 0, 0);
+
+        {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+         CorrectRightButtonRect(ButtonRect);
+
         if ButtonRect.Width > 0 then
           LStyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
 
@@ -1533,6 +1795,10 @@ begin
 
         if not LStyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
           ButtonRect := Rect(0, 0, 0, 0);
+
+        {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+          CorrectRightButtonRect(ButtonRect);
+
         if ButtonRect.Width > 0 then
           LStyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
 
@@ -1559,6 +1825,10 @@ begin
 
         if not LStyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
           ButtonRect := Rect(0, 0, 0, 0);
+
+        {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
+          CorrectRightButtonRect(ButtonRect);
+
         if ButtonRect.Width > 0 then
           LStyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
 
@@ -1573,7 +1843,7 @@ begin
        Inc(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount-1].BoundsRect.Right - NCControls.ButtonsList[0].BoundsRect.Left + 10);
 
       //text
-      if (NCControls<>nil) and  (NCControls.ShowCaption) then
+      if (NCControls<>nil) and (NCControls.ShowCaption) then
       begin
 
         TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
@@ -1581,7 +1851,17 @@ begin
           Include(TextFormat, tfRtlReading);
 
         LText := Text;
-        LStyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+
+        if (TCustomFormClass(Form).WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and
+           (TextTopOffset <> 0) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) then
+        begin
+          Inc(TextRect.Left, R.Left);
+          MoveWindowOrg(CaptionBuffer.Canvas.Handle, 0, TextTopOffset);
+          LStyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+          MoveWindowOrg(CaptionBuffer.Canvas.Handle, 0, -TextTopOffset);
+        end
+        else
+          LStyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
       end;
 
       if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) then

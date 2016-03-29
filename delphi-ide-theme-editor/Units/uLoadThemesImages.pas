@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit uLoadThemesImages
 // unit for uLoadThemesImages the Delphi IDE Theme Editor
@@ -14,10 +14,10 @@
 // The Original Code is uLoadThemesImages.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 
 unit uLoadThemesImages;
 
@@ -31,15 +31,14 @@ uses
 type
   TLoadThemesImages = class(TThread)
   private
-    FPath :String;
-    FImageList : TImageList;
-    FListview  : TListView;
+    FPath: String;
+    FImageList: TImageList;
+    FListview: TListView;
   protected
     procedure Execute; override;
   public
-    constructor Create(const Path : string;ImageList:TImageList;ListView: TListView);
+    constructor Create(const Path: string; ImageList: TImageList; ListView: TListView);
   end;
-
 
 implementation
 
@@ -49,76 +48,113 @@ uses
   IOUtils,
   Graphics,
   uMisc,
+  System.Types,
   uDelphiIDEHighlight;
 
-constructor TLoadThemesImages.Create(const Path : string;ImageList:TImageList;ListView: TListView);
+constructor TLoadThemesImages.Create(const Path: string; ImageList: TImageList; ListView: TListView);
 begin
-   inherited Create(False);
-   FPath:=Path;
-   FImageList:=ImageList;
-   FListview:=ListView;
-   FreeOnTerminate:=True;
+  inherited Create(False);
+  FPath := Path;
+  FImageList := ImageList;
+  FListview := ListView;
+  FreeOnTerminate := True;
 end;
 
 procedure TLoadThemesImages.Execute;
 var
-  Item    : TListItem;
+  Item: TListItem;
   ImageName: string;
   FileName: string;
   ImpTheme: TIDETheme;
-  Bmp     : TBitmap;
-  i       : Integer;
-  CreateArr : Boolean;
+  Bmp: TBitmap;
+  i: Integer;
+  CreateArr: Boolean;
+
+  procedure CreateThemeBmp(Width, Height: Word; Background, Foreground1, Foreground2: TColor; var Bitmap: TBitmap);
+  Var
+    LRect: TRect;
+  begin
+    Bitmap.PixelFormat := pf24bit;
+    Bitmap.Width := Width;
+    Bitmap.Height := Height;
+    Bitmap.Canvas.Brush.Color := Background;
+    LRect := Rect(0, 0, Width, Height);
+    Bitmap.Canvas.FillRect(LRect);
+
+    // InflateRect(LRect, -1, -1);
+    Bitmap.Canvas.Brush.Style := bsClear;
+    Bitmap.Canvas.Pen.Color := clBlack;
+    Bitmap.Canvas.Rectangle(LRect);
+
+    Bitmap.Canvas.Pen.Color := Foreground1;
+    Bitmap.Canvas.MoveTo(2, 3);
+    Bitmap.Canvas.LineTo(6, 3);
+
+    Bitmap.Canvas.Pen.Color := Foreground2;
+    Bitmap.Canvas.MoveTo(8, 3);
+    Bitmap.Canvas.LineTo(Width - 2, 3);
+
+    Bitmap.Canvas.Pen.Color := Foreground1;
+    Bitmap.Canvas.MoveTo(2, 6);
+    Bitmap.Canvas.LineTo(5, 6);
+
+    Bitmap.Canvas.Pen.Color := Foreground2;
+    Bitmap.Canvas.MoveTo(2, 9);
+    Bitmap.Canvas.LineTo(Width - 2, 9);
+
+    Bitmap.Canvas.Pen.Color := Foreground2;
+    Bitmap.Canvas.MoveTo(2, 12);
+    Bitmap.Canvas.LineTo(Width - 2, 12);
+  end;
+
 begin
   inherited;
   if not TDirectory.Exists(FPath) then
     exit;
 
-  FListview.SmallImages:=nil;
+  FListview.SmallImages := nil;
   FImageList.Clear;
-  SysUtils.ForceDirectories(IncludeTrailingPathDelimiter(FPath)+'Images');
+  SysUtils.ForceDirectories(IncludeTrailingPathDelimiter(FPath) + 'Images');
   CoInitialize(nil);
   try
-    for i:=0 to FListview.Items.Count-1 do
+    for i := 0 to FListview.Items.Count - 1 do
     begin
-      Item:=FListview.Items.Item[i];
-      ImageName:=IncludeTrailingPathDelimiter(FPath)+'Images\'+ Item.Caption + '.bmp';
+      Item := FListview.Items.Item[i];
+      ImageName := IncludeTrailingPathDelimiter(FPath) + 'Images\' + Item.Caption + '.bmp';
 
-        Bmp:=TBitmap.Create;
-        try
-         CreateArr:=True;
-         if FileExists(ImageName) then
-         begin
+      Bmp := TBitmap.Create;
+      try
+        CreateArr := True;
+        if FileExists(ImageName) then
+        begin
           Bmp.LoadFromFile(ImageName);
-          if (Bmp.Width=FImageList.Width) and (Bmp.Height=FImageList.Height) then
-            CreateArr:=False;
-         end;
-
-
-         if CreateArr then
-         begin
-           FileName :=IncludeTrailingPathDelimiter(FPath)+ Item.Caption + '.theme.xml';
-           LoadThemeFromXMLFile(ImpTheme, FileName);
-           //CreateBitmapSolidColor(16,16,[StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),StringToColor(ImpTheme[ReservedWord].ForegroundColorNew)], Bmp);
-           CreateArrayBitmap(16,16,[StringToColor(ImpTheme[ReservedWord].ForegroundColorNew),StringToColor(ImpTheme[ReservedWord].BackgroundColorNew)], Bmp);
-         end;
-
-         Synchronize(
-           procedure
-           begin
-             FImageList.Add(Bmp, nil);
-             Item.ImageIndex:=FImageList.Count-1;
-           end
-         );
-          Bmp.SaveToFile(ImageName);
-        finally
-           Bmp.Free;
+          if (Bmp.Width = FImageList.Width) and (Bmp.Height = FImageList.Height) then
+            CreateArr := False;
         end;
+
+        if CreateArr then
+        begin
+          FileName := IncludeTrailingPathDelimiter(FPath) + Item.Caption + '.theme.xml';
+          LoadThemeFromXMLFile(ImpTheme, FileName);
+          CreateThemeBmp(16, 16, StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),
+            StringToColor(ImpTheme[ReservedWord].ForegroundColorNew), StringToColor(ImpTheme[Identifier].ForegroundColorNew), Bmp)
+        end;
+
+        Synchronize(
+          procedure
+          begin
+            FImageList.Add(Bmp, nil);
+            Item.ImageIndex := FImageList.Count - 1;
+          end);
+        Bmp.SaveToFile(ImageName);
+      finally
+        Bmp.Free;
+      end;
     end;
 
   finally
     CoUninitialize;
-    FListview.SmallImages:=FImageList;
+    FListview.SmallImages := FImageList;
   end;
 end;
 

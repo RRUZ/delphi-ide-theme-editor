@@ -386,7 +386,7 @@ end;
 class procedure TStyleManagerHelper.ReloadStyle(const StyleName : string);
 var
   LStyle: TCustomStyleServices;
-  t     : TPair<string, TStyleManager.TSourceInfo>;
+  LPair : TPair<string, TStyleManager.TSourceInfo>;
 begin
 
  if SameText(StyleName, ActiveStyle.Name, loUserLocale) then
@@ -399,11 +399,11 @@ begin
     Styles.Remove(LStyle);
   end;
 
-  for t in Self.FRegisteredStyles do
-    if SameText(StyleName, t.Key, loUserLocale) then
-     if (t.Value.Data<>nil) then
+  for LPair in Self.FRegisteredStyles do
+    if SameText(StyleName, LPair.Key, loUserLocale) then
+     if (LPair.Value.Data<>nil) then
      begin
-       TStream(t.Value.Data).Position:=0;
+       TStream(LPair.Value.Data).Position:=0;
        break;
      end;
 
@@ -413,7 +413,7 @@ end;
 class procedure TStyleManagerHelper.RemoveStyle(const StyleName: string);
 var
   LStyle: TCustomStyleServices;
-  t     : TPair<string, TStyleManager.TSourceInfo>;
+  LPair : TPair<string, TStyleManager.TSourceInfo>;
 begin
  if SameText(StyleName, ActiveStyle.Name, loUserLocale) then
    SetStyle(SystemStyle);
@@ -425,9 +425,12 @@ begin
     Styles.Remove(LStyle);
   end;
 
-  for t in Self.FRegisteredStyles do
-    if SameText(StyleName, t.Key, loUserLocale) then
-     Self.FRegisteredStyles.Remove(t.Key);
+  for LPair in Self.FRegisteredStyles do
+    if SameText(StyleName, LPair.Key, loUserLocale) then
+    begin
+     TMemoryStream(LPair.Value.Data).Free;
+     Self.FRegisteredStyles.Remove(LPair.Key);
+    end;
 
 end;
 

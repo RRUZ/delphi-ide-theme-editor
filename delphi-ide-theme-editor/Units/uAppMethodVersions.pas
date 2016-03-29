@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit uAppMethodVersions
 // unit for the Delphi IDE Theme Editor
@@ -14,10 +14,10 @@
 // The Original Code is uAppMethodVersions.pas
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 
 unit uAppMethodVersions;
 
@@ -33,26 +33,16 @@ uses
   Classes,
   ComCtrls;
 
-
 type
-  TAppMethodVersions =
-    (
-    AppMethod113
-    );
+  TAppMethodVersions = (AppMethod113);
 
 const
-  AppMethodVersionsNames: array[TAppMethodVersions] of string = (
-    'Appmethod 1.13'
-    );
+  AppMethodVersionsNames: array [TAppMethodVersions] of string = ('Appmethod 1.13');
 
-  AppMethodRegPaths: array[TAppMethodVersions] of string = (
-    '\Software\Embarcadero\BDS\13.0'
-    );
+  AppMethodRegPaths: array [TAppMethodVersions] of string = ('\Software\Embarcadero\BDS\13.0');
 
 
-//procedure FillListAppMethodVersions(AList:TList<TDelphiVersionData>);
-
-
+  // procedure FillListAppMethodVersions(AList:TList<TDelphiVersionData>);
 
 implementation
 
@@ -67,14 +57,12 @@ uses
   uRegistry,
   Registry;
 
-
-
-procedure FillListAppMethodVersions(AList:TList<TDelphiVersionData>);
+procedure FillListAppMethodVersions(AList: TList<TDelphiVersionData>);
 Var
-  VersionData : TDelphiVersionData;
-  LAppmethodComp  : TAppMethodVersions;
-  FileName    : string;
-  Found       : boolean;
+  VersionData: TDelphiVersionData;
+  LAppmethodComp: TAppMethodVersions;
+  FileName: string;
+  Found: boolean;
 begin
   for LAppmethodComp := Low(TAppMethodVersions) to High(TAppMethodVersions) do
   begin
@@ -91,19 +79,17 @@ begin
 
     if Found then
     begin
-      VersionData:=TDelphiVersionData.Create;
-      VersionData.Path:=Filename;
-      //VersionData.Version:=LAppmethodComp;
-      VersionData.Name   :=AppMethodVersionsNames[LAppmethodComp];
-      VersionData.IDEType:=TSupportedIDEs.AppMethodIDE;
-      VersionData.Icon    :=TIcon.Create;
-      ExtractIconFile(VersionData.Icon, Filename, SHGFI_SMALLICON);
+      VersionData := TDelphiVersionData.Create;
+      VersionData.Path := FileName;
+      // VersionData.Version:=LAppmethodComp;
+      VersionData.Name := AppMethodVersionsNames[LAppmethodComp];
+      VersionData.IDEType := TSupportedIDEs.AppMethodIDE;
+      VersionData.Icon := TIcon.Create;
+      ExtractIconFile(VersionData.Icon, FileName, SHGFI_SMALLICON);
       AList.Add(VersionData);
     end;
   end;
 
 end;
-
-
 
 end.

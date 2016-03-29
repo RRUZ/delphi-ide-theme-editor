@@ -150,6 +150,10 @@ function WM_To_String(const WM_Message: Integer): string;
 implementation
 
 uses
+  {$IF CompilerVersion >= 30}
+  DDetours,
+  Vcl.SysStyles,
+  {$IFEND}
   WinApi.CommCtrl;
 
 {$IFDEF EventLog}
@@ -925,5 +929,66 @@ begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));
 end;
+
+
+{$IF CompilerVersion >= 30}
+Type
+  TCustomStyleEngineClass = class(TCustomStyleEngine);
+
+  TCustomStyleEngineHelper = class helper for TCustomStyleEngine
+   function  CreateSysHookPtr : Pointer;
+   procedure SetPointer;
+  end;
+
+
+  TRegisterSysStyleHook = procedure(SysControlClass: String; SysStyleHookClass: Vcl.Themes.TSysStyleHookClass) of object;
+var
+  LRegisterSysStyleHookPtr: TRegisterSysStyleHook;
+  LCreateSysHookPtr: procedure of object;
+  Trampoline_RegisterSysStyleHook  : procedure(Self: TObject; SysControlClass: String; SysStyleHookClass: Vcl.Themes.TSysStyleHookClass);
+  Trampoline_CreateSysHook : procedure of Object;
+
+procedure  Detour_RegisterSysStyleHook(Self: TObject; SysControlClass: String; SysStyleHookClass: Vcl.Themes.TSysStyleHookClass);
+begin
+
+end;
+
+procedure  Detour_CreateSysHook(Self: TObject);
+begin
+ //OutputDebugString('Detour_CreateSysHook');
+end;
+
+function TCustomStyleEngineHelper.CreateSysHookPtr : Pointer;
+var
+  MethodAddr: procedure of object;
+begin
+  MethodAddr := CreateSysHook;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
+procedure TCustomStyleEngineHelper.SetPointer;
+begin
+  LCreateSysHookPtr := TCustomStyleEngineClass.CreateSysHook;
+end;
+
+initialization
+  //Disable  TCustomStyleEngine.RegisterSysStyleHoo method
+  LRegisterSysStyleHookPtr := TCustomStyleEngine.RegisterSysStyleHook;
+  TCustomStyleEngineClass(nil).SetPointer;
+  //LCreateSysHookPtr := TCustomStyleEngineClass.CreateSysHook;
+
+  @Trampoline_RegisterSysStyleHook := InterceptCreate(@LRegisterSysStyleHookPtr, @Detour_RegisterSysStyleHook);
+  @Trampoline_CreateSysHook := InterceptCreate(@LCreateSysHookPtr, @Detour_CreateSysHook);
+  //remove hooks;
+  //TCustomStyleEngineClass(nil).FChildRegSysStylesList.Clear;
+  //TCustomStyleEngineClass(nil).FRegSysStylesList.Clear;
+  //TCustomStyleEngineClass(nil).FSysStyleHookList.Clear;
+  //TStyleManager.Engine.UnHook;
+
+finalization
+  InterceptRemove(@Trampoline_RegisterSysStyleHook);
+  InterceptRemove(@Trampoline_CreateSysHook);
+
+{$IFEND}
 
 end.

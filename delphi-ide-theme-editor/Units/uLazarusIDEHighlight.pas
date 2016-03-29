@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit uLazarusIDEHighlight
 // unit uLazarusIDEHighlight  for the Delphi IDE Theme Editor
@@ -14,12 +14,11 @@
 // The Original Code is uLazarusIDEHighlight.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 unit uLazarusIDEHighlight;
-
 
 interface
 
@@ -27,17 +26,16 @@ uses
   uDelphiIDEHighlight;
 
 const
- LazarusOffsetFont=0;
+  LazarusOffsetFont = 0;
 
-function  GetLazarusIDEFontSize : Integer;
-function  GetLazarusIDEFontName : string;
-function  GetLazarusIDEThemeName : string;
-function  SetLazarusIDEFont(const FontName:String;FontSize:Integer):Boolean;
-function  ApplyLazarusIDETheme(const ATheme:TIDETheme;const ThemeName:string) : Boolean;
+function GetLazarusIDEFontSize: Integer;
+function GetLazarusIDEFontName: string;
+function GetLazarusIDEThemeName: string;
+function SetLazarusIDEFont(const FontName: String; FontSize: Integer): Boolean;
+function ApplyLazarusIDETheme(const ATheme: TIDETheme; const ThemeName: string): Boolean;
 
-function  DelphiIDEThemeToLazarusTheme(const ATheme:TIDETheme;const ThemeName, OutputFolder:string) : Boolean; overload;
-function  DelphiIDEThemeToLazarusTheme(const DelphiIdeTheme, OutputFolder:string) : Boolean;overload;
-
+function DelphiIDEThemeToLazarusTheme(const ATheme: TIDETheme; const ThemeName, OutputFolder: string): Boolean; overload;
+function DelphiIDEThemeToLazarusTheme(const DelphiIdeTheme, OutputFolder: string): Boolean; overload;
 
 implementation
 
@@ -56,34 +54,19 @@ uses
   uLazarusVersions;
 
 const
-  sLazarusThemeTemplate   ='ColorDummy.xml';
-  sDefaultLazarusFont     ='Courier New';
-  sDefaultLazarusFontSize =10;
-  sXMLLazarusEditorOptions=
-                            '<?xml version="1.0"?> '+
-                            '<CONFIG> '+
-                            '  <EditorOptions Version="9"> '+
-                            '    <KeyMapping> '+
-                            '      <default> '+
-                            '        <Version Value="6"/> '+
-                            '      </default> '+
-                            '    </KeyMapping> '+
-                            '    <Color Version="9"> '+
-                            '      <LangObjectPascal> '+
-                            '        <ColorScheme Value="Default"/> '+
-                            '      </LangObjectPascal> '+
-                            '    </Color> '+
-                            '    <Display DoNotWarnForFont="Courier New" EditorFont="Courier New" EditorFontSize="15" DisableAntialiasing="False"/> '+
-                            '  </EditorOptions> '+
-                            '</CONFIG>';
+  sLazarusThemeTemplate = 'ColorDummy.xml';
+  sDefaultLazarusFont = 'Courier New';
+  sDefaultLazarusFontSize = 10;
+  sXMLLazarusEditorOptions = '<?xml version="1.0"?> ' + '<CONFIG> ' + '  <EditorOptions Version="9"> ' + '    <KeyMapping> ' +
+    '      <default> ' + '        <Version Value="6"/> ' + '      </default> ' + '    </KeyMapping> ' + '    <Color Version="9"> ' +
+    '      <LangObjectPascal> ' + '        <ColorScheme Value="Default"/> ' + '      </LangObjectPascal> ' + '    </Color> ' +
+    '    <Display DoNotWarnForFont="Courier New" EditorFont="Courier New" EditorFontSize="15" DisableAntialiasing="False"/> ' +
+    '  </EditorOptions> ' + '</CONFIG>';
 
-
-
-
-function GetEditorOptionsXMLValue(const XPath:string)  : string;
+function GetEditorOptionsXMLValue(const XPath: string): string;
 var
   XmlDoc: OleVariant;
-  Node:   OleVariant;
+  Node: OleVariant;
 begin
   Result := '';
   XmlDoc := CreateOleObject('Msxml2.DOMDocument.6.0');
@@ -98,24 +81,24 @@ begin
 
       Node := XmlDoc.selectSingleNode(XPath);
       if not VarIsClear(Node) then
-        Result:= Node.Text;
+        Result := Node.Text;
     end;
   finally
     XmlDoc := Unassigned;
   end;
 end;
 
-function SetEditorOptionsXMLValue(const XPath,Value:OleVariant) : boolean;
+function SetEditorOptionsXMLValue(const XPath, Value: OleVariant): Boolean;
 var
-  XmlDoc: olevariant;
-  Node:   olevariant;
+  XmlDoc: OleVariant;
+  Node: OleVariant;
 begin
-  Result:=False;
+  Result := False;
   XmlDoc := CreateOleObject('Msxml2.DOMDocument.6.0');
   try
     XmlDoc.Async := False;
     if not XmlDoc.Load(GetLazarusEditorOptionsFileName) then
-     XmlDoc.LoadXML(sXMLLazarusEditorOptions);
+      XmlDoc.LoadXML(sXMLLazarusEditorOptions);
 
     XmlDoc.SetProperty('SelectionLanguage', 'XPath');
 
@@ -124,256 +107,249 @@ begin
 
     Node := XmlDoc.selectSingleNode(XPath);
     if not VarIsClear(Node) then
-      Node.Text:=Value
+      Node.Text := Value
     else
-     Exit(False);
+      Exit(False);
 
     XmlDoc.Save(GetLazarusEditorOptionsFileName);
-    Result:=True;
+    Result := True;
   finally
     XmlDoc := Unassigned;
   end;
 end;
 
-
-function  GetLazarusIDEFontSize : Integer;
+function GetLazarusIDEFontSize: Integer;
 begin
-  if TryStrToInt(GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize'),Result) then
-    Result:=Result-LazarusOffsetFont
+  if TryStrToInt(GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize'), Result) then
+    Result := Result - LazarusOffsetFont
   else
-    Result:=sDefaultLazarusFontSize;
+    Result := sDefaultLazarusFontSize;
 end;
 
-function  GetLazarusIDEFontName : string;
+function GetLazarusIDEFontName: string;
 begin
-  Result:=GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont');
-  if Result='' then
-    Result:=sDefaultLazarusFont;
+  Result := GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont');
+  if Result = '' then
+    Result := sDefaultLazarusFont;
 end;
 
-function CreateLazarusEditorOptionsXMLValue(const XPath: string; Value:OleVariant) : boolean;
+function CreateLazarusEditorOptionsXMLValue(const XPath: string; Value: OleVariant): Boolean;
 var
-  XML : IXMLDocument;
-  RootNode, CurNode : IXMLNode;
-  NodesArr : TStringDynArray;
-  sAttr, sNode : string;
+  Xml: IXMLDocument;
+  RootNode, CurNode: IXMLNode;
+  NodesArr: TStringDynArray;
+  sAttr, sNode: string;
 begin
-  Result:=False;
-  sAttr:='';
-  XML := NewXMLDocument;
-  XML.LoadFromFile(GetLazarusEditorOptionsFileName);
-  RootNode:=XML.DocumentElement;
-  NodesArr:=SplitString(XPath,'/');
-  CurNode:=RootNode;
-  for sNode in  NodesArr do
-   if (sNode<>'') then
-    if not StartsText('@', sNode) then
-      CurNode:=CurNode.ChildNodes[sNode]
-    else
-    begin
-      sAttr:= ReplaceStr(sNode,'@','');
-      break;
-    end;
+  Result := False;
+  sAttr := '';
+  Xml := NewXMLDocument;
+  Xml.LoadFromFile(GetLazarusEditorOptionsFileName);
+  RootNode := Xml.DocumentElement;
+  NodesArr := SplitString(XPath, '/');
+  CurNode := RootNode;
+  for sNode in NodesArr do
+    if (sNode <> '') then
+      if not StartsText('@', sNode) then
+        CurNode := CurNode.ChildNodes[sNode]
+      else
+      begin
+        sAttr := ReplaceStr(sNode, '@', '');
+        break;
+      end;
 
-  if (sAttr<>'') and (CurNode<>RootNode) then
+  if (sAttr <> '') and (CurNode <> RootNode) then
   begin
-    CurNode.Attributes[sAttr]:=Value;
-    XML.SaveToFile(GetLazarusEditorOptionsFileName);
-    Result:=True;
+    CurNode.Attributes[sAttr] := Value;
+    Xml.SaveToFile(GetLazarusEditorOptionsFileName);
+    Result := True;
   end;
 end;
 
-function  ApplyLazarusIDETheme(const ATheme:TIDETheme;const ThemeName:string) : Boolean;
+function ApplyLazarusIDETheme(const ATheme: TIDETheme; const ThemeName: string): Boolean;
 var
-  OutPutFolder : String;
+  OutputFolder: String;
 begin
-  OutPutFolder:=IncludeTrailingPathDelimiter(GetLazarusLocalFolder)+'userschemes';
-  ForceDirectories(OutPutFolder);
+  OutputFolder := IncludeTrailingPathDelimiter(GetLazarusLocalFolder) + 'userschemes';
+  ForceDirectories(OutputFolder);
 
-  Result:=DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutPutFolder);
+  Result := DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutputFolder);
   if Result then
-   Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
+    Result := SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value', MakeValidTagName(ThemeName));
 
   if not Result then
-    Result:=CreateLazarusEditorOptionsXMLValue('/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
+    Result := CreateLazarusEditorOptionsXMLValue('/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value', MakeValidTagName(ThemeName));
 end;
 
-
-function  SetLazarusIDEFont(const FontName:String;FontSize:Integer):Boolean;
+function SetLazarusIDEFont(const FontName: String; FontSize: Integer): Boolean;
 begin
-  Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont', FontName);
+  Result := SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFont', FontName);
   if not Result then
-    Result:=CreateLazarusEditorOptionsXMLValue('/EditorOptions/Display/@EditorFont', FontName);
+    Result := CreateLazarusEditorOptionsXMLValue('/EditorOptions/Display/@EditorFont', FontName);
 
   if Result then
-    Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize',FontSize+LazarusOffsetFont);
+    Result := SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Display/@EditorFontSize', FontSize + LazarusOffsetFont);
 
   if not Result then
-    Result:=CreateLazarusEditorOptionsXMLValue('/EditorOptions/Display/@EditorFontSize', FontSize+LazarusOffsetFont);
+    Result := CreateLazarusEditorOptionsXMLValue('/EditorOptions/Display/@EditorFontSize', FontSize + LazarusOffsetFont);
 end;
 
-
-
-
-function  DelphiIDEThemeToLazarusTheme(const ATheme:TIDETheme;const ThemeName,OutputFolder:string) : Boolean;
+function DelphiIDEThemeToLazarusTheme(const ATheme: TIDETheme; const ThemeName, OutputFolder: string): Boolean;
 const
- sGlobalElementXPath               = '/CONFIG/Lazarus/ColorSchemes/Globals/%s/%s';
- sLangObjectPascalXPath            = '/CONFIG/Lazarus/ColorSchemes/LangObjectPascal/%s/%s';
- sLangLazarus_Form_definitionXPath = '/CONFIG/Lazarus/ColorSchemes/LangLazarus_Form_definition/%s/%s';
- sLangXML_documentXPath            = '/CONFIG/Lazarus/ColorSchemes/LangXML_document/%s/%s';
- sLangHTML_documentXPath           = '/CONFIG/Lazarus/ColorSchemes/LangHTML_document/%s/%s';
- sLangC__XPath                     = '/CONFIG/Lazarus/ColorSchemes/LangC__/%s/%s';
- sLangPerlXPath                    = '/CONFIG/Lazarus/ColorSchemes/LangPerl/%s/%s';
- sLangJavaXPath                    = '/CONFIG/Lazarus/ColorSchemes/LangJava/%s/%s';
- sLangUNIX_Shell_ScriptXPath       = '/CONFIG/Lazarus/ColorSchemes/LangUNIX_Shell_Script/%s/%s';
- sLangPythonXPath                  = '/CONFIG/Lazarus/ColorSchemes/LangPython/%s/%s';
- sLangPHPXPath                     = '/CONFIG/Lazarus/ColorSchemes/LangPHP/%s/%s';
- sLangSQLXPath                     = '/CONFIG/Lazarus/ColorSchemes/LangSQL/%s/%s';
- sLangJavascriptXPath              = '/CONFIG/Lazarus/ColorSchemes/LangJavascript/%s/%s';
- sLangDiff_FileXPath               = '/CONFIG/Lazarus/ColorSchemes/LangDiff_File/%s/%s';
- sLangMS_DOS_batch_languageXPath   = '/CONFIG/Lazarus/ColorSchemes/LangMS_DOS_batch_language/%s/%s';
- sLangINI_fileXPath                = '/CONFIG/Lazarus/ColorSchemes/LangINI_file/%s/%s';
-
+  sGlobalElementXPath = '/CONFIG/Lazarus/ColorSchemes/Globals/%s/%s';
+  sLangObjectPascalXPath = '/CONFIG/Lazarus/ColorSchemes/LangObjectPascal/%s/%s';
+  sLangLazarus_Form_definitionXPath = '/CONFIG/Lazarus/ColorSchemes/LangLazarus_Form_definition/%s/%s';
+  sLangXML_documentXPath = '/CONFIG/Lazarus/ColorSchemes/LangXML_document/%s/%s';
+  sLangHTML_documentXPath = '/CONFIG/Lazarus/ColorSchemes/LangHTML_document/%s/%s';
+  sLangC__XPath = '/CONFIG/Lazarus/ColorSchemes/LangC__/%s/%s';
+  sLangPerlXPath = '/CONFIG/Lazarus/ColorSchemes/LangPerl/%s/%s';
+  sLangJavaXPath = '/CONFIG/Lazarus/ColorSchemes/LangJava/%s/%s';
+  sLangUNIX_Shell_ScriptXPath = '/CONFIG/Lazarus/ColorSchemes/LangUNIX_Shell_Script/%s/%s';
+  sLangPythonXPath = '/CONFIG/Lazarus/ColorSchemes/LangPython/%s/%s';
+  sLangPHPXPath = '/CONFIG/Lazarus/ColorSchemes/LangPHP/%s/%s';
+  sLangSQLXPath = '/CONFIG/Lazarus/ColorSchemes/LangSQL/%s/%s';
+  sLangJavascriptXPath = '/CONFIG/Lazarus/ColorSchemes/LangJavascript/%s/%s';
+  sLangDiff_FileXPath = '/CONFIG/Lazarus/ColorSchemes/LangDiff_File/%s/%s';
+  sLangMS_DOS_batch_languageXPath = '/CONFIG/Lazarus/ColorSchemes/LangMS_DOS_batch_language/%s/%s';
+  sLangINI_fileXPath = '/CONFIG/Lazarus/ColorSchemes/LangINI_file/%s/%s';
 
 var
   XmlStr: string;
-  XmlDoc: olevariant;
-  Node:   olevariant;
-  SchemeName      : string;
-  SchemeFileName  : string;
+  XmlDoc: OleVariant;
+  Node: OleVariant;
+  SchemeName: string;
+  SchemeFileName: string;
 
-  procedure SetElement(const XPath,Name : string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetElement(const XPath, Name: string; Element: TItemIDEHighlightElementsAttributes);
   var
-   ANode  : OleVariant;
+    ANode: OleVariant;
   begin
 
-    if Element.BackgroundColorNew<>'' then
+    if Element.BackgroundColorNew <> '' then
     begin
-      ANode := XmlDoc.selectSingleNode(Format(XPath,[SchemeName,Name]));
+      ANode := XmlDoc.selectSingleNode(Format(XPath, [SchemeName, Name]));
       if not VarIsClear(ANode) then
-        ANode.SetAttribute('Background',Element.BackgroundColorNew);
+        ANode.SetAttribute('Background', Element.BackgroundColorNew);
     end;
 
-    if Element.ForegroundColorNew<>'' then
+    if Element.ForegroundColorNew <> '' then
     begin
+      ANode := XmlDoc.selectSingleNode(Format(XPath, [SchemeName, Name]));
+      if not VarIsClear(ANode) then
+        ANode.SetAttribute('Foreground', Element.ForegroundColorNew);
+    end;
+    {
+      if Element.ForegroundColorNew<>'' then
+      begin
       ANode := XmlDoc.selectSingleNode(Format(XPath,[SchemeName,Name]));
       if not VarIsClear(ANode) then
-        ANode.SetAttribute('Foreground',Element.ForegroundColorNew);
-    end;
-      {
-    if Element.ForegroundColorNew<>'' then
-    begin
-      ANode := XmlDoc.selectSingleNode(Format(XPath,[SchemeName,Name]));
-      if not VarIsClear(ANode) then
-        ANode.SetAttribute('FrameColor',Element.ForegroundColorNew);
-    end;
-       }
+      ANode.SetAttribute('FrameColor',Element.ForegroundColorNew);
+      end;
+    }
     if Element.Bold then
     begin
-      ANode := XmlDoc.selectSingleNode(Format(XPath,[SchemeName,Name]));
+      ANode := XmlDoc.selectSingleNode(Format(XPath, [SchemeName, Name]));
       if not VarIsClear(ANode) then
-        ANode.SetAttribute('Style','fsBold');
+        ANode.SetAttribute('Style', 'fsBold');
     end
-    else
-    if Element.Italic then
+    else if Element.Italic then
     begin
-      ANode := XmlDoc.selectSingleNode(Format(XPath,[SchemeName,Name]));
+      ANode := XmlDoc.selectSingleNode(Format(XPath, [SchemeName, Name]));
       if not VarIsClear(ANode) then
-        ANode.SetAttribute('Style','fsItalic');
+        ANode.SetAttribute('Style', 'fsItalic');
     end;
   end;
 
-  procedure SetGlobalElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetGlobalElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sGlobalElementXPath, Name, Element);
+    SetElement(sGlobalElementXPath, Name, Element);
   end;
 
-  procedure SetLangObjectPascalElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangObjectPascalElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangObjectPascalXPath, Name, Element);
+    SetElement(sLangObjectPascalXPath, Name, Element);
   end;
 
-  procedure SetLangLazarus_Form_definitionElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangLazarus_Form_definitionElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangLazarus_Form_definitionXPath, Name, Element);
+    SetElement(sLangLazarus_Form_definitionXPath, Name, Element);
   end;
 
-  procedure SetLangXML_documentElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangXML_documentElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangXML_documentXPath, Name, Element);
+    SetElement(sLangXML_documentXPath, Name, Element);
   end;
 
-  procedure SetLangHTML_documentElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangHTML_documentElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangHTML_documentXPath, Name, Element);
+    SetElement(sLangHTML_documentXPath, Name, Element);
   end;
 
-  procedure SetLangPerlElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangPerlElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangPerlXPath, Name, Element);
+    SetElement(sLangPerlXPath, Name, Element);
   end;
 
-  procedure SetLangC__Element(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangC__Element(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangC__XPath, Name, Element);
+    SetElement(sLangC__XPath, Name, Element);
   end;
 
-  procedure SetLangJavaElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangJavaElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangJavaXPath, Name, Element);
+    SetElement(sLangJavaXPath, Name, Element);
   end;
 
-  procedure SetLangUNIX_Shell_ScriptElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangUNIX_Shell_ScriptElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangUNIX_Shell_ScriptXPath, Name, Element);
+    SetElement(sLangUNIX_Shell_ScriptXPath, Name, Element);
   end;
 
-  procedure SetLangPythonElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangPythonElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangPythonXPath, Name, Element);
+    SetElement(sLangPythonXPath, Name, Element);
   end;
 
-  procedure SetLangPHPElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangPHPElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangPHPXPath, Name, Element);
+    SetElement(sLangPHPXPath, Name, Element);
   end;
 
-  procedure SetLangSQLElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangSQLElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangSQLXPath, Name, Element);
+    SetElement(sLangSQLXPath, Name, Element);
   end;
 
-  procedure SetLangJavascriptElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangJavascriptElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangJavascriptXPath, Name, Element);
+    SetElement(sLangJavascriptXPath, Name, Element);
   end;
 
-  procedure SetLangDiff_FileElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangDiff_FileElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangDiff_FileXPath, Name, Element);
+    SetElement(sLangDiff_FileXPath, Name, Element);
   end;
 
-  procedure SetLangMS_DOS_batch_languageElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangMS_DOS_batch_languageElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangMS_DOS_batch_languageXPath, Name, Element);
+    SetElement(sLangMS_DOS_batch_languageXPath, Name, Element);
   end;
 
-  procedure SetLangINI_fileElement(const Name:string; Element :TItemIDEHighlightElementsAttributes);
+  procedure SetLangINI_fileElement(const Name: string; Element: TItemIDEHighlightElementsAttributes);
   begin
-      SetElement(sLangINI_fileXPath, Name, Element);
+    SetElement(sLangINI_fileXPath, Name, Element);
   end;
 
 begin
-  Result:=False;
-  SchemeName:='Scheme'+MakeValidTagName(ThemeName);
-  SchemeFileName:='Color'+MakeValidTagName(ThemeName)+'.xml';
-  XmlStr:= TFile.ReadAllText(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'default\'+sLazarusThemeTemplate);
-  XmlStr:=StringReplace(XmlStr,'SchemeDummy',SchemeName,[rfReplaceAll]);
+  Result := False;
+  SchemeName := 'Scheme' + MakeValidTagName(ThemeName);
+  SchemeFileName := 'Color' + MakeValidTagName(ThemeName) + '.xml';
+  XmlStr := TFile.ReadAllText(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'default\' + sLazarusThemeTemplate);
+  XmlStr := StringReplace(XmlStr, 'SchemeDummy', SchemeName, [rfReplaceAll]);
 
   XmlDoc := CreateOleObject('Msxml2.DOMDocument.6.0');
   try
     XmlDoc.Async := False;
-    XmlDoc.LoadXml(XmlStr);
+    XmlDoc.LoadXML(XmlStr);
     XmlDoc.SetProperty('SelectionLanguage', 'XPath');
 
     if (XmlDoc.parseError.errorCode <> 0) then
@@ -381,8 +357,7 @@ begin
 
     Node := XmlDoc.selectSingleNode('/CONFIG/Lazarus/ColorSchemes/Names/Item1/@Value');
     if not VarIsClear(Node) then
-      Node.Text:=MakeValidTagName(ThemeName);
-
+      Node.Text := MakeValidTagName(ThemeName);
 
     SetGlobalElement('ahaDefault', ATheme[PlainText]);
     SetGlobalElement('ahaTextBlock', ATheme[MarkedBlock]);
@@ -396,20 +371,20 @@ begin
     SetGlobalElement('ahaIncrementalSearch', ATheme[SearchMatch]);
     SetGlobalElement('ahaHighlightAll', ATheme[MarkedBlock]);
 
-    //SetGlobalElement('ahaBracketMatch', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew,'','');
+    // SetGlobalElement('ahaBracketMatch', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew,'','');
     SetGlobalElement('ahaMouseLink', ATheme[HotLink]);
     SetGlobalElement('ahaModifiedLine', ATheme[ModifiedLine]);
     SetGlobalElement('ahaCodeFoldingTree', ATheme[CodeFoldingTree]);
-    //SetGlobalElement('ahaHighlightWord', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew,'','');
+    // SetGlobalElement('ahaHighlightWord', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew,'','');
     SetGlobalElement('ahaFoldedCode', ATheme[FoldedCode]);
-    //SetGlobalElement('ahaWordGroup', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaTemplateEditCur', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaTemplateEditSync', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaTemplateEditOther', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaSyncroEditCur', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaSyncroEditSync', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaSyncroEditOther', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
-    //SetGlobalElement('ahaSyncroEditArea', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaWordGroup', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaTemplateEditCur', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaTemplateEditSync', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaTemplateEditOther', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaSyncroEditCur', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaSyncroEditSync', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaSyncroEditOther', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
+    // SetGlobalElement('ahaSyncroEditArea', ATheme[].BackgroundColorNew, ATheme[].ForegroundColorNew);
     SetGlobalElement('ahaGutterSeparator', ATheme[CodeFoldingTree]);
     SetGlobalElement('ahaGutter', ATheme[LineNumber]);
     SetGlobalElement('ahaRightMargin', ATheme[RightMargin]);
@@ -419,10 +394,9 @@ begin
     SetLangObjectPascalElement('Comment', ATheme[Comment]);
     SetLangObjectPascalElement('Directive', ATheme[Preprocessor]);
     SetLangObjectPascalElement('Number', ATheme[Number]);
-    SetLangObjectPascalElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangObjectPascalElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangObjectPascalElement('String', ATheme[&String]);
     SetLangObjectPascalElement('Symbol', ATheme[Symbol]);
-
 
     SetLangLazarus_Form_definitionElement('Comment', ATheme[Comment]);
     SetLangLazarus_Form_definitionElement('Key', ATheme[ReservedWord]);
@@ -455,16 +429,16 @@ begin
     SetLangC__Element('Assembler', ATheme[Assembler]);
     SetLangC__Element('Comment', ATheme[Comment]);
     SetLangC__Element('Number', ATheme[Number]);
-    SetLangC__Element('Preprocessor',  ATheme[Preprocessor]);
-    SetLangC__Element('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangC__Element('Preprocessor', ATheme[Preprocessor]);
+    SetLangC__Element('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangC__Element('Space', ATheme[Whitespace]);
     SetLangC__Element('String', ATheme[&String]);
     SetLangC__Element('Symbol', ATheme[Symbol]);
 
     SetLangPerlElement('Comment', ATheme[Comment]);
     SetLangPerlElement('Number', ATheme[Number]);
-    SetLangPerlElement('Pragma',  ATheme[Preprocessor]);
-    SetLangPerlElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangPerlElement('Pragma', ATheme[Preprocessor]);
+    SetLangPerlElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangPerlElement('Space', ATheme[Whitespace]);
     SetLangPerlElement('String', ATheme[&String]);
     SetLangPerlElement('Symbol', ATheme[Symbol]);
@@ -473,14 +447,14 @@ begin
     SetLangJavaElement('Comment', ATheme[Comment]);
     SetLangJavaElement('Documentation', ATheme[Identifier]);
     SetLangJavaElement('Number', ATheme[Number]);
-    SetLangJavaElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangJavaElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangJavaElement('Space', ATheme[Whitespace]);
     SetLangJavaElement('String', ATheme[&String]);
     SetLangJavaElement('Symbol', ATheme[Symbol]);
 
     SetLangUNIX_Shell_ScriptElement('Comment', ATheme[Comment]);
     SetLangUNIX_Shell_ScriptElement('Number', ATheme[Number]);
-    SetLangUNIX_Shell_ScriptElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangUNIX_Shell_ScriptElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangUNIX_Shell_ScriptElement('String', ATheme[&String]);
     SetLangUNIX_Shell_ScriptElement('Symbol', ATheme[Symbol]);
     SetLangUNIX_Shell_ScriptElement('Variable', ATheme[Scripts]);
@@ -492,7 +466,7 @@ begin
     SetLangPythonElement('Non_reserved_keyword', ATheme[PlainText]);
     SetLangPythonElement('Number', ATheme[Number]);
     SetLangPythonElement('Octal', ATheme[Octal]);
-    SetLangPythonElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangPythonElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangPythonElement('String', ATheme[&String]);
     SetLangPythonElement('Symbol', ATheme[Symbol]);
     SetLangPythonElement('SyntaxError', ATheme[IllegalChar]);
@@ -500,7 +474,7 @@ begin
 
     SetLangPHPElement('Comment', ATheme[Comment]);
     SetLangPHPElement('Number', ATheme[Number]);
-    SetLangPHPElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangPHPElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangPHPElement('String', ATheme[&String]);
     SetLangPHPElement('Symbol', ATheme[Symbol]);
 
@@ -518,7 +492,7 @@ begin
 
     SetLangJavascriptElement('Comment', ATheme[Comment]);
     SetLangJavascriptElement('Number', ATheme[Number]);
-    SetLangJavascriptElement('Reserved_word', ATheme[ReservedWord]); //+ style???
+    SetLangJavascriptElement('Reserved_word', ATheme[ReservedWord]); // + style???
     SetLangJavascriptElement('String', ATheme[&String]);
     SetLangJavascriptElement('Symbol', ATheme[Symbol]);
 
@@ -533,42 +507,39 @@ begin
     SetLangDiff_FileElement('Diff_Removed_Line', ATheme[DiffDeletion]);
     SetLangDiff_FileElement('Unknown_word', ATheme[InvalidBreak]);
 
-    SetLangMS_DOS_batch_languageElement('Key', ATheme[ReservedWord]); //+ style???
+    SetLangMS_DOS_batch_languageElement('Key', ATheme[ReservedWord]); // + style???
     SetLangMS_DOS_batch_languageElement('Number', ATheme[Number]);
     SetLangMS_DOS_batch_languageElement('Comment', ATheme[Comment]);
     SetLangMS_DOS_batch_languageElement('Variable', ATheme[Identifier]);
 
     SetLangINI_fileElement('Comment', ATheme[Comment]);
-    SetLangINI_fileElement('Section', ATheme[ReservedWord]); //+ style???
+    SetLangINI_fileElement('Section', ATheme[ReservedWord]); // + style???
 
     ForceDirectories(OutputFolder);
-    SchemeFileName:=IncludeTrailingPathDelimiter(OutputFolder)+SchemeFileName;
+    SchemeFileName := IncludeTrailingPathDelimiter(OutputFolder) + SchemeFileName;
     XmlDoc.Save(SchemeFileName);
-    Result:=True;
+    Result := True;
   finally
     XmlDoc := Unassigned;
   end;
 end;
 
-
-
-function  GetLazarusIDEThemeName : string;
+function GetLazarusIDEThemeName: string;
 begin
-  Result:=GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value');
+  Result := GetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value');
 end;
 
-function  DelphiIDEThemeToLazarusTheme(const DelphiIdeTheme, OutputFolder:string) : Boolean;overload;
+function DelphiIDEThemeToLazarusTheme(const DelphiIdeTheme, OutputFolder: string): Boolean; overload;
 var
- ATheme    : TIDETheme;
- ThemeName : string;
+  ATheme: TIDETheme;
+  ThemeName: string;
 begin
-  ThemeName:=MakeValidTagName(ChangeFileExt(ExtractFileName(DelphiIdeTheme),''));
-  Result:=LoadThemeFromXMLFile(ATheme,DelphiIdeTheme);
+  ThemeName := MakeValidTagName(ChangeFileExt(ExtractFileName(DelphiIdeTheme), ''));
+  Result := LoadThemeFromXMLFile(ATheme, DelphiIdeTheme);
   if Result then
-   Result:=DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutputFolder);
+    Result := DelphiIDEThemeToLazarusTheme(ATheme, ThemeName, OutputFolder);
   if Result then
-   Result:=SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value',MakeValidTagName(ThemeName));
+    Result := SetEditorOptionsXMLValue('/CONFIG/EditorOptions/Color/LangObjectPascal/ColorScheme/@Value', MakeValidTagName(ThemeName));
 end;
-
 
 end.

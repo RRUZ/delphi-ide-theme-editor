@@ -21,7 +21,7 @@
 unit Vcl.Styles.Utils.Forms;
 
 
-{$DEFINE USE_Vcl.Styles.Hooks}
+{$I VCL.Styles.Utils.inc}
 
 interface
 
@@ -2674,13 +2674,20 @@ initialization
  //UseLatestCommonDialogs := False;
  {$ENDIF}
 
+{$IF CompilerVersion >= 30}
+ TStyleManager.SystemHooks := TStyleManager.SystemHooks - [shDialogs];
+{$IFEND}
+
+
   if StyleServices.Available then
   begin
     TSysStyleManager.RegisterSysStyleHook('#32770', TSysDialogStyleHook);
+    //TSysStyleManager.RegisterSysStyleHook('HH Parent', TSysDialogStyleHook);
     TSysStyleManager.RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
   end;
 
 finalization
   TSysStyleManager.UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
+  //TSysStyleManager.UnRegisterSysStyleHook('HH Parent', TSysDialogStyleHook);
   TSysStyleManager.UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
 end.

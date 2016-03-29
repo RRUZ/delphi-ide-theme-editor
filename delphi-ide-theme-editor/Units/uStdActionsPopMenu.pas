@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit uStdActionsPopMenu
 // unit for the Delphi IDE Theme Editor
@@ -14,32 +14,31 @@
 // The Original Code is uStdActionsPopMenu.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 unit uStdActionsPopMenu;
 
 interface
 
 uses
-   Classes,
-   Vcl.ActnPopup,
-   Vcl.Menus;
+  Classes,
+  Vcl.ActnPopup,
+  Vcl.Menus;
 
 procedure FillPopupActionBar(PopupActionBar: TPopupActionBar);
-procedure AssignStdActionsPopUpMenu(ParentComponent: TComponent;PopupMenu:TPopupMenu);
-
+procedure AssignStdActionsPopUpMenu(ParentComponent: TComponent; PopupMenu: TPopupMenu);
 
 implementation
 
 uses
- Vcl.StdCtrls,
- Vcl.ActnList,
- Vcl.StdActns;
+  Vcl.StdCtrls,
+  Vcl.ActnList,
+  Vcl.StdActns;
 
 type
-  TCustomEditClass=class (TCustomEdit);
+  TCustomEditClass = class(TCustomEdit);
 
 procedure FillPopupActionBar(PopupActionBar: TPopupActionBar);
 var
@@ -91,7 +90,6 @@ begin
   MenuItem.Action := Action;
   PopupActionBar.Items.Add(MenuItem);
 
-
   MenuItem := TMenuItem.Create(PopupActionBar);
   Action := TEditDelete.Create(PopupActionBar);
   Action.Caption := '&Delete';
@@ -102,18 +100,15 @@ begin
   PopupActionBar.Items.Add(MenuItem);
 end;
 
-
-procedure AssignStdActionsPopUpMenu(ParentComponent: TComponent;PopupMenu:TPopupMenu);
+procedure AssignStdActionsPopUpMenu(ParentComponent: TComponent; PopupMenu: TPopupMenu);
 var
- i : integer;
+  i: integer;
 begin
- for i:=0 to ParentComponent.ComponentCount-1 do
-   if (ParentComponent.Components[i] is TCustomEdit) and (TCustomEditClass(ParentComponent.Components[i]).PopupMenu=nil) then
-    TCustomEditClass(ParentComponent.Components[i]).PopupMenu:=PopupMenu
-   else
-    AssignStdActionsPopUpMenu(ParentComponent.Components[i], PopupMenu);
+  for i := 0 to ParentComponent.ComponentCount - 1 do
+    if (ParentComponent.Components[i] is TCustomEdit) and (TCustomEditClass(ParentComponent.Components[i]).PopupMenu = nil) then
+      TCustomEditClass(ParentComponent.Components[i]).PopupMenu := PopupMenu
+    else
+      AssignStdActionsPopUpMenu(ParentComponent.Components[i], PopupMenu);
 end;
-
-
 
 end.

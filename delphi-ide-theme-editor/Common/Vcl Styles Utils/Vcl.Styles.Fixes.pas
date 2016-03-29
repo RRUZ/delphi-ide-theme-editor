@@ -105,6 +105,7 @@ uses
   Winapi.CommCtrl,
   Vcl.Themes,
   Vcl.Forms,
+  System.SysUtils,
   System.Classes,
   System.UITypes,
   System.Types;
@@ -185,7 +186,7 @@ begin
       LImageIndex := PBS_HOT;
     end
     else
-    if Focused or (IsDefault and (Screen.ActiveControl<>nil) and not (Screen.ActiveControl is TCustomButton) ) then
+    if Control.Focused or (IsDefault and (Screen.ActiveControl<>nil) and not (Screen.ActiveControl is TCustomButton) ) then
     begin
       LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted);
       LImageIndex := PBS_DEFAULTED;

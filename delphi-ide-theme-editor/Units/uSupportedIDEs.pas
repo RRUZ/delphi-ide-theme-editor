@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit uSupportedIDEs
 // unit uSupportedIDEs  for the Delphi IDE Theme Editor
@@ -14,19 +14,20 @@
 // The Original Code is uSupportedIDEs.pas
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 
 unit uSupportedIDEs;
 
 interface
 
 type
-  TSupportedIDEs = (DelphiIDE,LazarusIDE, SMSIDE, AppMethodIDE);
+  TSupportedIDEs = (DelphiIDE, LazarusIDE, SMSIDE, AppMethodIDE);
+
 const
-  ListSupportedIDEs : array[TSupportedIDEs] of string = ('Delphi IDE', 'Lazarus IDE', 'Smart Mobile Studio IDE', 'AppMethod IDE');
+  ListSupportedIDEs: array [TSupportedIDEs] of string = ('Delphi IDE', 'Lazarus IDE', 'Smart Mobile Studio IDE', 'AppMethod IDE');
 
 implementation
 

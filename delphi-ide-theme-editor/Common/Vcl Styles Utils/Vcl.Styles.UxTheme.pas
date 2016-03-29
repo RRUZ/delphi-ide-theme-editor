@@ -40,14 +40,13 @@ done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by Get
 done   fix navigation buttons  W8, W10
 done   improve drawing navigation buttons W7
 
-       fix related shell dialogs
+fix related shell dialogs
+Add support for custom titlebars.
+msstyles
 
-   Add support for custom titlebars.
-               msstyles
-
-   Add support for Classic Theme
-   fix menu
-      fix popup windows with trackbar
+Add support for Classic Theme
+fix menu
+fix popup windows with trackbar
 
 
 }
@@ -130,10 +129,12 @@ const
 {$IFDEF HOOK_CommandModule}
 const
   VSCLASS_COMMANDMODULE                  = 'CommandModule';
+  VSCLASS_CPLCOMMANDMODULE               = 'CPLCommandModule::CommandModule';
 {$ENDIF}
 
 {$IFDEF HOOK_SearchBox}
 const
+  VSCLASS_SEARCHEDITBOX                 = 'SearchEditBox';
   VSCLASS_SEARCHBOX                     = 'SearchBox';
   VSCLASS_CompositedSEARCHBOX           = 'SearchBoxCompositedSearchBox::SearchBox';
   VSCLASS_INACTIVESEARCHBOX             = 'InactiveSearchBoxCompositedSearchBox::SearchBox';
@@ -194,6 +195,11 @@ type
 var
   Trampoline_UxTheme_OpenThemeDataEx       : function(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall = nil;
   Trampoline_UxTheme_OpenThemeData         : function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall =  nil;
+{$IF CompilerVersion >= 30}
+  Trampoline_UxTheme_OpenThemeDataForDPI   : function(hwnd: HWND; pszClassList: LPCWSTR; hwnd2: HWND): HTHEME; stdcall =  nil;
+{$IFEND}
+
+
   Trampoline_UxTheme_CloseThemeData        : function(hTheme: HTHEME): HRESULT; stdcall =  nil;
   Trampoline_UxTheme_DrawThemeBackground   : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall =  nil;
   Trampoline_UxTheme_DrawThemeBackgroundEx : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pOptions: Pointer): HResult; stdcall =  nil;
@@ -214,6 +220,7 @@ var
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 begin
+  //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList));
   VCLStylesLock.Enter;
   try
     Result:=Trampoline_UxTheme_OpenThemeData(hwnd, pszClassList);
@@ -230,8 +237,28 @@ begin
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList+' hTheme '+IntToStr(Result)+' Handle '+IntToHex(hwnd, 8)));
 end;
 
+{$IF CompilerVersion >= 30}
+function Detour_UxTheme_OpenThemeDataForDPI(hwnd: HWND; pszClassList: LPCWSTR; hwnd2: HWND): HTHEME; stdcall;
+begin
+  VCLStylesLock.Enter;
+  try
+    Result:=Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, hwnd2);
+    if THThemesClasses.ContainsKey(Result) then
+      THThemesClasses.Remove(Result);
+    THThemesClasses.Add(Result, pszClassList);
+
+    if THThemesHWND.ContainsKey(Result) then
+      THThemesHWND.Remove(Result);
+    THThemesHWND.Add(Result, hwnd);
+  finally
+    VCLStylesLock.Leave;
+  end;
+end;
+{$IFEND}
+
 function Detour_UxTheme_OpenThemeDataEx(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall;
 begin
+  //OutputDebugString(PChar('Detour_UxTheme_OpenThemeDataEx '+pszClassList));
   VCLStylesLock.Enter;
   try
     Result:=Trampoline_UxTheme_OpenThemeDataEx(hwnd, pszClassList, dwFlags);
@@ -288,6 +315,26 @@ begin
     Exit(VSCLASS_LISTVIEW)
   else
     CloseThemeData(hThemeNew);
+
+
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_ITEMSVIEW_HEADER);
+  if hThemeNew=hTheme then
+    Exit(VSCLASS_ITEMSVIEW_HEADER)
+  else
+    CloseThemeData(hThemeNew);
+
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_NAVIGATION);
+  if hThemeNew=hTheme then
+    Exit(VSCLASS_NAVIGATION)
+  else
+    CloseThemeData(hThemeNew);
+
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_COMMANDMODULE);
+  if hThemeNew=hTheme then
+    Exit(VSCLASS_COMMANDMODULE)
+  else
+    CloseThemeData(hThemeNew);
+
 
   hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_EDIT);
   if hThemeNew=hTheme then
@@ -561,14 +608,46 @@ end;
 
 
 function UxTheme_ToolTip(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+var
+  LStartColor, LEndColor : TColor;
+  LCanvas : TCanvas;
+  SaveIndex : Integer;
 begin
    case iPartId of
+
        TTP_STANDARD :
          begin
           DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
           Exit(S_OK);
          end;
 
+       TTP_BALLOON :
+         begin
+           //DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
+           LStartColor := GetHighLightColor(StyleServices.GetStyleColor(TStyleColor.scPanel), 10);
+           LEndColor   := StyleServices.GetStyleColor(TStyleColor.scPanel);
+
+            LCanvas:=TCanvas.Create;
+            SaveIndex := SaveDC(hdc);
+            try
+              LCanvas.Handle:=hdc;
+
+              GradientFillCanvas(LCanvas, LStartColor, LEndColor,
+              Rect(pRect.Left, pRect.Top, pRect.Width, pRect.Bottom), TGradientDirection.gdVertical);
+            finally
+              LCanvas.Handle:=0;
+              LCanvas.Free;
+              RestoreDC(hdc, SaveIndex);
+            end;
+           Exit(S_OK);
+         end;
+
+       TTP_BALLOONSTEM :
+         begin
+          //if iStateId = 0 then
+          DrawStyleFillRect(hdc, pRect, GetHighLightColor(StyleServices.GetStyleColor(TStyleColor.scPanel), 10));
+          Exit(S_OK);
+         end;
    end;
    //OutputDebugString(PChar(Format('UxTheme_ToolTip class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
@@ -1212,9 +1291,18 @@ begin
                             end;
 
                          end;
+
+    LVP_COLUMNDETAIL  :
+                         begin
+                            LColor := StyleServices.GetSystemColor(clWindow);
+                            DrawStyleFillRect(hdc, pRect, LColor);
+                            Exit(S_OK)
+                         end;
   end;
 
   //OutputDebugString(PChar(Format('UxTheme_ListView hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+  //DrawStyleFillRect(hdc, pRect, clYellow);
+  //Exit(S_OK)
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
@@ -1352,48 +1440,62 @@ end;
 function UxTheme_Spin(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
-  SaveIndex : Integer;
+  LRect : TRect;
+  LColor : TColor;
 begin
    case iPartId of
       SPNP_UP :
         begin
           case iStateId of
-            UPS_NORMAL   :LDetails:=StyleServices.GetElementDetails(tsUpNormal);
-            UPS_HOT      :LDetails:=StyleServices.GetElementDetails(tsUpHot);
-            UPS_PRESSED  :LDetails:=StyleServices.GetElementDetails(tsUpPressed);
-            UPS_DISABLED :LDetails:=StyleServices.GetElementDetails(tsUpDisabled);
+            UPS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tsUpNormal);
+            UPS_HOT      : LDetails:=StyleServices.GetElementDetails(tsUpHot);
+            UPS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tsUpPressed);
+            UPS_DISABLED : LDetails:=StyleServices.GetElementDetails(tsUpDisabled);
           end;
 
-          SaveIndex := SaveDC(hdc);
-          try
-           if hwnd<>0  then
-             DrawStyleParentBackground(hwnd, hdc, pRect);
-
-           StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-          finally
-            RestoreDC(hdc, SaveIndex);
+          LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
+          case iStateId of
+            UPS_NORMAL   : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
+            UPS_HOT      : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextHot);
+            UPS_PRESSED  : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextPressed);
+            UPS_DISABLED : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextDisabled);
           end;
+
+
+          DrawStyleElement(hdc, LDetails, pRect);
+          LRect:= pRect;
+          LRect.Top  :=  LRect.Top + 3;
+          LRect.Left :=  LRect.Left + 5;
+          DrawStyleArrow(hdc, TScrollDirection.sdUp, LRect.Location, 2, LColor);
+
+
+
           Exit(S_OK);
         end;
 
       SPNP_DOWN :
         begin
           case iStateId of
-            DNS_NORMAL   :LDetails:=StyleServices.GetElementDetails(tsDownNormal);
-            DNS_HOT      :LDetails:=StyleServices.GetElementDetails(tsDownHot);
-            DNS_PRESSED  :LDetails:=StyleServices.GetElementDetails(tsDownPressed);
-            DNS_DISABLED :LDetails:=StyleServices.GetElementDetails(tsDownDisabled);
+            DNS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tsDownNormal);
+            DNS_HOT      : LDetails:=StyleServices.GetElementDetails(tsDownHot);
+            DNS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tsDownPressed);
+            DNS_DISABLED : LDetails:=StyleServices.GetElementDetails(tsDownDisabled);
           end;
 
-          SaveIndex := SaveDC(hdc);
-          try
-           if hwnd<>0  then
-             DrawStyleParentBackground(hwnd, hdc, pRect);
-
-           StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-          finally
-            RestoreDC(hdc, SaveIndex);
+          LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
+          case iStateId of
+            DNS_NORMAL   : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
+            DNS_HOT      : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextHot);
+            DNS_PRESSED  : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextPressed);
+            DNS_DISABLED : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextDisabled);
           end;
+
+
+          DrawStyleElement(hdc, LDetails, pRect);
+          LRect:= pRect;
+          LRect.Top  :=  LRect.Top + 3;
+          LRect.Left :=  LRect.Left + 5;
+          DrawStyleArrow(hdc, TScrollDirection.sdDown, LRect.Location, 2, LColor);
           Exit(S_OK);
         end;
    end;
@@ -1573,7 +1675,8 @@ begin
          begin
             LColor:= StyleServices.GetSystemColor(clWindowText);
             LRect:= pRect;
-            LRect.Top :=  LRect.Top + 5;
+            LRect.Top  :=  LRect.Top + 5;
+            LRect.Left :=  LRect.Left + 5;
 
             if (iStateId=GLPS_OPENED) or (iStateId=HGLPS_OPENED) then
              DrawStyleArrow(hdc, TScrollDirection.sdDown, LRect.Location, 3, LColor)
@@ -1587,7 +1690,8 @@ begin
          begin
             LColor:= StyleServices.GetSystemColor(clHighlightText);
             LRect:= pRect;
-            LRect.Top :=  LRect.Top + 5;
+            LRect.Top  :=  LRect.Top + 5;
+            LRect.Left :=  LRect.Left + 5;
 
             if (iStateId=HGLPS_OPENED) then
               DrawStyleArrow(hdc, TScrollDirection.sdDown, LRect.Location, 3, LColor)
@@ -1757,7 +1861,10 @@ begin
         TDLG_PRIMARYPANEL  :
         begin
           //LDetails:=StyleServices.GetElementDetails(ttdPrimaryPanel);   //ttdPrimaryPanel  this element is not included in the VCL Styles yet
+
           LColor:=StyleServices.GetStyleColor(scEdit);
+          if LColor=StyleServices.GetStyleColor(scBorder)  then
+            LColor:=StyleServices.GetStyleColor(scPanel);//GetShadowColor(LColor, -10);
           DrawStyleFillRect(hdc, pRect, LColor);
           Exit(S_OK);
         end;
@@ -2025,6 +2132,8 @@ begin
   if (iPartId=SBP_THUMBBTNVERT) then
     StyleServices.DrawElement(hdc, StyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, nil);
 
+    //OutputDebugString(PChar(Format('UxTheme_ScrollBar class %s hTheme %d iPartId %d iStateId %d Left %d Top %d Width %d Height %d',
+    //[THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId, PRect.Left, prect.Top, prect.Width, prect.Height])));
   StyleServices.DrawElement(hdc, LDetails, pRect, nil);
   Exit(S_OK);
 end;
@@ -2154,6 +2263,7 @@ var
   LColor : TColor;
   LPRect : System.Types.PRect;
 begin
+
     case iPartId of
 
        MENU_POPUPBORDERS   :  //OK
@@ -2947,7 +3057,7 @@ begin
 //
     LHWND := THThemesHWND.Items[hTheme];
 
-   //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+//   OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    if FuncsDrawThemeBackground.ContainsKey(LThemeClass) then
    begin
      LFuncDrawThemeBackground := FuncsDrawThemeBackground.Items[LThemeClass];
@@ -2955,10 +3065,12 @@ begin
    end
    else
    begin
-//    OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-//    DrawStyleFillRect(hdc, pRect, clPurple);
-//    Exit(S_OK);
-    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+
+//     OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+//     DrawStyleFillRect(hdc, pRect, clPurple);
+//     Exit(S_OK);
+
+     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
    end;
   finally
     VCLStylesLock.Leave;
@@ -3010,6 +3122,7 @@ end;
 function Detour_UxTheme_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
 var
   LThemeClass : string;
+  LColor : TColor;
 begin
 
      VCLStylesLock.Enter;
@@ -3021,155 +3134,234 @@ begin
        VCLStylesLock.Leave;
      end;
 
+
      case iPropId  of
 
          TMT_TEXTCOLOR :
+		 if not SameText(LThemeClass, VSCLASS_TASKDIALOGSTYLE) then
          begin
-           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-           if (Result=S_OK) and (@Trampoline_user32_GetSysColor<>nil) and (pColor=Trampoline_user32_GetSysColor(COLOR_WINDOWTEXT)) then
-           begin
-             //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-             pColor:=ColorToRGB(StyleServices.GetSystemColor(clWindowText));
-             Exit(S_OK);
-           end
-           else
-           //if SameText(LThemeClass, 'TEXTSTYLE') then
-           begin
-//             OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-//             pColor:=ColorToRGB(clRed);
-//             Exit(S_OK);
-           end;
-
+             Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+             if (Result=S_OK) and (@Trampoline_user32_GetSysColor<>nil) and (pColor=Trampoline_user32_GetSysColor(COLOR_WINDOWTEXT)) then
+             begin
+               //OutputDebugString(PChar(Format('Intercepted Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+               //pColor := ColorToRGB(clRed);
+               pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+               Exit(S_OK);
+             end;
          end;
-
-//          TMT_FILLCOLOR :
-//           begin
-//             Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-//             if (Result=S_OK) {and  (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) }then
-//             begin
-//               //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-//               pColor:=ColorToRGB(clRed);//ColorToRGB(StyleServices.GetSystemColor(clWindowText));
-//               Exit(S_OK);
-//             end;
-//
-//           end;
-
-
-     else
-       begin
-//           Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-//           //if pColor=$FCFCFC then
-//           if SameText('ReadingPane', LThemeClass) then
-//           begin
-//             OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-//             pColor:=ColorToRGB(clFuchsia);
-//             Exit(S_OK);
-//           end;
-       end;
      end;
-//
-//             pColor:=ColorToRGB(clRed);
-//             Exit(S_OK);
-//
 
-    if SameText(LThemeClass, VSCLASS_MENU) then
-    begin
-        pColor:=clNone;
-//        case iPartId of
-//
-//          MENU_BARITEM :
-//              case iStateId  of
-//               0 :  pColor:= ColorToRGB(clRed);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
-//              end;
-//
-//          MENU_POPUPBACKGROUND :
-//              case iStateId  of
-//               0 :  pColor:= ColorToRGB(clGreen);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
-//              end;
-//
-//          MENU_POPUPITEM :
-//              case iStateId  of
-//               0 :  pColor:= ColorToRGB(clFuchsia);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
-//              end;
-//
-//        end;
+//Debug Output: Detour_GetThemeColor Class Communications::Rebar hTheme 65566 iPartId 0 iStateId 0  iPropId 3803 Color   FAFAFA Process ThemedSysControls.exe (13176)
+//Debug Output: Detour_GetThemeColor Class TryHarder hTheme 65579 iPartId 1 iStateId 1  iPropId 3803 Color   5B391E Process ThemedSysControls.exe (13176)
+//Debug Output: Detour_GetThemeColor Class CONTROLPANELSTYLE hTheme 65569 iPartId 7 iStateId 1  iPropId 3803 Color   CC6600 Process ThemedSysControls.exe (13176)
 
-       if TColor(pColor)=clNone then
-       begin
-         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-       end
-       else
-         Result:=S_OK;
-    end
-    else
-    if SameText(LThemeClass, VSCLASS_TOOLTIP) then
-    begin
-        pColor:=clNone;
-        case iPartId of
+//Debug Output: Intercepted Detour_GetThemeColor Class CPLCommandModule::CommandModule hTheme 65575 iPartId 3 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
+//Debug Output: Intercepted Detour_GetThemeColor Class InfoBar hTheme 65576 iPartId 2 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 
-          TTP_STANDARD :
-              case iStateId  of
-               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
-              end;
+//OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 
-        end;
-
-       if TColor(pColor)=clNone then
-       begin
-         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-       end
-       else
-         Result:=S_OK;
-    end
-    else
-    if SameText(LThemeClass, VSCLASS_TEXTSTYLE) then
-    begin
-        pColor:=clNone;
-        case iPartId of
-
-          TEXT_MAININSTRUCTION :
-              case iStateId  of
-               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlightText));
-              end;
-
-        end;
-
-       if TColor(pColor)=clNone then
-       begin
-         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-       end
-       else
-         Result:=S_OK;
-    end
-    else
-    {$IFDEF HOOK_ListView}
-    if (SameText(LThemeClass, VSCLASS_HEADER) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_HEADER)) then
-    begin
-        pColor:=clNone;
-        case iPartId of
-
-          HP_HEADERITEM :
-              case iStateId  of
-               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
-              end;
-
-        end;
-
-       if TColor(pColor)=clNone then
-       begin
-         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-       end
-       else
-         Result:=S_OK;
-    end
-    else
-    {$ENDIF}
     if LThemeClass<>'' then
     begin
+      if SameText(LThemeClass, 'Tooltip') then
+      begin
+          pColor:=clNone;
+          case iPartId of
+            4 :
+                case iStateId  of
+                 0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+                end;
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+
+      end
+      ELSE
+      if SameText(LThemeClass, VSCLASS_CONTROLPANELSTYLE) then
+      begin
+          pColor:=clNone;
+//          case iPartId of
+//            EP_EDITTEXT :
+//                case iStateId  of
+//                 ETS_CUEBANNER :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+//                end;
+//          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      if SameText(LThemeClass, VSCLASS_EDIT) then
+      begin
+          pColor:=clNone;
+          case iPartId of
+            EP_EDITTEXT :
+                case iStateId  of
+                 ETS_CUEBANNER :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                end;
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      if SameText(LThemeClass, VSCLASS_TRYHARDER) then
+      begin
+          pColor:=clNone;
+          case iPartId of
+
+            0 :
+                case iStateId  of
+                 0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                end;
+
+            1 :
+                case iStateId  of
+                 1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                end;
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      if SameText(LThemeClass, VSCLASS_MENU) then
+      begin
+          pColor:=clNone;
+  //        case iPartId of
+  //
+  //          MENU_BARITEM :
+  //              case iStateId  of
+  //               0 :  pColor:= ColorToRGB(clRed);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+  //              end;
+  //
+  //          MENU_POPUPBACKGROUND :
+  //              case iStateId  of
+  //               0 :  pColor:= ColorToRGB(clGreen);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+  //              end;
+  //
+  //          MENU_POPUPITEM :
+  //              case iStateId  of
+  //               0 :  pColor:= ColorToRGB(clFuchsia);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+  //              end;
+  //
+  //        end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      if SameText(VSCLASS_SEARCHEDITBOX, LThemeClass) then
+      begin
+          pColor:=clNone;
+          case iPartId of
+                1  :    case iStateId of
+                          2 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                        end;
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      if SameText(LThemeClass, VSCLASS_TOOLTIP) then
+      begin
+          pColor:=clNone;
+          case iPartId of
+
+            TTP_STANDARD :
+                case iStateId  of
+                 0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+                end;
+
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      if SameText(LThemeClass, VSCLASS_TEXTSTYLE) then
+      begin
+          pColor:=clNone;
+          case iPartId of
+
+            TEXT_MAININSTRUCTION :
+                case iStateId  of
+                   0 :  begin
+                            pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlightText));
+                        end;
+
+                end;
+
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      {$IFDEF HOOK_ListView}
+      if (SameText(LThemeClass, VSCLASS_HEADER) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_HEADER)) then
+      begin
+          pColor:=clNone;
+          case iPartId of
+
+            HP_HEADERITEM :
+                case iStateId  of
+                 0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+                end;
+
+          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+      end
+      else
+      {$ENDIF}
 
       {$IFDEF HOOK_PreviewPane}
       if  SameText(LThemeClass, VSCLASS_READINGPANE) then
@@ -3243,15 +3435,18 @@ begin
       {$IFDEF HOOK_TaskDialog}
       if SameText(LThemeClass, VSCLASS_TASKDIALOGSTYLE) then
       begin
+         pColor := clNone;
          case iPartId of
            TDLG_MAININSTRUCTIONPANE : begin
-                                       pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
-                                       Result:= S_OK;
+                                        pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+                                        if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
+                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                                       end;
 
            TDLG_CONTENTPANE         : begin
-                                       pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
-                                       Result:= S_OK;
+                                        pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                                        if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
+                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                                       end;
           TDLG_EXPANDOTEXT,
           TDLG_EXPANDEDFOOTERAREA,
@@ -3259,17 +3454,19 @@ begin
           TDLG_VERIFICATIONTEXT,
           //TDLG_RADIOBUTTONPANE,
           TDLG_EXPANDEDCONTENT      : begin
-                                       pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
-                                       Result:= S_OK;
+                                        pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                                        if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
+                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                                       end;
-         else
-          begin
-           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-           //pColor:=clRed;
-           //Result:=S_OK;
-           //OutputDebugString(PChar(Format('Detour_GetThemeColor Theme Class %LThemeClass hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
-          end;
          end;
+
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
       end
       else
       {$ENDIF}
@@ -3279,18 +3476,11 @@ begin
 
         pColor:=clNone;
         case iPartId of
-
-
           0, 2 :
               case iStateId  of
                0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindow));//OK
 
               end;
-//
-//          TVP_BRANCH :
-//              case iStateId  of
-//               0 :  pColor:= StyleServices.GetSystemColor(clHighlight);//OK
-//              end;
         end;
 
        if TColor(pColor)=clNone then
@@ -3304,7 +3494,7 @@ begin
       else
      {$ENDIF}
      {$IFDEF HOOK_ListView}
-      if   (SameText(LThemeClass, VSCLASS_ITEMSVIEW) or  SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW))  then
+      if   (SameText(LThemeClass, VSCLASS_ITEMSVIEW) or  SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_LISTVIEWSTYLE) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW))  then
       begin
 
         pColor:=clNone;
@@ -3322,6 +3512,12 @@ begin
           LVP_LISTSORTEDDETAIL :
                               case iStateId  of
                                1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                               //normal main column (name)
+                               2 :  pColor:= ColorToRGB(clWindowText);
+
+                               //SELECTED
+                               3 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+
                                //hot text
                                4 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
                                5 :  pColor:= ColorToRGB(clBlue);
@@ -3342,7 +3538,6 @@ begin
                               end;
         end;
 
-       //Result:=S_OK;
        if TColor(pColor)=clNone then
        begin
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
@@ -3354,7 +3549,7 @@ begin
       else
      {$ENDIF}
      {$IFDEF HOOK_CommandModule}
-      if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) then
+      if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) or  SameText(LThemeClass, VSCLASS_CPLCOMMANDMODULE) then
       begin
 
         pColor:=clNone;
@@ -3366,6 +3561,12 @@ begin
                1 :  pColor:= ColorToRGB(GetStyleBtnTextColor);//GetStyleHighLightColor;
                6 :  pColor:= ColorToRGB(clYellow);//StyleServices.GetSystemColor(clBtnShadow);
               end;
+
+          4 :
+              case iStateId  of
+               1 :  pColor:= ColorToRGB(GetStyleBtnTextColor);
+              end;
+
 
           9 :
               case iStateId  of
@@ -3391,7 +3592,7 @@ begin
      {$ENDIF}
       begin
        Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-      // pColor:=clRed;
+       //pColor:=ColorToRGB(clRed);
        //Result:=S_OK;
        //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
       end;
@@ -3399,8 +3600,6 @@ begin
     else
     begin
      Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-     //pColor:=clFuchsia;
-     //Result:=S_OK;
      //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
      //OutputDebugString2(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor]));
     end;
@@ -3929,6 +4128,27 @@ begin
    Result:=Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
 end;
 
+{$IF CompilerVersion >= 30}
+function InterceptCreateOrdinal(const Module : string; MethodName: integer; const InterceptProc: Pointer; ForceLoadModule: Boolean = True;
+  Options: Byte = v1compatibility): Pointer;
+
+var
+  pOrgPointer: Pointer;
+  LModule: THandle;
+begin
+  Result := nil;
+  LModule := GetModuleHandle(PChar(Module));
+  if (LModule = 0) and ForceLoadModule then
+    LModule := LoadLibrary(PChar(Module));
+
+  if LModule <> 0 then
+  begin
+    pOrgPointer := GetProcAddress(LModule, PChar(MethodName));
+    if Assigned(pOrgPointer) then
+      Result := DDetours.InterceptCreate(pOrgPointer, InterceptProc, Options);
+  end;
+end;
+{$IFEND}
 
 const
   themelib = 'uxtheme.dll';
@@ -4034,6 +4254,10 @@ initialization
 
 
     @Trampoline_UxTheme_OpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
+    {$IF CompilerVersion >= 30}
+    if TOSVersion.Check(10) then
+     @Trampoline_UxTheme_OpenThemeDataForDPI    := InterceptCreateOrdinal(themelib, 129, @Detour_UxTheme_OpenThemeDataForDPI);
+    {$IFEND}
     @Trampoline_UxTheme_OpenThemeDataEx        := InterceptCreate(themelib, 'OpenThemeDataEx', @Detour_UxTheme_OpenThemeDataEx);
     @Trampoline_UxTheme_DrawThemeBackground    := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
     @Trampoline_UxTheme_DrawThemeBackgroundEx  := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
@@ -4044,12 +4268,17 @@ initialization
     @Trampoline_UxTheme_GetThemeSysColor       := InterceptCreate(themelib, 'GetThemeSysColor', @Detour_UxTheme_GetThemeSysColor);
     @Trampoline_UxTheme_GetThemeSysColorBrush  := InterceptCreate(themelib, 'GetThemeSysColorBrush', @Detour_UxTheme_GetThemeSysColorBrush);
     @Trampoline_UxTheme_GetThemeColor          := InterceptCreate(themelib, 'GetThemeColor', @Detour_UxTheme_GetThemeColor);
+
  end;
 
 finalization
   InterceptRemove(@Trampoline_UxTheme_GetThemeSysColor);
   InterceptRemove(@Trampoline_UxTheme_GetThemeSysColorBrush);
   InterceptRemove(@Trampoline_UxTheme_OpenThemeData);
+  {$IF CompilerVersion >= 30}
+  if TOSVersion.Check(10) then
+    InterceptRemove(@Trampoline_UxTheme_OpenThemeDataForDPI);
+  {$IFEND}
   InterceptRemove(@Trampoline_UxTheme_OpenThemeDataEx);
   InterceptRemove(@Trampoline_UxTheme_GetThemeColor);
   InterceptRemove(@Trampoline_UxTheme_DrawThemeBackground);
