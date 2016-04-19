@@ -14,7 +14,7 @@
 // The Original Code is Main.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -143,7 +143,6 @@ type
     ActionSaveChanges: TAction;
     ActionSaveAs: TAction;
     PopupActionBar1: TPopupActionBar;
-    Button1: TButton;
     PanelColors: TPanel;
     RadioButtonFore: TRadioButton;
     RadioButtonBack: TRadioButton;
@@ -191,7 +190,6 @@ type
     procedure ActionSaveChangesExecute(Sender: TObject);
     procedure ImageBugMouseEnter(Sender: TObject);
     procedure ImageBugMouseLeave(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure RadioButtonForeClick(Sender: TObject);
     procedure ImportVSTheme1Click(Sender: TObject);
     procedure ImportEclipseTheme1Click(Sender: TObject);
@@ -645,28 +643,6 @@ begin
   end;
 end;
 
-procedure TFrmMain.Button1Click(Sender: TObject);
-var
-  i : Integer;
-begin
-  ProgressBar1.Visible := True;
-  try
-    ProgressBar1.Position := 0;
-    ProgressBar1.Max      := LvThemes.Items.Count;
-    LabelMsg.Visible:=True;
-    for i := 0 to LvThemes.Items.Count - 1 do
-    begin
-      LvThemes.Selected:=LvThemes.Items[i];
-      LabelMsg.Caption:=Format('processing %s theme',[LvThemes.Items[i].Caption]);
-      GenerateThumbnail;
-      ProgressBar1.Position := i;
-    end;
-  finally
-    ProgressBar1.Visible := False;
-    LabelMsg.Visible:=False;
-  end;
-end;
-
 procedure PrintControl(AControl :TWinControl;ARect:TRect;AOut:TBitmap);
 var
   DC: HDC;
@@ -956,63 +932,64 @@ procedure TFrmMain.FormCreate(Sender: TObject);
 Var
   LIDEData  : TDelphiVersionData;
   Index     : Integer;
+  LNCButton : TNCButton;
 begin
  NCControls:=TNCControls.Create(Self);
  NCControls.ShowSystemMenu:=False;
  NCControls.Images  := ImageList2;
- NCControls.ButtonsList.Add;
- NCControls[0].Style := nsSplitButton;
- NCControls[0].ImageStyle := isGrayHot;
- NCControls[0].ImageIndex := 0;
- NCControls[0].BoundsRect := Rect(5,5,75,25);
- NCControls[0].Caption := 'Menu';
- NCControls[0].DropDownMenu:= PopupMenuThemes;
- //NCControls[0].OnClick := ButtonNCClick;
 
- NCControls.ButtonsList.Add;
- NCControls[1].Style := nsTranparent;
- NCControls[1].ImageStyle := isGrayHot;
- NCControls[1].ImageIndex := 3;
- NCControls[1].BoundsRect := Rect(78,5,98,25);
- NCControls[1].Name       := 'NCHue';
- NCControls[1].ShowHint   := True;
- NCControls[1].Hint       := 'Change Hue/Saturation';
- NCControls[1].Caption := '';
- NCControls[1].OnClick := ImageHueClick;
+ LNCButton := NCControls.ButtonsList.Add;
+ LNCButton.Style := nsSplitButton;
+ LNCButton.ImageStyle := isGrayHot;
+ LNCButton.ImageIndex := 0;
+ LNCButton.BoundsRect := Rect(5,5,75,25);
+ LNCButton.Caption := 'Menu';
+ LNCButton.DropDownMenu:= PopupMenuThemes;
+ //LNCButton.OnClick := ButtonNCClick;
 
- NCControls.ButtonsList.Add;
- NCControls[2].Style := nsTranparent;
- NCControls[2].ImageStyle := isGrayHot;
- NCControls[2].ImageIndex := 2;
- NCControls[2].BoundsRect := Rect(101,5,121,25);
- NCControls[2].Name       := 'NCConf';
- NCControls[2].ShowHint   := True;
- NCControls[2].Hint       := 'Settings';
- NCControls[2].Caption := '';
- NCControls[2].OnClick := ImageConfClick;
+ LNCButton := NCControls.ButtonsList.Add;
+ LNCButton.Style := nsTranparent;
+ LNCButton.ImageStyle := isGrayHot;
+ LNCButton.ImageIndex := 3;
+ LNCButton.BoundsRect := Rect(78,5,98,25);
+ LNCButton.Name       := 'NCHue';
+ LNCButton.ShowHint   := True;
+ LNCButton.Hint       := 'Change Hue/Saturation';
+ LNCButton.Caption := '';
+ LNCButton.OnClick := ImageHueClick;
 
- NCControls.ButtonsList.Add;
- NCControls[3].Style := nsTranparent;
- NCControls[3].ImageStyle := isGrayHot;
- NCControls[3].ImageIndex := 1;
- NCControls[3].BoundsRect := Rect(124,5,144,25);
- NCControls[3].Name       := 'NCBug';
- NCControls[3].ShowHint   := True;
- NCControls[3].Hint       := 'Report Bugs';
- NCControls[3].Caption := '';
- NCControls[3].OnClick := ImageBugClick;
+ LNCButton := NCControls.ButtonsList.Add;
+ LNCButton.Style := nsTranparent;
+ LNCButton.ImageStyle := isGrayHot;
+ LNCButton.ImageIndex := 2;
+ LNCButton.BoundsRect := Rect(101,5,121,25);
+ LNCButton.Name       := 'NCConf';
+ LNCButton.ShowHint   := True;
+ LNCButton.Hint       := 'Settings';
+ LNCButton.Caption := '';
+ LNCButton.OnClick := ImageConfClick;
 
- NCControls.ButtonsList.Add;
- NCControls[4].Style := nsTranparent;
- NCControls[4].ImageStyle := isGrayHot;
- NCControls[4].ImageIndex := 4;
- NCControls[4].BoundsRect := Rect(147,5,167,25);
- NCControls[4].Name       := 'NCUpdate';
- NCControls[4].ShowHint   := True;
- NCControls[4].Hint       := 'Check for updates';
- NCControls[4].Caption    := '';
- NCControls[4].OnClick := ImageUpdateClick;
+ LNCButton := NCControls.ButtonsList.Add;
+ LNCButton.Style := nsTranparent;
+ LNCButton.ImageStyle := isGrayHot;
+ LNCButton.ImageIndex := 1;
+ LNCButton.BoundsRect := Rect(124,5,144,25);
+ LNCButton.Name       := 'NCBug';
+ LNCButton.ShowHint   := True;
+ LNCButton.Hint       := 'Report Bugs';
+ LNCButton.Caption := '';
+ LNCButton.OnClick := ImageBugClick;
 
+ LNCButton := NCControls.ButtonsList.Add;
+ LNCButton.Style := nsTranparent;
+ LNCButton.ImageStyle := isGrayHot;
+ LNCButton.ImageIndex := 4;
+ LNCButton.BoundsRect := Rect(147,5,167,25);
+ LNCButton.Name       := 'NCUpdate';
+ LNCButton.ShowHint   := True;
+ LNCButton.Hint       := 'Check for updates';
+ LNCButton.Caption    := '';
+ LNCButton.OnClick := ImageUpdateClick;
 
   IDEsList:=TList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);

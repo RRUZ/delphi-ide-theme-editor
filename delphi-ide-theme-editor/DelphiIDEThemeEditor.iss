@@ -1862,7 +1862,7 @@ Source: Themes\zeym.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\zhech.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Themes\ziyong.theme.xml; DestDir: {userappdata}\DITE\Themes\
 Source: Installer\VclStylesInno.dll; DestDir: {app}; Flags: dontcopy
-Source: Installer\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
+Source: Installer\Glossy.vsf; DestDir: {app}; Flags: dontcopy
 Source: Installer\background.bmp; Flags: dontcopy
 Source: Styles\Amakrits.vsf; DestDir: {app}\Styles\
 Source: Styles\AmethystKamri.vsf; DestDir: {app}\Styles\
@@ -1924,10 +1924,10 @@ UsePreviousAppDir=true
 AppendDefaultDirName=true
 PrivilegesRequired=admin
 WindowVisible=false
-WizardSmallImageFile=Installer\WizModernSmallImage-IS_BW.bmp
-WizardImageFile=Installer\WizModernImage-IS_BW.bmp
+WizardSmallImageFile=Installer\WizModernSmallImage-IS.bmp
+WizardImageFile=Installer\WizModernImage-IS.bmp
 AppContact=theroadtodelphi@gmail.com
-DisableProgramGroupPage=false
+DisableProgramGroupPage=yes
 AppID=DelphiIDEThemeEditor
 SetupIconFile=Extras\Delphi_Ide_Theme_Editor.ico
 DefaultGroupName=Delphi IDE Theme Editor
@@ -1940,6 +1940,7 @@ Name: {userappdata}\DITE\Themes Eclipse
 Name: {userappdata}\DITE\Themes VS
 Name: {userappdata}\DITE\Themes Lazarus
 Name: {userappdata}\DITE\Themes
+Name: {userappdata}\DITE\Themes\Images
 Name: {app}\Images
 Name: {app}\Styles
 Name: {app}\HelpInsight
@@ -2026,8 +2027,8 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-   ExtractTemporaryFile('Amakrits.vsf');
-   LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
+   ExtractTemporaryFile('glossy.vsf');
+   LoadVCLStyle(ExpandConstant('{tmp}\glossy.vsf'));
    Result:=True;
 end;
 

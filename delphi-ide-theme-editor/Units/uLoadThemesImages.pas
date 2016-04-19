@@ -66,9 +66,9 @@ var
   ImageName: string;
   FileName: string;
   ImpTheme: TIDETheme;
-  Bmp: TBitmap;
+  LBitmap: TBitmap;
   i: Integer;
-  CreateArr: Boolean;
+  CreateThumbnail: Boolean;
 
   procedure CreateThemeBmp(Width, Height: Word; Background, Foreground1, Foreground2: TColor; var Bitmap: TBitmap);
   Var
@@ -122,33 +122,33 @@ begin
       Item := FListview.Items.Item[i];
       ImageName := IncludeTrailingPathDelimiter(FPath) + 'Images\' + Item.Caption + '.bmp';
 
-      Bmp := TBitmap.Create;
+      LBitmap := TBitmap.Create;
       try
-        CreateArr := True;
+        CreateThumbnail := True;
         if FileExists(ImageName) then
         begin
-          Bmp.LoadFromFile(ImageName);
-          if (Bmp.Width = FImageList.Width) and (Bmp.Height = FImageList.Height) then
-            CreateArr := False;
+          LBitmap.LoadFromFile(ImageName);
+          if (LBitmap.Width = FImageList.Width) and (LBitmap.Height = FImageList.Height) then
+            CreateThumbnail := False;
         end;
 
-        if CreateArr then
+        if CreateThumbnail then
         begin
           FileName := IncludeTrailingPathDelimiter(FPath) + Item.Caption + '.theme.xml';
           LoadThemeFromXMLFile(ImpTheme, FileName);
           CreateThemeBmp(16, 16, StringToColor(ImpTheme[ReservedWord].BackgroundColorNew),
-            StringToColor(ImpTheme[ReservedWord].ForegroundColorNew), StringToColor(ImpTheme[Identifier].ForegroundColorNew), Bmp)
+            StringToColor(ImpTheme[ReservedWord].ForegroundColorNew), StringToColor(ImpTheme[Identifier].ForegroundColorNew), LBitmap)
         end;
 
         Synchronize(
           procedure
           begin
-            FImageList.Add(Bmp, nil);
+            FImageList.Add(LBitmap, nil);
             Item.ImageIndex := FImageList.Count - 1;
           end);
-        Bmp.SaveToFile(ImageName);
+        LBitmap.SaveToFile(ImageName);
       finally
-        Bmp.Free;
+        LBitmap.Free;
       end;
     end;
 

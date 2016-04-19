@@ -360,16 +360,6 @@ object FrmMain: TFrmMain
     OnChange = ComboBoxExIDEsChange
     Images = ImageListDelphiVersion
   end
-  object Button1: TButton
-    Left = 641
-    Top = 79
-    Width = 122
-    Height = 25
-    Caption = 'Generate Thumbnails'
-    TabOrder = 18
-    Visible = False
-    OnClick = Button1Click
-  end
   object PanelColors: TPanel
     Left = 722
     Top = 15
@@ -377,7 +367,7 @@ object FrmMain: TFrmMain
     Height = 558
     Anchors = [akTop, akRight, akBottom]
     BevelOuter = bvNone
-    TabOrder = 19
+    TabOrder = 18
   end
   object RadioButtonFore: TRadioButton
     Left = 244
@@ -386,7 +376,7 @@ object FrmMain: TFrmMain
     Height = 17
     Caption = 'Foreground'
     Checked = True
-    TabOrder = 20
+    TabOrder = 19
     TabStop = True
     OnClick = RadioButtonForeClick
   end
@@ -396,7 +386,7 @@ object FrmMain: TFrmMain
     Width = 79
     Height = 17
     Caption = 'Background'
-    TabOrder = 21
+    TabOrder = 20
     OnClick = RadioButtonForeClick
   end
   object BtnAdditionalSettings: TButton
@@ -405,7 +395,7 @@ object FrmMain: TFrmMain
     Width = 107
     Height = 25
     Caption = 'Additional Settings'
-    TabOrder = 22
+    TabOrder = 21
     OnClick = BtnAdditionalSettingsClick
   end
   object ImageListDelphiVersion: TImageList
@@ -956,8 +946,8 @@ object FrmMain: TFrmMain
     Top = 232
   end
   object ActionList1: TActionList
-    Left = 380
-    Top = 64
+    Left = 132
+    Top = 352
     object ActionApplyTheme: TAction
       Caption = 'Apply Theme'
       ImageIndex = 6
@@ -1265,8 +1255,8 @@ object FrmMain: TFrmMain
       000000000000}
   end
   object ActionManager1: TActionManager
-    Left = 344
-    Top = 64
+    Left = 64
+    Top = 384
     StyleName = 'Platform Default'
     object ActionExoLazarusClrSch: TAction
       Caption = 'Export Theme to Lazarus Color Scheme'

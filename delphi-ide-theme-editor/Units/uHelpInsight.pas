@@ -50,7 +50,8 @@ const
     '\ObjRepos\en',  //XE6
     '\ObjRepos\en',  //XE7
     '\ObjRepos\en',  //XE8
-    '\ObjRepos\en'   //10
+    '\ObjRepos\en',  //10 Seattle
+    '\ObjRepos\en'   //10 Berlin
     );
 
 
