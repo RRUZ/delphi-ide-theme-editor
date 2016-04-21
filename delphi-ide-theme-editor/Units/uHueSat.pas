@@ -27,7 +27,8 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, uDelphiVersions,
   SynEdit,
-  uSettings,
+  DITE.Settings,
+  Vcl.Styles.Utils.Graphics,
   uHSLUtils,
   uDelphiIDEHighlight,
   SynEditHighlighter,
@@ -84,6 +85,7 @@ type
     FDelphiVersion: TDelphiVersions;
     FTheme: TIDETheme;
     FReloadThemes: Boolean;
+    Icons : TObjectDictionary<string, TIcon>;
     procedure Saturation(Value: integer);
     procedure Lightness(Value: integer);
     procedure Hue(Value: integer);
@@ -101,7 +103,8 @@ type
 implementation
 
 uses
-  System.UITypes;
+  Vcl.Themes,
+  System.UITypes, Vcl.Styles.Fixes;
 
 {$R *.dfm}
 
@@ -336,7 +339,16 @@ begin
 end;
 
 procedure TFrmHueSat.FormCreate(Sender: TObject);
+var
+  LIndex : Integer;
 begin
+  Icons := TObjectDictionary<string, TIcon>.Create([doOwnsValues]);
+
+  Icons.Add('default', TIcon.Create);
+  Icons['default'].Handle := AwesomeFont.GetIcon(fa_circle_o_notch, 16, 16, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
+  LIndex := ImageList1.AddIcon(Icons['default']);
+  //ActionApplyTheme.ImageIndex := LIndex;
+
   FReloadThemes := False;
   FColorList := TColorList.Create;
   FHueColorList := TColorList.Create;
@@ -344,6 +356,7 @@ end;
 
 procedure TFrmHueSat.FormDestroy(Sender: TObject);
 begin
+  Icons.Free;
   FColorList.Free;
   FHueColorList.Free;
 end;
@@ -464,4 +477,6 @@ begin
   AllowChange := True;
 end;
 
+initialization
+  TStyleManager.Engine.RegisterStyleHook(TButton, TButtonStyleHookFix);
 end.

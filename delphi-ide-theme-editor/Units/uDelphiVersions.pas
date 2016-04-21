@@ -136,7 +136,7 @@ Color15=$FFFFFF
     'RAD Studio XE7/Appmethod 1.15',
     'RAD Studio XE8',
     'RAD Studio 10 Seattle',
-    'RAD Studio 10 Berlin'
+    'RAD Studio 10.1 Berlin'
     );
 
   DelphiVersionNumbers: array[TDelphiVersions] of double =
