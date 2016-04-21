@@ -6,7 +6,15 @@ The Delphi IDE Theme Editor (DITE) is a tool to customize the IDE **color highli
 
 ![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/logos.png)
 
-DITE supports Delphi 5-7, 2005-2010, XE-XE8, RAD Studio 10 Seattle, Appmethod 1.13-1.16, Lazarus v1.0.6 and Smart Mobile Studio IDE v1.1.2.17
+DITE supports 
+
+* Delphi 5-7. 
+* RAD Studio 2005-2010 
+* RAD Studio XE-XE8 
+* RAD Studio 10 Seattle, RAD Studio 10.1 Berlin
+* Appmethod 1.13-1.16
+* Lazarus v1.0.6
+* Smart Mobile Studio IDE v1.1.2.17
 
 ![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/DITE_Animated.gif)
 
