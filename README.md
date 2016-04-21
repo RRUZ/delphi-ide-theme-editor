@@ -22,7 +22,7 @@ DITE supports
 
 ## Downloads ##
 * [Installer of the  Delphi IDE Theme Editor - Mirror 1](https://goo.gl/KLJSWZ)
-* [Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNOGZfWjJpZjFtelE)
+* [Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?authuser=0&id=0B7KzPH8HQCZNclcxSDBrejlmcEE&export=download)
 * [Themes Megapack 1 (+560 Visual Studio themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_VS_Megapack_Themes.zip)
 * [Themes MegaPack 2 (+1700 Eclipse IDE themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_Eclipse_Megapack_Themes.zip)
 * [50+ Lazarus Color Schemes](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Themes%20Lazarus.zip)
