@@ -6,7 +6,15 @@ The Delphi IDE Theme Editor (DITE) is a tool to customize the IDE **color highli
 
 ![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/logos.png)
 
-DITE supports Delphi 5-7, 2005-2010, XE-XE8, RAD Studio 10 Seattle, Appmethod 1.13-1.16, Lazarus v1.0.6 and Smart Mobile Studio IDE v1.1.2.17
+DITE supports 
+
+* Delphi 5-7. 
+* RAD Studio 2005-2010 
+* RAD Studio XE-XE8 
+* RAD Studio 10 Seattle, RAD Studio 10.1 Berlin
+* Appmethod 1.13-1.16
+* Lazarus v1.0.6
+* Smart Mobile Studio IDE v1.1.2.17
 
 ![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/DITE_Animated.gif)
 
@@ -14,7 +22,7 @@ DITE supports Delphi 5-7, 2005-2010, XE-XE8, RAD Studio 10 Seattle, Appmethod 1.
 
 ## Downloads ##
 * [Installer of the  Delphi IDE Theme Editor - Mirror 1](https://goo.gl/KLJSWZ)
-* [Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?export=download&id=0B7KzPH8HQCZNOGZfWjJpZjFtelE)
+* [Installer of the  Delphi IDE Theme Editor - Mirror 2](https://docs.google.com/uc?authuser=0&id=0B7KzPH8HQCZNclcxSDBrejlmcEE&export=download)
 * [Themes Megapack 1 (+560 Visual Studio themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_VS_Megapack_Themes.zip)
 * [Themes MegaPack 2 (+1700 Eclipse IDE themes imported)](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DephiIDEThemeEdito_Eclipse_Megapack_Themes.zip)
 * [50+ Lazarus Color Schemes](http://dl.dropbox.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/Themes%20Lazarus.zip)
