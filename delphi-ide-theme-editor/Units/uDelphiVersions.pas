@@ -368,10 +368,13 @@ begin
   for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
   begin
     Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_CURRENT_USER);
+
+    FileName := '';
+
     if Found then
       Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName, HKEY_CURRENT_USER) and FileExists(FileName);
 
-    if  (DelphiComp>=DelphiXE6) and not Found then
+    if (DelphiComp>=DelphiXE6) and not Found then
     begin
       FileName:=StringReplace(FileName, 'bds.exe', 'appmethod.exe', [rfReplaceAll]);
       Found:=FileExists(FileName);
