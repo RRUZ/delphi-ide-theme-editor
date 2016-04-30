@@ -146,7 +146,8 @@ begin
             FImageList.Add(LBitmap, nil);
             Item.ImageIndex := FImageList.Count - 1;
           end);
-        LBitmap.SaveToFile(ImageName);
+        if CreateThumbnail then
+          LBitmap.SaveToFile(ImageName);
       finally
         LBitmap.Free;
       end;

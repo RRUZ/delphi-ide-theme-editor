@@ -162,6 +162,7 @@ type
     BtnSave: TButton;
     EditThemeName: TEdit;
     LabelThemeName: TLabel;
+    BtnApplySmall: TButton;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure CbElementChange(Sender: TObject);
@@ -538,7 +539,7 @@ var
 begin
   try
     Directory := '';
-    OutPutFolder := GetSettingsFolder + 'Themes Lazarus';
+    OutPutFolder := GetCommonSettingsFolder + 'Themes Lazarus';
     if SysUtils.DirectoryExists(OutPutFolder) then
       Directory := OutPutFolder;
 
@@ -547,7 +548,7 @@ begin
     else
       Exit;
 
-    OpenDialogExport.InitialDir := GetSettingsFolder;
+    OpenDialogExport.InitialDir := GetPrivateSettingsFolder;
     if OpenDialogExport.Execute(Handle) then
     begin
 
@@ -1281,12 +1282,14 @@ begin
 
    PanelThemeName.Visible:=false;
    LvThemes.Height := 380;
-
+   BtnApplySmall.Visible := True;
+   BtnApplySmall.Top := LvThemes.Top + LvThemes.Height + 5;
  end
  else
  begin
  //  Self.Constraints.MinWidth := Self.Constraints.MinWidth + PanelColors.Width;
 //   Self.Width := Self.Constraints.MinWidth;
+   BtnApplySmall.Visible := False;
    Self.Width := Self.Width + PanelColors.Width;
    Self.Height:= 620;
    SynEditCode.Top := 192;

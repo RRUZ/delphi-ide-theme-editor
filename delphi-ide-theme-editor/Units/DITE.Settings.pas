@@ -36,7 +36,7 @@ type
     FCheckForUpdates: Boolean;
     FApplyThemeHelpInsight: Boolean;
   public
-    property ThemePath: string Read FThemePath Write FThemePath;
+    property ThemePath: string Read FThemePath;
     property VCLStyle: string Read FVCLStyle Write FVCLStyle;
     property ActivateColorizer: Boolean Read FActivateColorizer write FActivateColorizer;
     property CheckForUpdates : Boolean Read  FCheckForUpdates write FCheckForUpdates;
@@ -75,7 +75,8 @@ type
 procedure ReadSettings(var Settings: TSettings);
 procedure WriteSettings(const Settings: TSettings);
 procedure LoadVCLStyle(Const StyleName:String);
-function GetSettingsFolder : string;
+function  GetPrivateSettingsFolder : string;
+function  GetCommonSettingsFolder : string;
 
 
 implementation
@@ -100,13 +101,19 @@ type
  TVclStylesPreviewClass = class(TVclStylesPreview);
 
 
-function GetSettingsFolder : string;
+function GetPrivateSettingsFolder : string;
 begin
  Result:=IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_APPDATA))+ 'DITE\';
  //C:\Users\Dexter\AppData\Roaming\WDCC\Cache
  SysUtils.ForceDirectories(Result);
 end;
 
+function GetCommonSettingsFolder : string;
+begin
+ Result:=IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA))+ 'DITE\';
+ //C:\ProgramData\DITE
+ SysUtils.ForceDirectories(Result);
+end;
 
 procedure RegisterVCLStyle(const StyleFileName: string);
 begin
@@ -133,40 +140,41 @@ end;
 
 procedure ReadSettings(var Settings: TSettings);
 var
-  iniFile: TIniFile;
+  LIniFile: TIniFile;
 begin
-  iniFile := TIniFile.Create(GetSettingsFolder + 'Settings.ini');
+  LIniFile := TIniFile.Create(GetPrivateSettingsFolder + 'Settings.ini');
   try
-    Settings.ActivateColorizer:= iniFile.ReadBool('Global', 'ActivateColorizer',  False);
-    Settings.VCLStyle  := iniFile.ReadString('Global', 'VCLStyle',  'Glossy');
-    Settings.ThemePath := iniFile.ReadString('Global', 'ThemePath',  GetSettingsFolder + 'Themes');
-    Settings.CheckForUpdates :=iniFile.ReadBool('Global', 'CheckForUpdates',  True);
-    Settings.ApplyThemeHelpInsight :=iniFile.ReadBool('Global', 'ApplyThemeHelpInsight',  True);
+    Settings.ActivateColorizer:= LIniFile.ReadBool('Global', 'ActivateColorizer',  False);
+    Settings.VCLStyle  := LIniFile.ReadString('Global', 'VCLStyle',  'Glossy');
+    //Settings.ThemePath := LIniFile.ReadString('Global', 'ThemePath',  IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) +'DITE\Themes');
+    Settings.FThemePath :=  IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) +'DITE\Themes';
+    Settings.CheckForUpdates :=LIniFile.ReadBool('Global', 'CheckForUpdates',  True);
+    Settings.ApplyThemeHelpInsight :=LIniFile.ReadBool('Global', 'ApplyThemeHelpInsight',  True);
     if (Settings.VCLStyle='') or SameText(Settings.VCLStyle, 'Windows')  then
       Settings.VCLStyle  := 'Glossy';
 
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
-      Settings.ThemePath := GetSettingsFolder + 'Themes';
+      //Settings.ThemePath := GetSettingsFolder + 'Themes';
       SysUtils.ForceDirectories(Settings.ThemePath);
     end;
   finally
-    iniFile.Free;
+    LIniFile.Free;
   end;
 end;
 
 procedure WriteSettings(const Settings: TSettings);
 var
-  iniFile: TIniFile;
+  LIniFile: TIniFile;
 begin
-  iniFile := TIniFile.Create(GetSettingsFolder + 'Settings.ini');
+  LIniFile := TIniFile.Create(GetPrivateSettingsFolder + 'Settings.ini');
   try
-    iniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
-    iniFile.WriteString('Global', 'VCLStyle', Settings.VCLStyle);
-    iniFile.WriteBool('Global', 'CheckForUpdates', Settings.CheckForUpdates);
-    iniFile.WriteBool('Global', 'ApplyThemeHelpInsight', Settings.ApplyThemeHelpInsight);
+    //LIniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
+    LIniFile.WriteString('Global', 'VCLStyle', Settings.VCLStyle);
+    LIniFile.WriteBool('Global', 'CheckForUpdates', Settings.CheckForUpdates);
+    LIniFile.WriteBool('Global', 'ApplyThemeHelpInsight', Settings.ApplyThemeHelpInsight);
   finally
-    iniFile.Free;
+    LIniFile.Free;
   end;
 end;
 
@@ -180,7 +188,7 @@ procedure TFrmSettings.BtnSaveClick(Sender: TObject);
 begin
   if MessageDlg('Do you want save the changes ?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
-    FSettings.ThemePath := EditThemesFolder.Text;
+    //FSettings.ThemePath := EditThemesFolder.Text;
     FSettings.VCLStyle  := ComboBoxVCLStyle.Text;
     FSettings.CheckForUpdates :=CheckBoxUpdates.Checked;
     FSettings.ApplyThemeHelpInsight :=CheckBoxHelpInsight.Checked;

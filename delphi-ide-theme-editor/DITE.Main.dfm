@@ -177,7 +177,7 @@ object FrmMain: TFrmMain
     Left = 619
     Top = 35
     Width = 16
-    Height = 21
+    Height = 23
     Associate = EditFontSize
     Min = 1
     Max = 30
@@ -324,8 +324,6 @@ object FrmMain: TFrmMain
     Anchors = [akTop, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 15
-    ExplicitLeft = 722
-    ExplicitHeight = 558
   end
   object RadioButtonFore: TRadioButton
     Left = 244
@@ -359,7 +357,7 @@ object FrmMain: TFrmMain
   object Panel1: TPanel
     Left = 8
     Top = 556
-    Width = 231
+    Width = 137
     Height = 28
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
@@ -422,6 +420,16 @@ object FrmMain: TFrmMain
       ParentDoubleBuffered = False
       TabOrder = 2
     end
+  end
+  object BtnApplySmall: TButton
+    Left = 152
+    Top = 441
+    Width = 86
+    Height = 25
+    Caption = 'Apply Theme'
+    TabOrder = 21
+    Visible = False
+    OnClick = ActionApplyThemeExecute
   end
   object ImageListDelphiVersion: TImageList
     ColorDepth = cd32Bit
