@@ -26,7 +26,7 @@ uses
  uDelphiIDEHighlight,
  uDelphiVersions;
 
-{$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
+{$I Common.inc}
 
 const
   HelpInsightPaths: array[TDelphiVersions] of string = (

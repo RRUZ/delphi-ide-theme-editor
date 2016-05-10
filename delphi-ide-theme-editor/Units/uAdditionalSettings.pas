@@ -14,7 +14,7 @@
 // The Original Code is uMisc.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -227,7 +227,7 @@ procedure TFrmAdditionalSettings.LoadModernThemeData;
 var
   LModernTheme : TModernTheme;
 begin
-  LModernTheme:=TModernTheme.Create(FIDEData.Version);
+  LModernTheme:=TModernTheme.Create(FIDEData);
   try
    LModernTheme.LoadData;
    CbIDEFonts.ItemIndex    := CbIDEFonts.Items.IndexOf(LModernTheme.FontName);
@@ -242,7 +242,7 @@ procedure TFrmAdditionalSettings.RestoreModernThemeData;
 var
   LModernTheme : TModernTheme;
 begin
-  LModernTheme:=TModernTheme.Create(FIDEData.Version);
+  LModernTheme:=TModernTheme.Create(FIDEData);
   try
    LModernTheme.RestoreData;
   finally
@@ -260,7 +260,7 @@ procedure TFrmAdditionalSettings.SetModernThemeData;
 var
   LModernTheme : TModernTheme;
 begin
-  LModernTheme:=TModernTheme.Create(FIDEData.Version);
+  LModernTheme:=TModernTheme.Create(FIDEData);
   try
    LModernTheme.FontName:=CbIDEFonts.Text;
    LModernTheme.FontSize:=UpDownFontSize.Position;

@@ -102,6 +102,7 @@ begin
     VersionData.Name := Format('Smart Mobile Studio %s', [uMisc.GetFileVersion(FileName)]);
     VersionData.IDEType := TSupportedIDEs.SMSIDE;
     VersionData.Icon := TIcon.Create;
+    VersionData.Version := TDelphiVersions.DelphiXE; //used for syntax highlight
     // VersionData.Icon.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'images\sms.ico');
     ExtractIconFile(VersionData.Icon, FileName, SHGFI_SMALLICON);
     AList.Add(VersionData);

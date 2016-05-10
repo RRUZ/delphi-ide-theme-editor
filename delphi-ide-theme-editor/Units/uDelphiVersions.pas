@@ -32,7 +32,7 @@ uses
   Classes,
   ComCtrls;
 
-{$DEFINE DELPHI_OLDER_VERSIONS_SUPPORT}
+{$I Common.inc}
 
 type
   TDelphiVersions =
@@ -63,16 +63,18 @@ type
 
   TDelphiVersionData = Class
   private
-    FVersion: TDelphiVersions;
-    FName: string;
-    FPath: string;
-    FIcon: TIcon;
-    FIDEType: TSupportedIDEs;
+    FVersion : TDelphiVersions;
+    FName    : string;
+    FPath    : string;
+    FIcon    : TIcon;
+    FIDEType : TSupportedIDEs;
+    FRegKey  : string;
   public
-    property Version : TDelphiVersions read FVersion;
+    property Version : TDelphiVersions read FVersion write FVersion;
     property Path    : string read FPath write FPath;
     property Name    : string read FName write FName;
     property Icon    : TIcon read FIcon write FIcon;
+    property RegKey    : string read FRegKey;
     property IDEType : TSupportedIDEs read FIDEType write FIDEType;
     constructor Create;
     destructor Destroy; override;
@@ -166,32 +168,6 @@ Color15=$FFFFFF
     );
 
 
-
-  DelphiRegPaths: array[TDelphiVersions] of string = (
-  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-    '\Software\Borland\Delphi\5.0',
-    '\Software\Borland\Delphi\6.0',
-  {$ENDIF}
-    '\Software\Borland\Delphi\7.0',
-    '\Software\Borland\BDS\2.0',
-    '\Software\Borland\BDS\3.0',
-    '\Software\Borland\BDS\4.0',
-    '\Software\Borland\BDS\5.0',
-    '\Software\CodeGear\BDS\6.0',
-    '\Software\CodeGear\BDS\7.0',
-    '\Software\Embarcadero\BDS\8.0',
-    '\Software\Embarcadero\BDS\9.0',
-    '\Software\Embarcadero\BDS\10.0',
-    '\Software\Embarcadero\BDS\11.0',
-    '\Software\Embarcadero\BDS\12.0',
-    '\Software\Embarcadero\BDS\13.0',
-    '\Software\Embarcadero\BDS\14.0',
-    '\Software\Embarcadero\BDS\15.0',
-    '\Software\Embarcadero\BDS\16.0' ,
-    '\Software\Embarcadero\BDS\17.0',
-    '\Software\Embarcadero\BDS\18.0'
-    );
-
   DelphiVCLStylesPaths: array[TDelphiVersions] of string = (
   {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
     '',
@@ -218,15 +194,15 @@ Color15=$FFFFFF
     );
 
 
-procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
-procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
-{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
-function GetIndexClosestColor(AColor:TColor) : Integer;
-{$ENDIF}
+  procedure FillCurrentDelphiVersion(Data : TDelphiVersionData);
+  procedure FillListDelphiVersions(AList : TList<TDelphiVersionData>);
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+  function DelphiIsOldVersion(ADelphiVersionData : TDelphiVersionData) : Boolean;
+  function GetIndexClosestColor(AColor : TColor) : Integer;
+  {$ENDIF}
 
-function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions) : TColor;
-function GetVCLStylesFolder(DelphiVersion:TDelphiVersions) : string;
+  function GetDelphiVersionMappedColor(AColor : TColor; ADelphiVersionData : TDelphiVersionData) : TColor;
+  function GetVCLStylesFolder(DelphiVersion : TDelphiVersions) : string;
 
 {
 
@@ -256,19 +232,124 @@ uses
   uRegistry,
   Registry;
 
+type
+   TDelphiCmpnyName = (OldBorland, Borland, CodeGear, Embarcadero);
+
+
+const
+  DelphiRegPaths: array[TDelphiVersions] of string = (
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+    '\Software\Borland\Delphi\5.0',
+    '\Software\Borland\Delphi\6.0',
+  {$ENDIF}
+    '\Software\Borland\Delphi\7.0',
+    '\Software\Borland\BDS\2.0',
+    '\Software\Borland\BDS\3.0',
+    '\Software\Borland\BDS\4.0',
+    '\Software\Borland\BDS\5.0',
+    '\Software\CodeGear\BDS\6.0',
+    '\Software\CodeGear\BDS\7.0',
+    '\Software\Embarcadero\BDS\8.0',
+    '\Software\Embarcadero\BDS\9.0',
+    '\Software\Embarcadero\BDS\10.0',
+    '\Software\Embarcadero\BDS\11.0',
+    '\Software\Embarcadero\BDS\12.0',
+    '\Software\Embarcadero\BDS\13.0',
+    '\Software\Embarcadero\BDS\14.0',
+    '\Software\Embarcadero\BDS\15.0',
+    '\Software\Embarcadero\BDS\16.0' ,
+    '\Software\Embarcadero\BDS\17.0',
+    '\Software\Embarcadero\BDS\18.0'
+    );
+
+  DelphiCustomRegPaths: array[TDelphiVersions] of string = (
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+    '\Software\Borland\%s\5.0',  //Delphi
+    '\Software\Borland\%s\6.0',  //Delphi
+  {$ENDIF}
+    '\Software\Borland\%s\7.0',  //Delphi
+    '\Software\Borland\%s\2.0',  //BDS
+    '\Software\Borland\%s\3.0',  //BDS
+    '\Software\Borland\%s\4.0',  //BDS
+    '\Software\Borland\%s\5.0',  //BDS
+    '\Software\CodeGear\%s\6.0', //BDS
+    '\Software\CodeGear\%s\7.0', //BDS
+    '\Software\Embarcadero\%s\8.0',   //BDS
+    '\Software\Embarcadero\%s\9.0',   //BDS
+    '\Software\Embarcadero\%s\10.0',  //BDS
+    '\Software\Embarcadero\%s\11.0',  //BDS
+    '\Software\Embarcadero\%s\12.0',  //BDS
+    '\Software\Embarcadero\%s\13.0',  //BDS
+    '\Software\Embarcadero\%s\14.0',  //BDS
+    '\Software\Embarcadero\%s\15.0',  //BDS
+    '\Software\Embarcadero\%s\16.0' , //BDS
+    '\Software\Embarcadero\%s\17.0',  //BDS
+    '\Software\Embarcadero\%s\18.0'   //BDS
+    );
+
+
+  DelphiRegPathNumbers: array[TDelphiVersions] of Integer =
+    (
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+    5,      // 'Delphi 5',
+    6,      // 'Delphi 6',
+  {$ENDIF}
+    7,      // 'Delphi 7',
+    2,      // 'Delphi 8',
+    3,      // 'BDS 2005',
+    4,      // 'BDS 2006',
+    5,      // 'RAD Studio 2007',
+
+    6,      // 'RAD Studio 2009',
+    7,      // 'RAD Studio 2010',
+    8,      // 'RAD Studio XE'
+    9,      // 'RAD Studio XE2'
+    10,      // 'RAD Studio XE3'
+    11,      // 'RAD Studio XE4'
+    12,      // 'RAD Studio XE5'
+    13,      // 'Appmethod 1.13'
+    14,      // 'RAD Studio XE6'
+    15,      // 'RAD Studio XE7'
+    16,      // 'RAD Studio XE8'
+    17,      // 'RAD Studio 10 Seattle
+    18       // 'RAD Studio 10 Berlin
+    );
+
+  DelphiCmpnyNames : array[TDelphiVersions] of TDelphiCmpnyName =
+    (
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+    OldBorland,      // 'Delphi 5',
+    OldBorland,      // 'Delphi 6',
+  {$ENDIF}
+    OldBorland,      // 'Delphi 7',
+    Borland,      // 'Delphi 8',
+    Borland,      // 'BDS 2005',
+    Borland,      // 'BDS 2006',
+    Borland,      // 'RAD Studio 2007', (stored under Borland)
+    Codegear,      // 'RAD Studio 2009',
+    Codegear,      // 'RAD Studio 2010',
+    Embarcadero,      // 'RAD Studio XE'
+    Embarcadero,      // 'RAD Studio XE2'
+    Embarcadero,      // 'RAD Studio XE3'
+    Embarcadero,      // 'RAD Studio XE4'
+    Embarcadero,      // 'RAD Studio XE5'
+    Embarcadero,      // 'Appmethod 1.13'
+    Embarcadero,      // 'RAD Studio XE6'
+    Embarcadero,      // 'RAD Studio XE7'
+    Embarcadero,      // 'RAD Studio XE8'
+    Embarcadero,      // 'RAD Studio 10 Seattle
+    Embarcadero       // 'RAD Studio 10 Berlin
+    );
 
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-function DelphiIsOldVersion(DelphiVersion:TDelphiVersions) : Boolean;
+function DelphiIsOldVersion(ADelphiVersionData : TDelphiVersionData) : Boolean;
 var
  i  : integer;
 begin
  Result:=False;
-  for i:=0  to DelphiOldVersions-1 do
-    if DelphiVersion=DelphiOldVersionNumbers[i] then
-    begin
-       Result:=True;
-       exit;
-    end;
+  for i:=0  to (DelphiOldVersions - 1) do
+    if ADelphiVersionData.Version = DelphiOldVersionNumbers[i] then
+      Exit(True);
 end;
 
 function GetIndexClosestColor(AColor:TColor) : Integer;
@@ -299,12 +380,12 @@ end;
 {$ENDIF}
 
 
-function GetDelphiVersionMappedColor(AColor:TColor;DelphiVersion:TDelphiVersions) : TColor;
+function GetDelphiVersionMappedColor(AColor:TColor; ADelphiVersionData : TDelphiVersionData) : TColor;
 begin
  Result:=AColor;
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-  if DelphiIsOldVersion(DelphiVersion) then
-  Result:= DelphiOldColorsList[GetIndexClosestColor(AColor)];
+  if DelphiIsOldVersion(ADelphiVersionData) then
+    Result:= DelphiOldColorsList[GetIndexClosestColor(AColor)];
 {$ENDIF}
 end;
 
@@ -338,19 +419,20 @@ var
   LData : TDelphiVersionData;
   s : string;
 begin
-  s:=ParamStr(0);
-  List:= TObjectList<TDelphiVersionData>.Create;
+  s    := ParamStr(0);
+  List := TObjectList<TDelphiVersionData>.Create;
   try
     FillListDelphiVersions(List);
     for LData in List do
     if SameText(LData.Path, s) then
     begin
-      Data.FVersion :=LData.Version;
-      Data.Path    :=LData.Path;
-      Data.Name    :=LData.Name;
-      if Data.Icon=nil then Data.Icon:=TIcon.Create;
+      Data.FVersion := LData.Version;
+      Data.Path     := LData.Path;
+      Data.Name     := LData.Name;
+      if (Data.Icon = nil) then Data.Icon := TIcon.Create;
       Data.Icon.Assign(LData.Icon);
-      Data.IDEType :=LData.IDEType;
+      Data.IDEType  := LData.IDEType;
+      Data.FRegKey  := LData.FRegKey;
       break;
     end;
   finally
@@ -358,49 +440,162 @@ begin
   end;
 end;
 
-procedure FillListDelphiVersions(AList:TList<TDelphiVersionData>);
+procedure ScanRootKey(const AKey : string; AList : TStrings; AMin, AMax : Integer);
+var
+  s : string;
+  RootKey: HKEY;
+  LList : TStrings;
+
+  procedure GetItems();
+  var
+   LRegistry : TRegistry;
+  begin
+   LRegistry := TRegistry.Create;
+   try
+     LRegistry.RootKey := RootKey;
+      if LRegistry.OpenKeyReadOnly(AKey) then
+          LRegistry.GetKeyNames(LList);
+   finally
+     LRegistry.Free;
+   end;
+  end;
+
+function IsValidKey(const ASubKey : string) : boolean;
+var
+  LVersion : Integer;
+  FullKey, FileName  : string;
+begin
+  Result := False;
+  for LVersion := AMin to AMax do
+  begin
+    FullKey := Format('%s\%s\%d.0', [AKey, ASubKey, LVersion]);
+    if RegKeyExists(FullKey, RootKey) then
+    begin
+     Result :=  RegReadStr(FullKey, 'App', FileName, RootKey) and FileExists(FileName);
+     if Result then
+       Break;
+    end;
+  end;
+end;
+
+begin
+  RootKey := HKEY_CURRENT_USER;
+  LList := TStringList.Create;
+  try
+    AList.Clear;
+    GetItems();
+    if LList.Count>0 then
+      for s in  LList do
+       if {(s <> 'BDS') and} IsValidKey(s) then
+          AList.Add(s);
+  finally
+    LList.free;
+  end;
+end;
+
+
+procedure FillListDelphiVersions(AList : TList<TDelphiVersionData>);
+type
+  TBDSKeysItem  = record
+    MinValue, MaxValue : Integer;
+    Company  : TDelphiCmpnyName;
+    Key : string;
+  end;
+const
+   MaxBDSKeysItem = 4;
+
 Var
   VersionData : TDelphiVersionData;
   DelphiComp  : TDelphiVersions;
-  FileName    : string;
-  Found       : boolean;
+  LKey, FileName    : string;
+  Found       : Boolean;
+  RootKey     : HKEY;
+  BDSKeys     : TStrings;
+  i, j : Integer;
+  BDSKeysItems : Array [0..MaxBDSKeysItem-1] of TBDSKeysItem;
 begin
-  for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
-  begin
-    Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_CURRENT_USER);
+  BDSKeys := TStringList.Create;
+  try
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+    BDSKeysItems[0].MinValue := 5;
+  {$ELSE}
+    BDSKeysItems[0].MinValue := 7;
+  {$ENDIF}
 
-    FileName := '';
+    BDSKeysItems[0].MaxValue := 7;
+    BDSKeysItems[0].Company  := OldBorland;
+    BDSKeysItems[0].Key      := '\Software\Borland';
 
-    if Found then
-      Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName, HKEY_CURRENT_USER) and FileExists(FileName);
+    BDSKeysItems[1].MinValue := 2;
+    BDSKeysItems[1].MaxValue := 5;
+    BDSKeysItems[1].Company  := Borland;
+    BDSKeysItems[1].Key      := '\Software\Borland';
 
-    if (DelphiComp>=DelphiXE6) and not Found then
+    BDSKeysItems[2].MinValue := 6;
+    BDSKeysItems[2].MaxValue := 7;
+    BDSKeysItems[2].Company  := CodeGear;
+    BDSKeysItems[2].Key      := '\Software\CodeGear';
+
+    BDSKeysItems[3].MinValue := 8;
+    BDSKeysItems[3].MaxValue := 18;
+    BDSKeysItems[3].Company  := Embarcadero;
+    BDSKeysItems[3].Key      := '\Software\Embarcadero';
+
+    for j := 0 to MaxBDSKeysItem - 1 do
     begin
-      FileName:=StringReplace(FileName, 'bds.exe', 'appmethod.exe', [rfReplaceAll]);
-      Found:=FileExists(FileName);
-    end;
+      BDSKeys.Clear;
+      ScanRootKey(BDSKeysItems[j].Key, BDSKeys, BDSKeysItems[j].MinValue, BDSKeysItems[j].MaxValue);
 
+      for i := 0 to BDSKeys.Count-1 do
+      begin
+        for DelphiComp := Low(TDelphiVersions) to High(TDelphiVersions) do
+        if (DelphiCmpnyNames[DelphiComp] = BDSKeysItems[j].Company) and (DelphiRegPathNumbers[DelphiComp]>= BDSKeysItems[j].MinValue) and (DelphiRegPathNumbers[DelphiComp]<=BDSKeysItems[j].MaxValue) then
+        begin
+          RootKey := HKEY_CURRENT_USER;
+          //LKey    := DelphiRegPaths[DelphiComp];
+          LKey    := Format(DelphiCustomRegPaths[DelphiComp], [BDSKeys[i]]);
+          Found   := RegKeyExists(LKey, RootKey);
 
-    if not Found then
-    begin
-      Found := RegKeyExists(DelphiRegPaths[DelphiComp], HKEY_LOCAL_MACHINE);
-      if Found then
-        Found := RegReadStr(DelphiRegPaths[DelphiComp], 'App', FileName, HKEY_LOCAL_MACHINE) and FileExists(FileName);
-    end;
+          FileName := '';
 
-    if Found then
-    begin
-      VersionData:=TDelphiVersionData.Create;
-      VersionData.FPath:=Filename;
-      VersionData.FVersion:=DelphiComp;
-      VersionData.FName   :=DelphiVersionsNames[DelphiComp];
-      VersionData.FIDEType:=TSupportedIDEs.DelphiIDE;
-      VersionData.Icon     :=TIcon.Create;
-      ExtractIconFile(VersionData.FIcon, Filename, SHGFI_SMALLICON);
-      AList.Add(VersionData);
+          if Found then
+            Found := RegReadStr(LKey, 'App', FileName, RootKey) and FileExists(FileName);
+
+          if (DelphiComp >= DelphiXE6) and not Found then
+          begin
+            FileName:=StringReplace(FileName, 'bds.exe', 'appmethod.exe', [rfReplaceAll]);
+            Found:=FileExists(FileName);
+          end;
+
+          if not Found then
+          begin
+            RootKey := HKEY_LOCAL_MACHINE;
+            Found := RegKeyExists(LKey, RootKey);
+            if Found then
+              Found := RegReadStr(LKey, 'App', FileName, RootKey) and FileExists(FileName);
+          end;
+
+          if Found then
+          begin
+            VersionData := TDelphiVersionData.Create;
+            VersionData.FPath    := Filename;
+            VersionData.FRegKey  := LKey;
+            VersionData.FVersion := DelphiComp;
+            VersionData.FName    := DelphiVersionsNames[DelphiComp];
+            if not SameText(BDSKeys[i], 'BDS') then
+              VersionData.FName    := DelphiVersionsNames[DelphiComp] + ' (' + BDSKeys[i] + ')';
+
+            VersionData.FIDEType := TSupportedIDEs.DelphiIDE;
+            VersionData.Icon     := TIcon.Create;
+            ExtractIconFile(VersionData.FIcon, Filename, SHGFI_SMALLICON);
+            AList.Add(VersionData);
+          end;
+        end;
+      end;
     end;
+  finally
+    BDSKeys.Free;
   end;
-
 end;
 
 

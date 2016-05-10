@@ -106,6 +106,7 @@ begin
     VersionData.Name := Format('Lazarus %s', [uMisc.GetFileVersion(FileName)]);
     VersionData.IDEType := TSupportedIDEs.LazarusIDE;
     VersionData.Icon := TIcon.Create;
+    VersionData.Version := TDelphiVersions.DelphiXE; //used for syntax highlight
     ExtractIconFile(VersionData.Icon, FileName, SHGFI_SMALLICON);
     AList.Add(VersionData);
   end;

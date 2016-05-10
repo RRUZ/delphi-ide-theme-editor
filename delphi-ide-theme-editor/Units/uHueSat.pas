@@ -339,14 +339,16 @@ begin
 end;
 
 procedure TFrmHueSat.FormCreate(Sender: TObject);
+{
 var
   LIndex : Integer;
+}
 begin
   Icons := TObjectDictionary<string, TIcon>.Create([doOwnsValues]);
 
   Icons.Add('default', TIcon.Create);
   Icons['default'].Handle := AwesomeFont.GetIcon(fa_circle_o_notch, 16, 16, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
-  LIndex := ImageList1.AddIcon(Icons['default']);
+  {LIndex :=} ImageList1.AddIcon(Icons['default']);
   //ActionApplyTheme.ImageIndex := LIndex;
 
   FReloadThemes := False;

@@ -31,11 +31,11 @@ uses
   uDelphiIDEHighlight,
   uDelphiVersions;
 
-function ImportEclipseTheme(DelphiVersion: TDelphiVersions; const FileName, Path: TFileName; var ThemeName: string): boolean;
+function ImportEclipseTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 
 implementation
 
-function ImportEclipseTheme(DelphiVersion: TDelphiVersions; const FileName, Path: TFileName; var ThemeName: string): boolean;
+function ImportEclipseTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 var
   XmlDocEclipseTheme: OleVariant;
   NewTheme: TIDETheme;
@@ -86,7 +86,7 @@ var
 
 begin
   Result := False;
-  NewTheme := GetDelphiIDEDefaultTheme(DelphiVersion);
+  NewTheme := GetDelphiIDEDefaultTheme(ADelphiVersionData);
   XmlDocEclipseTheme := CreateOleObject(Msxml2_DOMDocument);
   XmlDocEclipseTheme.Async := False;
   try

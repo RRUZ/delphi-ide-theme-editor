@@ -29,14 +29,14 @@ uses
   uDelphiIDEHighlight,
   uDelphiVersions;
 
-function ImportVisualStudioTheme(DelphiVersion: TDelphiVersions; const FileName, Path: TFileName; var ThemeName: string): boolean;
+function ImportVisualStudioTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 
 implementation
 
 const
   sEmpty = 'Empty';
 
-function ImportVisualStudioTheme(DelphiVersion: TDelphiVersions; const FileName, Path: TFileName; var ThemeName: string): boolean;
+function ImportVisualStudioTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 var
   XmlDocVSTheme: OleVariant;
   Nodes: OleVariant;
@@ -161,7 +161,7 @@ var
 
 begin
   Result := False;
-  NewTheme := GetDelphiIDEDefaultTheme(DelphiVersion);
+  NewTheme := GetDelphiIDEDefaultTheme(ADelphiVersionData);
   XmlDocVSTheme := CreateOleObject(Msxml2_DOMDocument);
   XmlDocVSTheme.Async := False;
   try
