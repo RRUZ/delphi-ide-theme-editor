@@ -33,24 +33,7 @@ uses
   uSMSIDEHighlight in 'Units\uSMSIDEHighlight.pas',
   uSMSVersions in 'Units\uSMSVersions.pas',
   uAppMethodVersions in 'Units\uAppMethodVersions.pas',
-  Vcl.Styles.Ext in 'Common\Vcl Styles Utils\Vcl.Styles.Ext.pas',
-  Vcl.Styles.Fixes in 'Common\Vcl Styles Utils\Vcl.Styles.Fixes.pas',
-  Vcl.Styles.Hooks in 'Common\Vcl Styles Utils\Vcl.Styles.Hooks.pas',
-  Vcl.Styles.Utils.ComCtrls in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.ComCtrls.pas',
-  Vcl.Styles.Utils.Forms in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.Forms.pas',
-  Vcl.Styles.Utils.Menus in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.Menus.pas',
-  Vcl.Styles.Utils.ScreenTips in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.ScreenTips.pas',
-  Vcl.Styles.Utils.StdCtrls in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.StdCtrls.pas',
-  Vcl.Styles.Utils.SysControls in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.SysControls.pas',
-  Vcl.Styles.Utils.SysStyleHook in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.SysStyleHook.pas',
-  Vcl.Styles.Utils.SystemMenu in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.SystemMenu.pas',
-  DDetours in 'Common\delphi-detours-library\DDetours.pas',
-  InstDecode in 'Common\delphi-detours-library\InstDecode.pas',
-  Vcl.Styles.FormStyleHooks in 'Common\Vcl Styles Utils\Vcl.Styles.FormStyleHooks.pas',
-  Vcl.Styles.NC in 'Common\Vcl Styles Utils\Vcl.Styles.NC.pas',
-  uAdditionalSettings in 'Units\uAdditionalSettings.pas' {FrmAdditionalSettings},
-  Vcl.Styles.UxTheme in 'Common\Vcl Styles Utils\Vcl.Styles.UxTheme.pas',
-  Vcl.Styles.Utils.Graphics in 'Common\Vcl Styles Utils\Vcl.Styles.Utils.Graphics.pas';
+  uAdditionalSettings in 'Units\uAdditionalSettings.pas' {FrmAdditionalSettings};
 
 {$R *.res}
 

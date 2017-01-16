@@ -1,8 +1,11 @@
-Before to open this project (in Delphi XE4) you must install these components
+Before to open this project (using Delphi 10.1 Berlin) you must install these components
 
-* Synedit version unicode from svn repository http://synedit.svn.sourceforge.net/viewvc/synedit/SynEdit/
-* mbcolorlib components (ported to XE4) included on this distribution.
+* Synedit version unicode from Github
 
-Ago 13, 2013
+https://github.com/SynEdit/SynEdit
+ 
+* mbcolorlib components (ported to Delphi 10.1 Berlin) included on this distribution.
+
+
 
 Rodrigo Ruz.
