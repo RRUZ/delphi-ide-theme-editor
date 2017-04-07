@@ -14,7 +14,7 @@
 // The Original Code is Main.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -70,7 +70,7 @@ uses
   SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup, uAppMethodVersions,
   pngimage, DITE.Settings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC,
-  Vcl.ActnMan;
+  Vcl.ActnMan, System.ImageList;
 
 { .$DEFINE ENABLE_THEME_EXPORT }
 
@@ -1077,14 +1077,14 @@ begin
 
   if LvThemes.Items.Count > 0 then
     LvThemes.Selected := LvThemes.Items.Item[0];
-
+              {
   FrmColorPanel := TColorPanel.Create(PanelColors);
   FrmColorPanel.Parent := PanelColors;
   FrmColorPanel.BorderStyle := bsNone;
   FrmColorPanel.Align := alClient;
   FrmColorPanel.OnChange := OnSelForegroundColorChange;
   FrmColorPanel.Show;
-
+                 }
   ComboBox_SetDroppedWidth(ComboBoxExIDEs);
 end;
 
@@ -1258,6 +1258,15 @@ begin
  begin
 //   Self.Constraints.MinWidth := Self.Constraints.MinWidth - PanelColors.Width;
 //   Self.Width := Self.Constraints.MinWidth
+
+   if (FrmColorPanel <> nil) then
+   begin
+      FrmColorPanel.Free();
+      FrmColorPanel := nil;
+      //FrmColorPanel.Visible := false;
+      //Application.ProcessMessages();
+   end;
+
    Self.Width := Self.Width - PanelColors.Width;
    SynEditCode.Top := 63;
    Self.Height:= 490;
@@ -1290,13 +1299,13 @@ begin
    Self.Height:= 620;
    SynEditCode.Top := 192;
    LvThemes.Height := 400;
-
+   Application.ProcessMessages();
    PanelColors.Visible := True;
    GroupBoxTextAttr.Visible := True;
    GroupBoxUseDefaults.Visible := True;
    LabelElement.Visible := True;
    CbElement.Visible := True;
-   BtnAdditionalSettings.Visible:=True;
+   BtnAdditionalSettings.Visible := True;
    BtnSave.Visible := True;
 
    RadioButtonFore.Visible := True;
@@ -1306,7 +1315,18 @@ begin
 
    BtnSelForColor.Visible := True;
    BtnSelBackColor.Visible := True;
-   PanelThemeName.Visible:=True;
+   PanelThemeName.Visible := True;
+
+   Application.ProcessMessages();
+   if (FrmColorPanel = nil) then
+   begin
+      FrmColorPanel := TColorPanel.Create(PanelColors);
+      FrmColorPanel.Parent := PanelColors;
+      FrmColorPanel.BorderStyle := bsNone;
+      FrmColorPanel.Align := alClient;
+      FrmColorPanel.OnChange := OnSelForegroundColorChange;
+      FrmColorPanel.Show;
+   end;
  end;
 
 end;
@@ -1634,12 +1654,13 @@ begin
   CblBackground.Enabled := RadioButtonBack.Checked;
   BtnSelBackColor.Enabled := RadioButtonBack.Checked;
 
-  if RadioButtonFore.Checked then
+  if RadioButtonFore.Checked  and (FrmColorPanel <> nil) then
   begin
     FrmColorPanel.OnChange := OnSelForegroundColorChange;
     FrmColorPanel.SelectedColor := CblForeground.Selected;
   end
   else
+  if (FrmColorPanel <> nil) then
   begin
     FrmColorPanel.OnChange := OnSelBackGroundColorChange;
     FrmColorPanel.SelectedColor := CblBackground.Selected;

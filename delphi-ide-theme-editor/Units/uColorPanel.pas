@@ -31,7 +31,7 @@ uses
   Dialogs, ExtCtrls, StdCtrls, mbDeskPickerButton, mbColorPickerControl,
   HRingPicker, HexaColorPicker, mbColorPreview, ImgList, HSVColorPicker,
   ComCtrls, mbColorTree, mbColorPalette, Tabs, mbTrackBarPicker, LColorPicker,
-  HSColorPicker, HSLColorPicker, VColorPicker, pngimage;
+  HSColorPicker, HSLColorPicker, VColorPicker, pngimage, System.ImageList;
 
 type
   TColorPanel = class(TForm)
