@@ -265,6 +265,7 @@ uses
   CommCtrl,
   Vcl.Styles,
   Vcl.Styles.Utils.Graphics,
+  Vcl.Styles.FontAwesome,
   Vcl.Themes,
   Vcl.ListActns,
   uVclStylesFix,
@@ -853,7 +854,7 @@ begin
   NCControls.ShowSystemMenu := False;
   NCControls.Images := ImageListNCArea;
 
-  LNCButton := NCControls.ButtonsList.Add;
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsSplitButton;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 0;
@@ -862,7 +863,7 @@ begin
   LNCButton.DropDownMenu := PopupMenuThemes;
   // LNCButton.OnClick := ButtonNCClick;
 
-  LNCButton := NCControls.ButtonsList.Add;
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 3;
@@ -873,7 +874,7 @@ begin
   LNCButton.Caption := '';
   LNCButton.OnClick := ImageHueClick;
 
-  LNCButton := NCControls.ButtonsList.Add;
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 2;
@@ -884,7 +885,7 @@ begin
   LNCButton.Caption := '';
   LNCButton.OnClick := ImageConfClick;
 
-  LNCButton := NCControls.ButtonsList.Add;
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 1;
@@ -895,7 +896,7 @@ begin
   LNCButton.Caption := '';
   LNCButton.OnClick := ImageBugClick;
 
-  LNCButton := NCControls.ButtonsList.Add;
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 4;
@@ -906,7 +907,7 @@ begin
   LNCButton.Caption := '';
   LNCButton.OnClick := ImageUpdateClick;
 
-  LNCButton := NCControls.ButtonsList.Add;
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 5;
@@ -925,27 +926,27 @@ begin
  Icons := TObjectDictionary<string, TIcon>.Create([doOwnsValues]);
 
  Icons.Add('Apply', TIcon.Create);
- Icons['Apply'].Handle := AwesomeFont.GetIcon(fa_check, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+ Icons['Apply'].Handle := FontAwesome.GetIcon(fa_check, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
  LIndex := ImageList1.AddIcon(Icons['Apply']);
  ActionApplyTheme.ImageIndex := LIndex;
 
  Icons.Add('delete', TIcon.Create);
- Icons['delete'].Handle := AwesomeFont.GetIcon(fa_remove, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+ Icons['delete'].Handle := FontAwesome.GetIcon(fa_remove, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
  LIndex := ImageList1.AddIcon(Icons['delete']);
  ActionDeleteTheme.ImageIndex := LIndex;
 
  Icons.Add('export', TIcon.Create);
- Icons['export'].Handle := AwesomeFont.GetIcon(fa_chevron_right, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+ Icons['export'].Handle := FontAwesome.GetIcon(fa_chevron_right, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
  LIndex := ImageList1.AddIcon(Icons['export']);
  ActionExoLazarusClrSch.ImageIndex := LIndex;
 
  Icons.Add('import', TIcon.Create);
- Icons['import'].Handle := AwesomeFont.GetIcon(fa_chevron_left, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+ Icons['import'].Handle := FontAwesome.GetIcon(fa_chevron_left, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
  LIndex := ImageList1.AddIcon(Icons['import']);
  ActionImportThemeReg.ImageIndex := LIndex;
 
  Icons.Add('github', TIcon.Create);
- Icons['github'].Handle := AwesomeFont.GetIcon(fa_github, 24, 24, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
+ Icons['github'].Handle := FontAwesome.GetIcon(fa_github, 24, 24, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
 
  end;
 

@@ -14,7 +14,7 @@
 // The Original Code is uDelphiIDEHighlight.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -589,8 +589,10 @@ function SaveDelphiIDEThemeToRegFile(ADelphiVersionData : TDelphiVersionData; co
 var
   Element: TIDEHighlightElements;
   RegFile: TStringList;
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
   Indexb: Integer;
   Indexf: Integer;
+  {$ENDIF}
 begin
   Result := '';
   RegFile := TStringList.Create;
@@ -621,7 +623,7 @@ begin
         RegFile.Add(Format('"Default Foreground"="%s"', [BoolToStr(ATheme[Element].DefaultForeground, True)]));
         RegFile.Add(Format('"Default Background"="%s"', [BoolToStr(ATheme[Element].DefaultBackground, True)]));
 
-{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+        {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
         if DelphiIsOldVersion(ADelphiVersionData) then
         begin
           {
@@ -640,15 +642,15 @@ begin
         end
         else
         begin
-{$ENDIF}
+        {$ENDIF}
           RegFile.Add(Format('"Bold"="%s"', [BoolToStr(ATheme[Element].Bold, True)]));
           RegFile.Add(Format('"Italic"="%s"', [BoolToStr(ATheme[Element].Italic, True)]));
           RegFile.Add(Format('"Underline"="%s"', [BoolToStr(ATheme[Element].Underline, True)]));
           RegFile.Add(Format('"Foreground Color New"="%s"', [ATheme[Element].ForegroundColorNew]));
           RegFile.Add(Format('"Background Color New"="%s"', [ATheme[Element].BackgroundColorNew]));
-{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+        {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
         end;
-{$ENDIF}
+        {$ENDIF}
         RegFile.Add('');
       end;
 
@@ -662,8 +664,10 @@ end;
 function ImportDelphiIDEThemeToRegistry(ADelphiVersionData: TDelphiVersionData; const ATheme: TIDETheme): Boolean;
 var
   Element: TIDEHighlightElements;
+  {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
   Indexb: Integer;
   Indexf: Integer;
+  {$ENDIF}
   Reg: TRegistry;
 begin
   Result := False;
@@ -702,7 +706,7 @@ begin
           // RegFile.Add(Format('"Default Foreground"="%s"',[BoolToStr(ATheme[Element].DefaultForeground,True)]));
           // RegFile.Add(Format('"Default Background"="%s"',[BoolToStr(ATheme[Element].DefaultBackground,True)]));
 
-{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+          {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
           if DelphiIsOldVersion(ADelphiVersionData) then
           begin
             {
@@ -724,7 +728,7 @@ begin
           end
           else
           begin
-{$ENDIF}
+          {$ENDIF}
             Reg.WriteString('Bold', BoolToStr(ATheme[Element].Bold, True));
             Reg.WriteString('Italic', BoolToStr(ATheme[Element].Italic, True));
             Reg.WriteString('Underline', BoolToStr(ATheme[Element].Underline, True));
@@ -737,9 +741,9 @@ begin
               RegFile.Add(Format('"Foreground Color New"="%s"',[ATheme[Element].ForegroundColorNew]));
               RegFile.Add(Format('"Background Color New"="%s"',[ATheme[Element].BackgroundColorNew]));
             }
-{$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
+          {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
           end;
-{$ENDIF}
+          {$ENDIF}
           Result := True;
         end;
 

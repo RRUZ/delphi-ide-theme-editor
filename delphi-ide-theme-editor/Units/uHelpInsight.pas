@@ -33,7 +33,13 @@ const
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
     '', '',
 {$ENDIF}
-    '', '\ObjRepos', '\ObjRepos', '\ObjRepos', '\ObjRepos', '\ObjRepos', '\ObjRepos\en', // 2010
+    '',
+    '\ObjRepos',
+    '\ObjRepos',
+    '\ObjRepos',
+    '\ObjRepos',
+    '\ObjRepos',
+    '\ObjRepos\en', // 2010
     '\ObjRepos\en', // XE
     '\ObjRepos\en', // XE2
     '\ObjRepos\en', // XE3
@@ -45,7 +51,8 @@ const
     '\ObjRepos\en', // XE8
     '\ObjRepos\en', // 10 Seattle
     '\ObjRepos\en', // 10.1 Berlin
-    '\ObjRepos\en' // 10.2 Tokio
+    '\ObjRepos\en', // 10.2 Tokio
+    '\ObjRepos\en'  // 10.3
     );
 
 procedure ApplyThemeHelpInsight(const ATheme: TIDETheme; IDEData: TDelphiVersionData);

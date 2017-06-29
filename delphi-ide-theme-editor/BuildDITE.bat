@@ -6,7 +6,7 @@ pause
 EXIT
 
 :INNO
-"C:\Program Files (x86)\Inno Setup 5\iscc.exe" "C:\Delphi\github\delphi-ide-theme-editor\delphi-ide-theme-editor\DelphiIDEThemeEditor.iss"
+"C:\Program Files (x86)\Inno Setup 5\iscc.exe" "DelphiIDEThemeEditor.iss"
 set INNO_STATUS=%ERRORLEVEL%
 if %INNO_STATUS%==0 GOTO END
 pause

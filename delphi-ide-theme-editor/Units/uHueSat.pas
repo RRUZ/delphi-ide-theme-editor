@@ -14,7 +14,7 @@
 // The Original Code is uHueSat.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -34,7 +34,7 @@ uses
   SynEditHighlighter,
   SynHighlighterPas,
   Generics.Defaults,
-  Generics.Collections, Vcl.ImgList;
+  Generics.Collections, Vcl.ImgList, System.ImageList;
 
 type
   TFrmHueSat = class(TForm)
@@ -104,7 +104,9 @@ implementation
 
 uses
   Vcl.Themes,
-  System.UITypes, Vcl.Styles.Fixes;
+  System.UITypes,
+  Vcl.Styles.FontAwesome,
+  Vcl.Styles.Fixes;
 
 {$R *.dfm}
 
@@ -347,7 +349,7 @@ begin
   Icons := TObjectDictionary<string, TIcon>.Create([doOwnsValues]);
 
   Icons.Add('default', TIcon.Create);
-  Icons['default'].Handle := AwesomeFont.GetIcon(fa_circle_o_notch, 16, 16, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
+  Icons['default'].Handle := FontAwesome.GetIcon(fa_circle_o_notch, 16, 16, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
   {LIndex :=} ImageList1.AddIcon(Icons['default']);
   //ActionApplyTheme.ImageIndex := LIndex;
 

@@ -3370,6 +3370,10 @@ object ColorPanel: TColorPanel
     TabOrder = 0
     object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HexaColorPicker1: THexaColorPicker
         Left = 0
         Top = 0
@@ -3569,6 +3573,10 @@ object ColorPanel: TColorPanel
     object TabSheetHSV: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HSVColorPicker1: THSVColorPicker
         Left = 3
         Top = 17

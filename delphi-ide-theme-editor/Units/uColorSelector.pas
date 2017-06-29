@@ -14,7 +14,7 @@
 // The Original Code is uColorSelector.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2016 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //  Based in the components of
@@ -31,7 +31,7 @@ uses
   Dialogs, ExtCtrls, StdCtrls, mbDeskPickerButton, mbColorPickerControl,
   HRingPicker, HexaColorPicker, mbColorPreview, ImgList, HSVColorPicker,
   ComCtrls, mbColorTree, mbColorPalette, Tabs, mbTrackBarPicker, LColorPicker,
-  HSColorPicker, HSLColorPicker, VColorPicker, pngimage;
+  HSColorPicker, HSLColorPicker, VColorPicker, pngimage, System.ImageList;
 
 type
   TDialogColorSelector = class(TForm)

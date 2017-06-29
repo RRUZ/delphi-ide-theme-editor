@@ -3371,6 +3371,10 @@ object DialogColorSelector: TDialogColorSelector
     TabOrder = 1
     object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object HexaColorPicker1: THexaColorPicker
         Left = 0
         Top = 0
