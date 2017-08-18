@@ -22,4 +22,5 @@ DITE supports
 
 **Note** : If you want add styling support to the RAD Studio IDE try the [Delphi IDE Colorizer](https://github.com/RRUZ/Delphi-IDE-Colorizer) project
 
+---
 Looking for the installer? Check the [Release Area](https://github.com/RRUZ/delphi-ide-theme-editor/releases/latest) 
