@@ -1,7 +1,7 @@
 
 # Delphi IDE Theme Editor #
 
-![](https://dl.dropboxusercontent.com/u/12733424/Blog/Delphi%20IDE%20Theme%20Editor/DITE.png)
+![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/DITE.png)
 
 
 The Delphi IDE Theme Editor (DITE) is a tool to customize the IDE **color highlighting** of several Object Pascal IDE's like <a href='https://www.embarcadero.com/products/delphi'>Delphi (RAD Studio)</a>, <a href='http://www.appmethod.com/'>Appmethod</a>, <a href='http://www.lazarus.freepascal.org/'>Lazarus </a> and <a href='http://smartmobilestudio.com/'>Smart Mobile Studio</a>.
