@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit uDelphiVersions
+// Unit DITE.DelphiVersions
 // unit for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -14,20 +14,20 @@
 // The Original Code is uDelphiVersions.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
-unit uDelphiVersions;
+unit DITE.DelphiVersions;
 
 interface
 
 uses
   Generics.Defaults,
   Generics.Collections,
-  uSupportedIDEs,
-  Graphics,
+  DITE.SupportedIDEs,
+  Vcl.Graphics,
   SysUtils,
   Classes,
   ComCtrls;
@@ -41,7 +41,7 @@ type
     {$ENDIF}
     Delphi7, Delphi8, Delphi2005, Delphi2006, Delphi2007, Delphi2009, Delphi2010,
     DelphiXE, DelphiXE2, DelphiXE3, DelphiXE4, DelphiXE5, Appmethod, DelphiXE6,
-    DelphiXE7, DelphiXE8, Delphi10Seattle, Delphi10Berlin, Delphi10Tokio, Delphi10Carnival);
+    DelphiXE7, DelphiXE8, Delphi10Seattle, Delphi10Berlin, Delphi10Tokyo, Delphi10Rio);
 
   TDelphiVersionData = Class
   private
@@ -101,7 +101,7 @@ const
     'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'Appmethod 1.13',
     'RAD Studio XE6/Appmethod 1.14', 'RAD Studio XE7/Appmethod 1.15',
     'RAD Studio XE8', 'RAD Studio 10 Seattle', 'RAD Studio 10.1 Berlin',
-    'RAD Studio 10.2 Tokio', 'RAD Studio 10.3');
+    'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio');
 
   DelphiVersionNumbers: array [TDelphiVersions] of double = (
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -126,8 +126,8 @@ const
     29, // 'RAD Studio XE8'
     30, // 'RAD Studio 10 Seattle'
     31, // 'RAD Studio 10.1 Berlin'
-    32, // 'RAD Studio 10.2 Tokio'
-    33  // 'RAD Studio 10.3'
+    32, // 'RAD Studio 10.2 Tokyo'
+    33  // 'RAD Studio 10.3 Rio'
     );
 
   DelphiVCLStylesPaths: array [TDelphiVersions] of string = (
@@ -172,7 +172,7 @@ function GetVCLStylesFolder(DelphiVersion: TDelphiVersions): string;
 implementation
 
 uses
-  uMisc,
+  DITE.Misc,
   PsAPI,
   Controls,
   ImgList,
@@ -180,7 +180,7 @@ uses
   ShellAPI,
   ShlObj,
   Windows,
-  uRegistry,
+  DITE.Registry,
   Registry;
 
 type
@@ -265,8 +265,8 @@ const
     16, // 'RAD Studio XE8'
     17, // 'RAD Studio 10 Seattle'
     18, // 'RAD Studio 10.1 Berlin'
-    19, // 'RAD Studio 10.2 Tokio'
-    20  // 'RAD Studio 10.3'
+    19, // 'RAD Studio 10.2 Tokyo'
+    20  // 'RAD Studio 10.3 Rio'
     );
 
   DelphiCmpnyNames: array [TDelphiVersions] of TDelphiCmpnyName = (
@@ -292,8 +292,8 @@ const
     Embarcadero, // 'RAD Studio XE8'
     Embarcadero, // 'RAD Studio 10 Seattle
     Embarcadero, // 'RAD Studio 10.1 Berlin
-    Embarcadero, // 'RAD Studio 10.2 Tokio
-    Embarcadero // 'RAD Studio 10.3
+    Embarcadero, // 'RAD Studio 10.2 Tokyo
+    Embarcadero  // 'RAD Studio 10.3 Rio
     );
 
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -491,7 +491,7 @@ begin
     BDSKeysItems[2].Key := '\Software\CodeGear';
 
     BDSKeysItems[3].MinValue := DelphiRegPathNumbers[DelphiXE];
-    BDSKeysItems[3].MaxValue := DelphiRegPathNumbers[Delphi10Carnival];
+    BDSKeysItems[3].MaxValue := DelphiRegPathNumbers[Delphi10Rio];
     BDSKeysItems[3].Company := Embarcadero;
     BDSKeysItems[3].Key := '\Software\Embarcadero';
 

@@ -1,7 +1,7 @@
 //**************************************************************************************************
 //
-// Unit uAdditionalSettings
-// unit uAdditionalSettings for the Delphi IDE Theme Editor
+// Unit DITE.AdditionalSettings
+// unit DITE.AdditionalSettings for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -11,21 +11,21 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is uMisc.pas.
+// The Original Code is uAdditionalSettings.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
-unit uAdditionalSettings;
+unit DITE.AdditionalSettings;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList,
-  Vcl.ExtCtrls, uDelphiVersions, System.ImageList;
+  Vcl.ExtCtrls, DITE.DelphiVersions, System.ImageList;
 
 type
   TFrmAdditionalSettings = class(TForm)
@@ -65,9 +65,9 @@ uses
  System.UITypes,
  Vcl.Styles.Hooks,
  Vcl.GraphUtil,
- uDelphiIDEHighlight,
- uColorSelector,
- uMisc;
+ DITE.DelphiIDEHighlight,
+ DITE.ColorSelector,
+ DITE.Misc;
 
 {$R *.dfm}
 
@@ -100,28 +100,28 @@ end;
 
 procedure TFrmAdditionalSettings.BtnSelForColorClick(Sender: TObject);
 var
-   Frm      : TDialogColorSelector;
-   OldColor : TColor;
+  Frm: TDialogColorSelector;
+  OldColor: TColor;
 begin
-   Frm := TDialogColorSelector.Create(Self);
-   try
-     OldColor:=CblForeground.Selected;
-     //Frm.OnChange:=OnSelForegroundColorChange;
-     Frm.SelectedColor:=CblForeground.Selected;
-     if Frm.Execute then
-     begin
+  Frm := TDialogColorSelector.Create(Self);
+  try
+    OldColor:=CblForeground.Selected;
+    //Frm.OnChange:=OnSelForegroundColorChange;
+    Frm.SelectedColor:=CblForeground.Selected;
+    if Frm.Execute then
+    begin
       CblForeground.Selected:=Frm.SelectedColor;
-      //CblForegroundChange(CblForeground);
-     end
-     else
-     if CblForeground.Selected<>OldColor then
-     begin
+     //CblForegroundChange(CblForeground);
+    end
+    else
+    if CblForeground.Selected<>OldColor then
+    begin
       CblForeground.Selected:=OldColor;
-      //CblForegroundChange(CblForeground);
-     end;
-   finally
-     Frm.Free;
-   end;
+     //CblForegroundChange(CblForeground);
+    end;
+  finally
+    Frm.Free;
+  end;
 end;
 
 const
@@ -185,7 +185,8 @@ const
 function _ColorToRGB(Color: TColor): Longint;
 begin
   if Color < 0 then
-    Result := Trampoline_user32_GetSysColor(Color and $000000FF) else
+    Result := Trampoline_user32_GetSysColor(Color and $000000FF)
+  else
     Result := Color;
 end;
 
@@ -193,13 +194,13 @@ end;
 procedure TFrmAdditionalSettings.CblForegroundGetColors(Sender: TCustomColorBox;
   Items: TStrings);
 var
- Item : TIdentMapEntry;
+ Item: TIdentMapEntry;
 begin
   for Item in Colors do
-   Items.AddObject(StringReplace(Item.Name, 'cl', '' , [rfReplaceAll]), TObject(_ColorToRGB(Item.Value)));
+    Items.AddObject(StringReplace(Item.Name, 'cl', '' , [rfReplaceAll]), TObject(_ColorToRGB(Item.Value)));
 
   for Item in WebNamedColors do
-   Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]), TObject(Item.Value));
+    Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]), TObject(Item.Value));
 end;
 
 procedure TFrmAdditionalSettings.FormCreate(Sender: TObject);
@@ -209,7 +210,7 @@ end;
 
 procedure TFrmAdditionalSettings.LoadFonts;
 var
-  sDC:     integer;
+  sDC: integer;
   LogFont: TLogFont;
 begin
   CbIDEFonts.Items.Clear;
@@ -225,7 +226,7 @@ end;
 
 procedure TFrmAdditionalSettings.LoadModernThemeData;
 var
-  LModernTheme : TModernTheme;
+  LModernTheme: TModernTheme;
 begin
   LModernTheme:=TModernTheme.Create(FIDEData);
   try
@@ -240,13 +241,13 @@ end;
 
 procedure TFrmAdditionalSettings.RestoreModernThemeData;
 var
-  LModernTheme : TModernTheme;
+  LModernTheme: TModernTheme;
 begin
-  LModernTheme:=TModernTheme.Create(FIDEData);
+  LModernTheme := TModernTheme.Create(FIDEData);
   try
-   LModernTheme.RestoreData;
+    LModernTheme.RestoreData;
   finally
-   LModernTheme.Free;
+    LModernTheme.Free;
   end;
 end;
 
@@ -258,16 +259,16 @@ end;
 
 procedure TFrmAdditionalSettings.SetModernThemeData;
 var
-  LModernTheme : TModernTheme;
+  LModernTheme: TModernTheme;
 begin
-  LModernTheme:=TModernTheme.Create(FIDEData);
+  LModernTheme := TModernTheme.Create(FIDEData);
   try
-   LModernTheme.FontName:=CbIDEFonts.Text;
-   LModernTheme.FontSize:=UpDownFontSize.Position;
-   LModernTheme.MainToolBarColor:=ColorToString(CblForeground.Selected);
-   LModernTheme.WriteData;
+    LModernTheme.FontName:=CbIDEFonts.Text;
+    LModernTheme.FontSize:=UpDownFontSize.Position;
+    LModernTheme.MainToolBarColor:=ColorToString(CblForeground.Selected);
+    LModernTheme.WriteData;
   finally
-   LModernTheme.Free;
+    LModernTheme.Free;
   end;
 end;
 

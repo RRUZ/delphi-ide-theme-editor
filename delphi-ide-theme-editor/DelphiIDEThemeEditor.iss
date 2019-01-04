@@ -1881,13 +1881,13 @@ Source: Updater\ssleay32.dll; DestDir: {app}
 [Setup]
 UsePreviousLanguage=no
 AppName={#MyAppName}
-AppPublisher=The Road To Delphi
+AppPublisher=The Road to Delphi
 AppVerName={#MyAppName} {#MyAppVersion}
 VersionInfoVersion={#MyAppVersion}
 AppPublisherURL=http://theroadtodelphi.wordpress.com/
 AppSupportURL=http://theroadtodelphi.wordpress.com/
 AppUpdatesURL=http://theroadtodelphi.wordpress.com/
-DefaultDirName={pf}\The Road To Delphi\Delphi IDE Theme Editor
+DefaultDirName={pf}\The Road to Delphi\Delphi IDE Theme Editor
 ;OutputDir=C:\Delphi\google-code\DITE\delphi-ide-theme-editor
 OutputBaseFileName=Setup_DITE
 DisableDirPage=false

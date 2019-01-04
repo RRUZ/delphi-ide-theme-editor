@@ -245,6 +245,14 @@ object FrmMain: TFrmMain
     Font.Style = []
     TabOrder = 13
     OnClick = SynEditCodeClick
+    CodeFolding.GutterShapeSize = 11
+    CodeFolding.CollapsedLineColor = clGrayText
+    CodeFolding.FolderBarLinesColor = clGrayText
+    CodeFolding.IndentGuidesColor = clGray
+    CodeFolding.IndentGuides = True
+    CodeFolding.ShowCollapsedLine = False
+    CodeFolding.ShowHintMark = True
+    UseCodeFolding = False
     Gutter.BorderColor = clYellow
     Gutter.DigitCount = 3
     Gutter.Font.Charset = DEFAULT_CHARSET

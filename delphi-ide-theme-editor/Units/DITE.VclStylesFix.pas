@@ -1,7 +1,7 @@
 // **************************************************************************************************
 //
-// Unit uVclStylesFix
-// unit uVclStylesFix for the Delphi IDE Theme Editor
+// Unit DITE.VclStylesFix
+// unit DITE.VclStylesFix for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 
-unit uVclStylesFix;
+unit DITE.VclStylesFix;
 
 interface
 

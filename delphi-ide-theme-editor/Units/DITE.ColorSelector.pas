@@ -1,7 +1,7 @@
 ﻿//**************************************************************************************************
 //
-// Unit uColorPanel
-// Color Panel for the Delphi IDE Theme Editor
+// Unit DITE.ColorSelector
+// Color Dialog for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -11,10 +11,10 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is uColorPanel.pas.
+// The Original Code is uColorSelector.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //  Based in the components of
@@ -22,7 +22,7 @@
 //
 //**************************************************************************************************
 
-unit uColorPanel;
+unit DITE.ColorSelector;
 
 interface
 
@@ -34,7 +34,7 @@ uses
   HSColorPicker, HSLColorPicker, VColorPicker, pngimage, System.ImageList;
 
 type
-  TColorPanel = class(TForm)
+  TDialogColorSelector = class(TForm)
     mbDeskPickerButton1: TmbDeskPickerButton;
     mbColorPreview1: TmbColorPreview;
     ImageList1: TImageList;
@@ -47,10 +47,15 @@ type
     mbColorPreview2: TmbColorPreview;
     PageControl1: TPageControl;
     TabSheetHexa: TTabSheet;
+    TabSheetWEB: TTabSheet;
     HexaColorPicker1: THexaColorPicker;
+    mbColorPalette1: TmbColorPalette;
+    TabSheetHSL: TTabSheet;
+    HSLColorPicker1: THSLColorPicker;
     TabSheetHSV: TTabSheet;
     HSVColorPicker1: THSVColorPicker;
-    VColorPicker1: TVColorPicker;
+    BtnApply: TButton;
+    ButtonCancel: TButton;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
@@ -59,13 +64,16 @@ type
     Sat: TEdit;
     Label7: TLabel;
     Hex: TEdit;
+    CheckBoxLive: TCheckBox;
     PanelValues: TPanel;
-    PageControl2: TPageControl;
     procedure mbDeskPickerButton1SelColorChange(Sender: TObject);
+    procedure mbColorPalette1SelColorChange(Sender: TObject);
     procedure HSVColorPicker1Change(Sender: TObject);
-    procedure VColorPicker1Change(Sender: TObject);
     procedure HexaColorPicker1Change(Sender: TObject);
+    procedure ButtonCancelClick(Sender: TObject);
+    procedure BtnApplyClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure HSLColorPicker1Change(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure RedExit(Sender: TObject);
     procedure HueExit(Sender: TObject);
@@ -75,15 +83,20 @@ type
     FInitializating: Boolean;
     FSelectedColor: TColor;
     FStatus       : Boolean;
-    FRefreshHSVColorPicker : Boolean;
+    //FRefreshHSVColorPicker : Boolean;
     FOnChange: TNotifyEvent;
+    { Private declarations }
     procedure RefreshColors(Acolor: TColor);
     procedure SetSelectedColor(const Value: TColor);
   public
+    { Public declarations }
     property SelectedColor : TColor read FSelectedColor write SetSelectedColor;
+    function Execute : Boolean;
   published
     property OnChange : TNotifyEvent read FOnChange write FOnChange;
   end;
+
+function DialogSelectColor(SelectedColor: TColor): TColor;
 
 implementation
 
@@ -92,15 +105,56 @@ uses
 
 {$R *.dfm}
 
-procedure TColorPanel.FormCreate(Sender: TObject);
+
+function DialogSelectColor(SelectedColor: TColor): TColor;
+var
+   Frm : TDialogColorSelector;
+begin
+   Frm := TDialogColorSelector.Create(nil);
+   try
+     Frm.SelectedColor:=SelectedColor;
+     if Frm.Execute then
+       Result:=Frm.SelectedColor
+     else
+       Result:=clNone;
+   finally
+     Frm.Free;
+   end;
+end;
+
+procedure TDialogColorSelector.BtnApplyClick(Sender: TObject);
+begin
+  FStatus:=True;
+  Close;
+end;
+
+procedure TDialogColorSelector.ButtonCancelClick(Sender: TObject);
+begin
+  FStatus:=False;
+  Close;
+end;
+
+function TDialogColorSelector.Execute: Boolean;
+begin
+  ShowModal();
+  Result:=FStatus;
+end;
+
+procedure TDialogColorSelector.FormCreate(Sender: TObject);
 begin
    FInitializating:=True;
    FStatus:=False;
 end;
 
-procedure TColorPanel.FormShow(Sender: TObject);
+procedure TDialogColorSelector.FormShow(Sender: TObject);
 begin
   FInitializating:=False;
+end;
+
+procedure TDialogColorSelector.HexaColorPicker1Change(Sender: TObject);
+begin
+  if not FInitializating then
+    RefreshColors(HexaColorPicker1.SelectedColor);
 end;
 
 
@@ -114,7 +168,7 @@ begin
      ) ;
 end;
 
-procedure TColorPanel.HexExit(Sender: TObject);
+procedure TDialogColorSelector.HexExit(Sender: TObject);
 Var
  s : string;
  Value : Integer;
@@ -129,62 +183,44 @@ begin
   RefreshColors(HexToTColor(TEdit(Sender).Text));
 end;
 
-procedure TColorPanel.HexKeyPress(Sender: TObject; var Key: Char);
+procedure TDialogColorSelector.HexKeyPress(Sender: TObject; var Key: Char);
 begin
   if not ( CharInSet(Key,['0'..'9','a'..'f','A'..'F', #8, #3, #22])) then
     Key := #0;
 end;
 
-procedure TColorPanel.HexaColorPicker1Change(Sender: TObject);
+procedure TDialogColorSelector.HSLColorPicker1Change(Sender: TObject);
 begin
   if not FInitializating then
+    RefreshColors(HSLColorPicker1.SelectedColor);
+end;
+
+procedure TDialogColorSelector.HSVColorPicker1Change(Sender: TObject);
+begin
+  if not FInitializating then
+  //if FRefreshHSVColorPicker then
   begin
-    FRefreshHSVColorPicker:=False;
-    HSVColorPicker1.SelectedColor:=HexaColorPicker1.SelectedColor;
-    FRefreshHSVColorPicker:=True;
-    RefreshColors(HexaColorPicker1.SelectedColor);
+   //VColorPicker1.SelectedColor:=HSVColorPicker1.SelectedColor;
+   //RefreshColors(VColorPicker1.SelectedColor);
+   RefreshColors(HSVColorPicker1.SelectedColor);
   end;
 end;
 
 
 
-procedure TColorPanel.HSVColorPicker1Change(Sender: TObject);
+procedure TDialogColorSelector.mbColorPalette1SelColorChange(Sender: TObject);
 begin
   if not FInitializating then
-  if FRefreshHSVColorPicker then
-  begin
-   VColorPicker1.SelectedColor:=HSVColorPicker1.SelectedColor;
-   HexaColorPicker1.SelectedColor:=HSVColorPicker1.SelectedColor;
-   //HSLColorPicker1.SelectedColor:=HSVColorPicker1.SelectedColor;
-   //mbColorPalette1.SelectedColor:=HSVColorPicker1.SelectedColor;
-   RefreshColors(VColorPicker1.SelectedColor);
-  end;
+    RefreshColors(mbcolorpalette1.SelectedColor);
 end;
 
-
-
-procedure TColorPanel.VColorPicker1Change(Sender: TObject);
-begin
-  if not FInitializating then
-  begin
-   FRefreshHSVColorPicker:=False;
-   try
-     HSVColorPicker1.SelectedColor:=VColorPicker1.SelectedColor;
-     RefreshColors(HSVColorPicker1.SelectedColor);
-   finally
-     FRefreshHSVColorPicker:=True;
-   end;
-  end;
-end;
-
-
-procedure TColorPanel.mbDeskPickerButton1SelColorChange(Sender: TObject);
+procedure TDialogColorSelector.mbDeskPickerButton1SelColorChange(Sender: TObject);
 begin
   if not FInitializating then
     RefreshColors(mbDeskPickerButton1.SelectedColor);
 end;
 
-procedure TColorPanel.RedExit(Sender: TObject);
+procedure TDialogColorSelector.RedExit(Sender: TObject);
 const
   RGBMAX = 255;            // R,G, and B vary over 0-RGBMAX
 var
@@ -206,7 +242,7 @@ begin
     RefreshColors(color);
 end;
 
-procedure TColorPanel.HueExit(Sender: TObject);
+procedure TDialogColorSelector.HueExit(Sender: TObject);
 const
   HLSMAX = 240;            // H,L, and S vary over 0-HLSMAX
 var
@@ -216,7 +252,7 @@ begin
  if TEdit(Sender).Text='' then
   TEdit(Sender).Text:='0';
 
- if TryStrToInt(TEdit(Sender).Text, Value) and (Value>HLSMAX) then
+ if TryStrToInt(TEdit(Sender).Text,Value) and (Value>HLSMAX) then
    TEdit(Sender).Text:=IntToStr(HLSMAX);
 
   LHue        := StrToInt(Self.Hue.Text);
@@ -226,7 +262,7 @@ begin
   RefreshColors(ColorHLSToRGB(LHue, Luminance, Saturation));
 end;
 
-procedure TColorPanel.RefreshColors(Acolor: TColor);
+procedure TDialogColorSelector.RefreshColors(Acolor: TColor);
 var
   LHue, Luminance, Saturation: Word;
 begin
@@ -237,25 +273,22 @@ begin
   Blue.Text :=IntToStr(GetBValue(Acolor));
 
   ColorRGBToHLS(ColorToRGB(Acolor), LHue, Luminance, Saturation);
-
   Self.Hue.Text   :=IntToStr(LHue);
   Self.Lum.Text   :=IntToStr(Luminance);
   Self.Sat.Text   :=IntToStr(Saturation);
 
-  Hex.Text:=Format('%.2x%.2x%.2x',[GetRValue(Acolor),GetGValue(Acolor),GetBValue(Acolor)]);
+  Hex.Text:=Format('%.2x%.2x%.2x',[GetRValue(Acolor), GetGValue(Acolor), GetBValue(Acolor)]);
 
   FSelectedColor:=Acolor;
 
-  if {Assigned(CheckBoxLive) and CheckBoxLive.Checked and}  (@FOnChange<>nil) then
+  if Assigned(CheckBoxLive) and CheckBoxLive.Checked and  (@FOnChange<>nil) then
    OnChange(Self);
 end;
 
-procedure TColorPanel.SetSelectedColor(const Value: TColor);
+procedure TDialogColorSelector.SetSelectedColor(const Value: TColor);
 begin
   FSelectedColor := Value;
-  if HexaColorPicker1<>nil then
-  HexaColorPicker1.SelectedColor:=Value;
-  //RefreshColors(Value);
+  RefreshColors(Value);
 end;
 
 

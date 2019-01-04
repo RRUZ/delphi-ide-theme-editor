@@ -89,7 +89,7 @@ uses
   Vcl.Themes,
   System.Types,
   System.UITypes,
-  uMisc,
+  DITE.Misc,
   ShlObj,
   IOUtils,
   IniFiles;

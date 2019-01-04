@@ -1,9 +1,10 @@
-object ColorPanel: TColorPanel
+object DialogColorSelector: TDialogColorSelector
   Left = 698
   Top = 364
+  ActiveControl = BtnApply
   BorderStyle = bsDialog
-  Caption = 'Color Panel'
-  ClientHeight = 544
+  Caption = 'Color Selector'
+  ClientHeight = 379
   ClientWidth = 243
   Color = clBtnFace
   TransparentColorValue = clFuchsia
@@ -3362,18 +3363,14 @@ object ColorPanel: TColorPanel
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl
-    Left = 8
-    Top = 106
+    Left = 10
+    Top = 105
     Width = 225
     Height = 212
     ActivePage = TabSheetHexa
-    TabOrder = 0
+    TabOrder = 1
     object TabSheetHexa: TTabSheet
       Caption = 'Hexa'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object HexaColorPicker1: THexaColorPicker
         Left = 0
         Top = 0
@@ -3388,188 +3385,308 @@ object ColorPanel: TColorPanel
         OnChange = HexaColorPicker1Change
       end
     end
-  end
-  object PanelValues: TPanel
-    Left = 8
-    Top = 8
-    Width = 233
-    Height = 89
-    BevelOuter = bvNone
-    TabOrder = 1
-    object Label1: TLabel
-      Left = 6
-      Top = 1
-      Width = 19
-      Height = 13
-      Caption = 'Red'
+    object TabSheetWEB: TTabSheet
+      Caption = 'Web Palette'
+      ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object mbColorPalette1: TmbColorPalette
+        Left = 0
+        Top = 0
+        Width = 126
+        Height = 184
+        Align = alClient
+        Colors.Strings = (
+          'clBlack'
+          '$00330000'
+          '$00660000'
+          '$00990000'
+          '$00CC0000'
+          'clBlue'
+          '$00FF3300'
+          '$00CC3300'
+          '$00993300'
+          '$00663300'
+          '$00333300'
+          '$00003300'
+          '$00000033'
+          '$00330033'
+          '$00660033'
+          '$00990033'
+          '$00CC0033'
+          '$00FF0033'
+          '$00FF3333'
+          '$00CC3333'
+          '$00993333'
+          '$00663333'
+          '$00333333'
+          '$00003333'
+          '$00000066'
+          '$00330066'
+          '$00660066'
+          '$00990066'
+          '$00CC0066'
+          '$00FF0066'
+          '$00FF3366'
+          '$00CC3366'
+          '$00993366'
+          '$00663366'
+          '$00333366'
+          '$00003366'
+          '$00000099'
+          '$00330099'
+          '$00660099'
+          '$00990099'
+          '$00CC0099'
+          '$00FF0099'
+          '$00FF3399'
+          '$00CC3399'
+          '$00993399'
+          '$00663399'
+          '$00333399'
+          '$00003399'
+          '$000000CC'
+          '$003300CC'
+          '$006600CC'
+          '$009900CC'
+          '$00CC00CC'
+          '$00FF00CC'
+          '$00FF33CC'
+          '$00CC33CC'
+          '$009933CC'
+          '$006633CC'
+          '$003333CC'
+          '$000033CC'
+          'clRed'
+          '$003300FF'
+          '$006600FF'
+          '$009900FF'
+          '$00CC00FF'
+          'clFuchsia'
+          '$00FF33FF'
+          '$00CC33FF'
+          '$009933FF'
+          '$006633FF'
+          '$003333FF'
+          '$000033FF'
+          '$000066FF'
+          '$003366FF'
+          '$006666FF'
+          '$009966FF'
+          '$00CC66FF'
+          '$00FF66FF'
+          '$00FF99FF'
+          '$00CC99FF'
+          '$009999FF'
+          '$006699FF'
+          '$003399FF'
+          '$000099FF'
+          '$000066CC'
+          '$003366CC'
+          '$006666CC'
+          '$009966CC'
+          '$00CC66CC'
+          '$00FF66CC'
+          '$00FF99CC'
+          '$00CC99CC'
+          '$009999CC'
+          '$006699CC'
+          '$003399CC'
+          '$000099CC'
+          '$00006699'
+          '$00336699'
+          '$00666699'
+          '$00996699'
+          '$00CC6699'
+          '$00FF6699'
+          '$00FF9999'
+          '$00CC9999'
+          '$00999999'
+          '$00669999'
+          '$00339999'
+          '$00009999'
+          '$00006666'
+          '$00336666'
+          '$00666666'
+          '$00996666'
+          '$00CC6666'
+          '$00FF6666'
+          '$00FF9966'
+          '$00CC9966'
+          '$00999966'
+          '$00669966'
+          '$00339966'
+          '$00009966'
+          '$00006633'
+          '$00336633'
+          '$00666633'
+          '$00996633'
+          '$00CC6633'
+          '$00FF6633'
+          '$00FF9933'
+          '$00CC9933'
+          '$00999933'
+          '$00669933'
+          '$00339933'
+          '$00009933'
+          '$00006600'
+          '$00336600'
+          '$00666600'
+          '$00996600'
+          '$00CC6600'
+          '$00FF6600'
+          '$00FF9900'
+          '$00CC9900'
+          '$00999900'
+          '$00669900'
+          '$00339900'
+          '$00009900'
+          '$0000CC00'
+          '$0033CC00'
+          '$0066CC00'
+          '$0099CC00'
+          '$00CCCC00'
+          '$00FFCC00'
+          'clAqua'
+          '$00CCFF00'
+          '$0099FF00'
+          '$0066FF00'
+          '$0033FF00'
+          'clLime'
+          '$0000CC33'
+          '$0033CC33'
+          '$0066CC33'
+          '$0099CC33'
+          '$00CCCC33'
+          '$00FFCC33'
+          '$00FFFF33'
+          '$00CCFF33'
+          '$0099FF33'
+          '$0066FF33'
+          '$0033FF33'
+          '$0000FF33'
+          '$0000CC66'
+          '$0033CC66'
+          '$0066CC66'
+          '$0099CC66'
+          '$00CCCC66'
+          '$00FFCC66'
+          '$00FFFF66'
+          '$00CCFF66'
+          '$0099FF66'
+          '$0066FF66'
+          '$0033FF66'
+          '$0000FF66'
+          '$0000CC99'
+          '$0033CC99'
+          '$0066CC99'
+          '$0099CC99'
+          '$00CCCC99'
+          '$00FFCC99'
+          '$00FFFF99'
+          '$00CCFF99'
+          '$0099FF99'
+          '$0066FF99'
+          '$0033FF99'
+          '$0000FF99'
+          '$0000CCCC'
+          '$0033CCCC'
+          '$0066CCCC'
+          '$0099CCCC'
+          '$00CCCCCC'
+          '$00FFCCCC'
+          '$00FFFFCC'
+          '$00CCFFCC'
+          '$0099FFCC'
+          '$0066FFCC'
+          '$0033FFCC'
+          '$0000FFCC'
+          '$0000CCFF'
+          '$0033CCFF'
+          '$0066CCFF'
+          '$0099CCFF'
+          '$00CCCCFF'
+          '$00FFCCFF'
+          'clWhite'
+          '$00CCFFFF'
+          '$0099FFFF'
+          '$0066FFFF'
+          '$0033FFFF'
+          'clYellow'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          '$00000099'
+          '$00009999'
+          '$00009900'
+          '$00999900'
+          '$00990000'
+          '$00990099'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clRed'
+          'clYellow'
+          'clLime'
+          'clAqua'
+          'clBlue'
+          'clFuchsia'
+          'clWhite'
+          '$00CCCCCC'
+          '$00999999'
+          '$00666666'
+          '$00333333'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack'
+          'clBlack')
+        HintFormat = 'RGB(%r, %g, %b)'#13'Hex: %hex'
+        CellSize = 14
+        TabOrder = 0
+        ShowHint = True
+        ParentShowHint = False
+        OnSelColorChange = mbColorPalette1SelColorChange
+      end
     end
-    object Label2: TLabel
-      Left = 41
-      Top = 1
-      Width = 29
-      Height = 13
-      Caption = 'Green'
+    object TabSheetHSL: TTabSheet
+      Caption = 'HSL'
+      ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object HSLColorPicker1: THSLColorPicker
+        Left = 0
+        Top = 0
+        Width = 217
+        Height = 184
+        HSPickerHintFormat = 'H: %h S: %hslS'#13'Hex: %hex'
+        LPickerHintFormat = 'Luminance: %l'
+        ShowHint = True
+        ParentShowHint = False
+        Align = alClient
+        TabOrder = 0
+        OnChange = HSLColorPicker1Change
+        DesignSize = (
+          217
+          184)
+      end
     end
-    object Label3: TLabel
-      Left = 76
-      Top = 1
-      Width = 20
-      Height = 13
-      Caption = 'Blue'
-    end
-    object Label4: TLabel
-      Left = 124
-      Top = 1
-      Width = 19
-      Height = 13
-      Caption = 'Hue'
-    end
-    object Label5: TLabel
-      Left = 159
-      Top = 1
-      Width = 19
-      Height = 13
-      Caption = 'Lum'
-    end
-    object Label6: TLabel
-      Left = 194
-      Top = 1
-      Width = 16
-      Height = 13
-      Caption = 'Sat'
-    end
-    object Label7: TLabel
-      Left = 6
-      Top = 41
-      Width = 19
-      Height = 13
-      Caption = 'Hex'
-    end
-    object Blue: TEdit
-      Left = 76
-      Top = 20
-      Width = 29
-      Height = 19
-      Ctl3D = False
-      MaxLength = 3
-      NumbersOnly = True
-      ParentCtl3D = False
-      TabOrder = 0
-      OnExit = RedExit
-    end
-    object Green: TEdit
-      Left = 41
-      Top = 20
-      Width = 29
-      Height = 19
-      Ctl3D = False
-      MaxLength = 3
-      NumbersOnly = True
-      ParentCtl3D = False
-      TabOrder = 1
-      OnExit = RedExit
-    end
-    object Hex: TEdit
-      Left = 6
-      Top = 60
-      Width = 100
-      Height = 19
-      CharCase = ecUpperCase
-      Ctl3D = False
-      MaxLength = 6
-      ParentCtl3D = False
-      TabOrder = 2
-      Text = '255'
-      OnExit = HexExit
-      OnKeyPress = HexKeyPress
-    end
-    object Hue: TEdit
-      Left = 124
-      Top = 20
-      Width = 29
-      Height = 19
-      Ctl3D = False
-      MaxLength = 3
-      NumbersOnly = True
-      ParentCtl3D = False
-      TabOrder = 3
-      Text = '255'
-      OnExit = HueExit
-    end
-    object Lum: TEdit
-      Left = 159
-      Top = 20
-      Width = 29
-      Height = 19
-      Ctl3D = False
-      MaxLength = 3
-      NumbersOnly = True
-      ParentCtl3D = False
-      TabOrder = 4
-      OnExit = HueExit
-    end
-    object mbDeskPickerButton1: TmbDeskPickerButton
-      Left = 124
-      Top = 47
-      Width = 28
-      Height = 32
-      DoubleBuffered = True
-      ImageIndex = 0
-      Images = ImageList1
-      ParentDoubleBuffered = False
-      TabOrder = 5
-      OnSelColorChange = mbDeskPickerButton1SelColorChange
-      ScreenHintFormat = 'RGB(%r, %g, %b)'#13'Hex: %h'
-      ShowScreenHint = True
-    end
-    object Red: TEdit
-      Left = 6
-      Top = 20
-      Width = 29
-      Height = 19
-      Ctl3D = False
-      MaxLength = 3
-      NumbersOnly = True
-      ParentCtl3D = False
-      TabOrder = 6
-      Text = '255'
-      OnExit = RedExit
-    end
-    object Sat: TEdit
-      Left = 194
-      Top = 20
-      Width = 29
-      Height = 19
-      Ctl3D = False
-      MaxLength = 3
-      NumbersOnly = True
-      ParentCtl3D = False
-      TabOrder = 7
-      OnExit = HueExit
-    end
-    object mbColorPreview1: TmbColorPreview
-      Left = 159
-      Top = 47
-      Width = 29
-      Height = 32
-      Color = clLime
-    end
-    object mbColorPreview2: TmbColorPreview
-      Left = 194
-      Top = 47
-      Width = 29
-      Height = 32
-      Color = clLime
-      Opacity = 50
-    end
-  end
-  object PageControl2: TPageControl
-    Left = 8
-    Top = 323
-    Width = 227
-    Height = 214
-    ActivePage = TabSheetHSV
-    TabOrder = 2
     object TabSheetHSV: TTabSheet
       Caption = 'HSV'
       ImageIndex = 3
@@ -3578,11 +3695,11 @@ object ColorPanel: TColorPanel
       ExplicitWidth = 0
       ExplicitHeight = 0
       object HSVColorPicker1: THSVColorPicker
-        Left = 3
+        Left = 35
         Top = 17
         Width = 167
         Height = 142
-        SelectedColor = clYellow
+        SelectedColor = 1048575
         HintFormat = 
           'Hex #%hex'#10#13'RGB[%r, %g, %b]'#10#13'HSL[%hslH, %hslS, %hslL]'#10#13'HSV[%hsvH,' +
           ' %hsvS, %hsvV]'#10#13'CMYK[%c, %m, %y, %k]'#10#13'L*a*b*[%cieL, %cieA, %cieB' +
@@ -3591,22 +3708,214 @@ object ColorPanel: TColorPanel
         ParentShowHint = False
         TabOrder = 0
         Hue = 60
-        Saturation = 255
+        Saturation = 240
         OnChange = HSVColorPicker1Change
       end
-      object VColorPicker1: TVColorPicker
-        Left = 176
-        Top = 17
-        Width = 22
-        Height = 148
-        HintFormat = 'Value: %value'
-        ShowHint = True
-        ParentShowHint = False
-        TabOrder = 1
-        OnChange = VColorPicker1Change
-        Saturation = 44
-        SelectedColor = 13882367
-      end
+    end
+  end
+  object BtnApply: TButton
+    Left = 8
+    Top = 344
+    Width = 75
+    Height = 25
+    Caption = 'Apply'
+    TabOrder = 3
+    OnClick = BtnApplyClick
+  end
+  object ButtonCancel: TButton
+    Left = 89
+    Top = 344
+    Width = 75
+    Height = 25
+    Caption = 'Cancel'
+    TabOrder = 4
+    OnClick = ButtonCancelClick
+  end
+  object CheckBoxLive: TCheckBox
+    Left = 8
+    Top = 321
+    Width = 89
+    Height = 17
+    Caption = 'Live Preview'
+    Checked = True
+    State = cbChecked
+    TabOrder = 2
+  end
+  object PanelValues: TPanel
+    Left = 8
+    Top = 8
+    Width = 233
+    Height = 89
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 12
+      Top = 1
+      Width = 19
+      Height = 13
+      Caption = 'Red'
+    end
+    object Label2: TLabel
+      Left = 47
+      Top = 1
+      Width = 29
+      Height = 13
+      Caption = 'Green'
+    end
+    object Label3: TLabel
+      Left = 82
+      Top = 1
+      Width = 20
+      Height = 13
+      Caption = 'Blue'
+    end
+    object Label4: TLabel
+      Left = 130
+      Top = 1
+      Width = 19
+      Height = 13
+      Caption = 'Hue'
+    end
+    object Label5: TLabel
+      Left = 165
+      Top = 1
+      Width = 19
+      Height = 13
+      Caption = 'Lum'
+    end
+    object Label6: TLabel
+      Left = 200
+      Top = 1
+      Width = 16
+      Height = 13
+      Caption = 'Sat'
+    end
+    object Label7: TLabel
+      Left = 12
+      Top = 41
+      Width = 19
+      Height = 13
+      Caption = 'Hex'
+    end
+    object Blue: TEdit
+      Left = 82
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 2
+      Text = '0'
+      OnExit = RedExit
+    end
+    object Green: TEdit
+      Left = 47
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 1
+      Text = '0'
+      OnExit = RedExit
+    end
+    object Hex: TEdit
+      Left = 12
+      Top = 60
+      Width = 100
+      Height = 19
+      CharCase = ecUpperCase
+      Ctl3D = False
+      MaxLength = 6
+      ParentCtl3D = False
+      TabOrder = 7
+      Text = '255'
+      OnExit = HexExit
+      OnKeyPress = HexKeyPress
+    end
+    object Hue: TEdit
+      Left = 130
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 3
+      Text = '240'
+      OnExit = HueExit
+    end
+    object Lum: TEdit
+      Left = 165
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 4
+      Text = '0'
+      OnExit = HueExit
+    end
+    object mbDeskPickerButton1: TmbDeskPickerButton
+      Left = 130
+      Top = 47
+      Width = 28
+      Height = 32
+      DoubleBuffered = False
+      ImageIndex = 0
+      Images = ImageList1
+      ParentDoubleBuffered = False
+      StylusHotImageIndex = 0
+      TabOrder = 6
+      OnSelColorChange = mbDeskPickerButton1SelColorChange
+      ScreenHintFormat = 'RGB(%r, %g, %b)'#13'Hex: %h'
+    end
+    object Red: TEdit
+      Left = 12
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 0
+      Text = '255'
+      OnExit = RedExit
+    end
+    object Sat: TEdit
+      Left = 200
+      Top = 20
+      Width = 29
+      Height = 19
+      Ctl3D = False
+      MaxLength = 3
+      NumbersOnly = True
+      ParentCtl3D = False
+      TabOrder = 5
+      Text = '0'
+      OnExit = HueExit
+    end
+    object mbColorPreview1: TmbColorPreview
+      Left = 165
+      Top = 47
+      Width = 29
+      Height = 32
+      Color = clLime
+    end
+    object mbColorPreview2: TmbColorPreview
+      Left = 200
+      Top = 47
+      Width = 29
+      Height = 32
+      Color = clLime
+      Opacity = 50
     end
   end
   object ImageList1: TImageList

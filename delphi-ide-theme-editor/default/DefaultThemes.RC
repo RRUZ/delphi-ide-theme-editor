@@ -17,5 +17,5 @@ DelphiXE7 RCDATA XE7.reg
 DelphiXE8 RCDATA XE8.reg
 Delphi10Seattle RCDATA "RAD Studio 10 Seattle.reg"
 Delphi10Berlin RCDATA "RAD Studio 10.1 Berlin.reg"
-Delphi10Tokio RCDATA "RAD Studio 10.2 Tokio.reg"
-Delphi10Carnival RCDATA "RAD Studio 10.3.reg"
+Delphi10Tokyo RCDATA "RAD Studio 10.2 Tokio.reg"
+Delphi10Rio RCDATA "RAD Studio 10.3.reg"

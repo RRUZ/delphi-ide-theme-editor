@@ -1,7 +1,7 @@
 // **************************************************************************************************
 //
-// Unit uSMSIDEHighlight
-// unit uSMSIDEHighlight  for the Delphi IDE Theme Editor
+// Unit DITE.SMSIDEHighlight
+// unit for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -18,12 +18,12 @@
 // All Rights Reserved.
 //
 // **************************************************************************************************
-unit uSMSIDEHighlight;
+unit DITE.SMSIDEHighlight;
 
 interface
 
 uses
-  uDelphiIDEHighlight;
+  DITE.DelphiIDEHighlight;
 
 function GetSMSIDEFontSize: Integer;
 function GetSMSIDEFontName: string;
@@ -37,14 +37,14 @@ function DelphiIDEThemeToSMSTheme(const ATheme: TIDETheme; const ThemeName: stri
 implementation
 
 uses
-  uMisc,
+  DITE.Misc,
   ComObj,
   Windows,
   inifiles,
   System.IOUtils,
   System.SysUtils,
   System.Variants,
-  uSMSVersions;
+  DITE.SMSVersions;
 
 const
   sSMSThemeTemplate = 'Default.shi';

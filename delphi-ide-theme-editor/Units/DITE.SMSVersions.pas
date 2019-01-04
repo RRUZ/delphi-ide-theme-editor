@@ -1,7 +1,7 @@
 // **************************************************************************************************
 //
-// Unit uSMSVersions
-// this unit retrieves the Smart Mobile Studio installed versions  for the Delphi IDE Theme Editor
+// Unit DITE.SMSVersions
+// this unit retrieves the Smart Mobile Studio installed versions for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -14,12 +14,12 @@
 // The Original Code is uSMSVersions.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
-unit uSMSVersions;
+unit DITE.SMSVersions;
 
 interface
 
@@ -30,7 +30,7 @@ uses
   Classes,
   Windows,
   Variants,
-  uDelphiVersions,
+  DITE.DelphiVersions,
   Generics.Collections;
 
 function GetSMSLocalFolder: string;
@@ -44,13 +44,13 @@ procedure FillListSMSVersions(AList: TList<TDelphiVersionData>);
 implementation
 
 uses
-  uMisc,
+  DITE.Misc,
   SysUtils,
   ShellAPI,
   ShlObj,
   Vcl.Dialogs,
   Vcl.Graphics,
-  uSupportedIDEs;
+  DITE.SupportedIDEs;
 
 const
   sSMSConfigFile = 'preferences.ini';
@@ -99,7 +99,7 @@ begin
     FileName := GetSMSIDEFileName;
     VersionData := TDelphiVersionData.Create;
     VersionData.Path := FileName;
-    VersionData.Name := Format('Smart Mobile Studio %s', [uMisc.GetFileVersion(FileName)]);
+    VersionData.Name := Format('Smart Mobile Studio %s', [DITE.Misc.GetFileVersion(FileName)]);
     VersionData.IDEType := TSupportedIDEs.SMSIDE;
     VersionData.Icon := TIcon.Create;
     VersionData.Version := TDelphiVersions.DelphiXE; //used for syntax highlight

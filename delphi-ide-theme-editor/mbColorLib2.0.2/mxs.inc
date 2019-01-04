@@ -1,3 +1,42 @@
+    {$ifdef VER330}   //Rio
+     {$define DELPHI_5_UP}
+     {$define DELPHI_6_UP}
+     {$define DELPHI_7_UP}
+     {$define DELPHI_8_UP}
+     {$define DELPHI_9_UP}
+     {$define DELPHI_10_UP}
+     {$define DELPHI_XE2_UP}
+     {$define DELPHI_XE3_UP}
+     {$define DELPHI_XE4_UP}
+     {$define DELPHI_XE5_UP}
+     {$define DELPHI_XE6_UP}
+     {$define DELPHI_XE7_UP}
+     {$define DELPHI_XE8_UP}
+     {$define DELPHI_Seattle_UP}
+     {$define DELPHI_Berlin_UP}
+     {$define DELPHI_Tokyo_UP}
+     {$define DELPHI_Rio_UP}
+	{$endif}
+
+    {$ifdef VER320}   //Tokyo
+     {$define DELPHI_5_UP}
+     {$define DELPHI_6_UP}
+     {$define DELPHI_7_UP}
+     {$define DELPHI_8_UP}
+     {$define DELPHI_9_UP}
+     {$define DELPHI_10_UP}
+     {$define DELPHI_XE2_UP}
+     {$define DELPHI_XE3_UP}
+     {$define DELPHI_XE4_UP}
+     {$define DELPHI_XE5_UP}
+     {$define DELPHI_XE6_UP}
+     {$define DELPHI_XE7_UP}
+     {$define DELPHI_XE8_UP}
+     {$define DELPHI_Seattle_UP}
+     {$define DELPHI_Berlin_UP}
+     {$define DELPHI_Tokyo_UP}
+	{$endif}
+
 
     {$ifdef VER310}   //Berlin
      {$define DELPHI_5_UP}

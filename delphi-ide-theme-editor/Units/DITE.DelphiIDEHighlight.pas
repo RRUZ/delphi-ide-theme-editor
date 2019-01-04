@@ -1,7 +1,7 @@
 // **************************************************************************************************
 //
-// Unit uDelphiIDEHighlight
-// unit uDelphiIDEHighlight  for the Delphi IDE Theme Editor
+// Unit DITE.DelphiIDEHighlight
+// unit for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
 // you may not use this file except in compliance with the License. You may obtain a copy of the
@@ -14,12 +14,12 @@
 // The Original Code is uDelphiIDEHighlight.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
-unit uDelphiIDEHighlight;
+unit DITE.DelphiIDEHighlight;
 
 interface
 
@@ -28,7 +28,7 @@ uses
   Classes,
   ComCtrls,
   UITypes,
-  uDelphiVersions;
+  DITE.DelphiVersions;
 
 {$I Common.inc}
 
@@ -189,8 +189,8 @@ uses
   XMLIntf,
   Windows,
   Registry,
-  uMisc,
-  uRegistry;
+  DITE.Misc,
+  DITE.Registry;
 
 {$R DefaultThemes.RES}
 

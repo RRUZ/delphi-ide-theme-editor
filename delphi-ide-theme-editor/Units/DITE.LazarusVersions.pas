@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit uLazarusVersions
+// Unit DITE.LazarusVersions
 // unit retrieves the lazarus ide installed versions  for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -14,12 +14,12 @@
 // The Original Code is uLazarusVersions.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
-unit uLazarusVersions;
+unit DITE.LazarusVersions;
 
 interface
 
@@ -30,7 +30,7 @@ uses
   Classes,
   Windows,
   Variants,
-  uDelphiVersions,
+  DITE.DelphiVersions,
   Generics.Collections,
   SysUtils;
 
@@ -46,10 +46,10 @@ procedure FillListLazarusVersions(AList: TList<TDelphiVersionData>);
 implementation
 
 uses
-  uMisc,
+  DITE.Misc,
   Graphics,
   ShellAPI,
-  uSupportedIDEs;
+  DITE.SupportedIDEs;
 
 const
   sLazarusConfigFile = 'environmentoptions.xml';
@@ -74,7 +74,7 @@ begin
     ExtractIconFileToImageList(ListView.SmallImages, FileName);
     Item := ListView.Items.Add;
     Item.ImageIndex := ListView.SmallImages.Count - 1;
-    Item.Caption := Format('Lazarus %s', [uMisc.GetFileVersion(FileName)]);
+    Item.Caption := Format('Lazarus %s', [DITE.Misc.GetFileVersion(FileName)]);
     Item.SubItems.Add(FileName);
     Item.SubItems.Add(IntToStr(Ord(TSupportedIDEs.LazarusIDE)));
     Item.Data := nil;
@@ -103,7 +103,7 @@ begin
     VersionData := TDelphiVersionData.Create;
     VersionData.Path := FileName;
     // VersionData.Version:=;
-    VersionData.Name := Format('Lazarus %s', [uMisc.GetFileVersion(FileName)]);
+    VersionData.Name := Format('Lazarus %s', [DITE.Misc.GetFileVersion(FileName)]);
     VersionData.IDEType := TSupportedIDEs.LazarusIDE;
     VersionData.Icon := TIcon.Create;
     VersionData.Version := TDelphiVersions.DelphiXE; //used for syntax highlight

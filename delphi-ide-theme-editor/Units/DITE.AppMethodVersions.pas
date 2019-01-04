@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit uAppMethodVersions
+// Unit DITE.AppMethodVersions
 // unit for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -19,15 +19,15 @@
 //
 // **************************************************************************************************
 
-unit uAppMethodVersions;
+unit DITE.AppMethodVersions;
 
 interface
 
 uses
   Generics.Defaults,
   Generics.Collections,
-  uSupportedIDEs,
-  uDelphiVersions,
+  DITE.SupportedIDEs,
+  DITE.DelphiVersions,
   Graphics,
   SysUtils,
   Classes,
@@ -47,14 +47,14 @@ const
 implementation
 
 uses
-  uMisc,
+  DITE.Misc,
   PsAPI,
   Controls,
   ImgList,
   CommCtrl,
   ShellAPI,
   Windows,
-  uRegistry,
+  DITE.Registry,
   Registry;
 
 procedure FillListAppMethodVersions(AList: TList<TDelphiVersionData>);

@@ -65,12 +65,12 @@ interface
 // http://www.kolormodo.com
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, uColorPanel,
-  Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter, uSupportedIDEs, uColorSelector,
-  SynHighlighterPas, SynEdit, SynMemo, uDelphiVersions, uDelphiIDEHighlight, uLazarusVersions, Vcl.ActnPopup, uAppMethodVersions,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, DITE.ColorPanel,
+  Dialogs, ImgList, StdCtrls, ComCtrls, ExtCtrls, SynEditHighlighter, DITE.SupportedIDEs, DITE.ColorSelector,
+  SynHighlighterPas, SynEdit, SynMemo, DITE.DelphiVersions, DITE.DelphiIDEHighlight, DITE.LazarusVersions, Vcl.ActnPopup, DITE.AppMethodVersions,
   pngimage, DITE.Settings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC,
-  Vcl.ActnMan, System.ImageList;
+  Vcl.ActnMan, System.ImageList, SynEditCodeFolding;
 
 { .$DEFINE ENABLE_THEME_EXPORT }
 
@@ -255,31 +255,32 @@ uses
 {$WARN UNIT_PLATFORM OFF}
   Vcl.FileCtrl,
 {$WARN UNIT_PLATFORM ON}
-  Diagnostics,
+  System.Diagnostics,
   System.UITypes,
   System.Types,
-  ShellApi,
-  IOUtils,
-  StrUtils,
-  GraphUtil,
-  CommCtrl,
+  Winapi.ShellApi,
+  System.IOUtils,
+  System.StrUtils,
+  Vcl.GraphUtil,
+  Winapi.CommCtrl,
   Vcl.Styles,
   Vcl.Styles.Utils.Graphics,
   Vcl.Styles.FontAwesome,
   Vcl.Themes,
   Vcl.ListActns,
-  uVclStylesFix,
-  uHueSat,
-  EclipseThemes,
-  VSThemes,
-  uMisc,
-  uLazarusIDEHighlight,
-  uSMSIDEHighlight,
-  uStackTrace,
-  uSMSVersions,
-  uLoadThemesImages,
-  uHelpInsight,
-  uStdActionsPopMenu, uAdditionalSettings;
+  DITE.VclStylesFix,
+  DITE.HueSat,
+  DITE.EclipseThemes,
+  DITE.VSThemes,
+  DITE.Misc,
+  DITE.LazarusIDEHighlight,
+  DITE.SMSIDEHighlight,
+  DITE.StackTrace,
+  DITE.SMSVersions,
+  DITE.LoadThemesImages,
+  DITE.HelpInsight,
+  DITE.StdActionsPopMenu,
+  DITE.AdditionalSettings;
 
 const
   InvalidBreakLine = 9;
@@ -1060,7 +1061,7 @@ begin
   // FillListIDEThemesImport(CbIDEThemeImport.Items);
   // CbIDEThemeImport.ItemIndex := 0;
 
-  Self.Caption := Caption + Format(' %s', [uMisc.GetFileVersion(ParamStr(0))]);
+  Self.Caption := Caption + Format(' %s', [DITE.Misc.GetFileVersion(ParamStr(0))]);
 
   LoadFixedWidthFonts;
   LoadThemes;

@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit VSThemes
+// Unit DITE.VSThemes
 // Import visual studio themes
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -14,11 +14,11 @@
 // The Original Code is VSThemes.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
-unit VSThemes;
+unit DITE.VSThemes;
 
 interface
 
@@ -26,8 +26,8 @@ uses
   SysUtils,
   ComObj,
   Variants,
-  uDelphiIDEHighlight,
-  uDelphiVersions;
+  DITE.DelphiIDEHighlight,
+  DITE.DelphiVersions;
 
 function ImportVisualStudioTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 
@@ -38,21 +38,10 @@ const
 
 function ImportVisualStudioTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 var
-  XmlDocVSTheme: OleVariant;
-  Nodes: OleVariant;
-  lNodes: Integer;
-
-  Categories: OleVariant;
-  lCategories: Integer;
-
-  xPathElement: string;
-  Foreground: string;
-  Background: string;
-  BoldFont: string;
-
-  BackgroundPatch: string;
-  ForegroundPatch: string;
-
+  XmlDocVSTheme, Nodes, Categories: OleVariant;
+  LNodes, LCategories: Integer;
+  xPathElement, FG, BG, BoldFont,
+  BGPatch, FGPatch: string;
   NewTheme: TIDETheme;
 
   function GetDataVSTheme(const ElementName: String): boolean;
@@ -64,7 +53,7 @@ var
     if ElementName = sEmpty then
       Exit;
 
-    for i := 1 to lNodes do
+    for i := 1 to LNodes do
     begin
       xPathElement := '//UserSettings/Category/Category/FontsAndColors/Categories/Category/Items[1]/Item[%d]/';
       xPathElement := Format(xPathElement, [i]);
@@ -74,58 +63,24 @@ var
         if CompareText(ElementVariant.text, ElementName) = 0 then
         begin
           // OutputDebugString(PChar(VarToStr(ElementVariant.text)));
-          Foreground := XmlDocVSTheme.selectSingleNode(Format('%s%s', [xPathElement, '@Foreground'])).text;
-          Background := XmlDocVSTheme.selectSingleNode(Format('%s%s', [xPathElement, '@Background'])).text;
+          FG := XmlDocVSTheme.selectSingleNode(Format('%s%s', [xPathElement, '@Foreground'])).text;
+          BG := XmlDocVSTheme.selectSingleNode(Format('%s%s', [xPathElement, '@Background'])).text;
           BoldFont := XmlDocVSTheme.selectSingleNode(Format('%s%s', [xPathElement, '@BoldFont'])).text;
           Result := True;
           Break;
         end;
     end;
-
-    {
-      //UserSettings/Category/Category/FontsAndColors/Categories/Category/Items[1]/Item[@Name="Comment"]
-      xPathElement:='UserSettings/Category/Category/FontsAndColors/Categories/Category/Items[1]/Item[@Name="%s"]';
-      xPathElement:=Format(xPathElement,[ElementName]);
-      ElementVariant:=XmlDocVSTheme.selectSingleNode(xPathElement);
-      if not VarIsNull(ElementVariant) and not VarIsClear(ElementVariant) then
-      begin
-      for i := 0 to ElementVariant.Attributes.length - 1 do
-      if CompareText(ElementVariant.Attributes.Item(i).nodeName,'Foreground')=0 then
-      Foreground:=ElementVariant.Attributes.Item(i).nodeValue
-      else
-      if CompareText(ElementVariant.Attributes.Item(i).nodeName,'Background')=0 then
-      Background:=ElementVariant.Attributes.Item(i).nodeValue
-      else
-      if CompareText(ElementVariant.Attributes.Item(i).nodeName,'BoldFont')=0 then
-      BoldFont:=ElementVariant.Attributes.Item(i).nodeValue;
-      Result:=True;
-      end;
-    }
-
-    {
-      xPathElement:='UserSettings/Category/Category/FontsAndColors/Categories/Category/Items[1]/Item[@Name="%s"]';
-      xPathElement:=Format(xPathElement,[ElementName]);
-      ElementVariant:=XmlDocVSTheme.selectSingleNode(xPathElement);
-      if not VarIsNull(ElementVariant) and not VarIsClear(ElementVariant) then
-      begin
-      Foreground:=ElementVariant.getAttribute('Foreground');
-      Background:=ElementVariant.getAttribute('Background');
-      BoldFont  :=ElementVariant.getAttribute('BoldFont');
-      Result:=True;
-      end;
-    }
   end;
 
   Procedure SetIDEHighlightElement(Element: TIDEHighlightElements; const VsElement: String);
   var
-    UseBackgroundPatch: boolean;
-    UseForegroundPatch: boolean;
+    UseBGPatch, UseFGatch: boolean;
   begin
 
     if GetDataVSTheme(VsElement) then
     begin
-      UseBackgroundPatch := (Background = '0x02000000');
-      UseForegroundPatch := (Foreground = '0x02000000');
+      UseBGPatch := (BG = '0x02000000');
+      UseFGatch := (FG = '0x02000000');
 
       NewTheme[Element].Bold := BoldFont = 'Yes';
       NewTheme[Element].Italic := False;
@@ -134,15 +89,15 @@ var
       NewTheme[Element].DefaultBackground := False;
       // NewTheme[Element].ForegroundColorNew:=StringReplace(Foreground,'0x','$',[rfReplaceAll]);
 
-      if UseBackgroundPatch then
-        NewTheme[Element].BackgroundColorNew := BackgroundPatch
+      if UseBGPatch then
+        NewTheme[Element].BackgroundColorNew := BGPatch
       else
-        NewTheme[Element].BackgroundColorNew := StringReplace(Background, '0x', '$', [rfReplaceAll]);
+        NewTheme[Element].BackgroundColorNew := StringReplace(BG, '0x', '$', [rfReplaceAll]);
 
-      if UseForegroundPatch then
-        NewTheme[Element].ForegroundColorNew := ForegroundPatch
+      if UseFGatch then
+        NewTheme[Element].ForegroundColorNew := FGPatch
       else
-        NewTheme[Element].ForegroundColorNew := StringReplace(Foreground, '0x', '$', [rfReplaceAll]);
+        NewTheme[Element].ForegroundColorNew := StringReplace(FG, '0x', '$', [rfReplaceAll]);
 
     end
     else
@@ -171,17 +126,17 @@ begin
       raise Exception.CreateFmt('Error in Visual Studio Xml Data %s', [XmlDocVSTheme.parseError]);
 
     Categories := XmlDocVSTheme.selectNodes('//UserSettings/Category/Category/FontsAndColors/Categories/Category');
-    lCategories := Categories.Length;
-    if lCategories > 1 then
+    LCategories := Categories.Length;
+    if LCategories > 1 then
       raise Exception.CreateFmt('Visual Studio theme with multiples Categories %s', ['is not supported']);
 
     // UserSettings/Category/Category/FontsAndColors/Categories/Category/Items
     Nodes := XmlDocVSTheme.selectNodes('//UserSettings/Category/Category/FontsAndColors/Categories/Category/Items[1]/Item');
-    lNodes := Nodes.Length;
+    LNodes := Nodes.Length;
 
     GetDataVSTheme('Plain Text');
-    BackgroundPatch := StringReplace(Background, '0x', '$', [rfReplaceAll]);
-    ForegroundPatch := StringReplace(Foreground, '0x', '$', [rfReplaceAll]);
+    BGPatch := StringReplace(BG, '0x', '$', [rfReplaceAll]);
+    FGPatch := StringReplace(FG, '0x', '$', [rfReplaceAll]);
 
     SetIDEHighlightElement(TIDEHighlightElements.AdditionalSearchMatchHighlight, 'Selected Text');
     NewTheme[TIDEHighlightElements.AdditionalSearchMatchHighlight].DefaultForeground := True;

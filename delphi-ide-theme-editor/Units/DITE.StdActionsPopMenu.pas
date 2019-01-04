@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit uStdActionsPopMenu
+// Unit DITE.StdActionsPopMenu
 // unit for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -14,11 +14,11 @@
 // The Original Code is uStdActionsPopMenu.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
-unit uStdActionsPopMenu;
+unit DITE.StdActionsPopMenu;
 
 interface
 

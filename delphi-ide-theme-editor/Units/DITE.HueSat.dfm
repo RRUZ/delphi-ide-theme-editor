@@ -166,7 +166,7 @@ object FrmHueSat: TFrmHueSat
     Left = 295
     Top = 37
     Width = 16
-    Height = 21
+    Height = 23
     Associate = EditHue
     Min = -180
     Max = 180
@@ -187,7 +187,7 @@ object FrmHueSat: TFrmHueSat
     Left = 295
     Top = 91
     Width = 16
-    Height = 21
+    Height = 23
     Associate = EditSat
     TabOrder = 5
     OnChanging = UpDownSatChanging
@@ -206,7 +206,7 @@ object FrmHueSat: TFrmHueSat
     Left = 295
     Top = 147
     Width = 16
-    Height = 21
+    Height = 23
     Associate = EditLight
     Min = -255
     Max = 255

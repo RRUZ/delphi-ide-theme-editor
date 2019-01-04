@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit EclipseThemes
+// Unit DITE.EclipseThemes
 // Import Eclipse IDE themes
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -14,12 +14,12 @@
 // The Original Code is EclipseThemes.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
-unit EclipseThemes;
+unit DITE.EclipseThemes;
 
 interface
 
@@ -28,8 +28,8 @@ uses
   ComObj,
   Variants,
   Graphics,
-  uDelphiIDEHighlight,
-  uDelphiVersions;
+  DITE.DelphiIDEHighlight,
+  DITE.DelphiVersions;
 
 function ImportEclipseTheme(ADelphiVersionData: TDelphiVersionData; const FileName, Path: TFileName; var ThemeName: string): boolean;
 
@@ -39,9 +39,7 @@ function ImportEclipseTheme(ADelphiVersionData: TDelphiVersionData; const FileNa
 var
   XmlDocEclipseTheme: OleVariant;
   NewTheme: TIDETheme;
-  EclipseColor: string;
-  EclipseBackGround: string;
-  EclipseForeGround: string;
+  EclipseColor, EclipseBG, EclipseFG: string;
 
   function WebColorToTColor(const S: string): string;
   var
@@ -78,10 +76,10 @@ var
       NewTheme[Element].DefaultForeground := False;
       NewTheme[Element].DefaultBackground := False;
       NewTheme[Element].ForegroundColorNew := WebColorToTColor(StringReplace(EclipseColor, '#', '$', [rfReplaceAll]));
-      NewTheme[Element].BackgroundColorNew := EclipseBackGround;
+      NewTheme[Element].BackgroundColorNew := EclipseBG;
     end
     else
-      NewTheme[Element].BackgroundColorNew := EclipseBackGround;
+      NewTheme[Element].BackgroundColorNew := EclipseBG;
   end;
 
 begin
@@ -96,10 +94,10 @@ begin
       raise Exception.CreateFmt('Error in Eclipse Theme Xml Data %s', [XmlDocEclipseTheme.parseError]);
 
     GetDataEclipseTheme('background');
-    EclipseBackGround := WebColorToTColor(StringReplace(EclipseColor, '#', '$', [rfReplaceAll]));
+    EclipseBG := WebColorToTColor(StringReplace(EclipseColor, '#', '$', [rfReplaceAll]));
 
     GetDataEclipseTheme('foreground');
-    EclipseForeGround := WebColorToTColor(StringReplace(EclipseColor, '#', '$', [rfReplaceAll]));
+    EclipseFG := WebColorToTColor(StringReplace(EclipseColor, '#', '$', [rfReplaceAll]));
 
     SetIDEHighlightElement(TIDEHighlightElements.AdditionalSearchMatchHighlight, 'Empty');
     NewTheme[TIDEHighlightElements.AdditionalSearchMatchHighlight].DefaultForeground := True;

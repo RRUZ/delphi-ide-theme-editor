@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Unit uHelpInsight
+// Unit DITE.HelpInsight
 // unit for the Delphi IDE Theme Editor
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
@@ -14,17 +14,17 @@
 // The Original Code is uHelpInsight.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
-unit uHelpInsight;
+unit DITE.HelpInsight;
 
 interface
 
 uses
-  uDelphiIDEHighlight,
-  uDelphiVersions;
+  DITE.DelphiIDEHighlight,
+  DITE.DelphiVersions;
 
 {$I Common.inc}
 
@@ -51,8 +51,8 @@ const
     '\ObjRepos\en', // XE8
     '\ObjRepos\en', // 10 Seattle
     '\ObjRepos\en', // 10.1 Berlin
-    '\ObjRepos\en', // 10.2 Tokio
-    '\ObjRepos\en'  // 10.3
+    '\ObjRepos\en', // 10.2 Tokyo
+    '\ObjRepos\en'  // 10.3 Rio
     );
 
 procedure ApplyThemeHelpInsight(const ATheme: TIDETheme; IDEData: TDelphiVersionData);
@@ -61,7 +61,7 @@ function SetHelpInsightDefault(IDEData: TDelphiVersionData): Boolean;
 implementation
 
 uses
-  uMisc,
+  DITE.Misc,
   Winapi.Windows,
   Vcl.Graphics,
   Vcl.GraphUtil,

@@ -4,8 +4,8 @@ object FrmSettings: TFrmSettings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Settings'
-  ClientHeight = 407
-  ClientWidth = 393
+  ClientHeight = 413
+  ClientWidth = 404
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,29 +23,29 @@ object FrmSettings: TFrmSettings
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 8
-    Top = 1
+    Left = 16
+    Top = 9
     Width = 70
     Height = 13
     Caption = 'Themes Folder'
   end
   object Bevel1: TBevel
-    Left = 8
-    Top = 359
+    Left = 16
+    Top = 367
     Width = 497
     Height = 9
     Shape = bsTopLine
   end
   object Label9: TLabel
-    Left = 8
-    Top = 94
+    Left = 16
+    Top = 102
     Width = 45
     Height = 13
     Caption = 'VCL Style'
   end
   object BtnSave: TButton
-    Left = 8
-    Top = 368
+    Left = 16
+    Top = 376
     Width = 75
     Height = 25
     Caption = 'Apply'
@@ -53,15 +53,15 @@ object FrmSettings: TFrmSettings
     OnClick = BtnSaveClick
   end
   object EditThemesFolder: TEdit
-    Left = 8
-    Top = 20
+    Left = 16
+    Top = 28
     Width = 202
     Height = 21
     TabOrder = 1
   end
   object BtnSelFolderThemes: TButton
-    Left = 216
-    Top = 18
+    Left = 224
+    Top = 26
     Width = 26
     Height = 25
     Caption = '...'
@@ -69,8 +69,8 @@ object FrmSettings: TFrmSettings
     OnClick = BtnSelFolderThemesClick
   end
   object BtnCancel: TButton
-    Left = 89
-    Top = 368
+    Left = 97
+    Top = 376
     Width = 75
     Height = 25
     Caption = 'Cancel'
@@ -78,8 +78,8 @@ object FrmSettings: TFrmSettings
     OnClick = BtnCancelClick
   end
   object ComboBoxVCLStyle: TComboBox
-    Left = 8
-    Top = 113
+    Left = 16
+    Top = 121
     Width = 234
     Height = 21
     Style = csDropDownList
@@ -88,24 +88,24 @@ object FrmSettings: TFrmSettings
     OnChange = ComboBoxVCLStyleChange
   end
   object CheckBoxUpdates: TCheckBox
-    Left = 8
-    Top = 47
+    Left = 16
+    Top = 55
     Width = 161
     Height = 17
     Caption = 'Check for updates in start up.'
     TabOrder = 2
   end
   object CheckBoxHelpInsight: TCheckBox
-    Left = 8
-    Top = 71
+    Left = 16
+    Top = 79
     Width = 265
     Height = 17
     Caption = 'Apply theme to Help Insight (Elevation is required)'
     TabOrder = 6
   end
   object PanelPreview: TPanel
-    Left = 8
-    Top = 140
+    Left = 16
+    Top = 148
     Width = 369
     Height = 213
     BevelOuter = bvNone
