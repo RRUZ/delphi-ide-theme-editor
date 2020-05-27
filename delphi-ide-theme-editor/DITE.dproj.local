@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2020/05/27 08:34:50.492,=C:\Users\adria\Desktop\delphi-ide-theme-editor-master\delphi-ide-theme-editor-master\delphi-ide-theme-editor\Unit1.pas</Transaction>
+    <Transaction>2020/05/27 08:34:57.381,C:\Users\adria\Desktop\delphi-ide-theme-editor-master\delphi-ide-theme-editor-master\delphi-ide-theme-editor\IDETheme.ActnCtrls.pas=C:\Users\adria\Desktop\delphi-ide-theme-editor-master\delphi-ide-theme-editor-master\delphi-ide-theme-editor\Unit1.pas</Transaction>
+    <Transaction>2020/05/27 08:56:32.504,=C:\Users\adria\Desktop\delphi-ide-theme-editor-master\delphi-ide-theme-editor-master\delphi-ide-theme-editor\Units\IDETheme.ActnCtrls.pas</Transaction>
+  </Transactions>
+  <ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="Units"/>
+    <File Path="Units\DITE.AdditionalSettings.pas"/>
+    <File Path="Units\DITE.AdditionalSettings.dfm"/>
+    <File Path="Units\DITE.AppMethodVersions.pas"/>
+    <File Path="Units\DITE.ColorPanel.pas"/>
+    <File Path="Units\DITE.ColorPanel.dfm"/>
+    <File Path="Units\DITE.ColorSelector.pas"/>
+    <File Path="Units\DITE.ColorSelector.dfm"/>
+    <File Path="Units\DITE.DelphiIDEHighlight.pas"/>
+    <File Path="Units\DITE.DelphiVersions.pas"/>
+    <File Path="Units\DITE.EclipseThemes.pas"/>
+    <File Path="Units\DITE.HelpInsight.pas"/>
+    <File Path="Units\DITE.HSLUtils.pas"/>
+    <File Path="Units\DITE.HueSat.pas"/>
+    <File Path="Units\DITE.HueSat.dfm"/>
+    <File Path="Units\DITE.LazarusIDEHighlight.pas"/>
+    <File Path="Units\DITE.LazarusVersions.pas"/>
+    <File Path="Units\DITE.LoadThemesImages.pas"/>
+    <File Path="Units\DITE.Misc.pas"/>
+    <File Path="Units\DITE.Registry.pas"/>
+    <File Path="Units\DITE.Settings.pas"/>
+    <File Path="Units\DITE.Settings.dfm"/>
+    <File Path="Units\DITE.SMSIDEHighlight.pas"/>
+    <File Path="Units\DITE.SMSVersions.pas"/>
+    <File Path="Units\DITE.StackTrace.pas"/>
+    <File Path="Units\DITE.StdActionsPopMenu.pas"/>
+    <File Path="Units\DITE.SupportedIDEs.pas"/>
+    <File Path="Units\DITE.VclStylesFix.pas"/>
+    <File Path="Units\DITE.VSThemes.pas"/>
+    <File Path="Units\IDETheme.ActnCtrls.pas"/>
+    <File Path="DITE.Main.pas"/>
+    <File Path="DITE.Main.dfm"/>
+  </ProjectSortOrder>
+</BorlandProject>

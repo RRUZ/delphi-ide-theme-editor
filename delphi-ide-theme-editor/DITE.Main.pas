@@ -70,7 +70,7 @@ uses
   SynHighlighterPas, SynEdit, SynMemo, DITE.DelphiVersions, DITE.DelphiIDEHighlight, DITE.LazarusVersions, Vcl.ActnPopup, DITE.AppMethodVersions,
   pngimage, DITE.Settings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC,
-  Vcl.ActnMan, System.ImageList, SynEditCodeFolding;
+  Vcl.ActnMan, System.ImageList, SynEditCodeFolding, IDETheme.ActnCtrls;
 
 { .$DEFINE ENABLE_THEME_EXPORT }
 

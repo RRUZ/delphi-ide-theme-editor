@@ -33,7 +33,8 @@ uses
   DITE.SMSIDEHighlight in 'Units\DITE.SMSIDEHighlight.pas',
   DITE.SMSVersions in 'Units\DITE.SMSVersions.pas',
   DITE.AppMethodVersions in 'Units\DITE.AppMethodVersions.pas',
-  DITE.AdditionalSettings in 'Units\DITE.AdditionalSettings.pas' {FrmAdditionalSettings};
+  DITE.AdditionalSettings in 'Units\DITE.AdditionalSettings.pas' {FrmAdditionalSettings},
+  IDETheme.ActnCtrls in 'Units\IDETheme.ActnCtrls.pas';
 
 {$R *.res}
 
