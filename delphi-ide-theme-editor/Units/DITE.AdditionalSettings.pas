@@ -185,7 +185,7 @@ const
 function _ColorToRGB(Color: TColor): Longint;
 begin
   if Color < 0 then
-    Result := Trampoline_user32_GetSysColor(Color and $000000FF)
+    Result := ColorToRGB(Color and $000000FF)
   else
     Result := Color;
 end;

@@ -41,7 +41,8 @@ type
     {$ENDIF}
     Delphi7, Delphi8, Delphi2005, Delphi2006, Delphi2007, Delphi2009, Delphi2010,
     DelphiXE, DelphiXE2, DelphiXE3, DelphiXE4, DelphiXE5, Appmethod, DelphiXE6,
-    DelphiXE7, DelphiXE8, Delphi10Seattle, Delphi10Berlin, Delphi10Tokyo, Delphi10Rio);
+    DelphiXE7, DelphiXE8, Delphi10Seattle, Delphi10Berlin, Delphi10Tokyo, Delphi10Rio,
+    Delphi10Sydney);
 
   TDelphiVersionData = Class
   private
@@ -67,7 +68,7 @@ const
   DelphiOldVersions = 2;
   DelphiOldVersionNumbers: array [0 .. DelphiOldVersions - 1] of TDelphiVersions = (Delphi5, Delphi6);
 
-  DelphiOldColorsCount = 16;
+  DelphiOldColorsCount = 17;
 
   { BGR
     Color0=$000000
@@ -90,7 +91,7 @@ const
   DelphiOldColorsList: array [0 .. DelphiOldColorsCount - 1] of TColor =
   ($000000, $000080, $008000, $008080, $800000,
    $800080, $808000, $C0C0C0, $808080, $0000FF,
-   $00FF00, $00FFFF, $FF0000, $FF00FF, $FFFF00, $FFFFFF);
+   $00FF00, $00FFFF, $FF0000, $FF00FF, $FFFF00, $FFFFFF,$FFFFFF);
 {$ENDIF}
   DelphiVersionsNames: array [TDelphiVersions] of string = (
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -101,7 +102,7 @@ const
     'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'Appmethod 1.13',
     'RAD Studio XE6/Appmethod 1.14', 'RAD Studio XE7/Appmethod 1.15',
     'RAD Studio XE8', 'RAD Studio 10 Seattle', 'RAD Studio 10.1 Berlin',
-    'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio');
+    'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio', 'RAD Studio 10.4 Sydney');
 
   DelphiVersionNumbers: array [TDelphiVersions] of double = (
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -127,7 +128,8 @@ const
     30, // 'RAD Studio 10 Seattle'
     31, // 'RAD Studio 10.1 Berlin'
     32, // 'RAD Studio 10.2 Tokyo'
-    33  // 'RAD Studio 10.3 Rio'
+    33,  // 'RAD Studio 10.3 Rio'
+    34  // 'RAD Studio 10.4 Sydney'
     );
 
   DelphiVCLStylesPaths: array [TDelphiVersions] of string = (
@@ -146,7 +148,8 @@ const
     'Embarcadero\Studio\17.0\Styles',
     'Embarcadero\Studio\18.0\Styles',
     'Embarcadero\Studio\19.0\Styles',
-    'Embarcadero\Studio\20.0\Styles');
+    'Embarcadero\Studio\20.0\Styles',
+    'Embarcadero\Studio\21.0\Styles');
 
 procedure FillCurrentDelphiVersion(Data: TDelphiVersionData);
 procedure FillListDelphiVersions(AList: TList<TDelphiVersionData>);
@@ -211,7 +214,8 @@ const
     '\Software\Embarcadero\BDS\17.0',
     '\Software\Embarcadero\BDS\18.0',
     '\Software\Embarcadero\BDS\19.0',
-    '\Software\Embarcadero\BDS\20.0'
+    '\Software\Embarcadero\BDS\20.0',
+    '\Software\Embarcadero\BDS\21.0'
     );
 
   DelphiCustomRegPaths: array [TDelphiVersions] of string = (
@@ -238,7 +242,8 @@ const
     '\Software\Embarcadero\%s\17.0', // BDS
     '\Software\Embarcadero\%s\18.0', // BDS
     '\Software\Embarcadero\%s\19.0', // BDS
-    '\Software\Embarcadero\%s\20.0'  // BDS
+    '\Software\Embarcadero\%s\20.0', // BDS
+    '\Software\Embarcadero\%s\21.0'  // BDS
     );
 
   DelphiRegPathNumbers: array [TDelphiVersions] of Integer = (
@@ -266,7 +271,8 @@ const
     17, // 'RAD Studio 10 Seattle'
     18, // 'RAD Studio 10.1 Berlin'
     19, // 'RAD Studio 10.2 Tokyo'
-    20  // 'RAD Studio 10.3 Rio'
+    20, // 'RAD Studio 10.3 Rio'
+    21  // 'RAD Studio 10.4 Sydney'
     );
 
   DelphiCmpnyNames: array [TDelphiVersions] of TDelphiCmpnyName = (
@@ -293,7 +299,8 @@ const
     Embarcadero, // 'RAD Studio 10 Seattle
     Embarcadero, // 'RAD Studio 10.1 Berlin
     Embarcadero, // 'RAD Studio 10.2 Tokyo
-    Embarcadero  // 'RAD Studio 10.3 Rio
+    Embarcadero, // 'RAD Studio 10.3 Rio
+    Embarcadero  // 'RAD Studio 10.4 Sydney
     );
 
 {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
@@ -491,7 +498,7 @@ begin
     BDSKeysItems[2].Key := '\Software\CodeGear';
 
     BDSKeysItems[3].MinValue := DelphiRegPathNumbers[DelphiXE];
-    BDSKeysItems[3].MaxValue := DelphiRegPathNumbers[Delphi10Rio];
+    BDSKeysItems[3].MaxValue := DelphiRegPathNumbers[Delphi10Sydney];
     BDSKeysItems[3].Company := Embarcadero;
     BDSKeysItems[3].Key := '\Software\Embarcadero';
 
