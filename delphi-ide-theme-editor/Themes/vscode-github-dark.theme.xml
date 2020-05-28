@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DelphiIDETheme modified="2020-05-18 16:23:14" author="Delphi IDE Theme Editor" versionapp="1.94.6.66">
+<DelphiIDETheme modified="2020-05-28 12:10:02" author="Delphi IDE Theme Editor" versionapp="1.94.6.66">
   <AdditionalSearchMatchHighlight>
     <Bold>False</Bold>
     <Italic>False</Italic>
@@ -69,7 +69,7 @@
     <Underline>False</Underline>
     <DefaultForeground>False</DefaultForeground>
     <DefaultBackground>False</DefaultBackground>
-    <ForegroundColorNew>$00616161</ForegroundColorNew>
+    <ForegroundColorNew>$0051A153</ForegroundColorNew>
     <BackgroundColorNew>$00343129</BackgroundColorNew>
   </Comment>
   <DiffAddition>
