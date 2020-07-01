@@ -14,7 +14,7 @@
 // The Original Code is uDelphiIDEHighlight.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2020 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -158,7 +158,7 @@ type
 
   procedure ImportDelphiIDEThemeFromReg(var ATheme: TIDETheme; ADelphiVersionData: TDelphiVersionData; LoadDefaults: Boolean = True);
   procedure ImportDelphiIDEThemeFromRegExt(var ATheme: TIDETheme; ADelphiVersionData: TDelphiVersionData); // internal use only
-  function ImportDelphiIDEThemeToRegistry(ADelphiVersionData: TDelphiVersionData; const ATheme: TIDETheme): Boolean;
+  function ImportDelphiIDEThemeToRegistry(DelphiVersion: TDelphiVersionData; const IDETheme: TIDETheme; const ThemeName: string): Boolean;
 
   function GetDelphiIDEFontName(ADelphiVersionData: TDelphiVersionData): string;
   function GetDelphiIDEFontSize(ADelphiVersionData: TDelphiVersionData): Integer;
@@ -169,7 +169,7 @@ type
 
   function LoadThemeFromXMLFile(var ATheme: TIDETheme; const FileName: TFileName): Boolean;
   function SetDelphiIDEDefaultTheme(ADelphiVersionData: TDelphiVersionData): Boolean;
-  function ApplyDelphiIDETheme(ADelphiVersionData: TDelphiVersionData; const ATheme: TIDETheme; const ThemeName: string): Boolean;
+  function ApplyDelphiIDETheme(DelphiVersion: TDelphiVersionData; const ATheme: TIDETheme; const ThemeName: string): Boolean;
   function GetDelphiIDEDefaultTheme(ADelphiVersionData: TDelphiVersionData): TIDETheme;
 
   function ExistDelphiIDEThemeToImport(ADelphiVersionData: TDelphiVersionData): Boolean;
@@ -213,11 +213,20 @@ begin
   end;
 end;
 
-function ApplyDelphiIDETheme(ADelphiVersionData: TDelphiVersionData; const ATheme: TIDETheme; const ThemeName: string): Boolean;
+function ApplyDelphiIDETheme(DelphiVersion: TDelphiVersionData; const ATheme: TIDETheme; const ThemeName: string): Boolean;
 begin
-  Result := ImportDelphiIDEThemeToRegistry(ADelphiVersionData, ATheme);
+  Result := ImportDelphiIDEThemeToRegistry(DelphiVersion, ATheme, ThemeName);
   if Result then
-    Result := RegWriteStr(Format('%s\Editor\DITE', [ADelphiVersionData.RegKey]), 'ThemeName', ThemeName, HKEY_CURRENT_USER);
+  begin
+    Result := RegWriteStr(Format('%s\Editor\DITE', [DelphiVersion.RegKey]), 'ThemeName', ThemeName, HKEY_CURRENT_USER);
+
+    if DelphiVersionNumbers[DelphiVersion.Version] >= DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney] then
+    begin
+      Result := RegWriteStr(Format('%s\Theme', [DelphiVersion.RegKey]), 'DarkSpeedSetting', ThemeName, HKEY_CURRENT_USER);
+      if Result then
+        Result := RegWriteStr(Format('%s\Theme', [DelphiVersion.RegKey]), 'LightSpeedSetting', ThemeName, HKEY_CURRENT_USER);
+    end;
+  end;
 end;
 
 function SetDelphiIDEDefaultTheme(ADelphiVersionData: TDelphiVersionData): Boolean;
@@ -661,14 +670,14 @@ begin
   end;
 end;
 
-function ImportDelphiIDEThemeToRegistry(ADelphiVersionData: TDelphiVersionData; const ATheme: TIDETheme): Boolean;
+function ImportDelphiIDEThemeToRegistry(DelphiVersion: TDelphiVersionData; const IDETheme: TIDETheme; const ThemeName: string): Boolean;
 var
   Element: TIDEHighlightElements;
   {$IFDEF DELPHI_OLDER_VERSIONS_SUPPORT}
-  Indexb: Integer;
-  Indexf: Integer;
+  Indexb, Indexf: Integer;
   {$ENDIF}
   Reg: TRegistry;
+  sKey: String;
 begin
   Result := False;
   Reg := TRegistry.Create;
@@ -693,13 +702,19 @@ begin
       RegFile.Add(Format('[HKEY_CURRENT_USER%s\Editor\Highlight]',[DelphiRegPaths[DelphiVersion]]));
       RegFile.Add('');
     }
+
+    if DelphiVersionNumbers[DelphiVersion.Version] >= DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney] then
+      sKey := '%s\Editor\Highlight\Custom Themes\' + ThemeName + '\%s'
+    else
+      sKey := '%s\Editor\Highlight\%s';
+
     for Element in [Low(TIDEHighlightElements) .. High(TIDEHighlightElements)] do
-      if DelphiVersionNumbers[ADelphiVersionData.Version] >= IDEHighlightElementsMinVersion[Element] then
+      if DelphiVersionNumbers[DelphiVersion.Version] >= IDEHighlightElementsMinVersion[Element] then
       begin
-        if Reg.OpenKey(Format('%s\Editor\Highlight\%s', [ADelphiVersionData.RegKey, IDEHighlightElementsNames[Element]]), True) then
+        if Reg.OpenKey(Format(sKey, [DelphiVersion.RegKey, IDEHighlightElementsNames[Element]]), True) then
         begin
-          Reg.WriteString('Default Foreground', BoolToStr(ATheme[Element].DefaultForeground, True));
-          Reg.WriteString('Default Background', BoolToStr(ATheme[Element].DefaultBackground, True));
+          Reg.WriteString('Default Foreground', BoolToStr(IDETheme[Element].DefaultForeground, True));
+          Reg.WriteString('Default Background', BoolToStr(IDETheme[Element].DefaultBackground, True));
 
 
           // RegFile.Add(Format('[HKEY_CURRENT_USER%s\Editor\Highlight\%s]',[DelphiRegPaths[DelphiVersion],IDEHighlightElementsNames[Element]]));
@@ -729,11 +744,11 @@ begin
           else
           begin
           {$ENDIF}
-            Reg.WriteString('Bold', BoolToStr(ATheme[Element].Bold, True));
-            Reg.WriteString('Italic', BoolToStr(ATheme[Element].Italic, True));
-            Reg.WriteString('Underline', BoolToStr(ATheme[Element].Underline, True));
-            Reg.WriteString('Foreground Color New', ATheme[Element].ForegroundColorNew);
-            Reg.WriteString('Background Color New', ATheme[Element].BackgroundColorNew);
+            Reg.WriteString('Bold', BoolToStr(IDETheme[Element].Bold, True));
+            Reg.WriteString('Italic', BoolToStr(IDETheme[Element].Italic, True));
+            Reg.WriteString('Underline', BoolToStr(IDETheme[Element].Underline, True));
+            Reg.WriteString('Foreground Color New', IDETheme[Element].ForegroundColorNew);
+            Reg.WriteString('Background Color New', IDETheme[Element].BackgroundColorNew);
             {
               RegFile.Add(Format('"Bold"="%s"',[BoolToStr(ATheme[Element].Bold,True)]));
               RegFile.Add(Format('"Italic"="%s"',[BoolToStr(ATheme[Element].Italic,True)]));

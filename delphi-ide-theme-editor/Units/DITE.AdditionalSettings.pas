@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit DITE.AdditionalSettings
 // unit DITE.AdditionalSettings for the Delphi IDE Theme Editor
@@ -14,10 +14,10 @@
 // The Original Code is uAdditionalSettings.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2019 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2020 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 unit DITE.AdditionalSettings;
 
 interface
@@ -56,27 +56,26 @@ type
     procedure SetIDEData(const Value: TDelphiVersionData);
   public
     { Public declarations }
-    property IDEData   : TDelphiVersionData read FIDEData write SetIDEData;
+    property IDEData: TDelphiVersionData read FIDEData write SetIDEData;
   end;
 
 implementation
 
 uses
- System.UITypes,
- Vcl.Styles.Hooks,
- Vcl.GraphUtil,
- DITE.DelphiIDEHighlight,
- DITE.ColorSelector,
- DITE.Misc;
+  System.UITypes,
+  Vcl.Styles.Hooks,
+  Vcl.GraphUtil,
+  DITE.DelphiIDEHighlight,
+  DITE.ColorSelector,
+  DITE.Misc;
 
 {$R *.dfm}
-
 { TFrmAdditionalSettings }
 
 procedure TFrmAdditionalSettings.BtnApplyClick(Sender: TObject);
 begin
- if MessageDlg(
-  Format('Do you want apply the current settings to the %s IDE?', [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  if MessageDlg(Format('Do you want apply the current settings to the %s IDE?', [IDEData.Name]), mtConfirmation,
+    [mbYes, mbNo], 0) = mrYes then
   begin
     SetModernThemeData();
     Close();
@@ -90,12 +89,12 @@ end;
 
 procedure TFrmAdditionalSettings.BtnRestoreClick(Sender: TObject);
 begin
- if MessageDlg(
-  Format('Do you want restore the settings of the %s IDE?', [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
- begin
-   RestoreModernThemeData();
-   Close();
- end;
+  if MessageDlg(Format('Do you want restore the settings of the %s IDE?', [IDEData.Name]), mtConfirmation,
+    [mbYes, mbNo], 0) = mrYes then
+  begin
+    RestoreModernThemeData();
+    Close();
+  end;
 end;
 
 procedure TFrmAdditionalSettings.BtnSelForColorClick(Sender: TObject);
@@ -105,19 +104,18 @@ var
 begin
   Frm := TDialogColorSelector.Create(Self);
   try
-    OldColor:=CblForeground.Selected;
-    //Frm.OnChange:=OnSelForegroundColorChange;
-    Frm.SelectedColor:=CblForeground.Selected;
+    OldColor := CblForeground.Selected;
+    // Frm.OnChange:=OnSelForegroundColorChange;
+    Frm.SelectedColor := CblForeground.Selected;
     if Frm.Execute then
     begin
-      CblForeground.Selected:=Frm.SelectedColor;
-     //CblForegroundChange(CblForeground);
+      CblForeground.Selected := Frm.SelectedColor;
+      // CblForegroundChange(CblForeground);
     end
-    else
-    if CblForeground.Selected<>OldColor then
+    else if CblForeground.Selected <> OldColor then
     begin
-      CblForeground.Selected:=OldColor;
-     //CblForegroundChange(CblForeground);
+      CblForeground.Selected := OldColor;
+      // CblForegroundChange(CblForeground);
     end;
   finally
     Frm.Free;
@@ -125,62 +123,37 @@ begin
 end;
 
 const
-  Colors: array[0..51] of TIdentMapEntry = (
-    (Value: TColors.Black; Name: 'clBlack'),
-    (Value: TColors.Maroon; Name: 'clMaroon'),
-    (Value: TColors.Green; Name: 'clGreen'),
-    (Value: TColors.Olive; Name: 'clOlive'),
-    (Value: TColors.Navy; Name: 'clNavy'),
-    (Value: TColors.Purple; Name: 'clPurple'),
-    (Value: TColors.Teal; Name: 'clTeal'),
-    (Value: TColors.Gray; Name: 'clGray'),
-    (Value: TColors.Silver; Name: 'clSilver'),
-    (Value: TColors.Red; Name: 'clRed'),
-    (Value: TColors.Lime; Name: 'clLime'),
-    (Value: TColors.Yellow; Name: 'clYellow'),
-    (Value: TColors.Blue; Name: 'clBlue'),
-    (Value: TColors.Fuchsia; Name: 'clFuchsia'),
-    (Value: TColors.Aqua; Name: 'clAqua'),
-    (Value: TColors.White; Name: 'clWhite'),
+  Colors: array [0 .. 51] of TIdentMapEntry = ((
+    Value: TColors.Black; Name: 'clBlack'), (Value: TColors.Maroon;Name: 'clMaroon'),
+    (Value: TColors.Green; Name: 'clGreen'), (Value: TColors.Olive; Name: 'clOlive'),
+    (Value: TColors.Navy; Name: 'clNavy'), (Value: TColors.Purple; Name: 'clPurple'),
+    (Value: TColors.Teal; Name: 'clTeal'), (Value: TColors.Gray; Name: 'clGray'),
+    (Value: TColors.Silver; Name: 'clSilver'), (Value: TColors.Red; Name: 'clRed'),
+    (Value: TColors.Lime; Name: 'clLime'), (Value: TColors.Yellow; Name: 'clYellow'),
+    (Value: TColors.Blue; Name: 'clBlue'), (Value: TColors.Fuchsia; Name: 'clFuchsia'),
+    (Value: TColors.Aqua; Name: 'clAqua'), (Value: TColors.White; Name: 'clWhite'),
 
     (Value: TColors.MoneyGreen; Name: 'clMoneyGreen'),
     // Use LegacySkyBlue to maintain consistency in VCL colors
-    (Value: TColors.LegacySkyBlue; Name: 'clSkyBlue'),
-    (Value: TColors.Cream; Name: 'clCream'),
-    (Value: TColors.MedGray; Name: 'clMedGray'),
-
-    (Value: TColors.SysActiveBorder; Name: 'clActiveBorder'),
-    (Value: TColors.SysActiveCaption; Name: 'clActiveCaption'),
-    (Value: TColors.SysAppWorkSpace; Name: 'clAppWorkSpace'),
-    (Value: TColors.SysBackground; Name: 'clBackground'),
-    (Value: TColors.SysBtnFace; Name: 'clBtnFace'),
-    (Value: TColors.SysBtnHighlight; Name: 'clBtnHighlight'),
-    (Value: TColors.SysBtnShadow; Name: 'clBtnShadow'),
-    (Value: TColors.SysBtnText; Name: 'clBtnText'),
-    (Value: TColors.SysCaptionText; Name: 'clCaptionText'),
-    (Value: TColors.SysDefault; Name: 'clDefault'),
-    (Value: TColors.SysGradientActiveCaption; Name: 'clGradientActiveCaption'),
-    (Value: TColors.SysGradientInactiveCaption; Name: 'clGradientInactiveCaption'),
-    (Value: TColors.SysGrayText; Name: 'clGrayText'),
-    (Value: TColors.SysHighlight; Name: 'clHighlight'),
-    (Value: TColors.SysHighlightText; Name: 'clHighlightText'),
-    (Value: TColors.SysHotLight; Name: 'clHotLight'),
-    (Value: TColors.SysInactiveBorder; Name: 'clInactiveBorder'),
-    (Value: TColors.SysInactiveCaption; Name: 'clInactiveCaption'),
-    (Value: TColors.SysInactiveCaptionText; Name: 'clInactiveCaptionText'),
-    (Value: TColors.SysInfoBk; Name: 'clInfoBk'),
-    (Value: TColors.SysInfoText; Name: 'clInfoText'),
-    (Value: TColors.SysMenu; Name: 'clMenu'),
-    (Value: TColors.SysMenuBar; Name: 'clMenuBar'),
-    (Value: TColors.SysMenuHighlight; Name: 'clMenuHighlight'),
-    (Value: TColors.SysMenuText; Name: 'clMenuText'),
-    (Value: TColors.SysNone; Name: 'clNone'),
-    (Value: TColors.SysScrollBar; Name: 'clScrollBar'),
-    (Value: TColors.Sys3DDkShadow; Name: 'cl3DDkShadow'),
-    (Value: TColors.Sys3DLight; Name: 'cl3DLight'),
-    (Value: TColors.SysWindow; Name: 'clWindow'),
-    (Value: TColors.SysWindowFrame; Name: 'clWindowFrame'),
-    (Value: TColors.SysWindowText; Name: 'clWindowText'));
+    (Value: TColors.LegacySkyBlue; Name: 'clSkyBlue'), (Value: TColors.Cream; Name: 'clCream'),
+    (Value: TColors.MedGray; Name: 'clMedGray'), (Value: TColors.SysActiveBorder; Name: 'clActiveBorder'),
+    (Value: TColors.SysActiveCaption; Name: 'clActiveCaption'), (Value: TColors.SysAppWorkSpace; Name: 'clAppWorkSpace'),
+    (Value: TColors.SysBackground; Name: 'clBackground'), (Value: TColors.SysBtnFace; Name: 'clBtnFace'),
+    (Value: TColors.SysBtnHighlight; Name: 'clBtnHighlight'), (Value: TColors.SysBtnShadow; Name: 'clBtnShadow'),
+    (Value: TColors.SysBtnText; Name: 'clBtnText'), (Value: TColors.SysCaptionText; Name: 'clCaptionText'),
+    (Value: TColors.SysDefault; Name: 'clDefault'), (Value: TColors.SysGradientActiveCaption; Name: 'clGradientActiveCaption'),
+    (Value: TColors.SysGradientInactiveCaption; Name: 'clGradientInactiveCaption'), (Value: TColors.SysGrayText; Name: 'clGrayText'),
+    (Value: TColors.SysHighlight; Name: 'clHighlight'), (Value: TColors.SysHighlightText; Name: 'clHighlightText'),
+    (Value: TColors.SysHotLight; Name: 'clHotLight'), (Value: TColors.SysInactiveBorder; Name: 'clInactiveBorder'),
+    (Value: TColors.SysInactiveCaption; Name: 'clInactiveCaption'), (Value: TColors.SysInactiveCaptionText; Name: 'clInactiveCaptionText'),
+    (Value: TColors.SysInfoBk; Name: 'clInfoBk'), (Value: TColors.SysInfoText; Name: 'clInfoText'),
+    (Value: TColors.SysMenu; Name: 'clMenu'), (Value: TColors.SysMenuBar; Name: 'clMenuBar'),
+    (Value: TColors.SysMenuHighlight; Name: 'clMenuHighlight'), (Value: TColors.SysMenuText; Name: 'clMenuText'),
+    (Value: TColors.SysNone; Name: 'clNone'), (Value: TColors.SysScrollBar; Name: 'clScrollBar'),
+    (Value: TColors.Sys3DDkShadow; Name: 'cl3DDkShadow'), (Value: TColors.Sys3DLight; Name: 'cl3DLight'),
+    (Value: TColors.SysWindow; Name: 'clWindow'), (Value: TColors.SysWindowFrame; Name: 'clWindowFrame'),
+    (Value: TColors.SysWindowText; Name: 'clWindowText')
+    );
 
 function _ColorToRGB(Color: TColor): Longint;
 begin
@@ -190,17 +163,15 @@ begin
     Result := Color;
 end;
 
-
-procedure TFrmAdditionalSettings.CblForegroundGetColors(Sender: TCustomColorBox;
-  Items: TStrings);
+procedure TFrmAdditionalSettings.CblForegroundGetColors(Sender: TCustomColorBox; Items: TStrings);
 var
- Item: TIdentMapEntry;
+  Item: TIdentMapEntry;
 begin
   for Item in Colors do
-    Items.AddObject(StringReplace(Item.Name, 'cl', '' , [rfReplaceAll]), TObject(_ColorToRGB(Item.Value)));
+    Items.AddObject(StringReplace(Item.Name, 'cl', '', [rfReplaceAll]), TObject(_ColorToRGB(Item.Value)));
 
   for Item in WebNamedColors do
-    Items.AddObject(StringReplace(Item.Name, 'clWeb', '' , [rfReplaceAll]), TObject(Item.Value));
+    Items.AddObject(StringReplace(Item.Name, 'clWeb', '', [rfReplaceAll]), TObject(Item.Value));
 end;
 
 procedure TFrmAdditionalSettings.FormCreate(Sender: TObject);
@@ -228,14 +199,14 @@ procedure TFrmAdditionalSettings.LoadModernThemeData;
 var
   LModernTheme: TModernTheme;
 begin
-  LModernTheme:=TModernTheme.Create(FIDEData);
+  LModernTheme := TModernTheme.Create(FIDEData);
   try
-   LModernTheme.LoadData;
-   CbIDEFonts.ItemIndex    := CbIDEFonts.Items.IndexOf(LModernTheme.FontName);
-   UpDownFontSize.Position := LModernTheme.FontSize;
-   CblForeground.Selected  := _ColorToRGB(StringToColor(LModernTheme.MainToolBarColor));
+    LModernTheme.LoadData;
+    CbIDEFonts.ItemIndex := CbIDEFonts.Items.IndexOf(LModernTheme.FontName);
+    UpDownFontSize.Position := LModernTheme.FontSize;
+    CblForeground.Selected := _ColorToRGB(StringToColor(LModernTheme.MainToolBarColor));
   finally
-   LModernTheme.Free;
+    LModernTheme.Free;
   end;
 end;
 
@@ -263,14 +234,13 @@ var
 begin
   LModernTheme := TModernTheme.Create(FIDEData);
   try
-    LModernTheme.FontName:=CbIDEFonts.Text;
-    LModernTheme.FontSize:=UpDownFontSize.Position;
-    LModernTheme.MainToolBarColor:=ColorToString(CblForeground.Selected);
+    LModernTheme.FontName := CbIDEFonts.Text;
+    LModernTheme.FontSize := UpDownFontSize.Position;
+    LModernTheme.MainToolBarColor := ColorToString(CblForeground.Selected);
     LModernTheme.WriteData;
   finally
     LModernTheme.Free;
   end;
 end;
-
 
 end.

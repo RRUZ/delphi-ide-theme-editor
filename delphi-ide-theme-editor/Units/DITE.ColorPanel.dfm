@@ -6,6 +6,7 @@ object ColorPanel: TColorPanel
   ClientHeight = 544
   ClientWidth = 243
   Color = clBtnFace
+  CustomTitleBar.Height = 10
   TransparentColorValue = clFuchsia
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET

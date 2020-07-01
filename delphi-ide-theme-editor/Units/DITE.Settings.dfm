@@ -7,6 +7,7 @@ object FrmSettings: TFrmSettings
   ClientHeight = 413
   ClientWidth = 404
   Color = clBtnFace
+  CustomTitleBar.Height = 10
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

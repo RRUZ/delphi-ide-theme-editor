@@ -38,12 +38,12 @@ uses
 {$R *.res}
 
 Var
-  IDEsList:TList<TDelphiVersionData>;
+  IDEsList: TList<TDelphiVersionData>;
 begin
-  IDEsList:=TObjectList<TDelphiVersionData>.Create;
+  IDEsList := TObjectList<TDelphiVersionData>.Create;
   FillListDelphiVersions(IDEsList);
 
-  if (not IsSMSInstalled) and (not IsLazarusInstalled) and (IDEsList.Count = 0) then
+  if not IsSMSInstalled and not IsLazarusInstalled and (IDEsList.Count = 0) then
   begin
     IDEsList.Free;
     MsgBox('You don''t have a Object Pascal IDE installed (1)');

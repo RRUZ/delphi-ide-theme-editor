@@ -1,4 +1,4 @@
-//**************************************************************************************************
+// **************************************************************************************************
 //
 // Unit DITE.Settings
 // unit DITE.Settings for the Delphi IDE Theme Editor
@@ -14,10 +14,10 @@
 // The Original Code is uSettings.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2020 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-//**************************************************************************************************
+// **************************************************************************************************
 
 unit DITE.Settings;
 
@@ -39,18 +39,17 @@ type
     property ThemePath: string Read FThemePath;
     property VCLStyle: string Read FVCLStyle Write FVCLStyle;
     property ActivateColorizer: Boolean Read FActivateColorizer write FActivateColorizer;
-    property CheckForUpdates : Boolean Read  FCheckForUpdates write FCheckForUpdates;
+    property CheckForUpdates: Boolean Read FCheckForUpdates write FCheckForUpdates;
     property ApplyThemeHelpInsight: Boolean Read FApplyThemeHelpInsight write FApplyThemeHelpInsight;
   end;
 
-
   TFrmSettings = class(TForm)
-    BtnSave:   TButton;
-    Label1:    TLabel;
+    BtnSave: TButton;
+    Label1: TLabel;
     EditThemesFolder: TEdit;
     BtnSelFolderThemes: TButton;
     BtnCancel: TButton;
-    Bevel1:    TBevel;
+    Bevel1: TBevel;
     Label9: TLabel;
     ComboBoxVCLStyle: TComboBox;
     CheckBoxUpdates: TCheckBox;
@@ -64,8 +63,8 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     FSettings: TSettings;
-    FPreview:TVclStylesPreview;
-    procedure  LoadStyles;
+    FPreview: TVclStylesPreview;
+    procedure LoadStyles;
     procedure DrawSeletedVCLStyle;
   public
     property Settings: TSettings Read FSettings Write FSettings;
@@ -74,17 +73,16 @@ type
 
 procedure ReadSettings(var Settings: TSettings);
 procedure WriteSettings(const Settings: TSettings);
-procedure LoadVCLStyle(Const StyleName:String);
-function  GetPrivateSettingsFolder : string;
-function  GetCommonSettingsFolder : string;
-
+procedure LoadVCLStyle(Const StyleName: String);
+function GetPrivateSettingsFolder: string;
+function GetCommonSettingsFolder: string;
 
 implementation
 
 uses
-  {$WARN UNIT_PLATFORM OFF}
+{$WARN UNIT_PLATFORM OFF}
   Vcl.FileCtrl,
-  {$WARN UNIT_PLATFORM ON}
+{$WARN UNIT_PLATFORM ON}
   Vcl.Styles,
   Vcl.Themes,
   System.Types,
@@ -94,49 +92,46 @@ uses
   IOUtils,
   IniFiles;
 
-
 {$R *.dfm}
 
 type
- TVclStylesPreviewClass = class(TVclStylesPreview);
+  TVclStylesPreviewClass = class(TVclStylesPreview);
 
-
-function GetPrivateSettingsFolder : string;
+function GetPrivateSettingsFolder: string;
 begin
- Result:=IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_APPDATA))+ 'DITE\';
- //C:\Users\Dexter\AppData\Roaming\WDCC\Cache
- SysUtils.ForceDirectories(Result);
+  Result := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_APPDATA)) + 'DITE\';
+  // C:\Users\Dexter\AppData\Roaming\WDCC\Cache
+  SysUtils.ForceDirectories(Result);
 end;
 
-function GetCommonSettingsFolder : string;
+function GetCommonSettingsFolder: string;
 begin
- Result:=IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA))+ 'DITE\';
- //C:\ProgramData\DITE
- SysUtils.ForceDirectories(Result);
+  Result := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA))  + 'DITE\';
+  // C:\ProgramData\DITE
+  SysUtils.ForceDirectories(Result);
 end;
 
 procedure RegisterVCLStyle(const StyleFileName: string);
 begin
-   if TStyleManager.IsValidStyle(StyleFileName) then
-     TStyleManager.LoadFromFile(StyleFileName)
-   else
-     ShowMessage('The Vcl Style file is not valid');
+  if TStyleManager.IsValidStyle(StyleFileName) then
+    TStyleManager.LoadFromFile(StyleFileName)
+  else
+    ShowMessage('The Vcl Style file is not valid');
 end;
 
-procedure LoadVCLStyle(Const StyleName:String);
+procedure LoadVCLStyle(Const StyleName: String);
 begin
-  if StyleName<>'' then
-   TStyleManager.SetStyle(StyleName)
+  if StyleName <> '' then
+    TStyleManager.SetStyle(StyleName)
   else
-   TStyleManager.SetStyle(TStyleManager.SystemStyle.Name);
-       {
-  if CompareText(StyleName,'Windows')=0 then
-   TStyleManager.SetStyle(TStyleManager.SystemStyle.Name)
-  else
-   RegisterAndSetVCLStyle( IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Styles\'+StyleName+'.vsf');
-       }
+    TStyleManager.SetStyle(TStyleManager.SystemStyle.Name);
+  {
+    if CompareText(StyleName,'Windows')=0 then
+    TStyleManager.SetStyle(TStyleManager.SystemStyle.Name)
+    else
+    RegisterAndSetVCLStyle( IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Styles\'+StyleName+'.vsf');
+  }
 end;
-
 
 procedure ReadSettings(var Settings: TSettings);
 var
@@ -144,18 +139,18 @@ var
 begin
   LIniFile := TIniFile.Create(GetPrivateSettingsFolder + 'Settings.ini');
   try
-    Settings.ActivateColorizer:= LIniFile.ReadBool('Global', 'ActivateColorizer',  False);
-    Settings.VCLStyle  := LIniFile.ReadString('Global', 'VCLStyle',  'Glossy');
-    //Settings.ThemePath := LIniFile.ReadString('Global', 'ThemePath',  IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) +'DITE\Themes');
-    Settings.FThemePath :=  IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) +'DITE\Themes';
-    Settings.CheckForUpdates :=LIniFile.ReadBool('Global', 'CheckForUpdates',  True);
-    Settings.ApplyThemeHelpInsight :=LIniFile.ReadBool('Global', 'ApplyThemeHelpInsight',  True);
-    if (Settings.VCLStyle='') or SameText(Settings.VCLStyle, 'Windows')  then
-      Settings.VCLStyle  := 'Glossy';
+    Settings.ActivateColorizer := LIniFile.ReadBool('Global', 'ActivateColorizer', False);
+    Settings.VCLStyle := LIniFile.ReadString('Global', 'VCLStyle', 'Glossy');
+    // Settings.ThemePath := LIniFile.ReadString('Global', 'ThemePath',  IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) +'DITE\Themes');
+    Settings.FThemePath := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) + 'DITE\Themes';
+    Settings.CheckForUpdates := LIniFile.ReadBool('Global', 'CheckForUpdates', True);
+    Settings.ApplyThemeHelpInsight := LIniFile.ReadBool('Global', 'ApplyThemeHelpInsight', True);
+    if (Settings.VCLStyle = '') or SameText(Settings.VCLStyle, 'Windows') then
+      Settings.VCLStyle := 'Glossy';
 
     if not TDirectory.Exists(Settings.ThemePath) then
     begin
-      //Settings.ThemePath := GetSettingsFolder + 'Themes';
+      // Settings.ThemePath := GetSettingsFolder + 'Themes';
       SysUtils.ForceDirectories(Settings.ThemePath);
     end;
   finally
@@ -169,15 +164,15 @@ var
 begin
   LIniFile := TIniFile.Create(GetPrivateSettingsFolder + 'Settings.ini');
   try
-    //LIniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
+    // LIniFile.WriteString('Global', 'ThemePath', Settings.ThemePath);
     LIniFile.WriteString('Global', 'VCLStyle', Settings.VCLStyle);
     LIniFile.WriteBool('Global', 'CheckForUpdates', Settings.CheckForUpdates);
-    LIniFile.WriteBool('Global', 'ApplyThemeHelpInsight', Settings.ApplyThemeHelpInsight);
+    LIniFile.WriteBool('Global', 'ApplyThemeHelpInsight',
+      Settings.ApplyThemeHelpInsight);
   finally
     LIniFile.Free;
   end;
 end;
-
 
 procedure TFrmSettings.BtnCancelClick(Sender: TObject);
 begin
@@ -186,12 +181,13 @@ end;
 
 procedure TFrmSettings.BtnSaveClick(Sender: TObject);
 begin
-  if MessageDlg('Do you want save the changes ?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  if MessageDlg('Do you want save the changes ?', mtConfirmation, [mbYes, mbNo],
+    0) = mrYes then
   begin
-    //FSettings.ThemePath := EditThemesFolder.Text;
-    FSettings.VCLStyle  := ComboBoxVCLStyle.Text;
-    FSettings.CheckForUpdates :=CheckBoxUpdates.Checked;
-    FSettings.ApplyThemeHelpInsight :=CheckBoxHelpInsight.Checked;
+    // FSettings.ThemePath := EditThemesFolder.Text;
+    FSettings.VCLStyle := ComboBoxVCLStyle.Text;
+    FSettings.CheckForUpdates := CheckBoxUpdates.Checked;
+    FSettings.ApplyThemeHelpInsight := CheckBoxHelpInsight.Checked;
     WriteSettings(FSettings);
     LoadVCLStyle(ComboBoxVCLStyle.Text);
     Close();
@@ -202,42 +198,41 @@ procedure TFrmSettings.BtnSelFolderThemesClick(Sender: TObject);
 var
   Directory: string;
 begin
-  Directory:='';
+  Directory := '';
   if SysUtils.DirectoryExists(EditThemesFolder.Text) then
     Directory := EditThemesFolder.Text;
 
-  if SelectDirectory('Select directory',Directory,Directory,[sdNewFolder, sdNewUI, sdShowEdit, sdValidateDir, sdShowShares], nil) then
+  if SelectDirectory('Select directory', Directory, Directory,
+    [sdNewFolder, sdNewUI, sdShowEdit, sdValidateDir, sdShowShares], nil) then
     EditThemesFolder.Text := Directory;
 end;
 
-
 procedure TFrmSettings.ComboBoxVCLStyleChange(Sender: TObject);
 begin
- //LoadVCLStyle(ComboBoxVCLStyle.Text);
- DrawSeletedVCLStyle;
+  // LoadVCLStyle(ComboBoxVCLStyle.Text);
+  DrawSeletedVCLStyle;
 end;
 
 procedure TFrmSettings.DrawSeletedVCLStyle;
 var
-  StyleName : string;
-  LStyle    : TCustomStyleServices;
+  StyleName: string;
+  LStyle: TCustomStyleServices;
 begin
-   StyleName:=ComboBoxVCLStyle.Text;
-   if (StyleName<>'') and (not SameText(StyleName, 'Windows')) then
-   begin
-     TStyleManager.StyleNames;//call DiscoverStyleResources
-     LStyle:=TStyleManager.Style[StyleName];
-     FPreview.Caption:=StyleName;
-     FPreview.Style:=LStyle;
-     TVclStylesPreviewClass(FPreview).Paint;
-   end;
+  StyleName := ComboBoxVCLStyle.Text;
+  if (StyleName <> '') and (not SameText(StyleName, 'Windows')) then
+  begin
+    TStyleManager.StyleNames; // call DiscoverStyleResources
+    LStyle := TStyleManager.Style[StyleName];
+    FPreview.Caption := StyleName;
+    FPreview.Style := LStyle;
+    TVclStylesPreviewClass(FPreview).Paint;
+  end;
 end;
-
 
 procedure TFrmSettings.FormCreate(Sender: TObject);
 begin
-  FPreview:=TVclStylesPreview.Create(Self);
-  FPreview.Parent:=PanelPreview;
+  FPreview := TVclStylesPreview.Create(Self);
+  FPreview.Parent := PanelPreview;
   FPreview.BoundsRect := PanelPreview.ClientRect;
 
   LoadStyles;
@@ -252,22 +247,23 @@ procedure TFrmSettings.LoadSettings;
 begin
   ReadSettings(FSettings);
   EditThemesFolder.Text := FSettings.ThemePath;
-  ComboBoxVCLStyle.ItemIndex:=ComboBoxVCLStyle.Items.IndexOf(FSettings.VCLStyle);
-  CheckBoxUpdates.Checked:=FSettings.CheckForUpdates;
-  CheckBoxHelpInsight.Checked:=FSettings.ApplyThemeHelpInsight;
+  ComboBoxVCLStyle.ItemIndex := ComboBoxVCLStyle.Items.IndexOf
+    (FSettings.VCLStyle);
+  CheckBoxUpdates.Checked := FSettings.CheckForUpdates;
+  CheckBoxHelpInsight.Checked := FSettings.ApplyThemeHelpInsight;
   DrawSeletedVCLStyle;
 end;
 
 procedure TFrmSettings.LoadStyles;
 var
-  Style   : string;
+  Style: string;
 begin
   try
     ComboBoxVCLStyle.Items.BeginUpdate;
     ComboBoxVCLStyle.Items.Clear;
     for Style in TStyleManager.StyleNames do
-     if not SameText(Style, 'Windows') then
-      ComboBoxVCLStyle.Items.Add(Style);
+      if not SameText(Style, 'Windows') then
+        ComboBoxVCLStyle.Items.Add(Style);
   finally
     ComboBoxVCLStyle.Items.EndUpdate;
   end;
@@ -275,15 +271,15 @@ end;
 
 procedure RegisterVCLStyles;
 var
-  Style   : string;
+  Style: string;
 begin
-  for Style in TDirectory.GetFiles(ExtractFilePath(ParamStr(0))+'\Styles', '*.vsf') do
+  for Style in TDirectory.GetFiles(ExtractFilePath(ParamStr(0)) + '\Styles',
+    '*.vsf') do
     RegisterVCLStyle(Style);
 end;
 
-
 initialization
- RegisterVCLStyles;
 
+RegisterVCLStyles;
 
 end.

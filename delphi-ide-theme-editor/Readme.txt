@@ -1,11 +1,9 @@
-Before to open this project (using Delphi 10.1 Berlin) you must install these components
+Built using Delphi 10.4 Sydney
 
-* Synedit version unicode from Github
+Third-Party components
 
-https://github.com/SynEdit/SynEdit
- 
-* mbcolorlib components (ported to Delphi 10.1 Berlin) included on this distribution.
-
+* SynEdit https://github.com/SynEdit/SynEdit
+* mbcolorlib components (ported to Delphi 10.4 Sydney) included on this distribution.
 
 
 Rodrigo Ruz.

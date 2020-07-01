@@ -14,7 +14,7 @@
 // The Original Code is Main.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2020 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -226,7 +226,7 @@ type
     procedure RefreshPasSynEdit;
     procedure SetSynAttr(Element: TIDEHighlightElements; SynAttr: TSynHighlighterAttributes; ADelphiVersionData: TDelphiVersionData);
     procedure CreateThemeFile;
-    procedure ApplyCurentTheme;
+    procedure ApplyCurrentTheme;
     function GetThemeIndex(const AThemeName: string): integer;
     function GetElementIndex(Element: TIDEHighlightElements): integer;
     procedure OnSelForegroundColorChange(Sender: TObject);
@@ -300,7 +300,7 @@ begin
         MsgBox(Format('Before to continue you must close all running instances of the %s IDE', [IDEData.Name]))
       else if MessageDlg(Format('Do you want apply the theme "%s" to the %s IDE?', [LvThemes.Selected.Caption, IDEData.Name]),
         mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-        ApplyCurentTheme;
+        ApplyCurrentTheme;
   except
     on E: Exception do
       MsgBox(Format('Error setting theme - Message : %s : Trace %s', [E.Message, E.StackTrace]));
@@ -439,9 +439,10 @@ end;
 procedure TFrmMain.ActionSetDefaultThemeUpdate(Sender: TObject);
 begin
   TAction(Sender).Enabled := (IDEData.IDEType = TSupportedIDEs.DelphiIDE);
+  TAction(Sender).Visible := (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney])
 end;
 
-procedure TFrmMain.ApplyCurentTheme;
+procedure TFrmMain.ApplyCurrentTheme;
 begin
   if ComboBoxExIDEs.ItemIndex >= 0 then
   begin
@@ -452,7 +453,8 @@ begin
       else
         MsgBox('Error setting theme');
 
-      if Settings.ApplyThemeHelpInsight then
+      if Settings.ApplyThemeHelpInsight and
+        (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney]) then
         ApplyThemeHelpInsight(FCurrentTheme, IDEData);
     end
     else if IDEData.IDEType = TSupportedIDEs.LazarusIDE then
@@ -590,21 +592,22 @@ end;
 procedure TFrmMain.SetDefaultDelphiTheme;
 begin
   try
-    if ComboBoxExIDEs.ItemIndex >= 0 then
-      if not IsAppRunning(IDEData.Path) then
-        if MessageDlg(Format('Do you want apply the default theme to the "%s" IDE?', [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes
-        then
-        begin
-          if SetDelphiIDEDefaultTheme(IDEData) then
-            MsgBox('Default theme was applied')
-          else
-            MsgBox('Error setting theme');
+    if (ComboBoxExIDEs.ItemIndex >= 0) and not IsAppRunning(IDEData.Path)  then
+      if MessageDlg(Format('Do you want apply the default theme to the "%s" IDE?',
+        [IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes
+      then
+      begin
+        if SetDelphiIDEDefaultTheme(IDEData) then
+          MsgBox('Default theme was applied')
+        else
+          MsgBox('Error setting default theme');
 
-          if IDEData.IDEType = TSupportedIDEs.DelphiIDE then
-            SetHelpInsightDefault(IDEData);
+        if (IDEData.IDEType = TSupportedIDEs.DelphiIDE) and
+          (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney]) then
+          SetHelpInsightDefault(IDEData);
 
-          ComboBoxExIDEsChange(nil);
-        end;
+        ComboBoxExIDEsChange(nil);
+      end;
   except
     on E: Exception do
       MsgBox(Format('Error setting default theme - Message : %s : Trace %s', [E.Message, E.StackTrace]));
@@ -862,6 +865,8 @@ begin
   LNCButton.BoundsRect := Rect(5, 5, 75, 25);
   LNCButton.Caption := 'Menu';
   LNCButton.DropDownMenu := PopupMenuThemes;
+  LNCButton.FontColor := StyleServices(nil).GetSystemColor(clHighlight);
+  LNCButton.HotFontColor := LNCButton.FontColor;
   // LNCButton.OnClick := ButtonNCClick;
 
   LNCButton := NCControls.Controls.AddEx<TNCButton>;
@@ -924,32 +929,36 @@ procedure TFrmMain.LoadIcons;
 var
   LIndex : Integer;
 begin
- Icons := TObjectDictionary<string, TIcon>.Create([doOwnsValues]);
+  Icons := TObjectDictionary<string, TIcon>.Create([doOwnsValues]);
 
- Icons.Add('Apply', TIcon.Create);
- Icons['Apply'].Handle := FontAwesome.GetIcon(fa_check, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
- LIndex := ImageList1.AddIcon(Icons['Apply']);
- ActionApplyTheme.ImageIndex := LIndex;
+  Icons.Add('Apply', TIcon.Create);
+  Icons['Apply'].Handle := FontAwesome.GetIcon(fa_check, 16, 16,
+    StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+  LIndex := ImageList1.AddIcon(Icons['Apply']);
+  ActionApplyTheme.ImageIndex := LIndex;
 
- Icons.Add('delete', TIcon.Create);
- Icons['delete'].Handle := FontAwesome.GetIcon(fa_remove, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
- LIndex := ImageList1.AddIcon(Icons['delete']);
- ActionDeleteTheme.ImageIndex := LIndex;
+  Icons.Add('delete', TIcon.Create);
+  Icons['delete'].Handle := FontAwesome.GetIcon(fa_remove, 16, 16,
+    StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+  LIndex := ImageList1.AddIcon(Icons['delete']);
+  ActionDeleteTheme.ImageIndex := LIndex;
 
- Icons.Add('export', TIcon.Create);
- Icons['export'].Handle := FontAwesome.GetIcon(fa_chevron_right, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
- LIndex := ImageList1.AddIcon(Icons['export']);
- ActionExoLazarusClrSch.ImageIndex := LIndex;
+  Icons.Add('export', TIcon.Create);
+  Icons['export'].Handle := FontAwesome.GetIcon(fa_chevron_right, 16, 16,
+    StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+  LIndex := ImageList1.AddIcon(Icons['export']);
+  ActionExoLazarusClrSch.ImageIndex := LIndex;
 
- Icons.Add('import', TIcon.Create);
- Icons['import'].Handle := FontAwesome.GetIcon(fa_chevron_left, 16, 16, StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
- LIndex := ImageList1.AddIcon(Icons['import']);
- ActionImportThemeReg.ImageIndex := LIndex;
+  Icons.Add('import', TIcon.Create);
+  Icons['import'].Handle := FontAwesome.GetIcon(fa_chevron_left, 16, 16,
+    StyleServices.GetSystemColor(clMenuText), StyleServices.GetSystemColor(clMenu), 0, TImageAlignment.iaCenter);
+  LIndex := ImageList1.AddIcon(Icons['import']);
+  ActionImportThemeReg.ImageIndex := LIndex;
 
- Icons.Add('github', TIcon.Create);
- Icons['github'].Handle := FontAwesome.GetIcon(fa_github, 24, 24, StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
-
- end;
+  Icons.Add('github', TIcon.Create);
+  Icons['github'].Handle := FontAwesome.GetIcon(fa_github, 24, 24,
+    StyleServices.GetSystemColor(clHighlight), StyleServices.GetSystemColor(clBtnFace), 0, TImageAlignment.iaCenter);
+end;
 
 type
   TCustomComboClass = class(TCustomCombo);
@@ -963,7 +972,6 @@ begin
   LNewWidth := 0;
   for i := 0 to ACustomCombo.Items.Count -1 do
   begin
-    //OutputDebugString(PChar(theComboBox.Items[idx]));
     LWidth := ACustomCombo.Canvas.TextWidth(ACustomCombo.Items[i]);
     Inc(LWidth, PADDING);
     if (LWidth > LNewWidth) then
@@ -996,6 +1004,11 @@ begin
   Screen.MenuFont.Name := 'Calibri';
   Screen.MenuFont.Size := 9;
 
+  FChanging := False;
+  FSettings := TSettings.Create;
+  ReadSettings(FSettings);
+  LoadVCLStyle(FSettings.VCLStyle);
+
   //ImageList1
   LoadNCControls();
 
@@ -1020,16 +1033,10 @@ begin
 
   //ComboBoxExIDEs.ItemsEx.CustomSort(ListItemsCompare);
 
-
   ActionImages := TObjectDictionary<string, TCompPngImages>.Create([doOwnsValues]);
 
   FillPopupActionBar(PopupActionBar1);
   AssignStdActionsPopUpMenu(Self, PopupActionBar1);
-
-  FChanging := False;
-  FSettings := TSettings.Create;
-  ReadSettings(FSettings);
-  LoadVCLStyle(FSettings.VCLStyle);
 
   LoadIcons();
   Image1.Picture.Icon.Assign(Icons['github']);

@@ -7,6 +7,7 @@ object DialogColorSelector: TDialogColorSelector
   ClientHeight = 379
   ClientWidth = 243
   Color = clBtnFace
+  CustomTitleBar.Height = 10
   TransparentColorValue = clFuchsia
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET

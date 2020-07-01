@@ -7,6 +7,7 @@ object FrmMain: TFrmMain
   ClientHeight = 592
   ClientWidth = 974
   Color = clBtnFace
+  CustomTitleBar.Height = 10
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
