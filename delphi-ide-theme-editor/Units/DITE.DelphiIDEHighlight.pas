@@ -220,7 +220,7 @@ begin
   begin
     Result := RegWriteStr(Format('%s\Editor\DITE', [DelphiVersion.RegKey]), 'ThemeName', ThemeName, HKEY_CURRENT_USER);
 
-    if DelphiVersionNumbers[DelphiVersion.Version] >= DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney] then
+    if DelphiVersionNumbers[DelphiVersion.Version] >= DelphiVersionNumbers[TDelphiVersions.Delphi11Alexandria] then
     begin
       Result := RegWriteStr(Format('%s\Theme', [DelphiVersion.RegKey]), 'DarkSpeedSetting', ThemeName, HKEY_CURRENT_USER);
       if Result then
@@ -703,7 +703,7 @@ begin
       RegFile.Add('');
     }
 
-    if DelphiVersionNumbers[DelphiVersion.Version] >= DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney] then
+    if DelphiVersionNumbers[DelphiVersion.Version] >= DelphiVersionNumbers[TDelphiVersions.Delphi11Alexandria] then
       sKey := '%s\Editor\Highlight\Custom Themes\' + ThemeName + '\%s'
     else
       sKey := '%s\Editor\Highlight\%s';

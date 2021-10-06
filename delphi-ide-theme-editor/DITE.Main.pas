@@ -14,7 +14,7 @@
 // The Original Code is Main.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2021 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -439,7 +439,7 @@ end;
 procedure TFrmMain.ActionSetDefaultThemeUpdate(Sender: TObject);
 begin
   TAction(Sender).Enabled := (IDEData.IDEType = TSupportedIDEs.DelphiIDE);
-  TAction(Sender).Visible := (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney])
+  TAction(Sender).Visible := (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi11Alexandria])
 end;
 
 procedure TFrmMain.ApplyCurrentTheme;
@@ -454,7 +454,7 @@ begin
         MsgBox('Error setting theme');
 
       if Settings.ApplyThemeHelpInsight and
-        (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney]) then
+        (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi11Alexandria]) then
         ApplyThemeHelpInsight(FCurrentTheme, IDEData);
     end
     else if IDEData.IDEType = TSupportedIDEs.LazarusIDE then
@@ -603,7 +603,7 @@ begin
           MsgBox('Error setting default theme');
 
         if (IDEData.IDEType = TSupportedIDEs.DelphiIDE) and
-          (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney]) then
+          (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi11Alexandria]) then
           SetHelpInsightDefault(IDEData);
 
         ComboBoxExIDEsChange(nil);
