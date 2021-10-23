@@ -70,7 +70,8 @@ uses
   SynHighlighterPas, SynEdit, SynMemo, DITE.DelphiVersions, DITE.DelphiIDEHighlight, DITE.LazarusVersions, Vcl.ActnPopup, DITE.AppMethodVersions,
   pngimage, DITE.Settings, ExtDlgs, Menus, SynEditExport, SynExportHTML, Generics.Defaults, Generics.Collections, Vcl.ActnList,
   Vcl.PlatformDefaultStyleActnCtrls, System.Actions, Vcl.Styles.Fixes, Vcl.Styles.NC,
-  Vcl.ActnMan, System.ImageList, SynEditCodeFolding;
+  Vcl.ActnMan, System.ImageList, SynEditCodeFolding, Vcl.ControlList,
+  Vcl.AppEvnts;
 
 { .$DEFINE ENABLE_THEME_EXPORT }
 
@@ -87,12 +88,30 @@ type
     destructor Destroy; override;
   end;
 
+  TDITETheme = class
+  private
+    FFileName: string;
+    FName: string;
+    FAuthor: string;
+    FBitmap: Vcl.Graphics.TBitmap;
+    FTheme: TIDETheme;
+    FModified: TDateTime;
+  public
+    constructor Create(const AFileName: string);
+    destructor Destroy; override;
+    property Name: string read FName write FName;
+    property FileName: string read FFileName write FFileName;
+    property Author: string read FAuthor write FAuthor;
+    property Modified: TDateTime read FModified write FModified;
+    property Bitmap: Vcl.Graphics.TBitmap read FBitmap write FBitmap;
+    property Theme: TIDETheme read FTheme write FTheme;
+  end;
 
   // TPopupMenu=class(Vcl.ActnPopup.TPopupActionBar);
 
   TFrmMain = class(TForm)
     ImageListDelphiVersion: TImageList;
-    Label1: TLabel;
+    lbIDEs: TLabel;
     CbElement: TComboBox;
     LabelElement: TLabel;
     GroupBoxTextAttr: TGroupBox;
@@ -105,13 +124,12 @@ type
     CblForeground: TColorBox;
     CblBackground: TColorBox;
     SynPasSyn1: TSynPasSyn;
-    Label5: TLabel;
+    lbFont: TLabel;
     CbIDEFonts: TComboBox;
     EditFontSize: TEdit;
     UpDownFontSize: TUpDown;
     BtnApplyFont: TButton;
     Label7: TLabel;
-    LvThemes: TListView;
     OpenDialogImport: TOpenDialog;
     ProgressBar1: TProgressBar;
     SynEditCode: TSynEdit;
@@ -129,7 +147,6 @@ type
     SynExporterHTML1: TSynExporterHTML;
     OpenDialogExport: TOpenDialog;
     ComboBoxExIDEs: TComboBoxEx;
-    ImageListThemes: TImageList;
     PopupMenu1: TPopupMenu;
     ActionList1: TActionList;
     ActionApplyTheme: TAction;
@@ -165,6 +182,13 @@ type
     EditThemeName: TEdit;
     LabelThemeName: TLabel;
     BtnApplySmall: TButton;
+    clThemes: TControlList;
+    lbTheme: TLabel;
+    lbThemetype: TLabel;
+    Image3: TImage;
+    ApplicationEvents1: TApplicationEvents;
+    chbDark: TCheckBox;
+    chbLight: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure LvIDEVersionsChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure CbElementChange(Sender: TObject);
@@ -172,7 +196,6 @@ type
     procedure CblForegroundChange(Sender: TObject);
     procedure BtnApplyFontClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure LvThemesChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure SynEditCodeClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ImageConfClick(Sender: TObject);
@@ -204,10 +227,16 @@ type
     procedure BtnAdditionalSettingsClick(Sender: TObject);
     procedure LinkLabel1LinkClick(Sender: TObject; const Link: string;
       LinkType: TSysLinkType);
+    procedure clThemesBeforeDrawItem(AIndex: Integer; ACanvas: TCanvas;
+      ARect: TRect; AState: TOwnerDrawState);
+    procedure clThemesItemClick(Sender: TObject);
+    procedure ApplicationEvents1Idle(Sender: TObject; var Done: Boolean);
+    procedure chbLightClick(Sender: TObject);
+    procedure ActionApplyThemeUpdate(Sender: TObject);
   private
-    FCompactMode : Boolean;
-    FChanging : Boolean;
-    FThemeChangued: boolean;
+    FCompactMode: Boolean;
+    FChanging, FLoading: Boolean;
+    FThemeChangued, FThemesLoaded: boolean;
     FSettings: TSettings;
     FCurrentTheme: TIDETheme;
     FMapHighlightElementsTSynAttr: TStrings;
@@ -216,8 +245,9 @@ type
     FrmColorPanel: TColorPanel;
     NCControls: TNCControls;
     Icons : TObjectDictionary<string, TIcon>;
-
     ActionImages: TObjectDictionary<string, TCompPngImages>;
+
+    FDITEThemes: TObjectList<TDITETheme>;
     procedure SwitchModeClick(Sender: TObject);
     procedure SetCompactMode(Value : Boolean);
     procedure LoadThemes;
@@ -283,23 +313,22 @@ uses
   DITE.AdditionalSettings;
 
 const
-  InvalidBreakLine = 9;
-  ExecutionPointLine = 10;
-  EnabledBreakLine = 12;
-  DisabledBreakLine = 13;
-  ErrorLineLine = 14;
+  cInvalidBreakLine = 9;
+  cExecutionPointLine = 10;
+  cEnabledBreakLine = 12;
+  cDisabledBreakLine = 13;
+  cErrorLineLine = 14;
 
 {$R *.dfm}
-  { .$R Manbdmin.RES }
 
 procedure TFrmMain.ActionApplyThemeExecute(Sender: TObject);
 begin
   try
-    if (ComboBoxExIDEs.ItemIndex >= 0) and (LvThemes.Selected <> nil) then
+    if (ComboBoxExIDEs.ItemIndex >= 0) and (clThemes.ItemIndex <> -1) then
       if IsAppRunning(IDEData.Path) then
         MsgBox(Format('Before to continue you must close all running instances of the %s IDE', [IDEData.Name]))
-      else if MessageDlg(Format('Do you want apply the theme "%s" to the %s IDE?', [LvThemes.Selected.Caption, IDEData.Name]),
-        mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+      else if MessageDlg(Format('Do you want apply the theme "%s" to the %s IDE?',
+        [FDITEThemes[clThemes.ItemIndex].Name, IDEData.Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes then
         ApplyCurrentTheme;
   except
     on E: Exception do
@@ -307,28 +336,29 @@ begin
   end;
 end;
 
+procedure TFrmMain.ActionApplyThemeUpdate(Sender: TObject);
+begin
+   TAction(Sender).Enabled := not FLoading;
+end;
+
 procedure TFrmMain.ActionCloneThemeExecute(Sender: TObject);
 var
-  Index: integer;
-  FileName: string;
-  NFileName: string;
+  LIndex: Integer;
+  LFileName, NFileName: string;
 begin
   try
-    if LvThemes.Selected <> nil then
+    if clThemes.ItemIndex <> -1 then
     begin
-      Index := LvThemes.Selected.Index;
-      FileName := LvThemes.Selected.SubItems[0];
-      NFileName := ChangeFileExt(ExtractFileName(FileName), ''); // remove .xml
+      LIndex := clThemes.ItemIndex;
+      LFileName := FDITEThemes[LIndex].FileName;
+      NFileName := ChangeFileExt(ExtractFileName(LFileName), ''); // remove .xml
       NFileName := ChangeFileExt(ExtractFileName(NFileName), ''); // remove .theme
-      NFileName := ExtractFilePath(FileName) + NFileName + '-Clone.theme.xml';
+      NFileName := ExtractFilePath(LFileName) + NFileName + '-Clone.theme.xml';
       DeleteFile(NFileName);
-      TFile.Copy(FileName, NFileName);
+      TFile.Copy(LFileName, NFileName);
       LoadThemes;
-      if index >= 0 then
-      begin
-        LvThemes.Selected := LvThemes.Items.Item[index];
-        LvThemes.Selected.MakeVisible(True);
-      end;
+      if LIndex >= 0 then
+        clThemes.ItemIndex := LIndex;
     end;
   except
     on E: Exception do
@@ -338,20 +368,22 @@ end;
 
 procedure TFrmMain.ActionDeleteThemeExecute(Sender: TObject);
 var
-  Index: integer;
+  LIndex: integer;
 begin
   try
-    if LvThemes.Selected <> nil then
-      if MessageDlg(Format('Do you want delete the theme "%s"?', [LvThemes.Selected.Caption]), mtConfirmation, [mbYes, mbNo], 0) = mrYes
+    LIndex := clThemes.ItemIndex;
+    if LIndex <> -1 then
+      if MessageDlg(Format('Do you want delete the theme "%s"?',
+        [FDITEThemes[LIndex].Name]), mtConfirmation, [mbYes, mbNo], 0) = mrYes
       then
       begin
-        index := LvThemes.Selected.Index;
-        DeleteFile(LvThemes.Selected.SubItems[0]);
-        LoadThemes;
-        if index >= 0 then
+        DeleteFile(FDITEThemes[LIndex].FileName);
+        FDITEThemes.Delete(LIndex);
+        //LoadThemes;
+        if (LIndex >= 0) and (LIndex <= FDITEThemes.Count - 1) then
         begin
-          LvThemes.Selected := LvThemes.Items.Item[index];
-          LvThemes.Selected.MakeVisible(True);
+          clThemes.ItemIndex := LIndex;
+          clThemesItemClick(nil);
         end;
       end;
   except
@@ -386,24 +418,20 @@ end;
 
 procedure TFrmMain.ActionSaveAsExecute(Sender: TObject);
 var
-  Index: integer;
+  LIndex: integer;
   Value: string;
 begin
   // detect name in list show msg overwrite
   Value := EditThemeName.Text;
   try
-
     if InputQuery('Save As..', 'Enter the new name of the theme', Value) then
     begin
       EditThemeName.Text := Value;
       CreateThemeFile;
       LoadThemes;
-      index := GetThemeIndex(EditThemeName.Text);
-      if index >= 0 then
-      begin
-        LvThemes.Selected := LvThemes.Items.Item[index];
-        LvThemes.Selected.MakeVisible(True);
-      end;
+      LIndex := GetThemeIndex(EditThemeName.Text);
+      if LIndex >= 0 then
+        clThemes.ItemIndex := LIndex;
     end;
   except
     on E: Exception do
@@ -413,18 +441,15 @@ end;
 
 procedure TFrmMain.ActionSaveChangesExecute(Sender: TObject);
 var
-  Index: integer;
+  LIndex: integer;
 begin
   // detect name in list show msg overwrite
   try
     CreateThemeFile;
     LoadThemes;
-    index := GetThemeIndex(EditThemeName.Text);
-    if index >= 0 then
-    begin
-      LvThemes.Selected := LvThemes.Items.Item[index];
-      LvThemes.Selected.MakeVisible(True);
-    end;
+    LIndex := GetThemeIndex(EditThemeName.Text);
+    if LIndex >= 0 then
+      clThemes.ItemIndex := LIndex;
   except
     on E: Exception do
       MsgBox(Format('Error Saving theme  Message : %s : Trace %s', [E.Message, E.StackTrace]));
@@ -442,13 +467,24 @@ begin
   TAction(Sender).Visible := (DelphiVersionNumbers[IDEData.Version] < DelphiVersionNumbers[TDelphiVersions.Delphi10Sydney])
 end;
 
+procedure TFrmMain.ApplicationEvents1Idle(Sender: TObject; var Done: Boolean);
+begin
+ if not FThemesLoaded then
+ begin
+   LoadThemes;
+   ComboBoxExIDEs.ItemIndex := 0;
+   ComboBoxExIDEsChange(ComboBoxExIDEs);
+   FThemesLoaded := True;
+ end;
+end;
+
 procedure TFrmMain.ApplyCurrentTheme;
 begin
   if ComboBoxExIDEs.ItemIndex >= 0 then
   begin
     if IDEData.IDEType = TSupportedIDEs.DelphiIDE then
     begin
-      if ApplyDelphiIDETheme(IDEData, FCurrentTheme, LvThemes.Selected.Caption) then
+      if ApplyDelphiIDETheme(IDEData, FCurrentTheme, FDITEThemes[clThemes.ItemIndex].Name) then
         MsgBox('The theme was successfully applied')
       else
         MsgBox('Error setting theme');
@@ -472,14 +508,14 @@ end;
 
 procedure TFrmMain.BtnAdditionalSettingsClick(Sender: TObject);
 var
-  LFrm: TFrmAdditionalSettings;
+  LDialog: TFrmAdditionalSettings;
 begin
-  LFrm := TFrmAdditionalSettings.Create(Self);
+  LDialog := TFrmAdditionalSettings.Create(Self);
   try
-    LFrm.IDEData := IDEData;
-    LFrm.ShowModal;
+    LDialog.IDEData := IDEData;
+    LDialog.ShowModal;
   finally
-    LFrm.Free;
+    LDialog.Free;
   end;
 end;
 
@@ -526,7 +562,7 @@ var
   i: integer;
   OutPutFolder: String;
   GoNext: boolean;
-  s: TStopwatch;
+  LStopWatch: TStopwatch;
   Directory: String;
 begin
   try
@@ -554,8 +590,8 @@ begin
       if GoNext and (OpenDialogExport.Files.Count > 1) then
       begin
 
-        s := TStopwatch.Create;
-        s.Start;
+        LStopWatch := TStopwatch.Create;
+        LStopWatch.Start;
 
         ProgressBar1.Visible := True;
         try
@@ -573,8 +609,8 @@ begin
           LabelMsg.Visible := False;
         end;
 
-        s.Stop;
-        MsgBox(Format('%d Themes exported in %n seconds', [OpenDialogExport.Files.Count, s.Elapsed.TotalSeconds]));
+        LStopWatch.Stop;
+        MsgBox(Format('%d Themes exported in %n seconds', [OpenDialogExport.Files.Count, LStopWatch.Elapsed.TotalSeconds]));
       end
       else if GoNext and (OpenDialogExport.Files.Count = 1) then
       begin
@@ -725,10 +761,10 @@ begin
             EditThemeName.Text := ThemeName;
             MsgBox('Theme imported');
             LoadThemes;
-            for i := 0 to LvThemes.Items.Count - 1 do
-              if CompareText(LvThemes.Items.Item[i].Caption, EditThemeName.Text) = 0 then
+            for i := 0 to FDITEThemes.Count - 1 do
+              if SameText(FDITEThemes[i].Name, EditThemeName.Text) then
               begin
-                LvThemes.Selected := LvThemes.Items.Item[i];
+                clThemes.ItemIndex := i;
                 Break;
               end;
           end
@@ -741,7 +777,6 @@ begin
     on E: Exception do
       MsgBox(Format('Error importing theme from registry - Message : %s : Trace %s', [E.Message, E.StackTrace]));
   end;
-
 end;
 
 procedure TFrmMain.ImportEclipseTheme1Click(Sender: TObject);
@@ -752,9 +787,9 @@ end;
 procedure TFrmMain.ImportTheme(ImportType: TIDEImportThemes);
 var
   ThemeName: string;
-  i: integer;
+  LIndex: integer;
   GoNext: boolean;
-  s: TStopwatch;
+  LStopWatch: TStopwatch;
 begin
   // ImportType := TIDEImportThemes(
   // CbIDEThemeImport.Items.Objects[CbIDEThemeImport.ItemIndex]);
@@ -772,34 +807,31 @@ begin
 
       if GoNext and (OpenDialogImport.Files.Count > 1) then
       begin
-
-        s := TStopwatch.Create;
-        s.Start;
-
+        LStopWatch := TStopwatch.Create;
+        LStopWatch.Start;
         ProgressBar1.Visible := True;
         try
           ProgressBar1.Position := 0;
           ProgressBar1.Max := OpenDialogImport.Files.Count;
           LabelMsg.Visible := True;
-          for i := 0 to OpenDialogImport.Files.Count - 1 do
+          for LIndex := 0 to OpenDialogImport.Files.Count - 1 do
           begin
-            LabelMsg.Caption := Format('Importing %s theme', [ExtractFileName(OpenDialogImport.Files[i])]);
+            LabelMsg.Caption := Format('Importing %s theme', [ExtractFileName(OpenDialogImport.Files[LIndex])]);
             case ImportType of
-              VisualStudioThemes : ImportVisualStudioTheme(IDEData, OpenDialogImport.Files[i], FSettings.ThemePath, ThemeName);
-              EclipseTheme       : ImportEclipseTheme(IDEData, OpenDialogImport.Files[i], FSettings.ThemePath, ThemeName);
+              VisualStudioThemes: ImportVisualStudioTheme(IDEData, OpenDialogImport.Files[LIndex], FSettings.ThemePath, ThemeName);
+              EclipseTheme: ImportEclipseTheme(IDEData, OpenDialogImport.Files[LIndex], FSettings.ThemePath, ThemeName);
             end;
-
-            ProgressBar1.Position := i;
+            ProgressBar1.Position := LIndex;
           end;
         finally
           ProgressBar1.Visible := False;
           LabelMsg.Visible := False;
         end;
 
-        s.Stop;
-        MsgBox(Format('%d Themes imported in %n seconds', [OpenDialogImport.Files.Count, s.Elapsed.TotalSeconds]));
+        LStopWatch.Stop;
+        MsgBox(Format('%d Themes imported in %n seconds', [OpenDialogImport.Files.Count, LStopWatch.Elapsed.TotalSeconds]));
         LoadThemes;
-        LvThemes.Selected := LvThemes.Items.Item[0];
+        clThemes.ItemIndex := 0;
       end
       else if GoNext and (OpenDialogImport.Files.Count = 1) then
       begin
@@ -816,9 +848,9 @@ begin
           EditThemeName.Text := ThemeName;
           MsgBox(Format('"%s" Theme imported', [ThemeName]));
           LoadThemes;
-          i := GetThemeIndex(EditThemeName.Text);
-          if i >= 0 then
-            LvThemes.Selected := LvThemes.Items.Item[i];
+          LIndex := GetThemeIndex(EditThemeName.Text);
+          if LIndex >= 0 then
+            clThemes.ItemIndex := LIndex;
         end;
       end;
     end;
@@ -840,14 +872,13 @@ end;
 
 procedure TFrmMain.CbIDEFontsChange(Sender: TObject);
 begin
-  SynEditCode.Font.Name := CbIDEFonts.Text;
-  SynEditCode.Font.Size := StrToInt(EditFontSize.Text);
-  {
-    SynEditCode.Gutter.Font.Name := CbIDEFonts.Text;
-    SynEditCode.Gutter.Font.Size := StrToInt(EditFontSize.Text);
-  }
-  BtnApplyFont.Enabled := True;
-  RefreshPasSynEdit;
+  if not FLoading and (FDITEThemes.Count > 0) then
+  begin
+    SynEditCode.Font.Name := CbIDEFonts.Text;
+    SynEditCode.Font.Size := StrToInt(EditFontSize.Text);
+    BtnApplyFont.Enabled := True;
+    RefreshPasSynEdit;
+  end;
 end;
 
 procedure TFrmMain.LoadNCControls;
@@ -865,7 +896,7 @@ begin
   LNCButton.BoundsRect := Rect(5, 5, 75, 25);
   LNCButton.Caption := 'Menu';
   LNCButton.DropDownMenu := PopupMenuThemes;
-  LNCButton.FontColor := StyleServices(nil).GetSystemColor(clHighlight);
+  LNCButton.FontColor := StyleServices(nil).GetSystemColor(clWindowText);
   LNCButton.HotFontColor := LNCButton.FontColor;
   // LNCButton.OnClick := ButtonNCClick;
 
@@ -1009,6 +1040,8 @@ begin
   ReadSettings(FSettings);
   LoadVCLStyle(FSettings.VCLStyle);
 
+  FDITEThemes := TObjectList<TDITETheme>.Create(True);
+
   //ImageList1
   LoadNCControls();
 
@@ -1030,6 +1063,14 @@ begin
     ComboBoxExIDEs.ItemsEx.AddItem(LIDEData.Name, ImageListDelphiVersion.Count - 1, ImageListDelphiVersion.Count - 1,
       ImageListDelphiVersion.Count - 1, 0, IDEsList[Index]);
   end;
+
+  if ComboBoxExIDEs.Items.Count = 0 then
+  begin
+    MsgBox('You don''t have a Object Pascal IDE installed');
+    Halt(0);
+  end;
+  ComboBox_SetDroppedWidth(ComboBoxExIDEs);
+  ComboBoxExIDEs.ItemIndex := 0;
 
   //ComboBoxExIDEs.ItemsEx.CustomSort(ListItemsCompare);
 
@@ -1071,36 +1112,20 @@ begin
   Self.Caption := Caption + Format(' %s', [DITE.Misc.GetFileVersion(ParamStr(0))]);
 
   LoadFixedWidthFonts;
-  LoadThemes;
 
-  if ComboBoxExIDEs.Items.Count > 0 then
-  begin
-    ComboBoxExIDEs.ItemIndex := 0;
-    ComboBoxExIDEsChange(ComboBoxExIDEs);
-  end
-  else
-  begin
-    MsgBox('You don''t have a Object Pascal IDE installed');
-    Halt(0);
-  end;
-
-  if LvThemes.Items.Count > 0 then
-    LvThemes.Selected := LvThemes.Items.Item[0];
-              {
-  FrmColorPanel := TColorPanel.Create(PanelColors);
-  FrmColorPanel.Parent := PanelColors;
-  FrmColorPanel.BorderStyle := bsNone;
-  FrmColorPanel.Align := alClient;
-  FrmColorPanel.OnChange := OnSelForegroundColorChange;
-  FrmColorPanel.Show;
-                 }
-  ComboBox_SetDroppedWidth(ComboBoxExIDEs);
+//  LoadThemes;
+//  ComboBoxExIDEs.ItemIndex := 0;
+//  ComboBoxExIDEsChange(ComboBoxExIDEs);
+//
+//  if FDITEThemes.Count > 0 then
+//    clThemes.ItemIndex := 0;
 end;
 
 procedure TFrmMain.FormDestroy(Sender: TObject);
 var
   Index: integer;
 begin
+  FreeAndNil(FDITEThemes);
   Icons.Free;
 
   FSettings.Free;
@@ -1117,7 +1142,7 @@ end;
 procedure TFrmMain.FormShow(Sender: TObject);
 begin
   BtnApplyFont.Enabled := False;
-  ComboBoxExIDEsChange(ComboBoxExIDEs);
+  //ComboBoxExIDEsChange(ComboBoxExIDEs);
 end;
 
 function TFrmMain.GetDelphiVersionData(Index: integer): TDelphiVersionData;
@@ -1132,10 +1157,7 @@ begin
   Result := -1;
   for i := 0 to CbElement.Items.Count - 1 do
     if TIDEHighlightElements(CbElement.Items.Objects[i]) = Element then
-    begin
-      Result := i;
-      Break;
-    end;
+      Exit(i);
 end;
 
 function TFrmMain.GetIDEData: TDelphiVersionData;
@@ -1146,15 +1168,12 @@ end;
 
 function TFrmMain.GetThemeIndex(const AThemeName: string): integer;
 var
-  i: integer;
+  i: Integer;
 begin
   Result := -1;
-  for i := 0 to LvThemes.Items.Count - 1 do
-    if CompareText(LvThemes.Items.Item[i].Caption, AThemeName) = 0 then
-    begin
-      Result := i;
-      Break;
-    end;
+  for i := 0 to FDITEThemes.Count - 1 do
+    if SameText(FDITEThemes[i].Name, AThemeName) then
+      Exit(i);
 end;
 
 procedure TFrmMain.ImageBugClick(Sender: TObject);
@@ -1174,55 +1193,54 @@ end;
 
 procedure TFrmMain.ImageConfClick(Sender: TObject);
 var
-  Frm: TFrmSettings;
+  LDialog: TFrmSettings;
 begin
-  Frm := TFrmSettings.Create(nil);
+  if FLoading then exit;
+  LDialog := TFrmSettings.Create(nil);
   try
-    Frm.Settings := FSettings;
-    Frm.LoadSettings;
-    Frm.ShowModal();
+    LDialog.Settings := FSettings;
+    LDialog.LoadSettings;
+    LDialog.ShowModal();
   finally
-    Frm.Free;
+    LDialog.Free;
   end;
 end;
 
 procedure TFrmMain.ImageHueClick(Sender: TObject);
 var
-  Frm: TFrmHueSat;
+  LDialog: TFrmHueSat;
   DelphiVersion: TDelphiVersions;
-  Index: integer;
+  LIndex: integer;
   FBackUpTheme: TIDETheme;
 begin
-  if (ComboBoxExIDEs.ItemIndex >= 0) and (LvThemes.Selected <> nil) then
+  if not FLoading and (ComboBoxExIDEs.ItemIndex >= 0) and (clThemes.ItemIndex <> -1) then
   begin
-
-    Frm := TFrmHueSat.Create(nil);
+    LDialog := TFrmHueSat.Create(nil);
     try
       FBackUpTheme := FCurrentTheme;
       DelphiVersion := IDEData.Version;
-      Frm.SynEditor := SynEditCode;
-      Frm.Theme := FCurrentTheme;
-      Frm.DelphiVersion := DelphiVersion;
-      Frm.ThemeName := LvThemes.Selected.Caption;
-      Frm.Settings := FSettings;
-      Frm.init;
-      Frm.ShowModal();
+      LDialog.SynEditor := SynEditCode;
+      LDialog.Theme := FCurrentTheme;
+      LDialog.DelphiVersion := DelphiVersion;
+      LDialog.ThemeName := FDITEThemes[clThemes.ItemIndex].Name;
+      LDialog.Settings := FSettings;
+      LDialog.init;
+      LDialog.ShowModal();
 
-      if Frm.Reloadthemes then
+      if LDialog.Reloadthemes then
       begin
         LoadThemes;
-        index := GetThemeIndex(EditThemeName.Text);
-        if index >= 0 then
-          LvThemes.Selected := LvThemes.Items.Item[index];
+        LIndex := GetThemeIndex(EditThemeName.Text);
+        if LIndex >= 0 then
+          clThemes.ItemIndex := LIndex;
       end
       else
       begin
         FCurrentTheme := FBackUpTheme;
         RefreshPasSynEdit;
       end;
-
     finally
-      Frm.Free;
+      LDialog.Free;
     end;
   end;
 end;
@@ -1235,7 +1253,7 @@ end;
 procedure TFrmMain.LinkLabel1LinkClick(Sender: TObject; const Link: string;
   LinkType: TSysLinkType);
 begin
- ShellExecute(0, 'Open', PChar(Link), '', nil, SW_SHOWNORMAL);
+  ShellExecute(0, 'Open', PChar(Link), '', nil, SW_SHOWNORMAL);
 end;
 
 procedure TFrmMain.LoadFixedWidthFonts;
@@ -1261,111 +1279,154 @@ end;
 
 procedure TFrmMain.SetCompactMode(Value : Boolean);
 begin
- FCompactMode := Value;
+  if FLoading then exit;
 
- if FCompactMode then
- begin
-//   Self.Constraints.MinWidth := Self.Constraints.MinWidth - PanelColors.Width;
-//   Self.Width := Self.Constraints.MinWidth
 
-   if (FrmColorPanel <> nil) then
-   begin
-      FrmColorPanel.Free();
-      FrmColorPanel := nil;
-      //FrmColorPanel.Visible := false;
-      //Application.ProcessMessages();
-   end;
+  FCompactMode := Value;
 
-   Self.Width := Self.Width - PanelColors.Width;
-   SynEditCode.Top := 63;
-   Self.Height:= 490;
+  if FCompactMode then
+  begin
 
-   //AnimateWindow(PanelColors.Handle, 200, AW_HIDE or AW_SLIDE OR AW_VER_POSITIVE);
-   PanelColors.Visible := False;
-   GroupBoxTextAttr.Visible := false;
-   GroupBoxUseDefaults.Visible := false;
-   LabelElement.Visible := false;
-   CbElement.Visible := false;
-   BtnAdditionalSettings.Visible:=false;
-   RadioButtonFore.Visible := false;
-   CblForeground.Visible := false;
-   RadioButtonBack.Visible := false;
-   CblBackground.Visible := false;
-   BtnSelForColor.Visible := false;
-   BtnSelBackColor.Visible := false;
+    if (FrmColorPanel <> nil) then
+    begin
+       FrmColorPanel.Free();
+       FrmColorPanel := nil;
+       //FrmColorPanel.Visible := false;
+       //Application.ProcessMessages();
+    end;
 
-   PanelThemeName.Visible:=false;
-   LvThemes.Height := 380;
-   BtnApplySmall.Visible := True;
-   BtnApplySmall.Top := LvThemes.Top + LvThemes.Height + 5;
- end
- else
- begin
- //  Self.Constraints.MinWidth := Self.Constraints.MinWidth + PanelColors.Width;
-//   Self.Width := Self.Constraints.MinWidth;
-   BtnApplySmall.Visible := False;
-   Self.Width := Self.Width + PanelColors.Width;
-   Self.Height:= 620;
-   SynEditCode.Top := 192;
-   LvThemes.Height := 400;
-   Application.ProcessMessages();
-   PanelColors.Visible := True;
-   GroupBoxTextAttr.Visible := True;
-   GroupBoxUseDefaults.Visible := True;
-   LabelElement.Visible := True;
-   CbElement.Visible := True;
-   BtnAdditionalSettings.Visible := True;
-   BtnSave.Visible := True;
+    Self.Width := Self.Width - PanelColors.Width;
+    SynEditCode.Top := 63;
+    Self.Height:= 490;
 
-   RadioButtonFore.Visible := True;
-   CblForeground.Visible := True;
-   RadioButtonBack.Visible := True;
-   CblBackground.Visible := True;
+    //AnimateWindow(PanelColors.Handle, 200, AW_HIDE or AW_SLIDE OR AW_VER_POSITIVE);
+    PanelColors.Visible := False;
+    GroupBoxTextAttr.Visible := false;
+    GroupBoxUseDefaults.Visible := false;
+    LabelElement.Visible := false;
+    CbElement.Visible := false;
+    BtnAdditionalSettings.Visible:=false;
+    RadioButtonFore.Visible := false;
+    CblForeground.Visible := false;
+    RadioButtonBack.Visible := false;
+    CblBackground.Visible := false;
+    BtnSelForColor.Visible := false;
+    BtnSelBackColor.Visible := false;
 
-   BtnSelForColor.Visible := True;
-   BtnSelBackColor.Visible := True;
-   PanelThemeName.Visible := True;
+    PanelThemeName.Visible:=false;
+    clThemes.Height := 380;
+    BtnApplySmall.Visible := True;
+    BtnApplySmall.Top := clThemes.Top + clThemes.Height + 5;
+  end
+  else
+  begin
+    BtnApplySmall.Visible := False;
+    Self.Width := Self.Width + PanelColors.Width;
+    Self.Height := 620;
+    SynEditCode.Top := 192;
+    clThemes.Height := 400;
+    Application.ProcessMessages();
+    PanelColors.Visible := True;
+    GroupBoxTextAttr.Visible := True;
+    GroupBoxUseDefaults.Visible := True;
+    LabelElement.Visible := True;
+    CbElement.Visible := True;
+    BtnAdditionalSettings.Visible := True;
+    BtnSave.Visible := True;
 
-   Application.ProcessMessages();
-   if (FrmColorPanel = nil) then
-   begin
+    RadioButtonFore.Visible := True;
+    CblForeground.Visible := True;
+    RadioButtonBack.Visible := True;
+    CblBackground.Visible := True;
+
+    BtnSelForColor.Visible := True;
+    BtnSelBackColor.Visible := True;
+    PanelThemeName.Visible := True;
+
+    Application.ProcessMessages();
+    if (FrmColorPanel = nil) then
+    begin
       FrmColorPanel := TColorPanel.Create(PanelColors);
       FrmColorPanel.Parent := PanelColors;
       FrmColorPanel.BorderStyle := bsNone;
       FrmColorPanel.Align := alClient;
       FrmColorPanel.OnChange := OnSelForegroundColorChange;
       FrmColorPanel.Show;
-   end;
- end;
-
+    end;
+  end;
 end;
 
 procedure TFrmMain.LoadThemes;
 var
-  Item: TListItem;
-  FileName: string;
+  LTheme: TDITETheme;
+  i: Integer;
+  LFiles: TArray<string>;
+  IsLightTheme: Boolean;
+
+  procedure UpdateControls(AEnabled: boolean);
+  begin
+    chbDark.Enabled := AEnabled;
+    chbLight.Enabled := AEnabled;
+    BtnApply.Enabled := AEnabled;
+    ComboBoxExIDEs.Enabled := AEnabled;
+    CbIDEFonts.Enabled := AEnabled;
+    EditFontSize.Enabled := AEnabled;
+    lbIDEs.Enabled := AEnabled;
+    lbFont.Enabled := AEnabled;
+  end;
+
 begin
-  if not TDirectory.Exists(FSettings.ThemePath) then
+  if FLoading or not TDirectory.Exists(FSettings.ThemePath) then
     Exit;
 
-  LvThemes.SmallImages := nil;
-  ImageListThemes.Clear;
-  LvThemes.Items.BeginUpdate;
+  FLoading := True;
   try
-    LvThemes.Items.Clear;
-    for FileName in TDirectory.GetFiles(FSettings.ThemePath, '*.theme.xml') do
-    begin
-      Item := LvThemes.Items.Add;
-      Item.Caption := Copy(ExtractFileName(FileName), 1, Pos('.theme', ExtractFileName(FileName)) - 1);
-      Item.SubItems.Add(FileName);
-    end;
-    FThemeChangued := False;
-  finally
-    LvThemes.Items.EndUpdate;
-  end;
-  LvThemes.SmallImages := ImageListThemes;
+    FDITEThemes.Clear;
+    clThemes.ItemCount := 0;
 
-  TLoadThemesImages.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
+    LFiles := TDirectory.GetFiles(FSettings.ThemePath, '*.theme.xml');
+    UpdateControls(False);
+    ProgressBar1.Visible := True;
+    try
+      ProgressBar1.Position := 0;
+      ProgressBar1.Max := Length(LFiles);
+      //LabelMsg.Visible := True;
+      for i := 0 to Length(LFiles) - 1 do
+      begin
+        //LabelMsg.Caption := Format('Exporting %s theme', [ExtractFileName(OpenDialogExport.Files[i])]);
+        //DelphiIDEThemeToLazarusTheme(OpenDialogExport.Files[i], OutPutFolder);
+        LTheme := TDITETheme.Create(LFiles[i]);
+        IsLightTheme := ColorIsBright(StringToColor(LTheme.Theme[ReservedWord].BackgroundColorNew));
+
+        if (chbDark.Checked and not IsLightTheme) or (chbLight.Checked and IsLightTheme) then
+          FDITEThemes.Add(LTheme)
+        else
+          FreeAndNil(LTheme);
+
+        ProgressBar1.Position := i;
+
+        if i mod 10 = 0 then
+        begin
+          clThemes.ItemCount := FDITEThemes.Count;
+          if clThemes.ItemIndex = -1 then
+            clThemes.ItemIndex := 0;
+          Application.ProcessMessages;
+        end;
+      end;
+    finally
+      ProgressBar1.Visible := False;
+      UpdateControls(True);
+      //LabelMsg.Visible := False;
+    end;
+
+    //for FileName in LFiles  do
+
+    FThemeChangued := False;
+    clThemes.ItemCount := FDITEThemes.Count;
+    //TLoadThemesImages.Create(FSettings.ThemePath, ImageListThemes, LvThemes);
+  finally
+    FLoading := False;
+  end;
 end;
 
 procedure TFrmMain.LoadValuesElements;
@@ -1443,43 +1504,11 @@ begin
     // BtnImportRegTheme.Visible:=not DelphiIsOldVersion(DelphiVersion) and (IDEData.IDEType=TSupportedIDEs.DelphiIDE);
     // BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
 
-    if (LvThemes.Selected <> nil) and (CbElement.Items.Count > 0) then
+    if (clThemes.ItemIndex <> -1) and (CbElement.Items.Count > 0) then
     begin
       CbElement.ItemIndex := 0;
       LoadValuesElements;
     end;
-  end;
-end;
-
-procedure TFrmMain.LvThemesChange(Sender: TObject; Item: TListItem; Change: TItemChange);
-Var
-  ImpTheme: TIDETheme;
-begin
-  try
-    if (LvThemes.Selected <> nil) and (ComboBoxExIDEs.ItemIndex >= 0) then
-    begin
-      EditThemeName.Text := LvThemes.Selected.Caption;
-      LoadThemeFromXMLFile(ImpTheme, LvThemes.Selected.SubItems[0]);
-
-      if IsValidDelphiIDETheme(ImpTheme) then
-      begin
-        FCurrentTheme := ImpTheme;
-        RefreshPasSynEdit;
-        if CbElement.Items.Count > 0 then
-        begin
-          CbElement.ItemIndex := 0;
-          LoadValuesElements;
-          // PaintGutterGlyphs;
-          // SynEditCode.InvalidateGutter;
-        end;
-      end
-      else
-        MsgBox(Format('The Theme %s has invalid values', [LvThemes.Selected.Caption]));
-
-    end;
-  except
-    on E: Exception do
-      MsgBox(Format('Error loading values of current theme - Message : %s : Trace %s', [E.Message, E.StackTrace]));
   end;
 end;
 
@@ -1518,6 +1547,74 @@ begin
   end;
 end;
 
+procedure TFrmMain.chbLightClick(Sender: TObject);
+begin
+  LoadThemes;
+end;
+
+procedure TFrmMain.clThemesBeforeDrawItem(AIndex: Integer; ACanvas: TCanvas;
+  ARect: TRect; AState: TOwnerDrawState);
+const
+  cThemeTypeStr: Array[Boolean] of string = ('Dark', 'Light');
+begin
+  if (AIndex < 0) or (AIndex > FDITEThemes.Count - 1) then exit;
+
+  lbTheme.Caption := FDITEThemes[AIndex].Name;
+  lbThemetype.Caption := Format('%s Theme',
+    [cThemeTypeStr[ColorIsBright(StringToColor(FDITEThemes[AIndex].Theme[ReservedWord].BackgroundColorNew))]]);
+
+
+  if not (odSelected in AState) then
+    lbThemetype.Font.Color := ColorBlendRGB(StyleServices.GetSystemColor(clWindow),
+    StyleServices.GetSystemColor(clWindowText), 0.6)
+  else
+    lbThemetype.Font.Color := ColorBlendRGB(StyleServices.GetSystemColor(clHighlight),
+    StyleServices.GetSystemColor(clHighlightText), 0.8);
+
+
+  //lbAuthor.Caption := FDITEThemes[AIndex].Author;
+  //lbmodified.Caption := DateToStr(FDITEThemes[AIndex].Modified);
+
+  if FDITEThemes[AIndex].Bitmap = nil then
+  begin
+    var LBitmap := TBitmap.Create;
+    CreateThemeBmp(32, 32,
+      StringToColor(FDITEThemes[AIndex].Theme[ReservedWord].BackgroundColorNew),
+      StringToColor(FDITEThemes[AIndex].Theme[ReservedWord].ForegroundColorNew),
+      StringToColor(FDITEThemes[AIndex].Theme[Identifier].ForegroundColorNew), LBitmap);
+    FDITEThemes[AIndex].Bitmap := LBitmap;
+  end;
+
+  ACanvas.Draw(ARect.Left + 8, ARect.Top + 8, FDITEThemes[AIndex].Bitmap);
+end;
+
+procedure TFrmMain.clThemesItemClick(Sender: TObject);
+begin
+  try
+    if (clThemes.ItemIndex <> -1) and (ComboBoxExIDEs.ItemIndex >= 0) then
+    begin
+      EditThemeName.Text := FDITEThemes[clThemes.ItemIndex].Name;
+      if IsValidDelphiIDETheme(FDITEThemes[clThemes.ItemIndex].Theme) then
+      begin
+        FCurrentTheme := FDITEThemes[clThemes.ItemIndex].Theme;
+        RefreshPasSynEdit;
+        if CbElement.Items.Count > 0 then
+        begin
+          CbElement.ItemIndex := 0;
+          LoadValuesElements;
+          // PaintGutterGlyphs;
+          // SynEditCode.InvalidateGutter;
+        end;
+      end
+      else
+        MsgBox(Format('The Theme %s has invalid values', [FDITEThemes[clThemes.ItemIndex].Name]));
+    end;
+  except
+    on E: Exception do
+      MsgBox(Format('Error loading values of current theme - Message : %s : Trace %s', [E.Message, E.StackTrace]));
+  end;
+end;
+
 procedure TFrmMain.CMStyleChanged(var Message: TMessage);
 begin
   CbElement.Style := csDropDownList;
@@ -1525,35 +1622,6 @@ begin
 
   CbIDEFonts.Style := csDropDownList;
   CbIDEFonts.OnDrawItem := nil;
-
-  // CbIDEThemeImport.Style:=csDropDownList;
-  // CbIDEThemeImport.OnDrawItem:=nil;
-
-  LvThemes.OwnerDraw := False;
-  LvThemes.OnDrawItem := nil;
-  LvThemes.OnMouseDown := nil;
-
-  // if not TStyleManager.ActiveStyle.IsSystemStyle then
-  // begin
-  // CbElement.Style:=csOwnerDrawFixed;
-  // CbElement.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
-  //
-  // CbIDEFonts.Style:=csOwnerDrawFixed;
-  // CbIDEFonts.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
-
-  // CbIDEThemeImport.Style:=csOwnerDrawFixed;
-  // CbIDEThemeImport.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
-
-  // LvThemes.OwnerDraw  :=True;
-  // LvThemes.OnDrawItem :=VclStylesOwnerDrawFixViewDrawItem;
-  // LvThemes.OnMouseDown:=VclStylesOwnerDrawFixViewMouseDown;
-  // end;
-
-  {
-    ApplyVclStylesOwnerDrawFix(Self, false);
-    if not TStyleManager.ActiveStyle.IsSystemStyle then
-    ApplyVclStylesOwnerDrawFix(Self, true);
-  }
 end;
 
 procedure TFrmMain.ComboBoxExIDEsChange(Sender: TObject);
@@ -1562,7 +1630,7 @@ var
   CurrentThemeName: string;
   i: integer;
 begin
-  if ComboBoxExIDEs.ItemIndex >= 0 then
+  if not FLoading and (ComboBoxExIDEs.ItemIndex >= 0) then
   begin
     CurrentThemeName := '';
     if IDEData.IDEType = TSupportedIDEs.DelphiIDE then
@@ -1615,15 +1683,14 @@ begin
     // BtnExportToLazarusTheme.Visible:=(IDEData.IDEType=TSupportedIDEs.LazarusIDE);
 
     if CurrentThemeName <> '' then
-      for i := 0 to LvThemes.Items.Count - 1 do
-        if SameText(CurrentThemeName, LvThemes.Items[i].Caption) then
+      for i := 0 to FDITEThemes.Count - 1 do
+        if SameText(CurrentThemeName, FDITEThemes[i].Name) then
         begin
-          LvThemes.Selected := LvThemes.Items[i];
-          LvThemes.Selected.MakeVisible(False);
+          clThemes.ItemIndex := i;
           Break;
         end;
 
-    if (LvThemes.Selected <> nil) and (CbElement.Items.Count > 0) then
+    if (clThemes.ItemIndex <> -1) and (CbElement.Items.Count > 0) then
     begin
       CbElement.ItemIndex := 0;
       LoadValuesElements;
@@ -1638,17 +1705,14 @@ end;
 
 procedure TFrmMain.CreateThemeFile;
 var
-  // DelphiVersion: TDelphiVersions;
   FileName: string;
 begin
   if (ComboBoxExIDEs.ItemIndex >= 0) then
   begin
-    // DelphiVersion := TDelphiVersions(integer(LvIDEVersions.Selected.Data));
     if EditThemeName.Text = '' then
       MsgBox('You must enter a name for the current theme')
     else
     begin
-      // FileName := SaveDelphiIDEThemeToXmlFile(DelphiVersion, FCurrentTheme, FSettings.ThemePath, EditThemeName.Text);
       FileName := SaveDelphiIDEThemeToXmlFile(FCurrentTheme, FSettings.ThemePath, EditThemeName.Text);
       MsgBox(Format('The theme was saved to the file %s', [FileName]));
     end;
@@ -1680,7 +1744,7 @@ procedure TFrmMain.RefreshPasSynEdit;
 var
   Element: TIDEHighlightElements;
 begin
-  if (ComboBoxExIDEs.ItemIndex >= 0) and (LvThemes.Selected <> nil) then
+  if (ComboBoxExIDEs.ItemIndex >= 0) and (clThemes.ItemIndex <> -1) then
   begin
     Element := TIDEHighlightElements.RightMargin;
     SynEditCode.RightEdgeColor := GetDelphiVersionMappedColor(StringToColor(FCurrentTheme[Element].ForegroundColorNew), IDEData);
@@ -1783,15 +1847,15 @@ begin
   SynEditCode.GetPositionOfMouse(ptCaret);
   Done := False;
   case ptCaret.Line of
-    InvalidBreakLine:
+    cInvalidBreakLine:
       Done := SetCbElement(TIDEHighlightElements.InvalidBreak);
-    ExecutionPointLine:
+    cExecutionPointLine:
       Done := SetCbElement(TIDEHighlightElements.ExecutionPoint);
-    EnabledBreakLine:
+    cEnabledBreakLine:
       Done := SetCbElement(TIDEHighlightElements.EnabledBreak);
-    DisabledBreakLine:
+    cDisabledBreakLine:
       Done := SetCbElement(TIDEHighlightElements.DisabledBreak);
-    ErrorLineLine:
+    cErrorLineLine:
       Done := SetCbElement(TIDEHighlightElements.ErrorLine);
   end;
 
@@ -1834,17 +1898,17 @@ procedure TFrmMain.SynEditCodeSpecialLineColors(Sender: TObject; Line: integer; 
   end;
 
 begin
-  if LvThemes.Selected <> nil then
+  if clThemes.ItemIndex <> -1 then
     case Line of
-      InvalidBreakLine:
+      cInvalidBreakLine:
         SetColorSpecialLine(InvalidBreak);
-      ExecutionPointLine:
+      cExecutionPointLine:
         SetColorSpecialLine(ExecutionPoint);
-      EnabledBreakLine:
+      cEnabledBreakLine:
         SetColorSpecialLine(EnabledBreak);
-      DisabledBreakLine:
+      cDisabledBreakLine:
         SetColorSpecialLine(DisabledBreak);
-      ErrorLineLine:
+      cErrorLineLine:
         SetColorSpecialLine(ErrorLine);
     end;
 end;
@@ -1860,6 +1924,23 @@ begin
     FBN.Free;
 
   Inherited;
+end;
+
+
+{ TDITETheme }
+
+constructor TDITETheme.Create(const AFileName: string);
+begin
+  inherited Create;
+  FFileName := AFileName;
+  FName := Copy(ExtractFileName(AFileName), 1, Pos('.theme', ExtractFileName(AFileName)) - 1);
+  LoadThemeFromXMLFile(FTheme, AFileName, FAuthor, FModified);
+end;
+
+destructor TDITETheme.Destroy;
+begin
+  FreeAndNil(FBitmap);
+  inherited;
 end;
 
 end.

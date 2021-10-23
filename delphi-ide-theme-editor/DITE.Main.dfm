@@ -11,8 +11,8 @@ object FrmMain: TFrmMain
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -13
-  Font.Name = 'Calibri'
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
   Font.Style = []
   GlassFrame.Top = 10
   GlassFrame.Bottom = 55
@@ -26,10 +26,10 @@ object FrmMain: TFrmMain
     592)
   PixelsPerInch = 96
   TextHeight = 15
-  object Label1: TLabel
+  object lbIDEs: TLabel
     Left = 244
     Top = 16
-    Width = 76
+    Width = 69
     Height = 15
     Caption = 'Installed IDEs'
   end
@@ -40,10 +40,10 @@ object FrmMain: TFrmMain
     Height = 15
     Caption = 'Element'
   end
-  object Label5: TLabel
+  object lbFont: TLabel
     Left = 483
     Top = 16
-    Width = 100
+    Width = 95
     Height = 15
     Caption = 'Global Editor Font'
   end
@@ -57,12 +57,11 @@ object FrmMain: TFrmMain
   object LabelMsg: TLabel
     Left = 8
     Top = 529
-    Width = 52
+    Width = 51
     Height = 15
     Anchors = [akLeft, akBottom]
     Caption = 'LabelMsg'
     Visible = False
-    ExplicitTop = 519
   end
   object CbElement: TComboBox
     Left = 244
@@ -70,7 +69,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 23
     Style = csDropDownList
-    TabOrder = 6
+    TabOrder = 8
     OnChange = CbElementChange
   end
   object GroupBoxTextAttr: TGroupBox
@@ -79,7 +78,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 46
     Caption = 'Text Attributes'
-    TabOrder = 7
+    TabOrder = 9
     object CheckBold: TCheckBox
       Left = 16
       Top = 19
@@ -114,7 +113,7 @@ object FrmMain: TFrmMain
     Width = 233
     Height = 46
     Caption = 'Use defaults for'
-    TabOrder = 8
+    TabOrder = 10
     object CheckForeground: TCheckBox
       Left = 16
       Top = 19
@@ -141,7 +140,7 @@ object FrmMain: TFrmMain
     Height = 22
     NoneColorColor = 16729138
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
-    TabOrder = 9
+    TabOrder = 11
     OnChange = CblForegroundChange
   end
   object CblBackground: TColorBox
@@ -151,7 +150,7 @@ object FrmMain: TFrmMain
     Height = 22
     Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbIncludeNone, cbCustomColor, cbPrettyNames, cbCustomColors]
     Enabled = False
-    TabOrder = 11
+    TabOrder = 13
     OnChange = CblForegroundChange
   end
   object CbIDEFonts: TComboBox
@@ -161,7 +160,7 @@ object FrmMain: TFrmMain
     Height = 23
     Style = csDropDownList
     Sorted = True
-    TabOrder = 3
+    TabOrder = 5
     OnChange = CbIDEFontsChange
   end
   object EditFontSize: TEdit
@@ -170,7 +169,7 @@ object FrmMain: TFrmMain
     Width = 23
     Height = 23
     ReadOnly = True
-    TabOrder = 4
+    TabOrder = 6
     Text = '5'
     OnChange = CbIDEFontsChange
   end
@@ -183,7 +182,7 @@ object FrmMain: TFrmMain
     Min = 1
     Max = 30
     Position = 5
-    TabOrder = 5
+    TabOrder = 7
   end
   object BtnApplyFont: TButton
     Left = 641
@@ -192,51 +191,30 @@ object FrmMain: TFrmMain
     Height = 25
     Caption = 'Apply Font'
     Enabled = False
-    TabOrder = 0
+    TabOrder = 3
     OnClick = BtnApplyFontClick
   end
-  object LvThemes: TListView
-    Left = 8
-    Top = 35
-    Width = 230
-    Height = 400
-    Anchors = [akLeft, akTop, akBottom]
-    Columns = <
-      item
-        Caption = 'Theme'
-        Width = 200
-      end
-      item
-        Caption = 'Path'
-        Width = 0
-      end>
-    DoubleBuffered = True
-    HideSelection = False
-    ReadOnly = True
-    RowSelect = True
-    ParentDoubleBuffered = False
-    PopupMenu = PopupMenuThemes
-    ShowColumnHeaders = False
-    SmallImages = ImageListThemes
-    TabOrder = 1
-    ViewStyle = vsReport
-    OnChange = LvThemesChange
-  end
   object ProgressBar1: TProgressBar
+    AlignWithMargins = True
     Left = 8
-    Top = 545
-    Width = 225
-    Height = 17
-    Anchors = [akLeft, akBottom]
-    TabOrder = 14
+    Top = 584
+    Width = 958
+    Height = 8
+    Margins.Left = 8
+    Margins.Top = 0
+    Margins.Right = 8
+    Margins.Bottom = 0
+    Align = alBottom
+    TabOrder = 16
     Visible = False
+    ExplicitTop = 586
+    ExplicitWidth = 225
   end
   object SynEditCode: TSynEdit
     Left = 245
     Top = 192
     Width = 471
     Height = 381
-    Color = clSilver
     ActiveLineColor = clYellow
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -244,7 +222,7 @@ object FrmMain: TFrmMain
     Font.Name = 'Consolas'
     Font.Pitch = fpFixed
     Font.Style = []
-    TabOrder = 13
+    TabOrder = 15
     OnClick = SynEditCodeClick
     CodeFolding.GutterShapeSize = 11
     CodeFolding.CollapsedLineColor = clGrayText
@@ -254,12 +232,13 @@ object FrmMain: TFrmMain
     CodeFolding.ShowCollapsedLine = False
     CodeFolding.ShowHintMark = True
     UseCodeFolding = False
-    Gutter.BorderColor = clYellow
+    Gutter.Color = clWindow
+    Gutter.BorderColor = clGrayText
     Gutter.DigitCount = 3
     Gutter.Font.Charset = DEFAULT_CHARSET
-    Gutter.Font.Color = clRed
-    Gutter.Font.Height = -11
-    Gutter.Font.Name = 'Courier New'
+    Gutter.Font.Color = clWindowText
+    Gutter.Font.Height = -12
+    Gutter.Font.Name = 'Consolas'
     Gutter.Font.Style = []
     Gutter.ShowLineNumbers = True
     Highlighter = SynPasSyn1
@@ -300,7 +279,7 @@ object FrmMain: TFrmMain
     Height = 22
     ImageIndex = 4
     Images = ImageList1
-    TabOrder = 10
+    TabOrder = 12
     OnClick = BtnSelForColorClick
   end
   object BtnSelBackColor: TButton
@@ -311,7 +290,7 @@ object FrmMain: TFrmMain
     Enabled = False
     ImageIndex = 4
     Images = ImageList1
-    TabOrder = 12
+    TabOrder = 14
     OnClick = BtnSelBackColorClick
   end
   object ComboBoxExIDEs: TComboBoxEx
@@ -321,7 +300,8 @@ object FrmMain: TFrmMain
     Height = 24
     ItemsEx = <>
     Style = csExDropDownList
-    TabOrder = 2
+    ItemHeight = 18
+    TabOrder = 4
     OnChange = ComboBoxExIDEsChange
     Images = ImageListDelphiVersion
   end
@@ -329,12 +309,13 @@ object FrmMain: TFrmMain
     Left = 738
     Top = 0
     Width = 236
-    Height = 592
+    Height = 584
     Align = alRight
     BevelOuter = bvNone
     Color = clLime
     ParentBackground = False
-    TabOrder = 15
+    TabOrder = 17
+    ExplicitHeight = 592
   end
   object RadioButtonFore: TRadioButton
     Left = 244
@@ -343,7 +324,7 @@ object FrmMain: TFrmMain
     Height = 17
     Caption = 'Foreground'
     Checked = True
-    TabOrder = 16
+    TabOrder = 18
     TabStop = True
     OnClick = RadioButtonForeClick
   end
@@ -353,7 +334,7 @@ object FrmMain: TFrmMain
     Width = 79
     Height = 17
     Caption = 'Background'
-    TabOrder = 17
+    TabOrder = 19
     OnClick = RadioButtonForeClick
   end
   object BtnAdditionalSettings: TButton
@@ -362,7 +343,7 @@ object FrmMain: TFrmMain
     Width = 107
     Height = 25
     Caption = 'Additional Settings'
-    TabOrder = 18
+    TabOrder = 20
     OnClick = BtnAdditionalSettingsClick
   end
   object Panel1: TPanel
@@ -372,7 +353,7 @@ object FrmMain: TFrmMain
     Height = 28
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
-    TabOrder = 19
+    TabOrder = 21
     object Image1: TImage
       Left = 3
       Top = 2
@@ -383,7 +364,7 @@ object FrmMain: TFrmMain
     object LinkLabel1: TLinkLabel
       Left = 31
       Top = 5
-      Width = 101
+      Width = 103
       Height = 19
       Caption = 
         ' <a href="https://github.com/RRUZ/delphi-ide-theme-editor">githu' +
@@ -398,11 +379,11 @@ object FrmMain: TFrmMain
     Width = 232
     Height = 82
     BevelOuter = bvNone
-    TabOrder = 20
+    TabOrder = 22
     object LabelThemeName: TLabel
       Left = 0
       Top = 3
-      Width = 69
+      Width = 71
       Height = 15
       Caption = 'Theme Name'
     end
@@ -433,19 +414,88 @@ object FrmMain: TFrmMain
     end
   end
   object BtnApplySmall: TButton
-    Left = 152
+    Left = 153
     Top = 441
     Width = 86
     Height = 25
     Caption = 'Apply Theme'
-    TabOrder = 21
+    TabOrder = 23
     Visible = False
     OnClick = ActionApplyThemeExecute
   end
+  object clThemes: TControlList
+    Left = 8
+    Top = 35
+    Width = 230
+    Height = 400
+    ItemHeight = 48
+    ItemMargins.Left = 0
+    ItemMargins.Top = 0
+    ItemMargins.Right = 0
+    ItemMargins.Bottom = 0
+    ParentColor = False
+    PopupMenu = PopupMenuThemes
+    TabOrder = 2
+    OnBeforeDrawItem = clThemesBeforeDrawItem
+    OnItemClick = clThemesItemClick
+    object lbTheme: TLabel
+      Left = 45
+      Top = 8
+      Width = 164
+      Height = 16
+      AutoSize = False
+      Caption = 'Foo Theme'
+      EllipsisPosition = epEndEllipsis
+    end
+    object lbThemetype: TLabel
+      Left = 46
+      Top = 25
+      Width = 66
+      Height = 15
+      Caption = 'Light Theme'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clGrayText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      StyleName = 'Windows'
+    end
+    object Image3: TImage
+      Left = 8
+      Top = 8
+      Width = 32
+      Height = 32
+    end
+  end
+  object chbDark: TCheckBox
+    Left = 130
+    Top = 16
+    Width = 46
+    Height = 17
+    Caption = 'Dark'
+    Checked = True
+    State = cbChecked
+    TabOrder = 0
+    OnClick = chbLightClick
+  end
+  object chbLight: TCheckBox
+    Left = 189
+    Top = 16
+    Width = 49
+    Height = 17
+    Caption = 'Light'
+    Checked = True
+    Color = clBtnFace
+    ParentColor = False
+    State = cbChecked
+    TabOrder = 1
+    OnClick = chbLightClick
+  end
   object ImageListDelphiVersion: TImageList
     ColorDepth = cd32Bit
-    Left = 107
-    Top = 91
+    Left = 123
+    Top = 107
   end
   object SynPasSyn1: TSynPasSyn
     Options.AutoDetectEnabled = False
@@ -985,11 +1035,6 @@ object FrmMain: TFrmMain
     Left = 168
     Top = 224
   end
-  object ImageListThemes: TImageList
-    ColorDepth = cd32Bit
-    Left = 56
-    Top = 96
-  end
   object PopupMenu1: TPopupMenu
     Left = 532
     Top = 232
@@ -1001,23 +1046,28 @@ object FrmMain: TFrmMain
     object ActionApplyTheme: TAction
       Caption = 'Apply Theme'
       OnExecute = ActionApplyThemeExecute
+      OnUpdate = ActionApplyThemeUpdate
     end
     object ActionCloneTheme: TAction
       Caption = 'Clone Theme'
       OnExecute = ActionCloneThemeExecute
+      OnUpdate = ActionApplyThemeUpdate
     end
     object ActionDeleteTheme: TAction
       Caption = 'Delete Theme'
       ShortCut = 46
       OnExecute = ActionDeleteThemeExecute
+      OnUpdate = ActionApplyThemeUpdate
     end
     object ActionSaveChanges: TAction
       Caption = 'Save Changes'
       OnExecute = ActionSaveChangesExecute
+      OnUpdate = ActionApplyThemeUpdate
     end
     object ActionSaveAs: TAction
       Caption = 'Save As...'
       OnExecute = ActionSaveAsExecute
+      OnUpdate = ActionApplyThemeUpdate
     end
   end
   object PopupActionBar1: TPopupActionBar
@@ -1320,5 +1370,10 @@ object FrmMain: TFrmMain
       OnExecute = ActionSetDefaultThemeExecute
       OnUpdate = ActionSetDefaultThemeUpdate
     end
+  end
+  object ApplicationEvents1: TApplicationEvents
+    OnIdle = ApplicationEvents1Idle
+    Left = 480
+    Top = 296
   end
 end

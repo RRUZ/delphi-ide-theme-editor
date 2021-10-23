@@ -24,9 +24,8 @@ unit DITE.LoadThemesImages;
 interface
 
 uses
-  Vcl.Controls,
-  Vcl.ComCtrls,
-  Classes;
+  System.Classes, Vcl.Controls, Vcl.ComCtrls,
+  Vcl.Graphics;
 
 type
   TLoadThemesImages = class(TThread)
@@ -40,16 +39,62 @@ type
     constructor Create(const Path: string; ImageList: TImageList; ListView: TListView);
   end;
 
+procedure CreateThemeBmp(Width, Height: SmallInt; Background, Foreground1, Foreground2: TColor; var Bitmap: TBitmap);
+
 implementation
 
 uses
   ActiveX,
   SysUtils,
   IOUtils,
-  Graphics,
   DITE.Misc,
   System.Types,
   DITE.DelphiIDEHighlight;
+
+
+procedure CreateThemeBmp(Width, Height: SmallInt; Background, Foreground1, Foreground2: TColor; var Bitmap: TBitmap);
+const
+  cBaseSize = 16;
+var
+  LRect: TRect;
+  LFactor: Integer;
+begin
+  LFactor := Width div cBaseSize;
+  Bitmap.PixelFormat := pf24bit;
+  Bitmap.Width := Width;
+  Bitmap.Height := Height;
+  Bitmap.Canvas.Brush.Color := Background;
+  LRect := Rect(0, 0, Width, Height);
+  Bitmap.Canvas.FillRect(LRect);
+
+  // InflateRect(LRect, -1, -1);
+  Bitmap.Canvas.Brush.Style := bsClear;
+  Bitmap.Canvas.Pen.Color := clBlack;
+  Bitmap.Canvas.Rectangle(LRect);
+
+  Bitmap.Canvas.Pen.Color := Foreground1;
+  Bitmap.Canvas.Pen.Width := LFactor;
+
+  Bitmap.Canvas.MoveTo(2 * LFactor, 3 * LFactor);
+  Bitmap.Canvas.LineTo(6 * LFactor, 3 * LFactor);
+
+  Bitmap.Canvas.Pen.Color := Foreground2;
+  Bitmap.Canvas.MoveTo(8 * LFactor, 3 * LFactor);
+  Bitmap.Canvas.LineTo(Width - (2 * LFactor), 3 * LFactor);
+
+  Bitmap.Canvas.Pen.Color := Foreground1;
+  Bitmap.Canvas.MoveTo(2 * LFactor, 6 * LFactor);
+  Bitmap.Canvas.LineTo(5 * LFactor, 6 * LFactor);
+
+  Bitmap.Canvas.Pen.Color := Foreground2;
+  Bitmap.Canvas.MoveTo(2 * LFactor, 9 * LFactor);
+  Bitmap.Canvas.LineTo(Width - (2 * LFactor), 9 * LFactor);
+
+  Bitmap.Canvas.Pen.Color := Foreground2;
+  Bitmap.Canvas.MoveTo(2 * LFactor, 12 * LFactor);
+  Bitmap.Canvas.LineTo(Width - (2 * LFactor), 12 * LFactor);
+end;
+
 
 constructor TLoadThemesImages.Create(const Path: string; ImageList: TImageList; ListView: TListView);
 begin
@@ -69,44 +114,6 @@ var
   LBitmap: TBitmap;
   i: Integer;
   CreateThumbnail: Boolean;
-
-  procedure CreateThemeBmp(Width, Height: Word; Background, Foreground1, Foreground2: TColor; var Bitmap: TBitmap);
-  Var
-    LRect: TRect;
-  begin
-    Bitmap.PixelFormat := pf24bit;
-    Bitmap.Width := Width;
-    Bitmap.Height := Height;
-    Bitmap.Canvas.Brush.Color := Background;
-    LRect := Rect(0, 0, Width, Height);
-    Bitmap.Canvas.FillRect(LRect);
-
-    // InflateRect(LRect, -1, -1);
-    Bitmap.Canvas.Brush.Style := bsClear;
-    Bitmap.Canvas.Pen.Color := clBlack;
-    Bitmap.Canvas.Rectangle(LRect);
-
-    Bitmap.Canvas.Pen.Color := Foreground1;
-    Bitmap.Canvas.MoveTo(2, 3);
-    Bitmap.Canvas.LineTo(6, 3);
-
-    Bitmap.Canvas.Pen.Color := Foreground2;
-    Bitmap.Canvas.MoveTo(8, 3);
-    Bitmap.Canvas.LineTo(Width - 2, 3);
-
-    Bitmap.Canvas.Pen.Color := Foreground1;
-    Bitmap.Canvas.MoveTo(2, 6);
-    Bitmap.Canvas.LineTo(5, 6);
-
-    Bitmap.Canvas.Pen.Color := Foreground2;
-    Bitmap.Canvas.MoveTo(2, 9);
-    Bitmap.Canvas.LineTo(Width - 2, 9);
-
-    Bitmap.Canvas.Pen.Color := Foreground2;
-    Bitmap.Canvas.MoveTo(2, 12);
-    Bitmap.Canvas.LineTo(Width - 2, 12);
-  end;
-
 begin
   inherited;
   if not TDirectory.Exists(FPath) then

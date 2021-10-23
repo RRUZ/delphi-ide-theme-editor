@@ -63,7 +63,7 @@ implementation
 
 uses
   System.UITypes,
-  Vcl.Styles.Hooks,
+  //Vcl.Styles.Hooks,
   Vcl.GraphUtil,
   DITE.DelphiIDEHighlight,
   DITE.ColorSelector,
@@ -157,9 +157,9 @@ const
 
 function _ColorToRGB(Color: TColor): Longint;
 begin
-  if Color < 0 then
-    Result := Trampoline_user32_GetSysColor(Color and $000000FF)
-  else
+//  if Color < 0 then
+//    Result := Trampoline_user32_GetSysColor(Color and $000000FF)
+//  else
     Result := Color;
 end;
 

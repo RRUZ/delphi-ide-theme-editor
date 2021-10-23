@@ -167,7 +167,9 @@ type
   function SaveDelphiIDEThemeToRegFile(ADelphiVersionData : TDelphiVersionData; const ATheme: TIDETheme; Path, Name: string): TFileName;
   function SaveDelphiIDEThemeToXmlFile(const ATheme: TIDETheme; const Path, Name: string): TFileName;
 
-  function LoadThemeFromXMLFile(var ATheme: TIDETheme; const FileName: TFileName): Boolean;
+  function LoadThemeFromXMLFile(var ATheme: TIDETheme; const FileName: TFileName): Boolean; overload;
+  function LoadThemeFromXMLFile(var ATheme: TIDETheme; const FileName: TFileName; out AAuthor: string; out AModified: TDateTime): Boolean; overload;
+
   function SetDelphiIDEDefaultTheme(ADelphiVersionData: TDelphiVersionData): Boolean;
   function ApplyDelphiIDETheme(DelphiVersion: TDelphiVersionData; const ATheme: TIDETheme; const ThemeName: string): Boolean;
   function GetDelphiIDEDefaultTheme(ADelphiVersionData: TDelphiVersionData): TIDETheme;
@@ -225,6 +227,8 @@ begin
       Result := RegWriteStr(Format('%s\Theme', [DelphiVersion.RegKey]), 'DarkSpeedSetting', ThemeName, HKEY_CURRENT_USER);
       if Result then
         Result := RegWriteStr(Format('%s\Theme', [DelphiVersion.RegKey]), 'LightSpeedSetting', ThemeName, HKEY_CURRENT_USER);
+      if Result then
+        Result := RegWriteStr(Format('%s\Theme', [DelphiVersion.RegKey]), 'GraySpeedSetting', ThemeName, HKEY_CURRENT_USER);
     end;
   end;
 end;
@@ -326,10 +330,19 @@ end;
 
 function LoadThemeFromXMLFile(var ATheme: TIDETheme; const FileName: TFileName): Boolean;
 var
+  Author: string;
+  Modified: TDateTime;
+begin
+   Result := LoadThemeFromXMLFile(ATheme, FileName, Author, Modified);
+end;
+
+function LoadThemeFromXMLFile(var ATheme: TIDETheme; const FileName: TFileName; out AAuthor: string; out AModified: TDateTime): Boolean;
+var
   XmlDocIDETheme: OleVariant;
   xPathElement: string;
   Element: TIDEHighlightElements;
   ElementName: string;
+  LFormat: TFormatSettings;
 begin
   Result := False;
   XmlDocIDETheme := CreateOleObject(Msxml2_DOMDocument);
@@ -340,6 +353,19 @@ begin
     XmlDocIDETheme.SetProperty('SelectionLanguage', 'XPath');
     if (XmlDocIDETheme.parseError.errorCode <> 0) then
       raise Exception.CreateFmt('Error in Delphi theme Xml Data %s', [XmlDocIDETheme.parseError]);
+
+
+    AAuthor := XmlDocIDETheme.selectSingleNode('//DelphiIDETheme/@author').Text;
+
+    // sample 2013-04-24 20:49:28
+    LFormat := TFormatSettings.Create;
+    LFormat.DateSeparator := '-';
+    LFormat.ShortDateFormat := 'yyyy-MM-dd';
+    LFormat.TimeSeparator := ':';
+    LFormat.ShortTimeFormat := 'hh:mm';
+    LFormat.LongTimeFormat := 'hh:mm:ss';
+
+    AModified := StrToDateTime(XmlDocIDETheme.selectSingleNode('//DelphiIDETheme/@modified').Text, LFormat);
 
     for Element in [Low(TIDEHighlightElements) .. High(TIDEHighlightElements)] do
     begin
@@ -379,7 +405,6 @@ begin
   Doc.Options := [doNodeAutoIndent];
   RootNode := Doc.AddChild('DelphiIDETheme');
 
-  // <colorTheme id="1" name="Oblivion" modified="2011-02-11 14:35:49" author="Roger Dudler" website="http://www.rogerdudler.com/?p=362">
   RootNode.Attributes['modified'] := FormatDateTime('YYYY-MM-DD HH:NN:SS', Now);
   RootNode.Attributes['author'] := 'Delphi IDE Theme Editor';
   RootNode.Attributes['versionapp'] := GetFileVersion(ParamStr(0));

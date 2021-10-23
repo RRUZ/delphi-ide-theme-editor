@@ -1983,18 +1983,18 @@ begin
 
   { TBitmapImage }
   Page := CreateCustomPage(wpInstalling, 'Contributions',
-  'If you want show your appreciation for this project. Go to the github page, login with you github account and star the project.');
+  'Show your appreciation for this project, go to github, login and star the project.');
 
   BitmapImage := TBitmapImage.Create(Page);
   BitmapImage.AutoSize := True;
   BitmapImage.Left := 0;
-  BitmapImage.Top  := 0;
+  BitmapImage.Top := 0;
   BitmapImage.Bitmap.LoadFromFile(BitmapFileName);
   BitmapImage.Cursor := crHand;
   BitmapImage.OnClick := @BitmapImageOnClick;
   BitmapImage.Parent := Page.Surface;
-  BitmapImage.Align:=alCLient;
-  BitmapImage.Stretch:=True;
+  BitmapImage.Align := alClient;
+  BitmapImage.Stretch := True;
 end;
 
 procedure InitializeWizard();
@@ -2006,7 +2006,7 @@ function InitializeSetup(): Boolean;
 begin
    ExtractTemporaryFile('glossy.vsf');
    LoadVCLStyle(ExpandConstant('{tmp}\glossy.vsf'));
-   Result:=True;
+   Result := True;
 end;
 
 procedure DeinitializeSetup();
@@ -2016,7 +2016,7 @@ end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if (CurStep=ssInstall) then
+  if (CurStep = ssInstall) then
   begin
     if (IsUpgrade()) then
     begin
