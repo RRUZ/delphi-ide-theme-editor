@@ -19,7 +19,5 @@ DITE supports
 
 ![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/DITE_Animated.gif)
 
-**Note** : If you want add styling support to the RAD Studio IDE try the [Delphi IDE Colorizer](https://github.com/RRUZ/Delphi-IDE-Colorizer) project.
-
 ---
 Looking for the installer? Check the [Release Area](https://github.com/RRUZ/delphi-ide-theme-editor/releases/latest) 
