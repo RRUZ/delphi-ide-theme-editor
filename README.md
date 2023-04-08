@@ -4,7 +4,7 @@
 ![](https://github.com/RRUZ/delphi-ide-theme-editor/blob/master/delphi-ide-theme-editor/Site%20Images/DITE.png)
 
 
-The Delphi IDE Theme Editor (DITE) is a tool to customize the **syntax color highlighting** of <a href='https://www.embarcadero.com/products/delphi'>Delphi (RAD Studio)</a> and <a href='http://www.lazarus.freepascal.org/'>Lazarus</a>.
+The Delphi IDE Theme Editor (DITE) is a tool to customize the **syntax color highlighting** in <a href='https://www.embarcadero.com/products/delphi'>Delphi (RAD Studio)</a> and <a href='http://www.lazarus.freepascal.org/'>Lazarus</a>.
 
 
 DITE supports 
