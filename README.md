@@ -12,7 +12,7 @@ DITE supports
 * Delphi 7. 
 * RAD Studio 2005-2010 
 * RAD Studio XE-XE8 
-* RAD Studio 10 Seattle, RAD Studio 10.1 Berlin, RAD Studio 10.2 Tokyo, RAD Studio 10.3 Rio, RAD Studio 10.4 Sydney, RAD Studio 11 Alexandria
+* RAD Studio 10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens
 * Lazarus v1.0.6
 * Appmethod 1.13-1.16
 * Smart Mobile Studio IDE v1.1.2.17

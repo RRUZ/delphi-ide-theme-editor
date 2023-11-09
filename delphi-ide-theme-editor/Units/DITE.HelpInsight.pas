@@ -54,7 +54,8 @@ const
     '\ObjRepos\en', // 10.2 Tokyo
     '\ObjRepos\en', // 10.3 Rio
     '\ObjRepos\en', // 10.4 Sydney
-    '\ObjRepos\en'  // 11.0 Alexandria
+    '\ObjRepos\en', // 11.0 Alexandria
+    '\ObjRepos\en'  // 12.0 Athens
     );
 
 procedure ApplyThemeHelpInsight(const ATheme: TIDETheme; IDEData: TDelphiVersionData);

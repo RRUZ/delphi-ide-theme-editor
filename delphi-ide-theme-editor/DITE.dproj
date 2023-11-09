@@ -131,10 +131,10 @@
         <DCC_DebugInformation>true</DCC_DebugInformation>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-        <VerInfo_MinorVer>97</VerInfo_MinorVer>
+        <VerInfo_MinorVer>98</VerInfo_MinorVer>
         <VerInfo_Build>1</VerInfo_Build>
         <DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-        <VerInfo_Keys>CompanyName=The road to Delphi;FileDescription=Delphi IDE Theme Editor;FileVersion=1.97.1.1;InternalName=DITE;LegalCopyright=RRUZ;LegalTrademarks=;OriginalFilename=;ProductName=Delphi IDE Theme Editor;ProductVersion=1.0.0.0;Comments=That is not dead which can eternal lie.
+        <VerInfo_Keys>CompanyName=The road to Delphi;FileDescription=Delphi IDE Theme Editor;FileVersion=1.98.1.1;InternalName=DITE;LegalCopyright=RRUZ;LegalTrademarks=;OriginalFilename=;ProductName=Delphi IDE Theme Editor;ProductVersion=1.0.0.0;Comments=That is not dead which can eternal lie.
 And with strange aeons even death may die.;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
