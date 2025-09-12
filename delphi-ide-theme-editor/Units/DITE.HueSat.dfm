@@ -72,11 +72,11 @@ object FrmHueSat: TFrmHueSat
     Caption = 'Hue'
   end
   object BtnApply: TButton
-    Left = 67
+    Left = 167
     Top = 209
-    Width = 225
+    Width = 174
     Height = 25
-    Caption = 'Apply changes to the current theme'
+    Caption = 'Apply Theme Changes'
     TabOrder = 12
     OnClick = BtnApplyClick
   end
@@ -136,7 +136,7 @@ object FrmHueSat: TFrmHueSat
     DoubleBuffered = True
     Max = 100
     ParentDoubleBuffered = False
-    TabOrder = 6
+    TabOrder = 4
     TickStyle = tsManual
     OnChange = TrackBarSaturationChange
   end
@@ -150,15 +150,15 @@ object FrmHueSat: TFrmHueSat
     ImageIndex = 0
     Images = ImageList1
     ParentBiDiMode = False
-    TabOrder = 1
+    TabOrder = 3
     OnClick = ButtonHueClick
   end
   object BtnSaveAs: TButton
-    Left = 67
+    Left = 167
     Top = 240
-    Width = 225
+    Width = 174
     Height = 25
-    Caption = 'Save changes to a New theme'
+    Caption = 'Save as New Theme'
     TabOrder = 13
     OnClick = BtnSaveAsClick
   end
@@ -170,7 +170,7 @@ object FrmHueSat: TFrmHueSat
     Associate = EditHue
     Min = -180
     Max = 180
-    TabOrder = 3
+    TabOrder = 2
     OnChanging = UpDownHueChanging
   end
   object EditHue: TEdit
@@ -179,7 +179,7 @@ object FrmHueSat: TFrmHueSat
     Width = 32
     Height = 23
     NumbersOnly = True
-    TabOrder = 2
+    TabOrder = 1
     Text = '0'
     OnExit = EditHueExit
   end
@@ -189,7 +189,7 @@ object FrmHueSat: TFrmHueSat
     Width = 16
     Height = 23
     Associate = EditSat
-    TabOrder = 5
+    TabOrder = 6
     OnChanging = UpDownSatChanging
   end
   object EditSat: TEdit
@@ -198,7 +198,7 @@ object FrmHueSat: TFrmHueSat
     Width = 32
     Height = 23
     NumbersOnly = True
-    TabOrder = 4
+    TabOrder = 5
     Text = '0'
     OnExit = EditSatExit
   end

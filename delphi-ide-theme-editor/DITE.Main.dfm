@@ -29,9 +29,9 @@ object FrmMain: TFrmMain
   object lbIDEs: TLabel
     Left = 244
     Top = 16
-    Width = 69
+    Width = 51
     Height = 15
-    Caption = 'Installed IDEs'
+    Caption = 'Select IDE'
   end
   object LabelElement: TLabel
     Left = 244
@@ -207,8 +207,6 @@ object FrmMain: TFrmMain
     Align = alBottom
     TabOrder = 16
     Visible = False
-    ExplicitTop = 586
-    ExplicitWidth = 225
   end
   object SynEditCode: TSynEdit
     Left = 245
@@ -300,7 +298,6 @@ object FrmMain: TFrmMain
     Height = 24
     ItemsEx = <>
     Style = csExDropDownList
-    ItemHeight = 18
     TabOrder = 4
     OnChange = ComboBoxExIDEsChange
     Images = ImageListDelphiVersion
@@ -315,7 +312,6 @@ object FrmMain: TFrmMain
     Color = clLime
     ParentBackground = False
     TabOrder = 17
-    ExplicitHeight = 592
   end
   object RadioButtonFore: TRadioButton
     Left = 244

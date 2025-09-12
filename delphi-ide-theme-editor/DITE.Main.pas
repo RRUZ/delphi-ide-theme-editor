@@ -1,4 +1,4 @@
-// **************************************************************************************************
+﻿// **************************************************************************************************
 //
 // Unit DITE.Main
 // Main Form  for the Delphi IDE Theme Editor
@@ -13,8 +13,8 @@
 //
 // The Original Code is Main.pas.
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2023 Rodrigo Ruz V.
+// The Original Code was initially developed by Rodrigo Ruz (RRUZ)
+// Portions created by Rodrigo Ruz (RRUZ). 2011–2025
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -932,7 +932,7 @@ begin
   LNCButton.Hint := 'Report Bugs';
   LNCButton.Caption := '';
   LNCButton.OnClick := ImageBugClick;
-
+                          {
   LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
@@ -943,13 +943,13 @@ begin
   LNCButton.Hint := 'Check for updates';
   LNCButton.Caption := '';
   LNCButton.OnClick := ImageUpdateClick;
-
+                             }
   LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsTranparent;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 5;
-  LNCButton.BoundsRect := Rect(170, 5, 190, 25);
-  LNCButton.Name := 'NCUpdate';
+  LNCButton.BoundsRect := Rect(147, 5, 167, 25);
+  LNCButton.Name := 'NCSwitch';
   LNCButton.ShowHint := True;
   LNCButton.Hint := 'Switch Compact/Full';
   LNCButton.Caption := '';

@@ -106,7 +106,7 @@
         <VerInfo_Release>99</VerInfo_Release>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <VerInfo_Build>9999</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileVersion=9.9.99.9999;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(ModuleName);FileDescription=$(ModuleName);ProductName=$(ModuleName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileVersion=9.9.99.9999;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <BT_BuildType>Debug</BT_BuildType>
     </PropertyGroup>
@@ -127,14 +127,14 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Release>9</VerInfo_Release>
         <DCC_DebugInformation>true</DCC_DebugInformation>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-        <VerInfo_MinorVer>98</VerInfo_MinorVer>
+        <VerInfo_MinorVer>99</VerInfo_MinorVer>
         <VerInfo_Build>1</VerInfo_Build>
         <DCC_UNIT_PLATFORM>false</DCC_UNIT_PLATFORM>
-        <VerInfo_Keys>CompanyName=The road to Delphi;FileDescription=Delphi IDE Theme Editor;FileVersion=1.98.1.1;InternalName=DITE;LegalCopyright=RRUZ;LegalTrademarks=;OriginalFilename=;ProductName=Delphi IDE Theme Editor;ProductVersion=1.0.0.0;Comments=That is not dead which can eternal lie.
+        <VerInfo_Keys>CompanyName=The road to Delphi;FileDescription=Delphi IDE Theme Editor;FileVersion=1.99.9.1;InternalName=DITE;LegalCopyright=RRUZ;LegalTrademarks=;OriginalFilename=;ProductName=Delphi IDE Theme Editor;ProductVersion=1.0.0.0;Comments=That is not dead which can eternal lie.
 And with strange aeons even death may die.;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>

@@ -13,8 +13,8 @@
 //
 // The Original Code is uHelpInsight.pas.
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2023 Rodrigo Ruz V.
+// The Original Code was initially developed by Rodrigo Ruz (RRUZ)
+// Portions created by Rodrigo Ruz (RRUZ). 2011–2025
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -55,7 +55,8 @@ const
     '\ObjRepos\en', // 10.3 Rio
     '\ObjRepos\en', // 10.4 Sydney
     '\ObjRepos\en', // 11.0 Alexandria
-    '\ObjRepos\en'  // 12.0 Athens
+    '\ObjRepos\en', // 12.0 Athens
+    '\ObjRepos\en'  // 13.0 Florence
     );
 
 procedure ApplyThemeHelpInsight(const ATheme: TIDETheme; IDEData: TDelphiVersionData);

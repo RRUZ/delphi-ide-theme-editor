@@ -13,8 +13,8 @@
 //
 // The Original Code is uHSLUtils.pas.
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2023 Rodrigo Ruz V.
+// The Original Code was initially developed by Rodrigo Ruz (RRUZ)
+// Portions created by Rodrigo Ruz (RRUZ). 2011–2025
 // All Rights Reserved.
 //
 // **************************************************************************************************

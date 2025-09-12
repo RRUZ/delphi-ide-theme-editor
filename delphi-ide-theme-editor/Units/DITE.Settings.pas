@@ -13,8 +13,8 @@
 //
 // The Original Code is uSettings.pas.
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2023 Rodrigo Ruz V.
+// The Original Code was initially developed by Rodrigo Ruz (RRUZ)
+// Portions created by Rodrigo Ruz (RRUZ). 2011–2025
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -134,19 +134,21 @@ begin
 end;
 
 procedure ReadSettings(var Settings: TSettings);
+const
+  cDefaultVCLStyle = 'Glow';
 var
   LIniFile: TIniFile;
 begin
   LIniFile := TIniFile.Create(GetPrivateSettingsFolder + 'Settings.ini');
   try
     Settings.ActivateColorizer := LIniFile.ReadBool('Global', 'ActivateColorizer', False);
-    Settings.VCLStyle := LIniFile.ReadString('Global', 'VCLStyle', 'Glossy');
+    Settings.VCLStyle := LIniFile.ReadString('Global', 'VCLStyle', cDefaultVCLStyle);
     // Settings.ThemePath := LIniFile.ReadString('Global', 'ThemePath',  IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) +'DITE\Themes');
     Settings.FThemePath := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_COMMON_APPDATA)) + 'DITE\Themes';
     Settings.CheckForUpdates := LIniFile.ReadBool('Global', 'CheckForUpdates', True);
     Settings.ApplyThemeHelpInsight := LIniFile.ReadBool('Global', 'ApplyThemeHelpInsight', True);
     if (Settings.VCLStyle = '') or SameText(Settings.VCLStyle, 'Windows') then
-      Settings.VCLStyle := 'Glossy';
+      Settings.VCLStyle := cDefaultVCLStyle;
 
     if not TDirectory.Exists(Settings.ThemePath) then
     begin

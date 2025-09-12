@@ -1873,10 +1873,6 @@ Source: Styles\Sterling.vsf; DestDir: {app}\Styles\
 Source: Styles\TabletDark.vsf; DestDir: {app}\Styles\
 Source: Styles\TurquoiseGray.vsf; DestDir: {app}\Styles\
 Source: Styles\Windows10Dark.vsf; DestDir: {app}\Styles\
-Source: Updater.exe; DestDir: {app}
-Source: DownloadInfo.xml; DestDir: {app}
-Source: Updater\libeay32.dll; DestDir: {app}
-Source: Updater\ssleay32.dll; DestDir: {app}
 
 [Setup]
 UsePreviousLanguage=no

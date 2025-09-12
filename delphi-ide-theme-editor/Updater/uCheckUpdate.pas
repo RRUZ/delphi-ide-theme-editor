@@ -13,7 +13,7 @@
 //
 // The Original Code is uCheckUpdate.pas.
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// The Original Code was initially developed by Rodrigo Ruz (RRUZ)
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2011-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //
